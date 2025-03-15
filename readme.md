@@ -6,3 +6,5 @@
     <img width="100%" src="https://raw.githubusercontent.com/monsterkodi/ked/master/img/ked03.png" />
   </a>
 </p>
+
+![greet](./img/ked.gif)
