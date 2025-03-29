@@ -5,8 +5,5 @@
     <img width="100%" src="https://raw.githubusercontent.com/monsterkodi/ked/master/img/ked04.png" />
     <img width="100%" src="https://raw.githubusercontent.com/monsterkodi/ked/master/img/ked05.png" />
     <img width="100%" src="https://raw.githubusercontent.com/monsterkodi/ked/master/img/ked06.png" />
-    <img width="100%" src="https://raw.githubusercontent.com/monsterkodi/ked/master/img/ked01.png" />
-    <img width="100%" src="https://raw.githubusercontent.com/monsterkodi/ked/master/img/ked02.png" />
-    <img width="100%" src="https://raw.githubusercontent.com/monsterkodi/ked/master/img/ked03.png" />
   </a>
 </p>
