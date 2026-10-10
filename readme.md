@@ -8,3 +8,5 @@
     <img width="100%" src="https://raw.githubusercontent.com/monsterkodi/ked/master/img/ked07.png" />
   </a>
 </p>
+
+requires a kitty terminal
