@@ -1,78 +1,50 @@
 #!/usr/bin/env node
 
 /*
-###
- ███████   ███████   ███      █████████  ████████  ████████ 
-███       ███   ███  ███         ███     ███       ███   ███
-███████   █████████  ███         ███     ███████   ███████  
-     ███  ███   ███  ███         ███     ███       ███   ███
-███████   ███   ███  ███████     ███     ████████  ███   ███
-###
-*/
+     ███████   ███████   ███      █████████  ████████  ████████ 
+    ███       ███   ███  ███         ███     ███       ███   ███
+    ███████   █████████  ███         ███     ███████   ███████  
+         ███  ███   ███  ███         ███     ███       ███   ███
+    ███████   ███   ███  ███████     ███     ████████  ███   ███
 
-// renders a five row ascii-art header for a word, using the same generator
-// that ked uses for cmd+3 / ctrl+3.
-//
-//   salter foo              █-filled block
-//   salter -0 foo           0-filled, the convention in kode sources
-//   salter -c foo           wrapped in ### fences
-//   salter -i 4 foo         indented, for inserting into a file
-//   salter -p '# ' foo      prefixes every row
-//   salter --list           the presets
-//   salter todo             renders a preset
+    renders a five row ascii-art header for a string, using the same generator that ked uses.
+*/
 
 import salter from '../js/kxk/salter.js'
 
-let presets = {
-    kaktus: 'kaktus',
-    todo:   'TODO',
-    fixme:  'FIXME',
-    note:   'NOTE',
-    hack:   'HACK',
-    xxx:    'XXX',
-    done:   'DONE'
-}
-
 function usage () {
     console.log(`
-salter ${salter('help')}
+${salter('salter')}
 
 usage
 
     salter <text>            render <text>
-    salter <preset>          render a preset, see --list
 
 options
 
-    -0           fill with 0 instead of █
     -c           wrap the block in ### fences
     -i <n>       indent every row by n spaces
     -p <str>     prefix every row with <str>
     -a <str>     append to every row
     -P <str>     prepend to the whole block
     -A <str>     append to the whole block
-    --list       list the presets
-    -h           this text
 
 notes
 
-    unsupported characters are dropped, spaces included, so "two words"
-    renders as two-words. put the gap in with -p or -a.
+    unsupported characters are dropped, 
+    see salter.kode for the list of supported ones.
 `)
 }
 
-let opt = {char:'█'}
+let opt  = {}
 let args = []
-let list = false
 
 for (let i = 2; i < process.argv.length; i++) {
 
     let a = process.argv[i]
 
-    if      (a == '-0')         opt.char    = '0'
-    else if (a == '-c')         opt.fence   = true
+    if (a == '-c')              opt.fence   = true
     else if (a == '-h')         opt.help    = true
-    else if (a == '--list')     list        = true
     else if (a == '-i')         opt.indent  = parseInt(process.argv[++i] ?? '0')
     else if (a == '-p')         opt.prefix  = process.argv[++i] ?? ''
     else if (a == '-a')         opt.postfix = process.argv[++i] ?? ''
@@ -88,25 +60,14 @@ if (opt.help) {
     process.exit(0)
 }
 
-if (!args.length && !list) {
+if (!args.length) {
     usage()
     process.exit(1)
 }
 
-if (list) {
-    console.log('presets\n')
-    for (let k in presets) {
-        let pad = k.padEnd(10)
-        console.log(`    ${pad}${presets[k]}`)
-    }
-    console.log('')
-    process.exit(0)
-}
+let text = args[0]
 
-let name = args[0]
-let text = presets[name.toLowerCase()] ?? name
-
-let block = salter(text, {char:opt.char})
+let block = salter(text, {char:'█'})
 
 if (opt.indent) {
     let pad = ' '.repeat(opt.indent)
