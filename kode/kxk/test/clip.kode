@@ -1,0 +1,31 @@
+###
+   ███████  ███      ███  ████████ 
+  ███       ███      ███  ███   ███
+  ███       ███      ███  ████████ 
+  ███       ███      ███  ███      
+   ███████  ███████  ███  ███      
+  
+  tests the clipboard fallback path, never the system clipboard
+###
+
+use .. ◆ clip
+
+# nothing here sets opt.system, so clip only touches its own buffer
+
+▸ clip
+
+    ▸ has
+
+        clip.has ''                      ▸ false
+        clip.has 'definitely-not-a-tool' ▸ false
+        clip.has 'sh'                    ▸ true # sh is on every posix box
+
+    ▸ detect
+
+        tool = clip.detect()
+        known = tool in ['wl' 'xsel' 'xclip' 'none']
+        known ▸ true
+
+        # the answer is cached, so a second call cannot change it
+        clip.detect() ▸ tool
+

@@ -1,0 +1,497 @@
+###
+000   000   0000000   000       0000000   00000000     
+000  000   000   000  000      000   000  000   000    
+0000000    000   000  000      000   000  0000000      
+000  000   000   000  000      000   000  000   000    
+000   000   0000000   0000000   0000000   000   000    
+###
+
+use ./util ▪ inc ranges dissect lang
+        
+lang 'kode'
+        
+▸ kolor
+
+    # 000   000   0000000   0000000    00000000  
+    # 000  000   000   000  000   000  000       
+    # 0000000    000   000  000   000  0000000   
+    # 000  000   000   000  000   000  000       
+    # 000   000   0000000   0000000    00000000  
+    
+    ▸ kode
+    
+        lang 'kode'
+        
+        dss = dissect "a = b -> true"
+        inc dss[0] 0 "a"   ▸ 'function'
+        inc dss[0] 2 "="   ▸ 'punct function'
+        inc dss[0] 4 "b"   ▸ 'function argument'
+        inc dss[0] 6 "->"  ▸ 'punct function tail ligature'
+
+        dss = dissect "->"
+        inc dss[0] 0 "->"  ▸ 'punct function tail ligature'
+
+        dss = dissect "    -> true"
+        inc dss[0] 4 "->"  ▸ 'punct function tail ligature'
+        
+    # 00000000   0000000   000      000      0000000     0000000    0000000  000   000  
+    # 000       000   000  000      000      000   000  000   000  000       000  000   
+    # 000000    000000000  000      000      0000000    000000000  000       0000000    
+    # 000       000   000  000      000      000   000  000   000  000       000  000   
+    # 000       000   000  0000000  0000000  0000000    000   000   0000000  000   000  
+    
+    ▸ fallback
+            
+        rgs = ranges 'text' 'unknown'
+        inc rgs, 0 'text' ▸ 'text'
+    
+        rgs = ranges 'text' 'fish'
+        inc rgs, 0 'text' ▸ 'text'
+        
+        rgs = ranges "###" '.coffee' 
+        inc rgs, 0 "#" ▸ 'punct comment triple'
+        
+    # 000   000  000   000  000   0000000   0000000   0000000    00000000  
+    # 000   000  0000  000  000  000       000   000  000   000  000       
+    # 000   000  000 0 000  000  000       000   000  000   000  0000000   
+    # 000   000  000  0000  000  000       000   000  000   000  000       
+    #  0000000   000   000  000   0000000   0000000   0000000    00000000  
+    
+    ▸ unicode
+        
+        rgs = ranges "🌈"
+        # log rgs
+        inc rgs, 0 '🌈' ▸ 'text'
+        rgs[0] ▸ start:0 length:2 match:'🌈' turd: '🌈' clss: 'text' 
+        
+        rgs = ranges "🌈🌱"
+        inc rgs, 0 '🌈' ▸ 'text'
+        inc rgs, 2 '🌱' ▸ 'text'
+         
+        rgs = ranges "🙂lol😀"
+        inc rgs, 0 '🙂'     ▸   'text'
+        inc rgs, 2 'lol'     ▸   'text'
+        inc rgs, 5 '😀'     ▸   'text'
+         
+        rgs = ranges "a➜b"
+     
+        inc rgs, 1 '➜' ▸ 'punct keyword'
+         
+        rgs = ranges '┌─┬─┐'
+        inc rgs, 0 '┌' ▸ 'text unicode'
+        inc rgs, 1 '─' ▸ 'text unicode'
+        inc rgs, 2 '┬' ▸ 'text unicode'
+        inc rgs, 3 '─' ▸ 'text unicode'
+        inc rgs, 4 '┐' ▸ 'text unicode'
+         
+        rgs = ranges "🐀🐁🐂🐃🐄🐅🐆🐇🐈🐉🐊🐋🐌🐍🐎🐏🐐🐑🐒🐓🐔🐕🐖🐗🐘🐙🐚🐛🐜🐝🐞🐟🐠🐡🐢🐣🐤🐥"
+        inc rgs, 0 '🐀' ▸ 'text'
+        inc rgs, 24 '🐌' ▸ 'text'
+     
+        rgs = ranges "'🔧' bla:1"
+        inc rgs, 6 'bla' ▸ 'dictionary key'
+         
+        rgs = ranges "icon: '🔧' bla:1"
+        inc rgs, 12 'bla' ▸ 'dictionary key'
+        
+    #  0000000   0000000   00     00  00     00  00000000  000   000  000000000   0000000  
+    # 000       000   000  000   000  000   000  000       0000  000     000     000       
+    # 000       000   000  000000000  000000000  0000000   000 0 000     000     0000000   
+    # 000       000   000  000 0 000  000 0 000  000       000  0000     000          000  
+    #  0000000   0000000   000   000  000   000  00000000  000   000     000     0000000   
+    
+    ▸ comments
+        
+        rgs = ranges "hello # world"
+        inc rgs, 6 "#"      ▸ 'punct comment'
+        inc rgs, 8 "world"  ▸ 'comment'
+                
+    ▸ triple comment
+                
+        rgs = ranges "###a###"
+        inc rgs, 0 "#"  ▸ 'punct comment triple'
+        inc rgs, 1 "#"  ▸ 'punct comment triple'
+        inc rgs, 2 "#"  ▸ 'punct comment triple'
+        inc rgs, 3 "a"  ▸ 'comment triple'
+        inc rgs, 4 "#"  ▸ 'punct comment triple'
+        inc rgs, 5 "#"  ▸ 'punct comment triple'
+        inc rgs, 6 "#"  ▸ 'punct comment triple'
+    
+        dss = dissect "###\na\n###"
+        inc dss[0], 0 "#"   ▸ 'punct comment triple'
+        inc dss[0], 1 "#"   ▸ 'punct comment triple'
+        inc dss[0], 2 "#"   ▸ 'punct comment triple'
+        inc dss[1], 0 "a"   ▸ 'comment triple'
+        inc dss[2], 0 "#"   ▸ 'punct comment triple'
+        inc dss[2], 1 "#"   ▸ 'punct comment triple'
+        inc dss[2], 2 "#"   ▸ 'punct comment triple'
+    
+        lang 'styl'
+        
+        dss = dissect "/*\na\n*/"
+        inc dss[0], 0 "/"   ▸ 'punct comment triple'
+        inc dss[0], 1 "*"   ▸ 'punct comment triple'
+        inc dss[1], 0 "a"   ▸ 'comment triple'
+        inc dss[2], 0 "*"   ▸ 'punct comment triple'
+        inc dss[2], 1 "/"   ▸ 'punct comment triple'
+        
+    ▸ comment header
+    
+        lang 'kode'
+    
+        rgs = ranges "# 0 00 0000" 
+        inc rgs, 0  "#"     ▸ 'punct comment'
+        inc rgs, 2  "0"     ▸ 'comment header'
+        inc rgs, 4  "00"    ▸ 'comment header'
+        inc rgs, 7  "0000"  ▸ 'comment header'
+    
+        dss = dissect "###\n 0 00 0 \n###"
+        inc dss[1], 1 "0"   ▸ 'comment triple header'
+        
+        rgs = ranges "# 0 * 0.2"
+        inc rgs, 2 '0'      ▸ 'comment'
+        inc rgs, 6 '0'      ▸ 'comment'
+        
+        dss = dissect "###\n 0 1 0 \n###"
+        inc dss[1], 1 "0"   ▸ 'comment triple'
+        
+        lang 'styl'
+        
+        rgs = ranges "// 000"
+        inc rgs, 3  "000"   ▸ 'comment header'
+    
+        dss = dissect "/*\n 0 0 0 \n*/"
+        inc dss[1], 1 "0"   ▸ 'comment triple header'
+        
+    # 000   000  000   000  00     00  0000000    00000000  00000000    0000000  
+    # 0000  000  000   000  000   000  000   000  000       000   000  000       
+    # 000 0 000  000   000  000000000  0000000    0000000   0000000    0000000   
+    # 000  0000  000   000  000 0 000  000   000  000       000   000       000  
+    # 000   000   0000000   000   000  0000000    00000000  000   000  0000000   
+    
+    ▸ numbers
+                        
+        rgs = ranges "a 6670"
+        inc rgs, 2 "6670"   ▸ 'number'
+    
+        rgs = ranges "0x667AC"
+        inc rgs, 0 "0x667AC" ▸ 'number hex'
+    
+        rgs = ranges "66.700"
+        inc rgs, 0 "66"     ▸ 'number float'
+        inc rgs, 2 "."      ▸ 'punct number float'
+        inc rgs, 3 "700"    ▸ 'number float'
+    
+        rgs = ranges "77.800 -100"
+        inc rgs, 0 "77"     ▸ 'number float'
+        inc rgs, 8 "100"    ▸ 'number'
+    
+        rgs = ranges "(8.9,100.2)"
+        inc rgs, 3 "9"      ▸ 'number float'
+        inc rgs, 9 "2"      ▸ 'number float'
+         
+    #  0000000  00000000  00     00  000   000  00000000  00000000   
+    # 000       000       000   000  000   000  000       000   000  
+    # 0000000   0000000   000000000   000 000   0000000   0000000    
+    #      000  000       000 0 000     000     000       000   000  
+    # 0000000   00000000  000   000      0      00000000  000   000  
+    
+    ▸ semver    
+        
+        lang 'coffee'
+        
+        rgs = ranges "66.70.0"
+        inc rgs, 0 "66"     ▸ 'semver'
+        inc rgs, 2 "."      ▸ 'punct semver'
+        inc rgs, 3 "70"     ▸ 'semver'
+        inc rgs, 5 "."      ▸ 'punct semver'
+        inc rgs, 6 "0"      ▸ 'semver'
+    
+        rgs = ranges "^0.7.1"
+        inc rgs, 0 "^"      ▸ 'punct semver'
+        inc rgs, 1 "0"      ▸ 'semver'
+        inc rgs, 3 "7"      ▸ 'semver'
+        inc rgs, 5 "1"      ▸ 'semver'
+            
+        rgs = ranges "^1.0.0-alpha.12"
+        inc rgs, 1 "1"      ▸ 'semver'
+        inc rgs, 3 "0"      ▸ 'semver'
+        inc rgs, 5 "0"      ▸ 'semver'
+        
+        # lang 'noon'
+        
+        rgs = ranges ">=6.7.9"
+        inc rgs, 0 ">"      ▸ 'punct semver'
+        inc rgs, 1 "="      ▸ 'punct semver'
+        inc rgs, 2 "6"      ▸ 'semver'
+        inc rgs, 3 "."      ▸ 'punct semver'
+        inc rgs, 4 "7"      ▸ 'semver'
+        inc rgs, 5 "."      ▸ 'punct semver'
+        inc rgs, 6 "9"      ▸ 'semver'        
+                
+    #       000   0000000  
+    #       000  000       
+    #       000  0000000   
+    # 000   000       000  
+    #  0000000   0000000   
+    
+    ▸ js
+        
+        lang 'js'
+        
+        rgs = ranges "obj.prop.call(1);"
+        inc rgs, 0 'obj'        ▸ 'obj'
+        inc rgs, 4 'prop'       ▸ 'property'
+        inc rgs, 9 'call'       ▸ 'function call'
+        
+        rgs = ranges "func = function() {"
+        inc rgs, 0 'func'       ▸ 'function'
+        inc rgs, 7 'function'   ▸ 'keyword function'
+        
+        rgs = ranges "obj.value = obj.another.value"
+        inc rgs, 0  "obj"       ▸ 'obj'
+        inc rgs, 4  "value"     ▸ 'property'
+        inc rgs, 12 "obj"       ▸ 'obj'
+        inc rgs, 16 "another"   ▸ 'property'
+        inc rgs, 24 "value"     ▸ 'property'
+        
+        rgs = ranges "a(2);"
+        inc rgs, 0 'a'          ▸ 'function call'
+        
+        rgs = ranges "//# sourceMappingURL=data:"
+        inc rgs, 0 "/"          ▸ 'punct comment'
+        inc rgs, 1 "/"          ▸ 'punct comment'
+        inc rgs, 2 "#"          ▸ 'comment'
+                              
+    # 000000000  000   000  000000000  
+    #    000      000 000      000     
+    #    000       00000       000     
+    #    000      000 000      000     
+    #    000     000   000     000     
+    
+    ▸ txt
+        
+        lang 'txt'
+        
+        rgs = ranges "it's all we'll ever need. we'd never do that!"
+        inc rgs, 2  "'"         ▸ 'punct'
+        inc rgs, 3  "s"         ▸ 'text'
+        inc rgs, 11 "'"         ▸ 'punct'
+        inc rgs, 28 "'"         ▸ 'punct'
+        
+        rgs = ranges "'it' s, 'we' ll"
+        inc rgs, 0  "'"         ▸ 'punct string single'
+        inc rgs, 3  "'"         ▸ 'punct string single'
+        inc rgs, 5  "s"         ▸ 'text'
+        inc rgs, 8  "'"         ▸ 'punct string single'
+        inc rgs, 11  "'"        ▸ 'punct string single'
+        inc rgs, 13  "ll"       ▸ 'text'
+        
+        rgs = ranges "['s' 'll' 'd' 't']"
+        inc rgs, 1  "'"         ▸ 'punct string single'
+        inc rgs, 2  "s"         ▸ 'string single'
+        inc rgs, 3  "'"         ▸ 'punct string single'
+        inc rgs, 5  "'"         ▸ 'punct string single'
+        inc rgs, 8  "'"         ▸ 'punct string single'
+                    
+    # 000   000  000000000  00     00  000    
+    # 000   000     000     000   000  000    
+    # 000000000     000     000000000  000    
+    # 000   000     000     000 0 000  000    
+    # 000   000     000     000   000  0000000
+    
+    ▸ html
+        
+        lang 'html'
+        
+        rgs = ranges "</div>" 
+        inc rgs, 0 "<"    ▸ 'punct keyword'
+        inc rgs, 1 "/"    ▸ 'punct keyword'
+        inc rgs, 2 "div"  ▸ 'keyword'
+        inc rgs, 5 ">"    ▸ 'punct keyword'
+    
+        rgs = ranges "<div>" 
+        inc rgs, 0 "<"    ▸ 'punct keyword'
+        inc rgs, 1 "div"  ▸ 'keyword'
+        inc rgs, 4 ">"    ▸ 'punct keyword'  
+        
+    #  0000000   0000000   0000000  
+    # 000       000       000       
+    # 000       0000000   0000000   
+    # 000            000       000  
+    #  0000000  0000000   0000000   
+    
+    ▸ css
+        
+        lang 'css'
+        
+        rgs = ranges "0.5" 
+        inc rgs, 0 "0"      ▸ 'number float'
+        inc rgs, 1 "."      ▸ 'punct number float'
+        inc rgs, 2 "5"      ▸ 'number float'
+        
+    #  0000000  00000000   00000000 
+    # 000       000   000  000   000
+    # 000       00000000   00000000 
+    # 000       000        000      
+    #  0000000  000        000      
+    
+    ▸ cpp
+        
+        lang 'cpp'
+        
+        rgs = ranges "#include"      
+        inc rgs, 0 "#"              ▸ 'punct define'
+        inc rgs, 1 "include"        ▸ 'define'
+    
+        rgs = ranges "#if"            
+        inc rgs, 0 "#"              ▸ 'punct define'
+        inc rgs, 1 "if"             ▸ 'define'
+    
+        rgs = ranges "#  if"            
+        inc rgs, 0 "#"              ▸ 'punct define'
+        inc rgs, 3 "if"             ▸ 'define'
+            
+        rgs = ranges "if (true) {} else {}"    
+        inc rgs, 0 "if"             ▸ 'keyword'
+        inc rgs, 4 "true"           ▸ 'keyword'
+        inc rgs, 13 "else"          ▸ 'keyword'
+            
+        rgs = ranges "1.0f"
+        inc rgs, 0 "1"              ▸ 'number float'
+        inc rgs, 1 "."              ▸ 'punct number float'
+        inc rgs, 2 "0f"             ▸ 'number float'
+    
+        rgs = ranges "0.0000f"
+        inc rgs, 2 "0000f"          ▸ 'number float'
+        
+        rgs = ranges "obj.value = obj.another.value;"
+        inc rgs, 0  "obj"           ▸ 'obj'
+        inc rgs, 4  "value"         ▸ 'property'
+        inc rgs, 12 "obj"           ▸ 'obj'
+        inc rgs, 16 "another"       ▸ 'property'
+        inc rgs, 24 "value"         ▸ 'property'
+        
+        rgs = ranges "Cast<targ>"
+        inc rgs, 4 '<'              ▸ 'punct template'
+        inc rgs, 5 'targ'           ▸ 'template'
+        inc rgs, 9 '>'              ▸ 'punct template'
+        
+        rgs = ranges "TMap<FGrid, FRoute>"
+        inc rgs, 0 'TMap'           ▸ 'keyword type'
+        inc rgs, 4 '<'              ▸ 'punct template'
+        inc rgs, 5 'FGrid'          ▸ 'template'
+        inc rgs, 10 ','             ▸ 'punct template'
+        inc rgs, 12 'FRoute'        ▸ 'template'
+        inc rgs, 18 '>'             ▸ 'punct template'
+        
+    
+    # 00     00  00     00  
+    # 000   000  000   000  
+    # 000000000  000000000  
+    # 000 0 000  000 0 000  
+    # 000   000  000   000  
+    
+    # ▸ mm
+    #         
+        # lang 'mm'
+    #         
+        # rgs = ranges "@import"      
+        # inc rgs, 0 "@"              ▸ 'punct define'
+        # inc rgs, 1 "import"         ▸ 'define'
+    
+        # rgs = ranges "@implementation"            
+        # inc rgs, 0 "@"              ▸ 'punct define'
+        # inc rgs, 1 "implementation" ▸ 'define'
+    
+        # rgs = ranges "@interface"            
+        # inc rgs, 0 "@"              ▸ 'punct define'
+        # inc rgs, 1 "interface"      ▸ 'define'
+    
+        # rgs = ranges "@synthesize"            
+        # inc rgs, 0 "@"              ▸ 'punct define'
+        # inc rgs, 1 "synthesize"     ▸ 'define'
+    
+        # rgs = ranges "@property"            
+        # inc rgs, 0 "@"              ▸ 'punct define'
+        # inc rgs, 1 "property"       ▸ 'define'
+    
+        # ▸ NSString
+    #             
+            # rgs = ranges '@"X"'            
+            # inc rgs, 0 "@"        ▸ 'punct string double nsstring'
+            # inc rgs, 1 '"'        ▸ 'punct string double nsstring'
+            # inc rgs, 2 'X'        ▸ 'string double nsstring'
+            # inc rgs, 3 '"'        ▸ 'punct string double nsstring'
+    #             
+            # rgs = ranges '@"%@"'
+            # inc rgs, 0 "@"        ▸ 'punct string double nsstring'
+            # inc rgs, 1 '"'        ▸ 'punct string double nsstring'
+            # inc rgs, 2 '%@'       ▸ 'string double nsstring'
+            # inc rgs, 4 '"'        ▸ 'punct string double nsstring'
+        
+    #  0000000  000   000  
+    # 000       000   000  
+    # 0000000   000000000  
+    #      000  000   000  
+    # 0000000   000   000  
+    
+    ▸ sh
+    
+        lang 'sh'
+        
+        rgs = ranges "dir/path/with/dashes/file.txt"
+        inc rgs, 0 'dir'        ▸ 'text dir'
+        inc rgs, 4 'path'       ▸ 'text dir'
+        inc rgs, 9 'with'       ▸ 'text dir'
+        inc rgs, 14 'dashes'    ▸ 'text dir'
+        
+        rgs = ranges "prg --arg1 -arg2"
+        inc rgs, 4 '-'          ▸ 'punct argument'
+        inc rgs, 5 '-'          ▸ 'punct argument'
+        inc rgs, 6 'arg1'       ▸ 'argument'
+        inc rgs, 11 '-'         ▸ 'punct argument'
+        inc rgs, 12 'arg2'      ▸ 'argument'
+        
+        rgs = ranges "cd ~"
+        inc rgs, 3 '~'          ▸ 'text dir'
+    
+        rgs = ranges "~/home"
+        inc rgs, 0 '~'          ▸ 'text dir'
+        inc rgs, 1 '/'          ▸ 'punct dir'
+        inc rgs, 2 'home'       ▸ 'text file'
+        
+    # 000       0000000    0000000   
+    # 000      000   000  000        
+    # 000      000   000  000  0000  
+    # 000      000   000  000   000  
+    # 0000000   0000000    0000000   
+    
+    ▸ log
+    
+        lang 'log'
+        
+        rgs = ranges "http://domain.com"
+        inc rgs, 0 'http'           ▸ 'url protocol'
+        inc rgs, 4 ':'              ▸ 'punct url'
+        inc rgs, 5 '/'              ▸ 'punct url'
+        inc rgs, 6 '/'              ▸ 'punct url'
+        inc rgs, 7 'domain'         ▸ 'url domain'
+        inc rgs, 13 '.'             ▸ 'punct url tld'
+        inc rgs, 14 'com'           ▸ 'url tld'
+        
+        rgs = ranges "file.coffee"
+        inc rgs, 0 'file'           ▸ 'coffee file'
+        inc rgs, 4 '.'              ▸ 'punct coffee'
+        inc rgs, 5 'coffee'         ▸ 'coffee ext'
+    
+        rgs = ranges "/some/path"
+        inc rgs, 1 'some'           ▸ 'text dir'
+        inc rgs, 5 '/'              ▸ 'punct dir'
+    
+        rgs = ranges "key: value"
+        inc rgs, 0 'key'            ▸ 'dictionary key'
+        inc rgs, 3 ':'              ▸ 'punct dictionary'
+        
+            
+            

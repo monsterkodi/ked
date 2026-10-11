@@ -1,0 +1,211 @@
+###
+    ██     ██   ███████   ███████    ████████
+    ███   ███  ███   ███  ███   ███  ███     
+    █████████  ███   ███  ███   ███  ███████ 
+    ███ █ ███  ███   ███  ███   ███  ███     
+    ███   ███   ███████   ███████    ████████
+
+    stores modes per editor state
+    
+    modes handle input and text insertion:
+
+    brckts   insert and highlight matching surround 
+    replex   replaces certain input strings with others
+    salter   ascii-headers
+    unype    unicode type writer
+###
+
+use ../../kxk ▪ kseg slash post
+use ../../kxk ◆ nfs
+use ../theme  ◆ theme
+ 
+function mode
+
+    @active:  {} # maps editor state names to active mode instances
+    @modes:   {} # maps mode names to mode classes
+    @pending: [] # list of editors that requested autostart before modes were loaded
+    
+    @names: -> Object.keys mode.modes
+    
+    # 000       0000000    0000000   0000000        00     00   0000000   0000000     000   000  000      00000000   0000000  
+    # 000      000   000  000   000  000   000      000   000  000   000  000   000   000   000  000      000       000       
+    # 000      000   000  000000000  000   000      000000000  000   000  000   000   000   000  000      0000000   0000000   
+    # 000      000   000  000   000  000   000      000 0 000  000   000  000   000   000   000  000      000            000  
+    # 0000000   0000000   000   000  0000000        000   000   0000000   0000000      0000000   0000000  00000000  0000000   
+    
+    @loadModules: ○->
+
+        list =○ nfs.list slash.path(◆dir 'mode')
+        
+        for item in list
+            file = item.path
+            continue if slash.ext(file) != 'js'
+
+            try
+                moduleJS    = './' + slash.relative(file ◆dir)
+                moduleExport =○ import(moduleJS)
+            catch err
+                error "import of #{moduleJS} failed" err
+                continue
+                
+            moduleName  = slash.name file
+            moduleClass = moduleExport.default
+            mode.modes[moduleName] = moduleClass
+            
+        post.emit 'modes.loaded'
+        
+        while valid mode.pending
+            mode.autoStartForEditor mode.pending.shift()
+        
+    #  0000000   000   000  000000000   0000000    0000000  000000000   0000000   00000000   000000000  
+    # 000   000  000   000     000     000   000  000          000     000   000  000   000     000     
+    # 000000000  000   000     000     000   000  0000000      000     000000000  0000000       000     
+    # 000   000  000   000     000     000   000       000     000     000   000  000   000     000     
+    # 000   000   0000000      000      0000000   0000000      000     000   000  000   000     000     
+    
+    @autoStartForEditor: editor ->
+        
+        if empty mode.modes
+            ⮐  mode.pending.push editor
+
+        for name in mode.names()
+            if editor.feats[name] and mode.modes[name].autoStart
+                mode.start editor.state name
+
+    #  ███████  █████████   ███████   ████████   █████████
+    # ███          ███     ███   ███  ███   ███     ███   
+    # ███████      ███     █████████  ███████       ███   
+    #      ███     ███     ███   ███  ███   ███     ███   
+    # ███████      ███     ███   ███  ███   ███     ███   
+    
+    @start: state name ->
+    
+        ⮐  if @isActive state name
+        
+        @active[state.name] ?= []
+        @active[state.name].push new mode.modes[name] state
+        
+    @stop: state name ->
+        
+        m = @get state name
+        
+        @active[state.name].splice @active[state.name].indexOf(m) 1
+        
+        m.stop() if m.stop is func
+        
+    @toggle: state name ->
+        
+        if @isActive state name
+            @stop state name
+        else
+            @start state name
+        
+    #  ███████    ███████  █████████  ███  ███   ███  ████████
+    # ███   ███  ███          ███     ███  ███   ███  ███     
+    # █████████  ███          ███     ███   ███ ███   ███████ 
+    # ███   ███  ███          ███     ███     ███     ███     
+    # ███   ███   ███████     ███     ███      █      ████████
+
+    @isActive: state name -> valid @get(state name)
+        
+    @get: state name ->
+        
+        for m in @active[state.name]
+            ⮐  m if m.name == name
+
+    @insert: state text ->
+        
+        for m in @active[state.name]
+            if m.insert is func
+                text = m.insert text
+        text
+        
+    @postInsert: state ->
+        
+        for m in @active[state.name]
+            if m.postInsert is func
+                m.postInsert()
+        
+    @deleteSelection: state ->
+        
+        for m in @active[state.name]
+            if m.deleteSelection is func
+                ⮐  true if m.deleteSelection()
+        false        
+        
+    @handleKey: state key event ->
+
+        for m in @active[state.name]
+            if m.handleKey is func
+                ⮐  if m.handleKey(key event) != 'unhandled'
+        'unhandled'
+        
+    @cursorsSet: state editor ->
+
+        for m in @active[state.name]
+            if m.cursorsSet is func
+                m.cursorsSet editor
+                
+        if not @isActive state 'salter'
+            mode.modes['salter']?.checkCursorsSet state
+        
+    @themeColor: state colorName defaultColor ->
+    
+        for m in @active[state.name]
+            if m.themeColor is func
+                ⮐ m.themeColor colorName defaultColor
+        
+        defaultColor
+        
+    @preDrawLines: state lines ->
+
+        for m in @active[state.name]
+            if m.preDrawLines is func
+                lines = m.preDrawLines(lines)
+        lines
+        
+    @postDraw: state ->
+
+        for m in @active[state.name]
+            if m.postDraw is func
+                m.postDraw()
+                
+    @fileLoaded: state file row col view ->
+        
+        for m in @active[state.name]
+            if m.fileLoaded is func
+                m.fileLoaded file row col view
+            
+# ███   ███  ███  ██     ██  ████████   ███      ████████
+# ███   ███  ███  ███   ███  ███   ███  ███      ███     
+#  ███ ███   ███  █████████  ████████   ███      ███████ 
+#    ███     ███  ███ █ ███  ███        ███      ███     
+#     █      ███  ███   ███  ███        ███████  ████████
+
+function vimple
+    
+    @: @state -> @name = 'vimple'
+
+# ███   ███  ███   ███  ███  ███   ███   ███████ 
+# ███   ███  ████  ███  ███  ███  ███   ███   ███
+# ███   ███  ███ █ ███  ███  ███████    ███   ███
+# ███   ███  ███  ████  ███  ███  ███   ███   ███
+#  ███████   ███   ███  ███  ███   ███   ███████ 
+
+function uniko
+
+    @: @state -> @name = 'uniko'
+        
+# 00000000   00000000   0000000   0000000   00000000   0000000    
+# 000   000  000       000       000   000  000   000  000   000  
+# 0000000    0000000   000       000   000  0000000    000   000  
+# 000   000  000       000       000   000  000   000  000   000  
+# 000   000  00000000   0000000   0000000   000   000  0000000    
+
+function record
+
+    @: @state -> @name = 'record'
+    
+mode.loadModules()
+    
+export mode

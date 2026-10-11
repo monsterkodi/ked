@@ -1,0 +1,153 @@
+###
+    000   000  000   000  00000000   0000000    
+    000  000   0000  000  000   000  000   000  
+    0000000    000 0 000  0000000    000   000  
+    000  000   000  0000  000   000  000   000  
+    000   000  000   000  000   000  0000000    
+
+    transpiles kode and noon files
+###
+
+use ../kode ◆ kode
+use ../kxk  ◆ nfs slash noon
+use         ◆ version
+
+# 00000000   000   000  000      00000000   0000000  
+# 000   000  000   000  000      000       000       
+# 0000000    000   000  000      0000000   0000000   
+# 000   000  000   000  000      000            000  
+# 000   000   0000000   0000000  00000000  0000000   
+
+rules =
+    
+    kode: 
+        tgtExt:  'js'
+        srcDir:  'kode'
+        tgtDir:  'js'
+        compile: srcText srcFile -> k0de = new kode header:false; k0de.compile srcText srcFile
+    noon:
+        tgtExt:  'json'
+        srcDir:  'kode'
+        tgtDir:  'js'
+        compile: srcText srcFile -> JSON.stringify noon.parse(srcText) null '  '
+        
+    ignore: [
+        'kolor/lang.noon'
+        ]
+        
+# 000   000  000000000  000  000        
+# 000   000     000     000  000        
+# 000   000     000     000  000        
+# 000   000     000     000  000        
+#  0000000      000     000  0000000    
+            
+srcForFile = file ->
+    
+    srcFile = file
+    if slash.isRelative srcFile
+        srcFile = slash.path process.cwd() srcFile
+    srcFile
+    
+tgtForSrc = srcFile rule ->
+    
+    slash.swapExt srcFile.replace(bundlePath(rule.srcDir) bundlePath(rule.tgtDir)) rule.tgtExt
+    
+bundlePath = p='' -> slash.path bundleDir() p
+    
+bundleDir = -> slash.path ◆dir '../..'
+  
+bump = ○->
+    
+    ○ nfs.write bundlePath('kode/konrad/version.kode') "export #{version+1}\n"
+    
+#  0000000    0000000   000000000  000   000  00000000  00000000   
+# 000        000   000     000     000   000  000       000   000  
+# 000  0000  000000000     000     000000000  0000000   0000000    
+# 000   000  000   000     000     000   000  000       000   000  
+#  0000000   000   000     000     000   000  00000000  000   000  
+
+gatherFiles = ○->
+    
+    list  =○ nfs.list(bundlePath('kode'))
+    list  = list.filter (item) -> item.type == 'file'
+    
+    files = list.map (item) -> item.path
+    files = files.filter (file) -> 
+        for ignore in rules.ignore
+            ⮐ false if file.endsWith ignore
+        true
+    
+# 000   000  000   000  00000000   0000000    
+# 000  000   0000  000  000   000  000   000  
+# 0000000    000 0 000  0000000    000   000  
+# 000  000   000  0000  000   000  000   000  
+# 000   000  000   000  000   000  0000000    
+
+knrd = files=[] opt={} ○->
+    # log "files" files   
+    if files is str
+        if slash.ext(files) in ['kode' 'noon']
+            files = [files]
+        else
+            files = []
+            
+    if files is arr and valid files
+        if slash.ext(files[0]) not in ['kode' 'noon']
+            log y5('✘ ') r5(slash.tilde(files[0])) r4('-- unknown file type!')
+            ⮐ []
+        
+    opt.verbose        ?= opt.debug
+    log 'opt'    opt   if opt.verbose
+    log 'files'  files if opt.debug
+    
+    # ● 🔨
+            
+    files =○ gatherFiles() if empty files
+    
+    icon = opt.dryrun ? w4(' ') : '🔨'
+        
+    log icon w5(slash.name(bundleDir())) b5(files.length) if not opt.quiet
+    
+    transpiled = 0
+        
+    for file in files
+        
+        skip = false
+        for ignore in rules.ignore
+            if file.endsWith ignore
+                log w2('✘  ') w3(slash.tilde(file)) if opt.verbose
+                skip = true
+                break
+                
+        if skip ➜ continue
+        
+        if rule = rules[slash.ext file]
+            
+            srcFile  = srcForFile file
+            tgtFile  = tgtForSrc  srcFile, rule
+            
+            srcText  =○ nfs.read srcFile
+            tgtText  =○ nfs.read tgtFile
+            log g2('▸') m3(srcFile) m5(tgtFile) if opt.verbose
+            compText = rule.compile srcText, srcFile
+            log g2('▸') m3(srcFile) m5(tgtFile) if opt.verbose
+            
+            log 'tgtText'  tgtFile, tgtText if opt.debug and opt.verbose
+            log 'compText' compText         if opt.debug and opt.verbose
+               
+            if empty compText
+                log y5('✘ ') r5(slash.tilde(srcFile)) r4('transpiles to empty!')
+            else
+                log g2('🔧') m3(slash.tilde(srcFile)) if opt.verbose
+                if tgtText != compText
+                    transpiled++
+                    ○ nfs.write tgtFile, compText if not opt.dryrun
+                    log b5('✔ ') g5(slash.tilde(tgtFile))
+                    
+    # ○ bump() if transpiled and not opt.dryrun
+    
+    transpiled
+        
+knrd.bundlePath = bundlePath
+    
+export knrd

@@ -1,0 +1,51 @@
+###
+    00000000    0000000    0000000  000000000    
+    000   000  000   000  000          000       
+    00000000   000   000  0000000      000       
+    000        000   000       000     000       
+    000         0000000   0000000      000       
+###
+
+POST = "__POST__"
+
+use events
+events.setMaxListeners 100
+
+class Poster extends EventTarget
+
+    @: ->
+        super()
+        @addEventListener POST @onPostEvent
+
+    onPostEvent: event ->
+        
+        out = new Event event.event
+        out.args      = event.args
+        @dispatchEvent out
+        
+    dispose: =>
+        
+        @removeEventListener POST @onPostEvent
+
+    post: event args -> 
+    
+        e = new Event POST
+        e.event = event
+        e.args = args
+        @dispatchEvent e
+
+poster = new Poster
+        
+export 
+
+    poster: poster
+
+    emit:   event args... -> poster.post event args
+        
+    on: event cb -> 
+        if cb is func
+            poster.addEventListener event (e) -> cb.apply cb e.args
+        else
+            log 'post.on no func?' event cb
+            
+    removeListener: event cb -> poster.removeEventListener event cb

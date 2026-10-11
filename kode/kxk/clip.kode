@@ -1,0 +1,147 @@
+###
+     ███████  ███      ███  ████████   
+    ███       ███      ███  ███   ███  
+    ███       ███      ███  ████████   
+    ███       ███      ███  ███        
+     ███████  ███████  ███  ███        
+
+  system clipboard with an internal buffer fallback
+###
+
+use ◆ slash
+use fs
+use child_process
+
+function Clip
+
+    @text: ''      # ked's own buffer, always written, never depends on a tool
+    @tool: undefined
+
+    @has: cmd ->
+
+        # always a boolean, so callers never have to distinguish false from unset
+        ⮐ false if empty cmd
+
+        for dir in (process.env.PATH ? '').split ':'
+            ⮐ true if fs.existsSync slash.path(dir, cmd)
+
+        false
+
+    # ███████    ████████  █████████  ████████   ███████  █████████
+    # ███   ███  ███          ███     ███       ███          ███   
+    # ███   ███  ███████      ███     ███████   ███          ███   
+    # ███   ███  ███          ███     ███       ███          ███   
+    # ███████    ████████     ███     ████████   ███████     ███   
+
+    @detect: ->
+
+        ⮐ Clip.tool if valid Clip.tool
+
+        # Wayland first: a session can have DISPLAY set via XWayland,
+        # but what kitty and other wayland apps read is the wl one.
+        if process.env.WAYLAND_DISPLAY and Clip.has('wl-copy') and Clip.has('wl-paste')
+            Clip.tool = 'wl'
+        else if Clip.has 'xsel'
+            Clip.tool = 'xsel'
+        else if Clip.has 'xclip'
+            Clip.tool = 'xclip'
+        else
+            Clip.tool = 'none'
+
+        Clip.tool
+
+    # ███   ███  ████████   ███  █████████  ████████
+    # ███ █ ███  ███   ███  ███     ███     ███     
+    # █████████  ███████    ███     ███     ███████ 
+    # ███   ███  ███   ███  ███     ███     ███     
+    # ██     ██  ███   ███  ███     ███     ████████
+
+    @write: text ->
+
+        tool = Clip.detect()
+
+        if tool == 'wl'
+            cmd = 'wl-copy'
+            args = []
+        else if tool == 'xsel'
+            cmd = 'xsel'
+            args = ['-i' '--clipboard']
+        else if tool == 'xclip'
+            cmd = 'xclip'
+            args = ['-selection' 'clipboard']
+        else
+            error 'clip.copy -- no clipboard tool found (tried wl-copy, xsel, xclip)'
+            ⮐
+        
+        log "clip.write" cmd args
+        proc = child_process.spawn cmd args
+
+        # without this a missing tool raises an unhandled 'error' event
+        proc.on 'error' (err) -> error "clip.copy -- #{cmd}: #{err}"
+
+        proc.stdin.on 'error' (err) -> error "clip.copy -- #{cmd}: #{err}"
+
+        proc.stdin.write text
+        proc.stdin.end()
+
+    # ████████   ████████   ███████   ███████  
+    # ███   ███  ███       ███   ███  ███   ███
+    # ███████    ███████   █████████  ███   ███
+    # ███   ███  ███       ███   ███  ███   ███
+    # ███   ███  ████████  ███   ███  ███████  
+
+    @read: ->
+
+        tool = Clip.detect()
+
+        if tool == 'wl'
+            cmd = 'wl-paste'
+            args = ['--no-newline'] # otherwise it appends one to the result
+        else if tool == 'xsel'
+            cmd = 'xsel'
+            args = ['-o' '--clipboard']
+        else if tool == 'xclip'
+            cmd = 'xclip'
+            args = ['-o' '-selection' 'clipboard']
+        else
+            error 'clip.paste -- no clipboard tool found (tried wl-copy, xsel, xclip)'
+            ⮐ ''
+
+        log "clip.read" cmd args
+
+        try
+            child_process.execSync([cmd].concat(args).join(' ')).toString 'utf8'
+        catch err
+            # a non-zero exit with nothing on stdout just means the clipboard is
+            # empty. only report a tool that could not be run at all.
+            error "clip.paste -- #{cmd}: #{err}" if err.status == null
+            ''
+
+    #  ███████   ███████   ████████   ███   ███
+    # ███       ███   ███  ███   ███   ███ ███ 
+    # ███       ███   ███  ████████     █████  
+    # ███       ███   ███  ███           ███   
+    #  ███████   ███████   ███           ███   
+
+    @copy: text  ->
+
+        # copying nothing is a no-op, it must not clear the buffer
+        ⮐ if empty text
+
+        Clip.text = text
+
+        Clip.write text
+
+    @paste: ->
+        
+        log "PASTE"
+        
+        text = Clip.read()
+        
+        log "PASTE" text
+        
+        ⮐ text if valid text
+
+        Clip.text
+
+export Clip

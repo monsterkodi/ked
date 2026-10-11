@@ -1,0 +1,70 @@
+###
+000000000  00000000   0000000  000000000
+   000     000       000          000   
+   000     0000000   0000000      000   
+   000     000            000     000   
+   000     00000000  0000000      000   
+###
+
+use ./kxk  ◆ nfs slash
+use ./kode ◆ tester
+
+mods = ['kxk' 'kode' 'kolor' 'ked']
+
+lastArg = process.argv[-1]
+
+if lastArg == 'help'
+    
+    log """
+    
+        test runner
+        
+        usage
+
+            kk -t                    run all tests
+            kk -t brief|silent       set verbosity
+            kk -t #{mods.join('|')}  test a single module
+            kk -t .../file.js        run a single test file
+    
+    """
+    process.exit 0
+
+tests = {}; for m in mods ➜ tests[m] = true
+
+hdr = h -> log G2(y8(' ' + rpad(33 h) + ' '))
+
+if 
+    lastArg == 'brief'
+    
+        tester.logSections = false
+
+    lastArg == 'silent'
+    
+        tester.logSections = false
+        tester.logModules = false
+    
+    lastArg in mods
+    
+        for m in mods ➜ tests[m] = m == lastArg
+    
+    lastArg != ◆file
+    
+        for m in mods ➜ tests[m] = false
+            
+        hdr process.argv[-1]
+        
+        file = slash.path ◆dir '..' lastArg
+        test =○ import(file)
+        tester.test test.default
+    
+for mod in mods
+    
+    if tests[mod]
+        hdr mod
+        files =○ nfs.list(slash.path(◆dir mod 'test'))
+        for file in files
+            continue if file.type == 'dir' # ignore subdirectories for now
+            test =○ import(file.path) # shouldn't the file type be checked here?
+            tester.test test.default
+        
+tester.summarize()

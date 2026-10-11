@@ -1,0 +1,245 @@
+###
+    000   000  000000000  000  000    
+    000   000     000     000  000    
+    000   000     000     000  000    
+    000   000     000     000  000    
+     0000000      000     000  0000000
+###
+    
+util =
+
+    # 000   0000000        00000000   0000000   000   000   0000000   000      
+    # 000  000             000       000   000  000   000  000   000  000      
+    # 000  0000000         0000000   000 00 00  000   000  000000000  000      
+    # 000       000        000       000 0000   000   000  000   000  000      
+    # 000  0000000         00000000   00000 00   0000000   000   000  0000000  
+    
+    isEqual: a b ->
+        
+        if a is arr and b is arr
+            
+            ⮐ false if a.length != b.length
+            
+            for index in 0...a.length
+                ⮐ false if not util.isEqual a[index] b[index]
+                
+            ⮐ true
+            
+        if a is obj and b is obj
+            
+            ⮐ util.isEqual(Object.keys(a) Object.keys(b)) and util.isEqual(Object.values(a) Object.values(b))
+            
+        a == b
+        
+    #  0000000   00000000   00000000    0000000   000   000  
+    # 000   000  000   000  000   000  000   000   000 000   
+    # 000000000  0000000    0000000    000000000    00000    
+    # 000   000  000   000  000   000  000   000     000     
+    # 000   000  000   000  000   000  000   000     000     
+    
+    zip: args... ->
+        
+        result = []
+        maxLen = max args.map((a) -> a.length)
+        for i in 0...maxLen
+            result.push args.map((a) -> a[i])
+        result
+        
+    fold: l a ->
+        
+        result = []
+        i = 0
+        while i <= a.length-l
+            result.push a.slice(i,i+l)
+            i += l
+        result
+    
+    reversed: arr -> arr.slice(0).reverse()
+    
+    max:      arr -> Math.max.apply null arr
+    min:      arr -> Math.min.apply null arr
+    
+    pull:     arr item -> 
+        
+        if arr is arr
+            index = arr.indexOf(item)
+            if index >= 0
+                arr.splice index 1
+        arr
+        
+    pullIf: arr pred ->
+        
+        for index in arr.length-1..0
+            if pred(arr[index])
+                arr.splice index 1
+        arr
+
+    keepIf: arr pred -> util.pullIf arr (m) -> not pred m
+    
+    splitWith: arr pred ->
+        
+        inc = []
+        exc = []
+        
+        if valid arr and arr is arr
+            for item in arr
+                if pred item
+                    inc.push item
+                else 
+                    exc.push item
+        else if not arr is arr
+            log 'not an array!?' arr
+            
+        [inc exc]
+    
+    findIf:    arr pred -> for v in arr ➜ ⮐ v if pred v
+    findIndex: arr pred -> for v,i in arr ➜ ⮐ i if pred v
+        
+    pullAll: arr items cmp=util.isEqual ->
+        
+        if valid arr and arr is arr
+        
+            for item in items
+                for index in arr.length-1..0
+                    if cmp arr[index], item
+                        arr.splice index, 1
+        arr
+        
+    uniq: arr ->
+        
+        result = []
+        for item in arr
+            if item not in result
+                result.push item
+        result
+        
+    uniqEqual: arr ->
+        
+        result = []
+        for item in arr
+            add = true
+            for ritem in result
+                if util.isEqual item, ritem
+                    add = false
+                    break
+            result.push item if add
+        result
+        
+    uniqBy: arr prop ->
+        
+        if prop is str
+            key = prop
+            prop = (o) -> o[key]
+            
+        result = []
+        for item in arr
+            add = true
+            for ritem in result
+                if prop(item) == prop(ritem)
+                    add = false
+                    break
+            result.push item if add
+        result
+        
+    sortBy: arr prop ->
+        
+        if prop is str
+            key = prop
+            prop = (o) -> o[key]
+            
+        arr.sort (a,b) -> 
+            pa = prop a
+            pb = prop b
+            if pa is str and pb is str
+                pa.localeCompare pb, 'en' sensitivity:'variant' caseFirst:'upper' numeric:true
+            else 
+                Number(pa) - Number(pb)
+                
+    replace: array index numToRemove arrayToInsert ->
+        
+        array.splice.apply array [index numToRemove].concat(arrayToInsert)
+        
+    insert: array index arrayToInsert -> util.replace array index 0 arrayToInsert
+        
+    #  0000000   0000000          000  00000000   0000000  000000000  
+    # 000   000  000   000        000  000       000          000     
+    # 000   000  0000000          000  0000000   000          000     
+    # 000   000  000   000  000   000  000       000          000     
+    #  0000000   0000000     0000000   00000000   0000000     000     
+    
+    defaults: obj def ->
+        
+        for key,val of def
+            obj[key] ?= val
+        obj
+        
+    pickBy: obj pred ->
+        
+        result = {}
+        for key,val of obj
+            if pred key,val
+                result[key] = val
+        result
+        
+    deleteBy: obj pred ->
+        
+        for key,val of obj
+            if pred key,val
+                delete obj[key]
+        obj
+        
+    toPairs: obj ->
+        
+        result = []
+        
+        if obj is obj
+            for key,val of obj
+                result.push [key val]
+        else if obj is arr
+            result = util.fold 2 obj
+        result
+        
+    fromPairs: pairs ->
+        
+        result = {}
+        for pair in pairs
+            result[pair[0]] = pair[1]
+        result
+    
+    #  0000000  000      00000000  00000000  00000000   
+    # 000       000      000       000       000   000  
+    # 0000000   000      0000000   0000000   00000000   
+    #      000  000      000       000       000        
+    # 0000000   0000000  00000000  00000000  000        
+    
+    sleep: ms ○-> ○ new Promise((r) => setTimeout(r ms)); true
+    
+    uuid: -> crypto.randomUUID()
+    
+    sessionId: ->
+    
+        now       = new Date()
+        year      = now.getFullYear()
+        yearStart = new Date(year 0 1)
+        seconds   = Math.floor((now.getTime() - yearStart.getTime()) / 522).toString(36)
+        (year-2025).toString(36) + lpad(5 seconds '0')
+        
+    # 00     00   0000000   000000000  000   000    
+    # 000   000  000   000     000     000   000    
+    # 000000000  000000000     000     000000000    
+    # 000 0 000  000   000     000     000   000    
+    # 000   000  000   000     000     000   000    
+    
+    rad2deg:        r -> 180 * r / Math.PI
+    deg2rad:        d -> Math.PI * d / 180
+    
+    randInt:      r   -> Math.floor Math.random() * r
+    randIntRange: l h -> Math.floor l+Math.random()*(h-l+1)
+    randRange:    l h -> l+Math.random()*(h-l)
+    
+    absMax:       a b -> (Math.abs(a) >= Math.abs(b)) ? a : b
+    absMin:       a b -> (Math.abs(a)  < Math.abs(b)) ? a : b
+    
+    fade:         a b v -> c = clamp 0 1 v; a * (1-c) + b * c 
+    
+export util

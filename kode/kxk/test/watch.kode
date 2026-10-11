@@ -1,0 +1,82 @@
+###
+000   000   0000000   000000000   0000000  000   000
+000 0 000  000   000     000     000       000   000
+000000000  000000000     000     000       000000000
+000   000  000   000     000     000       000   000
+00     00  000   000   000      0000000  000   000
+###
+
+use .. ◆ slash watch
+
+# never created on purpose: a Watch built on it opens no real fs.watch
+gone = ◆dir + '/.watch-test-nonexistent'
+
+▸ watch
+
+    ▸ stat
+
+        stat = watch.stat ◆file
+        (stat?) ▸ true
+        stat.isFile() ▸ true
+
+        stat = watch.stat ◆dir
+        (stat?) ▸ true
+        stat.isDirectory() ▸ true
+
+        stat = watch.stat(gone + '/nope')
+        (stat?) ▸ false
+
+        stat = watch.stat ''
+        (stat?) ▸ false
+
+        # a line position is stripped, the way fs.exists used to strip it
+        stat = watch.stat(◆file + ':12')
+        (stat?) ▸ true
+
+    ▸ ignore
+
+        w = watch.dir gone
+        r = w.ignore '/a/b'
+        (r?) ▸ false
+
+        w = watch.dir gone, ignore:['\.log$']
+        r = w.ignore '/a/b.log'
+        (r?) ▸ true
+        r = w.ignore '/a/b.js'
+        (r?) ▸ false
+
+    ▸ dirAndFile
+
+        w = watch.dir gone
+        w.dir ▸ slash.path gone
+
+        p = slash.path gone, 'a.txt'
+        w = watch.file p
+        w.file ▸ p
+        w.dir  ▸ slash.path gone
+
+    ▸ onChange
+
+        # a vanished path takes the remove branch.
+        # @emit passes one info object, which is what kk's watcher reads as info.path
+        w = watch.dir gone, emitRemove:true
+        seen = []
+        w.on 'change', (info) => seen.push info.change
+        w.onChange 'rename', 'ghost.txt', w.dir
+        seen.length ▸ 1
+        seen[0] ▸ 'remove'
+
+        # @opt.ignore short-circuits before anything is emitted
+        w = watch.dir gone, ignore:['\.log$'], emitRemove:true
+        seen = []
+        w.on 'change', (info) => seen.push info.change
+        w.onChange 'rename', 'keep.log', w.dir
+        seen.length ▸ 0
+
+        # a file watcher drops every other path
+        w = watch.file slash.path(gone, 'a.txt')
+        w.opt.emitRemove = true
+        seen = []
+        w.on 'change', (info) => seen.push info.change
+        w.onChange 'rename', 'other.txt', w.dir
+        seen.length ▸ 0

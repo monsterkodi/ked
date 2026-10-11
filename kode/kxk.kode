@@ -1,0 +1,21 @@
+###
+    000   000  000   000  000   000
+    000  000    000 000   000  000 
+    0000000      00000    0000000  
+    000  000    000 000   000  000 
+    000   000  000   000  000   000
+    
+    collection of utility functions and helper classes
+###
+
+kxk = {}
+
+use ./kxk ◆ post slash stash matchr immutable linediff karg krzl pretty profile keyinfo events kstr kseg kermit scooter pepe kpos util sds os nfs walkdir noon
+for exp in "post slash stash matchr immutable linediff karg krzl pretty profile keyinfo events kstr kseg kermit scooter pepe kpos util sds os nfs walkdir noon".split(' ') ➜ kxk[exp] = eval exp
+    
+for exp,utl of util ➜ kxk[exp] = utl # export all utility functions
+    
+kxk.kutil = util
+    
+export kxk
+    

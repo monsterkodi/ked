@@ -1,0 +1,657 @@
+###
+    000   000   0000000  000000000  00000000
+    000  000   000          000     000   000
+    0000000    0000000      000     0000000
+    000  000        000     000     000   000
+    000   000  0000000      000     000   000
+    
+    a collection of string related functions
+###
+
+use ./ansi
+use ./matchr
+
+str = o -> # converts anything into a string in noon syntax 
+
+    ⮐ 'null' if not o?
+    # '\n' + noon o # why was this ever prefixed with a newline?
+    noon o
+        
+# the function above is exported as the default
+# all the functions below are attached to it
+
+LINES_REGEXP = /\r?\n/
+
+str.lines = s -> s.split LINES_REGEXP
+
+str.graphemes = s ->
+    
+    segmenter = new Intl.Segmenter "en-US" granularity:'grapheme'
+    Array.from segmenter.segment(s)
+
+str.segments = s ->
+    
+    segmenter = new Intl.Segmenter "en-US" granularity:'grapheme'
+    Array.from(segmenter.segment(s)).map (s) -> s.segment
+    
+# 00000000  000  000      000      00000000  000000000   0000000  
+# 000       000  000      000      000          000     000       
+# 000000    000  000      000      0000000      000     0000000   
+# 000       000  000      000      000          000          000  
+# 000       000  0000000  0000000  00000000     000     0000000   
+
+###
+    converts a string into an array of objects.
+    the objects represent words or chunks of punctuation:
+
+    "hello world!" ▸
+    [
+        match: 'hello' length:5 index:0  word:true
+        match: 'world' length:5 index:6  word:true 
+        match: '!'     length:1 index:11 word:false 
+    ]
+###
+
+str.fillet = s wordCharacterSet='' ->
+    
+    fillets = []
+    
+    ⮐ fillets if not s is str
+    
+    for ci in 0...s.length
+        
+        ch = s[ci]
+        
+        if ch in ' \t\n\r'
+            fillets.push fillet if valid fillet
+            fillet = null
+            continue
+
+        isWord = /\w/.test(ch) or ch in wordCharacterSet
+        
+        if fillet?.word == isWord
+            fillet.match += ch
+            fillet.length++
+        else
+            fillets.push fillet if valid fillet
+            fillet = match:ch, index:ci, length:1 word:isWord
+            
+    fillets.push fillet if valid fillet
+    fillets
+
+# 000   000  000   000  00000000  000  000      000      00000000  000000000  
+# 000   000  0000  000  000       000  000      000      000          000     
+# 000   000  000 0 000  000000    000  000      000      0000000      000     
+# 000   000  000  0000  000       000  000      000      000          000     
+#  0000000   000   000  000       000  0000000  0000000  00000000     000     
+
+str.unfillet = fillets -> # converts an array of fillet objects into a string
+    
+    s = ''
+    for fillet in fillets
+        s = rpad fillet.index, s
+        s += fillet.match
+    trim s
+    
+# 0000000    000       0000000    0000000  000   000        00000000  000  000      000      00000000  000000000   0000000  
+# 000   000  000      000   000  000       000  000         000       000  000      000      000          000     000       
+# 0000000    000      000   000  000       0000000          000000    000  000      000      0000000      000     0000000   
+# 000   000  000      000   000  000       000  000         000       000  000      000      000          000          000  
+# 0000000    0000000   0000000    0000000  000   000        000       000  0000000  0000000  00000000     000     0000000   
+
+str.blockFillets = lineFillets -> # converts an array of fillet objects into a tree of block objects
+    
+    blocks = []
+    stack  = []
+    
+    for fillet,lineIndex in lineFillets
+        
+        continue if empty fillet
+        
+        indent = fillet[0]?.index
+        
+        block = 
+            line:   lineIndex
+            indent: indent
+            fillet: fillet
+            blocks: []
+            
+        if stackTop = last stack
+            if indent > stackTop.indent
+                stackTop.blocks.push block
+            else if indent == stackTop.indent
+                stack.pop()
+                if stackTop = last stack
+                    stackTop.blocks.push block
+                else
+                    blocks.push block
+            else # if indent < stackTop.indent
+                while valid(stack) and indent <= last(stack).indent
+                    stack.pop()
+                    
+                if stackTop = last stack
+                    stackTop.blocks.push block
+                else
+                    blocks.push block
+        else
+            blocks.push block
+            stack.pop()
+            
+        stack.push block
+        
+    blocks
+    
+str.unfilletBlock = block ->
+    
+    s = ''
+    s += str.unfillet block.fillet
+    s += '\n' 
+    s += str.unfilletBlocks block.blocks
+    s
+    
+str.unfilletBlocks = blocks ->
+    
+    s = ''
+    for b in blocks
+        s += rpad(b.indent, '') + str.unfilletBlock(b)
+    s
+    
+    # 000   000  000   000  000  000000000  00000000   0000000  00000000    0000000    0000000  00000000    
+    # 000 0 000  000   000  000     000     000       000       000   000  000   000  000       000         
+    # 000000000  000000000  000     000     0000000   0000000   00000000   000000000  000       0000000     
+    # 000   000  000   000  000     000     000            000  000        000   000  000       000         
+    # 00     00  000   000  000     000     00000000  0000000   000        000   000   0000000  00000000    
+
+str.indexOfClosestNonWhitespace = s x ->
+    
+    ⮐ -1 if empty s
+    x = clamp 0 s.length-1 x
+    ⮐ x if s[x] not in '\n\t\r '
+    
+    dl = dr = 0
+    
+    while s[x-dl] in '\r\n\t ' ➜ dl += 1
+        
+    if x-dl < 0 ➜ dl = Infinity
+        
+    while s[x+dr] in '\r\n\t ' ➜ dr += 1
+        
+    if x+dr >= s.length ➜ dr = Infinity
+        
+    ⮐ -1 if dl == dr == Infinity
+    
+    if dl < dr
+        x-dl
+    else
+        x+dr
+        
+str.indexOfPreviousWhitespace = s x ->
+    
+    ⮐ -1 if empty s
+    
+    x = clamp 0 s.length-1 x
+    
+    while x >= 0 and s[x] not in '\r\n\t '
+        x--
+    x
+
+str.indexOfNextWhitespace = s x ->
+    
+    ⮐ -1 if empty s
+    
+    x = clamp 0 s.length-1 x
+    
+    while x < s.length and s[x] not in '\r\n\t '
+        x++
+    x
+    
+    #  0000000   000      00000000   000   000   0000000   000   000  000   000  00     00    
+    # 000   000  000      000   000  000   000  000   000  0000  000  000   000  000   000    
+    # 000000000  000      00000000   000000000  000000000  000 0 000  000   000  000000000    
+    # 000   000  000      000        000   000  000   000  000  0000  000   000  000 0 000    
+    # 000   000  0000000  000        000   000  000   000  000   000   0000000   000   000    
+    
+str.isAlphaNumeric = s -> 
+
+    for c in s 
+        ⮐ false if not /\w+/.test c
+    true
+    
+str.indexOfClosestAlphaNumeric = s x ->
+    
+    ⮐ -1 if empty s
+    x = clamp 0 s.length-1 x
+    ⮐ x if str.isAlphaNumeric s[x]
+    
+    dl = dr = 0
+    
+    while not str.isAlphaNumeric s[x-dl] ➜ dl += 1
+        
+    if x-dl < 0 ➜ dl = Infinity
+        
+    while not str.isAlphaNumeric s[x+dr] ➜ dr += 1
+        
+    if x+dr >= s.length ➜ dr = Infinity
+        
+    ⮐ -1 if dl == dr == Infinity
+    
+    if dl < dr
+        x-dl
+    else
+        x+dr
+        
+str.indexOfPreviousNonAlphaNumeric = s x ->
+    
+    ⮐ -1 if empty s
+    
+    x = clamp 0 s.length-1 x
+    
+    while x >= 0 and str.isAlphaNumeric s[x]
+        x--
+    x
+
+str.indexOfNextNonAlphaNumeric = s x ->
+    
+    ⮐ -1 if empty s
+    
+    x = clamp 0 s.length-1 x
+    
+    while x < s.length and str.isAlphaNumeric s[x]
+        x++
+    x
+    
+#  0000000  000       0000000    0000000  00000000   0000000  000000000     000   000   0000000   00000000   0000000    
+# 000       000      000   000  000       000       000          000        000 0 000  000   000  000   000  000   000  
+# 000       000      000   000  0000000   0000000   0000000      000        000000000  000   000  0000000    000   000  
+# 000       000      000   000       000  000            000     000        000   000  000   000  000   000  000   000  
+#  0000000  0000000   0000000   0000000   00000000  0000000      000        00     00   0000000   000   000  0000000    
+
+str.rangeOfClosestWord = s x ->
+    
+    ⮐ if empty str
+    
+    x = str.indexOfClosestAlphaNumeric s x
+    
+    ⮐ if x < 0
+    
+    rs = str.indexOfPreviousNonAlphaNumeric s x
+    re = str.indexOfNextNonAlphaNumeric s x
+    
+    if re > rs
+        [rs+1 re]
+
+#  0000000  000       0000000    0000000  00000000   0000000  000000000   0000000  000   000  000   000  000   000  000   000  
+# 000       000      000   000  000       000       000          000     000       000   000  000   000  0000  000  000  000   
+# 000       000      000   000  0000000   0000000   0000000      000     000       000000000  000   000  000 0 000  0000000    
+# 000       000      000   000       000  000            000     000     000       000   000  000   000  000  0000  000  000   
+#  0000000  0000000   0000000   0000000   00000000  0000000      000      0000000  000   000   0000000   000   000  000   000  
+
+str.rangeOfClosestChunk = s x ->
+    
+    ⮐ if empty str
+    
+    x = str.indexOfClosestNonWhitespace s x
+    
+    ⮐ if x < 0
+    
+    rs = str.indexOfPreviousWhitespace s x
+    re = str.indexOfNextWhitespace s x
+    
+    if re > rs
+        [rs+1 re]
+    
+#  0000000  00000000   000      000   0000000  00000000
+# 000       000   000  000      000  000       000
+# 0000000   00000000   000      000  000       0000000
+#      000  000        000      000  000       000
+# 0000000   000        0000000  000   0000000  00000000
+
+# like array splice, but not in place
+
+str.splice = s i c r='' -> s.slice(0 i) + r + s.slice(i + Math.abs(c))
+
+# 00000000  000   000   0000000   0000000   0000000    00000000
+# 000       0000  000  000       000   000  000   000  000
+# 0000000   000 0 000  000       000   000  000   000  0000000
+# 000       000  0000  000       000   000  000   000  000
+# 00000000  000   000   0000000   0000000   0000000    00000000
+
+str.clean = s -> s.replaceAll '\r\n' '\n'
+
+str.encode = s spaces=true ->
+
+    if s
+        r = encodeURI s
+        if spaces
+            r = r.replace /\s/g, '&nbsp;'
+        r
+    else
+        ''
+
+ESCAPE_REGEXP = /[\-\\\^\$\*\+\?\.\(\)\|\[\]\{\}\/]/g
+
+str.escapeRegexp = s -> s.replace ESCAPE_REGEXP, '\\$&'
+str.escapeRegExp = s -> s.replace ESCAPE_REGEXP, '\\$&'
+
+# 000   000  00000000  000   000  
+# 000   000  000        000 000   
+# 000000000  0000000     00000    
+# 000   000  000        000 000   
+# 000   000  00000000  000   000  
+
+str.hex = s -> 
+    
+    if s is str ➜ ⮐ Number.parseInt s 16
+    if s is num ➜ ⮐ Number(s).toString 16
+        
+str.scaleColor = s f=0.5 ->
+    
+    s = str.hexColor(s) if not s is str
+    str.hexColor str.hexColor(s).map((v) -> clamp(0 255 parseInt(f*v)))
+    
+str.hexColor = s ->
+    
+    if s is arr
+        
+        h = '#' + s[0..2].map((v) -> lpad 2 str.hex(v) '0').join('')
+        if s.length > 3 and s[3] is num
+            h = str.scaleColor h s[3]
+        ⮐ h
+        
+    if s is str           
+        validate = a -> 
+            for v in a ➜ ⮐ if empty v
+            a
+        if s = str.rgbaToHexColor(s) if s.startsWith 'rgb'
+        ⮐ if empty s
+        l = s.length
+        if (l == 7 or l == 4) and s[0] == "#" ➜ s = s[1..]; l--
+        if l == 6 ➜ ⮐ validate [str.hex(s[0..1]) str.hex(s[2..3]) str.hex(s[4..5])]
+        if l == 3 ➜ ⮐ validate [str.hex(s[0])*17 str.hex(s[1])*17 str.hex(s[2])*17]
+        ⮐
+        
+    if s is num
+        
+        ⮐ str.hexColor str.hexColor(lpad(6 Number(s).toString(16) '0'))
+        
+str.rgbaToHexColor = s ->   
+    
+    if s is str and s.startsWith 'rgb'
+        
+        spl = s.split('(')[1].split(')')[0].split(',')
+        vls = spl[0..2].map((c) -> parseInt c)
+        ⮐ if not (3 <= vls.length <= 4)
+        for v in vls ➜ ⮐ if empty(v) or v < 0 or v > 255
+        if spl.length > 3
+            f = parseFloat(spl[3])
+            ⮐ if empty f
+            ⮐ if not (0 <= f <= 1)
+            vls.push f
+        str.hexColor vls
+        
+str.hash = s -> 
+
+    h = 9
+    for i in s.length..0 
+        h = Math.imul h^s.charCodeAt(i), 9**9
+    h^h >> 9
+
+#  0000000   0000000   000       0000000   00000000   
+# 000       000   000  000      000   000  000   000  
+# 000       000   000  000      000   000  0000000    
+# 000       000   000  000      000   000  000   000  
+#  0000000   0000000   0000000   0000000   000   000  
+
+str.colorRanges = s ->
+    
+    trio  = /#[a-fA-F0-9]{3}(?![\w\d])/
+    hexa  = /#[a-fA-F0-9]{6}|0x[a-fA-F0-9]{6}(?![\w\d])/
+    rgb   = /rgb\s*\(\s*\d+\s*\,\s*\d+\s*\,\s*\d+\s*\)/
+    rgba  = /rgba\s*\(\s*\d+\s*\,\s*\d+\s*\,\s*\d+\s*\,\s*\d+\.?\d*\s*\)/
+
+    regexps = [[trio 'trio'] [hexa 'hexa'] [rgb 'rgb'] [rgba 'rgba']]
+    if rngs = matchr.ranges regexps s
+        for rng in rngs
+            if rng.clss in ['rgb' 'rgba']
+                rng.color = str.hexColor str.rgbaToHexColor(rng.match)
+            else
+                rng.color = str.hexColor rng.match
+    rngs = rngs.filter (r) -> valid r.color
+    rngs
+        
+#  0000000  000000000  00000000   000  00000000
+# 000          000     000   000  000  000   000
+# 0000000      000     0000000    000  00000000
+#      000     000     000   000  000  000
+# 0000000      000     000   000  000  000
+
+str.rstrip = s cs=' ' ->
+
+    s ?= ''
+    s = s[0...s.length-1] while s[-1] in cs
+    s
+
+str.lstrip = s cs=' ' ->
+
+    s ?= ''
+    s = s[1..] while s[0] in cs
+    s
+
+str.strip = s cs=' ' -> str.rstrip str.lstrip(s,cs), cs
+
+# 000000000  00000000   000  00     00
+#    000     000   000  000  000   000
+#    000     0000000    000  000000000
+#    000     000   000  000  000 0 000
+#    000     000   000  000  000   000
+
+str.trim  = str.strip
+str.ltrim = str.lstrip
+str.rtrim = str.rstrip
+
+#  0000000  000   000  000000000
+# 000       0000  000     000
+# 000       000 0 000     000
+# 000       000  0000     000
+#  0000000  000   000     000
+
+str.lcnt = s c ->
+    s ?= ''
+    if typeof s == 'number' and Number.isFinite s then s = String s
+    ⮐ 0 if typeof s != 'string'
+    c ?= ''
+    i = -1
+    while s[++i] in c then
+    i
+
+str.rcnt = s c ->
+    s ?= ''
+    if typeof s == 'number' and Number.isFinite s then s = String s
+    ⮐ 0 if typeof s != 'string'
+    c ?= ''
+    i = -1
+    while s[s.length-(++i)-1] in c then
+    i
+
+str.cnt = s c ->
+    m = s.match(new RegExp(c, 'g'))
+    m? ? m.length : 0
+
+# 00000000    0000000   0000000
+# 000   000  000   000  000   000
+# 00000000   000000000  000   000
+# 000        000   000  000   000
+# 000        000   000  0000000
+
+str.lpad = s l c=' ' ->
+    s = String s
+    while s.length < l then s = c + s
+    s
+
+str.rpad = s l c=' ' ->
+    s = String s
+    while s.length < l then s += c
+    s
+
+str.pad = str.rpad
+
+str.detab = s ->
+    s = String s
+    i = 0
+    while i < s.length
+        if s[i] == '\t'
+            s = s[...i] + str.lpad('' 4-(i%4)) + s[i+1..]
+        i += 1
+    s
+
+# 000000000  000  00     00  00000000
+#    000     000  000   000  000
+#    000     000  000000000  0000000
+#    000     000  000 0 000  000
+#    000     000  000   000  00000000
+
+str.time = t ->
+    
+    switch typeof t
+        
+        'number'
+            
+            f = 1
+            o = ms:     1000
+                second: 60
+                minute: 60
+                hour:   24
+                day:    30
+                month:  12
+                year:   0
+                
+            for k in Object.keys o
+                
+                num = parseInt t/f
+                f *= o[k]
+                if k == 'year' or t < f
+                    k += 's' if k != 'ms' and num != 1
+                    ⮐ '' + num + ' ' + k
+        'bigint'
+            
+            thsnd = BigInt 1000
+            f = thsnd
+            for k in ['ns' 'μs' 'ms' 'second']
+                if k == 'seconds' or t < f
+                    num = parseInt thsnd * t / f
+                    k += 's' if k == 'second' and num != 1
+                    ⮐ '' + num + ' ' + k
+                f *= thsnd
+            ⮐ 'big:' + String(t)
+        ➜
+            'time:' + String(t)
+
+# 000   000   0000000   000   000
+# 0000  000  000   000  000 0 000
+# 000 0 000  000   000  000000000
+# 000  0000  000   000  000   000
+# 000   000   0000000   00     00
+
+str.now = ->
+
+    now = new Date Date.now()
+    "#{str.lpad now.getHours(), 2 '0'}:#{str.lpad now.getMinutes(), 2 '0'}:#{str.lpad now.getSeconds(), 2 '0'}.#{str.lpad now.getMilliseconds(), 3 '0'}"
+
+#  0000000   000   000   0000000  000
+# 000   000  0000  000  000       000
+# 000000000  000 0 000  0000000   000
+# 000   000  000  0000       000  000
+# 000   000  000   000  0000000   000
+
+str.stripAnsi = (s) -> ansi.strip s
+str.ansi2html = s -> ansi.html s
+str.ansi = ansi
+
+# 000      00000000  000   000  00000000  000   000   0000000  000000000  000   000  00000000  000  000   000  
+# 000      000       000   000  000       0000  000  000          000     000   000  000       000  0000  000  
+# 000      0000000    000 000   0000000   000 0 000  0000000      000     000000000  0000000   000  000 0 000  
+# 000      000          000     000       000  0000       000     000     000   000  000       000  000  0000  
+# 0000000  00000000      0      00000000  000   000  0000000      000     000   000  00000000  000  000   000  
+
+str.levensthein = a b='' ->
+        
+    ⮐ 0 if a == b
+  
+    if a.length > b.length
+        [a b] = [b a]
+  
+    la = a.length
+    lb = b.length
+
+    while la > 0 and (a.charCodeAt(la - 1) == b.charCodeAt(lb - 1))
+        la--
+        lb--
+
+    offset = 0
+
+    while offset < la and (a.charCodeAt(offset) == b.charCodeAt(offset))
+        offset++
+
+    la -= offset
+    lb -= offset
+
+    ⮐ lb if la == 0 or lb < 3
+
+    x = 0
+    vector = []
+
+    for y in 0...la
+        vector.push y + 1
+        vector.push a.charCodeAt(offset + y)
+
+    len = vector.length - 1
+
+    _min = d0 d1 d2 bx ay ->
+        
+        if d0 < d1 or d2 < d1
+            d0 > d2 ? d2 + 1 : d0 + 1
+        else
+            bx == ay ? d1 : d1 + 1
+    
+    while x < lb - 3
+        bx0 = b.charCodeAt offset + (d0 = x)
+        bx1 = b.charCodeAt offset + (d1 = x + 1)
+        bx2 = b.charCodeAt offset + (d2 = x + 2)
+        bx3 = b.charCodeAt offset + (d3 = x + 3)
+        dd = (x += 4)
+        for y2 in 0...len/2
+            y  = y2*2
+            dy = vector[y]
+            ay = vector[y + 1]
+            d0 = _min dy d0 d1 bx0 ay
+            d1 = _min d0 d1 d2 bx1 ay
+            d2 = _min d1 d2 d3 bx2 ay
+            dd = _min d2 d3 dd bx3 ay
+            vector[y] = dd
+            d3 = d2
+            d2 = d1
+            d1 = d0
+            d0 = dy
+
+    while x < lb
+        bx0 = b.charCodeAt offset + (d0 = x)
+        dd = ++x
+        for y2 in 0...len/2
+            y = y2*2
+            dy = vector[y]
+            vector[y] = dd = _min dy d0 dd bx0 vector[y + 1]
+            d0 = dy
+    dd
+    
+str.weight = s ->
+    
+    s = trim s if s is str
+    ⮐ 0 if empty s
+    w = 0
+    f = 1
+    for c,i in s
+        w += c.charCodeAt(0) * f
+        f /= 256.0
+    w
+
+export str

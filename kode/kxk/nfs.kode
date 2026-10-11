@@ -1,0 +1,381 @@
+###
+    000   000  00000000   0000000  
+    0000  000  000       000       
+    000 0 000  000000    0000000   
+    000  0000  000            000  
+    000   000  000       0000000   
+###
+
+use ◆ slash
+use fs
+use child_process
+
+import fsp from 'fs/promises'
+
+class NFS
+    
+    # 0000000    000  00000000   000      000   0000000  000000000  
+    # 000   000  000  000   000  000      000  000          000     
+    # 000   000  000  0000000    000      000  0000000      000     
+    # 000   000  000  000   000  000      000       000     000     
+    # 0000000    000  000   000  0000000  000  0000000      000     
+    
+    @listdir: dir opt ○->
+        
+        opt ?= {}
+        opt.recursive ?= true
+        opt.found ?= []
+        opt.ignoreDirs ?= []
+        
+        dir =○ NFS.resolveSymlink dir
+        
+        # log 'nfs.listdir' dir
+        
+        dirents =○ fsp.readdir dir withFileTypes:true
+        
+        for dirent in dirents
+    
+            file     = dirent.name
+            isDir    = dirent.isDirectory()
+            absPath  = slash.path dir file
+            resolved = undefined
+            
+            if dirent.isSymbolicLink()
+                resolved =○ fsp.readlink absPath
+                if not slash.isAbsolute resolved
+                    resolved = slash.path dir resolved
+                # log 'symlink' absPath resolved
+                isDir =○ @isDir resolved
+            
+            if isDir # is it a good idea to hardcode this here?
+                continue if file in ['node_modules' '.git']
+                continue if file in opt.ignoreDirs
+                continue if absPath in ['/Users/Shared']
+            else 
+                continue if file in ['.DS_Store' '.localized']
+            
+            # log "nfs.list #{absPath}"
+            
+            opt.found.push
+                type: isDir ? 'dir' : 'file'
+                file: file
+                path: absPath
+                
+            opt.found[-1].link = resolved if resolved
+            
+            if isDir and opt.recursive
+    
+                ○ NFS.listdir absPath opt
+        
+        opt.found.sort (a b) -> a.path.localeCompare b.path # if not opt.recursive
+        opt.found
+    
+    @list:    NFS.listdir
+    @dirlist: NFS.listdir
+    
+    @resolveSymlink: p ○->
+        
+        if not p is str
+            error "nfs.resolveSymlink needs a string! #{p}"
+            ⮐  p
+        
+        stat =○ fsp.lstat p
+        if stat.isSymbolicLink()
+            r =○ fsp.readlink p
+            if not slash.isAbsolute r
+                r = slash.path slash.dir(p) r
+            ⮐  r
+        p
+    
+    # 00000000   00000000   0000000   0000000    
+    # 000   000  000       000   000  000   000  
+    # 0000000    0000000   000000000  000   000  
+    # 000   000  000       000   000  000   000  
+    # 000   000  00000000  000   000  0000000    
+    
+    @read: p ○-> 
+        
+        try
+            ○ fsp.readFile p 'utf8'
+        catch err
+            ''
+            
+    # 000   000  00000000   000  000000000  00000000  
+    # 000 0 000  000   000  000     000     000       
+    # 000000000  0000000    000     000     0000000   
+    # 000   000  000   000  000     000     000       
+    # 00     00  000   000  000     000     00000000  
+    
+    @mode: p ○->
+        
+        ⮐ if empty p
+        
+        try
+            stat = ○ fsp.stat p
+        catch err
+            # no file yet, or unreadable: keep the temp file's default mode
+            ⮐
+        
+        stat.mode & 0o7777
+    
+    @write: p text ○->
+        
+        file = slash.untilde p
+        dir  = slash.dir file
+        
+        mode = ○ NFS.mode file
+        
+        try
+            ○ fsp.mkdir dir recursive:true
+            if ○ fsp.access dir fs.constants.W_OK ➜ ⮐ error: "can't access #{dir}"
+            
+            tmp = slash.tmpsib file # sibling temp, so the rename cannot cross a filesystem
+            
+            if ○ fsp.writeFile tmp text           ➜ ⮐ error: "can't write #{tmp}"
+            ○ fsp.chmod tmp mode if valid mode
+            if ○ fsp.rename tmp file              ➜ ⮐ error: "can't move #{tmp} to #{file}"
+            file
+        catch err
+            ⮐ error: "nfs.write -- #{String(err)}"
+            
+    # 000  000   000  00000000   0000000   
+    # 000  0000  000  000       000   000  
+    # 000  000 0 000  000000    000   000  
+    # 000  000  0000  000       000   000  
+    # 000  000   000  000        0000000   
+    
+    @info: p ○->
+        
+        try
+            ⮐  ○ fsp.stat p
+        catch err
+            error "nfs.info -- " + String(err)
+            
+    # 00     00  000   000  0000000    000  00000000   
+    # 000   000  000  000   000   000  000  000   000  
+    # 000000000  0000000    000   000  000  0000000    
+    # 000 0 000  000  000   000   000  000  000   000  
+    # 000   000  000   000  0000000    000  000   000  
+    
+    @mkdir: p ○->
+        
+        try
+            ○ fsp.mkdir p recursive:true
+        catch err
+            if err.code != 'EEXIST'
+                ⮐ error: "nfs.mkdir -- #{String(err)}"
+        p
+        
+    # 00000000  000   000  000   0000000  000000000   0000000  
+    # 000        000 000   000  000          000     000       
+    # 0000000     00000    000  0000000      000     0000000   
+    # 000        000 000   000       000     000          000  
+    # 00000000  000   000  000  0000000      000     0000000   
+    
+    @exists: p ○->
+        
+        try
+            ⮐  if not p?
+            p = slash.absolute slash.removeLinePos(p) process.cwd()
+            ○ fsp.stat p
+                            
+        catch err
+           null
+           
+    # 000000000  000   000  00000000   00000000  
+    #    000      000 000   000   000  000       
+    #    000       00000    00000000   0000000   
+    #    000        000     000        000       
+    #    000        000     000        00000000  
+    
+    @type: p ○->
+        
+        if stat =○ NFS.exists p
+            stat.isFile() ? 'file' : 'dir'
+                
+    # 00000000  000  000      00000000  00000000  000   000  000   0000000  000000000   0000000  
+    # 000       000  000      000       000        000 000   000  000          000     000       
+    # 000000    000  000      0000000   0000000     00000    000  0000000      000     0000000   
+    # 000       000  000      000       000        000 000   000       000     000          000  
+    # 000       000  0000000  00000000  00000000  000   000  000  0000000      000     0000000   
+    
+    @fileExists: p ○->
+        
+        stat =○ NFS.exists p
+        stat if stat?.isFile()
+        
+    @isFile: p ○-> NFS.fileExists p
+                
+    # 0000000    000  00000000   00000000  000   000  000   0000000  000000000   0000000  
+    # 000   000  000  000   000  000        000 000   000  000          000     000       
+    # 000   000  000  0000000    0000000     00000    000  0000000      000     0000000   
+    # 000   000  000  000   000  000        000 000   000       000     000          000  
+    # 0000000    000  000   000  00000000  000   000  000  0000000      000     0000000   
+    
+    @dirExists: p ○->
+
+        stat =○ NFS.exists p
+        stat if stat?.isDirectory()
+        
+    @isDir: p ○-> NFS.dirExists p
+        
+    # 00000000   00000000  00     00   0000000   000   000  00000000  
+    # 000   000  000       000   000  000   000  000   000  000       
+    # 0000000    0000000   000000000  000   000   000 000   0000000   
+    # 000   000  000       000 0 000  000   000     000     000       
+    # 000   000  00000000  000   000   0000000       0      00000000  
+    
+    @remove: p ○-> ○ fsp.rm p, force:true recursive:true
+    
+    #  0000000   0000000   00000000   000   000  
+    # 000       000   000  000   000   000 000   
+    # 000       000   000  00000000     00000    
+    # 000       000   000  000           000     
+    #  0000000   0000000   000           000     
+    
+    @copy: from to ○-> 
+        
+        if ○ NFS.isDir to
+            to = slash.path to, slash.file(from)
+          
+        ○ fsp.cp from, to, recursive:true
+
+    # 00     00   0000000   000   000  00000000  
+    # 000   000  000   000  000   000  000       
+    # 000000000  000   000   000 000   0000000   
+    # 000 0 000  000   000     000     000       
+    # 000   000   0000000       0      00000000  
+    
+    @move: from to ○-> 
+        
+        if ○ NFS.isDir to
+            to = slash.path to, slash.file(from)
+    
+        if ○ NFS.exists from
+            ○ fsp.rename from, to
+    
+    #  0000000   000  000000000  
+    # 000        000     000     
+    # 000  0000  000     000     
+    # 000   000  000     000     
+    #  0000000   000     000     
+    
+    @git: p ○->
+    
+        git = slash.path p
+        
+        while git.length and git != "/"
+            
+            ⮐  git if ○ NFS.isDir(slash.path(git '.git'))
+            
+            git = slash.dir git
+    
+    # 00000000   000   000   0000000   
+    # 000   000  000  000   000        
+    # 00000000   0000000    000  0000  
+    # 000        000  000   000   000  
+    # 000        000   000   0000000   
+    
+    @pkg: p ○->
+        
+        pkg = slash.path p
+        
+        while pkg.length and pkg != "/"
+            
+            ⮐  pkg if ○ NFS.isFile(slash.path(pkg 'package.json'))
+            
+            pkg = slash.dir pkg
+            
+    # 00000000   00000000         000  
+    # 000   000  000   000        000  
+    # 00000000   0000000          000  
+    # 000        000   000  000   000  
+    # 000        000   000   0000000   
+    
+    @prj: p ○->
+        
+        pth = slash.path p
+        
+        if ○ NFS.isFile pth
+            pth = slash.dir pth
+        
+        while pth.length and pth != "/"
+            
+            ⮐  pth if ○ NFS.isDir(slash.path(pth '.git'))
+            ⮐  pth if ○ NFS.isFile(slash.path(pth 'package.json'))
+            ⮐  pth if ○ NFS.isFile(slash.path(slash.dir(pth) 'kakao.kode')) # should be done differently at some point!
+            
+            pth = slash.dir pth
+            
+        pth
+    
+    # 00000000   00000000   0000000   0000000    000000000  00000000  000   000  000000000  
+    # 000   000  000       000   000  000   000     000     000        000 000      000     
+    # 0000000    0000000   000000000  000   000     000     0000000     00000       000     
+    # 000   000  000       000   000  000   000     000     000        000 000      000     
+    # 000   000  00000000  000   000  0000000       000     00000000  000   000     000     
+    
+    @readText: p ○->
+        
+        text =○ NFS.read p 
+        if text.includes '\ufffd' # unicode replacement character
+            if text[0..32].includes '\x00'
+                ⮐
+        text
+        
+    # 000000000  00000000    0000000    0000000  000   000  
+    #    000     000   000  000   000  000       000   000  
+    #    000     0000000    000000000  0000000   000000000  
+    #    000     000   000  000   000       000  000   000  
+    #    000     000   000  000   000  0000000   000   000  
+    
+    @hfsPath: p ○-> # using ideas from https://github.com/johansatge/mac-trash
+        
+        escapedPath = p.replace /"/g '\\\\\\"'
+        osascript = "tell application \\\"Finder\\\" to return posix file \\\"#{escapedPath}\\\""
+        stdout =○ @exec "/usr/bin/osascript -e \"#{osascript}\""
+        hfsPath = stdout.match /^file\s(.*)/
+        trim hfsPath[1]
+    
+    @trash: p ○->  # using ideas from https://github.com/johansatge/mac-trash
+    
+        hfs =○ NFS.hfsPath p
+        shellCommand = "/usr/bin/osascript -l JavaScript -e \"Application('Finder').delete([\\\"#{hfs}\\\"])\""
+        @exec shellCommand
+        
+    @exec: cmd ○->
+        
+        new Promise (resolve reject) ->
+            try
+                child_process.exec cmd {} (err stdout stderr) ->
+                    if err
+                        reject err stderr
+                    else
+                        resolve stdout
+            catch err
+                reject err
+
+    # ████████       ███  ███   ███  █████   
+    # ███   ███     ███   ███ █ ███     ███  
+    # ███████      ███    █████████   ███    
+    # ███   ███   ███     ███   ███          
+    # ███   ███  ███      ██     ██   ███    
+        
+    @isWritable: p ○->
+        
+        try
+            ○ fsp.access p fs.constants.W_OK
+            ⮐ true
+        catch err
+            ⮐ false
+        
+    @isReadable: p ○->
+        
+        try
+            ○ fsp.access p fs.constants.R_OK
+            ⮐ true
+        catch err
+            ⮐ false
+    
+
+export NFS

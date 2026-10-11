@@ -1,0 +1,143 @@
+###
+    000   000  000   000    
+    000  000   000  000     
+    0000000    0000000      
+    000  000   000  000     
+    000   000  000   000    
+###
+
+use ../kxk ▪ sleep karg slash os
+use ../kxk ◆ watch
+use        ◆ knrd status version
+
+use child_process
+
+import fs from 'fs/promises'
+
+args = karg """
+    kk
+        options                                   **
+        info       show build status              = false
+        knrd       transpile kode and noon        = false
+        build      transpile kode and noon        = false
+        rebuild    rebuild all targets            = false -R
+        watch      watch for file changes         = false
+        test       run tests                      = false
+        commit     git commit                     = false 
+        status     git status                     = false
+        diff       git status with diffs          = false 
+        quiet      log nothing                    = false
+        debug      log debug                      = false -D
+        verbose    log verbose                    = false -V
+        version    log version                    = false
+    """
+
+class kk
+    
+    # 00000000   000   000  000   000  
+    # 000   000  000   000  0000  000  
+    # 0000000    000   000  000 0 000  
+    # 000   000  000   000  000  0000  
+    # 000   000   0000000   000   000  
+    
+    @run: ○->
+        
+        while not os.loaded # todo: move this check somewhere else!
+            ○ sleep 150
+            
+        if args.version ➜ ○ log version slash.name(slash.path(◆dir '../../'))
+        if args.info    ➜ ○ kk.info()
+        if args.knrd    ➜ ○ knrd         args.options args
+        if args.build   ➜ ○ knrd         args.options args
+        if args.rebuild ➜ ○ kk.rebuild()                            
+        if args.test    ➜ ○ kk.test      args.options
+        if args.run     ➜ ○ kk.launch    args.options
+        if args.commit  ➜ ○ kk.commit    args.options
+        if args.status  ➜ ○ status()
+        if args.diff    ➜ ○ status diff:true
+        if args.watch   ➜ ○ kk.watch()                            
+            
+        # if valid args.options
+            # log 'leftover options' args.options
+                                                
+    @rebuild: ○->
+        
+        ○ knrd()
+                        
+    # 000  000   000  00000000   0000000   
+    # 000  0000  000  000       000   000  
+    # 000  000 0 000  000000    000   000  
+    # 000  000  0000  000       000   000  
+    # 000  000   000  000        0000000   
+ 
+    @info: ○-> ○ knrd [] dryrun:true
+        
+    # 000   000   0000000   000000000   0000000  000   000  
+    # 000 0 000  000   000     000     000       000   000  
+    # 000000000  000000000     000     000       000000000  
+    # 000   000  000   000     000     000       000   000  
+    # 00     00  000   000     000      0000000  000   000  
+    
+    @watch: ○->
+        
+        log '👁 ' w5(kk.appPath())
+        
+        watch.watch kk.appPath() recursive:true cb: (watcher) ->
+            watcher.on 'change' (info) ○-> 
+
+                ⮐  if slash.contains info.path '.stash'
+                
+                if slash.ext(info.path) in ['kode' 'pug' 'styl' 'noon']
+                    log b5('🔧') w3(info.path)
+                    ○ knrd info.path
+                    ○ kk.test args.options
+    
+    # 000000000  00000000   0000000  000000000  
+    #    000     000       000          000     
+    #    000     0000000   0000000      000     
+    #    000     000            000     000     
+    #    000     00000000  0000000      000     
+    
+    @test: options ○->
+                
+        cmd = "node js/test.js"
+        cmd += ' ' + options.join(' ') if valid options
+        opt = shell:true cwd:kk.appPath() # run tests inside the .app folder
+        
+        new Promise (resolve reject) ->
+        
+            child_process.exec cmd opt (err stdout stderr) -> 
+                
+                if err
+                    error 'ERROR' err
+                    resolve() # don't reject here to keep test watch running
+                else
+                    log stdout if valid stdout
+                    resolve()
+                    
+    #  0000000   0000000   00     00  00     00  000  000000000  
+    # 000       000   000  000   000  000   000  000     000     
+    # 000       000   000  000000000  000000000  000     000     
+    # 000       000   000  000 0 000  000 0 000  000     000     
+    #  0000000   0000000   000   000  000   000  000     000     
+    
+    @commit: args ○->
+
+        msg = args.join ' '
+        msg = 'misc' if empty msg
+        
+        exec = cmd -> log child_process.execSync(cmd encoding:'utf8')
+        
+        exec "git add ." 
+        exec "git commit -m #{msg}" 
+        exec "git push -q 2>&1" 
+        
+        status()
+
+    @appPath: -> slash.path ◆dir '../../'
+        
+    @appName: -> slash.name kk.appPath()
+                                
+global['kk'] = kk
+    
+export kk.run

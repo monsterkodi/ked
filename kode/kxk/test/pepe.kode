@@ -1,0 +1,184 @@
+###
+000000000  00000000   0000000  000000000        00000000   00000000  00000000   00000000  
+   000     000       000          000           000   000  000       000   000  000       
+   000     0000000   0000000      000           00000000   0000000   00000000   0000000   
+   000     000            000     000           000        000       000        000       
+   000     00000000  0000000      000           000        00000000  000        00000000  
+###
+
+use .. ◆ pepe
+
+▸ pepe
+
+    #  ███████  ███  ██     ██  ████████   ███      ████████
+    # ███       ███  ███   ███  ███   ███  ███      ███     
+    # ███████   ███  █████████  ████████   ███      ███████ 
+    #      ███  ███  ███ █ ███  ███        ███      ███     
+    # ███████   ███  ███   ███  ███        ███████  ████████
+
+    ▸ simple
+    
+        pepe 1             ▸ [ ]
+        pepe null          ▸ [ ]
+        pepe ""            ▸ [ '' ]
+        pepe " "           ▸ [ ' ' ]
+        pepe "A B C"       ▸ [ 'A B C' ]
+        pepe " s p a c e " ▸ [ " s p a c e " ]
+        
+    # ███████    ████████    ███████    ███████  ███   ███  ████████  █████████   ███████
+    # ███   ███  ███   ███  ███   ███  ███       ███  ███   ███          ███     ███     
+    # ███████    ███████    █████████  ███       ███████    ███████      ███     ███████ 
+    # ███   ███  ███   ███  ███   ███  ███       ███  ███   ███          ███          ███
+    # ███████    ███   ███  ███   ███   ███████  ███   ███  ████████     ███     ███████ 
+
+    ▸ brackets
+        
+        pepe "()"          ▸ [       start:'(' content:[], end:')' ]
+        pepe "(())"        ▸ [       start:'(' content:[ start:'(' content:[], end:')'], end:')' ]
+        pepe "A ( B ) C"   ▸ [ 'A ' {start:'(' content:[' B '] end: ')'} ' C' ]
+        pepe "A ({ B }) C" ▸ [ 'A ' {start:'(' content:[ start:'{' content:[' B '] end:'}'] end: ')'} ' C' ]
+        pepe "A ({[B]}) C" ▸ [ 'A ' {start:'(' content:[ start:'{' content:[start:'[' content:['B'] end:']'] end:'}'] end: ')'} ' C' ]
+        pepe "A [[[B]]] C" ▸ [ 'A ' {start:'[' content:[ start:'[' content:[start:'[' content:['B'] end:']'] end:']'] end: ']'} ' C' ]
+        
+    # ██     ██  ███   ███  ███      █████████  ███  ████████   ███      ████████
+    # ███   ███  ███   ███  ███         ███     ███  ███   ███  ███      ███     
+    # █████████  ███   ███  ███         ███     ███  ████████   ███      ███████ 
+    # ███ █ ███  ███   ███  ███         ███     ███  ███        ███      ███     
+    # ███   ███   ███████   ███████     ███     ███  ███        ███████  ████████
+
+    ▸ multiple
+    
+        pepe "()[]"       ▸ [       
+            start:'(' content:[] end:')' 
+            start:'[' content:[] end:']' 
+            ]
+
+    ▸ nested multiple
+    
+        pepe "{()[]}"       ▸ [ 
+            start:'{' 
+            content:[
+                    start:'(' content:[] end:')' 
+                    start:'[' content:[] end:']' 
+                ]
+            end:'}' 
+            ]
+
+        pepe "{[()()]}"       ▸ [ 
+            start:'{'
+            content: [
+                start:'[' 
+                content:[
+                        start:'(' content:[] end:')' 
+                        start:'(' content:[] end:')' 
+                    ]
+                end:']' 
+                ]
+            end:'}'
+            ]
+                
+    # ███   ███  ███   ███  ███████     ███████   ███       ███████   ███   ███   ███████  ████████  ███████  
+    # ███   ███  ████  ███  ███   ███  ███   ███  ███      ███   ███  ████  ███  ███       ███       ███   ███
+    # ███   ███  ███ █ ███  ███████    █████████  ███      █████████  ███ █ ███  ███       ███████   ███   ███
+    # ███   ███  ███  ████  ███   ███  ███   ███  ███      ███   ███  ███  ████  ███       ███       ███   ███
+    #  ███████   ███   ███  ███████    ███   ███  ███████  ███   ███  ███   ███   ███████  ████████  ███████  
+
+    ▸ unbalanced
+    
+        pepe "("          ▸ unbalanced: [{content:[]},    {start:'(' content:[]}]
+        pepe ";(("        ▸ unbalanced: [{content:[';']}, {start:'(' content:[]},               {start:'(' content:[]}]
+        pepe ";(8("       ▸ unbalanced: [{content:[';']}, {start:'(' content:['8']},            {start:'(' content:[]}]
+        pepe ";(8)("      ▸ unbalanced: [{content:[';'    {start:'(' content:['8'], end:')'}]}, {start:'(' content:[]}]
+        pepe ";(8)(xxx"   ▸ unbalanced: [{content:[';'    {start:'(' content:['8'], end:')'}]}, {start:'(' content:[]}], tail:'xxx' 
+        
+    # ██     ██  ███   ███████  ██     ██   ███████   █████████   ███████  ███   ███
+    # ███   ███  ███  ███       ███   ███  ███   ███     ███     ███       ███   ███
+    # █████████  ███  ███████   █████████  █████████     ███     ███       █████████
+    # ███ █ ███  ███       ███  ███ █ ███  ███   ███     ███     ███       ███   ███
+    # ███   ███  ███  ███████   ███   ███  ███   ███     ███      ███████  ███   ███
+
+    ▸ mismatch
+    
+        pepe "}"          ▸ mismatch: [{content:[]}], tail:'}'
+        pepe ")"          ▸ mismatch: [{content:[]}], tail:')'
+        pepe "]"          ▸ mismatch: [{content:[]}], tail:']'
+        pepe "(])"        ▸ mismatch: [{content:[]}, {start:'(' content:[]}], tail:'])'
+        pepe "(]"         ▸ mismatch: [{content:[]}, {start:'(' content:[]}], tail:']'
+        pepe "(]xxx"      ▸ mismatch: [{content:[]}, {start:'(' content:[]}], tail:']xxx' 
+        pepe "(xxx]"      ▸ mismatch: [{content:[]}, {start:'(' content:['xxx']}], tail:']' 
+        
+    #  ███████  █████████  ████████   ███  ███   ███   ███████    ███████
+    # ███          ███     ███   ███  ███  ████  ███  ███        ███     
+    # ███████      ███     ███████    ███  ███ █ ███  ███  ████  ███████ 
+    #      ███     ███     ███   ███  ███  ███  ████  ███   ███       ███
+    # ███████      ███     ███   ███  ███  ███   ███   ███████   ███████ 
+
+    ▸ strings
+    
+        pepe "''"         ▸ [ start:"'" content:[],     end:"'" ]
+        pepe "'x'"        ▸ [ start:"'" content:['x'],  end:"'" ]
+        
+        pepe "'"          ▸ unbalanced: [{content:[]}, {start:"'" content:[]}]
+        pepe '"'          ▸ unbalanced: [{content:[]}, {start:'"' content:[]}]
+        
+        pepe "'()'"       ▸ [ start:"'" content:['()'],  end:"'" ]
+        pepe "'(]}'"      ▸ [ start:"'" content:['(]}'], end:"'" ]
+        pepe "'\"'"       ▸ [ start:"'" content:['"'],   end:"'" ]
+        pepe "'\"\"\"'"   ▸ [ start:"'" content:['"""'], end:"'" ]
+        
+        pepe "str: '}])([{'" ▸ [
+            'str: '
+            start: "'"
+            content: ['}])([{']
+            end: "'"
+        ]
+        
+    # ███████    ████████  ████████   ████████  ████████   ████████
+    # ███   ███  ███       ███   ███  ███       ███   ███  ███     
+    # ███   ███  ███████   ████████   ███████   ████████   ███████ 
+    # ███   ███  ███       ███        ███       ███        ███     
+    # ███████    ████████  ███        ████████  ███        ████████
+
+    ▸ depepe
+        
+        cb = s -> s.toLowerCase()
+        pepe.depepe pepe("A ( B ) C"  ), cb ▸ "A ( b ) C"
+        pepe.depepe pepe("A ({ B }) C"), cb ▸ "A ({ b }) C"
+        
+    # ████████    ███████   ███  ████████    ███████
+    # ███   ███  ███   ███  ███  ███   ███  ███     
+    # ████████   █████████  ███  ███████    ███████ 
+    # ███        ███   ███  ███  ███   ███       ███
+    # ███        ███   ███  ███  ███   ███  ███████ 
+
+    ▸ pairs
+    
+        pepe.pairs "" ▸ []
+        
+        pepe.pairs "[]" ▸ [start:'[' rng:[0 1] end:']']
+        
+        pepe.pairs "[()]" ▸ [
+            start:'[' rng:[0 3] end:']' 
+            start:'(' rng:[1 2] end:')' 
+            ]
+            
+        pepe.pairs "[()]{''}" ▸ [
+            start:'[' rng:[0 3] end:']' 
+            start:'(' rng:[1 2] end:')' 
+            start:'{' rng:[4 7] end:'}' 
+            start:"'" rng:[5 6] end:"'" 
+            ]
+            
+        pepe.pairs "([()]{''})" ▸ [
+            start:'(' rng:[0 9] end:')' 
+            start:'[' rng:[1 4] end:']' 
+            start:'(' rng:[2 3] end:')' 
+            start:'{' rng:[5 8] end:'}' 
+            start:"'" rng:[6 7] end:"'" 
+            ]
+            
+        pepe.pairs "some ( nested [ stuff ] )" ▸ [
+            start:'(' rng:[ 5 24] end:')'
+            start:'[' rng:[14 22] end:']'
+            ]
+        

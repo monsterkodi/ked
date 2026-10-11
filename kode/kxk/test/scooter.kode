@@ -1,0 +1,164 @@
+###
+ 0000000   0000000   0000000    0000000   000000000  00000000  00000000 
+000       000       000   000  000   000     000     000       000   000
+0000000   000       000   000  000   000     000     0000000   0000000  
+     000  000       000   000  000   000     000     000       000   000
+0000000    0000000   0000000    0000000      000     00000000  000   000
+###
+
+use .. ◆ scooter
+
+near  = scooter.near
+scoot = s -> Number.parseFloat scooter(s)
+
+▸ scooter
+
+    ▸ add
+    
+        scoot   '1+1'           ▸ 2
+        scoot   '0+0'           ▸ 0
+        scoot   '+2'            ▸ 2
+        scoot   '-3'            ▸ -3
+            
+    ▸ multiply    
+            
+        scoot   '9*9'           ▸ 81    
+        scoot   '9*-3'          ▸ -27
+        scoot   '-2*-2'         ▸ 4
+        scoot   '3*3*3'         ▸ 27    
+        
+    ▸ divide
+        
+        scoot   '1/2'           ▸ 0.5
+        scoot   '1/-4'          ▸ -0.25
+        scoot   '-2/-4'         ▸ 0.5
+        scoot   '-2/8'          ▸ -0.25
+        scoot   '1/1/1/1'       ▸ 1
+        scoot   '20/2/5'        ▸ 2
+    
+        scooter '1/0'           ▸ '∞'
+        scoot   '1/0'           ▸ NaN
+        scoot   '0/0'           ▸ NaN
+        scoot   '1/Infinity'    ▸ 0
+            
+    ▸ pow    
+    
+        scoot   '2^2'           ▸ 4
+        scoot   '2^-2'          ▸ 0.25
+
+        scoot   '2^0.5'         ▸ Math.sqrt 2
+              
+        scoot   '2^2^2'         ▸ 16
+        scoot   '2^3^4'         ▸ Math.pow(2, Math.pow(3, 4))
+        scoot   '2^(3^4)'       ▸ Math.pow(2, Math.pow(3, 4))
+        scoot   '(2^3)^4'       ▸ 4096
+        
+        scoot   '2^3+1'         ▸ 9
+        scoot   '2^(3+1)'       ▸ 16
+
+    ▸ constants
+    
+        scoot   'PI'            ▸ Math.PI
+        scoot   'E'             ▸ Math.E
+        scoot   'PHI'           ▸ (1 + Math.sqrt(5)) / 2
+        
+    ▸ trigonometry
+
+        scoot   'cos(PI)'       ▸ -1
+        scoot   'sin(PI/2)'     ▸ 1
+        scoot   'cos(sin(PI))'  ▸ 1
+        
+    ▸ logarithm
+        
+        scoot   'log(E)'        ▸ 1
+        scooter 'log(0)'      ▸ '-∞'
+        scoot   'log(-1)'       ▸ NaN
+        scoot   'log(10)'       ▸ Math.log 10
+        
+    ▸ deg rad
+        
+        scoot   'rad(180)'      ▸ Math.PI
+        scoot   'deg(PI)'       ▸ 180
+        scoot   'deg(rad(E))'   ▸ Math.E
+        scoot   'rad(deg(E))'   ▸ Math.E
+        
+    ▸ sqrt
+        
+        scoot   'sqrt(9)'       ▸ 3     
+        scoot   'sqrt(8+1)'     ▸ 3 
+        scoot   'sqrt(E^2)'     ▸ Math.E 
+        near scoot('sqrt(E)^2'), Math.E ▸ true
+        
+    ▸ unicode 
+    
+        scoot   '∡(π)'          ▸ 180  
+        scoot   '√(9)'          ▸ 3
+        scoot   'π'             ▸ Math.PI
+        scoot   '𝒆'           ▸ Math.E
+        scooter '∞'             ▸ '∞'
+        scoot   '∞'             ▸ NaN
+        scoot   'ϕ'             ▸ (1 + Math.sqrt(5)) / 2
+        
+        ▸ degree
+        
+            scoot '180°'        ▸ Math.PI
+            scoot '(90+90)°'    ▸ Math.PI
+            scoot '(2*90)°'     ▸ Math.PI
+            scoot '2*90°'       ▸ Math.PI
+            scoot '90°+90°'     ▸ Math.PI
+            scoot '60°+60°+60°' ▸ Math.PI
+            scoot '360°/2'      ▸ Math.PI
+            scoot '(360/2)°'    ▸ Math.PI
+            scoot 'cos(0°)'     ▸  1
+            scoot 'cos(180°)'   ▸ -1
+            scoot 'sin(0°)'     ▸  0
+            near scoot('sin(180°)'), 0 ▸ true
+            
+    ▸ bigint 
+    
+        scooter '2^3^4'         ▸ '2417851639229258349412352'
+        scooter '3*2^3^4'       ▸ '7253554917687775048237056'
+        scooter '4*2^3^4'       ▸ '9671406556917033397649408'
+        scooter '(3*2)^3^4'     ▸ String(BigInt(Math.pow(6, Math.pow(3,4))))
+        scooter '(4*2)^3^4'     ▸ '14134776518227074636666380005943348126619871175004951664972849610340958208'
+        
+    ▸ smallfloat
+    
+        scooter '1/(2^3^4)'     ▸ '0.000000000000000000000000414'
+        
+    ▸ precision
+    
+        scooter 'cos(PI/2)'     ▸ '0.0000000000000000612'
+        
+        scooter 'cos(PI/2)' 17  ▸ '0.00000000000000006'
+        scooter 'cos(PI/2)' 16  ▸ '0.0000000000000001'
+        scooter 'cos(PI/2)' 15  ▸ '0'
+        
+    ▸ misc
+    
+        near scoot('log(1/√(𝒆^(16)))'), -8 ▸ true
+        near scoot('log(1/√(𝒆^(6)))'),  -3 ▸ true
+        
+        scooter('1/0')          ▸ '∞'
+        scooter('1/(∞)')        ▸ '0'
+        scooter('𝒆^(0)')       ▸ '1'
+        scooter('∡(π)')         ▸ '180'
+        scooter('180°-π')       ▸ '0'
+        scooter('(1+√(5))/2-ϕ') ▸ '0'
+        
+    ▸ hex
+    
+        scooter('hex(10)')      ▸ '0xa'
+        scooter('hex(4*4)')     ▸ '0x10'
+        scooter('hex(16^2-1)')  ▸ '0xff'
+
+        scooter('0xa')          ▸ '10'
+        scooter('0x10')         ▸ '16'
+        scooter('0xff')         ▸ '255'
+        
+        scooter('hex(16.5)')      ▸ '0x10'
+        scooter('hex(sqrt(257))') ▸ '0x10'
+        
+        scooter('hex(-16.5)')     ▸ '-0x10'
+        scooter('hex(10-100)')    ▸ '-0x5a'
+        

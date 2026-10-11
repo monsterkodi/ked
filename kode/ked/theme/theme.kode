@@ -1,0 +1,54 @@
+###
+000000000  000   000  00000000  00     00  00000000  
+   000     000   000  000       000   000  000       
+   000     000000000  0000000   000000000  0000000   
+   000     000   000  000       000 0 000  000       
+   000     000   000  00000000  000   000  00000000  
+###
+
+use ../../kxk ▪ post
+use ◆ color
+
+import theme from './theme.json' with { type: "json" }
+
+for key,val of theme # convert all colors into rgb triplets
+    if val is str
+        theme[key] = color.values(val)
+    else
+        for k,v of val
+            val[k] = color.values(v)
+
+for key,value of theme.syntax # generate colors for file ext and punct
+    if key.startsWith 'file_'
+        ext = key[5..]
+        theme.syntax['file_ext_'+ext]   = color.darken value 0.4
+        theme.syntax['file_icon_'+ext]  = color.darken value 0.6
+        theme.syntax['file_punct_'+ext] = color.darken value 0.3
+        
+# ███   ███  ███  ███████    ████████    ███████   ███   ███  █████████
+# ███   ███  ███  ███   ███  ███   ███  ███   ███  ████  ███     ███   
+#  ███ ███   ███  ███████    ███████    █████████  ███ █ ███     ███   
+#    ███     ███  ███   ███  ███   ███  ███   ███  ███  ████     ███   
+#     █      ███  ███████    ███   ███  ███   ███  ███   ███     ███   
+
+full_vibrant = clone theme
+
+setVibrant = vf lf=1.0 -> 
+
+    vf = clamp 0 1 vf
+    for key,val of full_vibrant
+        if val is arr
+            c = color.saturate val vf lf
+            theme[key][0] = c[0]
+            theme[key][1] = c[1]
+            theme[key][2] = c[2]
+        else
+            for k,v of val
+                c = color.saturate v vf lf
+                theme[key][k][0] = c[0]
+                theme[key][k][1] = c[1]
+                theme[key][k][2] = c[2]
+                
+post.on 'theme.vibrant' setVibrant
+
+export theme
