@@ -1,12 +1,12 @@
-# kaktus
+# ked - terminal editor
 
-A self-hosting toolchain. A custom language (**Kode**) compiles to JavaScript;
-on top of it sit a TUI editor, a syntax highlighter and a build driver.
+Includes a self-hosting toolchain for a custom language (**Kode**) that compiles to JavaScript.
+On top of it sit a TUI editor, a syntax highlighter and a build tool.
 
 - `kode/` — source of truth, 203 files, written in Kode
 - `js/` — **generated**, 212 files, mirrors `kode/` 1:1
-- `bin/ked`, `./kk` — entry points
-- `kode/ked/notes.md` — the author's todo list
+- `bin/ked` — entry point for the editor
+- `kk` — entry point of the build tool
 
 ## The two trees
 
@@ -25,15 +25,7 @@ Files are only written when content differs, so `js/` stays byte-stable.
 
 ### `.noon` files
 
-`.noon` is the source of truth; `.json` is derived from it. However `.noon`
-transpilation is **known-suspect** — it is believed there is a bug in
-`kk`/`konrad` that fails to transpile some `.noon` files correctly. If a
-generated `.json` looks wrong, suspect the transpiler before hand-editing the
-output — and prefer fixing the `.noon`.
-
-`package.noon` at the repo root sits outside `kode/` and is never touched by the
-transpiler. It currently disagrees with `package.json` (`build1` carries an
-extra `-v`). Which is authoritative has not been decided.
+`.noon` is the source of truth; `.json` is derived from it.
 
 ## Commands
 
@@ -42,7 +34,7 @@ extra `-v`). Which is authoritative has not been decided.
 | command | does |
 |---|---|
 | `kk -i` | dry run: transpiles to memory, **writes nothing**. Safe. A crash here is a bad sign. |
-| `kk -k` / `kk -b` | transpile `kode/` → `js/` (aliases) |
+| `kk -k` / `kk -b` | transpile `kode/` → `js/` |
 | `kk -k <file.kode>` | transpile a single source file |
 | `kk -R` | rebuild: transpile the whole tree |
 | `kk -t` | run all tests (`node js/test.js`) |
@@ -54,15 +46,6 @@ extra `-v`). Which is authoritative has not been decided.
 
 Long forms work too (`kk --knrd`, `kk --test`). Short flags are the option's
 first letter by default; `-R`, `-D`, `-V` are the deliberate exceptions.
-
-**Trap:** the single-file form only accepts `.kode`. Handing `knrd` a `.noon`
-path fails the extension check, the file list comes back empty, and it silently
-transpiles the *entire tree* instead. To transpile one `.noon`, transpile the
-tree or use `kk -R`.
-
-### `kk --build` is an alias for `kk --knrd`
-
-`kk -b` transpiles, same as `kk -k`. Both take the same optional file argument.
 
 ### `pnpm run stage` — compiler changes only
 
@@ -200,16 +183,3 @@ the transpiler's ignore list. Regenerate it directly:
 ```sh
 node js/kolor/lang.js
 ```
-
-## Unresolved
-
-A few things about `js/` are **not yet understood** and should be checked
-individually before being touched:
-
-| file | status |
-|---|---|
-| `js/ked/test/level2/test23.js`, `test234.js` | probably test fixtures |
-| `js/kolor/test.js`, `js/kolor/test/uutil.js` | probably test fixtures |
-| `js/csi.js`, `js/kxk/path.js`, `js/kxk/styl.js`, `js/kxk/kxk.js` | no matching `.kode` source; hand-written or stale artifact — unknown which |
-
-Treat these as read-only until their provenance is established.

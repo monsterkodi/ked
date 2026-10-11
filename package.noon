@@ -1,4 +1,4 @@
-name      kaktus
+name      ked
 type      module
 scripts
           stage     pnpm run build0 && pnpm run build1 && pnpm run testage
