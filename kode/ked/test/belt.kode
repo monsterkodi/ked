@@ -591,6 +591,44 @@ use ../edit/tool   ◆ belt
                     [0 3 1] [6 3 7] 
                 ]
             ]
+
+    #  the pairs of a line are parsed once and shared by every cursor on
+    #  it, so a batch has to come out exactly as those cursors asked for
+    #  one at a time
+
+    lines = belt.linesForText """
+        [[{()}]]
+        """
+        
+    posl = [[0 0] [1 0] [2 0] [3 0] [4 0] [5 0] [6 0] [7 0]]
+    
+    one = []
+    for pos in posl
+        [sps brk strs] = belt.spansOfNestedPairsAtPositions lines [pos]
+        one = one.concat sps
+    
+    [batched brk strs] = belt.spansOfNestedPairsAtPositions lines posl
+    batched ▸ one
+    
+    one = []
+    for pos in posl
+        rngs = belt.rangesOfNestedPairsAtPositions lines [pos]
+        one = one.concat rngs
+    
+    belt.rangesOfNestedPairsAtPositions lines posl ▸ one
+    
+    #  and a single cursor is unaffected by the batching
+
+    belt.spansOfNestedPairsAtPositions lines [[3 0]] ▸ [
+        [
+            [0 0 1] [7 0 8] [1 0 2] [6 0 7] [2 0 3] [5 0 6] [3 0 4] [4 0 5]
+        ]
+        [
+            [0 0 1] [7 0 8] [1 0 2] [6 0 7] [2 0 3] [5 0 6] [3 0 4] [4 0 5]
+        ]
+        []
+    ]
+
         
     #  ███████   ████████   ████████  ███   ███       ███████  ███       ███████    ███████  ████████
     # ███   ███  ███   ███  ███       ████  ███      ███       ███      ███   ███  ███       ███     

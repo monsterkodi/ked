@@ -1,6 +1,6 @@
 var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, last: function (o) {return o != null ? o.length ? o[o.length-1] : undefined : o}}
 
-var pair
+var brckts, clos, opns, pair
 
 import kxk from "../../../kxk.js"
 let kstr = kxk.kstr
@@ -10,6 +10,9 @@ let pepe = kxk.pepe
 
 import belt from "./belt.js"
 
+brckts = new Set(['(',')','[',']','{','}'])
+opns = new Set(['(','[','{'])
+clos = new Set([')',']','}'])
 
 pair = (function ()
 {
@@ -18,7 +21,7 @@ pair = (function ()
 
     pair["isUnbalancedPosition"] = function (lines, pos, char)
     {
-        var p, revs, start, _30_28_
+        var p, revs, start, _45_28_
 
         revs = {']':'[','}':'{',')':'(','"':'"',"'":"'"}
         p = pepe(kseg.str(lines[pos[1]]))
@@ -31,7 +34,7 @@ pair = (function ()
 
     pair["isRangeInString"] = function (lines, rng)
     {
-        var _39_76_
+        var _54_76_
 
         return (this.rangeOfStringSurroundingRange(lines,rng) != null)
     }
@@ -149,11 +152,12 @@ pair = (function ()
         return c
     }
 
-    pair["rangesOfNestedPairsAtPositions"] = function (lines, posl)
+    pair["pairsAtPositions"] = function (lines, posl)
     {
-        var line, pair, pos, rngs
+        var byLine, cu, found, li, pair, pairs, pos
 
-        rngs = []
+        byLine = {}
+        found = []
         var list = _k_.list(posl)
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
@@ -162,53 +166,72 @@ pair = (function ()
             {
                 continue
             }
-            line = lines[pos[1]]
-            var list1 = _k_.list(pepe.pairsAtCol(kseg.str(line),this.codeunitIndexForColumn(line,pos[0])))
+            li = pos[1]
+            pairs = byLine[li]
+            if (!pairs)
+            {
+                pairs = byLine[li] = pepe.pairs(kseg.str(lines[li]))
+            }
+            cu = this.codeunitIndexForColumn(lines[li],pos[0])
+            var list1 = _k_.list(pairs)
             for (var _b_ = 0; _b_ < list1.length; _b_++)
             {
                 pair = list1[_b_]
-                rngs.push([this.columnForCodeunitIndex(line,pair.rng[0]),pos[1],this.columnForCodeunitIndex(line,pair.rng[1]),pos[1]])
+                if (pair.rng[0] <= cu && pair.rng[1] >= cu)
+                {
+                    found.push([li,pair])
+                }
             }
+        }
+        return found
+    }
+
+    pair["rangesOfNestedPairsAtPositions"] = function (lines, posl)
+    {
+        var f, li, line, pair, rngs
+
+        rngs = []
+        var list = _k_.list(this.pairsAtPositions(lines,posl))
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            f = list[_a_]
+            li = f[0]
+            pair = f[1]
+            line = lines[li]
+            rngs.push([this.columnForCodeunitIndex(line,pair.rng[0]),li,this.columnForCodeunitIndex(line,pair.rng[1]),li])
         }
         return rngs
     }
 
     pair["spansOfNestedPairsAtPositions"] = function (lines, posl)
     {
-        var brackets, c0, c1, close, line, open, pair, pos, spans, strings
+        var brackets, c0, c1, close, f, li, line, open, pair, spans, strings
 
         spans = []
         brackets = []
         strings = []
-        var list = _k_.list(posl)
+        var list = _k_.list(this.pairsAtPositions(lines,posl))
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
-            pos = list[_a_]
-            if (this.isInvalidLineIndex(lines,pos[1]))
+            f = list[_a_]
+            li = f[0]
+            pair = f[1]
+            line = lines[li]
+            c0 = this.columnForCodeunitIndex(line,pair.rng[0])
+            c1 = this.columnForCodeunitIndex(line,pair.rng[1])
+            open = [c0,li,c0 + pair.start.length]
+            close = [c1,li,c1 + pair.end.length]
+            spans.push(open)
+            spans.push(close)
+            if (_k_.in(pair.start,'"\''))
             {
-                continue
+                strings.push(open)
+                strings.push(close)
             }
-            line = lines[pos[1]]
-            var list1 = _k_.list(pepe.pairsAtCol(kseg.str(line),this.codeunitIndexForColumn(line,pos[0])))
-            for (var _b_ = 0; _b_ < list1.length; _b_++)
+            else
             {
-                pair = list1[_b_]
-                c0 = this.columnForCodeunitIndex(line,pair.rng[0])
-                c1 = this.columnForCodeunitIndex(line,pair.rng[1])
-                open = [c0,pos[1],c0 + pair.start.length]
-                close = [c1,pos[1],c1 + pair.end.length]
-                spans.push(open)
-                spans.push(close)
-                if (_k_.in(pair.start,'"\''))
-                {
-                    strings.push(open)
-                    strings.push(close)
-                }
-                else
-                {
-                    brackets.push(open)
-                    brackets.push(close)
-                }
+                brackets.push(open)
+                brackets.push(close)
             }
         }
         return [spans,brackets,strings]
@@ -264,9 +287,8 @@ pair = (function ()
 
     pair["bracketIndex"] = function (lines)
     {
-        var brckts, c, idx, l, line, s
+        var c, idx, l, line, s
 
-        brckts = '([{}])'
         idx = []
         var list = _k_.list(lines)
         for (l = 0; l < list.length; l++)
@@ -276,7 +298,7 @@ pair = (function ()
             for (s = 0; s < list1.length; s++)
             {
                 c = list1[s]
-                if (_k_.in(c,brckts))
+                if (brckts.has(c))
                 {
                     idx.push([l,s,c])
                 }
@@ -327,12 +349,10 @@ pair = (function ()
 
     pair["openCloseSpansForPosition"] = function (lines, idx, pos)
     {
-        var ai, cc, cline, clos, e, firstClose, firstCloseIndex, firstCloseLine, j, lastOpen, lastOpenIndex, lastOpenLine, line, next, oc, oline, open, openEncounters, opns, prev, revs, si, stack
+        var ai, cc, cline, e, firstClose, firstCloseIndex, firstCloseLine, j, lastOpen, lastOpenIndex, lastOpenLine, line, next, oc, oline, open, openEncounters, prev, revs, si, stack
 
         open = {'[':']','{':'}','(':')'}
         revs = {']':'[','}':'{',')':'('}
-        opns = '[{('
-        clos = ']})'
         if (this.isInvalidLineIndex(lines,pos[1]))
         {
             return
@@ -344,7 +364,7 @@ pair = (function ()
         lastOpen = undefined
         lastOpenLine = pos[1]
         lastOpenIndex = -1
-        if (_k_.in(line[si],opns))
+        if (opns.has(line[si]))
         {
             lastOpen = line[si]
             lastOpenLine = pos[1]
@@ -359,7 +379,7 @@ pair = (function ()
             {
                 e = idx[j]
                 prev = e[2]
-                if (_k_.in(prev,opns))
+                if (opns.has(prev))
                 {
                     if (stack.length)
                     {
@@ -392,7 +412,7 @@ pair = (function ()
         firstCloseIndex = -1
         stack = []
         ai = si
-        if (_k_.in(line[si],opns))
+        if (opns.has(line[si]))
         {
             ai = si + 1
         }
@@ -401,7 +421,7 @@ pair = (function ()
         {
             e = idx[j]
             next = e[2]
-            if (_k_.in(next,clos))
+            if (clos.has(next))
             {
                 if (stack.length)
                 {
@@ -430,7 +450,7 @@ pair = (function ()
         }
         if (!(lastOpen != null) || !(firstClose != null))
         {
-            if (si - 1 >= 0 && _k_.in(line[si - 1],clos) && _k_.in(revs[line[si - 1]],openEncounters))
+            if (si - 1 >= 0 && clos.has(line[si - 1]) && _k_.in(revs[line[si - 1]],openEncounters))
             {
                 return this.openCloseSpansForPosition(lines,idx,[kseg.widthAtSegi(line,si - 1),pos[1]])
             }

@@ -9,6 +9,21 @@
 use ../../../kxk ▪ kstr kutil kseg pepe
 use              ◆ belt
 
+#  read by the inner loops, once per grapheme and once per bracket, so
+#  they are hoisted out of the methods and are Sets rather than strings.
+#  kode's `in` helper ends in a call to indexOf, which is always -1 for
+#  a Set - these have to go through .has.
+#
+#  only the sets live here.  the open/revs maps stay local to the methods
+#  that use them, because spansOfNestedPairsAtPositions has a local of
+#  its own called open and isUnbalancedPosition one called revs - hoist
+#  those and a method silently overwrites them for everyone.
+
+brckts = new Set(['(' ')' '[' ']' '{' '}'])
+
+opns = new Set(['(' '[' '{'])
+clos = new Set([')' ']' '}'])
+
 function pair
 
     # ███   ███  ███   ███  ███████     ███████   ███       ███████   ███   ███   ███████  ████████  ███████  
@@ -112,14 +127,38 @@ function pair
             c += kseg.segWidth g
         c
 
+    #  pepe.pairsAtCol re-parses the whole line on every call, and the two
+    #  methods below call it once per cursor, so the cost of a keystroke
+    #  grew with cursor count times line width.  parse each line at most
+    #  once per call instead.
+    #
+    #  lazily, on purpose - a file with one cursor must not pay to parse
+    #  every line it has.
+
+    @pairsAtPositions: lines posl ->
+        
+        byLine = {}
+        found  = []
+        
+        for pos in posl
+            continue if @isInvalidLineIndex lines pos[1]
+            li = pos[1]
+            pairs = byLine[li]
+            if not pairs
+                pairs = byLine[li] = pepe.pairs kseg.str(lines[li])
+            cu = @codeunitIndexForColumn lines[li] pos[0]
+            for pair in pairs
+                found.push [li pair] if pair.rng[0] <= cu and pair.rng[1] >= cu
+        found
+    
     @rangesOfNestedPairsAtPositions: lines posl ->
         
         rngs = []
-        for pos in posl
-            continue if @isInvalidLineIndex lines pos[1]
-            line = lines[pos[1]]
-            for pair in pepe.pairsAtCol(kseg.str(line) @codeunitIndexForColumn(line pos[0]))
-                rngs.push [@columnForCodeunitIndex(line pair.rng[0]) pos[1] @columnForCodeunitIndex(line pair.rng[1]) pos[1]]
+        for f in @pairsAtPositions lines posl
+            li = f[0]
+            pair = f[1]
+            line = lines[li]
+            rngs.push [@columnForCodeunitIndex(line pair.rng[0]) li @columnForCodeunitIndex(line pair.rng[1]) li]
         rngs
 
     @spansOfNestedPairsAtPositions: lines posl ->
@@ -128,26 +167,26 @@ function pair
         brackets = []
         strings  = []
         
-        for pos in posl
-            continue if @isInvalidLineIndex lines pos[1]
-            line = lines[pos[1]]
-            for pair in pepe.pairsAtCol(kseg.str(line) @codeunitIndexForColumn(line pos[0]))
-                c0 = @columnForCodeunitIndex line pair.rng[0]
-                c1 = @columnForCodeunitIndex line pair.rng[1]
-                open  = [c0 pos[1] c0+pair.start.length]
-                close = [c1 pos[1] c1+pair.end.length]
-                spans.push open
-                spans.push close
-                
-                if pair.start in '"\''
-                    strings.push open
-                    strings.push close
-                else
-                    brackets.push open
-                    brackets.push close
-                
+        for f in @pairsAtPositions lines posl
+            li = f[0]
+            pair = f[1]
+            line  = lines[li]
+            c0 = @columnForCodeunitIndex line pair.rng[0]
+            c1 = @columnForCodeunitIndex line pair.rng[1]
+            open  = [c0 li c0+pair.start.length]
+            close = [c1 li c1+pair.end.length]
+            spans.push open
+            spans.push close
+        
+            if pair.start in '"\''
+                strings.push open
+                strings.push close
+            else
+                brackets.push open
+                brackets.push close
+        
         [spans brackets strings]
-
+        
     @rangesOfPairsSurroundingPositions: lines pairs posl ->
         
         rngs = []
@@ -185,12 +224,10 @@ function pair
 
     @bracketIndex: lines ->
 
-        brckts = '([{}])'
-
         idx = []
         for line, l in lines
             for c, s in line
-                idx.push [l s c] if c in brckts
+                idx.push [l s c] if brckts.has c
         idx
 
     #  index of the first entry at or after (l s), or idx.length
@@ -236,10 +273,7 @@ function pair
             ']': '['
             '}': '{'
             ')': '('
-            
-        opns = '[{(' 
-        clos = ']})' 
-        
+
         ⮐  if @isInvalidLineIndex lines pos[1]
         
         line = lines[pos[1]]
@@ -256,7 +290,7 @@ function pair
         lastOpenLine  = pos[1]
         lastOpenIndex = -1
         
-        if line[si] in opns
+        if opns.has line[si]
         
             lastOpen      = line[si]
             lastOpenLine  = pos[1]
@@ -274,7 +308,7 @@ function pair
                 e = idx[j]
                 prev = e[2]
                 
-                if prev in opns
+                if opns.has prev
                     if stack.length
                         if open[prev] == last(stack)
                             openEncounters += prev
@@ -298,7 +332,7 @@ function pair
         stack = []
         
         ai = si
-        if line[si] in opns
+        if opns.has line[si]
             ai = si+1
         
         j = @indexOfBracketAtOrAfter idx pos[1] ai
@@ -308,7 +342,7 @@ function pair
             e = idx[j]
             next = e[2]
             
-            if next in clos
+            if clos.has next
                 if stack.length
                     if open[last(stack)] == next
                         stack.pop()
@@ -329,7 +363,7 @@ function pair
             #  a cursor sitting just after a closing bracket should still
             #  highlight that pair - retry from one grapheme to the left
             
-            if si-1 >= 0 and line[si-1] in clos and revs[line[si-1]] in openEncounters
+            if si-1 >= 0 and clos.has(line[si-1]) and revs[line[si-1]] in openEncounters
                 ⮐  @openCloseSpansForPosition lines idx [kseg.widthAtSegi(line si-1) pos[1]]
             ⮐
         

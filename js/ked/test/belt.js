@@ -1,7 +1,7 @@
 var toExport = {}
 var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
-var brackets, c, cells, l, line, lines, pairs, posl, rect, segls, spans, strings, text
+var batched, brackets, brk, c, cells, l, line, lines, one, pairs, pos, posl, rect, rngs, segls, spans, sps, strings, strs, text
 
 import kxk from "../../kxk.js"
 let kseg = kxk.kseg
@@ -458,6 +458,30 @@ def`)
         posl = [[4,0],[4,1],[4,2],[4,3],[4,4]]
         compare(belt.spansOfNestedPairsAtPositions(lines,posl),[[[0,2,1],[6,2,7],[0,3,1],[6,3,7],[0,4,1],[7,4,8],[1,4,2],[6,4,7],[2,4,3],[5,4,6],[3,4,4],[4,4,5]],[[0,4,1],[7,4,8],[1,4,2],[6,4,7],[2,4,3],[5,4,6],[3,4,4],[4,4,5]],[[0,2,1],[6,2,7],[0,3,1],[6,3,7]]])
     })
+    lines = belt.linesForText(`[[{()}]]`)
+    posl = [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0]]
+    one = []
+    var list1 = _k_.list(posl)
+    for (var _b_ = 0; _b_ < list1.length; _b_++)
+    {
+        pos = list1[_b_]
+        var _c_ = belt.spansOfNestedPairsAtPositions(lines,[pos]); sps = _c_[0]; brk = _c_[1]; strs = _c_[2]
+
+        one = one.concat(sps)
+    }
+    var _d_ = belt.spansOfNestedPairsAtPositions(lines,posl); batched = _d_[0]; brk = _d_[1]; strs = _d_[2]
+
+    compare(batched,one)
+    one = []
+    var list2 = _k_.list(posl)
+    for (var _e_ = 0; _e_ < list2.length; _e_++)
+    {
+        pos = list2[_e_]
+        rngs = belt.rangesOfNestedPairsAtPositions(lines,[pos])
+        one = one.concat(rngs)
+    }
+    compare(belt.rangesOfNestedPairsAtPositions(lines,posl),one)
+    compare(belt.spansOfNestedPairsAtPositions(lines,[[3,0]]),[[[0,0,1],[7,0,8],[1,0,2],[6,0,7],[2,0,3],[5,0,6],[3,0,4],[4,0,5]],[[0,0,1],[7,0,8],[1,0,2],[6,0,7],[2,0,3],[5,0,6],[3,0,4],[4,0,5]],[]])
     section("openCloseSpansForPositions", function ()
     {
         segls = kseg.segls(`[[{()}]]
@@ -492,7 +516,7 @@ def`)
         compare(belt.openCloseSpansForPositions(segls,[[6,0]]),[[1,0,2],[6,0,7]])
         compare(belt.openCloseSpansForPositions(segls,[[7,0]]),[[1,0,2],[6,0,7]])
         compare(belt.openCloseSpansForPositions(segls,[[8,0]]),[])
-        var _b_ = belt.spansOfNestedPairsAtPositions(segls,[[2,0]]); spans = _b_[0]; brackets = _b_[1]; strings = _b_[2]
+        var _f_ = belt.spansOfNestedPairsAtPositions(segls,[[2,0]]); spans = _f_[0]; brackets = _f_[1]; strings = _f_[2]
 
         compare(spans,[[1,0,2],[6,0,7]])
         compare(brackets,[[1,0,2],[6,0,7]])
