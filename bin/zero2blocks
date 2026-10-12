@@ -24,10 +24,11 @@ const CONFIG = `
 
     zero2blocks
         files        files to convert                                     **
-        dry          dry run: report what would change, write nothing  -d  = true
-        verbose      print (to-be-)converted headers                   -v  = true
-        ext          syntax ext to assume instead of the filename      -x
-        recursive    expect directories, walk tree for known exts     -r  = false
+        dry          dry run: report what would change, write nothing  = true
+        verbose      print (to-be-)converted headers                   = true
+        recursive    expect directories, walk tree for known exts      = false
+        debug        log debug messages                             -D = false
+        ext          syntax ext to assume instead of the filename      
 
     `
 
@@ -49,12 +50,13 @@ notes
     whose ext the highlighter does not know is skipped with a warning, and can
     be forced with -x.
 
-    with -r, arguments are directories.  the tool walks each tree and
-    processes all files whose extension is in the known exts list
-    (kode, noon, js, md, ts, json, yaml, py, ...).
-
     don't point this at js/ - it is build output, and a couple of test fixtures
     there hold 0-art inside string literals on purpose.
+
+    with -r, arguments are directories.  the tool walks each tree and
+    processes all files whose extension is in the known exts list:
+    
+${extlang.exts}
 `
 
 const args = karg(CONFIG, { preHelp: PRE, postHelp: POST })
@@ -71,6 +73,8 @@ if (!args.files.length) {
     usage()
     process.exit(1)
 }
+
+if (args.debug) console.log("args:", args)
 
 //  recursive: walk directories and collect files with known extensions
 if (args.recursive) {
@@ -95,6 +99,8 @@ if (args.recursive) {
     for (const dir of args.files) {
         walk(dir)
     }
+
+    if (args.debug) console.log("collected:", collected)
 
     args.files = collected
 }
@@ -125,6 +131,8 @@ let skipped = 0
 
 for (let path of args.files) {
 
+    if (args.debug) console.log(">", path)
+    
     let ext = args.ext || extname(path).replace(/^\./, '')
 
     //  karg takes the next word as the value, so "-nx -v f.kode" leaves -x
@@ -142,6 +150,7 @@ for (let path of args.files) {
     }
 
     let lines  = readFileSync(path, 'utf8').split('\n')
+
     let chunks = kulur.dissect(lines, ext)
 
     //  chunk offsets index into the line they came from, so a highlighter
