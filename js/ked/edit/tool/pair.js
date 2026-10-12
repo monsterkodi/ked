@@ -287,7 +287,7 @@ pair = (function ()
         revs = {']':'[','}':'{',')':'('}
         opns = '[{('
         clos = ']})'
-        maxLookups = 20000
+        maxLookups = 100000
         if (this.isInvalidLineIndex(lines,pos[1]))
         {
             return

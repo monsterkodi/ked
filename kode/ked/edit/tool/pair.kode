@@ -199,7 +199,7 @@ function pair
         opns = '[{(' 
         clos = ']})' 
         
-        maxLookups = 20000 # careful, increasing this drops performance significantly!
+        maxLookups = 100000 # careful, increasing this drops performance significantly!
         
         ⮐  if @isInvalidLineIndex lines pos[1]
         
