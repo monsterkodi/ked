@@ -176,28 +176,31 @@ syntax = (function ()
         return 'text'
     }
 
-    syntax.prototype["getColor"] = function (x, y)
+    syntax.prototype["getColor"] = function (x, y, clss)
     {
-        var clss, _130_27_
+        var _131_27_
 
         if (this.ansi)
         {
             return this.getAnsiColor(x,y)
         }
-        if (_k_.isNum(x))
+        if (!(clss != null))
         {
-            clss = this.getClass(x,y)
+            if (_k_.isNum(x))
+            {
+                clss = this.getClass(x,y)
+            }
+            else
+            {
+                clss = x
+            }
         }
-        else
-        {
-            clss = x
-        }
-        return ((_130_27_=theme.syntax[clss]) != null ? _130_27_ : [255,0,0])
+        return ((_131_27_=theme.syntax[clss]) != null ? _131_27_ : [255,0,0])
     }
 
     syntax.prototype["getAnsiColor"] = function (x, y)
     {
-        var clr, _142_24_
+        var clr, _143_24_
 
         var list = _k_.list(this.colors[y])
         for (var _a_ = 0; _a_ < list.length; _a_++)
@@ -221,11 +224,9 @@ syntax = (function ()
         return [256,0,256]
     }
 
-    syntax.prototype["getChar"] = function (x, y, char)
+    syntax.prototype["getChar"] = function (x, y, char, clss)
     {
-        var clss
-
-        clss = this.getClass(x,y)
+        clss = (clss != null ? clss : this.getClass(x,y))
         if (_k_.in('header',clss))
         {
             return '█'

@@ -50,7 +50,7 @@ function bubble extends view
             if ch in ''
                 @cells.set x 0 ch bg @color.empty
             else
-                fg = @syntax.getColor x 0 ch
+                fg = @syntax.getColor x 0
                 @cells.set x 0 ch fg bg 
                 @cells.adjustContrastForHighlight x 0 bg if @hover
                 

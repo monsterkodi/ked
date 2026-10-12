@@ -115,14 +115,15 @@ function syntax
     # ███       ███   ███  ███      ███   ███  ███   ███
     #  ███████   ███████   ███████   ███████   ███   ███
 
-    getColor: x y =>
+    getColor: x y clss =>
         
         if @ansi ➜ ⮐  @getAnsiColor x y
         
-        if x is num
-            clss = @getClass x y
-        else
-            clss = x
+        if not clss?
+            if x is num
+                clss = @getClass x y
+            else
+                clss = x
         
         # if empty theme.syntax[clss] and not clss.endsWith 'italic'
             # log "syntax.getColor - no syntax color for '#{clss}'" # @diss[y] 
@@ -153,9 +154,9 @@ function syntax
     # ███       ███   ███  ███   ███  ███   ███
     #  ███████  ███   ███  ███   ███  ███   ███
 
-    getChar: x y char =>
+    getChar: x y char clss =>
         
-        clss = @getClass x y
+        clss ?= @getClass x y
         ⮐ '█' if 'header' in clss
         char
         

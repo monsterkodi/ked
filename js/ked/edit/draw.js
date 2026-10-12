@@ -103,15 +103,15 @@ draw = (function ()
             {
                 break
             }
-            fg = syntax.getColor(ci,y)
-            ch = syntax.getChar(ci,y,line[si])
+            clss = syntax.getClass(ci,y)
+            fg = syntax.getColor(ci,y,clss)
+            ch = syntax.getChar(ci,y,line[si],clss)
             if (ch === "#")
             {
                 checkColor = true
             }
             else if (_k_.in(ch,'0█'))
             {
-                clss = syntax.getClass(ci,y)
                 if (clss.endsWith('header'))
                 {
                     headerClass = clss

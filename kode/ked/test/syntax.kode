@@ -1,0 +1,44 @@
+###
+     ███████  ███   ███  ███   ███  █████████   ███████   ███   ███
+    ███        ███ ███   ████  ███     ███     ███   ███   ███ ███
+    ███████     █████    ███ █ ███     ███     █████████    █████
+         ███     ███     ███  ████     ███     ███   ███   ███ ███
+    ███████      ███     ███   ███     ███     ███   ███  ███   ███
+###
+
+use ../util ◆ syntax
+
+▸ syntax
+
+    ▸ getClass argument
+
+        # getColor and getChar accept an already known class, so a caller
+        # like drawLine can look it up once per column instead of once for
+        # the color and again for the character
+
+        s = new syntax 'test'
+        s.setExt 'kode'
+        s.setLines ['class Foo']
+
+        x = 0
+        y = 0
+        clss = s.getClass x y
+        ch   = 'F'
+
+        s.getColor(x y clss) ▸ s.getColor(x y)
+        s.getChar(x y ch clss) ▸ s.getChar(x y ch)
+
+        origGetClass = s.getClass
+        calls = 0
+        s.getClass = (cx cy) ->
+            calls += 1
+            origGetClass cx cy
+
+        s.getColor x y clss
+        s.getChar x y ch clss
+        calls ▸ 0
+
+        s.getColor x y
+        s.getChar x y ch
+        calls ▸ 2
+        

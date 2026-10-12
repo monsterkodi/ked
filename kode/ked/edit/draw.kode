@@ -114,12 +114,13 @@ function draw extends view
                 # log "#{@name} #{r5 'break!'}"
                 break 
             
-            fg = syntax.getColor ci y
+            clss = syntax.getClass ci y
+            
+            fg = syntax.getColor ci y clss
                 
-            ch = syntax.getChar ci y line[si]
+            ch = syntax.getChar ci y line[si] clss
             if ch == "#" ➜ checkColor = true
             else if ch in '0█' 
-                clss = syntax.getClass ci y
                 if clss.endsWith('header') ➜ headerClass = clss
 
             cw = kseg.segWidth line[si]

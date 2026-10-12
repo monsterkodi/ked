@@ -50,7 +50,7 @@ bubble = (function ()
             }
             else
             {
-                fg = this.syntax.getColor(x,0,ch)
+                fg = this.syntax.getColor(x,0)
                 this.cells.set(x,0,ch,fg,bg)
                 if (this.hover)
                 {
