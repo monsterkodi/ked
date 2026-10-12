@@ -145,6 +145,24 @@ lang 'kode'
         inc rgs, 4  "00"    ▸ 'comment header'
         inc rgs, 7  "0000"  ▸ 'comment header'
     
+        #  headers spelled with the block character are headers too -
+        #  zero2blocks rewrites the old zero-ascii-art into these.
+        #  note they chunk one at a time where zeros merge into runs
+        
+        rgs = ranges "# █ ██ ███"
+        inc rgs, 0  "#"     ▸ 'punct comment'
+        inc rgs, 2  "█"     ▸ 'comment header'
+        inc rgs, 4  "█"     ▸ 'comment header'
+        inc rgs, 9  "█"     ▸ 'comment header'
+    
+        dss = dissect "###\n █ ██ █ \n###"
+        inc dss[1], 1 "█"   ▸ 'comment triple header'
+    
+        dss = dissect "###\n 0 █ 0 \n###"
+        inc dss[1], 1 "0"   ▸ 'comment triple header'
+        inc dss[1], 3 "█"   ▸ 'comment triple header'
+        inc dss[1], 5 "0"   ▸ 'comment triple header'
+    
         dss = dissect "###\n 0 00 0 \n###"
         inc dss[1], 1 "0"   ▸ 'comment triple header'
         

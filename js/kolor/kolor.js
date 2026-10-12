@@ -16,7 +16,7 @@ for (var _a_ = 0; _a_ < list.length; _a_++)
     swtch.md[ext] = {turd:'```',to:ext,end:'```',add:'code triple'}
 }
 SPACE = /\s/
-HEADER = /^0+$/
+HEADER = /^[0█]+$/u
 PUNCT = /\W+/gu
 PUNCT = /[^\wäöüßÄÖÜáéíóúÁÉÍÓÚñÑçÇàèìòùÀÈÌÒÙâêîôûÂÊÎÔÛãõÃÕåÅæÆœŒøØłŁđĐ]+/gu
 NUMBER = /^\d+$/
