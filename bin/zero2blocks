@@ -7,22 +7,34 @@
  ███     ███       ███   ███  ███   ███   ███    ███   ███  ███      ███   ███  ███       ███  ███        ███
 ███████  ████████  ███   ███   ███████   ██████  ███████    ███████   ███████    ███████  ███   ███  ███████
 
-    converts old 0-ascii-art headers into █-art headers.
+    converts 0 to █ in salter ascii-art headers.
+*/
 
-    detection reuses the syntax highlighter.  kulur calls a comment a header
-    when every chunk of it matches HEADER = /^[0█]+$/u, and those are exactly
-    the lines ked paints 'comment header'.  so we replace 0 with █ only in the
-    characters the highlighter already considers a header, and never touch a 0
-    in code, in a string, or in a number.
+import { readFileSync, writeFileSync } from 'node:fs'
+import { extname } from 'node:path'
 
-usage
+import karg from '../js/kxk/karg.js'
+import kulur from '../js/kolor/kulur.js'
+import salter from '../js/kxk/salter.js'
 
-    zero2blocks [-n] [-v] <file>...
+const CONFIG = `
 
-options
+    zero2blocks
+        files        files to convert                                     **
+        dry          dry run: report what would change, write nothing  -d  = true
+        verbose      print (to-be-)converted headers                   -v  = true
+        ext          syntax ext to assume instead of the filename      -x
 
-    -n      dry run, write nothing, print what would change
-    -v      print every changed line, not just the count
+    `
+
+const PRE = `
+
+${salter('zero2blocks')}
+
+    converts 0 to █ in salter ascii-art headers.
+`
+
+const POST = `
 
 notes
 
@@ -31,52 +43,26 @@ notes
 
     the ext of each file picks the syntax (kode, noon, js, md, ...).  a file
     whose ext the highlighter does not know is skipped with a warning, and can
-    be forced with -x <ext>.
+    be forced with -x.
 
     don't point this at js/ - it is build output, and a couple of test fixtures
     there hold 0-art inside string literals on purpose.
-*/
+`
 
-import { readFileSync, writeFileSync } from 'node:fs'
-import { extname } from 'node:path'
-
-import kulur from '../js/kolor/kulur.js'
+const args = karg(CONFIG, { preHelp: PRE, postHelp: POST })
 
 function usage () {
-    console.log(`
-${readFileSync(new URL(import.meta.url)).toString().split('\n').slice(3, 8).join('\n')}
-
-usage
-
-    zero2blocks [-n] [-v] <file>...
-
-options
-
-    -n      dry run, write nothing
-    -v      print every changed line
-    -x <e>  force the syntax ext instead of deriving it from the filename
-`)
+    console.log(karg(CONFIG, { returnLog: true, argv: ['-h'], preHelp: PRE, postHelp: POST }))
 }
 
-let opt  = {}
-let args = []
-
-for (let i = 2; i < process.argv.length; i++) {
-
-    let a = process.argv[i]
-
-    if      (a == '-n') opt.dry = true
-    else if (a == '-v') opt.verbose = true
-    else if (a == '-h') opt.help = true
-    else if (a == '-x') opt.ext = process.argv[++i] ?? ''
-    else if (a.startsWith('-')) opt.help = true
-    else args.push(a)
-
+if (args.__ignored?.length) {
+    console.log(`ignoring unrecognised argument(s): ${args.__ignored.join(' ')}`)
 }
 
-if (opt.help) { usage(); process.exit(0) }
-
-if (!args.length) { usage(); process.exit(1) }
+if (!args.files.length) {
+    usage()
+    process.exit(1)
+}
 
 //  replace 0 with █ in the header chunks of one line.  0 and █ are both
 //  one character, so chunk offsets stay valid while we go.
@@ -102,9 +88,17 @@ function convert (line, chunks) {
 let total = 0
 let skipped = 0
 
-for (let path of args) {
+for (let path of args.files) {
 
-    let ext = opt.ext || extname(path).replace(/^\./, '')
+    let ext = args.ext || extname(path).replace(/^\./, '')
+
+    //  karg takes the next word as the value, so "-nx -v f.kode" leaves -x
+    //  holding "-v".  say so rather than reporting a nonsense ext.
+
+    if (ext.startsWith('-')) {
+        console.log(`error   -x wants a syntax ext, got '${ext}'`)
+        process.exit(1)
+    }
 
     if (!kulur.exts.includes(ext)) {
         console.log(`skip    ${path} (unknown ext '${ext}', use -x to force)`)
@@ -141,20 +135,17 @@ for (let path of args) {
 
     total += changed.length
 
-    if (opt.verbose) {
+    if (args.verbose) {
+        console.log("")
+        let count = 0
         for (let n of changed) {
-            //console.log(`${path}:${n}`)
-            console.log(`  - ${lines[n-1]}`)
-            //console.log(`  + ${out[n-1]}`)
-        }
-        for (let n of changed) {
-            //console.log(`${path}:${n}`)
-            //console.log(`  - ${lines[n-1]}`)
-            console.log(`  + ${out[n-1]}`)
+            console.log(out[n-1])
+            count += 1
+            if (count % 5 == 0) console.log("")  
         }
     }
 
-    if (opt.dry) {
+    if (args.dry) {
         console.log(`dry     ${path}  ${changed.length} line(s)`)
     } else {
         writeFileSync(path, out.join('\n'))
@@ -162,5 +153,6 @@ for (let path of args) {
     }
 }
 
-console.log(`${total} line(s) ${opt.dry ? 'would change' : 'changed'}` +
+console.log(`${total} line(s) ${args.dry ? 'would change' : 'changed'}` +
             (skipped ? `, ${skipped} file(s) skipped` : ''))
+            

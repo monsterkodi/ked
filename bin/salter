@@ -1,73 +1,63 @@
 #!/usr/bin/env node
 
 /*
-     ███████   ███████   ███      █████████  ████████  ████████ 
+     ███████   ███████   ███      █████████  ████████  ████████
     ███       ███   ███  ███         ███     ███       ███   ███
-    ███████   █████████  ███         ███     ███████   ███████  
+    ███████   █████████  ███         ███     ███████   ███████
          ███  ███   ███  ███         ███     ███       ███   ███
     ███████   ███   ███  ███████     ███     ████████  ███   ███
 
     renders a five row ascii-art header for a string, using the same generator that ked uses.
 */
 
+import karg from '../js/kxk/karg.js'
 import salter from '../js/kxk/salter.js'
 
-function usage () {
-    console.log(`
+const CONFIG = `
+
+    salter
+        text        the text to render                           *
+        fence       wrap the block in ### fences             -c  = false
+        indent      indent every row by n spaces             -i  = 0
+        prefix      prefix every row with                    -p
+        rowappend   append to every row with                 -a
+        prepend     prepend to the whole block with          -P
+        append      append to the whole block with           -A
+
+    `
+
+const PRE = `
+
 ${salter('salter')}
 
-usage
+    renders a five row ascii-art header for a string, using the same
+    generator that ked uses.
+`
 
-    salter <text>            render <text>
-
-options
-
-    -c           wrap the block in ### fences
-    -i <n>       indent every row by n spaces
-    -p <str>     prefix every row with <str>
-    -a <str>     append to every row
-    -P <str>     prepend to the whole block
-    -A <str>     append to the whole block
+const POST = `
 
 notes
 
-    unsupported characters are dropped, 
+    unsupported characters are dropped,
     see salter.kode for the list of supported ones.
-`)
+`
+
+const opt = karg(CONFIG, { preHelp: PRE, postHelp: POST })
+
+function usage () {
+    console.log(karg(CONFIG, { returnLog: true, argv: ['-h'], preHelp: PRE, postHelp: POST }))
 }
 
-let opt  = {}
-let args = []
-
-for (let i = 2; i < process.argv.length; i++) {
-
-    let a = process.argv[i]
-
-    if (a == '-c')              opt.fence   = true
-    else if (a == '-h')         opt.help    = true
-    else if (a == '-i')         opt.indent  = parseInt(process.argv[++i] ?? '0')
-    else if (a == '-p')         opt.prefix  = process.argv[++i] ?? ''
-    else if (a == '-a')         opt.postfix = process.argv[++i] ?? ''
-    else if (a == '-P')         opt.prepend = process.argv[++i] ?? ''
-    else if (a == '-A')         opt.append  = process.argv[++i] ?? ''
-    else if (a.startsWith('-')) opt.help    = true
-    else                        args.push(a)
-
+if (opt.__ignored?.length) {
+    console.log(`ignoring unrecognised argument(s): ${opt.__ignored.join(' ')}`)
 }
 
-if (opt.help) {
-    usage()
-    process.exit(0)
-}
-
-if (!args.length) {
+if (!opt.text) {
     usage()
     process.exit(1)
 }
 
-let text = args[0]
-
-let block = salter(text, {char:'█'})
+let block = salter(opt.text, { char: '█' })
 
 if (opt.indent) {
     let pad = ' '.repeat(opt.indent)
