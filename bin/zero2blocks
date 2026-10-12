@@ -1,0 +1,166 @@
+#!/usr/bin/env node
+
+/*
+███████  ████████  ████████    ███████   █████   ███████    ███       ███████    ███████  ███   ███   ███████
+   ███   ███       ███   ███  ███   ███     ███  ███   ███  ███      ███   ███  ███       ███  ███   ███
+  ███    ███████   ███████    ███   ███    ███   ███████    ███      ███   ███  ███       ███████    ███████
+ ███     ███       ███   ███  ███   ███   ███    ███   ███  ███      ███   ███  ███       ███  ███        ███
+███████  ████████  ███   ███   ███████   ██████  ███████    ███████   ███████    ███████  ███   ███  ███████
+
+    converts old 0-ascii-art headers into █-art headers.
+
+    detection reuses the syntax highlighter.  kulur calls a comment a header
+    when every chunk of it matches HEADER = /^[0█]+$/u, and those are exactly
+    the lines ked paints 'comment header'.  so we replace 0 with █ only in the
+    characters the highlighter already considers a header, and never touch a 0
+    in code, in a string, or in a number.
+
+usage
+
+    zero2blocks [-n] [-v] <file>...
+
+options
+
+    -n      dry run, write nothing, print what would change
+    -v      print every changed line, not just the count
+
+notes
+
+    idempotent - a converted file has no 0 left in its headers, so running
+    this twice changes nothing the second time.
+
+    the ext of each file picks the syntax (kode, noon, js, md, ...).  a file
+    whose ext the highlighter does not know is skipped with a warning, and can
+    be forced with -x <ext>.
+
+    don't point this at js/ - it is build output, and a couple of test fixtures
+    there hold 0-art inside string literals on purpose.
+*/
+
+import { readFileSync, writeFileSync } from 'node:fs'
+import { extname } from 'node:path'
+
+import kulur from '../js/kolor/kulur.js'
+
+function usage () {
+    console.log(`
+${readFileSync(new URL(import.meta.url)).toString().split('\n').slice(3, 8).join('\n')}
+
+usage
+
+    zero2blocks [-n] [-v] <file>...
+
+options
+
+    -n      dry run, write nothing
+    -v      print every changed line
+    -x <e>  force the syntax ext instead of deriving it from the filename
+`)
+}
+
+let opt  = {}
+let args = []
+
+for (let i = 2; i < process.argv.length; i++) {
+
+    let a = process.argv[i]
+
+    if      (a == '-n') opt.dry = true
+    else if (a == '-v') opt.verbose = true
+    else if (a == '-h') opt.help = true
+    else if (a == '-x') opt.ext = process.argv[++i] ?? ''
+    else if (a.startsWith('-')) opt.help = true
+    else args.push(a)
+
+}
+
+if (opt.help) { usage(); process.exit(0) }
+
+if (!args.length) { usage(); process.exit(1) }
+
+//  replace 0 with █ in the header chunks of one line.  0 and █ are both
+//  one character, so chunk offsets stay valid while we go.
+
+function convert (line, chunks) {
+
+    let res = ''
+    let prev = 0
+
+    for (let c of chunks) {
+
+        if (!c.clss.includes('header')) continue
+
+        res += line.slice(prev, c.start) +
+               line.slice(c.start, c.start + c.length).replace(/0/g, '█')
+
+        prev = c.start + c.length
+    }
+
+    return res + line.slice(prev)
+}
+
+let total = 0
+let skipped = 0
+
+for (let path of args) {
+
+    let ext = opt.ext || extname(path).replace(/^\./, '')
+
+    if (!kulur.exts.includes(ext)) {
+        console.log(`skip    ${path} (unknown ext '${ext}', use -x to force)`)
+        skipped++
+        continue
+    }
+
+    let lines  = readFileSync(path, 'utf8').split('\n')
+    let chunks = kulur.dissect(lines, ext)
+
+    //  chunk offsets index into the line they came from, so a highlighter
+    //  returning a different number of lines would point at the wrong ones.
+    //  bail rather than guess.
+
+    if (chunks.length !== lines.length) {
+        console.log(`skip    ${path} (highlighter gave ${chunks.length} lines for ${lines.length})`)
+        skipped++
+        continue
+    }
+
+    let out     = lines.slice()
+    let changed = []
+
+    for (let i = 0; i < chunks.length; i++) {
+
+        let line = convert(lines[i], chunks[i])
+        if (line !== lines[i]) {
+            out[i] = line
+            changed.push(i + 1)
+        }
+    }
+
+    if (!changed.length) continue
+
+    total += changed.length
+
+    if (opt.verbose) {
+        for (let n of changed) {
+            //console.log(`${path}:${n}`)
+            console.log(`  - ${lines[n-1]}`)
+            //console.log(`  + ${out[n-1]}`)
+        }
+        for (let n of changed) {
+            //console.log(`${path}:${n}`)
+            //console.log(`  - ${lines[n-1]}`)
+            console.log(`  + ${out[n-1]}`)
+        }
+    }
+
+    if (opt.dry) {
+        console.log(`dry     ${path}  ${changed.length} line(s)`)
+    } else {
+        writeFileSync(path, out.join('\n'))
+        console.log(`wrote   ${path}  ${changed.length} line(s)`)
+    }
+}
+
+console.log(`${total} line(s) ${opt.dry ? 'would change' : 'changed'}` +
+            (skipped ? `, ${skipped} file(s) skipped` : ''))
