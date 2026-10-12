@@ -8,31 +8,31 @@
 
 # files
 
-    ctrl+s          cmd+s           save
-    shift+cmd+s     shift+ctrl+s    save as (todo)
-    ctrl+r          cmd+r           reload file from disk
-    ctrl+n          cmd+n           new file
-    ctrl+q   alt+q  cmd+esc         quit
-    alt+o                           jump to counterpart
-    alt+1                           filepos: previous entry
-    alt+2                           filepos: next entry
-    cmd+1                           filepos: swap previous
-    alt+h                           show filepos history
-
-# views
-
-    alt+m                           menu
-    cmd+p           ctrl+p          quicky: project files
-    cmd+f           ctrl+f          finder, or searcher if finder open
-    shift+cmd+f     shift+ctrl+f    searcher
-    cmd+.           ctrl+.          browse: go to directory
-    alt+,                           cursor to previous function
-    alt+.                           cursor to next function
-    alt+r                           reveal file in dir column
-    cmd+\           ctrl+\          toggle dir column
-    cmd+'           ctrl+'          toggle function column
-    cmd+i                           differ: status
-    cmd+m   cmd+;   ctrl+;          macro
+    ctrl+s          cmd+s               save
+    shift+cmd+s     shift+ctrl+s        save as (todo)
+    ctrl+r          cmd+r               reload file from disk
+    ctrl+n          cmd+n               new file
+    ctrl+q   alt+q  cmd+esc             quit
+    alt+o                               jump to counterpart
+    alt+1                               filepos: previous entry
+    alt+2                               filepos: next entry
+    cmd+1                               filepos: swap previous
+    alt+h                               show filepos history
+                                        
+# views                                 
+                                        
+    alt+m                               menu
+    cmd+p           ctrl+p              quicky: project files
+    cmd+f           ctrl+f              finder, or searcher if finder is open
+    shift+cmd+f     shift+ctrl+f        searcher
+    cmd+.           ctrl+.              browse: go to directory
+    alt+,                               cursor to previous function
+    alt+.                               cursor to next function
+    alt+r                               reveal file in dir column
+    cmd+\           ctrl+\              toggle dir column
+    cmd+'           ctrl+'              toggle function column
+    cmd+i                               differ: status
+    cmd+m   cmd+;   ctrl+;              macro
 
 # cursor
 
