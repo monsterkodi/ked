@@ -12,10 +12,13 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { extname } from 'node:path'
+import { readdirSync, statSync } from 'node:fs'
+import { join } from 'node:path'
 
 import karg from '../js/kxk/karg.js'
 import kulur from '../js/kolor/kulur.js'
 import salter from '../js/kxk/salter.js'
+import extlang from '../js/kolor/extlang.js'
 
 const CONFIG = `
 
@@ -24,6 +27,7 @@ const CONFIG = `
         dry          dry run: report what would change, write nothing  -d  = true
         verbose      print (to-be-)converted headers                   -v  = true
         ext          syntax ext to assume instead of the filename      -x
+        recursive    expect directories, walk tree for known exts     -r  = false
 
     `
 
@@ -45,6 +49,10 @@ notes
     whose ext the highlighter does not know is skipped with a warning, and can
     be forced with -x.
 
+    with -r, arguments are directories.  the tool walks each tree and
+    processes all files whose extension is in the known exts list
+    (kode, noon, js, md, ts, json, yaml, py, ...).
+
     don't point this at js/ - it is build output, and a couple of test fixtures
     there hold 0-art inside string literals on purpose.
 `
@@ -62,6 +70,33 @@ if (args.__ignored?.length) {
 if (!args.files.length) {
     usage()
     process.exit(1)
+}
+
+//  recursive: walk directories and collect files with known extensions
+if (args.recursive) {
+    const knownExts = new Set(extlang.exts)
+    const collected = []
+
+    function walk (dir) {
+        for (const entry of readdirSync(dir)) {
+            const full = join(dir, entry)
+            const st = statSync(full)
+            if (st.isDirectory()) {
+                walk(full)
+            } else {
+                const ext = extname(entry).replace(/^\./, '')
+                if (knownExts.has(ext)) {
+                    collected.push(full)
+                }
+            }
+        }
+    }
+
+    for (const dir of args.files) {
+        walk(dir)
+    }
+
+    args.files = collected
 }
 
 //  replace 0 with █ in the header chunks of one line.  0 and █ are both
