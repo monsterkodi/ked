@@ -158,16 +158,6 @@ Keep the snippet in **single quotes**: `#` begins a Kode comment, and many
 operators are non-ASCII (`➜`, `○`, `⮐`, `◆`), so anything the shell touches
 will corrupt it.
 
-## Conventions
-
-- **The `0`-art header at the top of each file is deliberate.** Each file opens
-  with a comment block spelling a word in ASCII art using only `0` and space.
-  It is a navigation aid, not decoration. Do not remove it, and do not treat it
-  as noise when tidying a file. `bin/salter` can be used to generate these headers.
-- **`# log '...' args` lines are a live debugging idiom,** not dead code. They
-  are the fastest way to trace execution in this codebase. They may be removed
-  only when the surrounding code they describe is removed.
-
 ## Never
 
 - **Never edit anything under `js/`.** It is generated and will be overwritten.
