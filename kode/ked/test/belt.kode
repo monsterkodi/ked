@@ -675,6 +675,124 @@ use ../edit/tool   ◆ belt
         belt.openCloseSpansForPositions segls [[20 0]] ▸ [[0 0 1] [2 0 3]]
         belt.openCloseSpansForPositions segls [[1 0]] ▸ [[0 0 1] [2 0 3]]
         
+        #  the scans must hop between brackets, so these all have to keep
+        #  working across lines, and must not depend on how much text is in
+        #  between the cursor and the bracket it does or doesn't find
+        
+        segls = kseg.segls """
+            f(a,
+              b,
+              c)
+            """
+            
+        belt.openCloseSpansForPositions segls [[2 0]] ▸ [[1 0 2] [3 2 4]]
+        belt.openCloseSpansForPositions segls [[2 2]] ▸ [[1 0 2] [3 2 4]]
+        
+        #  cursor in the virtual space past the end of a line
+        
+        belt.openCloseSpansForPositions segls [[40 0]] ▸ [[1 0 2] [3 2 4]]
+        belt.openCloseSpansForPositions segls [[40 2]] ▸ [[1 0 2] [3 2 4]]
+        
+        #  an empty line below the pair is not part of it
+        
+        belt.openCloseSpansForPositions segls [[2 3]] ▸ []
+        
+        #  no partner anywhere: the scan walks the whole file and gives up
+        
+        segls = kseg.segls """
+            foo(bar
+            baz
+            qux
+            """
+            
+        belt.openCloseSpansForPositions segls [[4 0]] ▸ []
+        belt.openCloseSpansForPositions segls [[4 2]] ▸ []
+        
+        segls = kseg.segls """
+            foo)bar
+            baz
+            qux
+            """
+            
+        belt.openCloseSpansForPositions segls [[4 0]] ▸ []
+        
+        #  a closer with no opener before it anywhere
+        
+        segls = kseg.segls """
+            foo
+            baz)
+            qux
+            """
+            
+        belt.openCloseSpansForPositions segls [[3 1]] ▸ []
+        
+        #  the stack hits a mismatch and the whole lookup bails
+        
+        segls = kseg.segls """
+            ([)] x
+            """
+            
+        belt.openCloseSpansForPositions segls [[1 0]] ▸ []
+        belt.openCloseSpansForPositions segls [[3 0]] ▸ []
+        
+        #  nesting: the cursor sits on the innermost pair
+        
+        segls = kseg.segls """
+            ((((((((((x))))))))))
+            """
+            
+        belt.openCloseSpansForPositions segls [[10 0]] ▸ [[9 0 10] [11 0 12]]
+        belt.openCloseSpansForPositions segls [[0 0]] ▸ [[0 0 1] [20 0 21]]
+        belt.openCloseSpansForPositions segls [[20 0]] ▸ [[0 0 1] [20 0 21]]
+        
+        #  brackets either side of wide graphemes - positions are display
+        #  columns, so ')' closes at column 5 and the second '(' opens
+        #  at column 7, even though they are graphemes 3 and 5
+        
+        segls = kseg.segls """
+            (日本)a(日本)
+            """
+            
+        belt.openCloseSpansForPositions segls [[0 0]] ▸ [[0 0 1] [5 0 6]]
+        belt.openCloseSpansForPositions segls [[7 0]] ▸ [[7 0 8] [12 0 13]]
+        belt.openCloseSpansForPositions segls [[8 0]] ▸ [[7 0 8] [12 0 13]]
+        
+        #  a cursor sitting just after a closing bracket still highlights
+        #  that pair - the backward scan gives up having only skipped over
+        #  balanced pairs, so the lookup retries from one grapheme left
+        
+        segls = kseg.segls """
+            [a](b) c
+            """
+            
+        belt.openCloseSpansForPositions segls [[6 0]] ▸ [[3 0 4] [5 0 6]]
+        belt.openCloseSpansForPositions segls [[7 0]] ▸ []
+        
+    ▸ bracketIndex
+        
+        belt.bracketIndex kseg.segls('abc') ▸ []
+        belt.bracketIndex kseg.segls('') ▸ []
+        belt.bracketIndex kseg.segls('()[]{}') ▸ [
+            [0 0 '('] [0 1 ')'] [0 2 '['] [0 3 ']'] [0 4 '{'] [0 5 '}']
+        ]
+        
+        #  the index is flat and ascending across lines, and carries the
+        #  grapheme index rather than the display column
+        
+        segls = kseg.segls """
+            ab(
+            日本]
+            """
+            
+        belt.bracketIndex segls ▸ [
+            [0 2 '('] [1 2 ']']
+        ]
+        
+        #  brackets inside strings are still brackets as far as the index
+        #  is concerned - filtering them is the caller's business
+        
+        belt.bracketIndex kseg.segls("'a(b'") ▸ [[0 2 '(']]
+        
     # ████████    ███████    ███████         ███████   ███████   ███       ███████
     # ███   ███  ███   ███  ███             ███       ███   ███  ███      ███     
     # ████████   ███   ███  ███████         ███       ███   ███  ███      ███████ 

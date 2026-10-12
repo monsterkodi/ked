@@ -503,6 +503,51 @@ def`)
         segls = kseg.segls(`(a)`)
         compare(belt.openCloseSpansForPositions(segls,[[20,0]]),[[0,0,1],[2,0,3]])
         compare(belt.openCloseSpansForPositions(segls,[[1,0]]),[[0,0,1],[2,0,3]])
+        segls = kseg.segls(`f(a,
+  b,
+  c)`)
+        compare(belt.openCloseSpansForPositions(segls,[[2,0]]),[[1,0,2],[3,2,4]])
+        compare(belt.openCloseSpansForPositions(segls,[[2,2]]),[[1,0,2],[3,2,4]])
+        compare(belt.openCloseSpansForPositions(segls,[[40,0]]),[[1,0,2],[3,2,4]])
+        compare(belt.openCloseSpansForPositions(segls,[[40,2]]),[[1,0,2],[3,2,4]])
+        compare(belt.openCloseSpansForPositions(segls,[[2,3]]),[])
+        segls = kseg.segls(`foo(bar
+baz
+qux`)
+        compare(belt.openCloseSpansForPositions(segls,[[4,0]]),[])
+        compare(belt.openCloseSpansForPositions(segls,[[4,2]]),[])
+        segls = kseg.segls(`foo)bar
+baz
+qux`)
+        compare(belt.openCloseSpansForPositions(segls,[[4,0]]),[])
+        segls = kseg.segls(`foo
+baz)
+qux`)
+        compare(belt.openCloseSpansForPositions(segls,[[3,1]]),[])
+        segls = kseg.segls(`([)] x`)
+        compare(belt.openCloseSpansForPositions(segls,[[1,0]]),[])
+        compare(belt.openCloseSpansForPositions(segls,[[3,0]]),[])
+        segls = kseg.segls(`((((((((((x))))))))))`)
+        compare(belt.openCloseSpansForPositions(segls,[[10,0]]),[[9,0,10],[11,0,12]])
+        compare(belt.openCloseSpansForPositions(segls,[[0,0]]),[[0,0,1],[20,0,21]])
+        compare(belt.openCloseSpansForPositions(segls,[[20,0]]),[[0,0,1],[20,0,21]])
+        segls = kseg.segls(`(日本)a(日本)`)
+        compare(belt.openCloseSpansForPositions(segls,[[0,0]]),[[0,0,1],[5,0,6]])
+        compare(belt.openCloseSpansForPositions(segls,[[7,0]]),[[7,0,8],[12,0,13]])
+        compare(belt.openCloseSpansForPositions(segls,[[8,0]]),[[7,0,8],[12,0,13]])
+        segls = kseg.segls(`[a](b) c`)
+        compare(belt.openCloseSpansForPositions(segls,[[6,0]]),[[3,0,4],[5,0,6]])
+        compare(belt.openCloseSpansForPositions(segls,[[7,0]]),[])
+    })
+    section("bracketIndex", function ()
+    {
+        compare(belt.bracketIndex(kseg.segls('abc')),[])
+        compare(belt.bracketIndex(kseg.segls('')),[])
+        compare(belt.bracketIndex(kseg.segls('()[]{}')),[[0,0,'('],[0,1,')'],[0,2,'['],[0,3,']'],[0,4,'{'],[0,5,'}']])
+        segls = kseg.segls(`ab(
+日本]`)
+        compare(belt.bracketIndex(segls),[[0,2,'('],[1,2,']']])
+        compare(belt.bracketIndex(kseg.segls("'a(b'")),[[0,2,'(']])
     })
     section("positionColumns", function ()
     {

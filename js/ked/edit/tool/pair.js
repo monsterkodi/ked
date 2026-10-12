@@ -262,16 +262,62 @@ pair = (function ()
         return spans
     }
 
+    pair["bracketIndex"] = function (lines)
+    {
+        var brckts, c, idx, l, line, s
+
+        brckts = '([{}])'
+        idx = []
+        var list = _k_.list(lines)
+        for (l = 0; l < list.length; l++)
+        {
+            line = list[l]
+            var list1 = _k_.list(line)
+            for (s = 0; s < list1.length; s++)
+            {
+                c = list1[s]
+                if (_k_.in(c,brckts))
+                {
+                    idx.push([l,s,c])
+                }
+            }
+        }
+        return idx
+    }
+
+    pair["indexOfBracketAtOrAfter"] = function (idx, l, s)
+    {
+        var e, hi, lo, mid
+
+        lo = 0
+        hi = idx.length
+        while (lo < hi)
+        {
+            mid = (lo + hi) >> 1
+            e = idx[mid]
+            if (e[0] > l || (e[0] === l && e[1] >= s))
+            {
+                hi = mid
+            }
+            else
+            {
+                lo = mid + 1
+            }
+        }
+        return lo
+    }
+
     pair["openCloseSpansForPositions"] = function (lines, posl)
     {
-        var pos, spans, sps
+        var idx, pos, spans, sps
 
+        idx = this.bracketIndex(lines)
         spans = []
         var list = _k_.list(posl)
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             pos = list[_a_]
-            if (sps = this.openCloseSpansForPosition(lines,pos))
+            if (sps = this.openCloseSpansForPosition(lines,idx,pos))
             {
                 spans = spans.concat(sps)
             }
@@ -279,15 +325,14 @@ pair = (function ()
         return spans
     }
 
-    pair["openCloseSpansForPosition"] = function (lines, pos)
+    pair["openCloseSpansForPosition"] = function (lines, idx, pos)
     {
-        var ai, ay, bi, by, cc, cline, clos, cnt, firstClose, firstCloseIndex, firstCloseLine, lastOpen, lastOpenIndex, lastOpenLine, line, maxLookups, next, oc, oline, open, openEncounters, opns, prev, revs, si, stack
+        var ai, cc, cline, clos, e, firstClose, firstCloseIndex, firstCloseLine, j, lastOpen, lastOpenIndex, lastOpenLine, line, next, oc, oline, open, openEncounters, opns, prev, revs, si, stack
 
         open = {'[':']','{':'}','(':')'}
         revs = {']':'[','}':'{',')':'('}
         opns = '[{('
         clos = ']})'
-        maxLookups = 100000
         if (this.isInvalidLineIndex(lines,pos[1]))
         {
             return
@@ -304,77 +349,58 @@ pair = (function ()
             lastOpen = line[si]
             lastOpenLine = pos[1]
             lastOpenIndex = si
+            j = -1
         }
         else
         {
-            cnt = 0
-            by = pos[1]
-            bi = si - 1
-            while (true)
+            j = this.indexOfBracketAtOrAfter(idx,pos[1],si)
+            j -= 1
+            while (j >= 0)
             {
-                if (bi >= 0)
+                e = idx[j]
+                prev = e[2]
+                if (_k_.in(prev,opns))
                 {
-                    prev = lines[by][bi]
-                    if (_k_.in(prev,opns))
+                    if (stack.length)
                     {
-                        if (stack.length)
+                        if (open[prev] === _k_.last(stack))
                         {
-                            if (open[prev] === _k_.last(stack))
-                            {
-                                openEncounters += prev
-                                stack.pop()
-                                bi -= 1
-                                continue
-                            }
-                            else
-                            {
-                                return
-                            }
+                            openEncounters += prev
+                            stack.pop()
+                            j -= 1
+                            continue
                         }
-                        lastOpen = prev
-                        lastOpenLine = by
-                        lastOpenIndex = bi
-                        break
+                        else
+                        {
+                            return
+                        }
                     }
-                    else if (_k_.in(prev,clos))
-                    {
-                        stack.push(prev)
-                    }
-                    bi -= 1
+                    lastOpen = prev
+                    lastOpenLine = e[0]
+                    lastOpenIndex = e[1]
+                    break
                 }
                 else
                 {
-                    by -= 1
-                    if (by < 0)
-                    {
-                        break
-                    }
-                    bi = lines[by].length - 1
+                    stack.push(prev)
                 }
-                if ((lastOpen != null))
-                {
-                    break
-                }
-                if (cnt++ > maxLookups)
-                {
-                    break
-                }
+                j -= 1
             }
         }
         firstClose = undefined
         firstCloseLine = pos[1]
         firstCloseIndex = -1
         stack = []
-        cnt = 0
         ai = si
-        if ((lastOpen != null) && lastOpenLine === pos[1] && lastOpenIndex === si)
+        if (_k_.in(line[si],opns))
         {
             ai = si + 1
         }
-        ay = pos[1]
-        while (ay < lines.length)
+        j = this.indexOfBracketAtOrAfter(idx,pos[1],ai)
+        while (j < idx.length)
         {
-            next = lines[ay][ai]
+            e = idx[j]
+            next = e[2]
             if (_k_.in(next,clos))
             {
                 if (stack.length)
@@ -391,31 +417,22 @@ pair = (function ()
                 else
                 {
                     firstClose = next
-                    firstCloseLine = ay
-                    firstCloseIndex = ai
+                    firstCloseLine = e[0]
+                    firstCloseIndex = e[1]
                     break
                 }
             }
-            else if (_k_.in(next,opns))
+            else
             {
                 stack.push(next)
             }
-            ai += 1
-            if (ai >= lines[ay].length)
-            {
-                ai = 0
-                ay += 1
-            }
-            if (cnt++ > maxLookups)
-            {
-                break
-            }
+            j += 1
         }
         if (!(lastOpen != null) || !(firstClose != null))
         {
             if (si - 1 >= 0 && _k_.in(line[si - 1],clos) && _k_.in(revs[line[si - 1]],openEncounters))
             {
-                return this.openCloseSpansForPosition(lines,[kseg.widthAtSegi(line,si - 1),pos[1]])
+                return this.openCloseSpansForPosition(lines,idx,[kseg.widthAtSegi(line,si - 1),pos[1]])
             }
             return
         }

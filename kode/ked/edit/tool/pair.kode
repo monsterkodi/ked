@@ -171,6 +171,45 @@ function pair
                     spans.push [srng[2]-1 srng[3] srng[2]]
         spans
         
+    # 0000000    00000000    0000000    0000000  000   000  00000000  000000000  000  000   000  0000000    00000000  000   000
+    # 000   000  000   000  000   000  000       000  000   000          000     000  0000  000  000   000  000        000 000
+    # 0000000    0000000    000000000  000       0000000    0000000      000     000  000 0 000  000   000  0000000     00000
+    # 000   000  000   000  000   000  000       000  000   000          000     000  000  0000  000   000  000        000 000
+    # 0000000    000   000  000   000  0000000  000   000  00000000     000     000  000   000  0000000    00000000  000   000
+
+    #  every bracket in the file, as [line segindex char], in ascending
+    #  order.  the scans below hop between these entries instead of walking
+    #  the text, which is what made the miss case cost O(filesize) per
+    #  cursor per keystroke.  brackets inside strings are included - telling
+    #  them apart is the caller's business.
+
+    @bracketIndex: lines ->
+
+        brckts = '([{}])'
+
+        idx = []
+        for line, l in lines
+            for c, s in line
+                idx.push [l s c] if c in brckts
+        idx
+
+    #  index of the first entry at or after (l s), or idx.length
+
+    @indexOfBracketAtOrAfter: idx l s ->
+
+        lo = 0
+        hi = idx.length
+
+        while lo < hi
+            mid = (lo + hi) >> 1
+            e = idx[mid]
+            if e[0] > l or (e[0] == l and e[1] >= s)
+                hi = mid
+            else
+                lo = mid + 1
+
+        lo
+
     #  ███████   ████████   ████████  ███   ███         ███████  ███       ███████    ███████  ████████
     # ███   ███  ███   ███  ███       ████  ███        ███       ███      ███   ███  ███       ███     
     # ███   ███  ████████   ███████   ███ █ ███        ███       ███      ███   ███  ███████   ███████ 
@@ -179,13 +218,15 @@ function pair
 
     @openCloseSpansForPositions: lines posl ->
 
+        idx = @bracketIndex lines
+
         spans = []
         for pos in posl
-            if sps = @openCloseSpansForPosition lines pos
+            if sps = @openCloseSpansForPosition lines idx pos
                 spans = spans.concat sps
         spans
         
-    @openCloseSpansForPosition: lines pos ->
+    @openCloseSpansForPosition: lines idx pos ->
                 
         open =
             '[': ']'
@@ -198,8 +239,6 @@ function pair
             
         opns = '[{(' 
         clos = ']})' 
-        
-        maxLookups = 100000 # careful, increasing this drops performance significantly!
         
         ⮐  if @isInvalidLineIndex lines pos[1]
         
@@ -223,55 +262,51 @@ function pair
             lastOpenLine  = pos[1]
             lastOpenIndex = si
             
+            j = -1 # the cursor sits on its own opener, nothing to scan back over
+            
         else
         
-            cnt = 0
-            by  = pos[1]
-            bi  = si-1
+            j = @indexOfBracketAtOrAfter idx pos[1] si
+            j -= 1
             
-            while true # find last open bracket before
+            while j >= 0 # find last open bracket before
                 
-                if bi >= 0
-                    prev = lines[by][bi]
-                    if prev in opns
-                        if stack.length
-                            if open[prev] == last(stack)
-                                openEncounters += prev
-                                stack.pop()
-                                bi -= 1
-                                continue
-                            else
-                                ⮐  # stack mismatch
-                        lastOpen      = prev
-                        lastOpenLine  = by
-                        lastOpenIndex = bi
-                        break
-                    else if prev in clos
-                        stack.push prev
-                    bi -= 1
+                e = idx[j]
+                prev = e[2]
+                
+                if prev in opns
+                    if stack.length
+                        if open[prev] == last(stack)
+                            openEncounters += prev
+                            stack.pop()
+                            j -= 1
+                            continue
+                        else
+                            ⮐  # stack mismatch
+                    lastOpen      = prev
+                    lastOpenLine  = e[0]
+                    lastOpenIndex = e[1]
+                    break
                 else
-                    by -= 1
-                    break if by < 0
-                    bi = lines[by].length-1
-                    
-                break if lastOpen?
-                break if cnt++ > maxLookups # maximum lookups exceeded
+                    stack.push prev
+                j -= 1
         
         firstClose      = undefined
         firstCloseLine  = pos[1]
         firstCloseIndex = -1
         
         stack = []
-        cnt   = 0
         
         ai = si
-        if lastOpen? and lastOpenLine == pos[1] and lastOpenIndex == si
+        if line[si] in opns
             ai = si+1
-        ay = pos[1]
         
-        while ay < lines.length # find first close bracket after
+        j = @indexOfBracketAtOrAfter idx pos[1] ai
+        
+        while j < idx.length # find first close bracket after
             
-            next = lines[ay][ai]
+            e = idx[j]
+            next = e[2]
             
             if next in clos
                 if stack.length
@@ -281,18 +316,13 @@ function pair
                         ⮐  # stack mismatch
                 else
                     firstClose      = next
-                    firstCloseLine  = ay
-                    firstCloseIndex = ai
+                    firstCloseLine  = e[0]
+                    firstCloseIndex = e[1]
                     break
-            else if next in opns
+            else
                 stack.push next
 
-            ai += 1
-            if ai >= lines[ay].length
-                ai = 0
-                ay += 1
-            
-            break if cnt++ > maxLookups # maximum lookups exceeded   
+            j += 1
         
         if not lastOpen? or not firstClose?
             
@@ -300,7 +330,7 @@ function pair
             #  highlight that pair - retry from one grapheme to the left
             
             if si-1 >= 0 and line[si-1] in clos and revs[line[si-1]] in openEncounters
-                ⮐  @openCloseSpansForPosition lines [kseg.widthAtSegi(line si-1) pos[1]]
+                ⮐  @openCloseSpansForPosition lines idx [kseg.widthAtSegi(line si-1) pos[1]]
             ⮐
         
         if open[lastOpen] == firstClose
