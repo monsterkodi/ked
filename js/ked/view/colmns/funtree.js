@@ -26,6 +26,7 @@ funSyntax = (function ()
     
         this["getChar"] = this["getChar"].bind(this)
         this["getColor"] = this["getColor"].bind(this)
+        this["getClasses"] = this["getClasses"].bind(this)
         this["getClass"] = this["getClass"].bind(this)
         this["setSegls"] = this["setSegls"].bind(this)
         this["setLines"] = this["setLines"].bind(this)
@@ -47,6 +48,11 @@ funSyntax = (function ()
     funSyntax.prototype["getClass"] = function (x, y)
     {
         return ''
+    }
+
+    funSyntax.prototype["getClasses"] = function (y)
+    {
+        return []
     }
 
     funSyntax.prototype["getColor"] = function (x, y)
@@ -210,7 +216,7 @@ funtree = (function ()
 
     funtree.prototype["onFileIndexed"] = function (path, info)
     {
-        var clss, clssl, func, funcs, indt, items, name, symbol, _158_22_
+        var clss, clssl, func, funcs, indt, items, name, symbol, _159_22_
 
         if (path !== this.editor.currentFile)
         {
@@ -226,7 +232,7 @@ funtree = (function ()
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             clss = list[_a_]
-            clss.file = ((_158_22_=clss.file) != null ? _158_22_ : path)
+            clss.file = ((_159_22_=clss.file) != null ? _159_22_ : path)
             clss.name = ' ' + SYMBOL.clss + ' ' + clss.name
         }
         var list1 = _k_.list(funcs)

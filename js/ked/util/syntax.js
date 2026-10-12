@@ -20,6 +20,7 @@ syntax = (function ()
         this["getChar"] = this["getChar"].bind(this)
         this["getAnsiColor"] = this["getAnsiColor"].bind(this)
         this["getColor"] = this["getColor"].bind(this)
+        this["getClasses"] = this["getClasses"].bind(this)
         this["getClass"] = this["getClass"].bind(this)
         this["appendSegls"] = this["appendSegls"].bind(this)
         this["addSegl"] = this["addSegl"].bind(this)
@@ -176,9 +177,26 @@ syntax = (function ()
         return 'text'
     }
 
+    syntax.prototype["getClasses"] = function (y)
+    {
+        var classes, dss, x
+
+        classes = []
+        var list = _k_.list(this.diss[y])
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            dss = list[_a_]
+            for (var _b_ = x = dss.start, _c_ = dss.start + dss.length; (_b_ <= _c_ ? x < dss.start + dss.length : x > dss.start + dss.length); (_b_ <= _c_ ? ++x : --x))
+            {
+                classes[x] = dss.clss
+            }
+        }
+        return classes
+    }
+
     syntax.prototype["getColor"] = function (x, y, clss)
     {
-        var _131_27_
+        var _143_27_
 
         if (this.ansi)
         {
@@ -195,12 +213,12 @@ syntax = (function ()
                 clss = x
             }
         }
-        return ((_131_27_=theme.syntax[clss]) != null ? _131_27_ : [255,0,0])
+        return ((_143_27_=theme.syntax[clss]) != null ? _143_27_ : [255,0,0])
     }
 
     syntax.prototype["getAnsiColor"] = function (x, y)
     {
-        var clr, _143_24_
+        var clr, _155_24_
 
         var list = _k_.list(this.colors[y])
         for (var _a_ = 0; _a_ < list.length; _a_++)

@@ -177,6 +177,7 @@ function mapview extends view
         w      = data.length / 3
         maxX   = w/@pixelsPerCol
         syntax = @getSyntax()
+        classes = syntax.getClasses y
         
         for x in 0...line.length
             
@@ -187,11 +188,12 @@ function mapview extends view
             if valid ch and ch != ' '
              
                 f = 0.7
+                clss = classes[x]
+                clss ?= 'text'
                 if ch in '0█'
-                    clss = syntax.getClass x y
                     if 'header' in clss
                         f = 2.0
-                rgb = syntax.getColor x y
+                rgb = syntax.getColor x y clss
                 rgb = rgb.map (v) -> clamp(0 255 int(f*v))
                  
                 charPixels x rgb

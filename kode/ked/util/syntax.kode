@@ -109,6 +109,18 @@ function syntax
                 ⮐  dss.clss
         'text'
         
+    # the classes of a whole line in one scan, indexed by column. columns no
+    # chunk covers are holes, so a caller defaulting them nullish - with ?=
+    # not with ?, to keep '' - gets what getClass would have answered.
+    
+    getClasses: y =>
+        
+        classes = []
+        for dss in @diss[y]
+            for x in dss.start...dss.start+dss.length
+                classes[x] = dss.clss
+        classes
+        
     #  ███████   ███████   ███       ███████   ████████ 
     # ███       ███   ███  ███      ███   ███  ███   ███
     # ███       ███   ███  ███      ███   ███  ███████  

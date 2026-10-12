@@ -53,6 +53,7 @@ function funSyntax
     #  ███████   ███████   ███████   ███████   ███   ███
 
     getClass: x y => ''
+    getClasses: y => []
     getColor: x y =>
         
         item = @tree.items[y]

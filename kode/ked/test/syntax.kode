@@ -42,3 +42,43 @@ use ../util ◆ syntax
         s.getChar x y ch
         calls ▸ 2
         
+    #      ███████   ████████  █████████   ███████  ███       ███████    ███████   ███████  ████████   ███████
+    #     ███        ███          ███     ███       ███      ███   ███  ███       ███       ███       ███     
+    #     ███  ████  ███████      ███     ███       ███      █████████  ███████   ███████   ███████   ███████ 
+    #     ███   ███  ███          ███     ███       ███      ███   ███       ███       ███  ███            ███
+    #      ███████   ████████     ███      ███████  ███████  ███   ███  ███████   ███████   ████████  ███████ 
+
+    ▸ getClasses
+
+        # one scan of @diss[y] per line has to answer every column exactly
+        # like one scan per column, gaps and tail included
+
+        s = new syntax 'test'
+        s.setExt 'kode'
+        lines = ['# header' 'f = (a) -> a + 1' '   indented' "u = '🌈'" '']
+        s.setLines lines
+
+        lim = 40 # wider than every line, so the tail is covered too
+
+        for y in 0...lines.length
+            classes = s.getClasses y
+            for x in 0...lim
+                clss = classes[x]
+                clss ?= 'text'
+                exp = s.getClass x y
+                clss ▸ exp
+
+        s.getClasses(4).length ▸ 0
+
+        # '' is a class like any other, so a caller defaulting with ?=
+        # keeps it, while a column no chunk covers stays 'text'
+
+        s.diss[0] = [start:0 length:1 clss:'']
+
+        blank = s.getClasses(0)[0]
+        blank ▸ ''
+
+        hole = s.getClasses(0)[1]
+        hole ?= 'text'
+        hole ▸ 'text'
+        

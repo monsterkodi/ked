@@ -72,7 +72,7 @@ draw = (function ()
 
     draw.prototype["drawLine"] = function (line, y, row)
     {
-        var bg, c, ch, checkColor, ci, clss, cw, fg, firstIndex, firstSegi, headerClass, linel, si, sw, syntax, view, x
+        var bg, c, ch, checkColor, ci, classes, clss, cw, fg, firstIndex, firstSegi, headerClass, linel, si, sw, syntax, view, x
 
         row = (row != null ? row : y - this.state.s.view[1])
         bg = this.color.bg
@@ -80,6 +80,7 @@ draw = (function ()
         headerClass = null
         syntax = this.state.syntax
         view = this.state.s.view
+        classes = syntax.getClasses(y)
         linel = kseg.width(line) - view[0]
         c = 0
         firstIndex = kseg.indexAtWidth(line,view[0])
@@ -103,7 +104,8 @@ draw = (function ()
             {
                 break
             }
-            clss = syntax.getClass(ci,y)
+            clss = classes[ci]
+            clss = (clss != null ? clss : 'text')
             fg = syntax.getColor(ci,y,clss)
             ch = syntax.getChar(ci,y,line[si],clss)
             if (ch === "#")

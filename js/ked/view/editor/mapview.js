@@ -225,7 +225,7 @@ mapview = (function ()
 
     mapview.prototype["imageForLine"] = function (data, line, y, syntax)
     {
-        var ch, charPixels, clss, f, maxX, rgb, w, x
+        var ch, charPixels, classes, clss, f, maxX, rgb, w, x
 
         charPixels = (function (x, rgb)
         {
@@ -241,6 +241,7 @@ mapview = (function ()
         w = data.length / 3
         maxX = w / this.pixelsPerCol
         syntax = this.getSyntax()
+        classes = syntax.getClasses(y)
         for (var _c_ = x = 0, _d_ = line.length; (_c_ <= _d_ ? x < line.length : x > line.length); (_c_ <= _d_ ? ++x : --x))
         {
             if (x > maxX)
@@ -251,15 +252,16 @@ mapview = (function ()
             if (!_k_.empty(ch) && ch !== ' ')
             {
                 f = 0.7
+                clss = classes[x]
+                clss = (clss != null ? clss : 'text')
                 if (_k_.in(ch,'0█'))
                 {
-                    clss = syntax.getClass(x,y)
                     if (_k_.in('header',clss))
                     {
                         f = 2.0
                     }
                 }
-                rgb = syntax.getColor(x,y)
+                rgb = syntax.getColor(x,y,clss)
                 rgb = rgb.map(function (v)
                 {
                     return _k_.clamp(0,255,parseInt(f * v))

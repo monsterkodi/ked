@@ -88,6 +88,8 @@ function draw extends view
         syntax = @state.syntax
         view   = @state.s.view
     
+        classes = syntax.getClasses y # one scan per line, not per column
+    
         linel = kseg.width(line) - view[0]
         
         c = 0
@@ -114,7 +116,8 @@ function draw extends view
                 # log "#{@name} #{r5 'break!'}"
                 break 
             
-            clss = syntax.getClass ci y
+            clss = classes[ci]
+            clss ?= 'text'
             
             fg = syntax.getColor ci y clss
                 
