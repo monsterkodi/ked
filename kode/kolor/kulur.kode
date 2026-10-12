@@ -78,14 +78,22 @@ chunked = segls ext ->
         chunks = kseg.chunks kseg.detab(segs)
 
         continue if empty chunks
-        
+
+        # width of the first i graphemes of the line, built once so that
+        # start columns come out in linear instead of quadratic time
+        widths = [0]
+        wsum = 0
+        for sg in segs
+            wsum += kseg.width sg
+            widths.push wsum
+
         lastWord = null
         lastWordIndex = -1
 
         pushLastWord = ->
             
             if lastWord != null
-                chnks.chunks.push start:kseg.widthAtSegi(segs lastWordIndex) length:kseg.width(lastWord) match:kseg.str(lastWord) clss:'text'
+                chnks.chunks.push start:widths[lastWordIndex] length:kseg.width(lastWord) match:kseg.str(lastWord) clss:'text'
                 lastWord = null
                 lastWordIndex = -1
         
@@ -121,7 +129,7 @@ chunked = segls ext ->
                         if s in [','';''{''}''('')']
                             clss += ' minor'
 
-                    chnks.chunks.push start:kseg.widthAtSegi(segs chnk.index+segIndex) length:kseg.width(s) match:s turd:turd clss:clss
+                    chnks.chunks.push start:widths[chnk.index+segIndex] length:kseg.width(s) match:s turd:turd clss:clss
                 else
                     if lastWord == null
                         lastWord = []

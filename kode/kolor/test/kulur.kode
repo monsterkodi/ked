@@ -836,4 +836,34 @@ dissect = c -> kulur.dissect kstr.lines(c) ext
                       - fix me!
                 """
         inc dss[1] 6 '-' ▸ 'punct li2 marker'
+
+    # ███       ███████   ███   ███   ███████   ███      ███  ███   ███  ████████   ███████
+    # ███      ███   ███  ████  ███  ███        ███      ███  ████  ███  ███       ███     
+    # ███      ███   ███  ███ █ ███  ███  ████  ███      ███  ███ █ ███  ███████   ███████ 
+    # ███      ███   ███  ███  ████  ███   ███  ███      ███  ███  ████  ███            ███
+    # ███████   ███████   ███   ███   ███████   ███████  ███  ███   ███  ████████  ███████ 
+
+    ▸ longlines
+
+        # one line, many chunks: coloring must not recompute the width of
+        # the prefix before every chunk - that is quadratic and stalls on
+        # files with very long lines (e.g. generated data tables)
+
+        lang 'js'
+
+        n = 1000
+        line = 'const LTC_MAT_1 = [' + ('0, ' for i in 0...n).join('') + ']'
+
+        origSegWidth = kseg.segWidth
+        segWidthCalls = 0
+        kseg.segWidth = (seg) ->
+            segWidthCalls++
+            origSegWidth seg
+
+        dss = dissect line
+
+        kseg.segWidth = origSegWidth
+
+        inc dss[0] 0 'const' ▸ 'keyword'
+        compare (segWidthCalls < 20 * line.length), true
         

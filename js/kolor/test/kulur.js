@@ -1,5 +1,5 @@
 var toExport = {}
-var dissect, dss, ext, lang, ranges, rgs
+var dissect, dss, ext, i, lang, line, n, origSegWidth, ranges, rgs, segWidthCalls
 
 import kxk from "../../kxk.js"
 let kstr = kxk.kstr
@@ -592,6 +592,23 @@ text`)
         dss = dissect(`ugga
       - fix me!`)
         compare(inc(dss[1],6,'-'),'punct li2 marker')
+    })
+    section("longlines", function ()
+    {
+        lang('js')
+        n = 1000
+        line = 'const LTC_MAT_1 = [' + (function () { var r_a_ = []; for (var _b_ = i = 0, _c_ = n; (_b_ <= _c_ ? i < n : i > n); (_b_ <= _c_ ? ++i : --i))  { r_a_.push('0, ')  } return r_a_ }).bind(this)().join('') + ']'
+        origSegWidth = kseg.segWidth
+        segWidthCalls = 0
+        kseg.segWidth = function (seg)
+        {
+            segWidthCalls++
+            return origSegWidth(seg)
+        }
+        dss = dissect(line)
+        kseg.segWidth = origSegWidth
+        compare(inc(dss[0],0,'const'),'keyword')
+        compare((segWidthCalls < 20 * line.length),true)
     })
 }
 toExport["kulur"]._section_ = true
