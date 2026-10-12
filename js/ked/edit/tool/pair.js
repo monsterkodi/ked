@@ -1,4 +1,4 @@
-var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, last: function (o) {return o != null ? o.length ? o[o.length-1] : undefined : o}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }}
+var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, last: function (o) {return o != null ? o.length ? o[o.length-1] : undefined : o}}
 
 var pair
 
@@ -121,20 +121,53 @@ pair = (function ()
         return found
     }
 
+    pair["codeunitIndexForColumn"] = function (line, col)
+    {
+        var segi
+
+        segi = kseg.segiAtWidth(line,col)
+        return kseg.str(line.slice(0, typeof segi === 'number' ? segi : -1)).length
+    }
+
+    pair["columnForCodeunitIndex"] = function (line, cu)
+    {
+        var c, g, n
+
+        n = 0
+        c = 0
+        var list = _k_.list(line)
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            g = list[_a_]
+            if (n >= cu)
+            {
+                return c
+            }
+            n += g.length
+            c += kseg.segWidth(g)
+        }
+        return c
+    }
+
     pair["rangesOfNestedPairsAtPositions"] = function (lines, posl)
     {
-        var pair, pos, rngs
+        var line, pair, pos, rngs
 
         rngs = []
         var list = _k_.list(posl)
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             pos = list[_a_]
-            var list1 = _k_.list(pepe.pairsAtCol(kseg.str(lines[pos[1]]),pos[0]))
+            if (this.isInvalidLineIndex(lines,pos[1]))
+            {
+                continue
+            }
+            line = lines[pos[1]]
+            var list1 = _k_.list(pepe.pairsAtCol(kseg.str(line),this.codeunitIndexForColumn(line,pos[0])))
             for (var _b_ = 0; _b_ < list1.length; _b_++)
             {
                 pair = list1[_b_]
-                rngs.push([pair.rng[0],pos[1],pair.rng[1],pos[1]])
+                rngs.push([this.columnForCodeunitIndex(line,pair.rng[0]),pos[1],this.columnForCodeunitIndex(line,pair.rng[1]),pos[1]])
             }
         }
         return rngs
@@ -142,7 +175,7 @@ pair = (function ()
 
     pair["spansOfNestedPairsAtPositions"] = function (lines, posl)
     {
-        var brackets, close, open, pair, pos, spans, strings
+        var brackets, c0, c1, close, line, open, pair, pos, spans, strings
 
         spans = []
         brackets = []
@@ -151,12 +184,19 @@ pair = (function ()
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             pos = list[_a_]
-            var list1 = _k_.list(pepe.pairsAtCol(kseg.str(lines[pos[1]]),pos[0]))
+            if (this.isInvalidLineIndex(lines,pos[1]))
+            {
+                continue
+            }
+            line = lines[pos[1]]
+            var list1 = _k_.list(pepe.pairsAtCol(kseg.str(line),this.codeunitIndexForColumn(line,pos[0])))
             for (var _b_ = 0; _b_ < list1.length; _b_++)
             {
                 pair = list1[_b_]
-                open = [pair.rng[0],pos[1],pair.rng[0] + pair.start.length]
-                close = [pair.rng[1],pos[1],pair.rng[1] + pair.end.length]
+                c0 = this.columnForCodeunitIndex(line,pair.rng[0])
+                c1 = this.columnForCodeunitIndex(line,pair.rng[1])
+                open = [c0,pos[1],c0 + pair.start.length]
+                close = [c1,pos[1],c1 + pair.end.length]
                 spans.push(open)
                 spans.push(close)
                 if (_k_.in(pair.start,'"\''))
@@ -241,26 +281,40 @@ pair = (function ()
 
     pair["openCloseSpansForPosition"] = function (lines, pos)
     {
-        var ap, bp, clos, closeEncounters, cnt, firstClose, lastOpen, maxLookups, next, open, openEncounters, opns, prev, revs, stack
+        var ai, ay, bi, by, cc, cline, clos, cnt, firstClose, firstCloseIndex, firstCloseLine, lastOpen, lastOpenIndex, lastOpenLine, line, maxLookups, next, oc, oline, open, openEncounters, opns, prev, revs, si, stack
 
         open = {'[':']','{':'}','(':')'}
         revs = {']':'[','}':'{',')':'('}
         opns = '[{('
         clos = ']})'
-        maxLookups = 1000
-        bp = [pos[0],pos[1]]
-        if (!(_k_.in(lines[bp[1]][bp[0]],opns)))
+        maxLookups = 20000
+        if (this.isInvalidLineIndex(lines,pos[1]))
         {
-            closeEncounters = ''
-            openEncounters = ''
-            stack = []
+            return
+        }
+        line = lines[pos[1]]
+        si = kseg.segiAtWidth(line,pos[0])
+        stack = []
+        openEncounters = ''
+        lastOpen = undefined
+        lastOpenLine = pos[1]
+        lastOpenIndex = -1
+        if (_k_.in(line[si],opns))
+        {
+            lastOpen = line[si]
+            lastOpenLine = pos[1]
+            lastOpenIndex = si
+        }
+        else
+        {
             cnt = 0
+            by = pos[1]
+            bi = si - 1
             while (true)
             {
-                bp[0] -= 1
-                if (bp[0] >= 0)
+                if (bi >= 0)
                 {
-                    prev = lines[bp[1]][bp[0]]
+                    prev = lines[by][bi]
                     if (_k_.in(prev,opns))
                     {
                         if (stack.length)
@@ -269,6 +323,7 @@ pair = (function ()
                             {
                                 openEncounters += prev
                                 stack.pop()
+                                bi -= 1
                                 continue
                             }
                             else
@@ -277,28 +332,26 @@ pair = (function ()
                             }
                         }
                         lastOpen = prev
+                        lastOpenLine = by
+                        lastOpenIndex = bi
                         break
                     }
                     else if (_k_.in(prev,clos))
                     {
                         stack.push(prev)
-                        closeEncounters += prev
                     }
+                    bi -= 1
                 }
                 else
                 {
-                    bp[1] -= 1
-                    if (bp[1] < 0)
+                    by -= 1
+                    if (by < 0)
                     {
                         break
                     }
-                    bp[0] = lines[bp[1]].length
+                    bi = lines[by].length - 1
                 }
                 if ((lastOpen != null))
-                {
-                    break
-                }
-                if (bp[1] < 0)
                 {
                     break
                 }
@@ -308,16 +361,20 @@ pair = (function ()
                 }
             }
         }
-        else
-        {
-            lastOpen = lines[bp[1]][bp[0]]
-        }
+        firstClose = undefined
+        firstCloseLine = pos[1]
+        firstCloseIndex = -1
         stack = []
-        ap = [_k_.max(bp[0] + 1,pos[0]),pos[1]]
         cnt = 0
-        while (ap[1] < lines.length)
+        ai = si
+        if ((lastOpen != null) && lastOpenLine === pos[1] && lastOpenIndex === si)
         {
-            next = lines[ap[1]][ap[0]]
+            ai = si + 1
+        }
+        ay = pos[1]
+        while (ay < lines.length)
+        {
+            next = lines[ay][ai]
             if (_k_.in(next,clos))
             {
                 if (stack.length)
@@ -334,6 +391,8 @@ pair = (function ()
                 else
                 {
                     firstClose = next
+                    firstCloseLine = ay
+                    firstCloseIndex = ai
                     break
                 }
             }
@@ -341,11 +400,11 @@ pair = (function ()
             {
                 stack.push(next)
             }
-            ap[0] += 1
-            if (ap[0] >= lines[ap[1]].length)
+            ai += 1
+            if (ai >= lines[ay].length)
             {
-                ap[0] = 0
-                ap[1] += 1
+                ai = 0
+                ay += 1
             }
             if (cnt++ > maxLookups)
             {
@@ -354,43 +413,19 @@ pair = (function ()
         }
         if (!(lastOpen != null) || !(firstClose != null))
         {
-            if (pos[1] >= lines.length)
+            if (si - 1 >= 0 && _k_.in(line[si - 1],clos) && _k_.in(revs[line[si - 1]],openEncounters))
             {
-                console.log("pos[1] too large")
-                return
-            }
-            if (_k_.empty(lines[pos[1]]))
-            {
-                return
-            }
-            if (pos[0] - 1 >= lines[pos[1]].length)
-            {
-                console.log("pos[0]-1 too large")
-                return
-            }
-            if (lines[pos[1]] >= revs.length)
-            {
-                console.log("lines[pos[1]] too large for revs")
-                return
-            }
-            if (_k_.empty(revs[lines[pos[1]]]))
-            {
-                return
-            }
-            if (pos[0] - 1 >= revs[lines[pos[1]]].length)
-            {
-                console.log("pos[0]-1 too large for revs")
-                return
-            }
-            if (_k_.in(lines[pos[1]][pos[0] - 1],clos) && _k_.in(revs[lines[pos[1]][pos[0] - 1]],openEncounters))
-            {
-                return this.openCloseSpansForPosition(lines,[pos[0] - 1,pos[1]])
+                return this.openCloseSpansForPosition(lines,[kseg.widthAtSegi(line,si - 1),pos[1]])
             }
             return
         }
         if (open[lastOpen] === firstClose)
         {
-            return [[bp[0],bp[1],bp[0] + 1],[ap[0],ap[1],ap[0] + 1]]
+            oline = lines[lastOpenLine]
+            cline = lines[firstCloseLine]
+            oc = kseg.widthAtSegi(oline,lastOpenIndex)
+            cc = kseg.widthAtSegi(cline,firstCloseIndex)
+            return [[oc,lastOpenLine,oc + 1],[cc,firstCloseLine,cc + 1]]
         }
     }
 

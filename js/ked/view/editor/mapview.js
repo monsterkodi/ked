@@ -219,7 +219,6 @@ mapview = (function ()
         }
         while (this.images.length > this.state.s.lines.length)
         {
-            console.log('pooping')
             this.cells.screen.t.deleteImage(this.images.pop())
         }
     }

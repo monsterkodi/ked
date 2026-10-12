@@ -1,7 +1,7 @@
 var toExport = {}
 var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
-var c, cells, l, line, lines, pairs, posl, rect, segls, spans, text
+var brackets, c, cells, l, line, lines, pairs, posl, rect, segls, spans, strings, text
 
 import kxk from "../../kxk.js"
 let kseg = kxk.kseg
@@ -471,22 +471,38 @@ def`)
         compare(belt.openCloseSpansForPositions(segls,[[5,0]]),[[2,0,3],[5,0,6]])
         compare(belt.openCloseSpansForPositions(segls,[[6,0]]),[[1,0,2],[6,0,7]])
         compare(belt.openCloseSpansForPositions(segls,[[7,0]]),[[0,0,1],[7,0,8]])
-        compare(belt.openCloseSpansForPositions(segls,[[8,0]]),[])
+        compare(belt.openCloseSpansForPositions(segls,[[8,0]]),[[0,0,1],[7,0,8]])
         compare(belt.openCloseSpansForPositions(segls,[[0,1]]),[])
         compare(belt.openCloseSpansForPositions(segls,[[6,1]]),[])
         compare(belt.stringDelimiterSpansForPositions(segls,[[0,1]]),[[0,1,1],[6,1,7]])
         compare(belt.stringDelimiterSpansForPositions(segls,[[6,1]]),[[0,1,1],[6,1,7]])
         compare(belt.normalizeSpans(belt.openCloseSpansForPositions(segls,[[2,2]])),[[2,2,3],[3,2,4]])
         compare(belt.normalizeSpans(belt.openCloseSpansForPositions(segls,[[3,2]])),[[2,2,3],[3,2,4]])
-        compare(belt.normalizeSpans(belt.openCloseSpansForPositions(segls,[[4,2]])),[])
+        compare(belt.normalizeSpans(belt.openCloseSpansForPositions(segls,[[4,2]])),[[2,2,3],[3,2,4]])
         compare(belt.normalizeSpans(belt.stringDelimiterSpansForPositions(segls,[[2,2]])),[[0,2,1],[5,2,6]])
         compare(belt.normalizeSpans(belt.stringDelimiterSpansForPositions(segls,[[3,2]])),[[0,2,1],[5,2,6]])
         compare(belt.normalizeSpans(belt.stringDelimiterSpansForPositions(segls,[[4,2]])),[[0,2,1],[5,2,6]])
         segls = kseg.segls(`next = lines[ap[1]][ap[0]]  `)
         compare(belt.openCloseSpansForPositions(segls,[[25,0]]),[[19,0,20],[25,0,26]])
-        compare(belt.openCloseSpansForPositions(segls,[[26,0]]),[])
+        compare(belt.openCloseSpansForPositions(segls,[[26,0]]),[[19,0,20],[25,0,26]])
         segls = kseg.segls(`s[2]`)
-        compare(belt.openCloseSpansForPositions(segls,[[4,0]]),[])
+        compare(belt.openCloseSpansForPositions(segls,[[4,0]]),[[1,0,2],[3,0,4]])
+        segls = kseg.segls(`x(日本)y`)
+        compare(belt.openCloseSpansForPositions(segls,[[2,0]]),[[1,0,2],[6,0,7]])
+        compare(belt.openCloseSpansForPositions(segls,[[6,0]]),[[1,0,2],[6,0,7]])
+        compare(belt.openCloseSpansForPositions(segls,[[7,0]]),[[1,0,2],[6,0,7]])
+        compare(belt.openCloseSpansForPositions(segls,[[8,0]]),[])
+        var _b_ = belt.spansOfNestedPairsAtPositions(segls,[[2,0]]); spans = _b_[0]; brackets = _b_[1]; strings = _b_[2]
+
+        compare(spans,[[1,0,2],[6,0,7]])
+        compare(brackets,[[1,0,2],[6,0,7]])
+        compare(strings,[])
+        compare(belt.rangesOfNestedPairsAtPositions(segls,[[2,0]]),[[1,0,6,0]])
+        segls = kseg.segls(`(日本)`)
+        compare(belt.openCloseSpansForPositions(segls,[[6,0]]),[[0,0,1],[5,0,6]])
+        segls = kseg.segls(`(a)`)
+        compare(belt.openCloseSpansForPositions(segls,[[20,0]]),[[0,0,1],[2,0,3]])
+        compare(belt.openCloseSpansForPositions(segls,[[1,0]]),[[0,0,1],[2,0,3]])
     })
     section("positionColumns", function ()
     {

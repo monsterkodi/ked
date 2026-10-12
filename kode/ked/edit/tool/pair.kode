@@ -94,12 +94,32 @@ function pair
     # 000        000   000  000  000   000       000             000  000   000  000   000  000   000  000   000  000   000  
     # 000        000   000  000  000   000  0000000         0000000    0000000   000   000  000   000  0000000     0000000   
     
+    #  positions are display columns but pepe works on string indices, so
+    #  convert between the two before and after asking pepe about a line
+
+    @codeunitIndexForColumn: line col ->
+        
+        segi = kseg.segiAtWidth line col
+        kseg.str(line[0...segi]).length
+        
+    @columnForCodeunitIndex: line cu ->
+        
+        n = 0
+        c = 0
+        for g in line
+            ⮐  c if n >= cu
+            n += g.length
+            c += kseg.segWidth g
+        c
+
     @rangesOfNestedPairsAtPositions: lines posl ->
         
         rngs = []
         for pos in posl
-            for pair in pepe.pairsAtCol(kseg.str(lines[pos[1]]) pos[0])
-                rngs.push [pair.rng[0] pos[1] pair.rng[1] pos[1]]
+            continue if @isInvalidLineIndex lines pos[1]
+            line = lines[pos[1]]
+            for pair in pepe.pairsAtCol(kseg.str(line) @codeunitIndexForColumn(line pos[0]))
+                rngs.push [@columnForCodeunitIndex(line pair.rng[0]) pos[1] @columnForCodeunitIndex(line pair.rng[1]) pos[1]]
         rngs
 
     @spansOfNestedPairsAtPositions: lines posl ->
@@ -109,10 +129,13 @@ function pair
         strings  = []
         
         for pos in posl
-            
-            for pair in pepe.pairsAtCol(kseg.str(lines[pos[1]]) pos[0])
-                open  = [pair.rng[0] pos[1] pair.rng[0]+pair.start.length]
-                close = [pair.rng[1] pos[1] pair.rng[1]+pair.end.length]
+            continue if @isInvalidLineIndex lines pos[1]
+            line = lines[pos[1]]
+            for pair in pepe.pairsAtCol(kseg.str(line) @codeunitIndexForColumn(line pos[0]))
+                c0 = @columnForCodeunitIndex line pair.rng[0]
+                c1 = @columnForCodeunitIndex line pair.rng[1]
+                open  = [c0 pos[1] c0+pair.start.length]
+                close = [c1 pos[1] c1+pair.end.length]
                 spans.push open
                 spans.push close
                 
@@ -176,54 +199,79 @@ function pair
         opns = '[{(' 
         clos = ']})' 
         
-        maxLookups = 1000 # careful, increasing this drops performance significantly!
+        maxLookups = 20000 # careful, increasing this drops performance significantly!
         
-        bp = [pos[0] pos[1]]
+        ⮐  if @isInvalidLineIndex lines pos[1]
         
-        if lines[bp[1]][bp[0]] not in opns
+        line = lines[pos[1]]
         
-            closeEncounters = ''
-            openEncounters = ''
+        #  positions are display columns but lines are lists of graphemes,
+        #  find the grapheme the cursor sits on before scanning
+        
+        si = kseg.segiAtWidth line pos[0]
+        
+        stack = []
+        openEncounters = ''
+        
+        lastOpen      = undefined
+        lastOpenLine  = pos[1]
+        lastOpenIndex = -1
+        
+        if line[si] in opns
+        
+            lastOpen      = line[si]
+            lastOpenLine  = pos[1]
+            lastOpenIndex = si
             
-            stack = []
-            
+        else
+        
             cnt = 0
+            by  = pos[1]
+            bi  = si-1
+            
             while true # find last open bracket before
-
-                bp[0] -= 1
-                if bp[0] >= 0
-                    prev = lines[bp[1]][bp[0]]
+                
+                if bi >= 0
+                    prev = lines[by][bi]
                     if prev in opns
                         if stack.length
                             if open[prev] == last(stack)
                                 openEncounters += prev
                                 stack.pop()
+                                bi -= 1
                                 continue
                             else
                                 ⮐  # stack mismatch
-                        lastOpen = prev
+                        lastOpen      = prev
+                        lastOpenLine  = by
+                        lastOpenIndex = bi
                         break
                     else if prev in clos
                         stack.push prev
-                        closeEncounters += prev
+                    bi -= 1
                 else
-                    bp[1] -= 1
-                    break if bp[1] < 0
-                    bp[0] = lines[bp[1]].length
-    
+                    by -= 1
+                    break if by < 0
+                    bi = lines[by].length-1
+                    
                 break if lastOpen?
-                break if bp[1] < 0
-                break if cnt++ > maxLookups # maximum lookups exceeded            
-        else
-            lastOpen = lines[bp[1]][bp[0]]
-            
+                break if cnt++ > maxLookups # maximum lookups exceeded
+        
+        firstClose      = undefined
+        firstCloseLine  = pos[1]
+        firstCloseIndex = -1
+        
         stack = []
-        ap    = [max(bp[0]+1 pos[0]) pos[1]]
         cnt   = 0
         
-        while ap[1] < lines.length # find first close bracket after
+        ai = si
+        if lastOpen? and lastOpenLine == pos[1] and lastOpenIndex == si
+            ai = si+1
+        ay = pos[1]
+        
+        while ay < lines.length # find first close bracket after
             
-            next = lines[ap[1]][ap[0]]
+            next = lines[ay][ai]
             
             if next in clos
                 if stack.length
@@ -232,30 +280,34 @@ function pair
                     else
                         ⮐  # stack mismatch
                 else
-                    firstClose = next
+                    firstClose      = next
+                    firstCloseLine  = ay
+                    firstCloseIndex = ai
                     break
             else if next in opns
                 stack.push next
 
-            ap[0] += 1
-            if ap[0] >= lines[ap[1]].length
-                ap[0] = 0
-                ap[1] += 1
+            ai += 1
+            if ai >= lines[ay].length
+                ai = 0
+                ay += 1
             
             break if cnt++ > maxLookups # maximum lookups exceeded   
-
+        
         if not lastOpen? or not firstClose?
-            if pos[1] >= lines.length ➜ log "pos[1] too large" ; ⮐  
-            ⮐  if empty lines[pos[1]] # ➜ "no lines[pos[1]]"
-            if pos[0]-1 >= lines[pos[1]].length ➜ log "pos[0]-1 too large" ; ⮐  
-            if lines[pos[1]] >= revs.length ➜ log "lines[pos[1]] too large for revs" ; ⮐  
-            ⮐  if empty revs[lines[pos[1]]] #➜ log "no revs[lines[pos[1]]]" ; ⮐  
-            if pos[0]-1 >= revs[lines[pos[1]]].length ➜ log "pos[0]-1 too large for revs" ; ⮐  
-            if lines[pos[1]][pos[0]-1] in clos and revs[lines[pos[1]][pos[0]-1]] in openEncounters
-                ⮐  @openCloseSpansForPosition lines [pos[0]-1 pos[1]]
+            
+            #  a cursor sitting just after a closing bracket should still
+            #  highlight that pair - retry from one grapheme to the left
+            
+            if si-1 >= 0 and line[si-1] in clos and revs[line[si-1]] in openEncounters
+                ⮐  @openCloseSpansForPosition lines [kseg.widthAtSegi(line si-1) pos[1]]
             ⮐
         
         if open[lastOpen] == firstClose
-            ⮐  [[bp[0] bp[1] bp[0]+1] [ap[0] ap[1] ap[0]+1]]
-            
+            oline = lines[lastOpenLine]
+            cline = lines[firstCloseLine]
+            oc = kseg.widthAtSegi oline lastOpenIndex
+            cc = kseg.widthAtSegi cline firstCloseIndex
+            ⮐  [[oc lastOpenLine oc+1] [cc firstCloseLine cc+1]]
+
 export pair
