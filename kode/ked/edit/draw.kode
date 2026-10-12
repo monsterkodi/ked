@@ -96,10 +96,17 @@ function draw extends view
         c = 1 if firstIndex != firstSegi            # one column to the right 
         
         x = 0
+        si = 0
+        sw = 0
         while x < @cells.cols
             
             ci = x+view[0]
-            si = kseg.indexAtWidth line ci
+            # advance the grapheme cursor instead of rescanning the line
+            # from the start for every column - colorful long lines are
+            # O(cols*linewidth) otherwise
+            while sw < ci and si < line.length
+                sw += kseg.segWidth line[si]
+                si += 1
             
             # log "draw #{@name} #{ci} #{si} #{view} #{r3 kseg.str(line)} #{row} #{@cells.cols} #{@cells.rows} #{y} #{lines.length}"
             
@@ -183,7 +190,12 @@ function draw extends view
             
             break if y >= @cells.rows
                 
-            for x in highlight[0]...highlight[2]
+            # clip the span to the visible columns - a bracket pair spanning
+            # a very long line must not redraw every column every frame
+            xs = max highlight[0], vx
+            xe = min highlight[2], vx+@cells.cols
+            
+            for x in xs...xe
                 hlc = @cells.get_char x-vx y
                 switch hlc
                     '{' '[' '(' ')' ']' '}' ➜ ulc = @color.highlight.bracket_ul ; bgc = @color.highlight.bracket
