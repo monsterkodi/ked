@@ -218,7 +218,7 @@ function status extends view
         add = char fg bg => x += set x char fg bg
         
         add '' 'col' @color.gutter # column number ...
-        colno = rpad @gutter-1 "#{cursor[0]}"
+        colno = rpad @gutter-1 "#{cursor[0]+1}"
         for ci in 1...@gutter
             fg = cursor[0] ? 'fg' : 'col_zero'
             fg = 'col_empty' if belt.isLinesPosOutside @state.s.lines cursor 

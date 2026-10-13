@@ -217,6 +217,31 @@ kodfiles = (dir, out=[]) ->
         version = json.version
         version ▸ 3
 
+    ▸ names it as a file:// uri
+
+        # the comment under the map is what node names a frame after when it
+        # has no map of its own, and what a terminal turns into a link when
+        # it sees a uri - so it is written as one
+
+        code = kmap 'a = 1'
+        mark = '//# sourceURL='
+        at = code.lastIndexOf mark
+
+        has = at >= 0
+        has ▸ true
+
+        url = code[(at + mark.length)..].split('\n')[0]
+
+        url.startsWith 'file://' ▸ true
+
+        # and it still points at the probe file, from the working directory
+
+        src = url.replace 'file://', ''
+        src.endsWith 'kode/srcmap-probe.kode' ▸ true
+
+        back = slash.absolute src, process.cwd()
+        back ▸ PROBE
+
     ▸ names its source from where it is written
 
         # a runtime reads the frames of a stack trace against the file the

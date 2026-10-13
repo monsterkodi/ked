@@ -27,4 +27,4 @@ export default toExport
 
 
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY2xpcC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9reGsvdGVzdC9jbGlwLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7O2dCQWtCUSxLQUFLLElBQUksSUFBMEI7Z0JBQ25DLEtBQUssSUFBSSx5QkFBMEI7Z0JBQ25DLEtBQUssSUFBSSxNQUEwQjs7OztRQUluQyxPQUFPLEtBQUs7UUFDWixlQUFRLE1BQVMsS0FBSyxPQUFPLFFBQVE7Z0JBQ3JDLE1BQVE7Z0JBR1IsS0FBSyxTQUFXIn0=
-//# sourceURL=kode/kxk/test/clip.kode
+//# sourceURL=file://kode/kxk/test/clip.kode

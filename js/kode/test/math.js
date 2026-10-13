@@ -15,4 +15,4 @@ export default toExport
 
 
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWF0aC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rb2RlL3Rlc3QvbWF0aC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7O1lBWUksR0FBRyxTQUFXO1lBQ2QsR0FBRyxTQUFXO1lBQ2QsR0FBRyxVQUFXIn0=
-//# sourceURL=kode/kode/test/math.kode
+//# sourceURL=file://kode/kode/test/math.kode

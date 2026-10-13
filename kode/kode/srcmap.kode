@@ -223,7 +223,13 @@ class SourceMap
         
         encoded = @base64encode JSON.stringify(v3Map)
         dataURL = "//# sourceMappingURL=data:application/json;base64,#{encoded}"
-        sourceURL = "//# sourceURL=#{@source}"
+        
+        # file:// so that a terminal reading the output can turn it into a
+        # link, and so that node reads the kode behind it for the frame it
+        # prints under an error. it resolves against the working directory,
+        # the same as the rest of the relative naming here.
+        
+        sourceURL = "//# sourceURL=file://#{@source}"
         "\n\n#{dataURL}\n#{sourceURL}\n"
         
         

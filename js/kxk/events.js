@@ -36,4 +36,4 @@ events = (function ()
 export default events;
 
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZXZlbnRzLmpzIiwic291cmNlcyI6WyIuLi8uLi9rb2RlL2t4ay9ldmVudHMua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7OztRQVlRLEtBQUMsaUJBQWlCOzs7OztlQUlsQixLQUFDLFdBQVcsaUJBQWlCOzttQkFBa0IsR0FBRyxNQUFNLEdBQUksRUFBRTs7Ozs7Ozs7UUFJOUQsWUFBWSxNQUFNO1FBQ2xCLE1BQU0sT0FBTztlQUViLEtBQUMsV0FBVyxjQUFjOzs7OztlQUkxQixLQUFDLFdBQVcsb0JBQW9CLFVBQVU7Ozs7OztlQUUzQyJ9
-//# sourceURL=kode/kxk/events.kode
+//# sourceURL=file://kode/kxk/events.kode
