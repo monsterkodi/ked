@@ -2,7 +2,10 @@
 
 // where did this line of js come from?
 //
-//   node where.mjs js/kode/lexer.js 222 18
+//   bin/where js/kode/lexer.js:222:18     a stack trace, pasted in whole
+//   bin/where js/kode/lexer.js:222        column defaults to the line start
+//   bin/where js/kode/lexer.js 222 18     the same, in three arguments
+//
 //   ->  ../../kode/kode/lexer.kode:265:58   if trim(splt[0]) == '' ...
 //
 // node resolves a position to the nearest segment at or before it, which
@@ -14,9 +17,28 @@ import {SourceMap} from 'node:module'
 import fs from 'node:fs'
 import path from 'node:path'
 
-const [srcfile, line, col = 0] = process.argv.slice(2)
+const [srcfile, ...rest] = process.argv.slice(2)
 
-let file = process.cwd() + "/" + srcfile
+let line = rest[0]
+let col = rest[1] ?? 0
+let file = srcfile
+
+// a trace hands over its position as one argument, so that spelling has to
+// work: file:line:col, or file:line for the whole of it.  the lazy path
+// stops at the first colon the numbers can follow, so one further down a
+// path does not go looking for a line number.
+
+if (line == null && srcfile.includes(':')) {
+    const m = /^(.+?):(\d+)(?::(\d+))?$/.exec(srcfile)
+
+    if (m) {
+        file = m[1]
+        line = m[2]
+        col = m[3] ?? 0
+    }
+}
+
+file = process.cwd() + "/" + file
 
 const js = fs.readFileSync(file, 'utf8')
 const mark = 'sourceMappingURL=data:application/json;base64,'
