@@ -89,7 +89,6 @@ Krzl = (function ()
 
         if (_k_.empty(abbrv))
         {
-            console.warn('krzl.filter without abbreviation?')
             return []
         }
         if (_k_.empty(this.values))

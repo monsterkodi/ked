@@ -86,7 +86,8 @@ function Krzl
     
     filter: (abbrv) -> # subset of values that match abbreviation
     
-        if empty abbrv        ➜ warn 'krzl.filter without abbreviation?'      ; ⮐ []
+        # if empty abbrv        ➜ warn 'krzl.filter without abbreviation?'      ; ⮐ []
+        if empty abbrv        ➜ ⮐ []
         if empty @values      ➜ warn 'krzl.filter without @values?'           ; ⮐ []
         if not abbrv is str   ➜ warn 'krzl.filter abbreviation not a string?' ; ⮐ []
         if not @values is arr ➜ warn 'krzl.filter @values not an array?'      ; ⮐ []
