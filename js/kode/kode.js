@@ -152,7 +152,7 @@ if (((globalThis.process != null ? globalThis.process.argv : undefined) != null)
     outdir      transpile files into output directory
     run         execute files                               = true
     js          print transpiled js code                    = false
-    map         generate inline source maps                 = true
+    map         generate inline source maps                 = false
     header      prepend output with version header          = false -H
     verbose     log more                                    = false
     debug       debug output                                = false`)

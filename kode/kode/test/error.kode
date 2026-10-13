@@ -10,7 +10,7 @@ use ./utils ▪ kf
 
 ▸ error
 
-    # kf  "✘" ▸ true
+    kf  "✘" ▸ true
     
     kf  "r = some.call((some args)" ▸ true
     kf  "r = some.call(some args))" ▸ true

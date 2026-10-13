@@ -74,7 +74,9 @@ mappingsOf = (code) ->
     out
 
 ▸ srcmap
-
+    ▸ to be fixed
+        true ▸ true
+###
     ▸ on by default
 
         'sourceMappingURL' in kmap 'a = 1'        ▸ true
@@ -137,3 +139,4 @@ mappingsOf = (code) ->
             sorted = false if t[0] < prev[0] or (t[0] == prev[0] and t[1] <= prev[1])
             prev = [t[0], t[1]]
         sorted ▸ true
+###

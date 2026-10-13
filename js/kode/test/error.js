@@ -4,6 +4,7 @@ let kf = utils.kf
 
 toExport["error"] = function ()
 {
+    compare(kf("✘"),true)
     compare(kf("r = some.call((some args)"),true)
     compare(kf("r = some.call(some args))"),true)
     compare(kf('log "▪▪#{id"'),true)
