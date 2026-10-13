@@ -10,13 +10,13 @@ import noon from "../kxk/noon.js"
 
 import version from "./version.js"
 
-rules = {kode:{tgtExt:'js',srcDir:'kode',tgtDir:'js',compile:function (srcText, srcFile)
+rules = {kode:{tgtExt:'js',srcDir:'kode',tgtDir:'js',compile:function (srcText, srcFile, tgtFile, opt)
 {
     var k0de
 
-    k0de = new kode({header:false})
-    return k0de.compile(srcText,srcFile)
-}},noon:{tgtExt:'json',srcDir:'kode',tgtDir:'js',compile:function (srcText, srcFile)
+    k0de = new kode({header:false,map:opt.map})
+    return k0de.compile(srcText,srcFile,tgtFile)
+}},noon:{tgtExt:'json',srcDir:'kode',tgtDir:'js',compile:function (srcText, srcFile, tgtFile, opt)
 {
     return JSON.stringify(noon.parse(srcText),null,'  ')
 }},ignore:['kolor/lang.noon']}
@@ -158,7 +158,7 @@ knrd = async function (files = [], opt = {})
             {
                 console.log(_k_.g2('▸'),_k_.m3(srcFile),_k_.m5(tgtFile))
             }
-            compText = rule.compile(srcText,srcFile)
+            compText = rule.compile(srcText,srcFile,tgtFile,opt)
             if (opt.verbose)
             {
                 console.log(_k_.g2('▸'),_k_.m3(srcFile),_k_.m5(tgtFile))

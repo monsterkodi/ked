@@ -192,9 +192,9 @@ class Operator
     logChain: chain p ->
                 
         s = ''
-        rndr = (n) => 
+        rndr = (n) =>
             try
-                w2 @kode.renderer.node(n)
+                w2 @kode.renderer.plain @kode.renderer.node(n)
             catch e
                 print.noon e, n
         s += chain.map((i) => 

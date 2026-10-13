@@ -6,32 +6,57 @@
     ███████   ███   ███   ███████  ███   ███  ███   ███  ███        
 ###
 
-# 'buffer' resolves to the module object, whose Buffer constructor is
-# the entry point; a bare 'Buffer' name would collide with kode's own
-# register capture operator
+# the transpiler writes an inline source map at the foot of every file it
+# compiles with a map on: locations in the js, back to locations in the
+# kode it was made from.
+#
+# these tests read the map back out of the compiled js and ask whether it
+# says anything true - that the js is the same js, that a token sits where
+# the map says it does, and that a decoder can make sense of the segments.
 
-use ./utils ▪ kc
+use ../kode
+use ../../kxk ◆ slash
 use buffer
+use fs
+
+# 'buffer' resolves to the module object, whose Buffer constructor is the
+# entry point; a bare 'Buffer' name would collide with kode's own register
+# capture operator
 
 B64 = buffer.Buffer
 
-# kc() needs a filename for the renderer to derive @source, and the
-# map option, since neither is set when Kode is constructed bare
+# a filename is not optional: the renderer takes the source path from it,
+# and that path is what a map names as its source
 
-kmap = (c) -> kc c, 'srcmap-probe.kode', {map:true}
+PROBE = slash.path ◆dir '..' '..' '..' 'kode' 'srcmap-probe.kode'
 
-# decodes the inline sourcemap of a compiled snippet and returns
-# [generatedLine, generatedCol, sourceLine, sourceCol] tuples
+kmap   = (c) -> (new kode header:false, map:true).compile c, PROBE
+kplain = (c) -> (new kode header:false).compile c, PROBE
+
+# the js on its own, without the map at the foot of it. a map counts lines
+# as they are written, so the tests here work on the whole file.
+
+body = (code) ->
+
+    # the map goes on as two newlines and a comment: take both back off
+
+    i = code.lastIndexOf '\n\n//# sourceMappingURL'
+    i < 0 ? code : code[...i]
+
+linesOf = (code) -> body(code).split '\n'
+
+# a segment is a run of base64 chars, and the continuation bit (32) says
+# whether a value carries on into the next char, so one segment decodes to
+# a LIST of values and not to a single value
 
 VLQ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
-# a segment is a run of base64 chars; the continuation bit (32)
-# says whether the value continues into the next char, so one
-# segment decodes to a LIST of values, not a single one
 decodeSegment = (s) ->
+
     vals = []
     v = 0
     sh = 0
+
     for c in s
         d = VLQ.indexOf c
         v += (d & 31) << sh
@@ -42,25 +67,33 @@ decodeSegment = (s) ->
             vals.push if n then -v else v
             v = 0
             sh = 0
+
     vals
 
-mappingsOf = (code) ->
+# the map of a compiled snippet, decoded into [genLine, genCol, srcLine,
+# srcCol] tuples. mappings separate generated lines with ';', and every
+# value in a segment is relative to the one before it.
+
+decode = (code) ->
 
     mark = 'sourceMappingURL=data:application/json;base64,'
-    at = code.indexOf mark
-    return [] if at < 0
+    at = code.lastIndexOf mark
+    ⮐ null if at < 0
+
     b64 = ''
     i = at + mark.length
+
     while i < code.length
         c = code[i]
         break if c not in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
         b64 += c
         i++
+
     sm = JSON.parse B64.from(b64, 'base64').toString()
     out = []
     sl = 0
     sc = 0
-    # mappings separates generated lines with ';', not newline
+
     for line, li in sm.mappings.split ';'
         gc = 0
         for seg in line.split ','
@@ -71,72 +104,333 @@ mappingsOf = (code) ->
                 sl += f[2]
                 sc += f[3]
                 out.push [li+1, gc, sl+1, sc]
+
+    [sm, out]
+
+mapsOf = (code) ->
+
+    r = decode code
+    r ? r[1] : []
+
+jsonOf = (code) ->
+
+    r = decode code
+    r ? r[0] : {}
+
+# the text of the token a mapping points at, on the source side
+
+tokAt = (lines, line, col) ->
+
+    l = lines[line-1]
+    ⮐ '' if not l?
+
+    m = /^[\w$]+/.exec l[col..]
+    m ? m[0] : l[col]
+
+# kode rewrites some tokens on the way out, so a mapping is not always text
+# landing on text: log becomes console.log, yes becomes true, and so on.
+# these are the ones the snippets below run into.
+
+rewrites =
+
+    log:     'console.'
+    warn:    'console.'
+    error:   'console.'
+    yes:     'true'
+    no:      'false'
+    '@':     'this'
+    '"':     '`'
+    '●':     '_k_.profile'
+    '●▸':    '_k_.profile'
+    '●▪':    '_k_.profilend'
+    in:      '_k_.in'
+    valid:   '!_k_.empty'
+    empty:   '_k_.empty'
+    eql:     '_k_.eql'
+
+same = (st, gt) ->
+
+    ⮐ true if gt.startsWith st
+    ⮐ false if not rewrites[st]?
+    gt.startsWith rewrites[st]
+
+# every mapping of a snippet, as [tuple, sourceText, generatedText] - the
+# two ends a decoder would meet when it walked to that mapping
+
+pairs = (c) ->
+
+    code = kmap c
+    gl = linesOf code
+    sl = c.split '\n'
+    out = []
+
+    for t in mapsOf code
+        st = tokAt sl, t[2], t[3]
+        gt = gl[t[0]-1]?[t[1]..] or ''
+        out.push [t, st, gt]
+
+    out
+
+# every kode file under dir
+
+kodfiles = (dir, out=[]) ->
+
+    for name in fs.readdirSync dir
+        p = slash.path dir, name
+        if fs.statSync(p).isDirectory() ➜ kodfiles p, out
+        else if p.endsWith '.kode'        ➜ out.push p
+
     out
 
 ▸ srcmap
-    ▸ to be fixed
-        true ▸ true
-###
-    ▸ on by default
 
-        'sourceMappingURL' in kmap 'a = 1'        ▸ true
-        'sourceURL'        in kmap 'a = 1'        ▸ true
+    ▸ only when asked for
 
-    ▸ maps every line
+        has = 'sourceMappingURL' in kmap 'a = 1'
+        has ▸ true
 
-        out = mappingsOf kmap 'a = 1\nb = a + 2\nlog b\n'
+        has = 'sourceURL' in kmap 'a = 1'
+        has ▸ true
 
-        # note: kode's list comprehension does not destructure,
-        # so index the tuples instead
-        # note: kc() strips the header and 'var' lines, so these are
-        # line numbers within the stripped output, not the written file.
-        # bind to a name first: an array on the right of ▸ is compared
-        # element by element, which reads as many failures
-        gen = out.map (t) -> t[0]
-        gen ▸ [5 5 6 6 6 7 7]
+        has = 'sourceMappingURL' in kplain 'a = 1'
+        has ▸ false
 
-        src = out.map (t) -> t[2]
-        src ▸ [1 1 2 2 2 3 3]
+        has = 'sourceURL' in kplain 'a = 1'
+        has ▸ false
+
+    ▸ names the file it was made from
+
+        json = jsonOf kmap('a = 1')
+
+        src = json.sources
+        src.length ▸ 1
+
+        names = src[0].endsWith 'kode/srcmap-probe.kode'
+        names ▸ true
+
+        version = json.version
+        version ▸ 3
+
+    ▸ names its source from where it is written
+
+        # a runtime reads the frames of a stack trace against the file the
+        # map is written into, so the source is named from that file's
+        # directory and not from the working directory
+
+        dir = slash.path ◆dir, '..', '..'
+        tgt = slash.path dir, 'probe.js'
+
+        out = (new kode header:false, map:true).compile 'a = 1', PROBE, tgt
+
+        name = jsonOf(out).sources[0]
+        back = slash.absolute name, slash.dir(tgt)
+
+        back ▸ PROBE
+
+    ▸ writes the same js either way
+
+        # a map is a comment at the foot of the file and nothing else. if
+        # the tagging behind it leaked into the js, or steered the renderer
+        # into rendering something else, this is where it shows.
+
+        snips =
+            'a = 1'
+            'a = 1\nb = a + 2\nlog b'
+            'f = (a, b) -> a + b'
+            'class Foo\n    @: (a) ->\n        @a ?= a\n    mthd: -> @a + 1\n'
+            'x = if a ➜ 1 else 2'
+            'for i in 0...10 ➜ log i'
+            'x = "a #{b} c"'
+            'x = """\n    a #{b}\n    """'
+            'l = [1 2 3]\nl.map (i) -> i * 2'
+            'd = {a: 1, b: 2}'
+            'try\n    f()\ncatch e\n    log e'
+            'switch a\n    when 1 ➜ log "one"\n    else ➜ log "other"'
+            'log b4 "hi" a'
+            'x = int "42" + min 1 2 + trim " a "'
+
+        for c in snips
+            mapped = body kmap(c)
+            unmap = kplain c
+
+            eq = mapped == unmap
+            eq ▸ true
+
+    ▸ twice over
+
+        # one kode instance can compile more than once, and the parser
+        # renders a node or two while it parses - so a map left behind by
+        # one run must not tag the next
+
+        c = 'class Foo\n    @bar: 1\n    mthd: -> @bar\n'
+
+        k = new kode header:false, map:true
+
+        first = k.compile c, PROBE
+        again = k.compile c, PROBE
+
+        eq = body(first) == body(again)
+        eq ▸ true
+
+    ▸ points at the token it maps
+
+        # the strong claim: whatever a mapping says a generated position
+        # came from, the same token sits at both ends of it
+
+        out = pairs 'a = 1\nb = a + 2\nc = b + 3\nlog c\n'
+
+        wrong = out.filter (t) ->
+            ok = same t[1], t[2]
+            ok == no
+        report = wrong.map((t) -> "#{t[0]} #{t[1]} #{t[2][0..12]}").join ' '
+
+        report ▸ ''
+
+    ▸ maps every line it can
+
+        snips =
+            'a = 1\nb = a + 2\nc = b + 3\nlog c\n'
+            'f = ->\n    a = 1\n    b = a + 2\n    log b\nf()\n'
+            'class Foo\n    @: ->\n        @a = 1\n    mthd: -> @a\n'
+
+        for c in snips
+
+            sl = c.split('\n').map((l, i) -> if trim l then i+1 else 0).filter (l) -> l
+
+            ms = mapsOf kmap(c)
+            got = ms.map (t) -> t[2]
+
+            missed = sl.filter (l) -> l not in got
+            missed ▸ []
 
     ▸ finds column zero
 
-        # the earlier solve() skipped past a match at index 0, and
-        # compared the search offset instead of the match itself
-        out = mappingsOf kmap 'a = 1\nb = a + 2\n'
+        out = mapsOf kmap('a = 1\nb = a + 2\nlog b\n')
 
         zero = out.filter((t) -> t[1] == 0).map((t) -> t[0])
-        zero ▸ [5 6]
+        zero ▸ [3 4 5]
+
+    ▸ maps a call
+
+        # log is rewritten into console.log, so the mapping points at where
+        # the call starts, not at where the name ends up
+
+        out = mapsOf kmap('log b\n')
+
+        out[0] ▸ [1 0 1 0]
+        out[1] ▸ [1 12 1 4]
 
     ▸ maps a nested body
 
-        out = mappingsOf kmap 'f = ->\n    a = 1\n    b = a + 2\nf()\n'
+        # a body is rendered indented, so generated columns run ahead of the
+        # source, and the source line a mapping gives is the line the token
+        # was written on
 
-        # the body renders indented, so generated columns differ from
-        # source; source line 3 (b = a + 2) becomes the implicit return
+        c = 'f = ->\n    a = 1\n    b = a + 2\nf()\n'
+
+        out = mapsOf kmap(c)
+        gl = linesOf kmap(c)
+
         gen = out.map (t) -> t[0]
-        gen ▸ [6 8 10 11 11 11 13]
+        gen ▸ [4 8 8 9 9 9 11]
 
         src = out.map (t) -> t[2]
         src ▸ [1 2 2 3 3 3 4]
 
-    ▸ no duplicate columns
+        # the three tokens of 'b = a + 2' are the body's return value, and
+        # they land on the line the renderer put them on
+        
+        cols = out.filter((t) -> t[2] == 3).map (t) -> t[1]
+        cols ▸ [11 15 19]
 
-        out = mappingsOf kmap 'a = 1\nb = a + 2\nlog b\n'
+        text = gl[8][11..]
+        text ▸ 'b = a + 2'
 
-        keys = out.map (t) -> "#{t[0]}:#{t[1]}"
+    ▸ maps a triple string
 
-        dupes = keys.filter (k,i) -> keys.indexOf(k) != i
-        n = dupes.length
-        n ▸ 0
+        # a triple string is rendered as a template literal and comes out
+        # re-indented, but it starts where it started in the source
+
+        out = mapsOf kmap('x = """\n    abc\n    def\n    """\n')
+
+        out[0] ▸ [3 0 1 0]
+        out[1] ▸ [3 4 1 4]
+
+    ▸ maps an interpolation
+
+        # the expression inside a string is parsed on its own, and put back
+        # where the string had it
+
+        out = mapsOf kmap('x = "a #{b + 1} c"\n')
+
+        out[0] ▸ [3 0 1 0]
+        out[1] ▸ [3 9 1 9]
+        out[2] ▸ [3 13 1 13]
 
     ▸ ordered and monotonic
 
-        out = mappingsOf kmap 'a = 1\nb = a + 2\nc = b + 3\nlog c\n'
+        # a decoder reads the segments of a line in order and adds them up,
+        # so a column that goes backwards is a segment nobody can read
 
-        sorted = true
-        prev = [-1, -1]
-        for t in out
-            sorted = false if t[0] < prev[0] or (t[0] == prev[0] and t[1] <= prev[1])
-            prev = [t[0], t[1]]
-        sorted ▸ true
-###
+        snips =
+            'a = 1\nb = a + 2\nlog b\n'
+            'class Foo\n    @: ->\n        @a = [1 2 3]\n        for i in @a ➜ log i\n'
+            'f = (a, b) ->\n    g = -> a + b\n    g()\n'
+
+        for c in snips
+
+            sorted = true
+            prev = [-1, -1]
+            for t in mapsOf kmap(c)
+                sorted = false if t[0] < prev[0] or (t[0] == prev[0] and t[1] <= prev[1])
+                prev = [t[0], t[1]]
+            sorted ▸ true
+
+    ▸ no column twice
+
+        # two tokens cannot start in the same place, and the segments of a
+        # line are read in order, so a second one on a column would lie
+
+        snips =
+            'a = 1\nb = a + 2\nlog b\n'
+            'f = (a, b) -> if a then a + b else b - a\n'
+
+        for c in snips
+
+            ms = mapsOf kmap(c)
+            keys = ms.map (t) -> "#{t[0]}:#{t[1]}"
+
+            n = keys.filter((k, i) -> keys.indexOf(k) != i).length
+            n ▸ 0
+
+    ▸ the whole compiler
+
+        # the renderer matches and slices its own output in a few places,
+        # and a tag riding on a token would throw those off - quietly, and
+        # only for the code that runs into them. so every file of kode/kode
+        # has to compile to the same js with a map on as with it off.
+
+        dir = slash.path ◆dir, '..', '..', '..', 'kode', 'kode'
+        files = kodfiles dir
+
+        files.length > 20 ▸ true
+
+        wrong = []
+
+        for file in files
+
+            text = fs.readFileSync file, 'utf8'
+            out = (new kode header:false, map:true).compile text, file
+
+            continue if not out?
+
+            # the probe sits next to the compiler and is not one of its own
+            continue if file.endsWith 'srcmap-probe.kode'
+
+            unmap = (new kode header:false).compile text, file
+            eq = body(out) == unmap
+
+            wrong.push file if eq == no
+
+        report = wrong.join ' '
+        report ▸ ''

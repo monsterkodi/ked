@@ -123,6 +123,16 @@ class Lexer
                         {
                             tokens.slice(-1)[0].type = 'op'
                             tokens.slice(-1)[0].text = _k_.trim(tokens.slice(-1)[0].text,' \n')
+                            lines = match[0].split('\n')
+                            line += lines.length - 1
+                            if (lines.length > 1)
+                            {
+                                col = lines.slice(-1)[0].length
+                            }
+                            else
+                            {
+                                col += match[0].length
+                            }
                         }
                     }
                     else if (key.startsWith('prof') && _k_.empty(pullIf(linetokens,function (t)
@@ -155,7 +165,7 @@ class Lexer
                     }
                     else
                     {
-                        col += value.length
+                        col += match[0].length
                     }
                     text = text.slice(match[0].length)
                     break
@@ -173,67 +183,84 @@ class Lexer
 
     tripdent (tokens)
     {
-        var minind, splt, tok
+        var i, minind, org, splt, tok
 
         var list = _k_.list(tokens)
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             tok = list[_a_]
-            if (tok.type === 'triple')
+            if (tok.type !== 'triple')
             {
-                splt = tok.text.slice(3, -3).split('\n')
-                if (splt.length > 1)
+                continue
+            }
+            splt = tok.text.slice(3, -3).split('\n')
+            if (splt.length < 2)
+            {
+                continue
+            }
+            org = [[tok.line,tok.col + 3]]
+            for (var _b_ = i = 1, _c_ = splt.length; (_b_ <= _c_ ? i < splt.length : i > splt.length); (_b_ <= _c_ ? ++i : --i))
+            {
+                org.push([tok.line + i,0])
+            }
+            if (splt.length === 2)
+            {
+                if (_k_.empty(_k_.trim(splt[1])))
                 {
-                    if (splt.length === 2)
-                    {
-                        if (_k_.empty(_k_.trim(splt[1])))
-                        {
-                            tok.text = '"""' + splt[0] + '"""'
-                        }
-                        else
-                        {
-                            tok.text = '"""' + splt[0] + '\n' + kstr.lstrip(splt[1]) + '"""'
-                        }
-                    }
-                    else
-                    {
-                        if (_k_.trim(splt[0]) === '' && splt.length > 2)
-                        {
-                            splt.shift()
-                        }
-                        if (_k_.trim(splt.slice(-1)[0]) === '')
-                        {
-                            splt.pop()
-                        }
-                        if (splt.length === 1)
-                        {
-                            tok.text = '"""' + kstr.lstrip(splt[0]) + '"""'
-                        }
-                        else
-                        {
-                            minind = Math.min.apply(0,splt.map(function (s)
-                            {
-                                if (_k_.empty((_k_.trim(s))))
-                                {
-                                    return Infinity
-                                }
-                                else
-                                {
-                                    return kstr.lcnt(s,' ')
-                                }
-                            }))
-                            if ((Infinity > minind && minind > 0))
-                            {
-                                splt = splt.map(function (s)
-                                {
-                                    return s.slice(minind)
-                                })
-                            }
-                            tok.text = '"""' + splt.join('\n') + '"""'
-                        }
-                    }
+                    org.pop()
+                    tok.text = '"""' + splt[0] + '"""'
+                }
+                else
+                {
+                    org[1][1] += kstr.lcnt(splt[1],' ')
+                    tok.text = '"""' + splt[0] + '\n' + kstr.lstrip(splt[1]) + '"""'
                 }
             }
+            else
+            {
+                if (_k_.trim(splt[0]) === '' && splt.length > 2)
+                {
+                    splt.shift()
+                    org.shift()
+                }
+                if (_k_.trim(splt.slice(-1)[0]) === '')
+                {
+                    splt.pop()
+                    org.pop()
+                }
+                if (splt.length === 1)
+                {
+                    org[0][1] += kstr.lcnt(splt[0],' ')
+                    tok.text = '"""' + kstr.lstrip(splt[0]) + '"""'
+                }
+                else
+                {
+                    minind = Math.min.apply(0,splt.map(function (s)
+                    {
+                        if (_k_.empty((_k_.trim(s))))
+                        {
+                            return Infinity
+                        }
+                        else
+                        {
+                            return kstr.lcnt(s,' ')
+                        }
+                    }))
+                    if ((Infinity > minind && minind > 0))
+                    {
+                        splt = splt.map(function (s)
+                        {
+                            return s.slice(minind)
+                        })
+                        org = org.map(function ([l,c])
+                        {
+                            return [l,c + minind]
+                        })
+                    }
+                    tok.text = '"""' + splt.join('\n') + '"""'
+                }
+            }
+            tok.org = org
         }
         return tokens
     }

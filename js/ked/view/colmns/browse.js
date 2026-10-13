@@ -321,7 +321,7 @@ browse = (function ()
 
     browse.prototype["onChoicesAction"] = function (action, choice)
     {
-        var upDir, _290_63_
+        var upDir, _290_58_
 
         switch (action)
         {
@@ -339,7 +339,7 @@ browse = (function ()
                     else
                     {
                         this.hideMap()
-                        return this.gotoDirOrOpenFile(((_290_63_=choice.link) != null ? _290_63_ : choice.path))
+                        return this.gotoDirOrOpenFile(((_290_58_=choice.link) != null ? _290_58_ : choice.path))
                     }
                 }
                 break

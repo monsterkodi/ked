@@ -88,7 +88,7 @@ class Kode
 
     @compile: text opt={} -> (new Kode(opt)).compile text
     
-    compile: @text @file ->
+    compile: @text @file @target ->
 
         ⮐  '' if empty trim @text
         
@@ -96,7 +96,7 @@ class Kode
 
         try
             ast = @ast @text
-            @renderer.render ast @file
+            @renderer.render ast, @file, @target
         catch err
             ⮐  # error should already be logged in @onError
         
@@ -162,7 +162,10 @@ export Kode
         
     for file in args.files
 
-        file = slash.path file
+        # the source path is what a source map names, so it has to be the
+        # file and not however it was typed on the command line
+        
+        file = slash.absolute slash.path(file), process.cwd()
         log gray(file) if args.verbose
 
         text =○ nfs.read file
@@ -171,9 +174,9 @@ export Kode
 
         if
             args.outdir
-                            js  = kode.compile text file
-                            out = slash.swapExt slash.path(args.outdir slash.file(file)) 'js'
+                            out = slash.absolute(slash.swapExt(slash.path(args.outdir slash.file(file)) 'js'), process.cwd())
                             log out if args.verbose
+                            js  = kode.compile text, file, out
                             res = ○ nfs.write out js
                             if res?.error then error R2(y3("can't write #{R3(y6(out))}"))
             args.js    ➜    log kode.compile(text file)

@@ -27,6 +27,28 @@ Files are only written when content differs, so `js/` stays byte-stable.
 
 `.noon` is the source of truth; `.json` is derived from it.
 
+### Source maps
+
+`--map` / `kk -m` makes the transpiler write an inline source map at the
+foot of every file it compiles, so a stack trace out of `js/` points at the
+line and column of the `.kode` it came from:
+
+```sh
+kk -m -R                        # transpile the tree with maps
+node --enable-source-maps js/kode/tester.js
+```
+
+The map names its source relative to the file the map is written into, so
+run node from the repo root and the paths resolve. The checked-in `js/` is
+built **without** maps: they are a debugging aid, not build output.
+
+Every token the renderer writes is tagged on its way out and the tags are
+read back out of the finished file, so the map cannot change the js. Two
+places in the renderer match or slice what they rendered (`call` and
+`args`); both go through `plain` first. `kode/kode/test/srcmap.kode`
+holds the whole compiler up against that: every file of `kode/kode` has to
+compile to the same js with a map on as with it off.
+
 ## Commands
 
 `./kk <flag>` — or `pnpm run <script>` for the two npm scripts.
@@ -36,6 +58,7 @@ Files are only written when content differs, so `js/` stays byte-stable.
 | `kk -i` | dry run: transpiles to memory, **writes nothing**. Safe. A crash here is a bad sign. |
 | `kk -k` / `kk -b` | transpile `kode/` → `js/` |
 | `kk -k <file.kode>` | transpile a single source file |
+| `kk -m` | with `-k`/`-b`: write inline source maps (see above) |
 | `kk -R` | rebuild: transpile the whole tree |
 | `kk -t` | run all tests (`node js/test.js`) |
 | `kk -t kode` | one module: `kode` \| `kxk` \| `kolor` \| `ked` |

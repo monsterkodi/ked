@@ -97,10 +97,11 @@ class Kode
         return (new Kode(opt)).compile(text)
     }
 
-    compile (text, file)
+    compile (text, file, target)
     {
         this.text = text
         this.file = file
+        this.target = target
     
         var ast
 
@@ -115,7 +116,7 @@ class Kode
         try
         {
             ast = this.ast(this.text)
-            return this.renderer.render(ast,this.file)
+            return this.renderer.render(ast,this.file,this.target)
         }
         catch (err)
         {
@@ -174,7 +175,7 @@ if (((globalThis.process != null ? globalThis.process.argv : undefined) != null)
 for (var _a_ = 0; _a_ < list.length; _a_++)
 {
     file = list[_a_]
-    file = slash.path(file)
+    file = slash.absolute(slash.path(file),process.cwd())
     if (args.verbose)
     {
         console.log(gray(file))
@@ -187,12 +188,12 @@ for (var _a_ = 0; _a_ < list.length; _a_++)
     }
     if (args.outdir)
     {
-        js = kode.compile(text,file)
-        out = slash.swapExt(slash.path(args.outdir,slash.file(file)),'js')
+        out = slash.absolute(slash.swapExt(slash.path(args.outdir,slash.file(file)),'js'),process.cwd())
         if (args.verbose)
         {
             console.log(out)
         }
+        js = kode.compile(text,file,out)
         res = await nfs.write(out,js)
         if ((res != null ? res.error : undefined))
         {

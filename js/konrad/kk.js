@@ -24,6 +24,7 @@ args = karg(`kk
     build      transpile kode and noon        = false
     watch      watch for file changes         = false
     test       run tests                      = false
+    map        write inline source maps       = false
     
     quiet      log nothing                    = false
     debug      log debug                      = false -D

@@ -26,12 +26,12 @@ rules =
         tgtExt:  'js'
         srcDir:  'kode'
         tgtDir:  'js'
-        compile: srcText srcFile -> k0de = new kode header:false; k0de.compile srcText srcFile
+        compile: srcText srcFile tgtFile opt -> k0de = new kode header:false, map:opt.map; k0de.compile srcText srcFile tgtFile
     noon:
         tgtExt:  'json'
         srcDir:  'kode'
         tgtDir:  'js'
-        compile: srcText srcFile -> JSON.stringify noon.parse(srcText) null '  '
+        compile: srcText srcFile tgtFile opt -> JSON.stringify noon.parse(srcText) null '  '
         
     ignore: [
         'kolor/lang.noon'
@@ -134,7 +134,7 @@ knrd = files=[] opt={} ○->
             srcText  =○ nfs.read srcFile
             tgtText  =○ nfs.read tgtFile
             log g2('▸') m3(srcFile) m5(tgtFile) if opt.verbose
-            compText = rule.compile srcText, srcFile
+            compText = rule.compile srcText, srcFile, tgtFile, opt
             log g2('▸') m3(srcFile) m5(tgtFile) if opt.verbose
             
             log 'tgtText'  tgtFile, tgtText if opt.debug and opt.verbose

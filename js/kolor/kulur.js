@@ -358,7 +358,7 @@ starComment = function ()
 
 funcArgs = function ()
 {
-    var ch, turd, _298_31_
+    var ch, turd, _298_26_
 
     if (notCode)
     {

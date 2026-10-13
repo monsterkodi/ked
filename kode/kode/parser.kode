@@ -985,7 +985,12 @@ function Parser extends parse
         else if key.prop
             
             {line, col} = firstLineCol key
-            text = @kode.renderer.node key
+            
+            # this key is read back off the rendered text and put into the
+            # ast, so it has to be the text as it reads without a source
+            # map - a tag in there would be part of the name from here on
+            
+            text = @kode.renderer.plain @kode.renderer.node(key)
             if text?.startsWith('this')
                 if text == 'this' then text = '@'
                 else if text.startsWith('this.') then text = '@' + text[5..]

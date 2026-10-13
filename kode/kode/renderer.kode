@@ -34,7 +34,7 @@ class Renderer
     # ███   ███  ███       ███  ████  ███   ███  ███       ███   ███  
     # ███   ███  ████████  ███   ███  ███████    ████████  ███   ███  
     
-    render: ast source ->
+    render: ast source target ->
 
         if @verbose ➜ log noon ast
         
@@ -43,8 +43,20 @@ class Renderer
             @source = slash.relative source, globalThis.process.cwd()
         # log @file, @source
         
+        # a map left over from a previous run of this renderer has no
+        # business tagging this one
+        
+        @srcmap = null
+        
         if @kode.args.map and @source
-            @srcmap = new SrcMap @source
+            # the map names its source from where it is written, so that a
+            # stack trace in the js points at the kode file beside it. the
+            # name the rest of the renderer uses stays relative to the
+            # working directory.
+            
+            name = if target then slash.relative(source, slash.dir(target))
+            
+            @srcmap = new srcmap @source, name
             @srcmap.verbose = @trace
         
         @ast = ast
@@ -73,21 +85,45 @@ class Renderer
             s += '\ntoExport._test_ = true'
             s += '\nexport default toExport\n'
 
+        s = @header s            
+        
         if @srcmap
+            
+            # the tags come out first, and only then: the map is measured
+            # against the file as it is written, so it has to be the file
+            # as it is written. the header shifts every line but the first.
+            
+            s = @srcmap.strip s
+            
             # tracing is for --verbose; the three print flags cover the
             # token/block/parse trees, and are what the error hint names
+            
             @srcmap.done s if @trace
-            sm = @srcmap.generate s
+            
+            sm = @srcmap.generate()
             print.noon sm if @trace
+            
             s += @srcmap.jscode sm
         
-        s = @header s            
         s
         
-    js: s tl => 
+    # every token is rendered through here, and tagged on its way out. the
+    # tag says which token the text belongs to; where it ends up in the
+    # finished file is for the source map to work out afterwards.
     
-        @srcmap?.commit s tl
-        s
+    mark: (s, tok) =>
+    
+        # the renderer builds tokens of its own - the bind(this) lines and
+        # friends - and those have no place in the source to point back to
+        
+        if @srcmap and valid tok.line then @srcmap.mark s, tok else s
+    
+    # the same text with those tags taken out again, for the places where
+    # the renderer matches or slices what it rendered
+    
+    plain: (s) =>
+    
+        if @srcmap then @srcmap.plain s else s
         
     # ███   ███  ████████   ███████   ███████    ████████  ████████   
     # ███   ███  ███       ███   ███  ███   ███  ███       ███   ███  
@@ -208,7 +244,7 @@ class Renderer
 
         ⮐ '' if not exp
 
-        if exp.type? and exp.text? ➜ ⮐ @token exp
+        if exp.type? and exp.text? ➜ ⮐ @mark @token(exp), exp
 
         if exp is Array ➜ ⮐ (@node(a) for a in exp).join ';\n'
 
@@ -742,7 +778,12 @@ class Renderer
             if a.text then used[a.text] = a.text
 
         args = args.map (a) =>
-            t = @node a
+            
+            # this one cuts the rendered text up, so it has to work on the
+            # text as it looks without a source map - a tag in there would
+            # be a character the offsets below never counted
+            
+            t = @plain @node(a)
             if t?.startsWith 'this.'
                 l = trim t.split('=')[0]
                 
@@ -792,19 +833,25 @@ class Renderer
             
         callee = @node p.callee
         
+        # what the callee is compared against below. with a source map on,
+        # a tag can be riding on it, and the comparisons - and the hints they
+        # set - have to see the name as it reads without one.
+        
+        name = @plain callee
+        
         if p.args
             
-            if callee.length == 2 and /[1-8]/.test(callee[1]) and callee[0].toLowerCase() in kolorNames
+            if name.length == 2 and /[1-8]/.test(name[1]) and name[0].toLowerCase() in kolorNames
                 @hint._k_.k = true
-                @hint._k_[callee] = true
-                ⮐ "_k_.#{callee}(#{@nodes p.args, ','})"
+                @hint._k_[name] = true
+                ⮐ "_k_.#{name}(#{@nodes p.args, ','})"
 
-            if callee.length == 3 and /[1-8]/.test(callee[2]) and callee[0].toLowerCase() in kolorNames and callee[1] in kolorNames
+            if name.length == 3 and /[1-8]/.test(name[2]) and name[0].toLowerCase() in kolorNames and name[1] in kolorNames
                 @hint._k_.k = true
-                @hint._k_[callee] = true
-                ⮐ "_k_.#{callee}(#{@nodes p.args, ','})"
+                @hint._k_[name] = true
+                ⮐ "_k_.#{name}(#{@nodes p.args, ','})"
                 
-            switch callee
+            switch name
                 'throw'
                 'new'    ➜ "#{callee} #{@nodes p.args, ','}"
                 'int'    ➜ "parseInt(#{@nodes p.args, ','})"
@@ -827,8 +874,8 @@ class Renderer
                     "_k_.dbg(#{'\"' + (@source or '???') + '\"'}, #{p.callee.line}, #{p.callee.col}, #{msg}, #{@nodes p.args, ','})"
                     
                 'clamp' 'min' 'max' 'lpad' 'rpad' 'trim' 'ltrim' 'rtrim' # 'first' 'last' ???
-                    @hint._k_[callee] = true
-                    "_k_.#{callee}(#{@nodes p.args, ','})"
+                    @hint._k_[name] = true
+                    "_k_.#{name}(#{@nodes p.args, ','})"
                     
                 '▴'
                     @hint._k_.assert = true

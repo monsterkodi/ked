@@ -803,7 +803,7 @@ Parser = (function ()
             line = firstLineCol(key).line
             col = firstLineCol(key).col
 
-            text = this.kode.renderer.node(key)
+            text = this.kode.renderer.plain(this.kode.renderer.node(key))
             if ((text != null ? text.startsWith('this') : undefined))
             {
                 if (text === 'this')
@@ -897,7 +897,7 @@ Parser = (function ()
 
     Parser.prototype["error"] = function (o, tokens)
     {
-        var _1_17_, _1_6_
+        var _1143_45_, _1143_74_, _1145_39_, _1145_60_
 
         if (o.pop)
         {
@@ -905,11 +905,11 @@ Parser = (function ()
         }
         if (globalThis.process)
         {
-            console.error(_k_.B3(_k_.b7(` ${((_1_17_=(tokens != null ? tokens[0] != null ? tokens[0].line : undefined : undefined)) != null ? _1_17_ : ' ')} `)) + _k_.R1(_k_.y4(` ${((_1_6_=o.hdr) != null ? _1_6_ : o.pop)} `)) + _k_.R2(_k_.y7(` ${o.msg} `)))
+            console.error(_k_.B3(_k_.b7(` ${((_1143_45_=(tokens != null ? tokens[0] != null ? tokens[0].line : undefined : undefined)) != null ? _1143_45_ : ' ')} `)) + _k_.R1(_k_.y4(` ${((_1143_74_=o.hdr) != null ? _1143_74_ : o.pop)} `)) + _k_.R2(_k_.y7(` ${o.msg} `)))
         }
         else
         {
-            console.error(` ${((_1_17_=(tokens != null ? tokens[0] != null ? tokens[0].line : undefined : undefined)) != null ? _1_17_ : ' ')} ` + ` ${((_1_6_=o.hdr) != null ? _1_6_ : o.pop)} ` + ` ${o.msg} `)
+            console.error(` ${((_1145_39_=(tokens != null ? tokens[0] != null ? tokens[0].line : undefined : undefined)) != null ? _1145_39_ : ' ')} ` + ` ${((_1145_60_=o.hdr) != null ? _1145_60_ : o.pop)} ` + ` ${o.msg} `)
         }
         return null
     }

@@ -76,18 +76,49 @@ class Stripol
     
     string: e ->
         
-        s = if e.type == 'triple' then e.text[3...-3] else e.text[1...-1]
+        # the body of the string starts one column in, three for a triple,
+        # and the chunks are numbered from there
         
-        chunks = @dissect s, e.line, e.col
+        s   = if e.type == 'triple' then e.text[3...-3] else e.text[1...-1]
+        col = e.col + (if e.type == 'triple' then 3 else 1)
+        
+        chunks = @dissect s, e.line, col, e.org
         
         if chunks.length > 1
             if chunks[-1].type != 'close'
-                chunks.push type:'close' text:'' line:e.line, col:e.col+s.length
+                chunks.push type:'close' text:'' line:e.line, col:col+s.length
                 
             ⮐ stripol:chunks
         else
             e.text = e.text.replace '#{}' ''
         e
+        
+    # 00000000   000       0000000    0000000  00000000
+    # 000   000  000      000   000  000       000     
+    # 00000000   000      000000000  000       0000000 
+    # 000        000      000   000  000       000     
+    # 000        0000000  000   000  0000000  00000000
+    
+    # an interpolated expression is parsed on its own, so its tokens come
+    # back numbered from the top of their own little string. move them onto
+    # the line and column the expression starts at, so a source map built
+    # from them points into the string and not into the head of the file.
+    
+    place: (ast, line, col) ->
+        
+        if ast is arr
+            for a in ast ➜ @place a, line, col
+            ⮐
+        
+        if not ast is obj then ⮐
+        
+        if valid ast.line and valid ast.type and valid ast.text
+            l = ast.line
+            ast.line = l + line - 1
+            ast.col += col if l == 1
+        
+        for k,v of ast
+            @place v, line, col if v is arr or v is obj
         
     # ███████    ███   ███████   ███████  ████████   ███████  █████████  
     # ███   ███  ███  ███       ███       ███       ███          ███     
@@ -95,14 +126,36 @@ class Stripol
     # ███   ███  ███       ███       ███  ███       ███          ███     
     # ███████    ███  ███████   ███████   ████████   ███████     ███     
     
-    dissect: s line col ->
-
+    dissect: (s, line, col, org=[]) ->
+        
         c = 0; chunks = []
             
-        push = type text => 
+        push = (type, text, at=0) => 
             if type == 'code'
                 if valid text
                     ast = @kode.ast text
+                    
+                    # where the expression sits in the body of the string,
+                    # in the body's own line and column
+                    
+                    pre = s[...at]
+                    nl  = pre.split('\n').length - 1
+                    bc  = if nl then pre.length - pre.lastIndexOf('\n') - 1 else at
+                    
+                    # and where that is in the source: a triple string comes
+                    # out of the lexer re-indented, and it says by how much
+                    
+                    o = org[nl]
+                    
+                    if valid o
+                        tl = o[0]
+                        tc = o[1] + bc
+                    else
+                        tl = line + nl
+                        tc = col + bc
+                    
+                    @place ast.exps, tl, tc
+                    
                     chunks.push code: exps:ast.exps
             else
                 chunks.push type:type, text:text, line:line, col:col+c
@@ -144,7 +197,7 @@ class Stripol
                 
                 b = switch matches[0][0]
                     when 'close'
-                        push 'code' s[ic...c+index]
+                        push 'code' s[ic...c+index], ic
                         c += index+length
                         true
                     when 'triple' 'double' 'single'

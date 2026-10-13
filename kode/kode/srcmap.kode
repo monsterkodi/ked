@@ -1,107 +1,159 @@
 ###
- 0000000   0000000   000   000  00000000    0000000  00000000  00     00   0000000   00000000   
+  0000000   0000000   000   000  00000000    0000000  00000000  00     00   0000000   00000000   
 000       000   000  000   000  000   000  000       000       000   000  000   000  000   000  
 0000000   000   000  000   000  0000000    000       0000000   000000000  000000000  00000000   
-     000  000   000  000   000  000   000  000       000       000 0 000  000   000  000        
-0000000    0000000    0000000   000   000   0000000  00000000  000   000  000   000  000        
+      000  000   000  000   000  000   000  000       000       000 0 000  000   000  000        
+0000000    0000000    0000000   000   000  0000000  00000000  000   000  000   000  000   
 ###
 
 use ../kxk ◆ kstr slash
-use ./print
 
 # maps locations in a single generated js file back to locations in the original source file
+#
+# the renderer hands every token it renders to mark, which tags the token's
+# text with a number of its own. the tag rides along with the text through
+# whatever the renderer does to the string it is building, and strip reads
+# the tags back out of the finished js - so strip is the only place that has
+# to know where anything ended up, and the rest of the rendering does not
+# have to keep track of a position at all.
+#
+# a tag goes behind the text of its token, not in front of it: the renderer
+# still sees what it rendered at the head of a string, which is most of what
+# it looks at. where it does look at the middle - the two places that slice
+# or match what they rendered - it goes through plain first.
+
+# a private use codepoint, so a tag can never be confused with anything the
+# renderer wrote itself, whatever the source held. plain and strip look for
+# tags with a regular expression, and it has to be this shape.
+
+TAG = '\u0001'
 
 class SourceMap
     
-    @: (@source) -> 
+    @: (@source, @name) ->
         
-        @jsline = 0
-        @lines  = []
-        @cache  = []
-        @verbose = false
+        @toks     = [] # [js, tok] per tag, in the order they were marked
+        @lines    = [] # LineMap per generated line
+        @stripped = 0  # tags read back out of the finished js
+        @verbose  = false
 
     # sourcemap tracing: silent unless --verbose or a tree dumping
     # flag was given, so a normal compile prints only its result
     verb: -> if @verbose then console.log.apply console.log, arguments
 
-    #  0000000   0000000   00     00  00     00  000  000000000  
-    # 000       000   000  000   000  000   000  000     000     
-    # 000       000   000  000000000  000000000  000     000     
-    # 000       000   000  000 0 000  000 0 000  000     000     
-    #  0000000   0000000   000   000  000   000  000     000     
+    #  00     00   0000000   00000000   000   000
+    # 000   000  000   000  000   000  000  000 
+    # 000000000  000000000  0000000    0000000  
+    # 000 0 000  000   000  000   000  000  000 
+    # 000   000  000   000  000   000  000  000 
     
-    commit: (s, tl) ->
+    # tag a token's rendered text with its own number
+    
+    mark: (s, tok) ->
         
-        if tl == true
-            
-            while s[0] == '\n'
-                s = s[1..]
-                @jsline++
-                            
-            @verb b7('c'), g4(lpad(4 @jsline)), s
-            
-            @jsline += @solve s
-            
-            @cache  = []
-            
-        else if tl?.type
-            
-            @verb b4('t'), r2(lpad(4 tl.line ? '?')), s
-            @cache.push [s, tl]
-            
-        else
-            
-            @verb b4('.'), b2(lpad(4 @jsline)), w2(s)
-            
-    #  0000000   0000000   000      000   000  00000000  
-    # 000       000   000  000      000   000  000       
-    # 0000000   000   000  000       000 000   0000000   
-    #      000  000   000  000         000     000       
-    # 0000000    0000000   0000000      0      00000000  
-    
-    solve: (s) ->
+        @toks.push [s, tok]
+        i = @toks.length-1
+        s + TAG + i + TAG
 
-        return 0 if empty s
+    # 00000000   000       0000000   000  000   000
+    # 000   000  000      000   000  000  0000  000
+    # 00000000   000      000000000  000  000 0 000
+    # 000        000      000   000  000  000  0000
+    # 000        0000000  000   000  000  000   000
+    
+    # the same text with the tags taken out again. the renderer matches and
+    # slices its own output in places, and that has to go on text looking
+    # the way it would look without a map - a tag would be characters the
+    # comparisons and offsets never saw.
+    
+    plain: (s) -> s.replaceAll /\u0001\d+\u0001/g, ''
+    
+    #  0000000  000000000  00000000   000  00000000 
+    # 000          000     000   000  000  000   000
+    # 0000000      000     0000000    000  00000000 
+    #      000     000     000   000  000  000      
+    # 0000000      000     000   000  000  000      
+    
+    # take every tag out of the finished js, remembering where each one
+    # stood: that is where its token landed in the generated file
+    
+    strip: (code) ->
         
-        slcs = []
+        ⮐ code if empty code
         
-        jsidx = 0
-        jslns = s.split '\n'
+        out  = ''
+        li   = 0 # line in the generated js, 0-based
+        col  = 0 # column just past the last character taken over
+        sli  = 0 # the same, as of the last tag read
+        scol = 0
+        pos  = 0 # everything before this has been read and copied
+        rg   = /\u0001(\d+)\u0001/g
         
-        for ci in 0...@cache.length
+        while (m = rg.exec code)
             
-            [cs, tok] = @cache[ci]
+            chunk = code[pos...m.index]
+            nl    = chunk.lastIndexOf '\n'
             
-            # search forward from the last hit; a token never appears before it
-            i = -1
-            while jsidx < jslns.length
-                i = jslns[jsidx].indexOf cs
-                break if i >= 0
-                jsidx++
-            
-            if i >= 0
-                ji = @jsline+jsidx
-                slcs.push [jslns[jsidx][i...i+cs.length], [ji, tok.line, tok.col]]
-                @add [tok.line-1, tok.col], [ji, i], jslns[jsidx][i...i+cs.length]
-                @verb b6(ji), w3(i), r4(tok.line), r2(tok.col), cs+r2 '◂'
+            if nl >= 0
+                li  += chunk.split('\n').length - 1
+                col  = chunk.length - nl - 1
             else
-                @verb "srcmap.solve can't locate tok #{tok.text} in #{s}"
+                col += chunk.length
+            
+            out += chunk
+            
+            # a tag stands directly behind the text of its token, so the
+            # token ends where the tag begins - and a token is never touched
+            # between there and where it began, or a tag would have gone
+            # with it. that puts the token inside this piece of text, ending
+            # on it: measure back from there, and not from the tag, so that
+            # a token over several lines keeps its first column too.
+            
+            tk = @toks[Number m[1]]
+            
+            if tk
                 
-        @verb @jsline, s, slcs
-        jslns.length-1
+                [js, tok] = tk
+                at  = chunk.length - js.length
+                
+                if at >= 0
+                    
+                    head = if at then chunk[0...at] else ''
+                    nl   = head.lastIndexOf '\n'
+                    tl   = sli + head.split('\n').length - 1
+                    tc   = if nl >= 0 then head.length - nl - 1 else scol + head.length
+                    
+                    @add [tok.line-1, tok.col], [tl, tc], js
+                    @stripped++
+                    
+                    @verb b5(li), b3(col), r2(tok.line), b2(tok.col), js
+                else
+                    @verb r4("token #{tok.text} does not fit what was written")
+            else
+                @verb r4("no token for tag #{m[1]}")
+            
+            pos  = m.index + m[0].length
+            sli  = li
+            scol = col
         
+        @verb b7('t'), @stripped, 'of', @toks.length
+        
+        out + code[pos..]
+    
     # 0000000     0000000   000   000  00000000  
     # 000   000  000   000  0000  000  000       
     # 000   000  000   000  000 0 000  0000000   
-    # 000   000  000   000  000  0000  000       
+    # 000   000  000   000  000   000  000       
     # 0000000     0000000   000   000  00000000  
+    
+    # print the finished js, with the positions that were found on it
+    # behind every mapped token
     
     done: (s) ->
         
         ls = s.split '\n'
         
-        @verb b5('d'), @jsline, ls.length, @lines.length
-        
+        @verb b5('d'), @stripped, 'of', @toks.length, 'tags in', ls.length, 'lines,', @lines.length, 'mapped'
         @verb ls
                 
         for li in 0...ls.length
@@ -113,9 +165,8 @@ class SourceMap
             if lm = @lines[li]
                 for c in lm.columns
                     continue if not c
-                    @verb "#{red c.jsstr} #{c.sourceLine} #{c.sourceColumn}"
-            
-    #  0000000   0000000    0000000    
+                    @verb "#{r4 c.jsstr} #{c.sourceLine} #{c.sourceColumn}"
+    # 0000000   0000000    0000000    
     # 000   000  000   000  000   000  
     # 000000000  000   000  000   000  
     # 000   000  000   000  000   000  
@@ -128,22 +179,27 @@ class SourceMap
         @lines[line].verbose = @verbose
         @lines[line].add column, source, jsstr
 
-    #  0000000   00000000  000   000  00000000  00000000    0000000   000000000  00000000  
+    # 0000000   00000000  000   000  00000000  00000000    0000000   000000000  00000000  
     # 000        000       0000  000  000       000   000  000   000     000     000       
     # 000  0000  0000000   000 0 000  0000000   0000000    000000000     000     0000000   
     # 000   000  000       000  0000  000       000   000  000   000     000     000       
-    #  0000000   00000000  000   000  00000000  000   000  000   000     000     00000000  
+    # 0000000   00000000  000   000  00000000  000   000  000   000     000     00000000  
     
-    generate: (code) ->
+    # the map itself. a source map is one line of segments per line of the
+    # generated file, each segment a run of vlq values: generated column,
+    # source, source line, source column - all but the first relative to
+    # whatever came before.
+    
+    generate: ->
         
         writingline      = 0
         lastColumn       = 0
         lastSourceLine   = 0
         lastSourceColumn = 0
         needComma        = no
-        buffer           = ""
+        buffer           = ''
 
-        for lineMap, lineNumber in @lines 
+        for lineMap in @lines
             continue if not lineMap
             for mapping in lineMap.columns 
                 continue if not mapping
@@ -188,22 +244,25 @@ class SourceMap
                 lastSourceColumn = mapping.sourceColumn
                 needComma = yes
 
-        file = slash.file slash.swapExt(@source, 'js'), @source
+        # the generated file, and the one source it was made from, named the
+        # way a runtime reading this map out of the js will look for it
+        
+        file = slash.file slash.swapExt(@source, 'js')
                 
         version:        3
         file:           file
-        sources:        [slash.file(@source) or '']
+        sources:        [@name or @source]
         mappings:       buffer
 
     #       000   0000000   0000000   0000000   0000000    00000000  
     #       000  000       000       000   000  000   000  000       
     #       000  0000000   000       000   000  000   000  0000000   
     # 000   000       000  000       000   000  000   000  000       
-    #  0000000   0000000    0000000   0000000   0000000    00000000  
+    # 0000000   0000000    0000000   0000000   0000000    00000000  
     
     jscode: (v3Map) ->
         
-        encoded = @base64encode JSON.stringify v3Map
+        encoded = @base64encode JSON.stringify(v3Map)
         dataURL = "//# sourceMappingURL=data:application/json;base64,#{encoded}"
         sourceURL = "//# sourceURL=#{@source}"
         "\n\n#{dataURL}\n#{sourceURL}\n"
@@ -215,7 +274,7 @@ class SourceMap
         
     # 00000000  000   000   0000000   0000000   0000000    00000000  
     # 000       0000  000  000       000   000  000   000  000       
-    # 0000000   000 0 000  000       000   000  000   000  0000000   
+    # 0000000   000 0 000  000       000   000  000   000  000       
     # 000       000  0000  000       000   000  000   000  000       
     # 00000000  000   000   0000000   0000000   0000000    00000000  
     
@@ -280,6 +339,4 @@ class LineMap
         @columns[column] = {line: @line, column, sourceLine, sourceColumn, jsstr}
 
 export SourceMap
-
-
 

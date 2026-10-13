@@ -227,7 +227,7 @@ class Operator
 
     fixPrec (e)
     {
-        var newlhs, newop, op, _142_23_, _142_41_, _142_52_, _142_62_, _146_37_, _146_48_, _182_54_, _182_84_, _188_32_, _188_53_
+        var newlhs, newop, op, _142_23_, _142_41_, _142_52_, _142_62_, _146_32_, _146_43_, _182_54_, _182_84_, _188_32_, _188_53_
 
         op = e.operation || e.qmrkcolon
         if (precedence(e) < precedence(op.rhs))
@@ -240,7 +240,7 @@ class Operator
             {
                 return
             }
-            if (_k_.in(((_146_37_=e.operation.rhs) != null ? (_146_48_=_146_37_.operation) != null ? _146_48_.operator.text : undefined : undefined),assign))
+            if (_k_.in(((_146_32_=e.operation.rhs) != null ? (_146_43_=_146_32_.operation) != null ? _146_43_.operator.text : undefined : undefined),assign))
             {
                 return
             }
@@ -293,7 +293,7 @@ class Operator
         {
             try
             {
-                return _k_.w2(this.kode.renderer.node(n))
+                return _k_.w2(this.kode.renderer.plain,this.kode.renderer.node(n))
             }
             catch (e)
             {

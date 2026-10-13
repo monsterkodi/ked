@@ -160,22 +160,22 @@ cells = (function ()
 
     cells.prototype["meta_pre"] = function (x, y, p)
     {
-        var _47_49_
+        var _47_46_
 
         if (this.inside(x,y))
         {
-            this.m = ((_47_49_=this.m) != null ? _47_49_ : belt.metas(this.cols,this.rows))
+            this.m = ((_47_46_=this.m) != null ? _47_46_ : belt.metas(this.cols,this.rows))
             return this.m[y][x].pre.push(p)
         }
     }
 
     cells.prototype["meta_pst"] = function (x, y, p)
     {
-        var _48_49_
+        var _48_46_
 
         if (this.inside(x,y))
         {
-            this.m = ((_48_49_=this.m) != null ? _48_49_ : belt.metas(this.cols,this.rows))
+            this.m = ((_48_46_=this.m) != null ? _48_46_ : belt.metas(this.cols,this.rows))
             return this.m[y][x].pst.push(p)
         }
     }

@@ -1,4 +1,4 @@
-var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}}
+var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, isArr: function (o) {return Array.isArray(o)}, isObj: function (o) {return !(o == null || typeof o != 'object' || o.constructor.name !== 'Object')}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}}
 
 import print from "./print.js"
 
@@ -85,15 +85,16 @@ class Stripol
 
     string (e)
     {
-        var chunks, s
+        var chunks, col, s
 
         s = e.type === 'triple' ? e.text.slice(3, -3) : e.text.slice(1, -1)
-        chunks = this.dissect(s,e.line,e.col)
+        col = e.col + (e.type === 'triple' ? 3 : 1)
+        chunks = this.dissect(s,e.line,col,e.org)
         if (chunks.length > 1)
         {
             if (chunks.slice(-1)[0].type !== 'close')
             {
-                chunks.push({type:'close',text:'',line:e.line,col:e.col + s.length})
+                chunks.push({type:'close',text:'',line:e.line,col:col + s.length})
             }
             return {stripol:chunks}
         }
@@ -104,21 +105,73 @@ class Stripol
         return e
     }
 
-    dissect (s, line, col)
+    place (ast, line, col)
+    {
+        var a, k, l, v
+
+        if (_k_.isArr(ast))
+        {
+            var list = _k_.list(ast)
+            for (var _a_ = 0; _a_ < list.length; _a_++)
+            {
+                a = list[_a_]
+                this.place(a,line,col)
+            }
+            return
+        }
+        if (!(_k_.isObj(ast)))
+        {
+            return
+        }
+        if (!_k_.empty(ast.line) && !_k_.empty(ast.type) && !_k_.empty(ast.text))
+        {
+            l = ast.line
+            ast.line = l + line - 1
+            if (l === 1)
+            {
+                ast.col += col
+            }
+        }
+        for (k in ast)
+        {
+            v = ast[k]
+            if (_k_.isArr(v) || _k_.isObj(v))
+            {
+                this.place(v,line,col)
+            }
+        }
+    }
+
+    dissect (s, line, col, org = [])
     {
         var b, c, chunks, i, ic, index, k, length, m, matches, push, r, rgs, t
 
         c = 0
         chunks = []
-        push = (function (type, text)
+        push = (function (type, text, at = 0)
         {
-            var ast
+            var ast, bc, nl, o, pre, tc, tl
 
             if (type === 'code')
             {
                 if (!_k_.empty(text))
                 {
                     ast = this.kode.ast(text)
+                    pre = s.slice(0, typeof at === 'number' ? at : -1)
+                    nl = pre.split('\n').length - 1
+                    bc = nl ? pre.length - pre.lastIndexOf('\n') - 1 : at
+                    o = org[nl]
+                    if (!_k_.empty(o))
+                    {
+                        tl = o[0]
+                        tc = o[1] + bc
+                    }
+                    else
+                    {
+                        tl = line + nl
+                        tc = col + bc
+                    }
+                    this.place(ast.exps,tl,tc)
                     return chunks.push({code:{exps:ast.exps}})
                 }
             }
@@ -163,7 +216,7 @@ class Stripol
                     switch (matches[0][0])
                     {
                         case 'close':
-                            push('code',s.slice(ic, c + index))
+                            push('code',s.slice(ic, c + index),ic)
                             c += index + length
                             return true
 

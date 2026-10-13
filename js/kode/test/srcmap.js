@@ -1,18 +1,40 @@
 var toExport = {}
-var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
+var _k_ = {dir: function () { let url = import.meta.url.substring(7); let si = url.lastIndexOf('/'); return url.substring(0, si); }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, trim: function (s,c=' ') {return _k_.ltrim(_k_.rtrim(s,c),c)}, ltrim: function (s,c=' ') { while (_k_.in(s[0],c)) { s = s.slice(1) } return s}, rtrim: function (s,c=' ') {while (_k_.in(s.slice(-1)[0],c)) { s = s.slice(0, s.length - 1) } return s}}
 
-var B64, decodeSegment, kmap, mappingsOf, VLQ
+var again, B64, back, body, c, cols, decode, decodeSegment, dir, eq, file, files, first, gen, gl, got, has, json, jsonOf, k, keys, kmap, kodfiles, kplain, linesOf, mapped, mapsOf, missed, ms, n, name, names, out, pairs, prev, PROBE, report, rewrites, same, sl, snips, sorted, src, t, text, tgt, tokAt, unmap, version, VLQ, wrong, zero
 
-import utils from "./utils.js"
-let kc = utils.kc
+import kode from "../kode.js"
+
+import slash from "../../kxk/slash.js"
 
 import buffer from "buffer"
 
+import fs from "fs"
+
 B64 = buffer.Buffer
+PROBE = slash.path(_k_.dir(),'..','..','..','kode','srcmap-probe.kode')
 
 kmap = function (c)
 {
-    return kc(c,'srcmap-probe.kode',{map:true})
+    return (new kode({header:false,map:true})).compile(c,PROBE)
+}
+
+kplain = function (c)
+{
+    return (new kode({header:false})).compile(c,PROBE)
+}
+
+body = function (code)
+{
+    var i
+
+    i = code.lastIndexOf('\n\n//# sourceMappingURL')
+    return (i < 0 ? code : code.slice(0, typeof i === 'number' ? i : -1))
+}
+
+linesOf = function (code)
+{
+    return body(code).split('\n')
 }
 VLQ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
@@ -42,15 +64,15 @@ decodeSegment = function (s)
     return vals
 }
 
-mappingsOf = function (code)
+decode = function (code)
 {
     var at, b64, c, f, gc, i, li, line, mark, out, sc, seg, sl, sm
 
     mark = 'sourceMappingURL=data:application/json;base64,'
-    at = code.indexOf(mark)
+    at = code.lastIndexOf(mark)
     if (at < 0)
     {
-        return []
+        return null
     }
     b64 = ''
     i = at + mark.length
@@ -91,13 +113,321 @@ mappingsOf = function (code)
             }
         }
     }
+    return [sm,out]
+}
+
+mapsOf = function (code)
+{
+    var r
+
+    r = decode(code)
+    return (r ? r[1] : [])
+}
+
+jsonOf = function (code)
+{
+    var r
+
+    r = decode(code)
+    return (r ? r[0] : {})
+}
+
+tokAt = function (lines, line, col)
+{
+    var l, m
+
+    l = lines[line - 1]
+    if (!(l != null))
+    {
+        return ''
+    }
+    m = /^[\w$]+/.exec(l.slice(col))
+    return (m ? m[0] : l[col])
+}
+rewrites = {log:'console.',warn:'console.',error:'console.',yes:'true',no:'false','@':'this','"':'`','●':'_k_.profile','●▸':'_k_.profile','●▪':'_k_.profilend',in:'_k_.in',valid:'!_k_.empty',empty:'_k_.empty',eql:'_k_.eql'}
+
+same = function (st, gt)
+{
+    if (gt.startsWith(st))
+    {
+        return true
+    }
+    if (!(rewrites[st] != null))
+    {
+        return false
+    }
+    return gt.startsWith(rewrites[st])
+}
+
+pairs = function (c)
+{
+    var code, gl, gt, out, sl, st, t
+
+    code = kmap(c)
+    gl = linesOf(code)
+    sl = c.split('\n')
+    out = []
+    var list = _k_.list(mapsOf(code))
+    for (var _d_ = 0; _d_ < list.length; _d_++)
+    {
+        t = list[_d_]
+        st = tokAt(sl,t[2],t[3])
+        gt = (gl[t[0] - 1] != null ? gl[t[0] - 1].slice(t[1]) : undefined) || ''
+        out.push([t,st,gt])
+    }
+    return out
+}
+
+kodfiles = function (dir, out = [])
+{
+    var name, p
+
+    var list = _k_.list(fs.readdirSync(dir))
+    for (var _e_ = 0; _e_ < list.length; _e_++)
+    {
+        name = list[_e_]
+        p = slash.path(dir,name)
+        if (fs.statSync(p).isDirectory())
+        {
+            kodfiles(p,out)
+        }
+        else if (p.endsWith('.kode'))
+        {
+            out.push(p)
+        }
+    }
     return out
 }
 toExport["srcmap"] = function ()
 {
-    section("to be fixed", function ()
+    section("only when asked for", function ()
     {
-        compare(true,true)
+        has = _k_.in('sourceMappingURL',kmap('a = 1'))
+        compare(has,true)
+        has = _k_.in('sourceURL',kmap('a = 1'))
+        compare(has,true)
+        has = _k_.in('sourceMappingURL',kplain('a = 1'))
+        compare(has,false)
+        has = _k_.in('sourceURL',kplain('a = 1'))
+        compare(has,false)
+    })
+    section("names the file it was made from", function ()
+    {
+        json = jsonOf(kmap('a = 1'))
+        src = json.sources
+        compare(src.length,1)
+        names = src[0].endsWith('kode/srcmap-probe.kode')
+        compare(names,true)
+        version = json.version
+        compare(version,3)
+    })
+    section("names its source from where it is written", function ()
+    {
+        dir = slash.path(_k_.dir(),'..','..')
+        tgt = slash.path(dir,'probe.js')
+        out = (new kode({header:false,map:true})).compile('a = 1',PROBE,tgt)
+        name = jsonOf(out).sources[0]
+        back = slash.absolute(name,slash.dir(tgt))
+        compare(back,PROBE)
+    })
+    section("writes the same js either way", function ()
+    {
+        snips = 'a = 1'
+        var list = _k_.list(snips)
+        for (var _f_ = 0; _f_ < list.length; _f_++)
+        {
+            c = list[_f_]
+            mapped = body(kmap(c))
+            unmap = kplain(c)
+            eq = mapped === unmap
+            compare(eq,true)
+        }
+    })
+    section("twice over", function ()
+    {
+        c = 'class Foo\n    @bar: 1\n    mthd: -> @bar\n'
+        k = new kode({header:false,map:true})
+        first = k.compile(c,PROBE)
+        again = k.compile(c,PROBE)
+        eq = body(first) === body(again)
+        compare(eq,true)
+    })
+    section("points at the token it maps", function ()
+    {
+        out = pairs('a = 1\nb = a + 2\nc = b + 3\nlog c\n')
+        wrong = out.filter(function (t)
+        {
+            var ok
+
+            ok = same(t[1],t[2])
+            return ok === false
+        })
+        report = wrong.map(function (t)
+        {
+            return `${t[0]} ${t[1]} ${t[2].slice(0, 13)}`
+        }).join(' ')
+        compare(report,'')
+    })
+    section("maps every line it can", function ()
+    {
+        snips = 'a = 1\nb = a + 2\nc = b + 3\nlog c\n'
+        var list1 = _k_.list(snips)
+        for (var _10_ = 0; _10_ < list1.length; _10_++)
+        {
+            c = list1[_10_]
+            sl = c.split('\n').map(function (l, i)
+            {
+                if (_k_.trim(l))
+                {
+                    return i + 1
+                }
+                else
+                {
+                    return 0
+                }
+            }).filter(function (l)
+            {
+                return l
+            })
+            ms = mapsOf(kmap(c))
+            got = ms.map(function (t)
+            {
+                return t[2]
+            })
+            missed = sl.filter(function (l)
+            {
+                return !(_k_.in(l,got))
+            })
+            compare(missed,[])
+        }
+    })
+    section("finds column zero", function ()
+    {
+        out = mapsOf(kmap('a = 1\nb = a + 2\nlog b\n'))
+        zero = out.filter(function (t)
+        {
+            return t[1] === 0
+        }).map(function (t)
+        {
+            return t[0]
+        })
+        compare(zero,[3,4,5])
+    })
+    section("maps a call", function ()
+    {
+        out = mapsOf(kmap('log b\n'))
+        compare(out[0],[1,0,1,0])
+        compare(out[1],[1,12,1,4])
+    })
+    section("maps a nested body", function ()
+    {
+        c = 'f = ->\n    a = 1\n    b = a + 2\nf()\n'
+        out = mapsOf(kmap(c))
+        gl = linesOf(kmap(c))
+        gen = out.map(function (t)
+        {
+            return t[0]
+        })
+        compare(gen,[4,8,8,9,9,9,11])
+        src = out.map(function (t)
+        {
+            return t[2]
+        })
+        compare(src,[1,2,2,3,3,3,4])
+        cols = out.filter(function (t)
+        {
+            return t[2] === 3
+        }).map(function (t)
+        {
+            return t[1]
+        })
+        compare(cols,[11,15,19])
+        text = gl[8].slice(11)
+        compare(text,'b = a + 2')
+    })
+    section("maps a triple string", function ()
+    {
+        out = mapsOf(kmap('x = """\n    abc\n    def\n    """\n'))
+        compare(out[0],[3,0,1,0])
+        compare(out[1],[3,4,1,4])
+    })
+    section("maps an interpolation", function ()
+    {
+        out = mapsOf(kmap('x = "a #{b + 1} c"\n'))
+        compare(out[0],[3,0,1,0])
+        compare(out[1],[3,9,1,9])
+        compare(out[2],[3,13,1,13])
+    })
+    section("ordered and monotonic", function ()
+    {
+        snips = 'a = 1\nb = a + 2\nlog b\n'
+        var list2 = _k_.list(snips)
+        for (var _11_ = 0; _11_ < list2.length; _11_++)
+        {
+            c = list2[_11_]
+            sorted = true
+            prev = [-1,-1]
+            var list3 = _k_.list(mapsOf(kmap(c)))
+            for (var _12_ = 0; _12_ < list3.length; _12_++)
+            {
+                t = list3[_12_]
+                if (t[0] < prev[0] || (t[0] === prev[0] && t[1] <= prev[1]))
+                {
+                    sorted = false
+                }
+                prev = [t[0],t[1]]
+            }
+            compare(sorted,true)
+        }
+    })
+    section("no column twice", function ()
+    {
+        snips = 'a = 1\nb = a + 2\nlog b\n'
+        var list4 = _k_.list(snips)
+        for (var _13_ = 0; _13_ < list4.length; _13_++)
+        {
+            c = list4[_13_]
+            ms = mapsOf(kmap(c))
+            keys = ms.map(function (t)
+            {
+                return `${t[0]}:${t[1]}`
+            })
+            n = keys.filter(function (k, i)
+            {
+                return keys.indexOf(k) !== i
+            }).length
+            compare(n,0)
+        }
+    })
+    section("the whole compiler", function ()
+    {
+        dir = slash.path(_k_.dir(),'..','..','..','kode','kode')
+        files = kodfiles(dir)
+        compare(files.length > 20,true)
+        wrong = []
+        var list5 = _k_.list(files)
+        for (var _14_ = 0; _14_ < list5.length; _14_++)
+        {
+            file = list5[_14_]
+            text = fs.readFileSync(file,'utf8')
+            out = (new kode({header:false,map:true})).compile(text,file)
+            if (!(out != null))
+            {
+                continue
+            }
+            if (file.endsWith('srcmap-probe.kode'))
+            {
+                continue
+            }
+            unmap = (new kode({header:false})).compile(text,file)
+            eq = body(out) === unmap
+            if (eq === false)
+            {
+                wrong.push(file)
+            }
+        }
+        report = wrong.join(' ')
+        compare(report,'')
     })
 }
 toExport["srcmap"]._section_ = true

@@ -5,7 +5,7 @@ var firstLineCol, lastLineCol
 
 lastLineCol = function (e)
 {
-    var cols, _17_13_, _18_43_
+    var cols, _17_13_, _18_38_
 
     if (((e != null ? e.col : undefined) != null))
     {
