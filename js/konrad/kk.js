@@ -24,7 +24,7 @@ args = karg(`kk
     build      transpile kode and noon        = false
     watch      watch for file changes         = false
     test       run tests                      = false
-    map        write inline source maps       = false
+    map        write inline source maps       = true
     
     quiet      log nothing                    = false
     debug      log debug                      = false -D
@@ -123,3 +123,6 @@ class kk
 
 global['kk'] = kk
 export default kk.run;
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia2suanMiLCJzb3VyY2VzIjpbIi4uLy4uL2tvZGUva29ucmFkL2trLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7O09BY08sR0FBRyxLQUFLO0FBRWYsT0FBTyxLQUFLOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztRQThCSixRQUFRLEtBQUs7WUFDVixLQUFLOztrQkFBWSxZQUFJLFFBQVEsTUFBTSxLQUFLLE1BQU0sZUFBVSxXQUFXLFFBQVE7O1lBQzNFLEtBQUs7O2tCQUFZLFNBQW1CLE9BQU87O1lBQzNDLEtBQUs7O2tCQUFZLEtBQWEsTUFBTTs7WUFDcEMsS0FBSzs7a0JBQVksS0FBYSxNQUFNOztZQUNwQyxLQUFLOztrQkFBWSxHQUFHLEtBQVU7O1lBQzlCLEtBQUs7O3lCQUFZLEdBQUc7Ozs7OztRQWF2QixZQUFJLGFBQVMsR0FBRztlQUVoQixNQUFNLE1BQU0sR0FBRyxhQUFZLFVBQVUsS0FBSzs7bUJBQ3RDLFFBQVEsR0FBRzs7b0JBRUQsTUFBTSxTQUFTLEtBQUssS0FBSzs7OzsyQkFFNUIsTUFBTSxJQUFJLEtBQUssT0FBVSxPQUFPLE1BQU0sT0FBTzs7b0JBQzVDLG1CQUFPLGFBQVMsS0FBSzswQkFDbkIsS0FBSyxLQUFLO2lDQUNWLEdBQUcsS0FBSyxLQUFLOzs7Ozs7Ozs7O1FBVTNCLE1BQU07dUJBQ2tDOztZQUF4QyxPQUFPLE1BQU0sUUFBUSxLQUFLOztRQUMxQixPQUFNLE1BQU0sS0FBSyxJQUFJLEdBQUc7bUJBRXBCOzttQkFFQSxjQUFjLEtBQUssSUFBSTs7b0JBRWhCOztvQkFDQyxjQUFNLFFBQVE7MkJBQ2Q7Ozs7bUNBRW9COzt3QkFBcEIsWUFBSTs7MkJBQ0o7Ozs7Ozs7O2VBRUQsUUFBUTs7OztBQUkzQixPQUFPLFFBQVE7ZUFFUixHQUFHIn0=
+//# sourceURL=kode/konrad/kk.kode

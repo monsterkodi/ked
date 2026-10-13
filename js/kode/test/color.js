@@ -27,3 +27,7 @@ toExport["color"] = function ()
 toExport["color"]._section_ = true
 toExport._test_ = true
 export default toExport
+
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29sb3IuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva29kZS90ZXN0L2NvbG9yLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7O1lBYUksR0FBSSwyQkFBNkI7O2FBSXhCLFFBQUc7O1FBQ1IsSUFBSTs0QkFDSzs7OztZQUNMLElBQUksRUFBRTtZQUNOLEtBQUssTUFBTSxJQUFJLElBQUksT0FBTyxJQUFJLElBQUk7O1FBQ3RDLFlBQUkifQ==
+//# sourceURL=kode/kode/test/color.kode

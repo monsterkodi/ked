@@ -40,3 +40,6 @@ export default {
         console.log(`${_k_.r6(_k_.noon((rgs)))}\n${_k_.r5('expected')} ${_k_.g5(match)} ${_k_.r5('at index')} ${_k_.b7(start)} `)
     }
 }
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidXRpbC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rb2xvci90ZXN0L3V0aWwua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7O0FBVUEsTUFBTTs7SUFHRjs7ZUFBYSxNQUFNOztJQUNuQjs7ZUFBZSxNQUFNLE9BQU8sRUFBRzs7SUFDL0I7O2VBQWdCLE1BQU0sUUFBUSxFQUFFLE1BQU0sTUFBTzs7SUFFN0M7Ozs7NEJBQ2E7Ozs7Z0JBQVMsRUFBRSxVQUFTLFNBQVUsRUFBRSxVQUFTOzt1QkFBVSxFQUFFOzs7UUFDOUQsZ0NBQWUsa0JBQVksc0JBQWlCLGlCQUFZLHNCQUFpQiJ9
+//# sourceURL=kode/kolor/test/util.kode

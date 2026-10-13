@@ -77,3 +77,7 @@ toExport["ast"] = function ()
 toExport["ast"]._section_ = true
 toExport._test_ = true
 export default toExport
+
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXN0LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tvZGUvdGVzdC9hc3Qua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Z0JBYVEsSUFBSSxLQUFTO2dCQUNiLElBQUksS0FBUztnQkFDYixJQUFJLE1BQVM7Z0JBQ2IsSUFBSSxPQUFTOzs7O2dCQUliLElBQUksV0FDQTs7Ozs7OztnQkFVSixJQUFJLFNBQ0E7Ozs7Ozs7Z0JBVUosSUFBSSxPQUNBOzs7OztnQkFRSixJQUFJLFNBQ0E7Ozs7O2dCQVFKLElBQUksYUFDQTs7Ozs7Ozs7Ozs7OztnQkFnQkosSUFBSSxhQUNBOzs7Ozs7Ozs7Ozs7O2dCQWdCSixJQUFJLHFCQUNBIn0=
+//# sourceURL=kode/kode/test/ast.kode
