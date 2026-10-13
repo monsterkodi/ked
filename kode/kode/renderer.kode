@@ -9,6 +9,7 @@
 use ../kxk  ◆ kstr slash
 use ./utils ▪ firstLineCol lastLineCol
 use ◆ print 
+use ./srcmap
 
 kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
 
@@ -20,6 +21,10 @@ class Renderer
         @verbose  = @kode.args?.verbose
         @hint     = _k_:{}
         @varstack = []
+
+        # sourcemap tracing: --verbose, or any of the three flags that
+        # already dump an intermediate tree
+        @trace    = @verbose or @kode.args?.tokens or @kode.args?.block or @kode.args?.parse
         
     onError: msg info -> @kode.onError msg info        
         
@@ -37,6 +42,10 @@ class Renderer
         if source and globalThis.process
             @source = slash.relative source, globalThis.process.cwd()
         # log @file, @source
+        
+        if @kode.args.map and @source
+            @srcmap = new SrcMap @source
+            @srcmap.verbose = @trace
         
         @ast = ast
             
@@ -63,6 +72,14 @@ class Renderer
             s  = 'var toExport = {}\n' + s
             s += '\ntoExport._test_ = true'
             s += '\nexport default toExport\n'
+
+        if @srcmap
+            # tracing is for --verbose; the three print flags cover the
+            # token/block/parse trees, and are what the error hint names
+            @srcmap.done s if @trace
+            sm = @srcmap.generate s
+            print.noon sm if @trace
+            s += @srcmap.jscode sm
         
         s = @header s            
         s
@@ -360,26 +377,6 @@ class Renderer
                 
                 mod = m.text ? m
     
-                # log "▸▸use #{noon(m)} @file? #{@file}"
-                
-                # if @file # is this actually doing something meaningful?
-#     
-                    # if mod[0] == '.'
-                        # kodeFile = slash.path slash.dir(@file), mod + '.kode'
-                        # jsFile = slash.path slash.dir(@file), mod + '.js'
-                    # else
-                        # kodeFile = slash.path slash.dir(@file), name + '.kode'
-                        # jsFile = slash.path slash.dir(@file), name + '.js'
-#                                                 
-                    # if mod[0] == '.'
-                        # relFile = slash.relative jsFile, slash.dir(@file)
-                        # if relFile[0] != '.'
-                            # relFile = './' + relFile
-                        # s += " from \"#{relFile}\"\n"
-                    # else
-                        # s += " from \"#{mod}\"\n"
-#                     
-                # else
                 if true
                     if mod[0] == '.'
                         s += " from \"#{slash.swapExt mod 'js'}\"\n"
@@ -692,11 +689,11 @@ class Renderer
 
         @varstack.push n.body.vars
         
-        if valid ths                     # moved this up from below. let's see if it breaks something. 
-            s += '\n'                    # moved this up from below. let's see if it breaks something. 
-            for t in ths                 # moved this up from below. let's see if it breaks something. 
-                s += @indent + t + '\n'  # moved this up from below. let's see if it breaks something. 
-            s += gi                      # moved this up from below. let's see if it breaks something. 
+        if valid ths
+            s += '\n'
+            for t in ths
+                s += @indent + t + '\n'
+            s += gi
 
         if n.body.exps?[0]?.call?.callee.text == 'super'
             s += '\n'
@@ -709,12 +706,6 @@ class Renderer
             vs = @sortVars n.body.vars
             s += @indent + "var #{vs}\n"
 
-        # if valid ths
-            # s += '\n'
-            # for t in ths
-                # s += @indent + t + '\n'
-            # s += gi
-            
         if valid n.body.exps
 
             s += '\n'
