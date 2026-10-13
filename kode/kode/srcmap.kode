@@ -1,30 +1,28 @@
 ###
-  0000000   0000000   000   000  00000000    0000000  00000000  00     00   0000000   00000000   
-000       000   000  000   000  000   000  000       000       000   000  000   000  000   000  
-0000000   000   000  000   000  0000000    000       0000000   000000000  000000000  00000000   
-      000  000   000  000   000  000   000  000       000       000 0 000  000   000  000        
-0000000    0000000    0000000   000   000  0000000  00000000  000   000  000   000  000   
+     ███████  ████████    ███████  ██     ██   ███████   ████████ 
+    ███       ███   ███  ███       ███   ███  ███   ███  ███   ███
+    ███████   ███████    ███       █████████  █████████  ████████ 
+         ███  ███   ███  ███       ███ █ ███  ███   ███  ███      
+    ███████   ███   ███   ███████  ███   ███  ███   ███  ███      
+
+    maps locations in a single generated js file back to locations in the original source file
+    the renderer hands every token it renders to mark, which tags the token's
+    text with a number of its own. the tag rides along with the text through
+    whatever the renderer does to the string it is building, and strip reads
+    the tags back out of the finished js - so strip is the only place that has
+    to know where anything ended up, and the rest of the rendering does not
+    have to keep track of a position at all.
+    a tag goes behind the text of its token, not in front of it: the renderer
+    still sees what it rendered at the head of a string, which is most of what
+    it looks at. where it does look at the middle - the two places that slice
+    or match what they rendered - it goes through plain first.
+      
+    a private use codepoint, so a tag can never be confused with anything the
+    renderer wrote itself, whatever the source held. plain and strip look for
+    tags with a regular expression, and it has to be this shape.
 ###
 
 use ../kxk ◆ kstr slash
-
-# maps locations in a single generated js file back to locations in the original source file
-#
-# the renderer hands every token it renders to mark, which tags the token's
-# text with a number of its own. the tag rides along with the text through
-# whatever the renderer does to the string it is building, and strip reads
-# the tags back out of the finished js - so strip is the only place that has
-# to know where anything ended up, and the rest of the rendering does not
-# have to keep track of a position at all.
-#
-# a tag goes behind the text of its token, not in front of it: the renderer
-# still sees what it rendered at the head of a string, which is most of what
-# it looks at. where it does look at the middle - the two places that slice
-# or match what they rendered - it goes through plain first.
-
-# a private use codepoint, so a tag can never be confused with anything the
-# renderer wrote itself, whatever the source held. plain and strip look for
-# tags with a regular expression, and it has to be this shape.
 
 TAG = '\u0001'
 
@@ -39,14 +37,9 @@ class SourceMap
 
     # sourcemap tracing: silent unless --verbose or a tree dumping
     # flag was given, so a normal compile prints only its result
+
     verb: -> if @verbose then console.log.apply console.log, arguments
 
-    #  00     00   0000000   00000000   000   000
-    # 000   000  000   000  000   000  000  000 
-    # 000000000  000000000  0000000    0000000  
-    # 000 0 000  000   000  000   000  000  000 
-    # 000   000  000   000  000   000  000  000 
-    
     # tag a token's rendered text with its own number
     
     mark: (s, tok) ->
@@ -55,12 +48,6 @@ class SourceMap
         i = @toks.length-1
         s + TAG + i + TAG
 
-    # 00000000   000       0000000   000  000   000
-    # 000   000  000      000   000  000  0000  000
-    # 00000000   000      000000000  000  000 0 000
-    # 000        000      000   000  000  000  0000
-    # 000        0000000  000   000  000  000   000
-    
     # the same text with the tags taken out again. the renderer matches and
     # slices its own output in places, and that has to go on text looking
     # the way it would look without a map - a tag would be characters the
@@ -68,12 +55,7 @@ class SourceMap
     
     plain: (s) -> s.replaceAll /\u0001\d+\u0001/g, ''
     
-    #  0000000  000000000  00000000   000  00000000 
-    # 000          000     000   000  000  000   000
-    # 0000000      000     0000000    000  00000000 
-    #      000     000     000   000  000  000      
-    # 0000000      000     000   000  000  000      
-    
+
     # take every tag out of the finished js, remembering where each one
     # stood: that is where its token landed in the generated file
     
@@ -140,12 +122,6 @@ class SourceMap
         
         out + code[pos..]
     
-    # 0000000     0000000   000   000  00000000  
-    # 000   000  000   000  0000  000  000       
-    # 000   000  000   000  000 0 000  0000000   
-    # 000   000  000   000  000   000  000       
-    # 0000000     0000000   000   000  00000000  
-    
     # print the finished js, with the positions that were found on it
     # behind every mapped token
     
@@ -166,12 +142,7 @@ class SourceMap
                 for c in lm.columns
                     continue if not c
                     @verb "#{r4 c.jsstr} #{c.sourceLine} #{c.sourceColumn}"
-    # 0000000   0000000    0000000    
-    # 000   000  000   000  000   000  
-    # 000000000  000   000  000   000  
-    # 000   000  000   000  000   000  
-    # 000   000  0000000    0000000    
-    
+
     add: (source, target, jsstr) -> # source and target: [line, column]
         
         [line, column] = target
@@ -179,12 +150,6 @@ class SourceMap
         @lines[line].verbose = @verbose
         @lines[line].add column, source, jsstr
 
-    # 0000000   00000000  000   000  00000000  00000000    0000000   000000000  00000000  
-    # 000        000       0000  000  000       000   000  000   000     000     000       
-    # 000  0000  0000000   000 0 000  0000000   0000000    000000000     000     0000000   
-    # 000   000  000       000  0000  000       000   000  000   000     000     000       
-    # 0000000   00000000  000   000  00000000  000   000  000   000     000     00000000  
-    
     # the map itself. a source map is one line of segments per line of the
     # generated file, each segment a run of vlq values: generated column,
     # source, source line, source column - all but the first relative to
@@ -254,12 +219,6 @@ class SourceMap
         sources:        [@name or @source]
         mappings:       buffer
 
-    #       000   0000000   0000000   0000000   0000000    00000000  
-    #       000  000       000       000   000  000   000  000       
-    #       000  0000000   000       000   000  000   000  0000000   
-    # 000   000       000  000       000   000  000   000  000       
-    # 0000000   0000000    0000000   0000000   0000000    00000000  
-    
     jscode: (v3Map) ->
         
         encoded = @base64encode JSON.stringify(v3Map)
@@ -272,12 +231,6 @@ class SourceMap
         
         JSON.parse @base64decode encoded
         
-    # 00000000  000   000   0000000   0000000   0000000    00000000  
-    # 000       0000  000  000       000   000  000   000  000       
-    # 0000000   000 0 000  000       000   000  000   000  000       
-    # 000       000  0000  000       000   000  000   000  000       
-    # 00000000  000   000   0000000   0000000   0000000    00000000  
-    
     # Note that SourceMap VLQ encoding is "backwards".  MIDI-style VLQ encoding puts
     # the most-significant-bit (MSB) from the original value into the MSB of the VLQ
     # encoded value (see [Wikipedia](https://en.wikipedia.org/wiki/File:Uintvar_coding.svg)).
