@@ -182,6 +182,12 @@ kodfiles = (dir, out=[]) ->
 
     out
 
+#  ███████  ████████    ███████  ██     ██   ███████   ████████ 
+# ███       ███   ███  ███       ███   ███  ███   ███  ███   ███
+# ███████   ███████    ███       █████████  █████████  ████████ 
+#      ███  ███   ███  ███       ███ █ ███  ███   ███  ███      
+# ███████   ███   ███   ███████  ███   ███  ███   ███  ███      
+
 ▸ srcmap
 
     ▸ only when asked for
@@ -241,14 +247,13 @@ kodfiles = (dir, out=[]) ->
             'x = if a ➜ 1 else 2'
             'for i in 0...10 ➜ log i'
             'x = "a #{b} c"'
+            'try\n    f()\ncatch e\n    log e'
             'x = """\n    a #{b}\n    """'
             'l = [1 2 3]\nl.map (i) -> i * 2'
-            'd = {a: 1, b: 2}'
-            'try\n    f()\ncatch e\n    log e'
-            'switch a\n    when 1 ➜ log "one"\n    else ➜ log "other"'
             'log b4 "hi" a'
+            'switch a\n    when 1 ➜ log "one"\n    else ➜ log "other"'
             'x = int "42" + min 1 2 + trim " a "'
-
+        
         for c in snips
             mapped = body kmap(c)
             unmap = kplain c
