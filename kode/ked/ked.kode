@@ -102,7 +102,11 @@ function KED
         ked_session.set 'ked▸args' @args
         
         if valid @args.options
-            @loadFile @args.options[0]
+            [file line column] = slash.splitFileLine @args.options[0]
+            if line
+               post.emit 'file.open' file line-1 column-1
+            else
+                @loadFile file
         else if @args.fresh
             @hideEditor()
             @menu.show true

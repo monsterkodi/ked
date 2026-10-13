@@ -6,12 +6,13 @@
 //   bin/where js/kode/lexer.js:222        column defaults to the line start
 //   bin/where js/kode/lexer.js 222 18     the same, in three arguments
 //
-//   ->  ../../kode/kode/lexer.kode:265:58   if trim(splt[0]) == '' ...
+// both positions are 1-based, the way a trace spells them, and the answer
+// comes back in that spelling too - so it can go straight back in.
 //
 // node resolves a position to the nearest segment at or before it, which
 // is what an error reporter does, so this is the same answer a stack trace
-// would give.  the _k_ block at the top of a generated file has no
-// segments at all: it is the compiler's own boilerplate.
+// would give.  the _k_ block at the top of a generated file has no segments
+// at all: it is the compiler's own boilerplate.
 
 import {SourceMap} from 'node:module'
 import fs from 'node:fs'
@@ -20,7 +21,7 @@ import path from 'node:path'
 const [srcfile, ...rest] = process.argv.slice(2)
 
 let line = rest[0]
-let col = rest[1] ?? 0
+let col = rest[1] ?? 1
 let file = srcfile
 
 // a trace hands over its position as one argument, so that spelling has to
@@ -34,11 +35,14 @@ if (line == null && srcfile.includes(':')) {
     if (m) {
         file = m[1]
         line = m[2]
-        col = m[3] ?? 0
+        col = m[3] ?? 1
     }
 }
 
-file = process.cwd() + "/" + file
+// the answer is printed as a file:// url, so it has to read one back in
+// as well - and an absolute path resolves to itself
+
+file = path.resolve(file.replace(/^file:\/\//, ''))
 
 const js = fs.readFileSync(file, 'utf8')
 const mark = 'sourceMappingURL=data:application/json;base64,'
@@ -57,7 +61,9 @@ const sm = new SourceMap(payload, {
     lineLengths: js.split('\n').map(l => l.length)
 })
 
-const e = sm.findEntry(+line - 1, +col)
+const jsline = +line - 1
+const jscol = +col - 1
+const e = sm.findEntry(jsline, jscol)
 
 if (!e?.originalSource) {
     console.log(`${file}:${line}:${col}  ->  (nothing mapped here)`)
@@ -65,7 +71,21 @@ if (!e?.originalSource) {
 }
 
 const src = path.resolve(path.dirname(file), e.originalSource)
-const text = fs.readFileSync(src, 'utf8').split('\n')[e.originalLine]
 
-console.log(`${file}:${line}:${col}  ->  ${e.originalSource}:${e.originalLine + 1}:${e.originalColumn + 1}`)
-console.log(`    ${text?.trimEnd()}`)
+// file:// on both sides, so a terminal can link either of them
+
+console.log(`file://${file}:${line}:${col}  ->  file://${src}:${e.originalLine + 1}:${e.originalColumn + 1}`)
+
+// and then both lines, the way node prints a frame under an error: the
+// line, and a marker under the column it points at
+
+const show = (label, text, at_line, at_col) => {
+
+    console.log('')
+    console.log(`${label} ${at_line + 1}`)
+    console.log(`    ${text ?? ''}`)
+    console.log(`    ${' '.repeat(at_col)}^`)
+}
+
+show('js  ', js.split('\n')[jsline], jsline, jscol)
+show('kode', fs.readFileSync(src, 'utf8').split('\n')[e.originalLine], e.originalLine, e.originalColumn)
