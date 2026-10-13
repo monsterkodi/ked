@@ -124,13 +124,17 @@ parse   = (c,e) -> kolor.parse   c.split('\n'), e ? ext
 # ███   ███  ███      ███   ███  ███   ███  ███   ███  ███      ███   ███     ███       
 #  ███████   ███████   ███████   ███████    ███   ███  ███████  ███  ███████  ████████  
 
-▸ globalize
-
-    ▸ enable
-        kolor.klor.globalize()
-        global['red'] ▸ kolor.klor.red
-        global['red']('txt') ▸ kolor.klor.red 'txt'
-
-    ▸ disable  
-        kolor.klor.globalize false
-        global['red']('txt') ▸ 'txt'
+    ▸ globalize
+    
+        ▸ enable
+            kolor.klor.globalize()
+            global['red'] ▸ kolor.klor.red
+            global['red']('txt') ▸ kolor.klor.red 'txt'
+    
+        ▸ disable  
+            kolor.klor.globalize false
+            global['red']('txt') ▸ 'txt'
+            kolor.klor.globalize()
+            #global['red'] ▸ kolor.klor.red
+            #global['red']('txt') ▸ kolor.klor.red 'txt'
+        

@@ -49,22 +49,22 @@ toExport["parse"] = function ()
         compare(b[0].chunks[1].start,6)
         compare(b[0].chunks[2].start,9)
     })
+    section("globalize", function ()
+    {
+        section("enable", function ()
+        {
+            kolor.klor.globalize()
+            compare(global['red'],kolor.klor.red)
+            compare(global['red']('txt'),kolor.klor.red('txt'))
+        })
+        section("disable", function ()
+        {
+            kolor.klor.globalize(false)
+            compare(global['red']('txt'),'txt')
+            kolor.klor.globalize()
+        })
+    })
 }
 toExport["parse"]._section_ = true
-toExport["globalize"] = function ()
-{
-    section("enable", function ()
-    {
-        kolor.klor.globalize()
-        compare(global['red'],kolor.klor.red)
-        compare(global['red']('txt'),kolor.klor.red('txt'))
-    })
-    section("disable", function ()
-    {
-        kolor.klor.globalize(false)
-        compare(global['red']('txt'),'txt')
-    })
-}
-toExport["globalize"]._section_ = true
 toExport._test_ = true
 export default toExport
