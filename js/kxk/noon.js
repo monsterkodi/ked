@@ -1,8 +1,10 @@
-var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, last: function (o) {return o != null ? o.length ? o[o.length-1] : undefined : o}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, isFunc: function (o) {return typeof o === 'function'}}
+var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, last: function (o) {return o != null ? o.length ? o[o.length-1] : undefined : o}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}}
 
 var defaults, load, pad, parse, parseStr, regs, save, stringify
 
 import slash from "./slash.js"
+
+import nfs from "./nfs.js"
 
 
 parse = function (s)
@@ -662,7 +664,7 @@ stringify = function (obj, options = {})
     }
     toStr = function (o, ind = '', arry = false, visited = [])
     {
-        var s, t, v, _549_32_, _553_37_
+        var s, t, v, _550_32_, _554_37_
 
         if (!(o != null))
         {
@@ -738,50 +740,30 @@ parseStr = function (str, p, ext)
 
 load = async function (p, ext)
 {
-    var fs, str
+    var str
 
-    if (globalThis.global)
+    str = await nfs.readText(p)
+    if (!_k_.empty(str))
     {
-        fs = await import('fs/promises')
-        str = await fs.readFile(p,'utf8')
-        if (!_k_.empty(str))
-        {
-            return parseStr(str,p,ext)
-        }
-        else
-        {
-            return null
-        }
+        return parseStr(str,p,ext)
+    }
+    else
+    {
+        return null
     }
 }
 
-save = function (p, data, strOpt, cb)
+save = async function (p, data, strOpt)
 {
     var str
 
-    if (typeof(strOpt) === 'function')
-    {
-        cb = strOpt
-        strOpt = {}
-    }
-    else
-    {
-        strOpt = (strOpt != null ? strOpt : {})
-    }
     str = stringify(data,Object.assign({ext:slash.ext(p),strOpt:strOpt}))
-    if (_k_.isFunc(cb))
-    {
-        return slash.writeText(p,str,cb)
-    }
-    else
-    {
-        console.error('noon.save - no callback!')
-    }
+    return nfs.write(p,str)
 }
 export default {
-    save:save,
     load:load,
     read:load,
+    save:save,
     write:save,
     parse:parse,
     stringify:stringify

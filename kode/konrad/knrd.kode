@@ -6,6 +6,8 @@
     ███   ███  ███   ███  ███   ███  ███████    
 
     transpiles kode and noon files
+    
+    assumes to be run from a cwd() that has a js|kode structure (see bundleDir)
 ###
 
 use ../kode ◆ kode
@@ -54,7 +56,10 @@ tgtForSrc = srcFile rule ->
     
 bundlePath = p='' -> slash.path bundleDir() p
     
-bundleDir = -> slash.path ◆dir '../..'
+bundleDir = -> 
+    # this is used by side-projects already.
+    # make sure we execute relative to that.
+    process.cwd()
   
 bump = ○->
     

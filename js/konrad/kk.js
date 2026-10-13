@@ -11,7 +11,6 @@ let os = kxk.os
 import watch from "../kxk/watch.js"
 
 import knrd from "./knrd.js"
-import status from "./status.js"
 import version from "./version.js"
 
 import child_process from "child_process"
@@ -19,15 +18,13 @@ import child_process from "child_process"
 import fs from 'fs/promises'
 args = karg(`kk
     options                                   **
+    
     info       show build status              = false
     knrd       transpile kode and noon        = false
     build      transpile kode and noon        = false
-    rebuild    rebuild all targets            = false -R
     watch      watch for file changes         = false
     test       run tests                      = false
-    commit     git commit                     = false 
-    status     git status                     = false
-    diff       git status with diffs          = false 
+    
     quiet      log nothing                    = false
     debug      log debug                      = false -D
     verbose    log verbose                    = false -V
@@ -36,49 +33,28 @@ class kk
 {
     static async run ()
     {
-        while (!os.loaded)
-        {
-            await sleep(150)
-        }
+        var files
+
+        files = args.options
         if (args.version)
         {
-            await console.log(version,slash.name(slash.path(_k_.dir(),'../../')))
+            await console.log(version,slash.name(slash.path(_k_.dir(),'../../')),process.cwd())
         }
         if (args.info)
         {
-            await kk.info()
+            await knrd([],{dryrun:true})
         }
         if (args.knrd)
         {
-            await knrd(args.options,args)
+            await knrd(files,args)
         }
         if (args.build)
         {
-            await knrd(args.options,args)
-        }
-        if (args.rebuild)
-        {
-            await kk.rebuild()
+            await knrd(files,args)
         }
         if (args.test)
         {
-            await kk.test(args.options)
-        }
-        if (args.run)
-        {
-            await kk.launch(args.options)
-        }
-        if (args.commit)
-        {
-            await kk.commit(args.options)
-        }
-        if (args.status)
-        {
-            await status()
-        }
-        if (args.diff)
-        {
-            await status({diff:true})
+            await kk.test(files)
         }
         if (args.watch)
         {
@@ -86,20 +62,10 @@ class kk
         }
     }
 
-    static async rebuild ()
-    {
-        return await knrd()
-    }
-
-    static async info ()
-    {
-        return await knrd([],{dryrun:true})
-    }
-
     static async watch ()
     {
-        console.log('👁 ',_k_.w5(kk.appPath()))
-        return watch.watch(kk.appPath(),{recursive:true,cb:function (watcher)
+        console.log('👁 ',_k_.w5(kk.bundleDir()))
+        return watch.watch(kk.bundleDir(),{recursive:true,cb:function (watcher)
         {
             return watcher.on('change',async function (info)
             {
@@ -126,7 +92,7 @@ class kk
         {
             cmd += ' ' + options.join(' ')
         }
-        opt = {shell:true,cwd:kk.appPath()}
+        opt = {shell:true,cwd:kk.bundleDir()}
         return new Promise(function (resolve, reject)
         {
             return child_process.exec(cmd,opt,function (err, stdout, stderr)
@@ -148,33 +114,9 @@ class kk
         })
     }
 
-    static async commit (args)
+    static bundleDir ()
     {
-        var exec, msg
-
-        msg = args.join(' ')
-        if (_k_.empty(msg))
-        {
-            msg = 'misc'
-        }
-        exec = function (cmd)
-        {
-            console.log(child_process.execSync(cmd,{encoding:'utf8'}))
-        }
-        exec("git add .")
-        exec(`git commit -m ${msg}`)
-        exec("git push -q 2>&1")
-        return status()
-    }
-
-    static appPath ()
-    {
-        return slash.path(_k_.dir(),'../../')
-    }
-
-    static appName ()
-    {
-        return slash.name(kk.appPath())
+        return process.cwd()
     }
 }
 

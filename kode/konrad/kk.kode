@@ -8,7 +8,7 @@
 
 use ../kxk ▪ sleep karg slash os
 use ../kxk ◆ watch
-use        ◆ knrd status version
+use        ◆ knrd version
 
 use child_process
 
@@ -17,15 +17,13 @@ import fs from 'fs/promises'
 args = karg """
     kk
         options                                   **
+        
         info       show build status              = false
         knrd       transpile kode and noon        = false
         build      transpile kode and noon        = false
-        rebuild    rebuild all targets            = false -R
         watch      watch for file changes         = false
         test       run tests                      = false
-        commit     git commit                     = false 
-        status     git status                     = false
-        diff       git status with diffs          = false 
+        
         quiet      log nothing                    = false
         debug      log debug                      = false -D
         verbose    log verbose                    = false -V
@@ -42,36 +40,20 @@ class kk
     
     @run: ○->
         
-        while not os.loaded # todo: move this check somewhere else!
-            ○ sleep 150
-            
-        if args.version ➜ ○ log version slash.name(slash.path(◆dir '../../'))
-        if args.info    ➜ ○ kk.info()
-        if args.knrd    ➜ ○ knrd         args.options args
-        if args.build   ➜ ○ knrd         args.options args
-        if args.rebuild ➜ ○ kk.rebuild()                            
-        if args.test    ➜ ○ kk.test      args.options
-        if args.run     ➜ ○ kk.launch    args.options
-        if args.commit  ➜ ○ kk.commit    args.options
-        if args.status  ➜ ○ status()
-        if args.diff    ➜ ○ status diff:true
+        # while not os.loaded # todo: move this check somewhere else!
+        #     log '...'
+        #     ○ sleep 150
+        files = args.options    
+        if args.version ➜ ○ log version slash.name(slash.path(◆dir '../../')) process.cwd()
+        if args.info    ➜ ○ knrd         []    dryrun:true
+        if args.knrd    ➜ ○ knrd         files args
+        if args.build   ➜ ○ knrd         files args
+        if args.test    ➜ ○ kk.test      files
         if args.watch   ➜ ○ kk.watch()                            
             
         # if valid args.options
             # log 'leftover options' args.options
                                                 
-    @rebuild: ○->
-        
-        ○ knrd()
-                        
-    # ███  ███   ███  ████████   ███████   
-    # ███  ████  ███  ███       ███   ███  
-    # ███  ███ █ ███  ██████    ███   ███  
-    # ███  ███  ████  ███       ███   ███  
-    # ███  ███   ███  ███        ███████   
- 
-    @info: ○-> ○ knrd [] dryrun:true
-        
     # ███   ███   ███████   █████████   ███████  ███   ███  
     # ███ █ ███  ███   ███     ███     ███       ███   ███  
     # █████████  █████████     ███     ███       █████████  
@@ -80,9 +62,9 @@ class kk
     
     @watch: ○->
         
-        log '👁 ' w5(kk.appPath())
+        log '👁 ' w5(kk.bundleDir())
         
-        watch.watch kk.appPath() recursive:true cb: (watcher) ->
+        watch.watch kk.bundleDir() recursive:true cb: (watcher) ->
             watcher.on 'change' (info) ○-> 
 
                 ⮐  if slash.contains info.path '.stash'
@@ -102,7 +84,7 @@ class kk
                 
         cmd = "node js/test.js"
         cmd += ' ' + options.join(' ') if valid options
-        opt = shell:true cwd:kk.appPath() # run tests inside the .app folder
+        opt = shell:true cwd:kk.bundleDir() # run tests inside the .app folder
         
         new Promise (resolve reject) ->
         
@@ -115,28 +97,9 @@ class kk
                     log stdout if valid stdout
                     resolve()
                     
-    #  ███████   ███████   ██     ██  ██     ██  ███  █████████  
-    # ███       ███   ███  ███   ███  ███   ███  ███     ███     
-    # ███       ███   ███  █████████  █████████  ███     ███     
-    # ███       ███   ███  ███ █ ███  ███ █ ███  ███     ███     
-    #  ███████   ███████   ███   ███  ███   ███  ███     ███     
-    
-    @commit: args ○->
-
-        msg = args.join ' '
-        msg = 'misc' if empty msg
+    @bundleDir: -> process.cwd() #slash.path ◆dir '../../'
         
-        exec = cmd -> log child_process.execSync(cmd encoding:'utf8')
-        
-        exec "git add ." 
-        exec "git commit -m #{msg}" 
-        exec "git push -q 2>&1" 
-        
-        status()
-
-    @appPath: -> slash.path ◆dir '../../'
-        
-    @appName: -> slash.name kk.appPath()
+    # @appName: -> slash.name kk.bundleDir()
                                 
 global['kk'] = kk
     

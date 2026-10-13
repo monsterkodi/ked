@@ -7,6 +7,7 @@
 ###
 
 use ./slash
+use ./nfs
 
 # ████████    ███████   ████████    ███████  ████████
 # ███   ███  ███   ███  ███   ███  ███       ███
@@ -580,15 +581,22 @@ parseStr = str p ext ->
 
 load = p ext ○->
     
-    if globalThis.global
-        
-        fs  =○ import('fs/promises')
-        str =○ fs.readFile p 'utf8'
-             
-        if valid str
-            parseStr str p ext
-        else
-            null
+    # if globalThis.global
+    #     
+    #     fs  =○ import('fs/promises')
+    #     str =○ fs.readFile p 'utf8'
+    #          
+    #     if valid str
+    #         parseStr str p ext
+    #     else
+    #         null
+                    
+    str =○ nfs.readText p
+         
+    if valid str
+        parseStr str p ext
+    else
+        null
                     
 ###
  ███████   ███████   ███   ███  ████████
@@ -598,28 +606,33 @@ load = p ext ○->
 ███████   ███   ███      █      ████████
 ###
 
-save = p data strOpt cb ->
+# save = p data strOpt cb ->
+# 
+#     if strOpt is 'function'
+#         cb = strOpt
+#         strOpt = {}
+#     else
+#         strOpt ?= {}
+# 
+#     str = stringify data, Object.assign(ext:slash.ext(p), strOpt)
+# 
+#     if cb is func
+# 
+#         slash.writeText p, str, cb
+# 
+#     else
+# 
+#         error 'noon.save - no callback!'
 
-    if strOpt is 'function'
-        cb = strOpt
-        strOpt = {}
-    else
-        strOpt ?= {}
+save = p data strOpt ○->
 
     str = stringify data, Object.assign(ext:slash.ext(p), strOpt)
-
-    if cb is func
-
-        slash.writeText p, str, cb
-
-    else
-
-        error 'noon.save - no callback!'
+    nfs.write p, str
             
 export
-    save:       save
     load:       load
     read:       load
+    save:       save
     write:      save
     parse:      parse
     stringify:  stringify
