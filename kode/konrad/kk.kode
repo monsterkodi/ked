@@ -6,9 +6,10 @@
     ███   ███  ███   ███    
 ###
 
-use ../kxk ▪ sleep karg slash os
-use ../kxk ◆ watch
-use        ◆ knrd version
+use ../kxk  ▪ sleep karg slash os
+use ../kxk  ◆ watch nfs
+use         ◆ knrd version
+use ../kode ◆ tester
 
 use child_process
 
@@ -82,26 +83,37 @@ class kk
     #    ███     ████████  ███████      ███     
     
     @test: options ○->
-                
-        cmd = "node js/test.js"
-        cmd += ' ' + options.join(' ') if valid options
-        opt = shell:true cwd:kk.bundleDir() # run tests inside the .app folder
         
-        new Promise (resolve reject) ->
-        
-            child_process.exec cmd opt (err stdout stderr) -> 
+        if 
+            ○ nfs.exists "js/test.js"
                 
-                if err
-                    error 'ERROR' err
-                    resolve() # don't reject here to keep test watch running
-                else
-                    log stdout if valid stdout
-                    resolve()
+                cmd = "node js/test.js"
+                cmd += ' ' + options.join(' ') if valid options
+                opt = shell:true cwd:kk.bundleDir() # run tests inside the .app folder
+                
+                new Promise (resolve reject) ->
+                
+                    child_process.exec cmd opt (err stdout stderr) -> 
+                        
+                        if err
+                            error 'ERROR' err
+                            resolve() # don't reject here to keep test watch running
+                        else
+                            log stdout if valid stdout
+                            resolve()
+                            
+            ○ nfs.isDir "js/test"
+
+                files =○ nfs.list slash.path(process.cwd() 'js' 'test')
+                for file in files
+                    continue if file.type == 'dir' # ignore subdirectories for now
+                    test =○ import(file.path) # shouldn't the file type be checked here?
+                    tester.test test.default
+            
+                tester.summarize()
                     
-    @bundleDir: -> process.cwd() #slash.path ◆dir '../../'
+    @bundleDir: -> process.cwd()
         
-    # @appName: -> slash.name kk.bundleDir()
-                                
 global['kk'] = kk
     
 export kk.run

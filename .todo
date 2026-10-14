@@ -1,1 +1,1 @@
-check bla.blub at transpile time
+check bla.blub and other runtime errors at compile time  .
