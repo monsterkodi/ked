@@ -92,6 +92,12 @@ class Ansi
         STRIPANSI = /\x1B[[(?);]{0,2}(;?\d)*./g
         s.replace STRIPANSI ''
     
+    @link: url text=url -> 
+       
+        s  = "\x1b]8;;#{url}\x1b\\" 
+        s += "#{text}\x1b]8;;\x1b\\"
+        s
+    
     # ███   ███  █████████  ██     ██  ███    
     # ███   ███     ███     ███   ███  ███    
     # █████████     ███     █████████  ███    

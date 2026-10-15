@@ -6,7 +6,7 @@
 ███   ███   ███████   ███████    ████████
 ###
 
-use ../kxk ◆ slash karg
+use ../kxk ◆ slash karg ansi nfs
 use ◆ lexer print parser scoper stripol returner operator renderer
 
 class Kode
@@ -36,7 +36,6 @@ class Kode
     onError: msg info =>
         
         # error noon(info) #if @args.verbose
-        message = @file
         if valid info 
             if 
                 valid info.tokens and valid info.tokens[0]
@@ -45,8 +44,16 @@ class Kode
                     li = info.tok.line
                 valid info.line
                     li = info.line
-            if valid li
-                message += "\n#{li}: " + @text.split(/\r?\n/)[li-1]
+                    
+        afile = slash.absolute slash.path(@file), process.cwd()
+        
+        if valid li
+            afile += ':' + li
+        
+        message = ansi.link("file://"+afile, afile)
+
+        if valid li
+            message += "\n#{li}: " + @text.split(/\r?\n/)[li-1]
                 
         message += "\n" + msg
         throw message
@@ -61,13 +68,8 @@ class Kode
 
         ⮐ if empty text
         
-        try
-            js = @compile text file
-            eval js
-        catch err
-            log js
-            error err
-            throw err
+        js = @compile text file
+        eval js
         
     ###
      ███████   ███████   ██     ██  ████████   ███  ███      ████████
@@ -126,10 +128,56 @@ class Kode
         ast = @operator.collect ast # sort operation chains by precedence
 
     astr: text scopes -> print.astr @ast(text) scopes
-                    
+
+    # ████████   ███   ███  ███   ███  
+    # ███   ███  ███   ███  ████  ███  
+    # ███████    ███   ███  ███ █ ███  
+    # ███   ███  ███   ███  ███  ████  
+    # ███   ███   ███████   ███   ███  
+
+    @run: args ○-> 
+                                   
+        log 'Kode.run args' args if args.verbose
+        kode = new Kode args
+        
+        args = kode.args
+    
+        if args.compile
+            log kode.compile(args.compile)
+            process.exit 0
+            
+        if args.eval
+            log kode.eval(args.eval 'eval' global)
+            process.exit 0
+    
+        for file in args.files
+    
+            # the source path is what a source map names, so it has to be the
+            # file and not however it was typed on the command line
+            
+            file = slash.absolute slash.path(file), process.cwd()
+            log gray(file) if args.verbose
+    
+            text =○ nfs.read file
+    
+            if empty text then error Y4(r2("can't read #{R3(y5(file))}")); continue
+    
+            try
+                if
+                    args.outdir
+                                    out = slash.absolute(slash.swapExt(slash.path(args.outdir slash.file(file)) 'js'), process.cwd())
+                                    log out if args.verbose
+                                    js  = kode.compile text, file, out
+                                    res =○ nfs.write out js
+                                    if res?.error then error R2(y3("can't write #{R3(y6(out))}"))
+                    args.run   ➜    log kode.eval(text file global)
+                               ➜    log kode.compile(text file)
+            catch err
+                log err
 export Kode
 
-◆main    
+◆main # node js/kode/kode.js 
+
     args = karg """
         kode
             files       **
@@ -143,50 +191,6 @@ export Kode
             verbose     log more                                    = false
             debug       debug output                                = false
         """
-        
-    # log 'args' args if args.verbose
-    kode = new Kode args
-    
-    #  ███████  ███      ███
-    # ███       ███      ███
-    # ███       ███      ███
-    # ███       ███      ███
-    #  ███████  ███████  ███
 
-    args = kode.args
-
-    if args.compile
-        log kode.compile(args.compile)
-        process.exit 0
-        
-    if args.eval
-        log kode.eval(args.eval 'eval' global)
-        process.exit 0
-
-    nfs =○ import('../kxk/nfs.js')
-    nfs = nfs.default
-        
-    for file in args.files
-
-        # the source path is what a source map names, so it has to be the
-        # file and not however it was typed on the command line
-        
-        file = slash.absolute slash.path(file), process.cwd()
-        log gray(file) if args.verbose
-
-        text =○ nfs.read file
-
-        if empty text then error Y4(r2("can't read #{R3(y5(file))}")); continue
-
-        if
-            args.outdir
-                            out = slash.absolute(slash.swapExt(slash.path(args.outdir slash.file(file)) 'js'), process.cwd())
-                            log out if args.verbose
-                            js  = kode.compile text, file, out
-                            res = ○ nfs.write out js
-                            if res?.error then error R2(y3("can't write #{R3(y6(out))}"))
-            args.js    ➜    log kode.compile(text file)
-            args.run   ➜    log kode.eval(text file global)
-                       ➜    log kode.compile(text file)
-    
-    
+    Kode.run args
+       

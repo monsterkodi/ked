@@ -45,7 +45,7 @@ CASES = [
 outcome = src ->
 
     try
-        kc src 'kode/test/fuzz.kode'
+        kc src ◆file
         ''
     catch err
         err

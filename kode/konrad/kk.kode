@@ -9,7 +9,7 @@
 use ../kxk  ▪ sleep karg slash os
 use ../kxk  ◆ watch nfs
 use         ◆ knrd version
-use ../kode ◆ tester
+use ../kode ◆ tester kode
 
 use child_process
 
@@ -17,13 +17,15 @@ import fs from 'fs/promises'
 
 args = karg """
     kk
-        options                                   **
+        files                                     **
         
         info       show build status              = false
         knrd       transpile kode and noon        = false
         build      transpile kode and noon        = false
         watch      watch for file changes         = false
         test       run tests                      = false
+        run        execute kode file              = false
+        
         map        write inline source maps       = true
         
         quiet      log nothing                    = false
@@ -41,20 +43,22 @@ class kk
     # ███   ███   ███████   ███   ███  
     
     @run: ○->
-        
-        # while not os.loaded # todo: move this check somewhere else!
-        #     log '...'
-        #     ○ sleep 150
-        files = args.options    
+    
+        files = args.files    
         if args.version ➜ ○ log version slash.name(slash.path(◆dir '../../')) process.cwd()
         if args.info    ➜ ○ knrd         []    dryrun:true
         if args.knrd    ➜ ○ knrd         files args
         if args.build   ➜ ○ knrd         files args
         if args.test    ➜ ○ kk.test      files
         if args.watch   ➜ ○ kk.watch()                            
-            
-        # if valid args.options
-            # log 'leftover options' args.options
+        if args.run
+            ○ kode.run files:files run:true
+            files = []
+        
+        if valid args.__ignored
+            log 'ignored options' args.__ignored
+        if valid files
+            log 'leftover files' files
                                                 
     # ███   ███   ███████   █████████   ███████  ███   ███  
     # ███ █ ███  ███   ███     ███     ███       ███   ███  
@@ -74,7 +78,7 @@ class kk
                 if slash.ext(info.path) in ['kode' 'pug' 'styl' 'noon']
                     log b5('🔧') w3(info.path)
                     ○ knrd info.path
-                    ○ kk.test args.options
+                    ○ kk.test args.files
     
     # █████████  ████████   ███████  █████████  
     #    ███     ███       ███          ███     

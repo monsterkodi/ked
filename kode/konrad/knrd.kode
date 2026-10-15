@@ -26,7 +26,12 @@ rules =
         tgtExt:  'js'
         srcDir:  'kode'
         tgtDir:  'js'
-        compile: srcText srcFile tgtFile opt -> k0de = new kode header:false, map:opt.map; k0de.compile srcText srcFile tgtFile
+        compile: srcText srcFile tgtFile opt -> 
+            k0de = new kode header:false map:opt.map
+            try 
+                k0de.compile srcText srcFile tgtFile
+            catch err
+                log err
     noon:
         tgtExt:  'json'
         srcDir:  'kode'
@@ -141,7 +146,7 @@ knrd = files=[] opt={} ○->
             log 'compText' compText         if opt.debug and opt.verbose
                
             if empty compText
-                log y5('✘ ') r5(slash.tilde(srcFile)) r4('transpiles to empty!')
+                log y5('✘ ') r5(slash.tilde(srcFile)) r4('failed to transpile!')
             else
                 log g2('🔧') m3(slash.tilde(srcFile)) if opt.verbose
                 if tgtText != compText
