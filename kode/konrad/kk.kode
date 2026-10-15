@@ -47,18 +47,15 @@ class kk
         files = args.files    
         if args.version ➜ ○ log version slash.name(slash.path(◆dir '../../')) process.cwd()
         if args.info    ➜ ○ knrd         []    dryrun:true
-        if args.knrd    ➜ ○ knrd         files args
+        if args.knrd    ➜ ○ knrd         files args 
         if args.build   ➜ ○ knrd         files args
         if args.test    ➜ ○ kk.test      files
         if args.watch   ➜ ○ kk.watch()                            
         if args.run
             ○ kode.run files:files run:true
-            files = []
         
         if valid args.__ignored
             log 'ignored options' args.__ignored
-        if valid files
-            log 'leftover files' files
                                                 
     # ███   ███   ███████   █████████   ███████  ███   ███  
     # ███ █ ███  ███   ███     ███     ███       ███   ███  
