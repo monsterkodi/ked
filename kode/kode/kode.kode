@@ -16,7 +16,7 @@ class Kode
         @args ?= {}
         @args.header ?= true
         @version  = '0.2.0'
-
+        @errorMessage = ''
         @literals = ['bool''num''regex''single''double''triple']
         @atoms    = @literals.concat ['var']
 
@@ -36,7 +36,10 @@ class Kode
     
     errorLog: msg args... =>
         
-        console.error.apply null [msg].concat(args)
+        # console.error.apply null [msg].concat(args)
+        # console.log.apply null [msg].concat(args)
+        @errorMessage += [msg].concat(args).join(" ")
+        @errorMessage += "\n"
     
     onError: msg info =>
         
@@ -90,6 +93,8 @@ class Kode
     
     compile: @text @file @target ->
 
+        @errorMessage = ""
+
         ⮐  '' if empty trim @text
         
         log @text if @args.verbose
@@ -98,7 +103,10 @@ class Kode
             ast = @ast @text
             @renderer.render ast, @file, @target
         catch err
-            ⮐  # error should already be logged in @onError
+            @errorLog err
+            # console.log @errorMessage
+            throw @errorMessage
+            undefined
         
     #  ███████    ███████  █████████  
     # ███   ███  ███          ███     

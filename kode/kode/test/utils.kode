@@ -37,9 +37,14 @@ export
         k
         
     kf: c f -> 
-        r = kde().compile(c f)
-        if r != undefined
-            "#{w3 'compilation of'}\n#{c}\n#{w3 'should have failed! instead it returned'}\n#{r}"
-        else
-            true
+    
+        try
+            kde().compile(c f)
+            ⮐ false
+        catch err
+            ⮐ true
+        # if r != undefined
+        #     "#{w3 'compilation of'}\n#{c}\n#{w3 'should have failed! instead it returned'}\n#{r}"
+        # else
+        #     true
         

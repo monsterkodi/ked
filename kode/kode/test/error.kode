@@ -6,19 +6,61 @@
     ████████  ███   ███  ███   ███   ███████   ███   ███
 ###
 
-use ./utils ▪ kf
+use ./utils ▪ kf kc
+
+errmsg = c ->
+
+    try
+        kc c 'err.kode'
+        ''
+    catch err
+        String err
+    
+threw = c ->
+
+    try
+        kc c, 'err.kode'
+        false
+    catch err
+        true
 
 ▸ error
 
-    kf  "✘" ▸ true
+    ▸ fail
     
-    kf  "r = some.call((some args)" ▸ true
-    kf  "r = some.call(some args))" ▸ true
-    kf  'log "▪▪#{id"' ▸ true
+        kf  "✘" ▸ true
         
-    kf  """ 
-        f = ->
-            r = some.call(some args))
-            log 'r' r
-            r
-        """  ▸ true
+        kf  "r = some.call((some args)" ▸ true
+        kf  "r = some.call(some args))" ▸ true
+        kf  'log "▪▪#{id"' ▸ true
+            
+        kf  """ 
+            f = ->
+                r = some.call(some args))
+                log 'r' r
+                r
+            """  ▸ true
+ 
+     ▸ valid code compiles
+ 
+         threw 'a = 1\nb = a + 2\n'  ▸ false
+ 
+     ▸ valid code emits js
+ 
+         out = kc 'a = 1\nb = a + 2\n' 'err.kode'
+         'a = 1' in out  ▸ true
+            
+    ▸ missing close paren
+
+        m = errmsg 'x = (1 + 2\n'
+        'missing closing )' in m  ▸ true
+
+    ▸ missing close bracket
+
+        m = errmsg 'x = [1, 2\n'
+        'missing closing ]' in m  ▸ true
+
+    ▸ names the file
+
+        m = errmsg 'x = (1\n'
+        'err.kode' in m  ▸ true
