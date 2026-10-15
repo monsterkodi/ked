@@ -228,6 +228,8 @@ export new Tester
         continue if slash.name(file.path) == 'utils'
         test =○ import(file.path)
         tester = new Tester
+        tester.logSections = false
+        tester.logModules = false
         fail = fail or not tester.test test.default
     tester.summarize()
     if fail

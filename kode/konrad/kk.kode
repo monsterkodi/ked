@@ -21,7 +21,7 @@ args = karg """
         
         info       show build status              = false
         knrd       transpile kode and noon        = false
-        build      transpile kode and noon        = false
+        build      bootstrap the compiler         = false
         watch      watch for file changes         = false
         test       run tests                      = false
         run        execute kode file              = false
@@ -48,7 +48,7 @@ class kk
         if args.version ➜ ○ log version slash.name(slash.path(◆dir '../../')) process.cwd()
         if args.info    ➜ ○ knrd         [] util.defaults(args dryrun:true)
         if args.knrd    ➜ ○ knrd         files args 
-        if args.build   ➜ ○ knrd         files args
+        if args.build   ➜ ○ child_process.exec "pnpm build" {shell:true} (err stdout stderr) -> log stdout
         if args.test    ➜ ○ kk.test      files
         if args.watch   ➜ ○ kk.watch()                            
         if args.run
