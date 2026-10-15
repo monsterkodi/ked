@@ -53,8 +53,8 @@ handleKey = key event -> # will be bound to state
                                                  
         'alt+up'         'shift+ctrl+up'    ➜ ⮐  @moveSelectionOrCursorLines 'up'
         'alt+down'       'shift+ctrl+down'  ➜ ⮐  @moveSelectionOrCursorLines 'down'
-        'shift+alt+up'                      ➜ ⮐  @cloneSelectionAndCursorLines 'up'
-        'shift+alt+down'                    ➜ ⮐  @cloneSelectionAndCursorLines 'down'
+        'shift+alt+up'   'shift+cmd+up'     ➜ ⮐  @cloneSelectionAndCursorLines 'up'
+        'shift+alt+down' 'shift+cmd+down'   ➜ ⮐  @cloneSelectionAndCursorLines 'down'
                                                  
         'cmd+up'   'ctrl+up'                ➜ ⮐  @expandCursors   'up'
         'cmd+down' 'ctrl+down'              ➜ ⮐  @expandCursors   'down'
