@@ -86,9 +86,12 @@ class Returner
     #    ███     ███   ███     ███     
     
     try: e ->
+
+        # catch and finally are optional, and so is the whole try body, so every
+        # one of these has to be checked before it is reached through
         
-        @insert e.exps
-        @insert e.catch.exps if valid e.catch.exps
+        @insert e.exps    if valid e.exps
+        @insert e.catch?.exps
         @insert e.finally    if valid e.finally
         
     #  ███████  ███   ███  ███  █████████   ███████  ███   ███  
@@ -113,6 +116,10 @@ class Returner
     insert: e ->
 
         if e is Array
+
+            # an empty body has no last expression to look at
+            ⮐ if empty e
+
             lst = e[-1]
             if 
                 lst.return ➜ ⮐  @profilend e, -1

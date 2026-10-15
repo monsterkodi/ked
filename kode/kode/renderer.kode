@@ -446,7 +446,12 @@ class Renderer
         s = ''
         s += 'export '
         if n.args is arr
-            # log "[[[[]]]] renderer export array nargs"
+
+            # an export can name nothing: the parser rejects a bare one,
+            # but an explicit empty list gets this far
+            if empty n.args
+                @onError "export is missing what to export" n
+
             if n.args[0].object
                 # log '------- n.args[0] object' n.args
                 a = @object n.args[0].object ',\n' true
@@ -595,24 +600,28 @@ class Renderer
             
             [con, bind] = @prepareMethods mthds
             
-            if bind.length
-                for b in bind
-                    bn = b.keyval.val.func.name.text
+            # extends without a constructor has nowhere to hang the bind or
+            # the super call: there is no function body to put them in
+            
+            if con
+                if bind.length
+                    for b in bind
+                        bn = b.keyval.val.func.name.text
+                        con.keyval.val.func.body.exps ?= []
+                        con.keyval.val.func.body.exps.unshift
+                            type: 'code'
+                            text: "this[\"#{bn}\"] = this[\"#{bn}\"].bind(this)"
+                            
+                if n.extends
                     con.keyval.val.func.body.exps ?= []
-                    con.keyval.val.func.body.exps.unshift
-                        type: 'code'
-                        text: "this[\"#{bn}\"] = this[\"#{bn}\"].bind(this)"
-                        
-            if n.extends
-                con.keyval.val.func.body.exps ?= []
-                for e in con.keyval.val.func.body.exps
-                    if e.call and e.call.callee.text == 'super'
-                        callsSuper = true
-                        break
-                if not callsSuper
-                    con.keyval.val.func.body.exps.push
-                        type: 'code'
-                        text: "return #{@fncnName}.__super__.constructor.apply(this, arguments)"
+                    for e in con.keyval.val.func.body.exps
+                        if e.call and e.call.callee.text == 'super'
+                            callsSuper = true
+                            break
+                    if not callsSuper
+                        con.keyval.val.func.body.exps.push
+                            type: 'code'
+                            text: "return #{@fncnName}.__super__.constructor.apply(this, arguments)"
                         
             @indent = '    '
             for mi in 0...mthds.length
@@ -866,7 +875,7 @@ class Renderer
                     
                 'dbg'
                     @hint._k_.dbg = true
-                    if p.args[0].type in ['var'] or p.args[0]?.prop or p.args[0]?.call
+                    if p.args[0]?.type in ['var'] or p.args[0]?.prop or p.args[0]?.call
                         msg = '"'
                         msg += @node p.args[0]
                         msg += '"'
@@ -879,7 +888,7 @@ class Renderer
                     
                 '▴'
                     @hint._k_.assert = true
-                    if p.args[0].type in ['single''double''triple']
+                    if p.args[0]?.type in ['single''double''triple']
                         msg = p.args[0].text
                         p.args.shift()
                     else msg = '"assert failed!"'

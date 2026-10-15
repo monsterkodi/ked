@@ -64,3 +64,53 @@ threw = c ->
 
         m = errmsg 'x = (1\n'
         'err.kode' in m  ▸ true
+
+    # every one of these has to say what is missing, not just that
+    # something went wrong. the message is the interface.
+
+    ▸ closers name themselves
+
+        'parens is missing closing )'  in errmsg '(((('  ▸ true
+        'array is missing closing ]'   in errmsg '[['    ▸ true
+        'curly is missing closing }'   in errmsg '{{'    ▸ true
+        'index is missing closing ]'   in errmsg 'a[0'   ▸ true
+        'explicit call is missing closing bracket )' in errmsg 'a(1,'  ▸ true
+
+    ▸ brackets
+
+        'unmatched closing bracket' in errmsg ')'  ▸ true
+        'unmatched closing bracket' in errmsg '))))'  ▸ true
+
+    ▸ assignment
+
+        'assignment without operand' in errmsg 'a ='  ▸ true
+        'assignment without operand' in errmsg 'a.b ='  ▸ true
+
+    ▸ property
+
+        'property access is missing property name' in errmsg 'a.'  ▸ true
+        'property access is missing property name' in errmsg 'a.b.'  ▸ true
+        'property access is missing property name' in errmsg '@.'  ▸ true
+
+    ▸ keywords want their operands
+
+        'if is missing a condition' in errmsg 'if'  ▸ true
+        'class is missing a name' in errmsg 'class'  ▸ true
+        'function is missing a name' in errmsg 'function'  ▸ true
+        'import is missing what to import' in errmsg 'import'  ▸ true
+        'export is missing what to export' in errmsg 'export'  ▸ true
+        "'is' is missing what to test against" in errmsg '1 is'  ▸ true
+
+    ▸ for wants all three parts
+
+        'for is missing the variable to iterate' in errmsg 'for'  ▸ true
+        'for is missing the list to iterate' in errmsg 'for x in'  ▸ true
+
+    ▸ stray characters come from the lexer
+
+        'stray character' in errmsg 'a = "'  ▸ true
+        'stray character' in errmsg "a = '"  ▸ true
+
+    ▸ unreachable code
+
+        'unreachable code after return statement?' in errmsg 'return 1 2'  ▸ true

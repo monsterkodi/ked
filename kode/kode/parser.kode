@@ -1166,13 +1166,14 @@ function Parser extends parse
             lhs: lhs
             rhs: @exp(tokens)
 
+    # for a construct that cannot be parsed at all. this has to raise the
+    # same located error @onError does. it used to print and hand back null,
+    # which put a null node into the ast and then blew up two passes later
+    # in returner or renderer, a long way from what actually went wrong
+    
     error: o tokens ->
         
         @pop o.pop if o.pop
-        if globalThis.process
-            error B3(b7(" #{tokens?[0]?.line ? ' '} ")) + R1(y4(" #{o.hdr ? o.pop} ")) + R2(y7(" #{o.msg} "))
-        else
-            error " #{tokens?[0]?.line ? ' '} " + " #{o.hdr ? o.pop} " + " #{o.msg} "
-        null
+        @onError o.msg tokens:tokens
         
 export Parser

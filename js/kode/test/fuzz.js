@@ -1,62 +1,136 @@
 var toExport = {}
-var _k_ = {file: function () { return import.meta.url.substring(7); }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}};_k_.b5=_k_.k.F256(_k_.k.b(5));_k_.w2=_k_.k.F256(_k_.k.w(2))
+var _k_ = {in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, file: function () { return import.meta.url.substring(7); }, k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}};_k_.r5=_k_.k.F256(_k_.k.r(5));_k_.b5=_k_.k.F256(_k_.k.b(5))
 
-var CASES, compiled, crashed, index, m, outcome, reported, src
+var c, COUNT, crashed, FRAGMENTS, i, internal, msg, pick, program, r, rand, REGRESSIONS, rng, SEED, src, threw, _35_41_, _36_40_
 
 import utils from "./utils.js"
 let kc = utils.kc
 
-CASES = ['','   ','\n\n','▸','->','@','@.','@a','.','a.','a..','a.b.','a:',':a','a?','(',')','[',']','{','}','((','[[','{{','((((','))))','[1,','{a:','a = [1, 2','a = {a:1','=','==','+=','+','-','*','a +','+ a','a * * b','a = 1 +','a = 1 *','a = 1 ==','a = 1 ?','a = 1 and','a =','a = = 1','a = [','a = {','a = (','a = (1','a.b =','a=','a = 1;',';;','if','if a','if a then','else','switch','switch x','class','class C','class C extends','function','function f','for','for x in','for x in y do','while','while a','return','return 1 2','try','try a','catch','finally','a = ->','a = -> b =','f = (a,','f = (a, b) ->','(a, b)','▸ x','▸ ','a ▸','▴','▴ a','●','●▸','●▪','▸▸','a = """','a = "',"a = '",'a = `','a = /','a = /re','#','# comment','a = 1 # c','\\','a = "\\','use','use a','use a from','import','export','a each','a each (k,v)','a each (k,v) ->','lpad','rpad','is','1 is','empty','valid','noon','dbg','log','error','a ? b : c','a?.b','a?[0]','0x','0b','1e','.5','1..2','1...','..','...','a[','a[0','a[]','a()','a(1,','new','new a','throw','super','yield','await','async','typeof','instanceof','f = =>','-> ->','a => b','f = ->\n  a = 1\n b = 2']
+import lexer from "../lexer.js"
 
-outcome = function (src)
+SEED = +((_35_41_=(await process.env.KODE_FUZZ_SEED)) != null ? _35_41_ : 1)
+COUNT = +((_36_40_=(await process.env.KODE_FUZZ_N)) != null ? _36_40_ : 3000)
+
+rand = (function (st)
 {
-    try
+    var t
+
+    st.s = st.s + 0x6D2B79F5 | 0
+    t = Math.imul(st.s ^ st.s >>> 15,1 | st.s)
+    t = t + Math.imul(t ^ t >>> 7,61 | t) ^ t
+    return (t ^ t >>> 14) >>> 0
+}).bind(this)
+
+rng = function (seed)
+{
+    var st
+
+    st = {s:seed}
+    return function ()
     {
-        kc(src,_k_.file())
-        return ''
-    }
-    catch (err)
-    {
-        return err
+        return rand(st) / 0x80000000
     }
 }
-crashed = []
-reported = 0
-compiled = 0
-var list = _k_.list(CASES)
-for (index = 0; index < list.length; index++)
+
+pick = function (r, list)
 {
-    src = list[index]
-    try
-    {
-        m = outcome(src)
-    }
-    catch (err)
-    {
-        crashed.push([src,err])
-        continue
-    }
-    if (m)
-    {
-        reported++
-        console.log(_k_.w2("fuzz case"),_k_.b5(index))
-        console.log(m)
-    }
-    else
-    {
-        compiled++
-    }
+    return list[Math.floor(r() * list.length)]
 }
+FRAGMENTS = lexer.Patterns.keyword.concat(['@','@a','@.','this','▸','▴','⮐','◆','▪','●','●▸','■','->','=>','○->','○=>','+','-','*','/','%','!','~','^','&&','||','<<','>>','++','--','??','===','(',')','[',']','{','}',',',';',':','.','?','?.','\\','"str"',"'s'",'`t`','"""triple"""','/re/g','/re/i','1','0','1.5','1e3','0x1f','0b101','0o17','42n','-Infinity','true','false','yes','no','null','undefined','NaN','a','b','foo','bar','_x','$y','list','item','\n','  ','\n    ','\t','# c','#','a = 1','log x','f a b','[1, 2]','{a: 1}','(x)','x.y','a?[0]'])
+
+program = function (r)
+{
+    var i, n, parts
+
+    n = 1 + Math.floor(r() * 12)
+    parts = []
+    for (var _a_ = i = 0, _b_ = n; (_a_ <= _b_ ? i < n : i > n); (_a_ <= _b_ ? ++i : --i))
+    {
+        parts.push(pick(r,FRAGMENTS))
+        if (r() < 0.6)
+        {
+            parts.push(' ')
+        }
+        else
+        {
+            parts.push('\n')
+        }
+    }
+    return parts.join('')
+}
+
+internal = function (err)
+{
+    return _k_.in('internal kode compiler error',String(err))
+}
+REGRESSIONS = ['@.','a.','a..','a.b.','a +','a = 1 +','if','class','function','for','for x in','try','try a','import','export','a each','a each (k,v)','1 is']
 toExport["fuzz"] = function ()
 {
     section("nothing crashes", function ()
     {
+        crashed = []
+        var list = _k_.list(REGRESSIONS)
+        for (var _c_ = 0; _c_ < list.length; _c_++)
+        {
+            src = list[_c_]
+            try
+            {
+                kc(src,_k_.file())
+            }
+            catch (err)
+            {
+                if (internal(err))
+                {
+                    msg = String(err)
+                    crashed.push({seed:0,index:src,src:src,err:msg})
+                }
+            }
+        }
+        r = rng(SEED)
+        for (var _d_ = i = 0, _e_ = COUNT; (_d_ <= _e_ ? i < COUNT : i > COUNT); (_d_ <= _e_ ? ++i : --i))
+        {
+            src = program(r)
+            try
+            {
+                kc(src,_k_.file())
+            }
+            catch (err)
+            {
+                if (internal(err))
+                {
+                    msg = String(err)
+                    crashed.push({seed:SEED,index:i,src:src,err:msg})
+                }
+            }
+        }
+        var list1 = _k_.list(crashed)
+        for (var _f_ = 0; _f_ < list1.length; _f_++)
+        {
+            c = list1[_f_]
+            console.log(_k_.r5('fuzz case'),_k_.b5((c.seed ? c.index : 'regression')))
+            console.log((c.seed ? `seed ${c.seed}` : 'regression'))
+            console.log(JSON.stringify(c.src))
+            console.log(c.err)
+            console.log('')
+        }
         compare(crashed.length,0)
     })
-    section("cases exercise both paths", function ()
+    section("the generator reaches real programs, not just token salad", function ()
     {
-        compare(compiled > 0,true)
-        compare(reported > 0,true)
+        threw = function (src)
+        {
+            try
+            {
+                kc(src,_k_.file())
+                return false
+            }
+            catch (err)
+            {
+                return true
+            }
+        }
+        compare(threw('a = 1\nb = a + 2\nlog b'),false)
+        compare(threw('for x in [1, 2]\n    log x'),false)
     })
 }
 toExport["fuzz"]._section_ = true
@@ -64,5 +138,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZnV6ei5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rb2RlL3Rlc3QvZnV6ei5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7OztBQWlCQSxTQUNJLEdBQUksTUFBTyxPQUFRLElBQUssS0FBTSxJQUFLLEtBQU0sS0FDekMsSUFBSyxLQUFNLE1BQU8sT0FBUSxLQUFNLEtBQU0sS0FDdEMsSUFBSyxJQUFLLElBQUssSUFBSyxJQUFLLElBQUssS0FBTSxLQUFNLEtBQzFDLE9BQVEsT0FBUSxNQUFPLE1BQU8sWUFBYSxXQUMzQyxJQUFLLEtBQU0sS0FBTSxJQUFLLElBQUssSUFBSyxNQUFPLE1BQU8sVUFDOUMsVUFBVyxVQUFXLFdBQVksVUFBVyxZQUM3QyxNQUFPLFVBQVcsUUFBUyxRQUFTLFFBQVMsU0FDN0MsUUFBUyxLQUFNLFNBQVUsS0FDekIsS0FBTSxPQUFRLFlBQWEsT0FBUSxTQUFVLFdBQzdDLFFBQVMsVUFBVyxrQkFBbUIsV0FBWSxhQUNuRCxNQUFPLFdBQVksZ0JBQWlCLFFBQVMsVUFDN0MsU0FBVSxhQUFjLE1BQU8sUUFBUyxRQUFTLFVBQ2pELFNBQVUsYUFBYyxVQUFXLGdCQUFpQixTQUNwRCxNQUFPLEtBQU0sTUFBTyxJQUFLLE1BQU8sSUFBSyxLQUFNLEtBQU0sS0FDakQsVUFBVyxRQUFTLFFBQVMsUUFBUyxRQUFTLFVBQy9DLElBQUssWUFBYSxZQUFhLEtBQU0sVUFDckMsTUFBTyxRQUFTLGFBQWMsU0FBVSxTQUN4QyxTQUFVLGVBQWdCLGtCQUFtQixPQUFRLE9BQ3JELEtBQU0sT0FBUSxRQUFTLFFBQVMsT0FBUSxNQUN4QyxNQUFPLFFBQVMsWUFBYSxPQUFRLFFBQ3JDLEtBQU0sS0FBTSxLQUFNLEtBQU0sT0FBUSxPQUFRLEtBQU0sTUFDOUMsS0FBTSxNQUFPLE1BQU8sTUFBTyxPQUFRLE1BQU8sUUFBUyxRQUNuRCxRQUFTLFFBQVMsUUFBUyxRQUFTLFNBQVUsYUFDOUMsU0FBVSxRQUFTLFNBQVU7O0FBR2pDOzs7O1FBR1EsR0FBRztlQUNIOztXQUNFOztlQUNGOzs7QUFFUjtBQUNBLFdBQVc7QUFDWCxXQUFXO29CQUVNOzs7Ozs7UUFHVCxJQUFJLFFBQVE7O1dBQ1Y7O1FBQ0YsUUFBUSxNQUFNLElBQUs7UUFDbkI7O1FBQ0Q7O1FBQ0M7UUFDQSxtQkFBTyxvQkFBZ0I7UUFDdkIsWUFBSTs7OztRQUNIOzs7Ozs7O2dCQU1ELFFBQVEsT0FBUzs7OztnQkFJakIsV0FBVyxFQUFJO2dCQUNmLFdBQVcsRUFBSSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZnV6ei5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rb2RlL3Rlc3QvZnV6ei5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7O0FBa0NBLHlCQUFZLFFBQVEsSUFBSSxxQ0FBbUI7QUFDM0MsMEJBQVksUUFBUSxJQUFJLGtDQUFrQjs7QUFTMUM7Ozs7SUFFSSxHQUFHLElBQUksR0FBRyxJQUFJLGFBQWE7SUFDM0IsSUFBSSxLQUFLLEtBQUssR0FBRyxJQUFJLEdBQUcsTUFBTSxHQUFJLElBQUksR0FBRztJQUN6QyxJQUFJLElBQUksS0FBSyxLQUFLLElBQUksTUFBTSxFQUFHLEtBQUssS0FBSztZQUN4QyxJQUFJLE1BQU0sUUFBUTs7O0FBRXZCOzs7O0lBRUksTUFBSyxFQUFFOzs7ZUFLSixLQUFLLE1BQU07Ozs7QUFFbEI7O1dBQWlCLEtBQUssS0FBSyxNQUFNLE1BQU0sS0FBSzs7QUFLNUMsWUFBWSxNQUFNLFNBQVMsUUFBUSxRQUUvQixJQUFLLEtBQU0sS0FBTSxPQUFRLElBQUssSUFBSyxJQUFLLElBQUssSUFBSyxJQUFLLEtBQU0sSUFFN0QsS0FBTSxLQUFNLE1BQU8sTUFBTyxJQUFLLElBQUssSUFBSyxJQUFLLElBQUssSUFBSyxJQUFLLElBQzdELEtBQU0sS0FBTSxLQUFNLEtBQU0sS0FBTSxLQUFNLEtBQU0sTUFFMUMsSUFBSyxJQUFLLElBQUssSUFBSyxJQUFLLElBQUssSUFBSyxJQUFLLElBQUssSUFBSyxJQUFLLEtBQU0sS0FFN0QsUUFBUyxNQUFPLE1BQU8sZUFBZ0IsUUFBUyxRQUNoRCxJQUFLLElBQUssTUFBTyxNQUFPLE9BQVEsUUFBUyxPQUFRLE1BQU8sWUFDeEQsT0FBUSxRQUFTLE1BQU8sS0FBTSxPQUFRLFlBQWEsTUFFbkQsSUFBSyxJQUFLLE1BQU8sTUFBTyxLQUFNLEtBQU0sT0FBUSxPQUc1QyxLQUFNLEtBQU0sU0FBVSxLQUFNLE1BQU8sSUFHbkMsUUFBUyxRQUFTLFFBQVMsU0FBVSxTQUFVLE1BQU8sTUFBTzs7QUFPakU7Ozs7SUFFSSxJQUFJLElBQUksS0FBSyxNQUFNLE1BQU07SUFFekI7dUJBQ1MsU0FBSSxxQkFBQSxRQUFBOztRQUNULE1BQU0sS0FBSyxLQUFLLEVBQUc7WUFFaEIsTUFBTTs7WUFDTCxNQUFNLEtBQUs7Ozs7WUFFWCxNQUFNLEtBQUs7OztXQUVuQixNQUFNLEtBQUs7OztBQUtmOztrQkFBa0IsK0JBQWtDLE9BQU87O0FBRTNELGVBRUksS0FBTSxLQUFNLE1BQU8sT0FFbkIsTUFBTyxVQUVQLEtBQU0sUUFBUyxXQUFZLE1BQU8sV0FBWSxNQUFPLFFBQ3JELFNBQVUsU0FFVixTQUFVLGVBRVY7Ozs7O1FBT0k7NEJBS1c7Ozs7OztnQkFHSCxHQUFHOzttQkFDRDs7b0JBQ0MsU0FBUzs7b0JBQ1IsTUFBTSxPQUFPO29CQUNiLFFBQVEsTUFDSixLQUFNLEVBQ04sTUFBTyxJQUNQLElBQU8sSUFDUCxJQUFPOzs7O1FBS3ZCLElBQUksSUFBSTsyQkFFQyxTQUFJLHlCQUFBLFlBQUE7O1lBRVQsTUFBTSxRQUFROzs7Z0JBR1YsR0FBRzs7bUJBQ0Q7O29CQUNDLFNBQVM7O29CQUNSLE1BQU0sT0FBTztvQkFDYixRQUFRLE1BQ0osS0FBTyxLQUNQLE1BQU8sRUFDUCxJQUFPLElBQ1AsSUFBTzs7Ozs2QkFLZDs7OztZQUVMLG1CQUFPLHFCQUFnQixFQUFFLE9BQU8sRUFBRSxRQUFRO1lBQzFDLGFBQUksRUFBRSxlQUFlLEVBQUUsU0FBUztZQUdoQyxZQUFJLEtBQUssVUFBVSxFQUFFO1lBQ3JCLFlBQUksRUFBRTtZQUNOLFlBQUk7O2dCQUVSLFFBQVEsT0FBUzs7OztRQVFqQjs7OztnQkFFUSxHQUFHO3VCQUNIOzttQkFDRTs7dUJBQ0Y7OztnQkFFUixNQUFNLDJCQUE2QjtnQkFDbkMsTUFBTSw4QkFBZ0MifQ==
 //# sourceURL=file://kode/kode/test/fuzz.kode

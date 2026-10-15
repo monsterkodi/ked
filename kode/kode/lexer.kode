@@ -436,5 +436,12 @@ class Lexer
             block.tokens.push tok
 
         blocks[0]
-        
+
+# Patterns rides along on the class so a test can build its corpus out of
+# the same token set the lexer knows about, instead of a copy that goes
+# stale when a keyword is added. Attaching it here rather than exporting it
+# as a second name keeps the default export the class itself.
+
+Lexer.Patterns = Patterns
+
 export Lexer
