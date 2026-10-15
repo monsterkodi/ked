@@ -38,7 +38,7 @@ class Tester
         try
             f()
         catch err
-            log err
+            # log err
             fails.push
                 stack: stack.concat([comps])
                 comps: comps
@@ -143,7 +143,7 @@ class Tester
                 try
                     v()
                 catch err
-                    log err
+                    # log err
                     fails.push
                         stack: stack.concat([comps])
                         comps: comps

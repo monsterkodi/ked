@@ -43,8 +43,4 @@ export
             ⮐ false
         catch err
             ⮐ true
-        # if r != undefined
-        #     "#{w3 'compilation of'}\n#{c}\n#{w3 'should have failed! instead it returned'}\n#{r}"
-        # else
-        #     true
         

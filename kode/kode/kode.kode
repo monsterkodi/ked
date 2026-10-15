@@ -16,7 +16,6 @@ class Kode
         @args ?= {}
         @args.header ?= true
         @version  = '0.2.0'
-        @errorMessage = ''
         @literals = ['bool''num''regex''single''double''triple']
         @atoms    = @literals.concat ['var']
 
@@ -34,17 +33,10 @@ class Kode
     # ███       ███   ███  ███   ███  ███   ███  ███   ███  
     # ████████  ███   ███  ███   ███   ███████   ███   ███  
     
-    errorLog: msg args... =>
-        
-        # console.error.apply null [msg].concat(args)
-        # console.log.apply null [msg].concat(args)
-        @errorMessage += [msg].concat(args).join(" ")
-        @errorMessage += "\n"
-    
     onError: msg info =>
         
         # error noon(info) #if @args.verbose
-        @errorLog @file
+        message = @file
         if valid info 
             if 
                 valid info.tokens and valid info.tokens[0]
@@ -54,10 +46,10 @@ class Kode
                 valid info.line
                     li = info.line
             if valid li
-                @errorLog "#{li}:" @text.split(/\r?\n/)[li-1]
+                message += "\n#{li}: " + @text.split(/\r?\n/)[li-1]
                 
-        @errorLog msg
-        throw msg
+        message += "\n" + msg
+        throw message
 
     # ████████  ███   ███   ███████   ███
     # ███       ███   ███  ███   ███  ███
@@ -93,8 +85,6 @@ class Kode
     
     compile: @text @file @target ->
 
-        @errorMessage = ""
-
         ⮐  '' if empty trim @text
         
         log @text if @args.verbose
@@ -103,10 +93,18 @@ class Kode
             ast = @ast @text
             @renderer.render ast, @file, @target
         catch err
-            @errorLog err
-            # console.log @errorMessage
-            throw @errorMessage
-            undefined
+            msg = ""
+            if err is str
+                msg += "[syntax error]\n"
+                msg += err
+            else
+                msg += "[kode compile error]\n"
+                if valid err.stack
+                    msg += err.stack
+                else
+                    msg += err.message
+                msg += "\n"
+            throw msg
         
     #  ███████    ███████  █████████  
     # ███   ███  ███          ███     

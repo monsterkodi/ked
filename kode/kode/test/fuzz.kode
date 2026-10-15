@@ -1,0 +1,79 @@
+###
+    ████████  ███   ███  ███████  ███████  
+    ███       ███   ███     ███      ███   
+    ██████    ███   ███    ███      ███    
+    ███       ███   ███   ███      ███     
+    ███        ███████   ███████  ███████  
+###
+
+use ./utils ▪ kc
+
+# malformed and edge case source. Every entry must either compile or
+# raise a located error; a TypeError or ReferenceError escaping from
+# kode's own internals is a bug, and this is the net for that class.
+#
+# Bodies that raise a RuntimeError at run time are not covered here,
+# since compile never runs them.
+
+CASES = [
+    ''  '   '  '\n\n'  '▸'  '->'  '@'  '@.'  '@a'
+    '.'  'a.'  'a..'  'a.b.'  'a:'  ':a'  'a?'
+    '('  ')'  '['  ']'  '{'  '}'  '(('  '[['  '{{'
+    '(((('  '))))'  '[1,'  '{a:'  'a = [1, 2'  'a = {a:1'
+    '='  '=='  '+='  '+'  '-'  '*'  'a +'  '+ a'  'a * * b'
+    'a = 1 +'  'a = 1 *'  'a = 1 =='  'a = 1 ?'  'a = 1 and'
+    'a ='  'a = = 1'  'a = ['  'a = {'  'a = ('  'a = (1'
+    'a.b ='  'a='  'a = 1;'  ';;'
+    'if'  'if a'  'if a then'  'else'  'switch'  'switch x'
+    'class'  'class C'  'class C extends'  'function'  'function f'
+    'for'  'for x in'  'for x in y do'  'while'  'while a'
+    'return'  'return 1 2'  'try'  'try a'  'catch'  'finally'
+    'a = ->'  'a = -> b ='  'f = (a,'  'f = (a, b) ->'  '(a, b)'
+    '▸ x'  '▸ '  'a ▸'  '▴'  '▴ a'  '●'  '●▸'  '●▪'  '▸▸'
+    'a = """'  'a = "'  "a = '"  'a = `'  'a = /'  'a = /re'
+    '#'  '# comment'  'a = 1 # c'  '\\'  'a = "\\'
+    'use'  'use a'  'use a from'  'import'  'export'
+    'a each'  'a each (k,v)'  'a each (k,v) ->'  'lpad'  'rpad'
+    'is'  '1 is'  'empty'  'valid'  'noon'  'dbg'
+    'log'  'error'  'a ? b : c'  'a?.b'  'a?[0]'
+    '0x'  '0b'  '1e'  '.5'  '1..2'  '1...'  '..'  '...'
+    'a['  'a[0'  'a[]'  'a()'  'a(1,'  'new'  'new a'  'throw'
+    'super'  'yield'  'await'  'async'  'typeof'  'instanceof'
+    'f = =>'  '-> ->'  'a => b'  'f = ->\n  a = 1\n b = 2'
+]
+
+outcome = src ->
+
+    try
+        kc src 'kode/test/fuzz.kode'
+        ''
+    catch err
+        err
+
+crashed = []
+reported = 0
+compiled = 0
+
+for src in CASES
+
+    try
+        m = outcome src
+    catch err
+        crashed.push [src, err]
+        continue
+    if m
+        reported++ 
+        log reported ": " m 
+    else compiled++
+
+▸ fuzz
+
+    ▸ nothing crashes
+
+        crashed.length ▸ 0
+
+    ▸ cases exercise both paths
+
+        compiled > 0 ▸ true
+        reported > 0 ▸ true
+        
