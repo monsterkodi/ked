@@ -70,15 +70,9 @@ compile to the same js with a map on as with it off.
 Long forms work too (`kk --knrd`, `kk --test`). Short flags are the option's
 first letter by default; `-R`, `-D`, `-V` are the deliberate exceptions.
 
-### `pnpm run stage` — compiler changes only
+### `pnpm build` — compiler changes only
 
-The only thing that needs the two-stage self-compilation. Stage 0 compiles
-`kode/kode/*.kode` with the checked-in compiler, stage 1 recompiles with the
-result, tests, then promotes stage 1 over `js/kode/`. It is a fixed-point check
-that the compiler can compile itself.
-
-Required when `kode/kode/**` changes. Not required for `ked`, `kxk`, `kolor`
-or `konrad` changes — `kk -k` is enough there.
+3-stage compiler bootstrapping. It is a fixed-point check that the compiler can compile itself.
 
 ## Modules
 
