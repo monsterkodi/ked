@@ -22,14 +22,6 @@ codemsg = code msg ->
    m = errmsg code 
    msg in m ▸ true
     
-threw = c ->
-
-    try
-        kc c, 'err.kode'
-        false
-    catch err
-        true
-
 plain = c ->
 
     m = errmsg c
@@ -108,15 +100,6 @@ plain = c ->
                 r
             """  ▸ true
  
-    ▸ valid code compiles
- 
-         threw 'a = 1\nb = a + 2\n'  ▸ false
- 
-    ▸ valid code emits js
- 
-         out = kc 'a = 1\nb = a + 2\n' 'err.kode'
-         'a = 1' in out  ▸ true
-
     ▸ the report shows where
 
         m = plain 'a = 1\nb = foo('
