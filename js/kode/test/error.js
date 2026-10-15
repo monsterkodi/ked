@@ -1,11 +1,13 @@
 var toExport = {}
 var _k_ = {in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
 
-var errmsg, m, out, threw
+var errmsg, m, out, plain, threw
 
 import utils from "./utils.js"
 let kf = utils.kf
 let kc = utils.kc
+
+import ansi from "../../kxk/ansi.js"
 
 
 errmsg = function (c)
@@ -32,6 +34,14 @@ threw = function (c)
     {
         return true
     }
+}
+
+plain = function (c)
+{
+    var m
+
+    m = errmsg(c)
+    return ansi.strip(m.replace(/\x1b\]8;;[^\x07\x1b]*(\x07|\x1b\\)/g,''))
 }
 toExport["error"] = function ()
 {
@@ -117,11 +127,36 @@ toExport["error"] = function ()
     {
         compare(_k_.in('unreachable code after return statement?',errmsg('return 1 2')),true)
     })
+    section("the report shows where", function ()
+    {
+        m = plain('a = 1\nb = foo(')
+        compare(m.startsWith('~/s/ked/err.kode:2'),true)
+        compare(_k_.in('b = foo(',m),true)
+        compare(_k_.in('2: b',m),false)
+        compare(_k_.in('\n    ^',m),true)
+    })
+    section("the marker follows the column", function ()
+    {
+        compare(_k_.in('\n   ^',plain('log "x')),true)
+    })
+    section("a tab ahead of the column counts for what it prints as", function ()
+    {
+        compare(plain('a\t= [1').split('\n')[2],(' '.repeat(12)) + '^')
+    })
+    section("every report carries a location", function ()
+    {
+        m = plain('a = 1\nb = (1 + 2')
+        compare(m.startsWith('~/s/ked/err.kode:2'),true)
+    })
+    section("the message is the last line", function ()
+    {
+        compare(plain('a = [1, 2').split('\n').slice(-1)[0],'array is missing closing ]')
+    })
 }
 toExport["error"]._section_ = true
 toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZXJyb3IuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva29kZS90ZXN0L2Vycm9yLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7QUFVQTs7OztRQUdRLEdBQUcsRUFBRTtlQUNMOztXQUNFOztlQUNGLE9BQU87Ozs7QUFFZjs7OztRQUdRLEdBQUcsRUFBRztlQUNOOztXQUNFOztlQUNGOzs7Ozs7O2dCQU1BLEdBQUksS0FBTTtnQkFFVixHQUFJLDZCQUE4QjtnQkFDbEMsR0FBSSw2QkFBOEI7Z0JBQ2xDLEdBQUksZ0JBQWlCO2dCQUVyQixHQUFJOzs7UUFLTzs7OztnQkFJVixNQUFNLHNCQUF3Qjs7OztRQUk5QixNQUFNLEdBQUcscUJBQXFCO3VCQUM5QixRQUFXLEtBQU87Ozs7UUFJbkIsSUFBSSxPQUFPO3VCQUNYLG9CQUF1QixHQUFLOzs7O1FBSTVCLElBQUksT0FBTzt1QkFDWCxvQkFBdUIsR0FBSzs7OztRQUk1QixJQUFJLE9BQU87dUJBQ1gsV0FBYyxHQUFLOzs7O3VCQU9uQiw4QkFBa0MsT0FBTyxTQUFVO3VCQUNuRCw2QkFBa0MsT0FBTyxPQUFVO3VCQUNuRCw2QkFBa0MsT0FBTyxPQUFVO3VCQUNuRCw2QkFBa0MsT0FBTyxRQUFVO3VCQUNuRCw2Q0FBZ0QsT0FBTyxTQUFVOzs7O3VCQUlqRSw0QkFBK0IsT0FBTyxNQUFPO3VCQUM3Qyw0QkFBK0IsT0FBTyxTQUFVOzs7O3VCQUloRCw2QkFBZ0MsT0FBTyxRQUFTO3VCQUNoRCw2QkFBZ0MsT0FBTyxVQUFXOzs7O3VCQUlsRCwyQ0FBOEMsT0FBTyxPQUFRO3VCQUM3RCwyQ0FBOEMsT0FBTyxTQUFVO3VCQUMvRCwyQ0FBOEMsT0FBTyxPQUFROzs7O3VCQUk3RCw0QkFBK0IsT0FBTyxPQUFRO3VCQUM5QywwQkFBNkIsT0FBTyxVQUFXO3VCQUMvQyw2QkFBZ0MsT0FBTyxhQUFjO3VCQUNyRCxtQ0FBc0MsT0FBTyxXQUFZO3VCQUN6RCxtQ0FBc0MsT0FBTyxXQUFZO3VCQUN6RCx1Q0FBMEMsT0FBTyxTQUFVOzs7O3VCQUkzRCx5Q0FBNEMsT0FBTyxRQUFTO3VCQUM1RCxxQ0FBd0MsT0FBTyxhQUFjOzs7O3VCQUk3RCxrQkFBcUIsT0FBTyxVQUFXO3VCQUN2QyxrQkFBcUIsT0FBTyxVQUFXOzs7O3VCQUl2QywyQ0FBOEMsT0FBTyxlQUFnQiJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZXJyb3IuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva29kZS90ZXN0L2Vycm9yLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7OztBQVdBOzs7O1FBR1EsR0FBRyxFQUFFO2VBQ0w7O1dBQ0U7O2VBQ0YsT0FBTzs7OztBQUVmOzs7O1FBR1EsR0FBRyxFQUFHO2VBQ047O1dBQ0U7O2VBQ0Y7Ozs7QUFLUjs7OztJQUVJLElBQUksT0FBTztXQUNYLEtBQUssTUFBTSxFQUFFLFFBQVEsc0NBQXVDOzs7Ozs7Z0JBTXhELEdBQUksS0FBTTtnQkFFVixHQUFJLDZCQUE4QjtnQkFDbEMsR0FBSSw2QkFBOEI7Z0JBQ2xDLEdBQUksZ0JBQWlCO2dCQUVyQixHQUFJOzs7UUFLTzs7OztnQkFJVixNQUFNLHNCQUF3Qjs7OztRQUk5QixNQUFNLEdBQUcscUJBQXFCO3VCQUM5QixRQUFXLEtBQU87Ozs7UUFJbkIsSUFBSSxPQUFPO3VCQUNYLG9CQUF1QixHQUFLOzs7O1FBSTVCLElBQUksT0FBTzt1QkFDWCxvQkFBdUIsR0FBSzs7OztRQUk1QixJQUFJLE9BQU87dUJBQ1gsV0FBYyxHQUFLOzs7O3VCQU9uQiw4QkFBa0MsT0FBTyxTQUFVO3VCQUNuRCw2QkFBa0MsT0FBTyxPQUFVO3VCQUNuRCw2QkFBa0MsT0FBTyxPQUFVO3VCQUNuRCw2QkFBa0MsT0FBTyxRQUFVO3VCQUNuRCw2Q0FBZ0QsT0FBTyxTQUFVOzs7O3VCQUlqRSw0QkFBK0IsT0FBTyxNQUFPO3VCQUM3Qyw0QkFBK0IsT0FBTyxTQUFVOzs7O3VCQUloRCw2QkFBZ0MsT0FBTyxRQUFTO3VCQUNoRCw2QkFBZ0MsT0FBTyxVQUFXOzs7O3VCQUlsRCwyQ0FBOEMsT0FBTyxPQUFRO3VCQUM3RCwyQ0FBOEMsT0FBTyxTQUFVO3VCQUMvRCwyQ0FBOEMsT0FBTyxPQUFROzs7O3VCQUk3RCw0QkFBK0IsT0FBTyxPQUFRO3VCQUM5QywwQkFBNkIsT0FBTyxVQUFXO3VCQUMvQyw2QkFBZ0MsT0FBTyxhQUFjO3VCQUNyRCxtQ0FBc0MsT0FBTyxXQUFZO3VCQUN6RCxtQ0FBc0MsT0FBTyxXQUFZO3VCQUN6RCx1Q0FBMEMsT0FBTyxTQUFVOzs7O3VCQUkzRCx5Q0FBNEMsT0FBTyxRQUFTO3VCQUM1RCxxQ0FBd0MsT0FBTyxhQUFjOzs7O3VCQUk3RCxrQkFBcUIsT0FBTyxVQUFXO3VCQUN2QyxrQkFBcUIsT0FBTyxVQUFXOzs7O3VCQUl2QywyQ0FBOEMsT0FBTyxlQUFnQjs7OztRQU1yRSxJQUFJLE1BQU07Z0JBR1YsRUFBRSxXQUFXLHNCQUF3Qjt1QkFJckMsV0FBYyxHQUFLO3VCQUNuQixPQUFVLEdBQUs7dUJBSWYsVUFBYSxHQUFLOzs7O3VCQUtsQixTQUFZLE1BQU0sV0FBWTs7OztnQkFPOUIsTUFBTSxXQUFXLE1BQU0sTUFBTSxJQUFPLElBQUksT0FBTyxPQUFPOzs7O1FBS3RELElBQUksTUFBTTtnQkFDVixFQUFFLFdBQVcsc0JBQXdCOzs7O2dCQUlyQyxNQUFNLGFBQWEsTUFBTSxtQkFBYSJ9
 //# sourceURL=file://kode/kode/test/error.kode

@@ -8,6 +8,7 @@
 
 use ../kxk ◆ slash karg ansi nfs
 use ◆ lexer print parser scoper stripol returner operator renderer
+use ../kolor ◆ kolor
 
 class Kode
 
@@ -33,30 +34,87 @@ class Kode
     # ███       ███   ███  ███   ███  ███   ███  ███   ███  
     # ████████  ███   ███  ███   ███   ███████   ███   ███  
     
-    onError: msg info =>
-        
-        # error noon(info) #if @args.verbose
-        if valid info 
-            if 
-                valid info.tokens and valid info.tokens[0]
-                    li = info.tokens[0].line
-                valid info.tok 
-                    li = info.tok.line
-                valid info.line
-                    li = info.line
-                    
-        afile = slash.absolute slash.path(@file), process.cwd()
-        
-        if valid li
-            afile += ':' + li
-        
-        message = ansi.link("file://"+afile, afile)
+    # the error report, in the shape a compiler should hand one back:
+    #
+    #     ~/s/ked/kode/x.kode:14
+    #     a = foo(
+    #                ^
+    #     explicit call is missing closing bracket )
+    #
+    # the file line is a terminal hyperlink, the source line is syntax
+    # highlighted and linked to the same place, and the ^ sits under the
+    # column the parser actually choked on. no line number on the source
+    # line: the file:line above already carries it, and repeating it only
+    # lets the two drift apart when one of them is wrong.
+    #
+    # info is whatever the call site had to hand - a token, {tok:..},
+    # {tokens:[..]} or {line:..} - which is all of them, across the lexer,
+    # the parser and the renderer.
 
-        if valid li
-            message += "\n#{li}: " + @text.split(/\r?\n/)[li-1]
-                
-        message += "\n" + msg
+    onError: msg info =>
+
+        # dig a token out of whatever shape info arrived in. when there is
+        # none - end of input, most of the time - fall back to the end of
+        # the last line, so an unclosed paren points at the paren instead
+        # of printing a bare filename with nothing under it.
+
+        tok = null
+
+        if valid info?.tokens and info.tokens.length
+            tok = info.tokens[0]
+        else if valid info?.tok
+            tok = info.tok
+        else if valid info?.line or valid info?.col
+            tok = info
+
+        lines = @text.split /\r?\n/
+
+        li = null
+        ci = null
+
+        if valid tok?.line and tok.line > 0 and tok.line <= lines.length
+            li = tok.line
+            ci = tok.col
+
+        if not valid li
+            li = lines.length
+            ci = lines[-1].length
+
+        afile = slash.absolute slash.path(@file), process.cwd()
+
+        # the url keeps the full path, since ~ would not resolve, and it
+        # carries the line so the click lands where the error is
+        url = "file://#{afile}:#{li}"
+
+        message = bold(m5(slash.tilde(afile))) + m5(':') + m5(li)
+        message += '\n' + ansi.link(url, @caret(lines[li-1], ci))
+        message += '\n' + R2(y6(msg))
+
         throw message
+
+    # the source line and the ^ under it, as one string, so that a single
+    # hyperlink can cover both without splitting the escape sequence in two
+
+    caret: text col ->
+
+        hi = if text then kolor.kolorizeChunks kolor.ranges(text) else ''
+
+        # col is a character offset, but ^ has to land under the same
+        # character on screen, so tabs ahead of it count for what they
+        # print as. characters the terminal draws double width are not
+        # accounted for - the line is left long and uncropped on purpose,
+        # so the marker stays next to the source it belongs to.
+
+        if valid col
+
+            pad = ''
+            for ch in (text ? '')[0...col]
+                pad += if ch == '\t' then ' '.repeat 8 - pad.length % 8
+                      else ' '
+
+            hi += "\n#{pad}^"
+
+        hi
 
     # ████████  ███   ███   ███████   ███
     # ███       ███   ███  ███   ███  ███
