@@ -986,7 +986,7 @@ class Renderer
     
     each: n ->
         
-        numArgs = n.fnc.func.args?.parens.exps.length
+        numArgs = n.fnc?.func?.args?.parens?.exps?.length
         
         rv = 'r'+@makeVar(n.each)
         
@@ -1031,7 +1031,7 @@ class Renderer
             """
             
         else # no args
-            if n.fnc.func.body.exps?.length > 0 # some func but no args
+            if n.fnc?.func?.body?.exps?.length > 0 # some func but no args
                 @hint._k_.each_r = true
                 @ind()
                 fnc = @node n.fnc
@@ -1479,16 +1479,18 @@ class Renderer
                 close = ')'
                 
             op.operator.text == 'is'
+                if not op.rhs
+                    @onError "'is' is missing what to test against" op.operator
                 if op.rhs?.type in ['single' 'double' 'triple']
                     ⮐ "typeof(#{@atom op.lhs}) === #{@node op.rhs}"
                 else
                     if 
-                        op.rhs.text == 'num'
+                        op.rhs?.text == 'num'
                             lhs = @atom op.lhs
                             @hint._k_.isNum = true
                             ⮐ "_k_.isNum(#{lhs})"
                             
-                        op.rhs.text == 'obj'
+                        op.rhs?.text == 'obj'
                             if op.lhs.type == 'num'
                                 ⮐ 'false'
                             else
@@ -1496,7 +1498,7 @@ class Renderer
                                 @hint._k_.isObj = true
                                 ⮐ "_k_.isObj(#{lhs})"                                
 
-                        op.rhs.text == 'arr'
+                        op.rhs?.text == 'arr'
                             if op.lhs.type == 'num'
                                 ⮐ 'false'
                             else
@@ -1504,17 +1506,17 @@ class Renderer
                                 @hint._k_.isArr = true
                                 ⮐ "_k_.isArr(#{lhs})"
                                 
-                        op.rhs.text == 'str'
+                        op.rhs?.text == 'str'
                             lhs = @atom op.lhs
                             @hint._k_.isStr = true                            
                             ⮐ "_k_.isStr(#{lhs})"
 
-                        op.rhs.text == 'func'
+                        op.rhs?.text == 'func'
                             lhs = @atom op.lhs
                             @hint._k_.isFunc = true
                             ⮐ "_k_.isFunc(#{lhs})"
 
-                        op.rhs.text == 'elem'
+                        op.rhs?.text == 'elem'
                             lhs = @atom op.lhs
                             @hint._k_.isElem = true
                             ⮐ "_k_.isElem(#{lhs})"

@@ -37,13 +37,17 @@ function Parser extends parse
 
     if: tok tokens ->
 
-        if tokens[0].type == 'block'
+        if tokens[0]?.type == 'block'
             ⮐ @ifBlock tok tokens
 
         @push 'if'
         @lockBlock = true
         cond = @exp tokens
         @lockBlock = false
+        
+        if not cond
+            @onError "if is missing a condition" tok:tok
+            
         thn = @then 'if' tokens
 
         e = if:
@@ -145,11 +149,20 @@ function Parser extends parse
 
         vals = @exps 'for vals' tokens
         
+        if not vals?.length
+            @onError "for is missing the variable to iterate" tok:tok
+            
         vals = vals[0] if vals.length == 1
 
         inof = tokens.shift()
         
+        if not inof
+            @onError "for is missing 'in' or 'of'" tok:tok
+            
         list = @exp tokens
+
+        if not list
+            @onError "for is missing the list to iterate" tok:tok
 
         thn  = @then 'for' tokens
         
@@ -188,12 +201,21 @@ function Parser extends parse
         
         vals = @exps 'for vals' tokens
 
+        if not vals?.length
+            @onError "for is missing the variable to iterate" tok:tok
+            
         vals = vals[0] if vals.length == 1
 
         inof = tokens.shift()
         
+        if not inof
+            @onError "for is missing 'in' or 'of'" tok:tok
+            
         list = @exp tokens
-        
+
+        if not list
+            @onError "for is missing the list to iterate" tok:tok
+
         @pop 'for' 
         
         for:
@@ -336,7 +358,7 @@ function Parser extends parse
         
         exps = @block 'body' tokens
         
-        @shiftNewlineTok 'try body end' tokens tok tokens[1].text in ['catch' 'finally']
+        @shiftNewlineTok 'try body end' tokens tok tokens[1]?.text in ['catch' 'finally']
         
         if tokens[0]?.text == 'catch'
             
@@ -344,7 +366,7 @@ function Parser extends parse
 
             tokens.shift()
             
-            if tokens[0].type != 'block'
+            if tokens[0]?.type != 'block'
                 errr = @exp tokens
         
             ctch = 
@@ -382,6 +404,9 @@ function Parser extends parse
                 break
             toImport.push token
                 
+        if not toImport.length
+            @onError "import is missing what to import" tok:obj
+
         import:
             args: toImport
             
@@ -494,6 +519,9 @@ function Parser extends parse
         toExport = []
         start = tokens.shift()
         
+        if not start
+            @onError "export is missing what to export" tok:obj
+            
         if start.text == '{'
             toExport = @object 'export' start.tokens
             # while token = tokens.shift()
@@ -543,6 +571,9 @@ function Parser extends parse
         @push 'class'
 
         name = tokens.shift()
+
+        if not name
+            @onError "#{type} is missing a name" tok:tok
 
         e = {}
         e[type] = name:name
@@ -1031,9 +1062,8 @@ function Parser extends parse
         dot  = tokens.shift()
         prop = tokens.shift()
         
-        # if not prop
-            # error tokens
-            # print.sheap @sheap, 'no prop'
+        if not prop
+            @onError "property access is missing property name" tok:dot
             
         prop.type = 'var'
         
