@@ -334,7 +334,7 @@ class Ansi
                                  40 <= code <= 47  ➜ bg = STYLES["b#{code - 40}"]
                                  90 <= code <= 97  ➜ fg = STYLES["f#{8+code - 90}"] # high intensity
                                 100 <= code <= 107 ➜ bg = STYLES["b#{8+code - 100}"]
-                break if code in [38, 48]
+                break if code in [38 48]
             ''
             
         tokens = [

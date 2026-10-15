@@ -19,8 +19,11 @@ errmsg = c ->
 
 codemsg = code msg ->
 
-   m = errmsg code 
-   msg in m ▸ true
+    m = errmsg code 
+    if msg in m 
+        true ▸ true
+    else
+        msg ▸ m
     
 plain = c ->
 
@@ -29,40 +32,48 @@ plain = c ->
    
 ▸ error
             
-    ▸ missing close
-
-        codemsg 'x = (1 + 2\n'      'missing closing )'
-        codemsg 'x = [1, 2\n'       'missing closing ]'
-
     ▸ names the file
 
         codemsg 'x = (1\n'          'err.kode' 
 
-    ▸ closers name themselves
+    ▸ missing closing brackets
 
+        codemsg 'x = (1 + 2\n'      'parens is missing closing )'
+        codemsg 'x = [1, 2\n'       'array is missing closing ]'
         codemsg '(((('              'parens is missing closing )'  
         codemsg '[['                'array is missing closing ]'   
         codemsg '{{'                'curly is missing closing }'   
         codemsg 'a[0'               'index is missing closing ]'   
         codemsg 'a(1,'              'explicit call is missing closing bracket )' 
+        codemsg 'r = a.b((rg)'      'explicit call is missing closing bracket )'
 
-    ▸ brackets
+    ▸ unmatched closing bracket
 
         codemsg ')'                 'unmatched closing bracket' 
         codemsg '))))'              'unmatched closing bracket' 
+        codemsg 'r = a.b(args))'    'unmatched closing bracket'
+        codemsg """ 
+            f = ->
+                r = some.call(some args))
+                log 'r' r
+                r
+            """                     'unmatched closing bracket'
+    
+        codemsg '}'                 'unmatched closing bracket' 
+        codemsg ']'                 'unmatched closing bracket' 
 
     ▸ assignment without operand
 
         codemsg 'a ='               'assignment without operand' 
         codemsg 'a.b ='             'assignment without operand' 
 
-    ▸ property
+    ▸ property access is missing
 
         codemsg 'a.'                'property access is missing property name' 
         codemsg 'a.b.'              'property access is missing property name' 
         codemsg '@.'                'property access is missing property name' 
 
-    ▸ keywords want their operands
+    ▸ keywords missing operands
 
         codemsg 'if'                'if is missing a condition'             
         codemsg 'class'             'class is missing a name'               
@@ -71,34 +82,30 @@ plain = c ->
         codemsg 'export'            'export is missing what to export'      
         codemsg '1 is'              "'is' is missing what to test against"  
 
-    ▸ for wants all three parts
+    ▸ for is missing
 
         codemsg 'for'               'for is missing the variable to iterate' 
         codemsg 'for x in'          'for is missing the list to iterate'     
 
-    ▸ stray characters come from the lexer
+    ▸ stray character
 
         codemsg 'a = "'             'stray character' 
         codemsg "a = '"             'stray character' 
+        codemsg '✘'                 'stray character'
 
     ▸ unreachable code
 
         codemsg 'return 1 2'        'unreachable code after return statement?' 
 
-    ▸ fail
-    
-        kf  "✘" ▸ true
-        
-        kf  "r = some.call((some args)" ▸ true
-        kf  "r = some.call(some args))" ▸ true
-        kf  'log "▪▪#{id"' ▸ true
-            
-        kf  """ 
-            f = ->
-                r = some.call(some args))
-                log 'r' r
-                r
-            """  ▸ true
+    ▸ misc fails
+
+        codemsg 'log "▪▪#{id"'      '???'
+        codemsg 'a,'                '???'
+        codemsg 'a...'              '???'
+        codemsg 'a:'                '???'
+        codemsg 'a++-'              '???'
+        codemsg 'a+-+'              '???'
+        codemsg 'a/-^'              '???'
  
     ▸ the report shows where
 
