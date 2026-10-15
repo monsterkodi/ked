@@ -6,7 +6,7 @@
     ███   ███  ███   ███    
 ###
 
-use ../kxk  ▪ sleep karg slash os
+use ../kxk  ▪ sleep karg util slash os
 use ../kxk  ◆ watch nfs
 use         ◆ knrd version
 use ../kode ◆ tester kode
@@ -46,7 +46,7 @@ class kk
     
         files = args.files    
         if args.version ➜ ○ log version slash.name(slash.path(◆dir '../../')) process.cwd()
-        if args.info    ➜ ○ knrd         []    dryrun:true
+        if args.info    ➜ ○ knrd         [] util.defaults(args dryrun:true)
         if args.knrd    ➜ ○ knrd         files args 
         if args.build   ➜ ○ knrd         files args
         if args.test    ➜ ○ kk.test      files

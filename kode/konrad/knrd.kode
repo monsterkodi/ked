@@ -152,7 +152,7 @@ knrd = files=[] opt={} ○->
                 if tgtText != compText
                     transpiled++
                     ○ nfs.write tgtFile, compText if not opt.dryrun
-                    log b5('✔ ') g5(slash.tilde(tgtFile))
+                    log b5('✔ ') g5(slash.tilde(tgtFile)) tgtText.length compText.length
                     
     # ○ bump() if transpiled and not opt.dryrun
     
