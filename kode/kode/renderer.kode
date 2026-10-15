@@ -215,8 +215,8 @@ class Renderer
     nodes: nodes sep=',' tl ->
 
         if not nodes?
-            log 'no nodes?!?' @stack, @sheap
-            print.ast 'no nodes' @ast
+            log 'no nodes?!?' @stack, @sheap if @debug
+            print.ast 'no nodes' @ast if @debug
             return ''
         
         s = ''
@@ -255,7 +255,7 @@ class Renderer
             if @[k] is func
                 s += @[k] v
             else
-                log R4("renderer.node unhandled key #{k} in exp") exp
+                log R4("renderer.node unhandled key #{k} in exp") exp if @debug
         s
 
     #  ███████   █████████   ███████   ██     ██
@@ -675,8 +675,8 @@ class Renderer
         bind = []
         for m in mthds
             if not m.keyval
-                print.ast 'not a method?' m
-                print.ast 'not a method?' mthds
+                print.ast 'not a method?' m if @debug
+                print.ast 'not a method?' mthds if @debug
                 continue
             if not m.keyval.val.func # probably a static var
                 continue
@@ -1097,8 +1097,8 @@ class Renderer
             list = @node n.list
 
         if not list or list == 'undefined'
-            print.noon 'no list for' n.list
-            print.ast 'no list for' n.list
+            print.noon 'no list for' n.list if @debug
+            print.ast 'no list for' n.list if @debug
 
         gi = lineBreak or @ind()
         nl = lineBreak or '\n'

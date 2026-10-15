@@ -255,9 +255,13 @@ function Parse extends parseutils
                 
         switch tok.type
             
-            'block'     ➜   ⮐ error "INTERNAL ERROR: unexpected block token in exp!"
-            'nl'        ➜   ⮐ error "INTERNAL ERROR: unexpected nl token in exp!"
-            ';'         ➜   ⮐ error "INTERNAL ERROR: unexpected ; token in exp!"
+            # an `error` call renders as console.error and does not raise, so these
+            # used to print on stdout and carry on parsing. @onError is the
+            # one that throws, with a location
+            
+            'block'     ➜   ⮐ @onError "unexpected block token in exp!" tok:tok
+            'nl'        ➜   ⮐ @onError "unexpected nl token in exp!" tok:tok
+            ';'         ➜   ⮐ @onError "unexpected ; token in exp!" tok:tok
             'section'   ➜   ⮐ @section tok, tokens                
             'keyword'       # dispatch to block rules identified by keyword
                             if tokens[0]?.text not in ':' # allow keywords as dictionary keys

@@ -501,7 +501,7 @@ function Parser extends parse
                 name += token.text
                 
         if tokens.length and tokens[0].type != 'nl'
-            warn 'dangling use token?' tokens[0]
+            warn 'dangling use token?' tokens[0] if @debug
                 
         use:   
             toUse:toUse
@@ -973,7 +973,7 @@ function Parser extends parse
                 break if tokens[0].text in '])};'
                 break if tokens[0].type not in literals
                 
-                log 'object ... exps?' key tokens
+                log 'object ... exps?' key tokens if @debug
                 break
                 
         @pop '{'
