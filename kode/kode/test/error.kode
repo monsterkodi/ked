@@ -16,6 +16,11 @@ errmsg = c ->
         ''
     catch err
         String err
+
+codemsg = code msg ->
+
+   m = errmsg code 
+   msg in m ▸ true
     
 threw = c ->
 
@@ -25,15 +30,68 @@ threw = c ->
     catch err
         true
 
-# the report with the colour and the hyperlink taken out, so what is left
-# can be compared as plain text
-
 plain = c ->
 
-    m = errmsg(c)
+    m = errmsg c
     ansi.strip m.replace(/\x1b\]8;;[^\x07\x1b]*(\x07|\x1b\\)/g, '')
-
+   
 ▸ error
+            
+    ▸ missing close
+
+        codemsg 'x = (1 + 2\n'      'missing closing )'
+        codemsg 'x = [1, 2\n'       'missing closing ]'
+
+    ▸ names the file
+
+        codemsg 'x = (1\n'          'err.kode' 
+
+    ▸ closers name themselves
+
+        codemsg '(((('              'parens is missing closing )'  
+        codemsg '[['                'array is missing closing ]'   
+        codemsg '{{'                'curly is missing closing }'   
+        codemsg 'a[0'               'index is missing closing ]'   
+        codemsg 'a(1,'              'explicit call is missing closing bracket )' 
+
+    ▸ brackets
+
+        codemsg ')'                 'unmatched closing bracket' 
+        codemsg '))))'              'unmatched closing bracket' 
+
+    ▸ assignment without operand
+
+        codemsg 'a ='               'assignment without operand' 
+        codemsg 'a.b ='             'assignment without operand' 
+
+    ▸ property
+
+        codemsg 'a.'                'property access is missing property name' 
+        codemsg 'a.b.'              'property access is missing property name' 
+        codemsg '@.'                'property access is missing property name' 
+
+    ▸ keywords want their operands
+
+        codemsg 'if'                'if is missing a condition'             
+        codemsg 'class'             'class is missing a name'               
+        codemsg 'function'          'function is missing a name'            
+        codemsg 'import'            'import is missing what to import'      
+        codemsg 'export'            'export is missing what to export'      
+        codemsg '1 is'              "'is' is missing what to test against"  
+
+    ▸ for wants all three parts
+
+        codemsg 'for'               'for is missing the variable to iterate' 
+        codemsg 'for x in'          'for is missing the list to iterate'     
+
+    ▸ stray characters come from the lexer
+
+        codemsg 'a = "'             'stray character' 
+        codemsg "a = '"             'stray character' 
+
+    ▸ unreachable code
+
+        codemsg 'return 1 2'        'unreachable code after return statement?' 
 
     ▸ fail
     
@@ -50,115 +108,38 @@ plain = c ->
                 r
             """  ▸ true
  
-     ▸ valid code compiles
+    ▸ valid code compiles
  
          threw 'a = 1\nb = a + 2\n'  ▸ false
  
-     ▸ valid code emits js
+    ▸ valid code emits js
  
          out = kc 'a = 1\nb = a + 2\n' 'err.kode'
          'a = 1' in out  ▸ true
-            
-    ▸ missing close paren
-
-        m = errmsg 'x = (1 + 2\n'
-        'missing closing )' in m  ▸ true
-
-    ▸ missing close bracket
-
-        m = errmsg 'x = [1, 2\n'
-        'missing closing ]' in m  ▸ true
-
-    ▸ names the file
-
-        m = errmsg 'x = (1\n'
-        'err.kode' in m  ▸ true
-
-    # every one of these has to say what is missing, not just that
-    # something went wrong. the message is the interface.
-
-    ▸ closers name themselves
-
-        'parens is missing closing )'  in errmsg '(((('  ▸ true
-        'array is missing closing ]'   in errmsg '[['    ▸ true
-        'curly is missing closing }'   in errmsg '{{'    ▸ true
-        'index is missing closing ]'   in errmsg 'a[0'   ▸ true
-        'explicit call is missing closing bracket )' in errmsg 'a(1,'  ▸ true
-
-    ▸ brackets
-
-        'unmatched closing bracket' in errmsg ')'  ▸ true
-        'unmatched closing bracket' in errmsg '))))'  ▸ true
-
-    ▸ assignment
-
-        'assignment without operand' in errmsg 'a ='  ▸ true
-        'assignment without operand' in errmsg 'a.b ='  ▸ true
-
-    ▸ property
-
-        'property access is missing property name' in errmsg 'a.'  ▸ true
-        'property access is missing property name' in errmsg 'a.b.'  ▸ true
-        'property access is missing property name' in errmsg '@.'  ▸ true
-
-    ▸ keywords want their operands
-
-        'if is missing a condition' in errmsg 'if'  ▸ true
-        'class is missing a name' in errmsg 'class'  ▸ true
-        'function is missing a name' in errmsg 'function'  ▸ true
-        'import is missing what to import' in errmsg 'import'  ▸ true
-        'export is missing what to export' in errmsg 'export'  ▸ true
-        "'is' is missing what to test against" in errmsg '1 is'  ▸ true
-
-    ▸ for wants all three parts
-
-        'for is missing the variable to iterate' in errmsg 'for'  ▸ true
-        'for is missing the list to iterate' in errmsg 'for x in'  ▸ true
-
-    ▸ stray characters come from the lexer
-
-        'stray character' in errmsg 'a = "'  ▸ true
-        'stray character' in errmsg "a = '"  ▸ true
-
-    ▸ unreachable code
-
-        'unreachable code after return statement?' in errmsg 'return 1 2'  ▸ true
-
-    # the shape of the report, not just the wording
 
     ▸ the report shows where
 
         m = plain 'a = 1\nb = foo('
 
-        # the file, ~ shortened, with the line on the same line as it
-        m.startsWith '~/s/ked/err.kode:2'  ▸ true
+        m.startsWith '~/s/ked/err.kode:2'
 
-        # the offending source line, and not numbered - file:line above
-        # already says which line it is
-        'b = foo(' in m  ▸ true
+        'b = foo(' in m
         '2: b' in m  ▸ false
 
-        # and a marker under the column it choked on, which here is the
-        # end of the line, because that is where the ) should have been
-        '\n    ^' in m  ▸ true
+        '\n    ^' in m
 
     ▸ the marker follows the column
 
-        # the unterminated string starts at column 3
-        '\n   ^' in plain 'log "x'  ▸ true
+        '\n   ^' in plain 'log "x'
 
     ▸ a tab ahead of the column counts for what it prints as
 
-        # 'a\t= [1' is 6 characters but 12 columns wide once the tab is
-        # expanded, and end of input is where the marker goes - so the
-        # marker has to sit at 12, not 6
         plain('a\t= [1').split('\n')[2]  ▸ (' '.repeat(12)) + '^'
 
     ▸ every report carries a location
 
-        # end of input has no token, but it still has a line to point at
         m = plain 'a = 1\nb = (1 + 2'
-        m.startsWith '~/s/ked/err.kode:2'  ▸ true
+        m.startsWith '~/s/ked/err.kode:2' ▸ true
 
     ▸ the message is the last line
 

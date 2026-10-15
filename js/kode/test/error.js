@@ -1,7 +1,7 @@
 var toExport = {}
 var _k_ = {in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
 
-var errmsg, m, out, plain, threw
+var codemsg, errmsg, m, out, plain, threw
 
 import utils from "./utils.js"
 let kf = utils.kf
@@ -21,6 +21,14 @@ errmsg = function (c)
     {
         return String(err)
     }
+}
+
+codemsg = function (code, msg)
+{
+    var m
+
+    m = errmsg(code)
+    return compare(_k_.in(msg,m),true)
 }
 
 threw = function (c)
@@ -45,6 +53,62 @@ plain = function (c)
 }
 toExport["error"] = function ()
 {
+    section("missing close", function ()
+    {
+        codemsg('x = (1 + 2\n','missing closing )')
+        codemsg('x = [1, 2\n','missing closing ]')
+    })
+    section("names the file", function ()
+    {
+        codemsg('x = (1\n','err.kode')
+    })
+    section("closers name themselves", function ()
+    {
+        codemsg('((((','parens is missing closing )')
+        codemsg('[[','array is missing closing ]')
+        codemsg('{{','curly is missing closing }')
+        codemsg('a[0','index is missing closing ]')
+        codemsg('a(1,','explicit call is missing closing bracket )')
+    })
+    section("brackets", function ()
+    {
+        codemsg(')','unmatched closing bracket')
+        codemsg('))))','unmatched closing bracket')
+    })
+    section("assignment without operand", function ()
+    {
+        codemsg('a =','assignment without operand')
+        codemsg('a.b =','assignment without operand')
+    })
+    section("property", function ()
+    {
+        codemsg('a.','property access is missing property name')
+        codemsg('a.b.','property access is missing property name')
+        codemsg('@.','property access is missing property name')
+    })
+    section("keywords want their operands", function ()
+    {
+        codemsg('if','if is missing a condition')
+        codemsg('class','class is missing a name')
+        codemsg('function','function is missing a name')
+        codemsg('import','import is missing what to import')
+        codemsg('export','export is missing what to export')
+        codemsg('1 is',"'is' is missing what to test against")
+    })
+    section("for wants all three parts", function ()
+    {
+        codemsg('for','for is missing the variable to iterate')
+        codemsg('for x in','for is missing the list to iterate')
+    })
+    section("stray characters come from the lexer", function ()
+    {
+        codemsg('a = "','stray character')
+        codemsg("a = '",'stray character')
+    })
+    section("unreachable code", function ()
+    {
+        codemsg('return 1 2','unreachable code after return statement?')
+    })
     section("fail", function ()
     {
         compare(kf("✘"),true)
@@ -65,79 +129,17 @@ toExport["error"] = function ()
         out = kc('a = 1\nb = a + 2\n','err.kode')
         compare(_k_.in('a = 1',out),true)
     })
-    section("missing close paren", function ()
-    {
-        m = errmsg('x = (1 + 2\n')
-        compare(_k_.in('missing closing )',m),true)
-    })
-    section("missing close bracket", function ()
-    {
-        m = errmsg('x = [1, 2\n')
-        compare(_k_.in('missing closing ]',m),true)
-    })
-    section("names the file", function ()
-    {
-        m = errmsg('x = (1\n')
-        compare(_k_.in('err.kode',m),true)
-    })
-    section("closers name themselves", function ()
-    {
-        compare(_k_.in('parens is missing closing )',errmsg('((((')),true)
-        compare(_k_.in('array is missing closing ]',errmsg('[[')),true)
-        compare(_k_.in('curly is missing closing }',errmsg('{{')),true)
-        compare(_k_.in('index is missing closing ]',errmsg('a[0')),true)
-        compare(_k_.in('explicit call is missing closing bracket )',errmsg('a(1,')),true)
-    })
-    section("brackets", function ()
-    {
-        compare(_k_.in('unmatched closing bracket',errmsg(')')),true)
-        compare(_k_.in('unmatched closing bracket',errmsg('))))')),true)
-    })
-    section("assignment", function ()
-    {
-        compare(_k_.in('assignment without operand',errmsg('a =')),true)
-        compare(_k_.in('assignment without operand',errmsg('a.b =')),true)
-    })
-    section("property", function ()
-    {
-        compare(_k_.in('property access is missing property name',errmsg('a.')),true)
-        compare(_k_.in('property access is missing property name',errmsg('a.b.')),true)
-        compare(_k_.in('property access is missing property name',errmsg('@.')),true)
-    })
-    section("keywords want their operands", function ()
-    {
-        compare(_k_.in('if is missing a condition',errmsg('if')),true)
-        compare(_k_.in('class is missing a name',errmsg('class')),true)
-        compare(_k_.in('function is missing a name',errmsg('function')),true)
-        compare(_k_.in('import is missing what to import',errmsg('import')),true)
-        compare(_k_.in('export is missing what to export',errmsg('export')),true)
-        compare(_k_.in("'is' is missing what to test against",errmsg('1 is')),true)
-    })
-    section("for wants all three parts", function ()
-    {
-        compare(_k_.in('for is missing the variable to iterate',errmsg('for')),true)
-        compare(_k_.in('for is missing the list to iterate',errmsg('for x in')),true)
-    })
-    section("stray characters come from the lexer", function ()
-    {
-        compare(_k_.in('stray character',errmsg('a = "')),true)
-        compare(_k_.in('stray character',errmsg("a = '")),true)
-    })
-    section("unreachable code", function ()
-    {
-        compare(_k_.in('unreachable code after return statement?',errmsg('return 1 2')),true)
-    })
     section("the report shows where", function ()
     {
         m = plain('a = 1\nb = foo(')
-        compare(m.startsWith('~/s/ked/err.kode:2'),true)
-        compare(_k_.in('b = foo(',m),true)
+        m.startsWith('~/s/ked/err.kode:2')
+        _k_.in('b = foo(',m)
         compare(_k_.in('2: b',m),false)
-        compare(_k_.in('\n    ^',m),true)
+        _k_.in('\n    ^',m)
     })
     section("the marker follows the column", function ()
     {
-        compare(_k_.in('\n   ^',plain('log "x')),true)
+        _k_.in('\n   ^',plain('log "x'))
     })
     section("a tab ahead of the column counts for what it prints as", function ()
     {
@@ -158,5 +160,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZXJyb3IuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva29kZS90ZXN0L2Vycm9yLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7OztBQVdBOzs7O1FBR1EsR0FBRyxFQUFFO2VBQ0w7O1dBQ0U7O2VBQ0YsT0FBTzs7OztBQUVmOzs7O1FBR1EsR0FBRyxFQUFHO2VBQ047O1dBQ0U7O2VBQ0Y7Ozs7QUFLUjs7OztJQUVJLElBQUksT0FBTztXQUNYLEtBQUssTUFBTSxFQUFFLFFBQVEsc0NBQXVDOzs7Ozs7Z0JBTXhELEdBQUksS0FBTTtnQkFFVixHQUFJLDZCQUE4QjtnQkFDbEMsR0FBSSw2QkFBOEI7Z0JBQ2xDLEdBQUksZ0JBQWlCO2dCQUVyQixHQUFJOzs7UUFLTzs7OztnQkFJVixNQUFNLHNCQUF3Qjs7OztRQUk5QixNQUFNLEdBQUcscUJBQXFCO3VCQUM5QixRQUFXLEtBQU87Ozs7UUFJbkIsSUFBSSxPQUFPO3VCQUNYLG9CQUF1QixHQUFLOzs7O1FBSTVCLElBQUksT0FBTzt1QkFDWCxvQkFBdUIsR0FBSzs7OztRQUk1QixJQUFJLE9BQU87dUJBQ1gsV0FBYyxHQUFLOzs7O3VCQU9uQiw4QkFBa0MsT0FBTyxTQUFVO3VCQUNuRCw2QkFBa0MsT0FBTyxPQUFVO3VCQUNuRCw2QkFBa0MsT0FBTyxPQUFVO3VCQUNuRCw2QkFBa0MsT0FBTyxRQUFVO3VCQUNuRCw2Q0FBZ0QsT0FBTyxTQUFVOzs7O3VCQUlqRSw0QkFBK0IsT0FBTyxNQUFPO3VCQUM3Qyw0QkFBK0IsT0FBTyxTQUFVOzs7O3VCQUloRCw2QkFBZ0MsT0FBTyxRQUFTO3VCQUNoRCw2QkFBZ0MsT0FBTyxVQUFXOzs7O3VCQUlsRCwyQ0FBOEMsT0FBTyxPQUFRO3VCQUM3RCwyQ0FBOEMsT0FBTyxTQUFVO3VCQUMvRCwyQ0FBOEMsT0FBTyxPQUFROzs7O3VCQUk3RCw0QkFBK0IsT0FBTyxPQUFRO3VCQUM5QywwQkFBNkIsT0FBTyxVQUFXO3VCQUMvQyw2QkFBZ0MsT0FBTyxhQUFjO3VCQUNyRCxtQ0FBc0MsT0FBTyxXQUFZO3VCQUN6RCxtQ0FBc0MsT0FBTyxXQUFZO3VCQUN6RCx1Q0FBMEMsT0FBTyxTQUFVOzs7O3VCQUkzRCx5Q0FBNEMsT0FBTyxRQUFTO3VCQUM1RCxxQ0FBd0MsT0FBTyxhQUFjOzs7O3VCQUk3RCxrQkFBcUIsT0FBTyxVQUFXO3VCQUN2QyxrQkFBcUIsT0FBTyxVQUFXOzs7O3VCQUl2QywyQ0FBOEMsT0FBTyxlQUFnQjs7OztRQU1yRSxJQUFJLE1BQU07Z0JBR1YsRUFBRSxXQUFXLHNCQUF3Qjt1QkFJckMsV0FBYyxHQUFLO3VCQUNuQixPQUFVLEdBQUs7dUJBSWYsVUFBYSxHQUFLOzs7O3VCQUtsQixTQUFZLE1BQU0sV0FBWTs7OztnQkFPOUIsTUFBTSxXQUFXLE1BQU0sTUFBTSxJQUFPLElBQUksT0FBTyxPQUFPOzs7O1FBS3RELElBQUksTUFBTTtnQkFDVixFQUFFLFdBQVcsc0JBQXdCOzs7O2dCQUlyQyxNQUFNLGFBQWEsTUFBTSxtQkFBYSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZXJyb3IuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva29kZS90ZXN0L2Vycm9yLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7OztBQVdBOzs7O1FBR1EsR0FBRyxFQUFFO2VBQ0w7O1dBQ0U7O2VBQ0YsT0FBTzs7OztBQUVmOzs7O0lBRUcsSUFBSSxPQUFPOzBCQUNYLElBQU8sR0FBSTs7O0FBRWQ7Ozs7UUFHUSxHQUFHLEVBQUc7ZUFDTjs7V0FDRTs7ZUFDRjs7OztBQUVSOzs7O0lBRUksSUFBSSxPQUFPO1dBQ1gsS0FBSyxNQUFNLEVBQUUsUUFBUSxzQ0FBdUM7Ozs7OztRQU14RCxRQUFRLGVBQW9CO1FBQzVCLFFBQVEsY0FBb0I7Ozs7UUFJNUIsUUFBUSxXQUFvQjs7OztRQUk1QixRQUFRLE9BQW9CO1FBQzVCLFFBQVEsS0FBb0I7UUFDNUIsUUFBUSxLQUFvQjtRQUM1QixRQUFRLE1BQW9CO1FBQzVCLFFBQVEsT0FBb0I7Ozs7UUFJNUIsUUFBUSxJQUFvQjtRQUM1QixRQUFRLE9BQW9COzs7O1FBSTVCLFFBQVEsTUFBb0I7UUFDNUIsUUFBUSxRQUFvQjs7OztRQUk1QixRQUFRLEtBQW9CO1FBQzVCLFFBQVEsT0FBb0I7UUFDNUIsUUFBUSxLQUFvQjs7OztRQUk1QixRQUFRLEtBQW9CO1FBQzVCLFFBQVEsUUFBb0I7UUFDNUIsUUFBUSxXQUFvQjtRQUM1QixRQUFRLFNBQW9CO1FBQzVCLFFBQVEsU0FBb0I7UUFDNUIsUUFBUSxPQUFvQjs7OztRQUk1QixRQUFRLE1BQW9CO1FBQzVCLFFBQVEsV0FBb0I7Ozs7UUFJNUIsUUFBUSxRQUFvQjtRQUM1QixRQUFRLFFBQW9COzs7O1FBSTVCLFFBQVEsYUFBb0I7Ozs7Z0JBSTVCLEdBQUksS0FBTTtnQkFFVixHQUFJLDZCQUE4QjtnQkFDbEMsR0FBSSw2QkFBOEI7Z0JBQ2xDLEdBQUksZ0JBQWlCO2dCQUVyQixHQUFJOzs7UUFLTzs7OztnQkFJVixNQUFNLHNCQUF3Qjs7OztRQUk5QixNQUFNLEdBQUcscUJBQXFCO3VCQUM5QixRQUFXLEtBQU87Ozs7UUFJbkIsSUFBSSxNQUFNO1FBRVYsRUFBRSxXQUFXO2VBRWIsV0FBYzt1QkFDZCxPQUFVLEdBQUs7ZUFFZixVQUFhOzs7O2VBSWIsU0FBWSxNQUFNOzs7O2dCQUlsQixNQUFNLFdBQVcsTUFBTSxNQUFNLElBQU8sSUFBSSxPQUFPLE9BQU87Ozs7UUFJdEQsSUFBSSxNQUFNO2dCQUNWLEVBQUUsV0FBVyxzQkFBdUI7Ozs7Z0JBSXBDLE1BQU0sYUFBYSxNQUFNLG1CQUFhIn0=
 //# sourceURL=file://kode/kode/test/error.kode

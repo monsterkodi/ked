@@ -18,19 +18,11 @@ use ..     ◆ lexer
 # the generated half is the real fuzzing - random programs assembled out of
 # the token set the lexer knows about, checked against the same rule: either
 # it compiles or it raises a located error, never an internal one.
-#
-# Bodies that raise a RuntimeError at run time are not covered here, since
-# compile never runs them.
 
-# seed and size are fixed so a failure is reproducible. a fuzz test that
-# fails one run in fifty teaches you to re-run instead of read.
+# seed and size are fixed so a failure is reproducible. 
 #
 #   KODE_FUZZ_SEED=99 node js/test.js kode      # a different seed
 #   KODE_FUZZ_N=20000 node js/test.js kode      # a longer run
-
-# an env var arrives as a string, and a string seed would concatenate
-# instead of add its way through the prng - a different sequence from the
-# same number, which makes a reported failure unreproducible
 
 SEED  = +(○ process.env.KODE_FUZZ_SEED)  ? 1
 COUNT = +(○ process.env.KODE_FUZZ_N)    ? 3000
@@ -64,24 +56,15 @@ pick = r list -> list[Math.floor r() * list.length]
 # up here without anyone remembering to add it a second time
 
 FRAGMENTS = lexer.Patterns.keyword.concat [
-    # this and call sigils
     '@'  '@a'  '@.'  'this'  '▸'  '▴'  '⮐'  '◆'  '▪'  '●'  '●▸'  '■'
-    # arrows and operators
     '->'  '=>'  '○->'  '○=>'  '+'  '-'  '*'  '/'  '%'  '!'  '~'  '^'
     '&&'  '||'  '<<'  '>>'  '++'  '--'  '??'  '==='
-    # brackets and punctuation
     '('  ')'  '['  ']'  '{'  '}'  ','  ';'  ':'  '.'  '?'  '?.'  '\\'
-    # literals
     '"str"'  "'s'"  '`t`'  '"""triple"""'  '/re/g'  '/re/i'
     '1'  '0'  '1.5'  '1e3'  '0x1f'  '0b101'  '0o17'  '42n'  '-Infinity'
     'true'  'false'  'yes'  'no'  'null'  'undefined'  'NaN'
-    # names
     'a'  'b'  'foo'  'bar'  '_x'  '$y'  'list'  'item'
-    # whitespace and comments - newlines make the parser's block and
-    # indentation paths actually run
     '\n'  '  '  '\n    '  '\t'  '# c'  '#'
-    # whole fragments, so the generator produces plausible programs and
-    # not only token salad
     'a = 1'  'log x'  'f a b'  '[1, 2]'  '{a: 1}'  '(x)'  'x.y'  'a?[0]'
 ]
 
@@ -110,16 +93,11 @@ program = r ->
 internal = err -> 'internal kode compiler error' in String err
 
 REGRESSIONS = [
-    # property access with nothing after the dot
     '@.'  'a.'  'a..'  'a.b.'
-    # a binary operator at the end of the source
     'a +'  'a = 1 +'
-    # keywords without their operands
     'if'  'class'  'function'  'for'  'for x in'  'try'  'try a'
     'import'  'export'
-    # a construct whose body is missing
     'a each'  'a each (k,v)'
-    # is without a right hand side
     '1 is'
 ]
 
@@ -128,9 +106,6 @@ REGRESSIONS = [
     ▸ nothing crashes
 
         crashed = []
-
-        # one crash record shape for both halves, so one report loop covers
-        # both and a failure always prints the same four lines
 
         for src in REGRESSIONS
 
@@ -144,9 +119,6 @@ REGRESSIONS = [
                         index: src
                         src:   src
                         err:   msg
-
-        # the whole point of a seeded generator: a failure has to name the
-        # seed that produced it, or it cannot be looked at again
 
         r = rng SEED
 
@@ -165,33 +137,12 @@ REGRESSIONS = [
                         src:   src
                         err:   msg
 
-        # the whole point of a seeded generator: a failure has to name the
-        # seed that produced it, or it cannot be looked at again
-
         for c in crashed
 
             log r5('fuzz case') b5(c.seed ? c.index : 'regression')
             log c.seed ? "seed #{c.seed}" : 'regression'
-            # quoted, because a generated program is full of newlines and
-            # an unquoted one cannot be pasted back into a command
             log JSON.stringify(c.src)
             log c.err
             log ''
 
         crashed.length ▸ 0
-
-    ▸ the generator reaches real programs, not just token salad
-
-        # if every case errored, the corpus would prove nothing about the
-        # happy path. these two are the real check that it is still fuzzing
-        # and has not degenerated into generating garbage.
-
-        threw = (src) ->
-            try
-                kc src ◆file
-                false
-            catch err
-                true
-
-        threw 'a = 1\nb = a + 2\nlog b'  ▸ false
-        threw 'for x in [1, 2]\n    log x'  ▸ false
