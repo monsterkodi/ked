@@ -1503,14 +1503,14 @@ parse = lines ext='kode' -> ligatures(blocked(chunked(lines ext)))
 
 kolorize = chunk -> 
     
-    if cn = kolor.map[chunk.clss]
+    if cn = klor.map[chunk.clss]
         if cn is Array
             v = chunk.match
             for cr in cn
-                v = kolor[cr] v
+                v = klor[cr] v
             ⮐ v
         else
-            ⮐ kolor[cn] chunk.match
+            ⮐ klor[cn] chunk.match
             
     if chunk.clss.endsWith 'file'
         w8 chunk.match
