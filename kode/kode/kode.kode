@@ -78,7 +78,7 @@ class Kode
      
     converts a string of kode into a string of javascript
     
-    ⮐  undefined on lexer, parser or renderer errors
+    throws on syntax errors and internal lexer, parser or renderer errors
     ###
 
     @compile: text opt={} -> (new Kode(opt)).compile text
@@ -95,10 +95,10 @@ class Kode
         catch err
             msg = ""
             if err is str
-                msg += "[syntax error]\n"
+                # msg += "[syntax error]\n"
                 msg += err
             else
-                msg += "[kode compile error]\n"
+                msg += "[internal kode compiler error]\n"
                 if valid err.stack
                     msg += err.stack
                 else

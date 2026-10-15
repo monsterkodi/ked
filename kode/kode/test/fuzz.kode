@@ -54,7 +54,7 @@ crashed = []
 reported = 0
 compiled = 0
 
-for src in CASES
+for src,index in CASES
 
     try
         m = outcome src
@@ -63,7 +63,8 @@ for src in CASES
         continue
     if m
         reported++ 
-        log reported ": " m 
+        log w2("fuzz case") b5(index) 
+        log m 
     else compiled++
 
 ▸ fuzz
