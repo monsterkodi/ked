@@ -212,7 +212,7 @@ class Stripol
                         c += index+length
                         false
                     else
-                        log 'unhandled?' matches[0]
+                        log 'unhandled?' matches[0] if @debug
                         c += index+length
                         true
                 break if b

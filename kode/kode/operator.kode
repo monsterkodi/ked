@@ -204,7 +204,7 @@ class Operator
                     rndr(i.qmrkcolon.lhs) + ' ? ' + rndr(i.qmrkcolon.mid) + ' ' 
             ).join ' '
         s += ' ' + rndr(chain[-1].operation?.rhs) ? '...'
-        log w4('▪') s g3(p)
+        log w4('▪') s g3(p) if @debug
         
     verb: -> if @debug then console.log.apply console.log arguments 
 

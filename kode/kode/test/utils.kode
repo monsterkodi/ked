@@ -2,7 +2,7 @@
 █████████  ████████   ███████  █████████        ███   ███  █████████  ███  ███       ███████  
    ███     ███       ███          ███           ███   ███     ███     ███  ███      ███       
    ███     ███████   ███████      ███           ███   ███     ███     ███  ███      ███████   
-   ███     ███            ███     ███           ███   ███     ███     ███  ███           ███  
+   ███     ███            ███     ███           ███   ███     ███     ███  ███      ███  
    ███     ████████  ███████      ███            ███████      ███     ███  ███████  ███████   
 ###
 
@@ -11,9 +11,47 @@ use ../kode
 kde = -> new kode header:false
 kdd = -> new kode header:false debug:true verbose:true
 
+# the transpiled js, with the header and the var preamble the compiler
+# puts in front of it taken back off. defined here rather than inline in
+# the export, so errmsg below can use it too
+
+kc = c f ->
+
+    k = kde().compile c f
+    if k.startsWith '// monsterkodi/kode'   then k = k[k.indexOf('\n')+2..]
+    if k.startsWith 'var _k_'               then k = k[k.indexOf('\n')+2..]
+    if k.startsWith 'var '                  then k = k[k.indexOf('\n')+2..]
+    k
+
+# what the compiler said about a source, or '' if it said nothing at all.
+# every error test goes through this, so a test reads as a claim about the
+# message rather than about how to get at it
+
+errmsg = c ->
+
+    try
+        kc c 'err.kode'
+        ''
+    catch err
+        String err
+
+# assert that compiling `code` says `msg`. on a miss it prints the message
+# it actually got, which is the useful half of a failing assertion
+
+codemsg = code msg ->
+
+    m = errmsg code
+    if msg in m
+        true ▸ true
+    else
+        msg ▸ m
+
 export 
             
     ast: c p -> kde().astr c no
+    
+    errmsg:  errmsg
+    codemsg: codemsg
     
     ke: c   -> 
         try
@@ -22,12 +60,7 @@ export
             log c
             log err
             
-    kc: c f -> 
-        k = kde().compile c f
-        if k.startsWith '// monsterkodi/kode'   then k = k[k.indexOf('\n')+2..]
-        if k.startsWith 'var _k_'               then k = k[k.indexOf('\n')+2..]
-        if k.startsWith 'var '                  then k = k[k.indexOf('\n')+2..]
-        k
+    kc: kc
 
     kd: c f -> 
         k = kdd().compile c f
@@ -43,4 +76,3 @@ export
             ⮐ false
         catch err
             ⮐ true
-        

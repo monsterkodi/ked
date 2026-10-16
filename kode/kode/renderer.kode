@@ -571,7 +571,7 @@ class Renderer
                 if n.keyval.key.text.startsWith '@'
                     s += @indent + 'static ' + n.keyval.key.text[1..] + ' = ' + @node(n.keyval.val)
                 else
-                    log 'what is this?' n
+                    log 'what is this?' n if @debug
         s
 
     # ████████  ███   ███  ███   ███   ███████  █████████  ███   ███████   ███   ███  

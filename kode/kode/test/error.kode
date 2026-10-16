@@ -6,25 +6,9 @@
     ████████  ███   ███  ███   ███   ███████   ███   ███
 ###
 
-use ./utils ▪ kf kc
+use ./utils ▪ kf kc errmsg codemsg
 use ../../kxk ◆ ansi
 
-errmsg = c ->
-
-    try
-        kc c 'err.kode'
-        ''
-    catch err
-        String err
-
-codemsg = code msg ->
-
-    m = errmsg code 
-    if msg in m 
-        true ▸ true
-    else
-        msg ▸ m
-    
 plain = c ->
 
     m = errmsg c

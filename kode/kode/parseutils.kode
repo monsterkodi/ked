@@ -324,7 +324,7 @@ function ParseUtils
     sheapPop: m t ->
         
         popped = @sheap.pop()
-        if popped.text != t and popped.text != trim(t, "'") then error 'wrong pop?' popped.text, t
+        if popped.text != t and popped.text != trim(t, "'") then error 'wrong pop?' popped.text, t if @debug
         print.sheap @sheap, popped if @debug
         
     #  ███████  █████████   ███████    ███████  ███   ███  
@@ -343,7 +343,7 @@ function ParseUtils
         p = @stack.pop()
         @sheapPop 'stack' p
         if p != n
-            error "unexpected pop!" p, n
+            error "unexpected pop!" p, n if @debug
             
         if @debug
             print.stack @stack p (s) -> W1(w1(s))

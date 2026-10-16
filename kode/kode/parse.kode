@@ -166,7 +166,7 @@ function Parse extends parseutils
                 nl = @shiftNewline "exps nl (no stop) ..." tokens
                 
                 if tokens[0]?.text == '.' and tokens[1]?.type == 'var'
-                    log 'exps nl next line starts with .var!' @stack
+                    log 'exps nl next line starts with .var!' @stack if @debug
                     es.push @prop(es.pop() tokens)
                     
                 @verb 'exps nl continue...'
@@ -411,7 +411,7 @@ function Parse extends parseutils
             
             numTokens = tokens.length
             
-            if not e then return error 'no e?' nxt
+            if not e then return error 'no e?' nxt if @debug
             
             unspaced = (llc = lastLineCol(e)).col == nxt.col and llc.line == nxt.line
             spaced = not unspaced
@@ -470,7 +470,7 @@ function Parse extends parseutils
                                 e = @operation null e tokens
                         nxt.text in ['++''--'] and unspaced
                             if e.type not in ['var']
-                                return error 'wrong rhs increment'
+                                return error 'wrong rhs increment' if @debug
                             e = @operation e tokens.shift()
                         ➜
                             print.tokens "rhs no nxt match? break! stack:#{@stack} nxt:" [nxt] if @debug
@@ -517,7 +517,7 @@ function Parse extends parseutils
             
             numTokens = tokens.length
             
-            if not e then return error 'no e?' nxt
+            if not e then return error 'no e?' nxt if @debug
             
             last  = lastLineCol  e
             first = firstLineCol e
