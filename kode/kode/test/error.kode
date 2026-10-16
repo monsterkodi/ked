@@ -408,6 +408,53 @@ plain = c ->
         codemsg '"s"++'  '++ is missing a variable to increment'
         codemsg '"s"--'  '-- is missing a variable to increment'
 
+        # an array or an object is not something node can assign to. this is
+        # the same line node draws, only earlier - it throws a TypeError at
+        # runtime and says nothing, and here it gets a line and a caret
+
+        codemsg '[a]++'      '++ is missing a variable to increment'
+        codemsg '[a]--'      '-- is missing a variable to increment'
+        codemsg '{a:1}++'    '++ is missing a variable to increment'
+        codemsg '{a:1}--'    '-- is missing a variable to increment'
+
+        # and a postfix with nothing in front of it is the same mistake. a
+        # bare '++' cannot be a prefix here - there is no operand in front of
+        # it - so it is a postfix with the variable left out
+
+        codemsg '++'         '++ is missing a variable to increment'
+        codemsg '--'         '-- is missing a variable to increment'
+        codemsg 'a++++'      '++ is missing a variable to increment'
+        codemsg 'a++ ++'     '++ is missing a variable to increment'
+        codemsg 'a-- --'     '-- is missing a variable to increment'
+
+    ▸ the ? needs something on both sides
+
+        # '?' is a postfix: it turns what is in front of it into a
+        # conditional. at the head of an expression there is nothing in front
+        # of it, and with nothing after it the conditional has no second arm.
+        # both were rendering as a '?' standing in the output.
+        #
+        # '??' is two of them. kode has no nullish operator and does not
+        # need one, but it lexes as two '?' and the first is at the head of
+        # an expression with nothing in front of it.
+
+        codemsg '?'                 '? is missing a left operand'
+        codemsg '?[0]'              '? is missing a left operand'
+        codemsg "? 's'"             '? is missing a left operand'
+        codemsg 'a ??'             '? is missing a left operand'
+        codemsg '??'                '? is missing a left operand'
+        codemsg 'a = ?'             '? is missing a left operand'
+
+        codemsg 'a ?'               '? is missing a right operand'
+        codemsg 'f ?'               '? is missing a right operand'
+        codemsg "'s' ?"            '? is missing a right operand'
+        codemsg '(x) ?'             '? is missing a right operand'
+        codemsg 'f a ?'             '? is missing a right operand'
+
+        # 'a ? b :' has its '?' and something to test, and stops at the colon
+
+        codemsg 'a ? b :'           ': is missing a right operand'
+
     ▸ use has one module and one list
 
         codemsg 'use'                        'use is missing what to use'

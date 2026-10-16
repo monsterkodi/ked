@@ -1197,7 +1197,14 @@ function Parser extends parse
         
         qmrk = tokens.shift()
         rhs  = @exp tokens
-        
+
+        # '?' turns what is in front of it into a conditional and needs
+        # something to put on the other side. 'a ?' was rendering as
+        # '(a != null ? a : )'
+
+        if not rhs
+            @onError "#{qmrk.text} is missing a right operand" tok:qmrk
+
         @pop  '?'
         
         qmrkop:
@@ -1217,7 +1224,13 @@ function Parser extends parse
         
         colon = tokens.shift()
         rhs = @exp tokens
-        
+
+        # same as the '?' above, one step further along: 'a ? b :' was
+        # rendering as '(a ? b : )'
+
+        if not rhs
+            @onError "#{colon.text} is missing a right operand" tok:colon
+
         @pop  ':'
         
         qmrkcolon:

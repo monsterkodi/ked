@@ -310,6 +310,23 @@ function ParseUtils
                     ⮐ false
         false
         
+    # a postfix ++ or -- needs something node can assign to: a name, a
+    # property, an index, or a call. '[a]++' and '{a:1}++' are the two the
+    # hunt turned up, and both come past the check in @rhs that only ever
+    # sees a token.
+    #
+    # 'f()++' is javascript the parser takes and the runtime throws on, and
+    # that is node's line to draw rather than a stricter one - node does draw
+    # it, but at runtime, and by then it is a TypeError instead of a message
+    # with a line and a caret on it.
+
+    checkPostfix: e nxt ->
+
+        if e.type != 'var' and not (e.prop or e.index or e.call)
+            @onError "#{nxt.text} is missing a variable to increment" tok:nxt
+
+        true
+
     #  ███████  ███   ███  ████████   ███████   ████████     
     # ███       ███   ███  ███       ███   ███  ███   ███    
     # ███████   █████████  ███████   █████████  ████████     

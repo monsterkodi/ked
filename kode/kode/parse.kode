@@ -399,6 +399,12 @@ function Parse extends parseutils
             if alone
                 if m = needsPair[tok.text]
                     @onError m tok:tok
+                # a bare '++' or '--' has nothing to increment. it cannot be
+                # read as a prefix here - there is no operand in front of it -
+                # so it is the postfix with the variable left out, and it says
+                # so in the same words as '1++'
+                if tok.text in ['++' '--']
+                    @onError "#{tok.text} is missing a variable to increment" tok:tok
                 if tok.text in wantsRight
                     @onError "#{tok.text} is missing a right operand" tok:tok
                 if tok.text in wantsLeft or tok.text in wantsSlice or tok.text in wantsOperand
@@ -466,6 +472,21 @@ function Parse extends parseutils
             key = tokens[0]?.text == ':' and (tok.type == 'keyword' or tok.text in nameable)
             if not key
                 @onError "#{tok.text} is a javascript reserved word" tok:tok
+
+        # '?' is a postfix. it turns what is in front of it into a
+        # conditional, so there is nothing it can be at the head of - a '?'
+        # here is a conditional with nothing in front of it, and it was being
+        # rendered as itself. '?=' is a different token and is not caught.
+        #
+        # a '.' or an operator behind it is not something a conditional could
+        # use, and both are handled further down where they say something
+        # better: '?.' is a property access with no property name, and
+        # '? ===' is an '=' with nothing to assign.
+
+        nxt = tokens[0]
+
+        if tok.text == '?' and not (nxt and (nxt.text == '.' or nxt.type == 'op'))
+            @onError '? is missing a left operand' tok:tok
 
         @sheapPush 'exp' tok.text ? tok.type
         
@@ -645,8 +666,11 @@ function Parse extends parseutils
                     
                 ➜ # e is not a token anymore
                 
-                    if 
-                        nxt.text in ['++''--']  and unspaced        ➜ e = @operation e tokens.shift();  break
+                    if
+                        # '[a]++' and '{a:1}++' come through here rather than
+                        # through the check above, which only ever sees a token.
+                        # a postfix ++ or -- needs something node can assign to
+                        nxt.text in ['++''--']  and unspaced        ➜ @checkPostfix e nxt; e = @operation e tokens.shift();  break
                         @stack[-1] == 'call'    and nxt.text == ']' ➜ @verb 'rhs call array end';       break
                         @stack[-1] == '{'       and nxt.text == '}' ➜ @verb 'rhs curly end';            break                    
                         @stack[-1] == '['       and nxt.text == ']' ➜ @verb 'rhs array end';            break
