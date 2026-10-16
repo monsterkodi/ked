@@ -120,6 +120,19 @@ plain = c ->
         codemsg 'y and /'           '/ is missing an operand'
         codemsg '>\n%\n*'          '* is missing an operand'
 
+    ▸ dots with nothing to slice
+
+        # '..' is the two-dot end of a slice and of a range. there is a
+        # value on the left that it belongs to - 'a[1..3]', 'a[1..]' - and
+        # on its own it has nothing to take the slice of.
+        #
+        # '...' is not here and will not be: the renderer reads a '...'
+        # straight after a name in an argument list as a rest parameter, so
+        # '(args...)' is '(...args)'. '...' and '[1, 2, ...]' are waiting in
+        # error_todo until that can be told apart.
+
+        codemsg '..'                '.. is missing an operand'
+
     ▸ a prefix operator with nothing to its right
 
         # these can go in front of a value, so what is missing is the value.
@@ -249,6 +262,17 @@ plain = c ->
         codemsg '-> try'               'try is missing catch or finally'
         codemsg 'a try'                'try is missing catch or finally'
 
+    ▸ assert has nothing to assert
+
+        # '▴' is a callee and never a value. on its own it has no argument
+        # to test, and after a value it is not an argument to anything - it
+        # was being taken as one, and the call rendered with a '▴' in it
+
+        codemsg '▴'                   'assert is missing what to assert'
+        codemsg 'a ▴'                 'assert is missing what to assert'
+        codemsg "'s' ▴"             'assert is missing what to assert'
+        codemsg '"str" ▴'           'assert is missing what to assert'
+
     ▸ a block where an expression belongs
 
         codemsg 'await\n    a'      'unexpected block token in exp!'
@@ -278,6 +302,18 @@ plain = c ->
         codemsg 'use a ◆ b ▪ c'              'use has a dangling token'
         codemsg 'use a ▪ b ▪ c ◆ d'          'use has a dangling token'
         codemsg 'use a ◆ b ◆ c'              'use has a dangling token'
+
+        # a use takes its names from one list or the other. 'use a ◆ b ▪ c'
+        # has both, and the one after the other is the dangling half -
+        # 'use a ▪ b ◆ c' got through because the diamond branch did not
+        # look back at what the list had already collected
+
+        codemsg 'use a ▪ b ◆ c'            'use has a dangling token'
+
+        # and a list is names, so a '.' in one is not a name. it used to be
+        # taken as a var and rendered as 'let . = kxk..'
+
+        codemsg 'use ../../../kxk ▪ slse .' 'use has a dangling token'
 
     ▸ use with nothing after it
 

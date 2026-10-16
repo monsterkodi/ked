@@ -462,7 +462,11 @@ function Parser extends parse
             tokens.shift()
             token = tokens.shift()
 
-            while token and token.type != 'nl'
+            # a '▪' list is names, so a '.' in one is not a name. the type is the
+            # test rather than a list of words, so a list of keywords or of
+            # kode's own operator words is still a list of names
+
+            while token and token.type != 'nl' and token.type in ['var' 'keyword' 'bool' 'op']
                 
                 item = token.text
                 
@@ -473,10 +477,22 @@ function Parser extends parse
                 items.push item
                     
                 break if tokens.length and (tokens[0].type == 'nl' or tokens[0].text in '▪●◆')
-                
+
+                # before taking it, not after. a token left behind is one the
+                # dangling check at the foot of this method can speak about;
+                # one taken and dropped is one nobody says anything about
+
+                if tokens[0]?.type not in ['var' 'keyword' 'bool' 'op']
+                    break
+                    
                 token = tokens.shift()
 
-        if tokens.length and tokens[0].text == '◆'
+        # a use names its bindings with '▪' or '◆', not both. the two are
+        # alternatives, so if the list has already collected something the
+        # diamond branch is the dangling half - which is what 'use a ▪ b ◆ c'
+        # is, and it used to go through as an import and a let
+
+        if tokens.length and tokens[0].text == '◆' and not items.length
             
             # log 'use diamond'
             toUse = []

@@ -61,9 +61,20 @@ wantsRight = ['+' '-' '~' '!']
 
 wantsLeft = ['*' '/' '%' '^' '&' '|' '<' '>' '=' '==']
 
+# the two ends of a slice and of a range. they belong to the value on their
+# left, and there is none.
+#
+# '...' is left out on purpose: the renderer reads a '...' straight after a
+# name in an argument list as a rest parameter - '(args...)' is '(...args)' -
+# so a '...' there is not a slice with nothing in front of it.
+
+wantsSlice = ['..']
+
 # tokens that say which of a pair something is, and so want both halves. one
 # bracket alone is unclosed rather than pairless, so it gets the message the
 # unclosed case already has
+#
+# '▴' is a callee and never a value, so what is missing is its argument
 
 needsPair =
     '(':  'parens is missing closing )'
@@ -72,6 +83,7 @@ needsPair =
     ',':  "missing expression after ','"
     '.':  'property access is missing property name'
     ':':  ': is missing a key and a value'
+    '▴':  'assert is missing what to assert'
 
 # what closes each opener. [] is an empty array and () is an empty call, so
 # an opener followed by its own closer is not an unclosed one
@@ -331,7 +343,7 @@ function Parse extends parseutils
         # the types are part of the test. a string that reads 'throw' is a
         # string, and a comment that reads '*' is a comment.
 
-        if tok.type in ['keyword' 'op' 'punct' 'paren'] and not @prefixOperand
+        if tok.type in ['keyword' 'op' 'punct' 'paren' 'dots' 'assert'] and not @prefixOperand
 
             nxt = tokens[0]
 
@@ -345,7 +357,7 @@ function Parse extends parseutils
                     @onError m tok:tok
                 if tok.text in wantsRight
                     @onError "#{tok.text} is missing a right operand" tok:tok
-                if tok.text in wantsLeft or tok.text in wantsOperand
+                if tok.text in wantsLeft or tok.text in wantsSlice or tok.text in wantsOperand
                     @onError "#{tok.text} is missing an operand" tok:tok
 
         switch tok.type

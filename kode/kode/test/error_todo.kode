@@ -268,7 +268,6 @@ use ./utils ▪ codemsg
 
     ▸ dots and slices
 
-        codemsg '..' '???'
         codemsg '...' '???'
         codemsg '[1..]' '???'
         codemsg 'a[..]' '???'
@@ -287,15 +286,8 @@ use ./utils ▪ codemsg
 
     ▸ assert with nothing to assert
 
-        codemsg '▴' '???'
         codemsg '▴ x' '???'
-        codemsg 'a ▴' '???'
         codemsg 'a ▴ "msg"' '???'
-
-    ▸ a use chain that does not add up
-
-        codemsg 'use a ▪ b ◆ c' '???'
-        codemsg 'use ../../../kxk ▪ slse .' '???'
 
     ▸ a property chain on the next line
 
@@ -311,7 +303,6 @@ use ./utils ▪ codemsg
         codemsg '||\n●' '???'
         codemsg '●▸ \\' '???'
         codemsg "'s' ■" '???'
-        codemsg "'s' ▴" '???'
         codemsg '(x) ▪' '???'
         codemsg '&&\n ●' '???'
         codemsg '&& \n}' '???'
@@ -325,7 +316,6 @@ use ./utils ▪ codemsg
         codemsg '▴ ^ \n●' '???'
         codemsg 'b  ~\n4' '???'
         codemsg '-- ~ \nN' '???'
-        codemsg '"str" ▴' '???'
         codemsg '"str" ◆' '???'
         codemsg '[0] ^\n)' '???'
         codemsg 'ceil a?' '???'
