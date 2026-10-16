@@ -136,11 +136,16 @@ function Parse extends parseutils
                 @verb 'exps block end, break!'
                 break
                 
-            if tok.text == ')'                               
+            # a closing bracket with nothing open. ')' breaks out of whatever
+            # paren is on the stack; the other two have no such escape,
+            # so they are unmatched here - which is how a stray ] or }
+            # used to sail through and render as itself
+            
+            if tok.text in [')' ']' '}']
                 if '(' in @stack or 'args(' in @stack
-                    @verb 'exps break on )'     
+                    @verb "exps break on #{tok.text}"
                     break
-                @onError 'unmatched closing bracket' tok:last(tokens)
+                @onError 'unmatched closing bracket' tok:tok
             if tok.text in ['in''of'] and rule == 'for vals' ➜ @verb 'exps break on in|of' ; break
             if tok.type == 'nl' 
                 
@@ -337,6 +342,15 @@ function Parse extends parseutils
                     if @stack[-1]?.startsWith 'op'
                         @verb 'comma in operation, break without shifting'
                         break
+                        
+                    # a comma with nothing after it, at the end of a
+                    # statement. inside a literal a trailing comma is fine
+                    # - js allows '[1,2,]' and '{a:b,}' - and those have a
+                    # closing bracket or a stack entry behind them
+                    
+                    if empty @stack and empty tokens[1]
+                        @onError "missing expression after ','" tok:tok
+                        
                     @verb 'exp shift comma'
                     tokens.shift()                      # probably in a list or something similar ➜ ignore comma
                     

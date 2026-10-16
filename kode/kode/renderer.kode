@@ -1488,8 +1488,8 @@ class Renderer
                 close = ')'
                 
             op.operator.text == 'is'
-                if not op.rhs
-                    @onError "'is' is missing what to test against" op.operator
+                # a missing rhs is reported by the parser, which is the
+                # one place an operation is known to be short of one
                 if op.rhs?.type in ['single' 'double' 'triple']
                     ⮐ "typeof(#{@atom op.lhs}) === #{@node op.rhs}"
                 else

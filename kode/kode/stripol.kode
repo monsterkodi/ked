@@ -17,6 +17,8 @@ class Stripol
         @verbose = @kode.args.verbose
         @debug   = @kode.args.debug
         @raw     = @kode.args.raw
+
+    onError: msg info -> @kode.onError msg info
         
     #  ███████   ███████   ███      ███      ████████   ███████  █████████  
     # ███       ███   ███  ███      ███      ███       ███          ███     
@@ -191,7 +193,13 @@ class Stripol
                     if m? then matches.push [k, m] 
                     
                 matches.sort (a,b) -> a[1].index - b[1].index
+
+                # nothing matched at all means the string ran out with the
+                # interpolation still open - '#{id' and no closing }
                 
+                if empty matches
+                    @onError "unterminated string interpolation" line:line col:col+c
+                    
                 length = matches[0][1][0].length
                 index  = matches[0][1].index
                 

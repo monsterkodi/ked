@@ -99,13 +99,13 @@ plain = c ->
 
     ▸ misc fails
 
-        codemsg 'log "▪▪#{id"'      '???'
-        codemsg 'a,'                '???'
-        codemsg 'a...'              '???'
-        codemsg 'a:'                '???'
-        codemsg 'a++-'              '???'
-        codemsg 'a+-+'              '???'
-        codemsg 'a/-^'              '???'
+        codemsg 'log "▪▪#{id"'      'unterminated string interpolation'
+        codemsg 'a,'                "missing expression after ','"
+        codemsg 'a...'              'slice is missing the end'
+        codemsg 'a:'                'key is missing a value'
+        codemsg 'a++-'              '- is missing a right operand'
+        codemsg 'a+-+'              '- is missing a right operand'
+        codemsg 'a/-^'              '- is missing a right operand'
  
     ▸ the report shows where
 

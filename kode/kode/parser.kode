@@ -715,9 +715,27 @@ function Parser extends parse
                 tokens = tokens.shift().tokens
         
         @push "op#{op.text}"
-        
+
         rhs = @exp tokens
-        
+
+        # an operator needs a right operand. a postfix ++ or -- is the one
+        # exception: having nothing after it is what postfix means.
+        #
+        # a prefix + or - is an operation with no lhs at all, and it needs
+        # one just the same - in '-+' the minus swallowed the plus and left
+        # the expression standing on nothing. a bare op token further right
+        # of a real lhs is left alone, since that is how 'a & ~0xffff'
+        # reaches the renderer as a & ~
+        #
+        # 'is' names what it was looking for, so it says so
+
+        if not (op.text in ['++' '--'] and lhs)
+            if not rhs or (not lhs and rhs.type == 'op')
+                if op.text == 'is'
+                    @onError "'is' is missing what to test against" tok:op
+                else
+                    @onError "#{op.text} is missing a right operand" tok:op
+
         delete @blockAssign
         
         @pop "op#{op.text}"
@@ -807,6 +825,13 @@ function Parser extends parse
             upto = null
         else
             upto = @exp tokens
+
+            # 'x[1..]' and 'x[1...]' both end at a bracket and are open
+            # ended slices. anything else that runs out of tokens is a
+            # slice with no end at all, and renders as 'for (i = a; i < ;)'
+
+            if not upto
+                @onError "slice is missing the end" tok:dots
 
         slice:
             from: from
@@ -1004,6 +1029,12 @@ function Parser extends parse
             value = @exp tokens
 
         @pop ':'
+
+        # a key with a colon and nothing after it - 'a:' - is an object
+        # with a hole in it, and renders as '{a:}'
+
+        if not value
+            @onError "key is missing a value" tok:key
 
         k = type:'key'
         
