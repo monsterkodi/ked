@@ -114,7 +114,13 @@ plain = c ->
         # inside a switch. the parser for the construct that goes with them
         # is what normally eats them, so reaching the head of an expression
         # means that construct is not there. left alone they render as
-        # themselves and node gets a word it cannot parse
+        # themselves and node gets a word it cannot parse.
+        #
+        # what happens to be in front of the word does not change that. a
+        # value in front of it is not the missing if, and a finished
+        # statement on the line before is not the missing try or switch - so
+        # 'a else' and an 'else' on a line of its own are the same mistake
+        # as a bare one
 
         codemsg 'await'             'await is missing an operand'
         codemsg 'catch'             'catch is missing an operand'
@@ -127,10 +133,39 @@ plain = c ->
         codemsg 'typeof'            'typeof is missing an operand'
         codemsg 'when'              'when is missing an operand'
 
+        codemsg 'a await'           'await is missing an operand'
+        codemsg 'a catch'           'catch is missing an operand'
+        codemsg 'a else'            'else is missing an operand'
+        codemsg 'a extends'         'extends is missing an operand'
+        codemsg 'a finally'         'finally is missing an operand'
+        codemsg 'a super'           'super is missing an operand'
+        codemsg 'a throw'           'throw is missing an operand'
+        codemsg 'a typeof'          'typeof is missing an operand'
+        codemsg 'a when'            'when is missing an operand'
+
+        codemsg 'x = 1\ncatch'      'catch is missing an operand'
+        codemsg 'x = 1\nelse'       'else is missing an operand'
+        codemsg 'x = 1\nfinally'    'finally is missing an operand'
+        codemsg 'x = 1\nin'         'in is missing an operand'
+        codemsg 'x = 1\nsuper'      'super is missing an operand'
+        codemsg 'x = 1\nthrow'      'throw is missing an operand'
+        codemsg 'x = 1\nwhen'       'when is missing an operand'
+
+        codemsg 'x = in'            'in is missing an operand'
+
     ▸ switch needs a block
 
         codemsg 'switch x'          'block expected!'
         codemsg 'a switch'          'block expected!'
+
+    ▸ switch with an empty when
+
+        # 'else' is the one keyword that can head a switch branch of its own,
+        # so a switch without a when is a switch with nothing in it but an
+        # else and no condition. a when, on the other hand, is a branch, and
+        # a branch has to test something
+
+        codemsg 'switch x\n    when'   'when is missing an operand'
 
     ▸ a block where an expression belongs
 
