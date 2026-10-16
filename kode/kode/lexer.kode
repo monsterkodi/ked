@@ -93,7 +93,43 @@ Patterns =
         "abs"
     ]
     "var": "[▸a-zA-Z_$][a-zA-Z0-9_$]*"
-    
+
+# operators that are javascript's and not kode's. none of them is in
+# Patterns.op, so the lexer makes two or three tokens out of each and the
+# renderer puts them back together with a space in the wrong place -
+# 'a === b' came out as 'a === =\nb' and node stopped there.
+#
+# twelve of them are the javascript spelling of an operator kode has under
+# another name, and the renderer already emits the javascript one: 'a == b'
+# renders as 'a === b' and 'a and b' renders as 'a && b'. so these are not
+# broken kode that needs fixing - they are a second spelling for something
+# that already works, and the message says so and names the spelling to use.
+#
+# the value is what to write instead, and empty where there is none: '<<=' is
+# '<<' and '=' that javascript joins and kode does not, and there is nothing
+# to write instead of it.
+#
+# '&^' is not a javascript operator at all - it is go's 'and not' - so it
+# gets its own wording. 'a &^ b' was rendering as 'a & ^ b', which node
+# reads as 'a & (~b)': valid, and not what anyone meant.
+#
+# this is a module-level name and not a property because a bare assignment
+# inside the class body does not become one - jsOnlyError below came back
+# undefined that way.
+
+jsOnly =
+    '===':  '=='
+    '!==':  '!='
+    '&&':   'and'
+    '||':   'or'
+    '<<=':  ''
+    '>>=':  ''
+    '>>>=': ''
+    '&&=':  ''
+    '||=':  ''
+    '**=':  ''
+    '&^':   ''
+
 class Lexer
 
     @: @kode ->
@@ -118,6 +154,22 @@ class Lexer
     onError: msg info -> 
     
         @kode.onError msg info
+
+    # the message for an op match that is really the start of a longer one.
+    # text is the whole rest of the source, still including what matched, so
+    # '===' is caught on the '==' that Patterns.op did match.
+
+    jsOnlyError: matched text ->
+
+        for op, alt of jsOnly
+            if text.startsWith(op) and matched != op
+                if op == '&^'
+                    ⮐ '&^ is not a javascript operator'
+                if alt
+                    ⮐ "#{op} is not a kode operator - #{alt} is"
+                ⮐ "#{op} is not a kode operator"
+
+        ''
         
     # █████████   ███████   ███   ███  ████████  ███   ███  ███  ███████  ████████
     #    ███     ███   ███  ███  ███   ███       ████  ███  ███     ███   ███
@@ -154,6 +206,14 @@ class Lexer
                     
                     if key == 'then'   ➜ value = 'then';   key = 'keyword'
                     if key == 'return' ➜ value = 'return'; key = 'keyword'
+
+                    # an op that is really the front of a longer one kode does
+                    # not have. caught here because this is the only place
+                    # that still knows what was written next to what
+
+                    if key == 'op'
+                        if m = @jsOnlyError match[0], text
+                            @onError m tok:{ type:key text:value line:line col:col }
                         
                     if value == 'then' and tokens[-2]?.text == 'else' 
                         # skip then after else

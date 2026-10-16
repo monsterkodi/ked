@@ -10,66 +10,15 @@ use ./utils ▪ codemsg
 
 # every source kode accepts and turns into javascript that node cannot parse.
 #
-# found by six strategies, none of which knew what it was looking for:
-# enumerating every token in every position, matrices of keyword against
-# operand and operator against operand, the token fuzzer from fuzz.kode
-# over many seeds, and mutation fuzzing - deleting spans out of the 4135
-# snippets in this repo and seeing what the compiler made of the wreckage.
-# ~93.000 sources in all. None of them raised an internal error; every one
-# of them raised nothing at all.
-#
 # each line says what the compiler SHOULD say. they are all '???' because
-# nobody has decided yet, which is the point of the file - it is the list.
+# nobody has decided yet, which is the point of the file.
 #
 # when one starts passing, move it to error.kode: that file is for messages
 # that are settled, this one is for messages that are owed.
-#
-# the first line is the rule these were collected under, not a guarantee.
-# a word that renders as an ordinary identifier is not javascript node
-# cannot parse, and a good number of these never were - see 'a keyword with
-# no operand' below. the harness is what matters: a case stays here until
-# the compiler says something about it, or until someone decides it never
-# should.
 
 ▸ error_todo
 
-    ▸ a token on its own
-
-        # four of these are fine. '\' is a backslash and '●' is the profiling
-        # mark, and the arrow tokens on their own are '(function () {})' and
-        # a bind of it - all javascript node parses. only '⮐' is open, and it
-        # is the top-level-return question.
-
-        # codemsg '\\' '???'
-        # codemsg '●' '???'
-        codemsg '⮐' '???'
-        # codemsg '->' '???'
-        # codemsg '=>' '???'
-
     ▸ a keyword with no operand
-
-        # ten of these are settled and live in error.kode now: else catch
-        # finally throw super extends when in await typeof. each is a
-        # javascript reserved word or renders as one, so a bare one is
-        # always broken.
-        #
-        # the rest are not compiler bugs and this section was wrong about
-        # them. kode uses abs, clamp, copy, dbg, empty, first, from, last,
-        # lpad, min, max, noon, of, rpad, trim and valid as ordinary
-        # variable names - {new: new} and {delete: delete} are what
-        # object.kode says they should compile to - so a word that renders
-        # as a plain identifier is a name, and the compiler cannot tell a
-        # forgotten call from a variable. 'abs' on its own compiles to the
-        # identifier abs, which node parses and then throws on at runtime.
-        # not a message the compiler owes.
-        #
-        # break and continue are the other two: what they are missing is a
-        # loop, not an operand, and kode.kode:278 leans on a bare continue
-        # standing on its own.
-        #
-        # do and case are not kode keywords at all. the lexer takes them
-        # for names and the renderer hands node a reserved word, so they
-        # belong with 'a reserved word used as a name' below.
 
         codemsg 'break' '???'
         codemsg 'continue' '???'
@@ -81,25 +30,8 @@ use ./utils ▪ codemsg
 
     ▸ a keyword in the wrong place
 
-        # four of these are not bugs. 'of', 'from', 'empty' and 'valid' are
-        # kode words that happen to be ordinary javascript identifiers, so
-        # 'a from' rendering as 'a(from)' is not javascript node cannot
-        # parse. 'empty' and 'valid' read worst of the four as names - but
-        # they are names, and a compiler that rejected them would be
-        # rejecting them for reading like a word rather than for being one.
-
-        # codemsg 'a of' '???'
         codemsg 'a new' '???'
-        # codemsg 'a from' '???'
         codemsg 'a break' '???'
-        # codemsg 'a empty' '???'
-        # codemsg 'a valid' '???'
-
-        # the six returns are the top-level-return question, which is not
-        # settled yet. 'a new' is the new/delete-as-a-value family, and
-        # 'a break' and 'a continue' want to know what loop they are in,
-        # which is the same question in a different direction.
-
         codemsg 'a return' '???'
         codemsg 'd return' '???'
         codemsg 'm return' '???'
@@ -107,178 +39,10 @@ use ./utils ▪ codemsg
         codemsg 't return' '???'
         codemsg 'x return' '???'
         codemsg 'a continue' '???'
+        
+    ▸ return
 
-    ▸ await outside async
-
-        # none of these are bugs. top level await is javascript: a module may
-        # await at its top level and node has run it that way since v14.8.
-        # kode emits a module - every file it writes is parsed as one - so
-        # 'await a' at the top of a kode file becomes 'await a' at the top of
-        # a module and node takes it.
-        #
-        # these were here because the harness that found them parsed the
-        # output as a function body, which is not what it is. re-checked with
-        # node --check on a .mjs, all eleven parse. the same mistake had
-        # already moved the reserved words below once.
-        #
-        # kept as the note it is. if kode ever stops emitting a module, this
-        # section is the list to come back to.
-
-        # codemsg '○ a' '???'
-        # codemsg '○ -> a' '???'
-        # codemsg 'await @' '???'
-        # codemsg 'await 0' '???'
-        # codemsg 'await a' '???'
-        # codemsg 'await f' '???'
-        # codemsg 'await t' '???'
-        # codemsg 'x = ○ a' '???'
-        # codemsg "await 's'" '???'
-        # codemsg 'f await a' '???'
-        # codemsg 'x = await a' '???'
-
-    ▸ switch with an empty when
-
-        codemsg 'switch x\n    else' '???'
-
-    ▸ an operator the lexer does not have
-
-        # none of these are in lexer.Patterns.op, so they lex as two or
-        # three separate tokens and the renderer puts them back together
-        # with the wrong spacing: 'a === b' comes out as 'a === =\nb'.
-        #
-        # the note that used to be here said operator.kode lists <<= >>= >>>=
-        # &&= ||= and the renderer knows how to emit them, so this was only a
-        # lexer job. that is not the whole of it, and this section is not a
-        # defect list - it is a question about the surface of the language.
-        #
-        # twelve of the thirteen are javascript spellings of operators kode
-        # already has under another name, and the renderer already emits the
-        # javascript ones:
-        #
-        #     a == b   renders  a === b        a === b  is the same source
-        #     a != b   renders  a !== b        a !== b  is the same source
-        #     a and b  renders  a && b         a && b   is the same source
-        #     a or b   renders  a || b         a || b   is the same source
-        #
-        # the rest are a compound assignment of one of those. so adding them
-        # to the lexer would not fix anything that is broken - it would give
-        # kode a second spelling for operators it has, and the answer to
-        # whether it wants that is a decision, not a bug.
-        #
-        # '&^' is a third thing again. it is not a javascript operator at
-        # all - it is go's 'and not' - so there is nothing for it to be an
-        # alias of. kode renders 'a &^ b' as 'a & ^ b', which node reads as
-        # 'a & (~b)': valid, and not what anyone meant.
-        #
-        # the mechanical part is not free either. '&&', '||', '===', '!==',
-        # '**', '**=' and '&^' are all absent from operator.kode's
-        # precedence, so each of them would come back as Infinity - and in
-        # Operator.op the swap test is 'if p[i] > p[i-1]', so an Infinity
-        # anywhere in a chain forces a reorder. adding the tokens is only
-        # half of it; every one needs a precedence number, and '**' needs one
-        # of its own since it binds tighter than '*' in javascript and the
-        # table has '*' at 2.
-        #
-        # so: not done, and deliberately. the two coherent answers are to
-        # leave the javascript spellings out and say so in a message, or to
-        # take them as aliases and add the precedence entries. either is a
-        # language decision.
-
-        codemsg 'a === b' '???'
-        codemsg 'a !== b' '???'
-        codemsg 'a && b' '???'
-        codemsg 'a || b' '???'
-        codemsg 'a <<= b' '???'
-        codemsg 'a >>= b' '???'
-        codemsg 'a >>>= b' '???'
-        codemsg 'a &&= b' '???'
-        codemsg 'a ||= b' '???'
-        codemsg 'a **= b' '???'
-        codemsg 'a &^ b' '???'
-        codemsg 'x = a && b' '???'
-        codemsg 'a === 1' '???'
-
-
-    ▸ the ? family
-
-        codemsg 'a?b' '???'
-
-    ▸ a reserved word used as a name
-
-        # words javascript will not have as a name in any mode at all. the
-        # lexer takes them for names because it has no opinion, the renderer
-        # hands them on as themselves, and node reads 'var' or 'with' or 'in'
-        # and stops. every case here is the same rule about a different word,
-        # so they are grouped by the word now rather than by where the fuzzer
-        # happened to find them.
-        #
-        # one of them is in here because what comes out is wrong rather than
-        # unparseable: 'log in' renders as '_k_.in(log,)'. the renderer reads
-        # 'in' as a binary operator with no left operand, puts 'log' in the
-        # left slot, and calls the _k_.in helper with one argument. node is
-        # happy with it, which is why a syntax check does not find it
-
-
-
-
-
-
-
-
-        codemsg 'new.a' '???'
-        codemsg 'new()' '???'
-        codemsg 'new = 1' '???'
-        codemsg 'log new' '???'
-
-
-
-        codemsg 'delete' '???'
-        codemsg 'super.a' '???'
-
-    ▸ a word reserved only in a module
-
-        # these are the future reserved words and the strict mode ones. they
-        # are ordinary identifiers in a sloppy script and nowhere else, and
-        # kode emits a module - it uses import and export - so a module is
-        # always strict and these always stop. node says 'Unexpected strict
-        # mode reserved word' about every one.
-        #
-        # a rule that only rejects the words reserved everywhere would let
-        # all ten of these through, so whatever answers this section needs
-        # the strict mode list as well as the other one
-
-
-
-    ▸ a global and a literal are not reserved words
-
-        # these twenty are not bugs and the compiler is right to say nothing.
-        # they came out of the same hunt as the two sections above and there
-        # is no message owed for any of them, so they are written out here
-        # rather than left above as tests that can never pass.
-        #
-        # 'null', 'true', 'false' and 'this' cannot be a name, but they are
-        # values - 'x = null' and 'x = this' are exactly right, and 'null.a',
-        # 'true()' and 'this.x' are ordinary javascript.
-        #
-        # 'NaN' and 'eval' are not reserved at all. they are globals, and a
-        # module may bind a name that shadows one: 'NaN = 1' compiles to
-        # 'var NaN; NaN = 1' and means what it says.
-        #
-        # what they have in common with the sections above is only the shape
-        # of the hunt - a javascript word in a place a kode name went. kode
-        # lexes all of them as plain vars, which is what they are.
-
-        #   NaN        eval       null       this       true       false
-        #   NaN.a      eval.a     null.a     this.a     true.a     false.a
-        #   NaN()      eval()     null()     this()     true()     false()
-        #   log NaN    NaN = 1
-
-    ▸ postfix on something that cannot take one
-
-        codemsg 'f()++' '???'
-
-    ▸ return in the wrong place
-
+        codemsg '⮐' '???'
         codemsg '⮐ ⮐' '???'
         codemsg '⮐ x' '???'
         codemsg 'a ⮐' '???'
@@ -292,6 +56,28 @@ use ./utils ▪ codemsg
         codemsg 'f x ⮐' '???'
         codemsg '●▸\n \\\n⮐' '???'
         codemsg 'x = 1\nx ⮐' '???'
+        
+
+    ▸ switch with an empty when
+
+        codemsg 'switch x\n    else' '???'
+
+    ▸ the ? family
+
+        codemsg 'a?b' '???'
+
+    ▸ a reserved word used as a name
+
+        codemsg 'new.a' '???'
+        codemsg 'new()' '???'
+        codemsg 'new = 1' '???'
+        codemsg 'log new' '???'
+        codemsg 'delete' '???'
+        codemsg 'super.a' '???'
+
+    ▸ postfix on something that cannot take one
+
+        codemsg 'f()++' '???'
 
     ▸ dots and slices
 
@@ -300,10 +86,6 @@ use ./utils ▪ codemsg
         codemsg 'a[..]' '???'
         codemsg 'x[...]' '???'
         codemsg '[1, 2, ...]' '???'
-
-    ▸ malformed numbers
-
-        codemsg '.5' '???'
         codemsg '1..2' '???'
 
     ▸ this used as a name
@@ -313,10 +95,12 @@ use ./utils ▪ codemsg
 
     ▸ assert with nothing to assert
 
-        codemsg '▴ x' '???'
         codemsg 'a ▴ "msg"' '???'
+        
+    ▸ check what this actually does right now
+        # codemsg '▴ x' '???'
 
-    ▸ a property chain on the next line
+    ▸ a property chain on the next line, TBD: error or missing feature?
 
         codemsg 'a\n    .b' '???'
         codemsg 'a\n    .b.c' '???'
@@ -325,12 +109,8 @@ use ./utils ▪ codemsg
 
     ▸ seen by the fuzzer
 
-        codemsg '&&\n●' '???'
-        codemsg '||\n●' '???'
         codemsg '●▸ \\' '???'
-        codemsg '&&\n ●' '???'
         codemsg '? +\n 0' '???'
-        codemsg '|| \n ●' '???'
         codemsg '~ each' '???'
         codemsg '▴ ^ \n●' '???'
         codemsg 'ceil a?' '???'
@@ -339,3 +119,7 @@ use ./utils ▪ codemsg
         codemsg 'class 4' '???'
         codemsg 'last a?' '???'
         codemsg ', [1, 2]' '???'
+
+    # ▸ zero-less floats
+    # 
+    #     codemsg '.5' '???'

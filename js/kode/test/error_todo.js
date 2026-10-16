@@ -4,10 +4,6 @@ let codemsg = utils.codemsg
 
 toExport["error_todo"] = function ()
 {
-    section("a token on its own", function ()
-    {
-        codemsg('⮐','???')
-    })
     section("a keyword with no operand", function ()
     {
         codemsg('break','???')
@@ -30,28 +26,9 @@ toExport["error_todo"] = function ()
         codemsg('x return','???')
         codemsg('a continue','???')
     })
-    section("await outside async", function ()
-    {
-    })
     section("switch with an empty when", function ()
     {
         codemsg('switch x\n    else','???')
-    })
-    section("an operator the lexer does not have", function ()
-    {
-        codemsg('a === b','???')
-        codemsg('a !== b','???')
-        codemsg('a && b','???')
-        codemsg('a || b','???')
-        codemsg('a <<= b','???')
-        codemsg('a >>= b','???')
-        codemsg('a >>>= b','???')
-        codemsg('a &&= b','???')
-        codemsg('a ||= b','???')
-        codemsg('a **= b','???')
-        codemsg('a &^ b','???')
-        codemsg('x = a && b','???')
-        codemsg('a === 1','???')
     })
     section("the ? family", function ()
     {
@@ -66,18 +43,13 @@ toExport["error_todo"] = function ()
         codemsg('delete','???')
         codemsg('super.a','???')
     })
-    section("a word reserved only in a module", function ()
-    {
-    })
-    section("a global and a literal are not reserved words", function ()
-    {
-    })
     section("postfix on something that cannot take one", function ()
     {
         codemsg('f()++','???')
     })
-    section("return in the wrong place", function ()
+    section("return", function ()
     {
+        codemsg('⮐','???')
         codemsg('⮐ ⮐','???')
         codemsg('⮐ x','???')
         codemsg('a ⮐','???')
@@ -99,10 +71,6 @@ toExport["error_todo"] = function ()
         codemsg('a[..]','???')
         codemsg('x[...]','???')
         codemsg('[1, 2, ...]','???')
-    })
-    section("malformed numbers", function ()
-    {
-        codemsg('.5','???')
         codemsg('1..2','???')
     })
     section("this used as a name", function ()
@@ -112,10 +80,12 @@ toExport["error_todo"] = function ()
     })
     section("assert with nothing to assert", function ()
     {
-        codemsg('▴ x','???')
         codemsg('a ▴ "msg"','???')
     })
-    section("a property chain on the next line", function ()
+    section("check what this actually does right now", function ()
+    {
+    })
+    section("a property chain on the next line, TBD: error or missing feature?", function ()
     {
         codemsg('a\n    .b','???')
         codemsg('a\n    .b.c','???')
@@ -124,12 +94,8 @@ toExport["error_todo"] = function ()
     })
     section("seen by the fuzzer", function ()
     {
-        codemsg('&&\n●','???')
-        codemsg('||\n●','???')
         codemsg('●▸ \\','???')
-        codemsg('&&\n ●','???')
         codemsg('? +\n 0','???')
-        codemsg('|| \n ●','???')
         codemsg('~ each','???')
         codemsg('▴ ^ \n●','???')
         codemsg('ceil a?','???')
@@ -145,5 +111,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZXJyb3JfdG9kby5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rb2RlL3Rlc3QvZXJyb3JfdG9kby5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7OztRQTRDUSxRQUFRLElBQUk7Ozs7UUE2QlosUUFBUSxRQUFRO1FBQ2hCLFFBQVEsV0FBVzs7OztRQUluQixRQUFRLGFBQWE7UUFDckIsUUFBUSxjQUFjOzs7O1FBWXRCLFFBQVEsUUFBUTtRQUVoQixRQUFRLFVBQVU7UUFTbEIsUUFBUSxXQUFXO1FBQ25CLFFBQVEsV0FBVztRQUNuQixRQUFRLFdBQVc7UUFDbkIsUUFBUSxXQUFXO1FBQ25CLFFBQVEsV0FBVztRQUNuQixRQUFRLFdBQVc7UUFDbkIsUUFBUSxhQUFhOzs7Ozs7O1FBZ0NyQixRQUFRLHFCQUFxQjs7OztRQThDN0IsUUFBUSxVQUFVO1FBQ2xCLFFBQVEsVUFBVTtRQUNsQixRQUFRLFNBQVM7UUFDakIsUUFBUSxTQUFTO1FBQ2pCLFFBQVEsVUFBVTtRQUNsQixRQUFRLFVBQVU7UUFDbEIsUUFBUSxXQUFXO1FBQ25CLFFBQVEsVUFBVTtRQUNsQixRQUFRLFVBQVU7UUFDbEIsUUFBUSxVQUFVO1FBQ2xCLFFBQVEsU0FBUztRQUNqQixRQUFRLGFBQWE7UUFDckIsUUFBUSxVQUFVOzs7O1FBS2xCLFFBQVEsTUFBTTs7OztRQXdCZCxRQUFRLFFBQVE7UUFDaEIsUUFBUSxRQUFRO1FBQ2hCLFFBQVEsVUFBVTtRQUNsQixRQUFRLFVBQVU7UUFJbEIsUUFBUSxTQUFTO1FBQ2pCLFFBQVEsVUFBVTs7Ozs7Ozs7OztRQTBDbEIsUUFBUSxRQUFROzs7O1FBSWhCLFFBQVEsTUFBTTtRQUNkLFFBQVEsTUFBTTtRQUNkLFFBQVEsTUFBTTtRQUNkLFFBQVEsTUFBTTtRQUNkLFFBQVEsTUFBTTtRQUNkLFFBQVEsTUFBTTtRQUNkLFFBQVEsUUFBUTtRQUNoQixRQUFRLFFBQVE7UUFDaEIsUUFBUSxPQUFPO1FBQ2YsUUFBUSxRQUFRO1FBQ2hCLFFBQVEsUUFBUTtRQUNoQixRQUFRLGFBQWE7UUFDckIsUUFBUSxhQUFhOzs7O1FBSXJCLFFBQVEsTUFBTTtRQUNkLFFBQVEsUUFBUTtRQUNoQixRQUFRLFFBQVE7UUFDaEIsUUFBUSxTQUFTO1FBQ2pCLFFBQVEsY0FBYzs7OztRQUl0QixRQUFRLEtBQUs7UUFDYixRQUFRLE9BQU87Ozs7UUFJZixRQUFRLElBQUk7UUFDWixRQUFRLFFBQVE7Ozs7UUFJaEIsUUFBUSxNQUFNO1FBQ2QsUUFBUSxZQUFZOzs7O1FBSXBCLFFBQVEsWUFBWTtRQUNwQixRQUFRLGNBQWM7UUFDdEIsUUFBUSxjQUFjO1FBQ3RCLFFBQVEsd0JBQXdCOzs7O1FBSWhDLFFBQVEsUUFBUTtRQUNoQixRQUFRLFFBQVE7UUFDaEIsUUFBUSxRQUFRO1FBQ2hCLFFBQVEsU0FBUztRQUNqQixRQUFRLFVBQVU7UUFDbEIsUUFBUSxVQUFVO1FBQ2xCLFFBQVEsU0FBUztRQUNqQixRQUFRLFVBQVU7UUFDbEIsUUFBUSxVQUFVO1FBQ2xCLFFBQVEsVUFBVTtRQUNsQixRQUFRLFVBQVU7UUFDbEIsUUFBUSxVQUFVO1FBQ2xCLFFBQVEsVUFBVTtRQUNsQixRQUFRLFdBQVcifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZXJyb3JfdG9kby5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rb2RlL3Rlc3QvZXJyb3JfdG9kby5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7OztRQXNCUSxRQUFRLFFBQVE7UUFDaEIsUUFBUSxXQUFXOzs7O1FBSW5CLFFBQVEsYUFBYTtRQUNyQixRQUFRLGNBQWM7Ozs7UUFJdEIsUUFBUSxRQUFRO1FBQ2hCLFFBQVEsVUFBVTtRQUNsQixRQUFRLFdBQVc7UUFDbkIsUUFBUSxXQUFXO1FBQ25CLFFBQVEsV0FBVztRQUNuQixRQUFRLFdBQVc7UUFDbkIsUUFBUSxXQUFXO1FBQ25CLFFBQVEsV0FBVztRQUNuQixRQUFRLGFBQWE7Ozs7UUFJckIsUUFBUSxxQkFBcUI7Ozs7UUFJN0IsUUFBUSxNQUFNOzs7O1FBSWQsUUFBUSxRQUFRO1FBQ2hCLFFBQVEsUUFBUTtRQUNoQixRQUFRLFVBQVU7UUFDbEIsUUFBUSxVQUFVO1FBQ2xCLFFBQVEsU0FBUztRQUNqQixRQUFRLFVBQVU7Ozs7UUFJbEIsUUFBUSxRQUFROzs7O1FBSWhCLFFBQVEsSUFBSTtRQUNaLFFBQVEsTUFBTTtRQUNkLFFBQVEsTUFBTTtRQUNkLFFBQVEsTUFBTTtRQUNkLFFBQVEsTUFBTTtRQUNkLFFBQVEsTUFBTTtRQUNkLFFBQVEsTUFBTTtRQUNkLFFBQVEsUUFBUTtRQUNoQixRQUFRLFFBQVE7UUFDaEIsUUFBUSxPQUFPO1FBQ2YsUUFBUSxRQUFRO1FBQ2hCLFFBQVEsUUFBUTtRQUNoQixRQUFRLGFBQWE7UUFDckIsUUFBUSxhQUFhOzs7O1FBSXJCLFFBQVEsTUFBTTtRQUNkLFFBQVEsUUFBUTtRQUNoQixRQUFRLFFBQVE7UUFDaEIsUUFBUSxTQUFTO1FBQ2pCLFFBQVEsY0FBYztRQUN0QixRQUFRLE9BQU87Ozs7UUFJZixRQUFRLElBQUk7UUFDWixRQUFRLFFBQVE7Ozs7UUFJaEIsUUFBUSxZQUFZOzs7Ozs7O1FBT3BCLFFBQVEsWUFBWTtRQUNwQixRQUFRLGNBQWM7UUFDdEIsUUFBUSxjQUFjO1FBQ3RCLFFBQVEsd0JBQXdCOzs7O1FBSWhDLFFBQVEsUUFBUTtRQUNoQixRQUFRLFVBQVU7UUFDbEIsUUFBUSxTQUFTO1FBQ2pCLFFBQVEsVUFBVTtRQUNsQixRQUFRLFVBQVU7UUFDbEIsUUFBUSxVQUFVO1FBQ2xCLFFBQVEsVUFBVTtRQUNsQixRQUFRLFVBQVU7UUFDbEIsUUFBUSxVQUFVO1FBQ2xCLFFBQVEsV0FBVyJ9
 //# sourceURL=file://kode/kode/test/error_todo.kode

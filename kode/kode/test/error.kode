@@ -22,21 +22,19 @@ plain = c ->
 
     ▸ missing closing brackets
 
+        codemsg '('                 'parens is missing closing )'
         codemsg 'x = (1 + 2\n'      'parens is missing closing )'
-        codemsg 'x = [1, 2\n'       'array is missing closing ]'
         codemsg '(((('              'parens is missing closing )'  
         codemsg '[['                'array is missing closing ]'   
-        codemsg '{{'                'curly is missing closing }'   
+        codemsg 'x = [1, 2\n'       'array is missing closing ]'
         codemsg 'a[0'               'index is missing closing ]'   
+        codemsg '{{'                'curly is missing closing }'   
         codemsg 'a(1,'              'explicit call is missing closing bracket )' 
         codemsg 'r = a.b((rg)'      'explicit call is missing closing bracket )'
 
-        # one opener on its own is the same mistake as one too many
-
-        codemsg '('                 'parens is missing closing )'
         codemsg '['                 'array is missing closing ]'
         codemsg '{'                 'curly is missing closing }'
-        codemsg '[ \n]\n○-'     'array is missing closing ]'
+        codemsg '[ \n]\n○-'         'array is missing closing ]'
 
         codemsg 'f('                'explicit call is missing closing bracket )'
         codemsg 'f(a'               'explicit call is missing closing bracket )'
@@ -67,37 +65,31 @@ plain = c ->
         codemsg 'a ='               'assignment without operand' 
         codemsg 'a.b ='             'assignment without operand' 
 
-    ▸ an operator the lexer does not have
+    ▸ is not a kode operator
 
-        # these are not in lexer.Patterns.op, so they lex as two or three
-        # separate tokens. what comes out is a complaint about whichever
-        # piece the parser got to first, which is all the compiler has to
-        # go on. the rest of them - 'a === b', 'a && b' and friends - make
-        # it through with nothing said at all, and are in error_todo.
+        codemsg '==='               'is not a kode operator'
+        codemsg '!=='               'is not a kode operator'
+        codemsg '<<='               'is not a kode operator'
+        codemsg '>>='               'is not a kode operator'
+        codemsg '>>>='              'is not a kode operator'
+        codemsg '**='               'is not a kode operator'
+        codemsg '||='               'is not a kode operator'
+        codemsg '&&'                'is not a kode operator'
+        codemsg '||\n)'             'is not a kode operator'
+        codemsg '&& \n}'            'is not a kode operator'
+        codemsg '&&='               'is not a kode operator'
+        codemsg '||'                'is not a kode operator'
+        codemsg '=== >'             'is not a kode operator'
+        codemsg 'o  ==='            'is not a kode operator'
+        codemsg 'x  ==='            'is not a kode operator'
+        codemsg '[0] ==='           'is not a kode operator'
+        codemsg '=== -'             'is not a kode operator'
 
-        codemsg '==='               'assignment without operand'
-        codemsg '!=='               'assignment without operand'
-        codemsg '<<='               'assignment without operand'
-        codemsg '>>='               'assignment without operand'
-        codemsg '>>>='              'assignment without operand'
-        codemsg '**='               'assignment without operand'
+    ▸ is missing an operand
 
-    ▸ a binary operator with no right operand
-
-        codemsg '&&'                '& is missing a right operand'
-        codemsg '&&='               '&= is missing a right operand'
-        codemsg '||'                '| is missing a right operand'
-        codemsg '||='               '|= is missing a right operand'
-        codemsg '&^'                '^ is missing a right operand'
+        codemsg '&^'                'is not a javascript operator'
         codemsg '+++'               '++ is missing a right operand'
         codemsg 'a +++ b'           '++ is missing a right operand'
-
-    ▸ a binary operator with nothing to its left
-
-        # a binary operator standing on its own has no left operand. what
-        # follows it, if anything, is of no use to it - '= *' is not a thing
-        # kode can mean
-
         codemsg '*'                 '* is missing an operand'
         codemsg '/'                 '/ is missing an operand'
         codemsg '%'                 '% is missing an operand'
@@ -108,17 +100,9 @@ plain = c ->
         codemsg '>'                 '> is missing an operand'
         codemsg '='                 '= is missing an operand'
         codemsg '=='                '== is missing an operand'
-
-        # and with something in front of it, which is no use to a binary
-        # operator either
-
-        codemsg '=== >'             '> is missing an operand'
-        codemsg 'o  ==='            '= is missing an operand'
         codemsg 't >> *'            '* is missing an operand'
-        codemsg 'x  ==='            '= is missing an operand'
-        codemsg '[0] ==='           '= is missing an operand'
         codemsg 'y and /'           '/ is missing an operand'
-        codemsg '>\n%\n*'          '* is missing an operand'
+        codemsg '>\n%\n*'           '* is missing an operand'
 
     ▸ dots with nothing to slice
 
@@ -144,7 +128,6 @@ plain = c ->
         codemsg '!'                 '! is missing a right operand'
 
         codemsg "'s' !"             '! is missing a right operand'
-        codemsg '=== -'             '- is missing a right operand'
         codemsg 'p ~ +'             '+ is missing a right operand'
 
         # '~' is unary, and in between two values it is a binary operator
@@ -177,10 +160,8 @@ plain = c ->
 
         codemsg 'a % )'             'unmatched closing bracket'
         codemsg 'e % }'             'unmatched closing bracket'
-        codemsg '[0] ^\n)'         'unmatched closing bracket'
+        codemsg '[0] ^\n)'          'unmatched closing bracket'
         codemsg 'y \\\n%\n)'        'unmatched closing bracket'
-        codemsg '||\n)'             'unmatched closing bracket'
-        codemsg '&& \n}'            'unmatched closing bracket'
 
         codemsg 'f(a % )'           'explicit call is missing closing bracket )'
 
@@ -450,6 +431,66 @@ plain = c ->
         codemsg "'s' ▴"             'assert is missing what to assert'
         codemsg '"str" ▴'           'assert is missing what to assert'
 
+    ▸ a javascript operator that is not a kode operator
+
+        # twelve of these are the javascript spelling of an operator kode
+        # has under another name, and the renderer already emits the
+        # javascript one: 'a == b' comes out as 'a === b' and 'a and b' comes
+        # out as 'a && b'. so none of them is broken kode wanting a fix -
+        # it is a second spelling for something that already works, and the
+        # message names the spelling to use instead.
+        #
+        # 'a === b' used to compile to 'a === =\nb' and stop there, because
+        # '===' is not in Patterns.op: the lexer made '==' and then '=', and
+        # the renderer put them back together with a space in the wrong place.
+        # the check is in the lexer rather than in the parser because the
+        # lexer is the only place that still knows the two were written next
+        # to each other - by the time there are two tokens that is gone
+
+        codemsg 'a === b'             '=== is not a kode operator - == is'
+        codemsg 'a !== b'             '!== is not a kode operator - != is'
+        codemsg 'a && b'              '&& is not a kode operator - and is'
+        codemsg 'a || b'              '|| is not a kode operator - or is'
+        codemsg 'x = a && b'          '&& is not a kode operator - and is'
+        codemsg 'a === 1'             '=== is not a kode operator - == is'
+
+        # the compound assignments have no spelling to point at. '<<=' is
+        # '<<' and '=' that javascript joins and kode does not, so the
+        # message stops at saying that it is not one
+
+        codemsg 'a <<= b'             '<<= is not a kode operator'
+        codemsg 'a >>= b'             '>>= is not a kode operator'
+        codemsg 'a >>>= b'            '>>>= is not a kode operator'
+        codemsg 'a **= b'             '**= is not a kode operator'
+
+        # '&&=' and '||=' name the spelling of the operator in them even
+        # though there is no compound form to write instead - 'and' and 'or'
+        # are what the operator is called, and that part is the answer
+
+        codemsg 'a &&= b'             '&& is not a kode operator - and is'
+        codemsg 'a ||= b'             '|| is not a kode operator - or is'
+
+        # '&^' is not a javascript operator at all. it is go's 'and not', and
+        # it was rendering as 'a & ^ b', which node reads as 'a & (~b)':
+        # valid, and not what anyone meant
+
+        codemsg 'a &^ b'              '&^ is not a javascript operator'
+
+        # and the operators kode does have are untouched, including the ones
+        # that share a prefix with the ones above
+
+        kc  'a == b'    ▸ 'a === b'
+        kc  'a != b'    ▸ 'a !== b'
+        kc  'a and b'   ▸ 'a && b'
+        kc  'a or b'    ▸ 'a || b'
+        kc  'a << b'    ▸ 'a << b'
+        kc  'a >> b'    ▸ 'a >> b'
+        kc  'a >>> b'   ▸ 'a >>> b'
+        kc  'a ** b'    ▸ 'a ** b'
+        kc  'a <= b'    ▸ 'a <= b'
+        kc  'a >= b'    ▸ 'a >= b'
+        kc  'a += 1'    ▸ 'a += 1'
+
     ▸ a glyph on its own
 
         # '■', '▪', '◆' and '▸' are markers, and each one means something in
@@ -629,7 +670,7 @@ plain = c ->
         codemsg 'a,'                "missing expression after ','"
         codemsg ','                 "missing expression after ','"
         codemsg ':'                 ': is missing a key and a value'
-        codemsg '? ==='             '= is missing an operand'
+        codemsg '? ==='             '=== is not a kode operator'
         codemsg 'a...'              'slice is missing the end'
         codemsg '1...'              'slice is missing the end'
         codemsg 'a:'                'key is missing a value'
