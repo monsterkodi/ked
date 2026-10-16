@@ -12,8 +12,9 @@ kde = -> new kode header:false
 kdd = -> new kode header:false debug:true verbose:true
 
 # the transpiled js, with the header and the var preamble the compiler
-# puts in front of it taken back off. defined here rather than inline in
-# the export, so errmsg below can use it too
+# puts in front of it, and the sourceURL it puts at the foot of it, taken
+# back off. defined here rather than inline in the export, so errmsg below
+# can use it too
 
 kc = c f ->
 
@@ -21,6 +22,13 @@ kc = c f ->
     if k.startsWith '// monsterkodi/kode'   then k = k[k.indexOf('\n')+2..]
     if k.startsWith 'var _k_'               then k = k[k.indexOf('\n')+2..]
     if k.startsWith 'var '                  then k = k[k.indexOf('\n')+2..]
+
+    # the sourceURL goes out whether or not there is a sourcemap, so a test
+    # asking for the js should not have to know which it got
+
+    i = k.indexOf '\n//# source'
+    if i >= 0 then k = k.slice 0, i
+
     k
 
 # what the compiler said about a source, or '' if it said nothing at all.

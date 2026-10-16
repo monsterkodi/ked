@@ -93,26 +93,51 @@ gatherFiles = ○->
 # ███  ███   ███  ████  ███   ███  ███   ███  
 # ███   ███  ███   ███  ███   ███  ███████    
 
-# the path of the source a generated file was made from, relative to the
-# file itself the way a stack frame is, or '' if kode did not make it.
+# the absolute path of the source a generated file was made from, or '' if
+# kode did not make it. it is the only thing telling a generated file from
+# a hand written one - js/csi.js and js/kxk/kxk.js have no source and no
+# stamp, and are not anybody's to delete.
 #
-# every file the transpiler writes ends in a base64 sourcemap and that map
-# says where the text came from. it is the only thing telling a generated
-# file from a hand written one - js/csi.js and js/kxk/kxk.js have no source
-# and no map, and are not anybody's to delete.
+# there are two ways a compiled file says where it came from and they are
+# measured from different places, so both are normalised here rather than
+# at the call site:
+#
+#   //# sourceURL=file://<path>   from the working directory. written
+#                                whether or not there is a sourcemap
+#   the map's sources[0]          from the file carrying it, the way a
+#                                stack frame is
+#
+# the sourceURL is read first and the map is the fallback. that order is
+# the whole point: -map used to take the stamp with it, so a tree compiled
+# without maps was a tree nobody could ever clean up.
+#
+# the line is found by hand because a regex literal cannot hold a '#' in
+# this language - the lexer takes it for the start of a comment - so
+# /^\/\/\# sourceURL=/ would arrive as /^\/\/.
 
-stampSource = text =>
+stampSource = (text, file) =>
+
+    lines = text.split '\n'
+    from  = ''
+
+    for line in lines
+
+        rel = line.replace '//# sourceURL=file://' ''
+
+        if rel != line
+            from = slash.absolute slash.path(process.cwd(), rel)
+
+    if from
+        ⮐ from
 
     m = /sourceMappingURL=data:application\/json;base64,([A-Za-z0-9+\/=]*)/.exec text
-    if not (m and valid m[1])
-        ⮐ ''
+    if not (m and valid m[1]) ➜ ⮐ ''
 
     b64 = Buffer.from(m[1],'base64')
     map = JSON.parse b64.toString('utf8')
-    if not (valid map.sources and valid map.sources[0])
-        ⮐ ''
+    if not (valid map.sources and valid map.sources[0]) ➜ ⮐ ''
 
-    map.sources[0]
+    slash.absolute slash.path(slash.dir(file), map.sources[0])
 
 # take away the generated files in `dirs` whose source is gone.
 #
@@ -144,12 +169,8 @@ reconcile = dirs opt={} ○->
 
             file = item.path
             text = ○ nfs.read file
-            rel  = stampSource text
-            if not rel ➜ continue
-
-            # the map says where it came from, the way a stack frame does:
-            # relative to the file that carries it
-            from = slash.absolute slash.path(slash.dir(file), rel)
+            from = stampSource text, file
+            if not from ➜ continue
 
             if not from.startsWith srcDir + '/' ➜ continue
 

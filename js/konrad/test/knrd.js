@@ -1,5 +1,5 @@
 var toExport = {}
-var afterDirish, afterHand, afterKept, afterStray, dirs, dirText, gone1, goneJsText, goneNoText, hereText, isFile, jdir, jp, kdir, kp, nothing, nowhere, opt, root, stamped, strayText, write
+var afterDirish, afterHand, afterKept, afterStray, away, bad, dirs, dirText, fromCwd, gone1, goneJsText, goneNoText, hereText, isFile, jdir, jp, kdir, kp, mapHereText, mapped, nothing, nowhere, opt, relAway, root, stamped, strayText, write
 
 import knrd from "../knrd.js"
 
@@ -8,6 +8,11 @@ import slash from "../../kxk/slash.js"
 
 
 stamped = function (src)
+{
+    return `var a\n\n//# sourceURL=file://${src}\n`
+}
+
+mapped = function (src)
 {
     var b64, json
 
@@ -36,9 +41,15 @@ isFile = async function (p)
     found = await nfs.isFile(p)
     return (found ? true : false)
 }
-hereText = stamped('../kode/here.kode')
-goneJsText = stamped('../kode/gone.kode')
-goneNoText = stamped('../kode/gone.noon')
+
+fromCwd = function (p)
+{
+    return slash.relative(p,process.cwd())
+}
+hereText = stamped((fromCwd(kp('here.kode'))))
+goneJsText = stamped((fromCwd(kp('gone.kode'))))
+goneNoText = stamped((fromCwd(kp('gone.noon'))))
+mapHereText = mapped('../kode/here.kode')
 
 write = function (src, text)
 {
@@ -59,11 +70,13 @@ afterKept = await isFile(jp('kept.js'))
 afterHand = await isFile(jp('hand.js'))
 nothing = await knrd.reconcile(dirs,opt)
 nowhere = await knrd.reconcile([slash.path(root,'nowhere')],opt)
-strayText = stamped('../../kode/here.kode')
+away = slash.path(root,'elsewhere','here.kode')
+relAway = fromCwd(away)
+strayText = stamped(relAway)
 await nfs.write(jp('stray.js'),strayText)
 await knrd.reconcile(dirs,opt)
 afterStray = await isFile(jp('stray.js'))
-dirText = stamped('../kode')
+dirText = stamped((fromCwd(kdir)))
 await nfs.write(jp('dirish.js'),dirText)
 await knrd.reconcile(dirs,opt)
 afterDirish = await isFile(jp('dirish.js'))
@@ -71,19 +84,28 @@ toExport["stampSource"] = function ()
 {
     section("a file kode did not write has no source", function ()
     {
-        compare(knrd.stampSource('var a = 1\n'),'')
+        compare(knrd.stampSource('var a = 1\n',jdir),'')
     })
-    section("a file kode wrote names its source, relative to itself", function ()
+    section("a hand written file is not a candidate however empty it is", function ()
     {
-        compare(knrd.stampSource(hereText),'../kode/here.kode')
+        compare(knrd.stampSource('export default {}\n',jdir),'')
+    })
+    section("the sourceURL is enough on its own", function ()
+    {
+        compare(knrd.stampSource(hereText,jdir),kp('here.kode'))
+    })
+    section("and the sourcemap still works on its own", function ()
+    {
+        compare(knrd.stampSource(mapHereText,jp('x.js')),kp('here.kode'))
     })
     section("a sourcemap that is not base64 is not a stamp", function ()
     {
-        compare(knrd.stampSource('//# sourceMappingURL=data:application/json;base64,!!!\n'),'')
+        compare(knrd.stampSource('//# sourceMappingURL=data:application/json;base64,!!!\n',jdir),'')
     })
     section("a map with no sources is not a stamp", function ()
     {
-        compare(knrd.stampSource('//# sourceMappingURL=data:application/json;base64,eyJmb28iOiJiYXIifQ==\n'),'')
+        bad = '//# sourceMappingURL=data:application/json;base64,eyJmb28iOiJiYXIifQ==\n'
+        compare(knrd.stampSource(bad,jdir),'')
     })
 }
 toExport["stampSource"]._section_ = true
@@ -113,7 +135,7 @@ toExport["reconcile"] = function ()
     {
         compare(nowhere,[])
     })
-    section("the source is resolved against the file, not against cwd", function ()
+    section("the source is resolved, not guessed", function ()
     {
         compare(afterStray,true)
     })
@@ -127,5 +149,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia25yZC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rb25yYWQvdGVzdC9rbnJkLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztBQWtCQTs7OztJQUVJLE9BQU8sS0FBSyxXQUFXLFNBQVMsS0FBSyxTQUFTO0lBQzlDLE1BQU8sT0FBTyxLQUFLLEtBQUssUUFBUSxTQUFTO3lFQUNxQjs7QUFNbEUsT0FBTztBQUVQLE9BQU8sTUFBTSxLQUFLLEtBQU07QUFDeEIsT0FBTyxNQUFNLEtBQUssS0FBTTs7QUFFeEI7O1dBQWEsTUFBTSxLQUFLLEtBQU07OztBQUM5Qjs7V0FBYSxNQUFNLEtBQUssS0FBTTs7O0FBSzlCOzs7O0lBRUksY0FBVSxJQUFJLE9BQU87WUFDckIsUUFBUSxPQUFPOztBQUVuQixXQUFhLFFBQVE7QUFDckIsYUFBYSxRQUFRO0FBQ3JCLGFBQWEsUUFBUTs7QUFFckI7O1dBQW9CLElBQUksTUFBTSxHQUFHLEtBQUs7O01BRXBDLElBQUksT0FBTztNQUNYLElBQUksTUFBTztNQUNYLElBQUksTUFBTztNQUNYLElBQUksTUFBTyxHQUFHLGFBQWE7TUFHM0IsTUFBTSxVQUFVO01BR2hCLE1BQU0sV0FBVztNQUdqQixNQUFNLFVBQVU7TUFHaEIsTUFBTSxhQUFhO0FBRXJCLE9BQVEsT0FBTztBQUNmLFFBQVE7QUFFUixjQUFVLEtBQUssVUFBVSxLQUFLO0FBRTlCLGtCQUFjLE9BQU8sR0FBRztBQUN4QixrQkFBYyxPQUFPLEdBQUc7QUFHeEIsZ0JBQVksS0FBSyxVQUFVLEtBQUs7QUFHaEMsZ0JBQVksS0FBSyxXQUFXLE1BQU0sS0FBSyxLQUFLLFlBQVk7QUFNeEQsWUFBWSxRQUFRO01BQ2xCLElBQUksTUFBTSxHQUFHLFlBQVk7TUFDekIsS0FBSyxVQUFVLEtBQUs7QUFDdEIsbUJBQWUsT0FBTyxHQUFHO0FBR3pCLFVBQVUsUUFBUTtNQUNoQixJQUFJLE1BQU0sR0FBRyxhQUFhO01BQzFCLEtBQUssVUFBVSxLQUFLO0FBQ3RCLG9CQUFnQixPQUFPLEdBQUc7Ozs7O2dCQU1sQixLQUFLLFlBQVksZUFBaUI7Ozs7Z0JBSWxDLEtBQUssWUFBWSxVQUFZOzs7O2dCQUk3QixLQUFLLFlBQVksMkRBQTZEOzs7O2dCQUk5RSxLQUFLLFlBQVksNEVBQThFOzs7Ozs7OztnQkFNL0YsTUFBTSxPQUFVOzs7O2dCQUloQixNQUFNLEtBQUssUUFBVSxHQUFHLGVBQWUsR0FBRzs7OztnQkFJMUMsVUFBYTs7OztnQkFJYixVQUFhOzs7O2dCQUliOzs7O2dCQUlBOzs7O2dCQUlBLFdBQWM7Ozs7Z0JBSWQsWUFBZSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia25yZC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rb25yYWQvdGVzdC9rbnJkLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztBQXVCQTs7NENBQWtEOzs7QUFFbEQ7Ozs7SUFFSSxPQUFPLEtBQUssV0FBVyxTQUFTLEtBQUssU0FBUztJQUM5QyxNQUFPLE9BQU8sS0FBSyxLQUFLLFFBQVEsU0FBUzt5RUFDcUI7O0FBTWxFLE9BQU87QUFFUCxPQUFPLE1BQU0sS0FBSyxLQUFNO0FBQ3hCLE9BQU8sTUFBTSxLQUFLLEtBQU07O0FBRXhCOztXQUFhLE1BQU0sS0FBSyxLQUFNOzs7QUFDOUI7O1dBQWEsTUFBTSxLQUFLLEtBQU07OztBQUs5Qjs7OztJQUVJLGNBQVUsSUFBSSxPQUFPO1lBQ3JCLFFBQVEsT0FBTzs7O0FBTW5COztXQUFlLE1BQU0sU0FBUyxFQUFHLFFBQVE7O0FBRXpDLFdBQWEsU0FBUyxRQUFRLEdBQUc7QUFDakMsYUFBYSxTQUFTLFFBQVEsR0FBRztBQUNqQyxhQUFhLFNBQVMsUUFBUSxHQUFHO0FBS2pDLGNBQWMsT0FBTzs7QUFFckI7O1dBQW9CLElBQUksTUFBTSxHQUFHLEtBQUs7O01BRXBDLElBQUksT0FBTztNQUNYLElBQUksTUFBTztNQUNYLElBQUksTUFBTztNQUNYLElBQUksTUFBTyxHQUFHLGFBQWE7TUFHM0IsTUFBTSxVQUFVO01BR2hCLE1BQU0sV0FBVztNQUdqQixNQUFNLFVBQVU7TUFHaEIsTUFBTSxhQUFhO0FBRXJCLE9BQVEsT0FBTztBQUNmLFFBQVE7QUFFUixjQUFVLEtBQUssVUFBVSxLQUFLO0FBRTlCLGtCQUFjLE9BQU8sR0FBRztBQUN4QixrQkFBYyxPQUFPLEdBQUc7QUFHeEIsZ0JBQVksS0FBSyxVQUFVLEtBQUs7QUFHaEMsZ0JBQVksS0FBSyxXQUFXLE1BQU0sS0FBSyxLQUFLLFlBQVk7QUFLeEQsT0FBVyxNQUFNLEtBQUssS0FBSyxZQUFZO0FBQ3ZDLFVBQVcsUUFBUTtBQUNuQixZQUFZLFFBQVE7TUFDbEIsSUFBSSxNQUFNLEdBQUcsWUFBWTtNQUN6QixLQUFLLFVBQVUsS0FBSztBQUN0QixtQkFBZSxPQUFPLEdBQUc7QUFHekIsVUFBVSxTQUFTLFFBQVE7TUFDekIsSUFBSSxNQUFNLEdBQUcsYUFBYTtNQUMxQixLQUFLLFVBQVUsS0FBSztBQUN0QixvQkFBZ0IsT0FBTyxHQUFHOzs7OztnQkFNbEIsS0FBSyxZQUFZLGNBQWUsTUFBUTs7OztnQkFJeEMsS0FBSyxZQUFZLHNCQUF1QixNQUFROzs7O2dCQVNoRCxLQUFLLFlBQVksU0FBVSxNQUFRLEdBQUc7Ozs7Z0JBT3RDLEtBQUssWUFBWSxZQUFhLEdBQUcsU0FBVyxHQUFHOzs7O2dCQUkvQyxLQUFLLFlBQVksMERBQTJELE1BQVE7Ozs7UUFJcEYsTUFBTTtnQkFDTixLQUFLLFlBQVksSUFBSyxNQUFROzs7Ozs7OztnQkFNOUIsTUFBTSxPQUFVOzs7O2dCQUloQixNQUFNLEtBQUssUUFBVSxHQUFHLGVBQWUsR0FBRzs7OztnQkFJMUMsVUFBYTs7OztnQkFJYixVQUFhOzs7O2dCQUliOzs7O2dCQUlBOzs7O2dCQUlBLFdBQWM7Ozs7Z0JBSWQsWUFBZSJ9
 //# sourceURL=file://kode/konrad/test/knrd.kode

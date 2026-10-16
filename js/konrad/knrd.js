@@ -90,10 +90,26 @@ gatherFiles = async function ()
     })
 }
 
-stampSource = (function (text)
+stampSource = (function (text, file)
 {
-    var b64, m, map
+    var b64, from, line, lines, m, map, rel
 
+    lines = text.split('\n')
+    from = ''
+    var list = _k_.list(lines)
+    for (var _b_ = 0; _b_ < list.length; _b_++)
+    {
+        line = list[_b_]
+        rel = line.replace('//# sourceURL=file://','')
+        if (rel !== line)
+        {
+            from = slash.absolute(slash.path(process.cwd(),rel))
+        }
+    }
+    if (from)
+    {
+        return from
+    }
     m = /sourceMappingURL=data:application\/json;base64,([A-Za-z0-9+\/=]*)/.exec(text)
     if (!(m && !_k_.empty(m[1])))
     {
@@ -105,12 +121,12 @@ stampSource = (function (text)
     {
         return ''
     }
-    return map.sources[0]
+    return slash.absolute(slash.path(slash.dir(file),map.sources[0]))
 }).bind(this)
 
 reconcile = async function (dirs, opt = {})
 {
-    var dir, file, from, here, item, list, rel, removed, srcDir, still, text
+    var dir, file, from, here, item, list, removed, srcDir, still, text
 
     srcDir = opt.srcDir
     if (!srcDir)
@@ -119,9 +135,9 @@ reconcile = async function (dirs, opt = {})
     }
     removed = []
     var list1 = _k_.list(dirs)
-    for (var _b_ = 0; _b_ < list1.length; _b_++)
+    for (var _c_ = 0; _c_ < list1.length; _c_++)
     {
-        dir = list1[_b_]
+        dir = list1[_c_]
         here = await nfs.dirExists(dir)
         if (!here)
         {
@@ -129,21 +145,20 @@ reconcile = async function (dirs, opt = {})
         }
         list = await nfs.list(dir)
         var list2 = _k_.list(list)
-        for (var _c_ = 0; _c_ < list2.length; _c_++)
+        for (var _d_ = 0; _d_ < list2.length; _d_++)
         {
-            item = list2[_c_]
+            item = list2[_d_]
             if (item.type !== 'file')
             {
                 continue
             }
             file = item.path
             text = await nfs.read(file)
-            rel = stampSource(text)
-            if (!rel)
+            from = stampSource(text,file)
+            if (!from)
             {
                 continue
             }
-            from = slash.absolute(slash.path(slash.dir(file),rel))
             if (!from.startsWith(srcDir + '/'))
             {
                 continue
@@ -166,7 +181,7 @@ reconcile = async function (dirs, opt = {})
 
 knrd = async function (files = [], opt = {})
 {
-    var compText, dir, dirs, file, icon, ignore, removed, rule, skip, srcFile, srcText, tgtFile, tgtText, transpiled, _179_23_, _238_18_
+    var compText, dir, dirs, file, icon, ignore, removed, rule, skip, srcFile, srcText, tgtFile, tgtText, transpiled, _200_23_, _259_18_
 
     if (_k_.isStr(files))
     {
@@ -187,7 +202,7 @@ knrd = async function (files = [], opt = {})
             return []
         }
     }
-    opt.verbose = ((_179_23_=opt.verbose) != null ? _179_23_ : opt.debug)
+    opt.verbose = ((_200_23_=opt.verbose) != null ? _200_23_ : opt.debug)
     if (opt.verbose)
     {
         console.log('opt',opt)
@@ -208,14 +223,14 @@ knrd = async function (files = [], opt = {})
     transpiled = 0
     dirs = []
     var list = _k_.list(files)
-    for (var _d_ = 0; _d_ < list.length; _d_++)
+    for (var _e_ = 0; _e_ < list.length; _e_++)
     {
-        file = list[_d_]
+        file = list[_e_]
         skip = false
         var list1 = _k_.list(rules.ignore)
-        for (var _e_ = 0; _e_ < list1.length; _e_++)
+        for (var _f_ = 0; _f_ < list1.length; _f_++)
         {
-            ignore = list1[_e_]
+            ignore = list1[_f_]
             if (file.endsWith(ignore))
             {
                 if (opt.verbose)
@@ -280,7 +295,7 @@ knrd = async function (files = [], opt = {})
             }
         }
     }
-    opt.reconcile = ((_238_18_=opt.reconcile) != null ? _238_18_ : true)
+    opt.reconcile = ((_259_18_=opt.reconcile) != null ? _259_18_ : true)
     if (opt.reconcile && !opt.dryrun)
     {
         removed = await reconcile(dirs,opt)
@@ -296,5 +311,5 @@ knrd.stampSource = stampSource
 knrd.reconcile = reconcile
 export default knrd;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia25yZC5qcyIsInNvdXJjZXMiOlsiLi4vLi4va29kZS9rb25yYWQva25yZC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7QUFzQkEsU0FFSSxNQUNJLE9BQVMsS0FDVCxPQUFTLE9BQ1QsT0FBUyxLQUNUOzs7O0lBQ0ksV0FBVyxNQUFLLE9BQU8sTUFBTSxJQUFJLElBQUk7OztlQUVqQyxLQUFLLFFBQVEsUUFBUSxRQUFROztXQUMzQjs7UUFDRixZQUFJOztHQUNoQixNQUNJLE9BQVMsT0FDVCxPQUFTLE9BQ1QsT0FBUyxLQUNUOztXQUF3QyxLQUFLLFVBQVUsS0FBSyxNQUFNLFNBQVMsS0FBSztHQUVwRixRQUNJOztBQVNSOzs7O0lBRUksVUFBVTtRQUNQLE1BQU0sV0FBVzs7UUFDaEIsVUFBVSxNQUFNLEtBQUssUUFBUSxNQUFNOztXQUN2Qzs7O0FBRUo7O1dBRUksTUFBTSxRQUFRLFFBQVEsUUFBUSxXQUFXLEtBQUssUUFBUSxXQUFXLEtBQUssU0FBUyxLQUFLOzs7QUFFeEY7O1dBQXFCLE1BQU0sS0FBSyxZQUFZOzs7QUFFNUM7O1dBR0ksUUFBUTs7O0FBRVo7O2lCQUVNLElBQUksTUFBTSxXQUFXLHNDQUFzQyxVQUFROzs7QUFRekU7Ozs7SUFFSSxhQUFTLElBQUksS0FBSyxXQUFXO0lBQzdCLE9BQVEsS0FBSzs7ZUFBaUIsS0FBSyxTQUFROztJQUUzQyxRQUFRLEtBQUs7O2VBQWMsS0FBSzs7V0FDaEMsUUFBUSxNQUFNOzs7OzZCQUNJLE1BQU07Ozs7Z0JBQ0wsS0FBSyxTQUFTOzt1QkFBdkI7OztlQUNOOzs7O0FBZ0JSOzs7O0lBRUksSUFBSSxvRUFBb0UsS0FBSztVQUNyRSxnQkFBWSxFQUFFOztlQUNoQjs7SUFFTixNQUFNLE9BQU8sS0FBSyxFQUFFLEdBQUc7SUFDdkIsTUFBTSxLQUFLLE1BQU0sSUFBSSxTQUFTO3FCQUNoQixJQUFJLHVCQUFrQixJQUFJLFFBQVE7O2VBQzFDOztXQUVOLElBQUksUUFBUTs7O0FBV2hCOzs7O0lBRUksU0FB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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia25yZC5qcyIsInNvdXJjZXMiOlsiLi4vLi4va29kZS9rb25yYWQva25yZC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7QUFzQkEsU0FFSSxNQUNJLE9BQVMsS0FDVCxPQUFTLE9BQ1QsT0FBUyxLQUNUOzs7O0lBQ0ksV0FBVyxNQUFLLE9BQU8sTUFBTSxJQUFJLElBQUk7OztlQUVqQyxLQUFLLFFBQVEsUUFBUSxRQUFROztXQUMzQjs7UUFDRixZQUFJOztHQUNoQixNQUNJLE9BQVMsT0FDVCxPQUFTLE9BQ1QsT0FBUyxLQUNUOztXQUF3QyxLQUFLLFVBQVUsS0FBSyxNQUFNLFNBQVMsS0FBSztHQUVwRixRQUNJOztBQVNSOzs7O0lBRUksVUFBVTtRQUNQLE1BQU0sV0FBVzs7UUFDaEIsVUFBVSxNQUFNLEtBQUssUUFBUSxNQUFNOztXQUN2Qzs7O0FBRUo7O1dBRUksTUFBTSxRQUFRLFFBQVEsUUFBUSxXQUFXLEtBQUssUUFBUSxXQUFXLEtBQUssU0FBUyxLQUFLOzs7QUFFeEY7O1dBQXFCLE1BQU0sS0FBSyxZQUFZOzs7QUFFNUM7O1dBR0ksUUFBUTs7O0FBRVo7O2lCQUVNLElBQUksTUFBTSxXQUFXLHNDQUFzQyxVQUFROzs7QUFRekU7Ozs7SUFFSSxhQUFTLElBQUksS0FBSyxXQUFXO0lBQzdCLE9BQVEsS0FBSzs7ZUFBaUIsS0FBSyxTQUFROztJQUUzQyxRQUFRLEtBQUs7O2VBQWMsS0FBSzs7V0FDaEMsUUFBUSxNQUFNOzs7OzZCQUNJLE1BQU07Ozs7Z0JBQ0wsS0FBSyxTQUFTOzt1QkFBdkI7OztlQUNOOzs7O0FBOEJSOzs7O0lBRUksUUFBUSxLQUFLLE1BQU07SUFDbkIsT0FBUTt3QkFFSTs7OztRQUVSLE1BQU0sS0FBSyxRQUFRLHdCQUF3QjtZQUV4QyxRQUFPOztZQUNOLE9BQU8sTUFBTSxTQUFTLE1BQU0sS0FBSyxRQUFRLE1BQU87OztRQUVyRDs7ZUFDRzs7SUFFTixJQUFJLG9FQUFvRSxLQUFLO1VBQ3JFLGdCQUFZLEVBQUU7O2VBQVE7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
 //# sourceURL=file://kode/konrad/knrd.kode

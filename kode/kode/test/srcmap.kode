@@ -33,15 +33,21 @@ PROBE = slash.path ◆dir '..' '..' '..' 'kode' 'srcmap-probe.kode'
 kmap   = (c) -> (new kode header:false, map:true).compile c, PROBE
 kplain = (c) -> (new kode header:false).compile c, PROBE
 
-# the js on its own, without the map at the foot of it. a map counts lines
-# as they are written, so the tests here work on the whole file.
+# the js on its own, without the map or the sourceURL at the foot of it. a
+# map counts lines as they are written, so the tests here work on the whole
+# file.
 
 body = (code) ->
 
-    # the map goes on as two newlines and a comment: take both back off
+    # both go on as newlines and comments. the sourceURL is written whether
+    # or not there is a map, so this cannot look for one by name - and
+    # taking the first of the pair leaves whatever blank line came before it,
+    # which is why the tail is trimmed too.
 
-    i = code.lastIndexOf '\n\n//# sourceMappingURL'
-    i < 0 ? code : code[...i]
+    i = code.indexOf '\n//# source'
+    if i >= 0 then code = code[...i]
+
+    code.trimEnd()
 
 linesOf = (code) -> body(code).split '\n'
 
@@ -190,19 +196,48 @@ kodfiles = (dir, out=[]) ->
 
 ▸ srcmap
 
-    ▸ only when asked for
+    ▸ the map is only written when asked for
 
         has = 'sourceMappingURL' in kmap 'a = 1'
-        has ▸ true
-
-        has = 'sourceURL' in kmap 'a = 1'
         has ▸ true
 
         has = 'sourceMappingURL' in kplain 'a = 1'
         has ▸ false
 
+    ▸ the sourceURL is written either way
+
+        # -map is about stack traces. what a file in js/ is, and where it
+        # came from, is a different question and is answered by the
+        # sourceURL alone - konrad's reconcile can tell a generated file
+        # from a hand written one by nothing else. it is 40-odd bytes
+        # against a 6.7k sourcemap, so keeping it is not what -map is for.
+
+        has = 'sourceURL' in kmap 'a = 1'
+        has ▸ true
+
         has = 'sourceURL' in kplain 'a = 1'
-        has ▸ false
+        has ▸ true
+
+    ▸ the sourceURL without a map still names the source
+
+        url = kplain 'a = 1'
+        lines = url.split '\n'
+        url = lines.find (l) -> l.startsWith '//# sourceURL='
+        url ▸ "//# sourceURL=file://#{slash.relative PROBE, process.cwd()}"
+
+    ▸ and the js it wraps is untouched
+
+        # `writes the same js either way` below is this for a spread of
+        # snippets; this is the one-liner version, so a change that started
+        # steering the renderer instead of annotating it would be obvious
+        # here before it got interesting there
+
+        mapped = kmap   'a = 1'
+        plain  = kplain 'a = 1'
+        mapped = body mapped
+        plain  = body plain
+
+        mapped ▸ plain
 
     ▸ names the file it was made from
 
@@ -280,8 +315,10 @@ kodfiles = (dir, out=[]) ->
             'x = int "42" + min 1 2 + trim " a "'
         
         for c in snips
-            mapped = body kmap(c)
-            unmap = kplain c
+            mapped = kmap   c
+            unmap  = kplain c
+            mapped = body mapped
+            unmap  = body unmap
 
             eq = mapped == unmap
             eq ▸ true
@@ -458,7 +495,7 @@ kodfiles = (dir, out=[]) ->
             continue if file.endsWith 'srcmap-probe.kode'
 
             unmap = (new kode header:false).compile text, file
-            eq = body(out) == unmap
+            eq = body(out) == body(unmap)
 
             wrong.push file if eq == no
 

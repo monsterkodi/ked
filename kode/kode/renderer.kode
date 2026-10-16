@@ -85,26 +85,41 @@ class Renderer
             s += '\ntoExport._test_ = true'
             s += '\nexport default toExport\n'
 
-        s = @header s            
-        
+        s = @header s
+
         if @srcmap
-            
+
             # the tags come out first, and only then: the map is measured
             # against the file as it is written, so it has to be the file
             # as it is written. the header shifts every line but the first.
-            
+
             s = @srcmap.strip s
-            
+
             # tracing is for --verbose; the three print flags cover the
             # token/block/parse trees, and are what the error hint names
-            
+
             @srcmap.done s if @trace
-            
+
             sm = @srcmap.generate()
             print.noon sm if @trace
-            
+
             s += @srcmap.jscode sm
-        
+
+        else if @source
+
+            # the sourceURL says what this file is and where it came from,
+            # and it goes out whether or not the map does. -map is about
+            # stack traces, which is a different question from provenance,
+            # and the answer to this one is 40-odd bytes against a 6.7k
+            # sourcemap.
+            #
+            # it is also the only thing telling a generated file from a
+            # hand written one - konrad's reconcile can see that nothing
+            # else can - so tying it to -map meant a tree compiled without
+            # maps was a tree nobody could ever clean up.
+
+            s += "\n//# sourceURL=file://#{@source}\n"
+
         s
         
     # every token is rendered through here, and tagged on its way out. the

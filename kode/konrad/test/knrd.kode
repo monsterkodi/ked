@@ -1,22 +1,29 @@
 ###
     the transpiler's bookkeeping
 
-    kode writes a sourcemap at the end of every file it generates, and
-    that map names the source it was made from. that stamp is what makes
-    a generated file identifiable - js/ also holds files nobody generated,
-    and js/csi.js and js/kxk/kxk.js have to survive this.
+    kode writes a sourceURL at the end of every file it generates, and it
+    names the source it was made from. that stamp is what makes a
+    generated file identifiable - js/ also holds files nobody generated,
+    and js/kolor/extlang.js and js/kxk/kxk.js have to survive this.
 
     the tester runs a section synchronously, so the tree is built and the
     reconcile calls are made at the top of the file, where a module can
     await, and the sections below only look at what came back.
+
+    the whole tree below is stamped with a sourceURL and no sourcemap, on
+    purpose - that is what a tree compiled with -map off looks like, and it
+    has to be one we can still clean.
 ###
 
 use ../knrd
 use ../../kxk ◆ nfs slash
 
-# a file as the transpiler leaves it: the sourcemap, base64, at the end
+# a file as the transpiler leaves it: the stamp on its own. the sourcemap
+# is the fallback stamp, so a file that has only that still counts
 
-stamped = src ->
+stamped = src -> "var a\n\n//# sourceURL=file://#{src}\n"
+
+mapped = src ->
 
     json = JSON.stringify {sources:[src] mappings:''}
     b64  = Buffer.from(json,'utf8').toString('base64')
@@ -34,7 +41,7 @@ kdir = slash.path(root, 'kode')
 jp = name -> slash.path(jdir, name)
 kp = name -> slash.path(kdir, name)
 
-# nfs.fileExists hands back a fs.Stats, and a Stats is not what a compare
+# nfs.isFile hands back a fs.Stats, and a Stats is not what a compare
 # wants to print
 
 isFile = p ○->
@@ -42,9 +49,20 @@ isFile = p ○->
     found = ○ nfs.isFile p
     found ? true : false
 
-hereText   = stamped '../kode/here.kode'
-goneJsText = stamped '../kode/gone.kode'
-goneNoText = stamped '../kode/gone.noon'
+# the two stamps are measured from different places, and the fixtures have
+# to be too. the sourceURL is written by the renderer from the working
+# directory, so that is the base for it.
+
+fromCwd = p -> slash.relative p, process.cwd()
+
+hereText   = stamped (fromCwd(kp('here.kode')))
+goneJsText = stamped (fromCwd(kp('gone.kode')))
+goneNoText = stamped (fromCwd(kp('gone.noon')))
+
+# the sourcemap is written from the file carrying it, the way a stack frame
+# is, so the base for that one is the directory the .js sits in
+
+mapHereText = mapped '../kode/here.kode'
 
 write = src text -> nfs.write jp(src),text
 
@@ -79,17 +97,18 @@ nothing = ○ knrd.reconcile dirs opt
 # and a directory that was never there is not an error
 nowhere = ○ knrd.reconcile [slash.path(root,'nowhere')] opt
 
-# here.kode lives at root/kode, which is ../kode from root/js. a stamp
-# pointing one level too high resolves outside the tree, finds nothing
-# there, and would take a live file with it.
+# a stamp that resolves outside the tree finds nothing there and would
+# take a live file with it, so it is not ours to reason about
 
-strayText = stamped '../../kode/here.kode'
+away     = slash.path root 'elsewhere' 'here.kode'
+relAway  = fromCwd away
+strayText = stamped relAway
 ○ nfs.write jp('stray.js') strayText
 ○ knrd.reconcile dirs opt
 afterStray = ○ isFile jp('stray.js')
 
 # a stamp naming a directory rather than a file is not a source either
-dirText = stamped '../kode'
+dirText = stamped (fromCwd(kdir))
 ○ nfs.write jp('dirish.js') dirText
 ○ knrd.reconcile dirs opt
 afterDirish = ○ isFile jp('dirish.js')
@@ -98,19 +117,36 @@ afterDirish = ○ isFile jp('dirish.js')
 
     ▸ a file kode did not write has no source
 
-        knrd.stampSource 'var a = 1\n'  ▸ ''
+        knrd.stampSource 'var a = 1\n', jdir  ▸ ''
 
-    ▸ a file kode wrote names its source, relative to itself
+    ▸ a hand written file is not a candidate however empty it is
 
-        knrd.stampSource hereText  ▸ '../kode/here.kode'
+        knrd.stampSource 'export default {}\n', jdir  ▸ ''
+
+    ▸ the sourceURL is enough on its own
+
+        # this is the case that matters. -map used to take the stamp with
+        # it, so a tree compiled without maps was a tree nobody could
+        # ever clean up. the sourceURL is written either way now, and the
+        # sourcemap is only the fallback.
+
+        knrd.stampSource hereText, jdir  ▸ kp('here.kode')
+
+    ▸ and the sourcemap still works on its own
+
+        # every file in this repo has had both since the sourceURL was
+        # written at all. the fallback is for a file that lost one.
+
+        knrd.stampSource mapHereText, jp('x.js')  ▸ kp('here.kode')
 
     ▸ a sourcemap that is not base64 is not a stamp
 
-        knrd.stampSource '//# sourceMappingURL=data:application/json;base64,!!!\n'  ▸ ''
+        knrd.stampSource '//# sourceMappingURL=data:application/json;base64,!!!\n', jdir  ▸ ''
 
     ▸ a map with no sources is not a stamp
 
-        knrd.stampSource '//# sourceMappingURL=data:application/json;base64,eyJmb28iOiJiYXIifQ==\n'  ▸ ''
+        bad = '//# sourceMappingURL=data:application/json;base64,eyJmb28iOiJiYXIifQ==\n'
+        knrd.stampSource bad, jdir  ▸ ''
 
 ▸ reconcile
 
@@ -138,7 +174,7 @@ afterDirish = ○ isFile jp('dirish.js')
 
         nowhere  ▸ []
 
-    ▸ the source is resolved against the file, not against cwd
+    ▸ the source is resolved, not guessed
 
         afterStray  ▸ true
 
