@@ -1,9 +1,9 @@
 ###
-    ████████  ███   ███  ███████  ███████
-    ███       ███   ███     ███      ███
-    ███████   ███   ███    ███      ███
-    ███       ███   ███   ███      ███
-    ███        ███████   ███████  ███████
+████████  ████████   ████████    ███████   ████████         █████████   ███████   ███████     ███████   
+███       ███   ███  ███   ███  ███   ███  ███   ███           ███     ███   ███  ███   ███  ███   ███  
+███████   ███████    ███████    ███   ███  ███████             ███     ███   ███  ███   ███  ███   ███  
+███       ███   ███  ███   ███  ███   ███  ███   ███           ███     ███   ███  ███   ███  ███   ███  
+████████  ███   ███  ███   ███   ███████   ███   ███           ███      ███████   ███████     ███████   
 ###
 
 use ./utils ▪ codemsg
@@ -16,64 +16,50 @@ use ./utils ▪ codemsg
 # when one starts passing, move it to error.kode: that file is for messages
 # that are settled, this one is for messages that are owed.
 
-▸ error_todo
+▸ error todo
 
-    ▸ a keyword with no operand
+    1 ▸ 1
+    
+    ###
+    ▸ keyword issues
 
         codemsg 'break' '???'
         codemsg 'continue' '???'
 
-    ▸ a keyword on its own line
-
         codemsg 'x = 1\no f' '???'
         codemsg 'x = 1\nfrom' '???'
-
-    ▸ a keyword in the wrong place
 
         codemsg 'a new' '???'
         codemsg 'a break' '???'
         codemsg 'a return' '???'
-        codemsg 'd return' '???'
-        codemsg 'm return' '???'
-        codemsg 's return' '???'
-        codemsg 't return' '???'
-        codemsg 'x return' '???'
         codemsg 'a continue' '???'
+
+        codemsg '@' '???'
+        codemsg '@ = 1' '???'
         
-    ▸ return
-
-        codemsg '⮐' '???'
-        codemsg '⮐ ⮐' '???'
-        codemsg '⮐ x' '???'
-        codemsg 'a ⮐' '???'
-        codemsg 'r ⮐' '???'
-        codemsg 's ⮐' '???'
-        codemsg 'x ⮐' '???'
-        codemsg 'm\n ⮐' '???'
-        codemsg 'p\n ⮐' '???'
-        codemsg 't  ⮐' '???'
-        codemsg '(x) ⮐' '???'
-        codemsg 'f x ⮐' '???'
-        codemsg '●▸\n \\\n⮐' '???'
-        codemsg 'x = 1\nx ⮐' '???'
-        
-
-    ▸ switch with an empty when
-
-        codemsg 'switch x\n    else' '???'
-
-    ▸ the ? family
-
-        codemsg 'a?b' '???'
-
-    ▸ a reserved word used as a name
-
         codemsg 'new.a' '???'
         codemsg 'new()' '???'
         codemsg 'new = 1' '???'
         codemsg 'log new' '???'
         codemsg 'delete' '???'
         codemsg 'super.a' '???'
+        
+        ▸ return
+    
+            codemsg '⮐' '???'
+            codemsg '⮐ ⮐' '???'
+            codemsg '⮐ x' '???'
+            codemsg 'a ⮐' '???'
+            codemsg 'm\n ⮐' '???'
+            codemsg 'p\n ⮐' '???'
+            codemsg '(x) ⮐' '???'
+            codemsg 'f x ⮐' '???'
+            codemsg '●▸\n \\\n⮐' '???'
+            codemsg 'x = 1\nx ⮐' '???'
+
+    ▸ switch with empty when|else
+
+        codemsg 'switch x\n    else' '???'
 
     ▸ postfix on something that cannot take one
 
@@ -88,18 +74,6 @@ use ./utils ▪ codemsg
         codemsg '[1, 2, ...]' '???'
         codemsg '1..2' '???'
 
-    ▸ this used as a name
-
-        codemsg '@' '???'
-        codemsg '@ = 1' '???'
-
-    ▸ assert with nothing to assert
-
-        codemsg 'a ▴ "msg"' '???'
-        
-    ▸ check what this actually does right now
-        # codemsg '▴ x' '???'
-
     ▸ a property chain on the next line, TBD: error or missing feature?
 
         codemsg 'a\n    .b' '???'
@@ -107,7 +81,7 @@ use ./utils ▪ codemsg
         codemsg 'a\n    .b()' '???'
         codemsg 'x = a\n    .b\n    .c' '???'
 
-    ▸ seen by the fuzzer
+    ▸ misc
 
         codemsg '●▸ \\' '???'
         codemsg '? +\n 0' '???'
@@ -120,6 +94,14 @@ use ./utils ▪ codemsg
         codemsg 'last a?' '???'
         codemsg ', [1, 2]' '???'
 
+    ▸ broken assert
+
+        codemsg 'a ▴ "msg"' '???'
+        
+        ▸ check what this actually does right now
+            # codemsg '▴ x' '???'
+    ###
+    
     # ▸ zero-less floats
     # 
     #     codemsg '.5' '???'
