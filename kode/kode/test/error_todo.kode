@@ -168,74 +168,115 @@ use ./utils ▪ codemsg
 
     ▸ a reserved word used as a name
 
-        codemsg 'let' '???'
-        codemsg 'NaN' '???'
+        # words javascript will not have as a name in any mode at all. the
+        # lexer takes them for names because it has no opinion, the renderer
+        # hands them on as themselves, and node reads 'var' or 'with' or 'in'
+        # and stops. every case here is the same rule about a different word,
+        # so they are grouped by the word now rather than by where the fuzzer
+        # happened to find them.
+        #
+        # one of them is in here because what comes out is wrong rather than
+        # unparseable: 'log in' renders as '_k_.in(log,)'. the renderer reads
+        # 'in' as a binary operator with no left operand, puts 'log' in the
+        # left slot, and calls the _k_.in helper with one argument. node is
+        # happy with it, which is why a syntax check does not find it
+
         codemsg 'var' '???'
-        codemsg 'do.a' '???'
-        codemsg 'do()' '???'
-        codemsg 'enum' '???'
-        codemsg 'eval' '???'
-        codemsg 'in.a' '???'
-        codemsg 'in()' '???'
-        codemsg 'null' '???'
-        codemsg 'this' '???'
-        codemsg 'true' '???'
-        codemsg 'void' '???'
-        codemsg 'with' '???'
-        codemsg 'const' '???'
-        codemsg 'false' '???'
-        codemsg 'let.a' '???'
-        codemsg 'let()' '???'
-        codemsg 'NaN.a' '???'
-        codemsg 'NaN()' '???'
-        codemsg 'new.a' '???'
-        codemsg 'new()' '???'
         codemsg 'var.a' '???'
         codemsg 'var()' '???'
-        codemsg 'while' '???'
-        codemsg 'yield' '???'
-        codemsg 'case.a' '???'
-        codemsg 'case()' '???'
-        codemsg 'class\n' '???'
-        codemsg 'delete' '???'
+        codemsg 'log var' '???'
+
+        codemsg 'do.a' '???'
+        codemsg 'do()' '???'
         codemsg 'do = 1' '???'
-        codemsg 'enum.a' '???'
-        codemsg 'enum()' '???'
-        codemsg 'eval.a' '???'
-        codemsg 'eval()' '???'
-        codemsg 'in = 1' '???'
         codemsg 'log do' '???'
-        codemsg 'log in' '???'
-        codemsg 'null.a' '???'
-        codemsg 'null()' '???'
-        codemsg 'public' '???'
-        codemsg 'static' '???'
-        codemsg 'this.a' '???'
-        codemsg 'this()' '???'
-        codemsg 'true.a' '???'
-        codemsg 'true()' '???'
-        codemsg 'void.a' '???'
-        codemsg 'void()' '???'
-        codemsg 'with.a' '???'
-        codemsg 'with()' '???'
         codemsg 'x = do' '???'
         codemsg '{do: 1}' '???'
-        codemsg 'class \n' '???'
+
+        codemsg 'enum' '???'
+        codemsg 'enum.a' '???'
+        codemsg 'enum()' '???'
+
+        codemsg 'in.a' '???'
+        codemsg 'in()' '???'
+        codemsg 'in = 1' '???'
+        codemsg 'log in' '???'
+
+        codemsg 'void' '???'
+        codemsg 'void.a' '???'
+        codemsg 'void()' '???'
+
+        codemsg 'with' '???'
+        codemsg 'with.a' '???'
+        codemsg 'with()' '???'
+
+        codemsg 'const' '???'
         codemsg 'const.a' '???'
         codemsg 'const()' '???'
+
+        codemsg 'new.a' '???'
+        codemsg 'new()' '???'
+        codemsg 'new = 1' '???'
+        codemsg 'log new' '???'
+
+        codemsg 'case.a' '???'
+        codemsg 'case()' '???'
+
+        codemsg 'class\n' '???'
+        codemsg 'class \n' '???'
+
+        codemsg 'delete' '???'
         codemsg 'default' '???'
-        codemsg 'false.a' '???'
-        codemsg 'false()' '???'
+        codemsg 'while' '???'
+        codemsg 'super.a' '???'
+
+    ▸ a word reserved only in a module
+
+        # these are the future reserved words and the strict mode ones. they
+        # are ordinary identifiers in a sloppy script and nowhere else, and
+        # kode emits a module - it uses import and export - so a module is
+        # always strict and these always stop. node says 'Unexpected strict
+        # mode reserved word' about every one.
+        #
+        # a rule that only rejects the words reserved everywhere would let
+        # all ten of these through, so whatever answers this section needs
+        # the strict mode list as well as the other one
+
+        codemsg 'let' '???'
+        codemsg 'let.a' '???'
+        codemsg 'let()' '???'
         codemsg 'let = 1' '???'
         codemsg 'log let' '???'
-        codemsg 'log NaN' '???'
-        codemsg 'log new' '???'
-        codemsg 'log var' '???'
-        codemsg 'NaN = 1' '???'
-        codemsg 'new = 1' '???'
+
+        codemsg 'yield' '???'
+        codemsg 'public' '???'
+        codemsg 'static' '???'
         codemsg 'package' '???'
         codemsg 'private' '???'
-        codemsg 'super.a' '???'
+
+    ▸ a global and a literal are not reserved words
+
+        # these twenty are not bugs and the compiler is right to say nothing.
+        # they came out of the same hunt as the two sections above and there
+        # is no message owed for any of them, so they are written out here
+        # rather than left above as tests that can never pass.
+        #
+        # 'null', 'true', 'false' and 'this' cannot be a name, but they are
+        # values - 'x = null' and 'x = this' are exactly right, and 'null.a',
+        # 'true()' and 'this.x' are ordinary javascript.
+        #
+        # 'NaN' and 'eval' are not reserved at all. they are globals, and a
+        # module may bind a name that shadows one: 'NaN = 1' compiles to
+        # 'var NaN; NaN = 1' and means what it says.
+        #
+        # what they have in common with the sections above is only the shape
+        # of the hunt - a javascript word in a place a kode name went. kode
+        # lexes all of them as plain vars, which is what they are.
+
+        #   NaN        eval       null       this       true       false
+        #   NaN.a      eval.a     null.a     this.a     true.a     false.a
+        #   NaN()      eval()     null()     this()     true()     false()
+        #   log NaN    NaN = 1
 
     ▸ postfix on something that cannot take one
 
