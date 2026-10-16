@@ -380,7 +380,15 @@ function Parser extends parse
         if tokens[0]?.text == 'finally'
             tokens.shift()
             fnlly = @block 'body' tokens
-            
+
+        # a try with neither half compiles to a try node with two holes in
+        # it, and node reads that as a try around an empty block. the block
+        # is optional - '@try' takes what it can get and stops at the end of
+        # the tokens - so the check cannot be 'is there a body'
+
+        if not ctch and not fnlly
+            @onError "try is missing catch or finally" tok:tok
+
         @pop 'try'
 
         try:
@@ -1110,7 +1118,17 @@ function Parser extends parse
         dot  = tokens.shift()
         prop = tokens.shift()
         
-        if not prop
+        # a dot wants a name after it, and not everything that follows one
+        # is a name. an opening bracket is the start of something else -
+        # 'f.(' is a call that lost its callee - and '@' is this, which is
+        # this at the head of an expression and nowhere else.
+        #
+        # the type is the test rather than a list of words, and an op counts
+        # as a name: print.noon and a.clone spell a property the way kode
+        # spells the operators, and they are the same thing once the dot is
+        # there
+
+        if not prop or prop.type not in ['var' 'keyword' 'bool' 'op']
             @onError "property access is missing property name" tok:dot
             
         prop.type = 'var'

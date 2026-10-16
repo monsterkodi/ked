@@ -92,7 +92,6 @@ use ./utils ▪ codemsg
         codemsg 't if' '???'
         codemsg 'w if' '???'
         codemsg 'a new' '???'
-        codemsg 'a try' '???'
         codemsg 'a case' '???'
         codemsg 'a from' '???'
         codemsg 'a break' '???'
@@ -108,15 +107,6 @@ use ./utils ▪ codemsg
         codemsg 'a continue' '???'
         codemsg 'function in' '???'
         codemsg 'undefined class\n' '???'
-
-    ▸ try without catch or finally
-
-        codemsg 'try' '???'
-        codemsg 'try a' '???'
-        codemsg '-> try' '???'
-        codemsg 'try ->' '???'
-        codemsg 'try\n    a' '???'
-        codemsg 'try """triple"' '???'
 
     ▸ await outside async
 
@@ -167,7 +157,6 @@ use ./utils ▪ codemsg
         codemsg 'a ?' '???'
         codemsg 'a?b' '???'
         codemsg 'f ?' '???'
-        codemsg '?. ]' '???'
         codemsg '?[0]' '???'
         codemsg 'a ??' '???'
         codemsg "? 's'" '???'
@@ -290,13 +279,10 @@ use ./utils ▪ codemsg
 
         codemsg '.5' '???'
         codemsg '1..2' '???'
-        codemsg '1.2.3' '???'
 
     ▸ this used as a name
 
         codemsg '@' '???'
-        codemsg 'a.@' '???'
-        codemsg 'a.@b' '???'
         codemsg '@ = 1' '???'
 
     ▸ assert with nothing to assert
@@ -305,11 +291,6 @@ use ./utils ▪ codemsg
         codemsg '▴ x' '???'
         codemsg 'a ▴' '???'
         codemsg 'a ▴ "msg"' '???'
-
-    ▸ a call with no callee
-
-        codemsg 'f.(' '???'
-        codemsg 'f?.(' '???'
 
     ▸ a use chain that does not add up
 
@@ -325,7 +306,6 @@ use ./utils ▪ codemsg
 
     ▸ seen by the fuzzer
 
-        codemsg '?. )' '???'
         codemsg '&&\n●' '???'
         codemsg '||\n)' '???'
         codemsg '||\n●' '???'
@@ -339,7 +319,6 @@ use ./utils ▪ codemsg
         codemsg 'e % }' '???'
         codemsg 'n ~\ni' '???'
         codemsg 't ~\n@' '???'
-        codemsg 'y . }' '???'
         codemsg '? +\n 0' '???'
         codemsg '|| \n ●' '???'
         codemsg '~ each' '???'

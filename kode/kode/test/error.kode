@@ -143,6 +143,23 @@ plain = c ->
         codemsg '.'                 'property access is missing property name' 
         codemsg 'a ?.'              'property access is missing property name'
 
+        # a dot wants a name after it, and neither of these is one. 'f.(' is
+        # a call that lost its callee, and '@' is this - it is this at the
+        # head of an expression and nowhere else
+
+        codemsg 'f.('               'property access is missing property name'
+        codemsg 'f?.('              'property access is missing property name'
+        codemsg 'a.@'               'property access is missing property name'
+        codemsg 'a.@b'              'property access is missing property name'
+        codemsg '?. ]'              'property access is missing property name'
+        codemsg '?. )'              'property access is missing property name'
+        codemsg 'y . }'             'property access is missing property name'
+
+        # a number with two dots in it lands here too: the second dot goes
+        # looking for a property on the first one and finds a digit
+
+        codemsg '1.2.3'             'property access is missing property name'
+
     ▸ keywords missing operands
 
         codemsg 'if'                'if is missing a condition'             
@@ -217,6 +234,20 @@ plain = c ->
         # a branch has to test something
 
         codemsg 'switch x\n    when'   'when is missing an operand'
+
+    ▸ try needs a catch or a finally
+
+        # a try with neither compiles to a try node with two holes in it,
+        # which node reads as a try with an empty block. either half does
+        # the job - kode only wants to know there is something to catch
+
+        codemsg 'try'                  'try is missing catch or finally'
+        codemsg 'try a'                'try is missing catch or finally'
+        codemsg 'try ->'               'try is missing catch or finally'
+        codemsg 'try\n    a'          'try is missing catch or finally'
+        codemsg 'try """triple"'      'try is missing catch or finally'
+        codemsg '-> try'               'try is missing catch or finally'
+        codemsg 'a try'                'try is missing catch or finally'
 
     ▸ a block where an expression belongs
 
