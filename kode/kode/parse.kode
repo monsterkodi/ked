@@ -812,6 +812,12 @@ function Parse extends parseutils
                     (nxt.text not in ['if'] or not @noThenAhead(tokens)) and
                     nxt.text not in ',.;:)}]' and
                     nxt.type not in ['nl'] and
+                    # a block can be an argument - 'f' and a line under it is
+                    # 'f(a)'. a block that opens with a '.' is not: that is a
+                    # property chain continuing from here, and @exp has a
+                    # branch for it further down. taking it here instead gave
+                    # 'a(.,b)'
+                    not (nxt.type == 'block' and nxt.tokens[0]?.text == '.') and
                     (nxt.type != 'op' or nxt.text in ['++''--''noon''new''not'] or nxt.text in ['+''-'] and tokens[1]?.col == nxt.col+1) and
                     @isSuitableForImplicitCall(e) )
 
@@ -834,7 +840,7 @@ function Parse extends parseutils
                     if nxt.type == 'block' 
                         if  @isSuitableForImplicitCall(e) and 
                             @stackAllowsBlockArg() and
-                            nxt.tokens[0]?.text not in ['then' 'when'] and
+                            nxt.tokens[0]?.text not in ['then' 'when' '.'] and
                             @stack[-1] not in ['if' 'then' 'for' 'while' 'switch' 'when' 'catch' 'in?' '▸args' 'class' 'function' 'op+' 'op-' 'opis' 'opor' 'opand' 'op==' 'opnot' 'op<' 'op>']
                                 @verb 'blocked call arg' @stack e nxt
                                 e = @call e tokens

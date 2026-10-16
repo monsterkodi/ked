@@ -187,6 +187,16 @@ plain = c ->
         codemsg 'a import'          'import is missing what to import'
         codemsg 'a export'          'export is missing what to export'
 
+        # an if or a while attached to the value in front of it has nothing
+        # left to test. it was rendering as 'if () { a }' - the value became
+        # the body and the condition was an empty pair of brackets
+
+        codemsg 'a if'              'if is missing a condition'
+        codemsg 'm if'              'if is missing a condition'
+        codemsg 't if'              'if is missing a condition'
+        codemsg 'w if'              'if is missing a condition'
+        codemsg 'a while'           'while is missing a condition'
+
     # 'new' and 'delete' are on the list too and are not tested.
         # object.kode says {new: new} and {delete: delete} are what they
         # should compile to, so the compiler cannot tell a reserved word used
@@ -454,6 +464,24 @@ plain = c ->
         # 'a ? b :' has its '?' and something to test, and stops at the colon
 
         codemsg 'a ? b :'           ': is missing a right operand'
+
+    ▸ a property chain on the next line
+
+        # 'a' and a line under it that starts with a dot is one expression,
+        # not a call with a dot in the arguments. the block was being taken
+        # as an argument first - the branch that takes a block as arguments
+        # already knew to leave a 'then' and a 'when' one alone, and a '.'
+        # belongs in that list too
+
+        kc  'a\n    .b'            ▸ 'a.b'
+        kc  'a\n    .b.c'          ▸ 'a.b.c'
+        kc  'a\n    .b()'         ▸ 'a.b()'
+        kc  'x = a\n    .b\n    .c' ▸ 'x = a.b.c'
+
+        # and the blocked call it was shadowing still is one
+
+        kc  'f\n    a'        ▸ 'f(a)'
+        kc  'f\n    a\n    b' ▸ 'f(a,b)'
 
     ▸ use has one module and one list
 

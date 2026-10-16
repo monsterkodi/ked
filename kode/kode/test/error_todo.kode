@@ -81,17 +81,12 @@ use ./utils ▪ codemsg
 
     ▸ a keyword in the wrong place
 
-        codemsg 'a if' '???'
         codemsg 'a of' '???'
-        codemsg 'm if' '???'
-        codemsg 't if' '???'
-        codemsg 'w if' '???'
         codemsg 'a new' '???'
         codemsg 'a from' '???'
         codemsg 'a break' '???'
         codemsg 'a empty' '???'
         codemsg 'a valid' '???'
-        codemsg 'a while' '???'
         codemsg 'a return' '???'
         codemsg 'd return' '???'
         codemsg 'm return' '???'

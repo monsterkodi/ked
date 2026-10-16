@@ -132,9 +132,18 @@ function Parser extends parse
     # ███  ███          ███     ███   ███  ███  ███████  
     
     ifTail: e tok tokens ->
-        
+
+        # 'a if' attaches the if to the value in front of it, which leaves
+        # the if with nothing to test and the value as its body. it was
+        # rendering as 'if () { a }'
+
+        cond = @exp tokens
+
+        if not cond
+            @onError 'if is missing a condition' tok:tok
+
         if:
-            cond: @exp(tokens)
+            cond: cond
             then: [e]
             
     # ████████   ███████   ████████   
@@ -258,13 +267,19 @@ function Parser extends parse
     # ██     ██  ███   ███  ███  ███████  ████████     ███     ███   ███  ███  ███████  
     
     whileTail: e tok tokens ->
-        
+
         # @push 'while'
-        
+
+        # as @ifTail: 'a while' leaves the while with nothing to test and the
+        # value as its body, and it was rendering as 'while () { a }'
+
         cond = @exp tokens
 
+        if not cond
+            @onError 'while is missing a condition' tok:tok
+
         # @pop 'while'
-        
+
         while:
             cond: cond
             then: [e]
