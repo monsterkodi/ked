@@ -31,6 +31,14 @@ plain = c ->
         codemsg 'a(1,'              'explicit call is missing closing bracket )' 
         codemsg 'r = a.b((rg)'      'explicit call is missing closing bracket )'
 
+        codemsg 'f('                'explicit call is missing closing bracket )'
+        codemsg 'f(a'               'explicit call is missing closing bracket )'
+        codemsg 'f(a,'              'explicit call is missing closing bracket )'
+        codemsg '[a]('              'explicit call is missing closing bracket )'
+        codemsg '{a:1}('            'explicit call is missing closing bracket )'
+        codemsg 'a.b('              'explicit call is missing closing bracket )'
+        codemsg 'a?.b('             'explicit call is missing closing bracket )'
+
     ▸ unmatched closing bracket
 
         codemsg ')'                 'unmatched closing bracket' 
@@ -45,17 +53,44 @@ plain = c ->
     
         codemsg '}'                 'unmatched closing bracket' 
         codemsg ']'                 'unmatched closing bracket' 
+        codemsg '{in: 1}'           'unmatched closing bracket'
 
     ▸ assignment without operand
 
         codemsg 'a ='               'assignment without operand' 
         codemsg 'a.b ='             'assignment without operand' 
 
+    ▸ an operator the lexer does not have
+
+        # these are not in lexer.Patterns.op, so they lex as two or three
+        # separate tokens. what comes out is a complaint about whichever
+        # piece the parser got to first, which is all the compiler has to
+        # go on. the rest of them - 'a === b', 'a && b' and friends - make
+        # it through with nothing said at all, and are in error_todo.
+
+        codemsg '==='               'assignment without operand'
+        codemsg '!=='               'assignment without operand'
+        codemsg '<<='               'assignment without operand'
+        codemsg '>>='               'assignment without operand'
+        codemsg '>>>='              'assignment without operand'
+        codemsg '**='               'assignment without operand'
+
+    ▸ a binary operator with no right operand
+
+        codemsg '&&'                '& is missing a right operand'
+        codemsg '&&='               '&= is missing a right operand'
+        codemsg '||'                '| is missing a right operand'
+        codemsg '||='               '|= is missing a right operand'
+        codemsg '&^'                '^ is missing a right operand'
+        codemsg '+++'               '++ is missing a right operand'
+        codemsg 'a +++ b'           '++ is missing a right operand'
+
     ▸ property access is missing
 
         codemsg 'a.'                'property access is missing property name' 
         codemsg 'a.b.'              'property access is missing property name' 
         codemsg '@.'                'property access is missing property name' 
+        codemsg '?.'                'property access is missing property name'
 
     ▸ keywords missing operands
 
@@ -66,10 +101,25 @@ plain = c ->
         codemsg 'export'            'export is missing what to export'      
         codemsg '1 is'              "'is' is missing what to test against"  
 
+        codemsg 'a class'           'class is missing a name'
+        codemsg 'a function'        'function is missing a name'
+        codemsg 'a import'          'import is missing what to import'
+        codemsg 'a export'          'export is missing what to export'
+
+    ▸ switch needs a block
+
+        codemsg 'switch x'          'block expected!'
+        codemsg 'a switch'          'block expected!'
+
+    ▸ a block where an expression belongs
+
+        codemsg 'await\n    a'      'unexpected block token in exp!'
+
     ▸ for is missing
 
         codemsg 'for'               'for is missing the variable to iterate' 
         codemsg 'for x in'          'for is missing the list to iterate'     
+        codemsg 'a for'             'for is missing the variable to iterate'
 
     ▸ stray character
 
@@ -82,6 +132,7 @@ plain = c ->
         codemsg '1++'    '++ is missing a variable to increment'
         codemsg '1--'    '-- is missing a variable to increment'
         codemsg '"s"++'  '++ is missing a variable to increment'
+        codemsg '"s"--'  '-- is missing a variable to increment'
 
     ▸ use has one module and one list
 
@@ -89,6 +140,19 @@ plain = c ->
         codemsg 'use a ◆ b ▪ c'              'use has a dangling token'
         codemsg 'use a ▪ b ▪ c ◆ d'          'use has a dangling token'
         codemsg 'use a ◆ b ◆ c'              'use has a dangling token'
+
+    ▸ use with nothing after it
+
+        codemsg 'a use'                      'use is missing what to use'
+        codemsg 'if use'                     'use is missing what to use'
+        codemsg 'd use\n'                    'use is missing what to use'
+        codemsg 't use\n'                    'use is missing what to use'
+        codemsg 't use \n'                   'use is missing what to use'
+        codemsg 't use  \n'                  'use is missing what to use'
+        codemsg '@\n use\n'                  'use is missing what to use'
+        codemsg 'b\n use\n'                  'use is missing what to use'
+        codemsg 'g  use\n'                   'use is missing what to use'
+        codemsg 'm\n use\n'                  'use is missing what to use'
 
     ▸ unreachable code
 
@@ -99,6 +163,7 @@ plain = c ->
         codemsg 'log "▪▪#{id"'      'unterminated string interpolation'
         codemsg 'a,'                "missing expression after ','"
         codemsg 'a...'              'slice is missing the end'
+        codemsg '1...'              'slice is missing the end'
         codemsg 'a:'                'key is missing a value'
         codemsg 'a++-'              '- is missing a right operand'
         codemsg 'a+-+'              '- is missing a right operand'
