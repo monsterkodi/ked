@@ -1,0 +1,74 @@
+###
+    where -o puts a file
+
+    the output path is the input path with the extension swapped, kept in
+    the same shape. a flat input list lands flat, a nested one lands
+    nested - `kode/kode/test/error.kode` has to become
+    `js/kode1/test/error.js` and not `js/kode1/error.js`, or the
+    bootstrap cannot build the tests it runs against itself.
+###
+
+use ../kode
+
+▸ commonDir
+
+    ▸ one directory is its own root
+
+        kode.commonDir ['/r/a.kode' '/r/b.kode']  ▸ '/r'
+
+    ▸ the shared directory, not the shared prefix
+
+        # '/r/kode' and '/r/kol' share the string '/r/ko' and nothing else
+        kode.commonDir ['/r/kode/a.kode' '/r/kol/b.kode']  ▸ '/r'
+
+    ▸ a single file is its own root
+
+        kode.commonDir ['/r/a.kode']  ▸ '/r'
+
+    ▸ nothing in common falls back to the filesystem root
+
+        kode.commonDir ['/r/a.kode' '/s/b.kode']  ▸ '/'
+
+    ▸ no files at all
+
+        kode.commonDir []  ▸ '/'
+
+▸ outPath
+
+    ▸ a flat list stays flat
+
+        kode.outPath '/r/a.kode' '/out' '/r'  ▸ '/out/a.js'
+
+    ▸ a nested file stays nested
+
+        kode.outPath '/r/test/b.kode' '/out' '/r'  ▸ '/out/test/b.js'
+
+    ▸ two levels deep
+
+        kode.outPath '/r/a/b/c.kode' '/out' '/r'  ▸ '/out/a/b/c.js'
+
+    ▸ the extension is swapped, whatever it was
+
+        kode.outPath '/r/test/c.noon' '/out' '/r'  ▸ '/out/test/c.js'
+
+    ▸ a file outside the root keeps its name and nothing else
+
+        # this is the case that must not guess. a sibling of the root,
+        # /s/b.kode against root /r, has nowhere to go in /out
+
+        kode.outPath '/s/b.kode' '/out' '/r'  ▸ '/out/b.js'
+
+    ▸ a file whose name starts with the root is not under the root
+
+        # '/rb.kode' starts with '/r' but is not in it
+        kode.outPath '/rb.kode' '/out' '/r'  ▸ '/out/rb.js'
+
+▸ the root the bootstrap would pick
+
+    ▸ the compiler and its tests share one
+
+        kode.commonDir ['kode/kode/parse.kode' 'kode/kode/test/error.kode']  ▸ 'kode/kode'
+
+    ▸ the compiler on its own
+
+        kode.commonDir ['kode/kode/parse.kode' 'kode/kode/lexer.kode']  ▸ 'kode/kode'

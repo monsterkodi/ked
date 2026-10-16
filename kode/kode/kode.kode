@@ -193,6 +193,50 @@ class Kode
     # ███   ███  ███   ███  ███  ████  
     # ███   ███   ███████   ███   ███  
 
+    # the directory a set of inputs shares, which is what -o measures
+    # against. one directory in, one directory out: a flat list of sources
+    # in a flat directory lands exactly where it always did, and a nested
+    # one keeps the shape it had. '/r/kode' and '/r/kol' share the string
+    # '/r/ko' and nothing else, so this walks segments.
+
+    @commonDir: files =>
+
+        dirs = []
+
+        for f in files
+
+            dir = slash.dir f
+            dirs.push dir
+
+        ⮐ '/' if empty dirs
+
+        parts = dirs[0].split '/'
+
+        for d in dirs
+
+            p = d.split '/'
+
+            n = 0
+            while n < parts.length and n < p.length and parts[n] == p[n]
+                n++
+
+            parts = parts.slice 0, n
+
+        parts.join('/') or '/'
+
+    # where a file goes under -o. inside the shared root it keeps its
+    # shape; outside it has nowhere to go, so it keeps its name and lands
+    # at the top, which is what -o always did with it.
+
+    @outPath: (file, outdir, root) =>
+
+        rel = slash.name file
+
+        if file.startsWith root + '/'
+            rel = file.slice root.length + 1
+
+        slash.absolute slash.path(outdir slash.swapExt(rel 'js')) process.cwd()
+
     @run: args ○-> 
                                    
         log 'Kode.run args' args if args.verbose
@@ -208,6 +252,19 @@ class Kode
             log kode.eval(args.eval 'eval' global)
             process.exit 0
     
+        # -o measures every output against the directory the inputs share,
+        # so a nested source keeps its shape instead of landing on top of
+        # a flat one
+
+        absFiles = []
+
+        for f in args.files
+
+            abs = slash.absolute slash.path(f), process.cwd()
+            absFiles.push abs
+
+        root = Kode.commonDir absFiles
+
         for file in args.files
     
             # the source path is what a source map names, so it has to be the
@@ -223,7 +280,7 @@ class Kode
             try
                 if
                     args.outdir
-                                    out = slash.absolute(slash.swapExt(slash.path(args.outdir slash.file(file)) 'js'), process.cwd())
+                                    out = Kode.outPath file, args.outdir, root
                                     log out if args.verbose
                                     js  = kode.compile text, file, out
                                     res =○ nfs.write out js

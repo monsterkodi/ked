@@ -1,0 +1,73 @@
+var toExport = {}
+import kode from "../kode.js"
+
+toExport["commonDir"] = function ()
+{
+    section("one directory is its own root", function ()
+    {
+        compare(kode.commonDir(['/r/a.kode','/r/b.kode']),'/r')
+    })
+    section("the shared directory, not the shared prefix", function ()
+    {
+        compare(kode.commonDir(['/r/kode/a.kode','/r/kol/b.kode']),'/r')
+    })
+    section("a single file is its own root", function ()
+    {
+        compare(kode.commonDir(['/r/a.kode']),'/r')
+    })
+    section("nothing in common falls back to the filesystem root", function ()
+    {
+        compare(kode.commonDir(['/r/a.kode','/s/b.kode']),'/')
+    })
+    section("no files at all", function ()
+    {
+        compare(kode.commonDir([]),'/')
+    })
+}
+toExport["commonDir"]._section_ = true
+toExport["outPath"] = function ()
+{
+    section("a flat list stays flat", function ()
+    {
+        compare(kode.outPath('/r/a.kode','/out','/r'),'/out/a.js')
+    })
+    section("a nested file stays nested", function ()
+    {
+        compare(kode.outPath('/r/test/b.kode','/out','/r'),'/out/test/b.js')
+    })
+    section("two levels deep", function ()
+    {
+        compare(kode.outPath('/r/a/b/c.kode','/out','/r'),'/out/a/b/c.js')
+    })
+    section("the extension is swapped, whatever it was", function ()
+    {
+        compare(kode.outPath('/r/test/c.noon','/out','/r'),'/out/test/c.js')
+    })
+    section("a file outside the root keeps its name and nothing else", function ()
+    {
+        compare(kode.outPath('/s/b.kode','/out','/r'),'/out/b.js')
+    })
+    section("a file whose name starts with the root is not under the root", function ()
+    {
+        compare(kode.outPath('/rb.kode','/out','/r'),'/out/rb.js')
+    })
+}
+toExport["outPath"]._section_ = true
+toExport["the root the bootstrap would pick"] = function ()
+{
+    section("the compiler and its tests share one", function ()
+    {
+        compare(kode.commonDir(['kode/kode/parse.kode','kode/kode/test/error.kode']),'kode/kode')
+    })
+    section("the compiler on its own", function ()
+    {
+        compare(kode.commonDir(['kode/kode/parse.kode','kode/kode/lexer.kode']),'kode/kode')
+    })
+}
+toExport["the root the bootstrap would pick"]._section_ = true
+toExport._test_ = true
+export default toExport
+
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0ZGlyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tvZGUvdGVzdC9vdXRkaXIua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7OztnQkFnQlEsS0FBSyxXQUFXLFlBQVksY0FBZ0I7Ozs7Z0JBSzVDLEtBQUssV0FBVyxpQkFBaUIsa0JBQW9COzs7O2dCQUlyRCxLQUFLLFdBQVcsY0FBZ0I7Ozs7Z0JBSWhDLEtBQUssV0FBVyxZQUFZLGNBQWdCOzs7O2dCQUk1QyxLQUFLLGNBQWdCOzs7Ozs7OztnQkFNckIsS0FBSyxRQUFRLFlBQVksT0FBTyxNQUFROzs7O2dCQUl4QyxLQUFLLFFBQVEsaUJBQWlCLE9BQU8sTUFBUTs7OztnQkFJN0MsS0FBSyxRQUFRLGdCQUFnQixPQUFPLE1BQVE7Ozs7Z0JBSTVDLEtBQUssUUFBUSxpQkFBaUIsT0FBTyxNQUFROzs7O2dCQU83QyxLQUFLLFFBQVEsWUFBWSxPQUFPLE1BQVE7Ozs7Z0JBS3hDLEtBQUssUUFBUSxXQUFXLE9BQU8sTUFBUTs7Ozs7Ozs7Z0JBTXZDLEtBQUssV0FBVyx1QkFBdUIsOEJBQWdDOzs7O2dCQUl2RSxLQUFLLFdBQVcsdUJBQXVCLHlCQUEyQiJ9
+//# sourceURL=file://kode/kode/test/outdir.kode
