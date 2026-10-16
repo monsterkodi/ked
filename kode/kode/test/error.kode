@@ -106,6 +106,27 @@ plain = c ->
         codemsg 'a import'          'import is missing what to import'
         codemsg 'a export'          'export is missing what to export'
 
+    ▸ a keyword with no operand
+
+        # every one of these is a javascript reserved word, or a kode keyword
+        # that renders as one: 'else' after an if, 'catch' after a try, 'in'
+        # after whatever is being iterated, 'extends' inside a class, 'when'
+        # inside a switch. the parser for the construct that goes with them
+        # is what normally eats them, so reaching the head of an expression
+        # means that construct is not there. left alone they render as
+        # themselves and node gets a word it cannot parse
+
+        codemsg 'await'             'await is missing an operand'
+        codemsg 'catch'             'catch is missing an operand'
+        codemsg 'else'              'else is missing an operand'
+        codemsg 'extends'           'extends is missing an operand'
+        codemsg 'finally'           'finally is missing an operand'
+        codemsg 'in'                'in is missing an operand'
+        codemsg 'super'             'super is missing an operand'
+        codemsg 'throw'             'throw is missing an operand'
+        codemsg 'typeof'            'typeof is missing an operand'
+        codemsg 'when'              'when is missing an operand'
+
     ▸ switch needs a block
 
         codemsg 'switch x'          'block expected!'

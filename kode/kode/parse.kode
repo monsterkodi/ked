@@ -23,6 +23,33 @@
 use ./utils ▪ firstLineCol lastLineCol
 use         ◆ print parseutils
 
+# a word that means nothing standing on its own. each one is a javascript
+# reserved word or a kode keyword that renders as one: 'else' after an if,
+# 'catch' after a try, 'in' after whatever is being iterated, 'extends'
+# inside a class, 'when' inside a switch. the parser for the construct that
+# goes with them is what normally eats them.
+#
+# at the head of an expression is the one place they can have neither a left
+# operand nor a right one, and the renderer hands node the bare word, which
+# node cannot parse. further along they are an operation or a keyword the
+# loop in @exp attaches to what came before, and all of that is fine - which
+# is why the test below is about what is left of the token list and not
+# about the token alone.
+#
+# three groups are deliberately not here. 'new' and 'delete' want an
+# operand too, but kode uses both as plain names - {new: new} and {delete:
+# delete} are what object.kode says they should compile to - and a word that
+# renders as an ordinary identifier is a name, so the compiler cannot tell a
+# forgotten call from a variable. 'break' and 'continue' want a loop around
+# them rather than an operand, and they say so by compiling to javascript
+# node refuses; what is missing there is a loop, not an operand, and
+# kode.kode:278 leans on a bare 'continue'. and every function-like keyword
+# - 'abs', 'clamp', 'empty', 'first', 'int', 'last', 'max', 'min', 'noon',
+# 'of', 'trim' and the rest - is in that same first group.
+
+wantsOperand = ['else' 'catch' 'finally' 'throw' 'super' 'extends' 'when'
+                'in' 'await' 'typeof']
+
 function Parse extends parseutils
 
     @: @kode ->
@@ -257,7 +284,19 @@ function Parse extends parseutils
         tok = tokens.shift()
 
         log Y5(w1(tok?.text)) if @debug
-                
+
+        # this one sits above the dispatch below on purpose. 'await' and
+        # 'when' are keywords the parser does claim, and it is their own
+        # methods that hand an empty token list to @exp and get nothing back
+        # - so the word has to be judged before the dispatch hands it over.
+        #
+        # the type is part of the test. a string that reads 'throw' is a
+        # string.
+
+        if tok.type in ['keyword' 'op'] and tok.text in wantsOperand
+            if empty tokens or tokens[0].type == 'nl' or tokens[0].text in [')' ']' '}' ';' ',']
+                @onError "#{tok.text} is missing an operand" tok:tok
+
         switch tok.type
             
             # an `error` call renders as console.error and does not raise, so these
