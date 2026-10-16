@@ -143,6 +143,27 @@ function Parse extends parseutils
         
     onError: msg info -> @kode.onError msg info
 
+    # a name javascript has reserved is not a name it will take. the check in
+    # @exp covers a reserved word standing where an expression starts; this is
+    # the same list at the one other place a name gets taken, and it was
+    # missing there. all 42 of them were reaching node whole - 'function in'
+    # came out as 'var in' and an assignment of an iife to it.
+    #
+    # it lives here rather than at the check in @exp because @class is in
+    # parser.kode, and a subclass inherits the methods of its parent but not
+    # the module-level names those methods close over.
+    #
+    # the test is the text and not the type: 'in', 'if' and 'class' lex as
+    # keywords, and 'delete', 'new', 'var' and 'typeof' lex as ops, and every
+    # one of them is the same mistake
+
+    nameIsReserved: name ->
+
+        if name.text in reserved
+            @onError "#{name.text} is a javascript reserved word" tok:name
+
+        true
+
     # ████████    ███████   ████████    ███████  ████████
     # ███   ███  ███   ███  ███   ███  ███       ███
     # ████████   █████████  ███████    ███████   ███████

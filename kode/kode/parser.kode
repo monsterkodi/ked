@@ -628,6 +628,13 @@ function Parser extends parse
         if not name or name.type == 'nl'
             @onError "#{type} is missing a name" tok:tok
 
+        # and a name javascript has reserved is not a name it will take.
+        # @function comes through here too, so this is both of them. the
+        # list and the wording are in parse.kode, next to the check @exp
+        # makes at the head of an expression
+
+        @nameIsReserved name
+
         e = {}
         e[type] = name:name
 

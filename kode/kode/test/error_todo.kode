@@ -81,12 +81,25 @@ use ./utils ▪ codemsg
 
     ▸ a keyword in the wrong place
 
-        codemsg 'a of' '???'
+        # four of these are not bugs. 'of', 'from', 'empty' and 'valid' are
+        # kode words that happen to be ordinary javascript identifiers, so
+        # 'a from' rendering as 'a(from)' is not javascript node cannot
+        # parse. 'empty' and 'valid' read worst of the four as names - but
+        # they are names, and a compiler that rejected them would be
+        # rejecting them for reading like a word rather than for being one.
+
+        # codemsg 'a of' '???'
         codemsg 'a new' '???'
-        codemsg 'a from' '???'
+        # codemsg 'a from' '???'
         codemsg 'a break' '???'
-        codemsg 'a empty' '???'
-        codemsg 'a valid' '???'
+        # codemsg 'a empty' '???'
+        # codemsg 'a valid' '???'
+
+        # the six returns are the top-level-return question, which is not
+        # settled yet. 'a new' is the new/delete-as-a-value family, and
+        # 'a break' and 'a continue' want to know what loop they are in,
+        # which is the same question in a different direction.
+
         codemsg 'a return' '???'
         codemsg 'd return' '???'
         codemsg 'm return' '???'
@@ -94,7 +107,6 @@ use ./utils ▪ codemsg
         codemsg 't return' '???'
         codemsg 'x return' '???'
         codemsg 'a continue' '???'
-        codemsg 'function in' '???'
 
     ▸ await outside async
 

@@ -313,6 +313,22 @@ plain = c ->
         codemsg 'in()'              'in is a javascript reserved word'
         codemsg 'in = 1'            'in is a javascript reserved word'
 
+        # and a class or a function taking one for its name. the list is the
+        # same list - @class is the one other place a name gets taken and it
+        # was not reading it - but the outcome before was different: nothing
+        # was caught at all, and all 42 of them reached node whole.
+        # 'function in' came out as 'var in' and an assignment of an iife to
+        # it, and 'class in' came out as 'class in {}'
+        #
+        # every word in the list, for both, because none of them is a
+        # special case. the test is the text and not the type: 'in', 'if'
+        # and 'class' lex as keywords and 'delete', 'new', 'var' and
+        # 'typeof' lex as ops
+
+        for kw in ['await' 'break' 'case' 'catch' 'class' 'const' 'continue' 'debugger' 'default' 'delete' 'do' 'else' 'enum' 'export' 'extends' 'finally' 'for' 'function' 'if' 'implements' 'import' 'in' 'instanceof' 'interface' 'let' 'new' 'package' 'private' 'protected' 'public' 'return' 'static' 'super' 'switch' 'throw' 'try' 'typeof' 'var' 'void' 'while' 'with' 'yield']
+            codemsg "function #{kw}"  "#{kw} is a javascript reserved word"
+            codemsg "class #{kw}"     "#{kw} is a javascript reserved word"
+
         # 'in' is the odd one out in this section. it is a keyword and an
         # operator, so the reserved word check does not see it - this one
         # gets there by a different route entirely. 'log in' was rendering as
