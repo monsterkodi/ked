@@ -797,11 +797,36 @@ function Parser extends parse
         # 'is' names what it was looking for, so it says so
 
         if not (op.text in ['++' '--'] and lhs)
+
+            # a closing bracket is never the right operand of anything. when
+            # there is a paren or a call open for it to be closing it belongs
+            # to that, and 'f(a % )' is the call saying it is missing its
+            # own rather than the bracket saying it is unmatched. when
+            # nothing is open it closes nothing, and says so.
+
+            if '(' not in @stack and 'args(' not in @stack
+                if rhs?.type == 'paren' and rhs.text in [')' ']' '}']
+                    @onError 'unmatched closing bracket' tok:rhs
+
             if not rhs or (not lhs and rhs.type == 'op')
                 if op.text == 'is'
                     @onError "'is' is missing what to test against" tok:op
                 else
                     @onError "#{op.text} is missing a right operand" tok:op
+
+        # '~' is unary. node has no binary use for it - 'n ~ i' is not a
+        # thing javascript has - and kode was rendering it as one. it says
+        # nothing here about 'p ~ +': the '+' with nothing after it answers
+        # first, from inside the rhs above, and it is the more specific of
+        # the two.
+        #
+        # 'a & ~0xffff' is fine and is not this - there the '~' is the right
+        # operand of the '&' and never reaches @operation as an operator.
+        # '~~x' is fine too: the '~' in front is a prefix still waiting for
+        # the expression behind it, not a value in front of an operator.
+
+        if op.text == '~' and not (lhs?.type == 'op' and lhs.text == '~')
+            @onError '~ is not a binary operator' tok:op
 
         delete @blockAssign
         

@@ -147,6 +147,45 @@ plain = c ->
         codemsg '=== -'             '- is missing a right operand'
         codemsg 'p ~ +'             '+ is missing a right operand'
 
+        # '~' is unary, and in between two values it is a binary operator
+        # that javascript does not have. 'p ~ +' above is not this: the '+'
+        # with nothing after it answers first and is the more specific of the
+        # two.
+        #
+        # 'a & ~0xffff' is fine - there the '~' is the right operand of the
+        # '&' and never reaches @operation as an operator - and so is '~~x',
+        # where the '~' in front is a prefix still waiting for the expression
+        # behind it rather than a value in front of an operator
+
+        codemsg 'n ~\ni'         '~ is not a binary operator'
+        codemsg 'd ~\n●'         '~ is not a binary operator'
+        codemsg 't ~\n@'         '~ is not a binary operator'
+        codemsg 'b  ~\n4'        '~ is not a binary operator'
+        codemsg '-- ~ \nN'       '~ is not a binary operator'
+        codemsg 'n ~ i'          '~ is not a binary operator'
+
+        kc  'a & ~0xffff'   ▸ 'a & ~\n0xffff'
+        kc  '~~x'            ▸ '~ ~ x'
+
+    ▸ an operator with a closing bracket for a right operand
+
+        # a closing bracket is not a value, and by the time one reaches
+        # @operation as a right operand there is no paren or call open for it
+        # to be closing - @rhs breaks out on those first. 'f(a % )' is not
+        # this: the bracket is the call's own, and the call says it is
+        # missing one
+
+        codemsg 'a % )'             'unmatched closing bracket'
+        codemsg 'e % }'             'unmatched closing bracket'
+        codemsg '[0] ^\n)'         'unmatched closing bracket'
+        codemsg 'y \\\n%\n)'        'unmatched closing bracket'
+        codemsg '||\n)'             'unmatched closing bracket'
+        codemsg '&& \n}'            'unmatched closing bracket'
+
+        codemsg 'f(a % )'           'explicit call is missing closing bracket )'
+
+        kc  'f(a + b)'         ▸ 'f(a + b)'
+
     ▸ property access is missing
 
         codemsg 'a.'                'property access is missing property name' 
