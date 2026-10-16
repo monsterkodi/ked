@@ -187,6 +187,118 @@ plain = c ->
         codemsg 'a import'          'import is missing what to import'
         codemsg 'a export'          'export is missing what to export'
 
+    # 'new' and 'delete' are on the list too and are not tested.
+        # object.kode says {new: new} and {delete: delete} are what they
+        # should compile to, so the compiler cannot tell a reserved word used
+        # as a name from a name that happens to be one.
+
+    ▸ a javascript reserved word used as a name
+
+        # one list, not two. kode emits a module, a module is always strict,
+        # and in a module 'let' is exactly as unavailable as 'var' - so there
+        # is nothing in the language to draw a line at, and a compiler that
+        # rejects one and not the other would only be right by accident.
+        #
+        # each case is the same rule about a different word: the lexer has no
+        # opinion and hands it on as an ordinary name, the renderer renders
+        # it as itself, and node reads 'var' or 'with' or 'in' and stops.
+        # grouped by word, because the word is what the rule is keyed on.
+        #
+        # 'class' and 'while' are in the list too and do not appear here. they
+        # are kode keywords first and javascript words second, so @exp gives
+        # them their kode meaning before this can be reached - and then they
+        # have something better to say, which is below.
+
+        codemsg 'var'               'var is a javascript reserved word'
+        codemsg 'var.a'             'var is a javascript reserved word'
+        codemsg 'var()'             'var is a javascript reserved word'
+        codemsg 'log var'           'var is a javascript reserved word'
+
+        codemsg 'do.a'              'do is a javascript reserved word'
+        codemsg 'do()'              'do is a javascript reserved word'
+        codemsg 'do = 1'            'do is a javascript reserved word'
+        codemsg 'log do'            'do is a javascript reserved word'
+        codemsg 'x = do'            'do is a javascript reserved word'
+        codemsg '{do: 1}'           'do is a javascript reserved word'
+
+        codemsg 'enum'              'enum is a javascript reserved word'
+        codemsg 'enum.a'            'enum is a javascript reserved word'
+        codemsg 'enum()'            'enum is a javascript reserved word'
+
+        codemsg 'void'              'void is a javascript reserved word'
+        codemsg 'void.a'            'void is a javascript reserved word'
+        codemsg 'void()'            'void is a javascript reserved word'
+
+        codemsg 'with'              'with is a javascript reserved word'
+        codemsg 'with.a'            'with is a javascript reserved word'
+        codemsg 'with()'            'with is a javascript reserved word'
+
+        codemsg 'const'             'const is a javascript reserved word'
+        codemsg 'const.a'           'const is a javascript reserved word'
+        codemsg 'const()'           'const is a javascript reserved word'
+
+        codemsg 'case.a'            'case is a javascript reserved word'
+        codemsg 'case()'            'case is a javascript reserved word'
+
+        codemsg 'default'           'default is a javascript reserved word'
+
+        codemsg 'let'               'let is a javascript reserved word'
+        codemsg 'let.a'             'let is a javascript reserved word'
+        codemsg 'let()'             'let is a javascript reserved word'
+        codemsg 'let = 1'           'let is a javascript reserved word'
+        codemsg 'log let'           'let is a javascript reserved word'
+
+        codemsg 'yield'             'yield is a javascript reserved word'
+        codemsg 'public'            'public is a javascript reserved word'
+        codemsg 'static'            'static is a javascript reserved word'
+        codemsg 'package'           'package is a javascript reserved word'
+        codemsg 'private'           'private is a javascript reserved word'
+
+        codemsg 'do'                'do is a javascript reserved word'
+        codemsg 'a do'              'do is a javascript reserved word'
+        codemsg 'case'              'case is a javascript reserved word'
+        codemsg 'a case'            'case is a javascript reserved word'
+        codemsg 'x = 1\ncase'      'case is a javascript reserved word'
+
+        codemsg 'in.a'              'in is a javascript reserved word'
+        codemsg 'in()'              'in is a javascript reserved word'
+        codemsg 'in = 1'            'in is a javascript reserved word'
+
+        # 'in' is the odd one out in this section. it is a keyword and an
+        # operator, so the reserved word check does not see it - this one
+        # gets there by a different route entirely. 'log in' was rendering as
+        # '_k_.in(log,)': the helper called with one argument, which node
+        # accepts and which means nothing. only the check in @incond can tell,
+        # and it is about the missing right operand rather than the word
+
+        codemsg 'log in'            'in is missing a right operand'
+        codemsg 'a in'              'in is missing a right operand'
+
+        # 'super.a' is not here and will not be. 'super' is on the same
+        # footing as 'new' and 'delete': a kode construct the compiler cannot
+        # refuse, because 'super screen name features' is how every subclass
+        # in this repo opens its constructor. 'super' and 'super.a' are the
+        # same token followed by something, so telling them apart is not a
+        # thing this check can do. it is in error_todo.
+
+    ▸ a reserved word is still a kode keyword
+
+        # the words above that kode has its own meaning for. a bare 'class'
+        # is not a reserved word complaint, it is a class with no name - and
+        # that check has always been right. what was wrong was beside it: a
+        # newline counts as a name as far as @class could tell, so 'class\n'
+        # and 'class \n' took the line ending as the name and rendered an
+        # empty class
+
+        codemsg 'class\n'           'class is missing a name'
+        codemsg 'class \n'          'class is missing a name'
+        codemsg 'undefined class\n'  'class is missing a name'
+
+        # and 'while' with nothing to test has nothing to say for itself
+        # either - it was rendering as 'while ()'
+
+        codemsg 'while'             'while is missing a condition'
+
     ▸ a keyword with no operand
 
         # every one of these is a javascript reserved word, or a kode keyword

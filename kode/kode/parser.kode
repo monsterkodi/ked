@@ -236,6 +236,13 @@ function Parser extends parse
         
         cond = @exp tokens
 
+        # 'while' is a javascript reserved word and says so much better
+        # elsewhere, but a while with nothing to test has nothing to say for
+        # itself either - it was rendering as 'while ()'
+
+        if not cond
+            @onError 'while is missing a condition' tok:tok
+
         thn = @then 'while' tokens
         
         @pop 'while'
@@ -599,7 +606,11 @@ function Parser extends parse
 
         name = tokens.shift()
 
-        if not name
+        # a newline is not a name. 'class' with nothing after it was caught,
+        # but 'class\n' took the line ending as the name and rendered an
+        # empty class, which node reads as one missing a body
+
+        if not name or name.type == 'nl'
             @onError "#{type} is missing a name" tok:tok
 
         e = {}
@@ -816,7 +827,15 @@ function Parser extends parse
         @push 'in?'
         rhs = @exp tokens
         @pop  'in?'
-        
+
+        # 'in' is the operator, so whatever is on the right of it has to be
+        # something to test for membership of. 'log in' has nothing, and was
+        # rendering as '_k_.in(log,)' - the helper called with one argument,
+        # which node is perfectly happy with and which means nothing.
+
+        if not rhs
+            @onError 'in is missing a right operand' tok:intok
+
         incond:
             lhs: lhs
             in:  intok

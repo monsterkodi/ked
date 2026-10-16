@@ -50,6 +50,50 @@ use         ◆ print parseutils
 wantsOperand = ['else' 'catch' 'finally' 'throw' 'super' 'extends' 'when'
                 'in' 'await' 'typeof']
 
+# javascript's reserved words, and the check on them is one list rather than
+# two. kode emits a module, a module is always strict, and in a module 'let'
+# is exactly as unavailable as 'var'. there is no line in the language to
+# draw at, so a compiler that rejected one and not the other would only be
+# right by accident.
+#
+# 'null', 'true', 'false' and 'this' are left out. they are values rather
+# than names - 'x = null' is exactly right and 'this.x' is ordinary
+# javascript - and 'NaN' and 'eval' are not reserved at all, they are
+# globals a module is free to shadow.
+#
+# only words the lexer hands on as plain names, or as keywords kode does not
+# dispatch, reach the test. 'new' and 'delete' are in the list and are not
+# tested: they are kode operators, and object.kode says {new: new} and
+# {delete: delete} are what they should compile to, so the compiler cannot
+# tell one from a forgotten call. 'class' and 'while' are dispatched before
+# the test is reached and have better things to say.
+
+# the brackets are not decoration. a bare sequence of strings after an '=' is
+# a call, and 'reserved' came out as the one word 'await' - which then made
+# the test below a substring search, so 'a' matched. the same thing ate the
+# snips in srcmap.kode. the '[' has to be on this line for the same reason
+
+reserved = [
+    'await'  'break'    'case'      'catch'     'class'      'const'
+    'continue' 'debugger' 'default' 'delete'    'do'         'else'
+    'enum'   'export'   'extends'   'finally'   'for'        'function'
+    'if'     'implements' 'import'  'in'        'instanceof' 'interface'
+    'let'    'new'      'package'   'private'   'protected'  'public'
+    'return' 'static'   'super'     'switch'    'throw'      'try'
+    'typeof' 'var'      'void'      'while'     'with'       'yield'
+    ]
+
+# the reserved words that javascript will still have as a property name.
+# there are two kinds here and the difference matters: {static: s} is fine and
+# {do: 1} is not, a.let is fine and let.a is not.
+#
+# this is what makes a method called 'if' work - 'if:', 'for:', 'while:',
+# 'class:' and 'function:' are all methods in parser.kode - and a method is a
+# property under the class, so a keyword in key position needs no exemption
+# of its own.
+
+nameable = ['await' 'enum' 'implements' 'interface' 'let' 'package' 'private' 'protected' 'public' 'static' 'yield']
+
 # operators that can go in front of a value. what is missing is the value and
 # not whatever would have been to their left
 
@@ -402,6 +446,26 @@ function Parse extends parseutils
                                 '->' '=>' '○->' '○=>'
                                     if @stack[-1] not in ['{']
                                         ⮐ @func null tok tokens
+
+        # a reserved word standing where javascript wants a value. the lexer
+        # has no opinion about most of these and hands them on as names, so
+        # this is the last place that can tell - by here it is
+        # indistinguishable from a variable called 'var'.
+        #
+        # it sits below the dispatch above rather than beside the other tests
+        # above it, because a dispatched keyword has a kode meaning to be
+        # given first. 'class' is a class with no name and 'while' is a while
+        # with no condition; neither is better described as a reserved word.
+        #
+        # 'in' is the one keyword worth testing. it only ever appears between
+        # two values and never at the head of one, so nothing that works
+        # today can reach here carrying it - while 'super' is reached every
+        # day, as 'super screen name'.
+
+        if (tok.type == 'var' or tok.text == 'in') and tok.text in reserved
+            key = tokens[0]?.text == ':' and (tok.type == 'keyword' or tok.text in nameable)
+            if not key
+                @onError "#{tok.text} is a javascript reserved word" tok:tok
 
         @sheapPush 'exp' tok.text ? tok.type
         

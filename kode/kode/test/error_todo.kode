@@ -73,26 +73,20 @@ use ./utils ▪ codemsg
 
         codemsg 'break' '???'
         codemsg 'continue' '???'
-        codemsg 'do' '???'
-        codemsg 'case' '???'
 
     ▸ a keyword on its own line
 
         codemsg 'x = 1\no f' '???'
-        codemsg 'x = 1\ncase' '???'
         codemsg 'x = 1\nfrom' '???'
 
     ▸ a keyword in the wrong place
 
-        codemsg 'a do' '???'
         codemsg 'a if' '???'
-        codemsg 'a in' '???'
         codemsg 'a of' '???'
         codemsg 'm if' '???'
         codemsg 't if' '???'
         codemsg 'w if' '???'
         codemsg 'a new' '???'
-        codemsg 'a case' '???'
         codemsg 'a from' '???'
         codemsg 'a break' '???'
         codemsg 'a empty' '???'
@@ -106,7 +100,6 @@ use ./utils ▪ codemsg
         codemsg 'x return' '???'
         codemsg 'a continue' '???'
         codemsg 'function in' '???'
-        codemsg 'undefined class\n' '???'
 
     ▸ await outside async
 
@@ -181,53 +174,21 @@ use ./utils ▪ codemsg
         # left slot, and calls the _k_.in helper with one argument. node is
         # happy with it, which is why a syntax check does not find it
 
-        codemsg 'var' '???'
-        codemsg 'var.a' '???'
-        codemsg 'var()' '???'
-        codemsg 'log var' '???'
 
-        codemsg 'do.a' '???'
-        codemsg 'do()' '???'
-        codemsg 'do = 1' '???'
-        codemsg 'log do' '???'
-        codemsg 'x = do' '???'
-        codemsg '{do: 1}' '???'
 
-        codemsg 'enum' '???'
-        codemsg 'enum.a' '???'
-        codemsg 'enum()' '???'
 
-        codemsg 'in.a' '???'
-        codemsg 'in()' '???'
-        codemsg 'in = 1' '???'
-        codemsg 'log in' '???'
 
-        codemsg 'void' '???'
-        codemsg 'void.a' '???'
-        codemsg 'void()' '???'
 
-        codemsg 'with' '???'
-        codemsg 'with.a' '???'
-        codemsg 'with()' '???'
 
-        codemsg 'const' '???'
-        codemsg 'const.a' '???'
-        codemsg 'const()' '???'
 
         codemsg 'new.a' '???'
         codemsg 'new()' '???'
         codemsg 'new = 1' '???'
         codemsg 'log new' '???'
 
-        codemsg 'case.a' '???'
-        codemsg 'case()' '???'
 
-        codemsg 'class\n' '???'
-        codemsg 'class \n' '???'
 
         codemsg 'delete' '???'
-        codemsg 'default' '???'
-        codemsg 'while' '???'
         codemsg 'super.a' '???'
 
     ▸ a word reserved only in a module
@@ -242,17 +203,7 @@ use ./utils ▪ codemsg
         # all ten of these through, so whatever answers this section needs
         # the strict mode list as well as the other one
 
-        codemsg 'let' '???'
-        codemsg 'let.a' '???'
-        codemsg 'let()' '???'
-        codemsg 'let = 1' '???'
-        codemsg 'log let' '???'
 
-        codemsg 'yield' '???'
-        codemsg 'public' '???'
-        codemsg 'static' '???'
-        codemsg 'package' '???'
-        codemsg 'private' '???'
 
     ▸ a global and a literal are not reserved words
 
