@@ -1,0 +1,147 @@
+###
+    the transpiler's bookkeeping
+
+    kode writes a sourcemap at the end of every file it generates, and
+    that map names the source it was made from. that stamp is what makes
+    a generated file identifiable - js/ also holds files nobody generated,
+    and js/csi.js and js/kxk/kxk.js have to survive this.
+
+    the tester runs a section synchronously, so the tree is built and the
+    reconcile calls are made at the top of the file, where a module can
+    await, and the sections below only look at what came back.
+###
+
+use ../knrd
+use ../../kxk ◆ nfs slash
+
+# a file as the transpiler leaves it: the sourcemap, base64, at the end
+
+stamped = src ->
+
+    json = JSON.stringify {sources:[src] mappings:''}
+    b64  = Buffer.from(json,'utf8').toString('base64')
+    "var a\n\n//# sourceMappingURL=data:application/json;base64,#{b64}\n"
+
+# a scratch tree. konrad resolves everything against cwd, so reconcile is
+# handed the directories - and the directory the sources live under -
+# outright, and the tree can live anywhere
+
+root = '/tmp/opencode/kodeknrd'
+
+jdir = slash.path(root, 'js')
+kdir = slash.path(root, 'kode')
+
+jp = name -> slash.path(jdir, name)
+kp = name -> slash.path(kdir, name)
+
+# nfs.fileExists hands back a fs.Stats, and a Stats is not what a compare
+# wants to print
+
+isFile = p ○->
+
+    found = ○ nfs.isFile p
+    found ? true : false
+
+hereText   = stamped '../kode/here.kode'
+goneJsText = stamped '../kode/gone.kode'
+goneNoText = stamped '../kode/gone.noon'
+
+write = src text -> nfs.write jp(src),text
+
+○ nfs.remove root
+○ nfs.mkdir  jdir
+○ nfs.mkdir  kdir
+○ nfs.write  kp('here.kode') 'x = 1\n'
+
+# its source is still there
+○ write 'kept.js' hereText
+
+# its source is gone
+○ write 'stale.js' goneJsText
+
+# nobody generated this, and js/ is full of files like it
+○ write 'hand.js' 'export default {}\n'
+
+# noon lands as json, and has to go the same way
+○ write 'stale.json' goneNoText
+
+opt  = {srcDir:kdir}
+dirs = [jdir]
+
+gone1 = ○ knrd.reconcile dirs opt
+
+afterKept = ○ isFile jp('kept.js')
+afterHand = ○ isFile jp('hand.js')
+
+# a second pass has nothing left to do
+nothing = ○ knrd.reconcile dirs opt
+
+# and a directory that was never there is not an error
+nowhere = ○ knrd.reconcile [slash.path(root,'nowhere')] opt
+
+# here.kode lives at root/kode, which is ../kode from root/js. a stamp
+# pointing one level too high resolves outside the tree, finds nothing
+# there, and would take a live file with it.
+
+strayText = stamped '../../kode/here.kode'
+○ nfs.write jp('stray.js') strayText
+○ knrd.reconcile dirs opt
+afterStray = ○ isFile jp('stray.js')
+
+# a stamp naming a directory rather than a file is not a source either
+dirText = stamped '../kode'
+○ nfs.write jp('dirish.js') dirText
+○ knrd.reconcile dirs opt
+afterDirish = ○ isFile jp('dirish.js')
+
+▸ stampSource
+
+    ▸ a file kode did not write has no source
+
+        knrd.stampSource 'var a = 1\n'  ▸ ''
+
+    ▸ a file kode wrote names its source, relative to itself
+
+        knrd.stampSource hereText  ▸ '../kode/here.kode'
+
+    ▸ a sourcemap that is not base64 is not a stamp
+
+        knrd.stampSource '//# sourceMappingURL=data:application/json;base64,!!!\n'  ▸ ''
+
+    ▸ a map with no sources is not a stamp
+
+        knrd.stampSource '//# sourceMappingURL=data:application/json;base64,eyJmb28iOiJiYXIifQ==\n'  ▸ ''
+
+▸ reconcile
+
+    ▸ what has lost its source goes, and only that
+
+        gone1.length  ▸ 2
+
+    ▸ and it is the right two
+
+        gone1.join ' '  ▸ "#{jp('stale.js')} #{jp('stale.json')}"
+
+    ▸ a generated file whose source is still there stays
+
+        afterKept  ▸ true
+
+    ▸ a file nobody generated stays
+
+        afterHand  ▸ true
+
+    ▸ a second pass has nothing to do
+
+        nothing  ▸ []
+
+    ▸ a directory that is not there is not an error
+
+        nowhere  ▸ []
+
+    ▸ the source is resolved against the file, not against cwd
+
+        afterStray  ▸ true
+
+    ▸ a stamp naming a directory is not a source
+
+        afterDirish  ▸ true

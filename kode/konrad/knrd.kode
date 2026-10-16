@@ -93,6 +93,76 @@ gatherFiles = ○->
 # ███  ███   ███  ████  ███   ███  ███   ███  
 # ███   ███  ███   ███  ███   ███  ███████    
 
+# the path of the source a generated file was made from, relative to the
+# file itself the way a stack frame is, or '' if kode did not make it.
+#
+# every file the transpiler writes ends in a base64 sourcemap and that map
+# says where the text came from. it is the only thing telling a generated
+# file from a hand written one - js/csi.js and js/kxk/kxk.js have no source
+# and no map, and are not anybody's to delete.
+
+stampSource = text =>
+
+    m = /sourceMappingURL=data:application\/json;base64,([A-Za-z0-9+\/=]*)/.exec text
+    if not (m and valid m[1])
+        ⮐ ''
+
+    b64 = Buffer.from(m[1],'base64')
+    map = JSON.parse b64.toString('utf8')
+    if not (valid map.sources and valid map.sources[0])
+        ⮐ ''
+
+    map.sources[0]
+
+# take away the generated files in `dirs` whose source is gone.
+#
+# the test is never "was it in this run's list". kk -k takes a single file
+# as often as it takes the tree, and on a single file everything else in
+# js/ would look like an orphan. it is only "does the source this file
+# names still exist" - and only when that source lands under opt.srcDir.
+# a stamp pointing anywhere else is not ours to reason about, and a false
+# deletion costs a file somebody still needs.
+
+reconcile = dirs opt={} ○->
+
+    srcDir = opt.srcDir
+    if not srcDir
+        srcDir = bundlePath 'kode'
+
+    removed = []
+
+    for dir in dirs
+
+        here = ○ nfs.dirExists dir
+        if not here ➜ continue
+
+        list = ○ nfs.list dir
+
+        for item in list
+
+            if item.type != 'file' ➜ continue
+
+            file = item.path
+            text = ○ nfs.read file
+            rel  = stampSource text
+            if not rel ➜ continue
+
+            # the map says where it came from, the way a stack frame does:
+            # relative to the file that carries it
+            from = slash.absolute slash.path(slash.dir(file), rel)
+
+            if not from.startsWith srcDir + '/' ➜ continue
+
+            still = ○ nfs.isFile from
+            if still ➜ continue
+
+            ○ nfs.remove file
+            removed.push file
+
+            log r2('🗑 ') w3(slash.tilde(file)) r4(' <- ') w3(slash.tilde(from)) if not opt.quiet
+
+    removed
+
 knrd = files=[] opt={} ○->
     # log "files" files   
     if files is str
@@ -119,6 +189,7 @@ knrd = files=[] opt={} ○->
     log icon w5(slash.name(bundleDir())) b5(files.length) if not opt.quiet
     
     transpiled = 0
+    dirs      = []
         
     for file in files
         
@@ -135,6 +206,11 @@ knrd = files=[] opt={} ○->
             
             srcFile  = srcForFile file
             tgtFile  = tgtForSrc  srcFile, rule
+            
+            # the target dir is claimed even when the file turns out to be
+            # unchanged, so a stale sibling in it is still ours to clear
+            dir = slash.dir tgtFile
+            dirs.push dir if dir not in dirs
             
             srcText  =○ nfs.read srcFile
             tgtText  =○ nfs.read tgtFile
@@ -156,8 +232,18 @@ knrd = files=[] opt={} ○->
                     
     # ○ bump() if transpiled and not opt.dryrun
     
+    # a deleted .kode leaves its .js behind, and nothing else in here would
+    # ever notice. this is the one place that knows both halves.
+    
+    opt.reconcile ?= true
+    if opt.reconcile and not opt.dryrun
+        removed = ○ reconcile dirs, opt
+        log w5(slash.name(bundleDir())) b5('reclaimed') w5(removed.length) if removed.length and not opt.quiet
+    
     transpiled
         
 knrd.bundlePath = bundlePath
+knrd.stampSource = stampSource
+knrd.reconcile   = reconcile
     
 export knrd

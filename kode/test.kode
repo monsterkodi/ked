@@ -9,7 +9,7 @@
 use ./kxk  ◆ nfs slash
 use ./kode ◆ tester
 
-mods = ['kxk' 'kode' 'kolor' 'ked']
+mods = ['kxk' 'kode' 'kolor' 'ked' 'konrad']
 
 lastArg = process.argv[-1]
 
