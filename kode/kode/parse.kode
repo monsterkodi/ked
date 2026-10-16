@@ -119,6 +119,11 @@ wantsSlice = ['..']
 # unclosed case already has
 #
 # '▴' is a callee and never a value, so what is missing is its argument
+#
+# '○' is 'await' written the short way, and '○ a' is fine - so what is
+# missing is the operand, not the operator. the message names the word
+# rather than the glyph, the same way '▴' above names assert. see the note
+# on the entry itself
 
 needsPair =
     '(':  'parens is missing closing )'
@@ -128,11 +133,41 @@ needsPair =
     '.':  'property access is missing property name'
     ':':  ': is missing a key and a value'
     '▴':  'assert is missing what to assert'
+    '○':  'await is missing an operand'
+
+    # '○' is 'await' written the short way and '○ a' is fine, so what a bare
+    # one is missing is the operand. the message names the word the way the
+    # '▴' above names assert. '○' is a token type this block was not
+    # reading, which is why it reached the output at all
+    #
+    # '◆' is a different thing from all the rest of this. it has three uses
+    # and every one of them is real: 'use ◆ name' names what a use brings
+    # in, '◆main' is the entry point of a module, and '◆dir f' is an
+    # implicit call. all three want something after the '◆'
+
+    '◆':  '◆ is missing what it calls'
 
 # what closes each opener. [] is an empty array and () is an empty call, so
 # an opener followed by its own closer is not an unclosed one
 
 closers = '(':')' '[':']' '{':'}'
+
+# glyphs the lexer recognises and nothing reads. '▪' separates the module
+# from the names in a use, '▸' with a space after it starts a test section,
+# and '■' is not in the language at all: every one of them in this repo is
+# inside a string, as a character for kermit or for ked to look at.
+#
+# they all have a token type and nothing interprets it - grep the compiler
+# for 'right' and 'square' and the only hits are the lexer patterns
+# themselves. so at the head of an expression there is nothing they can be
+# doing, and they were falling through into the output as themselves.
+#
+# this is an if and not a lookup table on purpose. the check below is
+# outside the block that reads only a few token types, so it sees every
+# token there is, and a table keyed on tok.text hands back
+# Object.prototype for anything called 'constructor' or 'toString' -
+# sds.kode has 'object.constructor.name' in it and the table answered
+# with a function, which @onError then tried to print.
 
 function Parse extends parseutils
 
@@ -408,7 +443,7 @@ function Parse extends parseutils
         # the types are part of the test. a string that reads 'throw' is a
         # string, and a comment that reads '*' is a comment.
 
-        if tok.type in ['keyword' 'op' 'punct' 'paren' 'dots' 'assert'] and not @prefixOperand
+        if tok.type in ['keyword' 'op' 'punct' 'paren' 'dots' 'assert' 'await' 'diamond'] and not @prefixOperand
 
             nxt = tokens[0]
 
@@ -508,6 +543,16 @@ function Parse extends parseutils
 
         if tok.text == '?' and not (nxt and (nxt.text == '.' or nxt.type == 'op'))
             @onError '? is missing a left operand' tok:tok
+
+        # a glyph that means something in one position only, standing where
+        # that position is not. each of them is a marker, and the markers
+        # are read by the use and the section rules - not here
+
+        if tok.text == '■'
+            @onError '■ is not a kode character' tok:tok
+
+        if tok.text in ['▪' '▸']
+            @onError "#{tok.text} is missing what it goes with" tok:tok
 
         @sheapPush 'exp' tok.text ? tok.type
         

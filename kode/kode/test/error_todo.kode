@@ -35,16 +35,16 @@ use ./utils ▪ codemsg
 
     ▸ a token on its own
 
-        codemsg '\\' '???'
-        codemsg '■' '???'
-        codemsg '▪' '???'
-        codemsg '▸' '???'
-        codemsg '◆' '???'
-        codemsg '○' '???'
-        codemsg '●' '???'
+        # four of these are fine. '\' is a backslash and '●' is the profiling
+        # mark, and the arrow tokens on their own are '(function () {})' and
+        # a bind of it - all javascript node parses. only '⮐' is open, and it
+        # is the top-level-return question.
+
+        # codemsg '\\' '???'
+        # codemsg '●' '???'
         codemsg '⮐' '???'
-        codemsg '->' '???'
-        codemsg '=>' '???'
+        # codemsg '->' '???'
+        # codemsg '=>' '???'
 
     ▸ a keyword with no operand
 
@@ -145,9 +145,44 @@ use ./utils ▪ codemsg
         # none of these are in lexer.Patterns.op, so they lex as two or
         # three separate tokens and the renderer puts them back together
         # with the wrong spacing: 'a === b' comes out as 'a === =\nb'.
-        # operator.kode lists <<= >>= >>>= &&= ||= in its precedence table
-        # and the renderer knows how to emit them - the lexer just cannot
-        # make them.
+        #
+        # the note that used to be here said operator.kode lists <<= >>= >>>=
+        # &&= ||= and the renderer knows how to emit them, so this was only a
+        # lexer job. that is not the whole of it, and this section is not a
+        # defect list - it is a question about the surface of the language.
+        #
+        # twelve of the thirteen are javascript spellings of operators kode
+        # already has under another name, and the renderer already emits the
+        # javascript ones:
+        #
+        #     a == b   renders  a === b        a === b  is the same source
+        #     a != b   renders  a !== b        a !== b  is the same source
+        #     a and b  renders  a && b         a && b   is the same source
+        #     a or b   renders  a || b         a || b   is the same source
+        #
+        # the rest are a compound assignment of one of those. so adding them
+        # to the lexer would not fix anything that is broken - it would give
+        # kode a second spelling for operators it has, and the answer to
+        # whether it wants that is a decision, not a bug.
+        #
+        # '&^' is a third thing again. it is not a javascript operator at
+        # all - it is go's 'and not' - so there is nothing for it to be an
+        # alias of. kode renders 'a &^ b' as 'a & ^ b', which node reads as
+        # 'a & (~b)': valid, and not what anyone meant.
+        #
+        # the mechanical part is not free either. '&&', '||', '===', '!==',
+        # '**', '**=' and '&^' are all absent from operator.kode's
+        # precedence, so each of them would come back as Infinity - and in
+        # Operator.op the swap test is 'if p[i] > p[i-1]', so an Infinity
+        # anywhere in a chain forces a reorder. adding the tokens is only
+        # half of it; every one needs a precedence number, and '**' needs one
+        # of its own since it binds tighter than '*' in javascript and the
+        # table has '*' at 2.
+        #
+        # so: not done, and deliberately. the two coherent answers are to
+        # leave the javascript spellings out and say so in a message, or to
+        # take them as aliases and add the precedence entries. either is a
+        # language decision.
 
         codemsg 'a === b' '???'
         codemsg 'a !== b' '???'
@@ -293,14 +328,11 @@ use ./utils ▪ codemsg
         codemsg '&&\n●' '???'
         codemsg '||\n●' '???'
         codemsg '●▸ \\' '???'
-        codemsg "'s' ■" '???'
-        codemsg '(x) ▪' '???'
         codemsg '&&\n ●' '???'
         codemsg '? +\n 0' '???'
         codemsg '|| \n ●' '???'
         codemsg '~ each' '???'
         codemsg '▴ ^ \n●' '???'
-        codemsg '"str" ◆' '???'
         codemsg 'ceil a?' '???'
         codemsg 'class @' '???'
         codemsg 'class 0' '???'
