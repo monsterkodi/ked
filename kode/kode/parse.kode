@@ -411,7 +411,8 @@ function Parse extends parseutils
             
             numTokens = tokens.length
             
-            if not e then return error 'no e?' nxt
+            if not e
+                @onError 'missing expression on the left' tok:nxt
             
             unspaced = (llc = lastLineCol(e)).col == nxt.col and llc.line == nxt.line
             spaced = not unspaced
@@ -470,7 +471,7 @@ function Parse extends parseutils
                                 e = @operation null e tokens
                         nxt.text in ['++''--'] and unspaced
                             if e.type not in ['var']
-                                return error 'wrong rhs increment'
+                                @onError "#{nxt.text} is missing a variable to increment" tok:nxt
                             e = @operation e tokens.shift()
                         ➜
                             print.tokens "rhs no nxt match? break! stack:#{@stack} nxt:" [nxt] if @debug
@@ -517,7 +518,8 @@ function Parse extends parseutils
             
             numTokens = tokens.length
             
-            if not e then return error 'no e?' nxt
+            if not e
+                @onError 'missing expression on the right' tok:nxt
             
             last  = lastLineCol  e
             first = firstLineCol e

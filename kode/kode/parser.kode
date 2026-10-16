@@ -422,6 +422,9 @@ function Parser extends parse
         
         token = tokens.shift()
                         
+        if not token or token.type == 'nl'
+            @onError 'use is missing what to use' tok:obj
+            
         while token
             
             module = token.text
@@ -451,7 +454,7 @@ function Parser extends parse
             tokens.shift()
             token = tokens.shift()
 
-            while token
+            while token and token.type != 'nl'
                 
                 item = token.text
                 
@@ -461,7 +464,7 @@ function Parser extends parse
                 
                 items.push item
                     
-                break if tokens.length and tokens[0].type == 'nl'
+                break if tokens.length and (tokens[0].type == 'nl' or tokens[0].text in '▪●◆')
                 
                 token = tokens.shift()
 
@@ -473,7 +476,7 @@ function Parser extends parse
             tokens.shift()
             token = tokens.shift()
 
-            while token
+            while token and token.type != 'nl'
                 
                 item = module + '/' + token.text
                 
@@ -485,7 +488,7 @@ function Parser extends parse
                     type: 'var'
                     text:  item
                     
-                break if tokens.length and tokens[0].type == 'nl'
+                break if tokens.length and (tokens[0].type == 'nl' or tokens[0].text in '▪●◆')
                 
                 token = tokens.shift()
                 
@@ -501,7 +504,7 @@ function Parser extends parse
                 name += token.text
                 
         if tokens.length and tokens[0].type != 'nl'
-            warn 'dangling use token?' tokens[0] if @debug
+            @onError 'use has a dangling token' tok:tokens[0]
                 
         use:   
             toUse:toUse

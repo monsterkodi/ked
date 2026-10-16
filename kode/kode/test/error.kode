@@ -77,6 +77,19 @@ plain = c ->
         codemsg "a = '"             'stray character' 
         codemsg '✘'                 'stray character'
 
+    ▸ postfix needs something assignable
+
+        codemsg '1++'    '++ is missing a variable to increment'
+        codemsg '1--'    '-- is missing a variable to increment'
+        codemsg '"s"++'  '++ is missing a variable to increment'
+
+    ▸ use has one module and one list
+
+        codemsg 'use'                        'use is missing what to use'
+        codemsg 'use a ◆ b ▪ c'              'use has a dangling token'
+        codemsg 'use a ▪ b ▪ c ◆ d'          'use has a dangling token'
+        codemsg 'use a ◆ b ◆ c'              'use has a dangling token'
+
     ▸ unreachable code
 
         codemsg 'return 1 2'        'unreachable code after return statement?' 
