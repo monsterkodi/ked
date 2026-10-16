@@ -719,7 +719,21 @@ function Parser extends parse
         
         @push "op#{op.text}"
 
+        # @exp looks at a bare token it finds at the head of an expression
+        # and asks what to make of it, and whether it is the right side of
+        # this operation is the whole of the answer. a prefix operation has
+        # no lhs, and the check below already covers that case and names the
+        # operator that came up short - 'a/-^' is a minus with nothing after
+        # it, not a caret. a binary one has a lhs, so nothing else is going
+        # to say anything about what its right side looks like and @exp has
+        # to - 'x = in' is an 'in' with nothing to iterate.
+
+        wasPrefix = @prefixOperand
+        @prefixOperand = not lhs
+
         rhs = @exp tokens
+
+        @prefixOperand = wasPrefix
 
         # an operator needs a right operand. a postfix ++ or -- is the one
         # exception: having nothing after it is what postfix means.

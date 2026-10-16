@@ -50,6 +50,34 @@ use         ◆ print parseutils
 wantsOperand = ['else' 'catch' 'finally' 'throw' 'super' 'extends' 'when'
                 'in' 'await' 'typeof']
 
+# operators that can go in front of a value. what is missing is the value and
+# not whatever would have been to their left
+
+wantsRight = ['+' '-' '~' '!']
+
+# operators that only ever sit between two values. at the head of an
+# expression there is nothing to their left, and that is what they are
+# missing - what is on the right, if anything, is of no use to them
+
+wantsLeft = ['*' '/' '%' '^' '&' '|' '<' '>' '=' '==']
+
+# tokens that say which of a pair something is, and so want both halves. one
+# bracket alone is unclosed rather than pairless, so it gets the message the
+# unclosed case already has
+
+needsPair =
+    '(':  'parens is missing closing )'
+    '[':  'array is missing closing ]'
+    '{':  'curly is missing closing }'
+    ',':  "missing expression after ','"
+    '.':  'property access is missing property name'
+    ':':  ': is missing a key and a value'
+
+# what closes each opener. [] is an empty array and () is an empty call, so
+# an opener followed by its own closer is not an unclosed one
+
+closers = '(':')' '[':']' '{':'}'
+
 function Parse extends parseutils
 
     @: @kode ->
@@ -288,14 +316,37 @@ function Parse extends parseutils
         # this one sits above the dispatch below on purpose. 'await' and
         # 'when' are keywords the parser does claim, and it is their own
         # methods that hand an empty token list to @exp and get nothing back
-        # - so the word has to be judged before the dispatch hands it over.
+        # - so the token has to be judged before the dispatch hands it over.
         #
-        # the type is part of the test. a string that reads 'throw' is a
-        # string.
+        # it asks not 'is anything left' but 'is there anything here this
+        # token could work with'. an expression that ends here - at the end
+        # of the tokens, at a newline, or at one of the tokens that close a
+        # bracket or separate two things - has nothing to offer.
+        #
+        # it steps aside when it is looking at the right side of a prefix
+        # operation. @operation sets @prefixOperand around its own call to
+        # @exp and has a check of its own for that case, which names the
+        # operator that came up short rather than the one it swallowed.
+        #
+        # the types are part of the test. a string that reads 'throw' is a
+        # string, and a comment that reads '*' is a comment.
 
-        if tok.type in ['keyword' 'op'] and tok.text in wantsOperand
-            if empty tokens or tokens[0].type == 'nl' or tokens[0].text in [')' ']' '}' ';' ',']
-                @onError "#{tok.text} is missing an operand" tok:tok
+        if tok.type in ['keyword' 'op' 'punct' 'paren'] and not @prefixOperand
+
+            nxt = tokens[0]
+
+            alone = not nxt or nxt.type == 'nl' or nxt.text in [')' ']' '}' ';' ',']
+
+            if nxt and nxt.text == closers[tok.text]
+                alone = false
+
+            if alone
+                if m = needsPair[tok.text]
+                    @onError m tok:tok
+                if tok.text in wantsRight
+                    @onError "#{tok.text} is missing a right operand" tok:tok
+                if tok.text in wantsLeft or tok.text in wantsOperand
+                    @onError "#{tok.text} is missing an operand" tok:tok
 
         switch tok.type
             

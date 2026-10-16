@@ -31,6 +31,13 @@ plain = c ->
         codemsg 'a(1,'              'explicit call is missing closing bracket )' 
         codemsg 'r = a.b((rg)'      'explicit call is missing closing bracket )'
 
+        # one opener on its own is the same mistake as one too many
+
+        codemsg '('                 'parens is missing closing )'
+        codemsg '['                 'array is missing closing ]'
+        codemsg '{'                 'curly is missing closing }'
+        codemsg '[ \n]\n○-'     'array is missing closing ]'
+
         codemsg 'f('                'explicit call is missing closing bracket )'
         codemsg 'f(a'               'explicit call is missing closing bracket )'
         codemsg 'f(a,'              'explicit call is missing closing bracket )'
@@ -85,12 +92,56 @@ plain = c ->
         codemsg '+++'               '++ is missing a right operand'
         codemsg 'a +++ b'           '++ is missing a right operand'
 
+    ▸ a binary operator with nothing to its left
+
+        # a binary operator standing on its own has no left operand. what
+        # follows it, if anything, is of no use to it - '= *' is not a thing
+        # kode can mean
+
+        codemsg '*'                 '* is missing an operand'
+        codemsg '/'                 '/ is missing an operand'
+        codemsg '%'                 '% is missing an operand'
+        codemsg '^'                 '^ is missing an operand'
+        codemsg '&'                 '& is missing an operand'
+        codemsg '|'                 '| is missing an operand'
+        codemsg '<'                 '< is missing an operand'
+        codemsg '>'                 '> is missing an operand'
+        codemsg '='                 '= is missing an operand'
+        codemsg '=='                '== is missing an operand'
+
+        # and with something in front of it, which is no use to a binary
+        # operator either
+
+        codemsg '=== >'             '> is missing an operand'
+        codemsg 'o  ==='            '= is missing an operand'
+        codemsg 't >> *'            '* is missing an operand'
+        codemsg 'x  ==='            '= is missing an operand'
+        codemsg '[0] ==='           '= is missing an operand'
+        codemsg 'y and /'           '/ is missing an operand'
+        codemsg '>\n%\n*'          '* is missing an operand'
+
+    ▸ a prefix operator with nothing to its right
+
+        # these can go in front of a value, so what is missing is the value.
+        # '-1' and '~0xff' are fine; a '-' with nothing after it is not
+
+        codemsg '+'                 '+ is missing a right operand'
+        codemsg '-'                 '- is missing a right operand'
+        codemsg '~'                 '~ is missing a right operand'
+        codemsg '!'                 '! is missing a right operand'
+
+        codemsg "'s' !"             '! is missing a right operand'
+        codemsg '=== -'             '- is missing a right operand'
+        codemsg 'p ~ +'             '+ is missing a right operand'
+
     ▸ property access is missing
 
         codemsg 'a.'                'property access is missing property name' 
         codemsg 'a.b.'              'property access is missing property name' 
         codemsg '@.'                'property access is missing property name' 
-        codemsg '?.'                'property access is missing property name'
+        codemsg '?.'                'property access is missing property name' 
+        codemsg '.'                 'property access is missing property name' 
+        codemsg 'a ?.'              'property access is missing property name'
 
     ▸ keywords missing operands
 
@@ -218,6 +269,9 @@ plain = c ->
 
         codemsg 'log "▪▪#{id"'      'unterminated string interpolation'
         codemsg 'a,'                "missing expression after ','"
+        codemsg ','                 "missing expression after ','"
+        codemsg ':'                 ': is missing a key and a value'
+        codemsg '? ==='             '= is missing an operand'
         codemsg 'a...'              'slice is missing the end'
         codemsg '1...'              'slice is missing the end'
         codemsg 'a:'                'key is missing a value'
