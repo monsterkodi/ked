@@ -63,7 +63,7 @@ bundlePath = p='' -> slash.path bundleDir() p
     
 bundleDir = -> 
     # this is used by side-projects already.
-    # make sure we execute relative to that.
+    # make sure we execute relative to those.
     process.cwd()
   
 bump = ○->
@@ -87,33 +87,26 @@ gatherFiles = ○->
             ⮐ false if file.endsWith ignore
         true
     
-# ███   ███  ███   ███  ████████   ███████    
-# ███  ███   ████  ███  ███   ███  ███   ███  
-# ███████    ███ █ ███  ███████    ███   ███  
-# ███  ███   ███  ████  ███   ███  ███   ███  
-# ███   ███  ███   ███  ███   ███  ███████    
-
-# the absolute path of the source a generated file was made from, or '' if
-# kode did not make it. it is the only thing telling a generated file from
-# a hand written one - js/csi.js and js/kxk/kxk.js have no source and no
-# stamp, and are not anybody's to delete.
-#
-# there are two ways a compiled file says where it came from and they are
-# measured from different places, so both are normalised here rather than
-# at the call site:
-#
-#   //# sourceURL=file://<path>   from the working directory. written
-#                                whether or not there is a sourcemap
-#   the map's sources[0]          from the file carrying it, the way a
-#                                stack frame is
-#
-# the sourceURL is read first and the map is the fallback. that order is
-# the whole point: -map used to take the stamp with it, so a tree compiled
-# without maps was a tree nobody could ever clean up.
-#
-# the line is found by hand because a regex literal cannot hold a '#' in
-# this language - the lexer takes it for the start of a comment - so
-# /^\/\/\# sourceURL=/ would arrive as /^\/\/.
+###
+     ███████  █████████   ███████   ██     ██  ████████   
+    ███          ███     ███   ███  ███   ███  ███   ███  
+    ███████      ███     █████████  █████████  ████████   
+         ███     ███     ███   ███  ███ █ ███  ███        
+    ███████      ███     ███   ███  ███   ███  ███        
+    
+    the absolute path of the source a generated file was made from, or '' if
+    kode did not make it. it is the only thing telling a generated file from
+    a hand written one.
+    
+    there are two ways a compiled file says where it came from and they are
+    measured from different places, so both are normalised here rather than
+    at the call site:
+    
+      //# sourceURL=file://<path>   from the working directory. written
+                                    whether or not there is a sourcemap
+      the map's sources[0]          from the file carrying it, the way a
+                                    stack frame is
+###
 
 stampSource = (text, file) =>
 
@@ -139,14 +132,11 @@ stampSource = (text, file) =>
 
     slash.absolute slash.path(slash.dir(file), map.sources[0])
 
-# take away the generated files in `dirs` whose source is gone.
-#
-# the test is never "was it in this run's list". kk -k takes a single file
-# as often as it takes the tree, and on a single file everything else in
-# js/ would look like an orphan. it is only "does the source this file
-# names still exist" - and only when that source lands under opt.srcDir.
-# a stamp pointing anywhere else is not ours to reason about, and a false
-# deletion costs a file somebody still needs.
+# ████████   ████████   ███████   ███████   ███   ███   ███████  ███  ███      ████████
+# ███   ███  ███       ███       ███   ███  ████  ███  ███       ███  ███      ███     
+# ███████    ███████   ███       ███   ███  ███ █ ███  ███       ███  ███      ███████ 
+# ███   ███  ███       ███       ███   ███  ███  ████  ███       ███  ███      ███     
+# ███   ███  ████████   ███████   ███████   ███   ███   ███████  ███  ███████  ████████
 
 reconcile = dirs opt={} ○->
 
@@ -184,6 +174,12 @@ reconcile = dirs opt={} ○->
 
     removed
 
+# ███   ███  ███   ███  ████████   ███████    
+# ███  ███   ████  ███  ███   ███  ███   ███  
+# ███████    ███ █ ███  ███████    ███   ███  
+# ███  ███   ███  ████  ███   ███  ███   ███  
+# ███   ███  ███   ███  ███   ███  ███████    
+
 knrd = files=[] opt={} ○->
     # log "files" files   
     if files is str
@@ -198,6 +194,7 @@ knrd = files=[] opt={} ○->
             ⮐ []
         
     opt.verbose        ?= opt.debug
+    opt.map            ?= true
     log 'opt'    opt   if opt.verbose
     log 'files'  files if opt.debug
     
@@ -228,8 +225,6 @@ knrd = files=[] opt={} ○->
             srcFile  = srcForFile file
             tgtFile  = tgtForSrc  srcFile, rule
             
-            # the target dir is claimed even when the file turns out to be
-            # unchanged, so a stale sibling in it is still ours to clear
             dir = slash.dir tgtFile
             dirs.push dir if dir not in dirs
             
@@ -252,9 +247,6 @@ knrd = files=[] opt={} ○->
                     log b5('✔ ') g5(slash.tilde(tgtFile))
                     
     # ○ bump() if transpiled and not opt.dryrun
-    
-    # a deleted .kode leaves its .js behind, and nothing else in here would
-    # ever notice. this is the one place that knows both halves.
     
     opt.reconcile ?= true
     if opt.reconcile and not opt.dryrun
