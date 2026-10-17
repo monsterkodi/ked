@@ -5,22 +5,20 @@ var args
 import kxk from "../kxk.js"
 let sleep = kxk.sleep
 let karg = kxk.karg
+let watch = kxk.watch
+let nfs = kxk.nfs
 let util = kxk.util
 let slash = kxk.slash
 let os = kxk.os
 
-import watch from "../kxk/watch.js"
-import nfs from "../kxk/nfs.js"
+import tester from "../kode/tester.js"
+import kode from "../kode/kode.js"
 
 import knrd from "./knrd.js"
 import version from "./version.js"
 
-import tester from "../kode/tester.js"
-import kode from "../kode/kode.js"
-
 import child_process from "child_process"
 
-import fs from 'fs/promises'
 args = karg(`kk
     files                                     **
     

@@ -65,6 +65,10 @@ dircol = (function ()
         post.on('dircol.resize',this.onResize)
         post.on('dircol.toggle',this.onToggle)
         post.on('dircol.root',this.setRoot)
+        post.on('dircol.focus',(function ()
+        {
+            return this.dirtree.grabFocus()
+        }).bind(this))
         post.on('session.merge',this.onSessionMerge)
         root = ked_session.get('dircol▸root',process.cwd())
         this.setRoot(root)
@@ -80,7 +84,7 @@ dircol = (function ()
 
     dircol.prototype["onSessionMerge"] = function (recent)
     {
-        var args, root, _77_24_
+        var args, root, _78_24_
 
         if (_k_.empty(recent.dircol))
         {

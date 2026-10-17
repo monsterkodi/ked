@@ -6,14 +6,10 @@
     ███   ███  ███   ███    
 ###
 
-use ../kxk  ▪ sleep karg util slash os
-use ../kxk  ◆ watch nfs
-use         ◆ knrd version
+use ../kxk  ▪ sleep karg watch nfs util slash os
 use ../kode ◆ tester kode
-
-use child_process
-
-import fs from 'fs/promises'
+use         ◆ knrd version
+use           child_process
 
 args = karg """
     kk

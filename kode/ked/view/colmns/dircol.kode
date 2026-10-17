@@ -47,6 +47,7 @@ function dircol extends view
         post.on 'dircol.resize' @onResize
         post.on 'dircol.toggle' @onToggle
         post.on 'dircol.root'   @setRoot
+        post.on 'dircol.focus'  => @dirtree.grabFocus()
         
         post.on 'session.merge' @onSessionMerge
         

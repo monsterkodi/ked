@@ -38,6 +38,7 @@ function funcol extends view
         post.on 'funcol.resize' @onFuncolResize
         post.on 'funcol.toggle' @onFuncolToggle
         post.on 'session.merge' @onSessionMerge
+        post.on 'funcol.focus'  => @funtree.grabFocus()
         
     onSessionMerge: recent =>
     

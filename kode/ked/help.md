@@ -29,11 +29,13 @@
     alt+,                               cursor to previous function
     alt+.                               cursor to next function
     alt+r                               reveal file in dir column
-    cmd+\           ctrl+\              toggle dir column
-    cmd+'           ctrl+'              toggle function column
     cmd+i                               differ: status
     cmd+m   cmd+;   ctrl+;              macro
-
+    cmd+\           ctrl+\              toggle dir column
+    cmd+'           ctrl+'              toggle function column
+    alt+\                               focus dir column
+    alt+'                               focus function column
+    
 # cursor
 
     ctrl+alt+up     ctrl+alt+down       page up / down

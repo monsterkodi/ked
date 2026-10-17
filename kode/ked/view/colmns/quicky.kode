@@ -139,10 +139,10 @@ function quicky extends inputchoice
 
             t = item.tilde
             p = slash.parse t
-
+            r = slash.relative item.path @currentFile
             w = 0
-            w += (t.split('../').length-1) * 1024 * 4
-            for s,i in slash.split(p.dir)
+            w += (r.split('../').length-1) * 1024 * 4
+            for s,i in slash.split(slash.dir(item.path))
                 w += kstr.weight(s) / ((i+1)*(i+1))
             w
 
@@ -158,7 +158,7 @@ function quicky extends inputchoice
             item
             
         items.sort (a b) -> weight(a) - weight(b)            
-
+        # log items.map((i) -> "" + weight(i) + " " + i.path)
         @calcWidthAndShowPathItems items
         
     calcWidthAndShowPathItems: items =>
