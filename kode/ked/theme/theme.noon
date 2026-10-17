@@ -62,7 +62,7 @@ gutter
     bg_git_add                              #001a00
     bg_git_del                              #400   
                                               
-status                                      
+title                                      
     bg                                      #222   
     col                                     #111   
     col_zero                                #000   

@@ -1,6 +1,6 @@
 var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, trim: function (s,c=' ') {return _k_.ltrim(_k_.rtrim(s,c),c)}, ltrim: function (s,c=' ') { while (_k_.in(s[0],c)) { s = s.slice(1) } return s}, rtrim: function (s,c=' ') {while (_k_.in(s.slice(-1)[0],c)) { s = s.slice(0, s.length - 1) } return s}}
 
-var statusfile
+var titlefile
 
 import kxk from "../../../kxk.js"
 let slash = kxk.slash
@@ -14,16 +14,16 @@ import syntax from "../../util/syntax.js"
 import view from "../base/view.js"
 
 
-statusfile = (function ()
+titlefile = (function ()
 {
-    _k_.extend(statusfile, view)
-    function statusfile (screen, name)
+    _k_.extend(titlefile, view)
+    function titlefile (screen, name)
     {
         this["onMouse"] = this["onMouse"].bind(this)
         this["show"] = this["show"].bind(this)
-        statusfile.__super__.constructor.call(this,screen,name)
-        this.setColor('bg',theme.status.bg)
-        this.setColor('empty',theme.status.empty)
+        titlefile.__super__.constructor.call(this,screen,name)
+        this.setColor('bg',theme.title.bg)
+        this.setColor('empty',theme.title.empty)
         this.setColor('hover',theme.hover.bg)
         this.pointerType = 'pointer'
         this.syntax = new syntax
@@ -31,7 +31,7 @@ statusfile = (function ()
         this.rounded = ''
     }
 
-    statusfile.prototype["draw"] = function ()
+    titlefile.prototype["draw"] = function ()
     {
         var bg, ch, fg, x
 
@@ -39,7 +39,7 @@ statusfile = (function ()
         {
             return
         }
-        statusfile.__super__.draw.call(this)
+        titlefile.__super__.draw.call(this)
         bg = (this.hover ? this.color.hover : this.color.bg)
         var list = _k_.list(this.rounded)
         for (x = 0; x < list.length; x++)
@@ -61,7 +61,7 @@ statusfile = (function ()
         }
     }
 
-    statusfile.prototype["adjustText"] = function ()
+    titlefile.prototype["adjustText"] = function ()
     {
         var _62_14_
 
@@ -72,7 +72,7 @@ statusfile = (function ()
         return this.rounded = '' + this.pars.file + ''
     }
 
-    statusfile.prototype["set"] = function (file)
+    titlefile.prototype["set"] = function (file)
     {
         if (this.file === _k_.trim(file))
         {
@@ -82,15 +82,15 @@ statusfile = (function ()
         return this.adjustText()
     }
 
-    statusfile.prototype["show"] = function (file)
+    titlefile.prototype["show"] = function (file)
     {
         this.set(file)
         return this.cells.rows = 1
     }
 
-    statusfile.prototype["onMouse"] = function (event)
+    titlefile.prototype["onMouse"] = function (event)
     {
-        statusfile.__super__.onMouse.call(this,event)
+        titlefile.__super__.onMouse.call(this,event)
     
         switch (event.type)
         {
@@ -106,10 +106,10 @@ statusfile = (function ()
         return this.hover
     }
 
-    return statusfile
+    return titlefile
 })()
 
-export default statusfile;
+export default titlefile;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RhdHVzZmlsZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy9zdGF0dXMvc3RhdHVzZmlsZS5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7MkJBZTRCOzs7OzttREFJZCxPQUFPO1FBRWIsS0FBQyxTQUFTLEtBQVMsTUFBTSxPQUFPO1FBQ2hDLEtBQUMsU0FBUyxRQUFTLE1BQU0sT0FBTztRQUNoQyxLQUFDLFNBQVMsUUFBUyxNQUFNLE1BQU07UUFFL0IsS0FBQyxjQUFjO1FBQ2YsS0FBQyxhQUFhO1FBQ2QsS0FBQyxPQUFPLE9BQU87UUFFZixLQUFDLFVBQVU7Ozs7Ozs7WUFVTCxLQUFDOzs7OztRQUlQLE1BQUssS0FBQyxRQUFRLEtBQUMsTUFBTSxRQUFRLEtBQUMsTUFBTTs0QkFFeEIsS0FBQzs7Ozt1QkFDTixHQUFNOztnQkFDTCxLQUFDLE1BQU0sSUFBSSxFQUFFLEVBQUUsR0FBRyxHQUFHLEtBQUMsTUFBTTs7OztnQkFFNUIsS0FBSyxLQUFDLE9BQU8sU0FBUyxFQUFFO2dCQUN4QixLQUFDLE1BQU0sSUFBSSxFQUFFLEVBQUUsR0FBRyxHQUFHO29CQUN1QixLQUFDOztvQkFBN0MsS0FBQyxNQUFNLDJCQUEyQixFQUFFLEVBQUU7Ozs7Ozs7Ozs7UUFVOUMsS0FBQyxpQkFBRCxLQUFDLDBCQUFRO1FBQ1QsS0FBQyxPQUFPLE1BQU0sTUFBTSxLQUFDO1FBQ3JCLEtBQUMsT0FBTztRQUNSLEtBQUMsT0FBTyxVQUFVLE1BQUksS0FBQyxLQUFLO2VBQzVCLEtBQUMsVUFBVSxNQUFNLEtBQUMsS0FBSyxPQUFPOzs7OztZQUl4QixLQUFDLGtCQUFhOzs7O1FBRXBCLEtBQUMsZ0JBQVk7ZUFDYixLQUFDOzs7OztRQUVTLEtBQUMsSUFBSTtlQUFNLEtBQUMsTUFBTSxPQUFPOzs7OzsrQ0FVN0I7O2dCQUVDLE1BQU07O2lCQUVUO29CQUVPLEtBQUM7O29CQUNBLEtBQUMsS0FBSyxTQUFTLFFBQVEsS0FBQzs0QkFDdEIsT0FBTzs7Ozs7ZUFDckIsS0FBQzs7Ozs7O2VBRUYifQ==
-//# sourceURL=file://kode/ked/view/status/statusfile.kode
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGl0bGVmaWxlLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L3RpdGxlL3RpdGxlZmlsZS5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7MEJBZTJCOzs7OztrREFJYixPQUFPO1FBRWIsS0FBQyxTQUFTLEtBQVMsTUFBTSxNQUFNO1FBQy9CLEtBQUMsU0FBUyxRQUFTLE1BQU0sTUFBTTtRQUMvQixLQUFDLFNBQVMsUUFBUyxNQUFNLE1BQU07UUFFL0IsS0FBQyxjQUFjO1FBQ2YsS0FBQyxhQUFhO1FBQ2QsS0FBQyxPQUFPLE9BQU87UUFFZixLQUFDLFVBQVU7Ozs7Ozs7WUFVTCxLQUFDOzs7OztRQUlQLE1BQUssS0FBQyxRQUFRLEtBQUMsTUFBTSxRQUFRLEtBQUMsTUFBTTs0QkFFeEIsS0FBQzs7Ozt1QkFDTixHQUFNOztnQkFDTCxLQUFDLE1BQU0sSUFBSSxFQUFFLEVBQUUsR0FBRyxHQUFHLEtBQUMsTUFBTTs7OztnQkFFNUIsS0FBSyxLQUFDLE9BQU8sU0FBUyxFQUFFO2dCQUN4QixLQUFDLE1BQU0sSUFBSSxFQUFFLEVBQUUsR0FBRyxHQUFHO29CQUN1QixLQUFDOztvQkFBN0MsS0FBQyxNQUFNLDJCQUEyQixFQUFFLEVBQUU7Ozs7Ozs7Ozs7UUFVOUMsS0FBQyxpQkFBRCxLQUFDLDBCQUFRO1FBQ1QsS0FBQyxPQUFPLE1BQU0sTUFBTSxLQUFDO1FBQ3JCLEtBQUMsT0FBTztRQUNSLEtBQUMsT0FBTyxVQUFVLE1BQUksS0FBQyxLQUFLO2VBQzVCLEtBQUMsVUFBVSxNQUFNLEtBQUMsS0FBSyxPQUFPOzs7OztZQUl4QixLQUFDLGtCQUFhOzs7O1FBRXBCLEtBQUMsZ0JBQVk7ZUFDYixLQUFDOzs7OztRQUVTLEtBQUMsSUFBSTtlQUFNLEtBQUMsTUFBTSxPQUFPOzs7Ozs4Q0FVN0I7O2dCQUVDLE1BQU07O2lCQUVUO29CQUVPLEtBQUM7O29CQUNBLEtBQUMsS0FBSyxTQUFTLFFBQVEsS0FBQzs0QkFDdEIsT0FBTzs7Ozs7ZUFDckIsS0FBQzs7Ozs7O2VBRUYifQ==
+//# sourceURL=file://kode/ked/view/title/titlefile.kode

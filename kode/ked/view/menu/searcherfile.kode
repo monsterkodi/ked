@@ -109,6 +109,6 @@ function searcherfile extends view
 
     onCrumbsAction: action path =>
         
-        log "#{@name} onCrumbsAction #{action} #{path}" 
+        log "onCrumbsAction #{action} #{path}" 
 
 export searcherfile

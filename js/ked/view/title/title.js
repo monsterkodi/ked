@@ -1,6 +1,6 @@
 var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, isStr: function (o) {return typeof o === 'string' || o instanceof String}, rpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s+=c} return s}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
 
-var fileposSyntax, status
+var fileposSyntax, title
 
 import kxk from "../../../kxk.js"
 let post = kxk.post
@@ -20,7 +20,7 @@ import view from "../base/view.js"
 import crumbs from "../base/crumbs.js"
 import bubble from "../base/bubble.js"
 
-import statusfile from "./statusfile.js"
+import titlefile from "./titlefile.js"
 
 
 fileposSyntax = (function ()
@@ -29,7 +29,7 @@ fileposSyntax = (function ()
     {
         this["getColor"] = this["getColor"].bind(this)
         this.color = {}
-        this.color.number = theme.status.filepos
+        this.color.number = theme.title.filepos
         this.color.symbol = color.darken(this.color.number,0.8)
     }
 
@@ -50,10 +50,10 @@ fileposSyntax = (function ()
 })()
 
 
-status = (function ()
+title = (function ()
 {
-    _k_.extend(status, view)
-    function status (screen, editor)
+    _k_.extend(title, view)
+    function title (screen, editor)
     {
         this.screen = screen
         this.editor = editor
@@ -66,8 +66,8 @@ status = (function ()
         this["droopCrumb"] = this["droopCrumb"].bind(this)
         this["onCrumbsAction"] = this["onCrumbsAction"].bind(this)
         this["onFileposAction"] = this["onFileposAction"].bind(this)
-        this["onStatusFilepos"] = this["onStatusFilepos"].bind(this)
-        status.__super__.constructor.call(this,this.screen,'status')
+        this["onTitleFilepos"] = this["onTitleFilepos"].bind(this)
+        title.__super__.constructor.call(this,this.screen,'title')
         this.state = this.editor.state
         this.gutter = 4
         this.file = ''
@@ -76,20 +76,20 @@ status = (function ()
         this.fileoffs = []
         this.pointerType = 'pointer'
         this.setColor('gutter',theme.gutter.bg)
-        this.crumbs = new crumbs(this.screen,'status_crumbs')
-        this.statusfile = new statusfile(this.screen,'status_file')
-        this.filepos = new bubble(this.screen,"status_filepos")
+        this.crumbs = new crumbs(this.screen,'title_crumbs')
+        this.titlefile = new titlefile(this.screen,'title_file')
+        this.filepos = new bubble(this.screen,"title_bubble")
         this.crumbs.setColor('empty_left',this.color.gutter)
-        this.crumbs.setColor('empty_right',theme.status.empty)
-        this.filepos.setColor('empty',theme.status.empty)
+        this.crumbs.setColor('empty_right',theme.title.empty)
+        this.filepos.setColor('empty',theme.title.empty)
         this.filepos.syntax = new fileposSyntax
         this.crumbs.on('action',this.onCrumbsAction)
-        this.statusfile.on('action',this.onFileAction)
+        this.titlefile.on('action',this.onFileAction)
         this.filepos.on('action',this.onFileposAction)
-        post.on('status.filepos',this.onStatusFilepos)
+        post.on('title.filepos',this.onTitleFilepos)
     }
 
-    status.prototype["onStatusFilepos"] = function (fileposl, fileoffs)
+    title.prototype["onTitleFilepos"] = function (fileposl, fileoffs)
     {
         this.fileposl = fileposl
         this.fileoffs = fileoffs
@@ -104,7 +104,7 @@ status = (function ()
         }
     }
 
-    status.prototype["onFileposAction"] = function (action, item)
+    title.prototype["onFileposAction"] = function (action, item)
     {
         var files
 
@@ -135,7 +135,7 @@ status = (function ()
 
     }
 
-    status.prototype["onCrumbsAction"] = function (action, path, event)
+    title.prototype["onCrumbsAction"] = function (action, path, event)
     {
         switch (action)
         {
@@ -169,7 +169,7 @@ status = (function ()
 
     }
 
-    status.prototype["droopCrumb"] = async function (path, crumb)
+    title.prototype["droopCrumb"] = async function (path, crumb)
     {
         var files, x
 
@@ -181,7 +181,7 @@ status = (function ()
         return post.emit('droop.show',{files:files,pos:[x,this.crumbs.cells.y + 1]})
     }
 
-    status.prototype["onFileAction"] = function (action, file)
+    title.prototype["onFileAction"] = function (action, file)
     {
         switch (action)
         {
@@ -192,18 +192,18 @@ status = (function ()
 
     }
 
-    status.prototype["onMouse"] = function (event)
+    title.prototype["onMouse"] = function (event)
     {
         var col, cret, fret, row, sret
 
         cret = this.crumbs.onMouse(event)
-        sret = this.statusfile.onMouse(event)
+        sret = this.titlefile.onMouse(event)
         fret = this.filepos.onMouse(event)
         if (sret || cret || fret)
         {
             return sret || cret || fret
         }
-        status.__super__.onMouse.call(this,event)
+        title.__super__.onMouse.call(this,event)
         var _a_ = this.eventPos(event); col = _a_[0]; row = _a_[1]
 
         if (this.hover)
@@ -232,7 +232,7 @@ status = (function ()
         return this.hover
     }
 
-    status.prototype["setFile"] = function (file)
+    title.prototype["setFile"] = function (file)
     {
         this.file = file
     
@@ -241,12 +241,12 @@ status = (function ()
             return
         }
         this.crumbs.set(slash.dir(this.file))
-        return this.statusfile.set(this.file)
+        return this.titlefile.set(this.file)
     }
 
-    status.prototype["layout"] = function (x, y, w, h)
+    title.prototype["layout"] = function (x, y, w, h)
     {
-        status.__super__.layout.call(this,x,y,w,h)
+        title.__super__.layout.call(this,x,y,w,h)
     
         var cw
 
@@ -255,12 +255,12 @@ status = (function ()
         this.crumbs.layout(x,y,cw,1)
         this.crumbs.layout(x,y,this.crumbs.rounded.length,1)
         x += this.crumbs.rounded.length
-        this.statusfile.layout(x,y,this.statusfile.rounded.length,1)
-        x += this.statusfile.rounded.length
+        this.titlefile.layout(x,y,this.titlefile.rounded.length,1)
+        x += this.titlefile.rounded.length
         return this.filepos.layout(x,y,this.filepos.rounded.length,1)
     }
 
-    status.prototype["draw"] = function ()
+    title.prototype["draw"] = function ()
     {
         var add, ch, ci, colno, cols, cur, cursor, dty, fg, fnl, hil, i, rdo, sel, set, x, y
 
@@ -279,11 +279,11 @@ status = (function ()
         {
             if (_k_.isStr(fg))
             {
-                fg = theme.status[fg]
+                fg = theme.title[fg]
             }
             if (_k_.isStr(bg))
             {
-                bg = theme.status[bg]
+                bg = theme.title[bg]
             }
             this.cells.set(x,y,char,fg,bg)
             return 1
@@ -305,10 +305,10 @@ status = (function ()
         }
         add('','col',this.color.gutter)
         this.crumbs.draw()
-        this.statusfile.draw()
+        this.titlefile.draw()
         this.filepos.draw()
         x += this.crumbs.rounded.length
-        x += this.statusfile.rounded.length
+        x += this.titlefile.rounded.length
         x += this.filepos.rounded.length
         add('','dark','empty')
         if (dty)
@@ -329,7 +329,7 @@ status = (function ()
             cur = `${this.state.s.cursors.length}♦`
             for (var _c_ = i = 0, _d_ = cur.length; (_c_ <= _d_ ? i < cur.length : i > cur.length); (_c_ <= _d_ ? ++i : --i))
             {
-                add(cur[i],((i < cur.length - 1) ? 'cur' : color.darken(theme.status.cur)),'dark')
+                add(cur[i],((i < cur.length - 1) ? 'cur' : color.darken(theme.title.cur)),'dark')
             }
         }
         if (this.state.s.selections.length)
@@ -337,7 +337,7 @@ status = (function ()
             sel = `${this.state.s.selections.length}≡`
             for (var _e_ = i = 0, _f_ = sel.length; (_e_ <= _f_ ? i < sel.length : i > sel.length); (_e_ <= _f_ ? ++i : --i))
             {
-                add(sel[i],((i < sel.length - 1) ? 'sel' : color.darken(theme.status.sel)),'dark')
+                add(sel[i],((i < sel.length - 1) ? 'sel' : color.darken(theme.title.sel)),'dark')
             }
         }
         if (this.state.s.highlights.length)
@@ -345,7 +345,7 @@ status = (function ()
             hil = `${this.state.s.highlights.length}❇`
             for (var _10_ = i = 0, _11_ = hil.length; (_10_ <= _11_ ? i < hil.length : i > hil.length); (_10_ <= _11_ ? ++i : --i))
             {
-                add(hil[i],((i < hil.length - 1) ? 'hil' : color.darken(theme.status.hil)),'dark')
+                add(hil[i],((i < hil.length - 1) ? 'hil' : color.darken(theme.title.hil)),'dark')
             }
         }
         for (var _12_ = ci = x, _13_ = cols - 1; (_12_ <= _13_ ? ci < cols - 1 : ci > cols - 1); (_12_ <= _13_ ? ++ci : --ci))
@@ -372,10 +372,10 @@ status = (function ()
         return set(cols - 2,ch,fg,'dark')
     }
 
-    return status
+    return title
 })()
 
-export default status;
+export default title;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RhdHVzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L3N0YXR1cy9zdGF0dXMua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O1FBc0JRLEtBQUM7UUFDRCxLQUFDLE1BQU0sU0FBUyxNQUFNLE9BQU87UUFDN0IsS0FBQyxNQUFNLFNBQVMsTUFBTSxPQUFPLEtBQUMsTUFBTSxPQUFPOzs7OztnQkFJcEM7O2lCQUNIO3VCQUFNLEtBQUMsTUFBTTs7O3VCQUNQLEtBQUMsTUFBTTs7Ozs7Ozs7Ozs7dUJBRUQ7Ozs7Ozs7Ozs7Ozs7OzsrQ0FJVixLQUFDLE9BQU87UUFFZCxLQUFDLFFBQVcsS0FBQyxPQUFPO1FBQ3BCLEtBQUMsU0FBVztRQUNaLEtBQUMsT0FBVztRQUNaLEtBQUMsV0FBVztRQUNaLEtBQUM7UUFDRCxLQUFDO1FBRUQsS0FBQyxjQUFjO1FBRWYsS0FBQyxTQUFTLFNBQVMsTUFBTSxPQUFPO1FBRWhDLEtBQUMsYUFBaUIsT0FBVyxLQUFDLE9BQU87UUFDckMsS0FBQyxpQkFBaUIsV0FBVyxLQUFDLE9BQU87UUFDckMsS0FBQyxjQUFpQixPQUFXLEtBQUMsT0FBTztRQUVyQyxLQUFDLE9BQU8sU0FBUyxhQUFjLEtBQUMsTUFBTTtRQUN0QyxLQUFDLE9BQU8sU0FBUyxjQUFjLE1BQU0sT0FBTztRQUU1QyxLQUFDLFFBQVEsU0FBUyxRQUFRLE1BQU0sT0FBTztRQUN2QyxLQUFDLFFBQVEsYUFBYTtRQUV0QixLQUFDLE9BQU8sR0FBTyxTQUFTLEtBQUM7UUFDekIsS0FBQyxXQUFXLEdBQUcsU0FBUyxLQUFDO1FBQ3pCLEtBQUMsUUFBUSxHQUFNLFNBQVMsS0FBQztRQUV6QixLQUFLLEdBQUcsaUJBQWlCLEtBQUM7Ozs7Ozs7O1lBSXZCLEtBQUMsU0FBUyxTQUFTOzttQkFDbEIsS0FBQyxRQUFRLEtBQUksVUFBUyxLQUFDLFdBQVcsS0FBQyxTQUFTLFNBQU8sS0FBQyxXQUFTLElBQUksT0FB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
-//# sourceURL=file://kode/ked/view/status/status.kode
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGl0bGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvdGl0bGUvdGl0bGUua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O1FBc0JRLEtBQUM7UUFDRCxLQUFDLE1BQU0sU0FBUyxNQUFNLE1BQU07UUFDNUIsS0FBQyxNQUFNLFNBQVMsTUFBTSxPQUFPLEtBQUMsTUFBTSxPQUFPOzs7OztnQkFJcEM7O2lCQUNIO3VCQUFNLEtBQUMsTUFBTTs7O3VCQUNQLEtBQUMsTUFBTTs7Ozs7Ozs7Ozs7c0JBRUY7Ozs7Ozs7Ozs7Ozs7Ozs4Q0FJVCxLQUFDLE9BQU87UUFFZCxLQUFDLFFBQVcsS0FBQyxPQUFPO1FBQ3BCLEtBQUMsU0FBVztRQUNaLEtBQUMsT0FBVztRQUNaLEtBQUMsV0FBVztRQUNaLEtBQUM7UUFDRCxLQUFDO1FBRUQsS0FBQyxjQUFjO1FBRWYsS0FBQyxTQUFTLFNBQVMsTUFBTSxPQUFPO1FBRWhDLEtBQUMsYUFBZ0IsT0FBVyxLQUFDLE9BQU87UUFDcEMsS0FBQyxnQkFBZ0IsVUFBVyxLQUFDLE9BQU87UUFDcEMsS0FBQyxjQUFnQixPQUFXLEtBQUMsT0FBTztRQUVwQyxLQUFDLE9BQU8sU0FBUyxhQUFjLEtBQUMsTUFBTTtRQUN0QyxLQUFDLE9BQU8sU0FBUyxjQUFjLE1BQU0sTUFBTTtRQUUzQyxLQUFDLFFBQVEsU0FBUyxRQUFRLE1BQU0sTUFBTTtRQUN0QyxLQUFDLFFBQVEsYUFBYTtRQUV0QixLQUFDLE9BQU8sR0FBTyxTQUFTLEtBQUM7UUFDekIsS0FBQyxVQUFVLEdBQUksU0FBUyxLQUFDO1FBQ3pCLEtBQUMsUUFBUSxHQUFNLFNBQVMsS0FBQztRQUV6QixLQUFLLEdBQUcsZ0JBQWdCLEtBQUM7Ozs7Ozs7O1lBSXRCLEtBQUMsU0FBUyxTQUFTOzttQkFDbEIsS0FBQyxRQUFRLEtBQUksVUFBUyxLQUFDLFdBQVcsS0FBQyxTQUFTLFNBQU8sS0FBQyxXQUFTLElBQUksT0FBTSxL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
+//# sourceURL=file://kode/ked/view/title/title.kode

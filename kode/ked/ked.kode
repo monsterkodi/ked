@@ -14,7 +14,7 @@ use ./edit/tool   ◆ belt
 use ./edit        ◆ mode
 use ./edit/mode   ◆ filepos
 use ./view/base   ◆ view input
-use ./view/status ◆ status 
+use ./view/title  ◆ title 
 use ./view/editor ◆ fileeditor
 use ./view/screen ◆ screen ttio
 use ./view/menu   ◆ context menu macro finder searcher differ 
@@ -61,7 +61,7 @@ function KED
         @finder   = new finder     @screen @editor
         @searcher = new searcher   @screen @editor
         @differ   = new differ     @screen @editor
-        @status   = new status     @screen @editor
+        @title    = new title      @screen @editor
         @context  = new context    @screen
         @input    = new input      @screen
 
@@ -87,7 +87,7 @@ function KED
         # post.on 'focus'         (name) -> log "focus: '#{name}'"
         
         @contextHandlers = [                                                                               @editor         @dircol @funcol ]
-        @mouseHandlers   = [ @input @context @finder @searcher @differ @quicky @browse @droop @menu @macro @editor @status @dircol @funcol ]
+        @mouseHandlers   = [ @input @context @finder @searcher @differ @quicky @browse @droop @menu @macro @editor @title @dircol @funcol ]
         @wheelHandlers   = [                 @finder @searcher @differ @quicky @browse @droop       @macro @editor         @dircol @funcol ]
         @keyHandlers     = [ @input @context @finder @searcher @differ @quicky @browse @droop @menu @macro @editor         @dircol @funcol ]
         
@@ -116,14 +116,14 @@ function KED
     showEditor: -> 
     
         @editor.show()
-        @status.show()
+        @title.show()
         @dircol.show()
         @funcol.show()
 
     hideEditor: -> 
     
         @editor.hide()
-        @status.hide()
+        @title.hide()
         @dircol.hide()
         @funcol.hide()
         
@@ -179,7 +179,7 @@ function KED
         
         @dircol.layout  0     0  dcw        h    if @dircol.visible() and @dircol.active
         @funcol.layout  w-fcw 1  fcw        h-1  if @funcol.visible() and @funcol.active
-        @status.layout  dcw   0  w-dcw      1
+        @title.layout  dcw   0  w-dcw      1
         @editor.layout  dcw   1  w-dcw-fcw  h-1
     
     #  ███████   ███   ███  ███  █████████
@@ -221,7 +221,7 @@ function KED
         
         delete @currentFile
 
-        @status.setFile ''
+        @title.setFile ''
     
         @editor.state.syntax.ext = 'txt'
         @editor.state.loadLines ['']
@@ -354,7 +354,7 @@ function KED
         
         delete @loadingFile
         
-        @status.setFile slash.tilde(@currentFile)
+        @title.setFile slash.tilde(@currentFile)
                 
         if text == undefined
             text = '○ binary ○'
@@ -370,7 +370,7 @@ function KED
         @editor.setCurrentFile @currentFile     
         ked_session.set "editor▸file" @currentFile
         
-        @status.time = process.hrtime(start)[1]
+        @title.time = process.hrtime(start)[1]
         
         mode.fileLoaded @editor.state @currentFile row col view
         
@@ -385,7 +385,7 @@ function KED
         
         watcher.watch  @currentFile
                 
-        @t.setTitle slash.file(@status.file)
+        @t.setTitle slash.file(@title.file)
         
         @saveSessionFile @currentFile 'loaded'        
         
@@ -612,7 +612,7 @@ function KED
         
         start = process.hrtime()
         
-        @status.gutter = @editor.state.gutterWidth()
+        @title.gutter = @editor.state.gutterWidth()
         
         @screen.init()
         
@@ -621,7 +621,7 @@ function KED
         # ●▸ draw
         if @menu.greet.hidden()
             @editor.draw() if not @differ.visible()
-            @status.draw()
+            @title.draw()
             @dircol.draw()
             @funcol.draw()
             
@@ -641,7 +641,7 @@ function KED
         @t.removeImgs()
         # ●▪ render
         
-        @status.time = process.hrtime(start)[1]
+        @title.time = process.hrtime(start)[1]
         
 export KED.run
 

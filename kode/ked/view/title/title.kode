@@ -1,9 +1,9 @@
 ###
-     ███████  █████████   ███████   █████████  ███   ███   ███████  
-    ███          ███     ███   ███     ███     ███   ███  ███       
-    ███████      ███     █████████     ███     ███   ███  ███████   
-         ███     ███     ███   ███     ███     ███   ███       ███  
-    ███████      ███     ███   ███     ███      ███████   ███████   
+    █████████  ███  █████████  ███      ████████  
+       ███     ███     ███     ███      ███       
+       ███     ███     ███     ███      ███████   
+       ███     ███     ███     ███      ███       
+       ███     ███     ███     ███████  ████████  
 
     the row above the fileeditor
     displays currently edited file and editor state information 
@@ -14,14 +14,14 @@ use ../../edit/tool ◆ belt
 use ../../edit/mode ◆ filepos
 use ../../theme     ◆ color theme
 use ../base         ◆ view crumbs bubble 
-use                 ◆ statusfile
+use                 ◆ titlefile
 
 function fileposSyntax
 
     @: ->
     
         @color = {}
-        @color.number = theme.status.filepos
+        @color.number = theme.title.filepos
         @color.symbol = color.darken @color.number 0.8
         
     getColor: x y ch =>
@@ -30,11 +30,11 @@ function fileposSyntax
             '' ➜ @color.symbol
                 ➜ @color.number
 
-function status extends view
+function title extends view
 
     @: @screen @editor ->
         
-        super @screen 'status'
+        super @screen 'title'
         
         @state    = @editor.state
         @gutter   = 4
@@ -47,23 +47,23 @@ function status extends view
         
         @setColor 'gutter' theme.gutter.bg
            
-        @crumbs     = new crumbs     @screen 'status_crumbs'
-        @statusfile = new statusfile @screen 'status_file'
-        @filepos    = new bubble     @screen "status_filepos"
+        @crumbs    = new crumbs     @screen 'title_crumbs'
+        @titlefile = new titlefile  @screen 'title_file'
+        @filepos   = new bubble     @screen "title_bubble"
         
         @crumbs.setColor 'empty_left'  @color.gutter
-        @crumbs.setColor 'empty_right' theme.status.empty
+        @crumbs.setColor 'empty_right' theme.title.empty
         
-        @filepos.setColor 'empty' theme.status.empty
+        @filepos.setColor 'empty' theme.title.empty
         @filepos.syntax = new fileposSyntax
         
         @crumbs.on     'action' @onCrumbsAction
-        @statusfile.on 'action' @onFileAction
+        @titlefile.on  'action' @onFileAction
         @filepos.on    'action' @onFileposAction
         
-        post.on 'status.filepos' @onStatusFilepos
+        post.on 'title.filepos' @onTitleFilepos
         
-    onStatusFilepos: @fileposl @fileoffs => 
+    onTitleFilepos: @fileposl @fileoffs => 
     
         if @fileposl.length > 1
             @filepos.set tilde:"#{@fileoffs ? @fileposl.length-@fileoffs-1 : ''}#{@fileposl.length-1}"
@@ -129,7 +129,7 @@ function status extends view
     onMouse: event =>
 
         cret = @crumbs    .onMouse event
-        sret = @statusfile.onMouse event
+        sret = @titlefile.onMouse event
         fret = @filepos   .onMouse event
         
         ⮐  sret or cret or fret if sret or cret or fret
@@ -164,7 +164,7 @@ function status extends view
         
         ⮐  if empty @file
         @crumbs.set slash.dir(@file)
-        @statusfile.set @file
+        @titlefile.set @file
         
     # ███       ███████   ███   ███   ███████   ███   ███  █████████
     # ███      ███   ███   ███ ███   ███   ███  ███   ███     ███   
@@ -185,9 +185,9 @@ function status extends view
     
         x += @crumbs.rounded.length
         
-        @statusfile.layout x y @statusfile.rounded.length 1
+        @titlefile.layout x y @titlefile.rounded.length 1
         
-        x += @statusfile.rounded.length
+        x += @titlefile.rounded.length
         
         @filepos.layout x y @filepos.rounded.length 1
                 
@@ -210,8 +210,8 @@ function status extends view
         dty    = @state.isDirty()
         
         set = x char fg bg => 
-            if fg is str ➜ fg = theme.status[fg]
-            if bg is str ➜ bg = theme.status[bg]
+            if fg is str ➜ fg = theme.title[fg]
+            if bg is str ➜ bg = theme.title[bg]
             @cells.set x y char fg bg
             1
         add = char fg bg => x += set x char fg bg
@@ -225,11 +225,11 @@ function status extends view
         add '' 'col' @color.gutter # column number end
               
         @crumbs.draw() # dir path
-        @statusfile.draw() # file
+        @titlefile.draw() # file
         @filepos.draw()
         
         x += @crumbs.rounded.length
-        x += @statusfile.rounded.length
+        x += @titlefile.rounded.length
         x += @filepos.rounded.length
         
         # dirty and redo indicators
@@ -244,21 +244,21 @@ function status extends view
             cur = "#{@state.s.cursors.length}♦"
              
             for i in 0...cur.length
-                add cur[i] (i<cur.length-1) ? 'cur' : color.darken(theme.status.cur) 'dark'
+                add cur[i] (i<cur.length-1) ? 'cur' : color.darken(theme.title.cur) 'dark'
                 
         if @state.s.selections.length
 
             sel = "#{@state.s.selections.length}≡"
              
             for i in 0...sel.length
-                add sel[i] (i<sel.length-1) ? 'sel' : color.darken(theme.status.sel) 'dark'
+                add sel[i] (i<sel.length-1) ? 'sel' : color.darken(theme.title.sel) 'dark'
 
         if @state.s.highlights.length
 
             hil = "#{@state.s.highlights.length}❇"
              
             for i in 0...hil.length
-                add hil[i] (i<hil.length-1) ? 'hil' : color.darken(theme.status.hil) 'dark'
+                add hil[i] (i<hil.length-1) ? 'hil' : color.darken(theme.title.hil) 'dark'
                                 
         # fill to the right
         
@@ -276,5 +276,5 @@ function status extends view
             '' ➜ 1 #log "#{y5 ch} #{w3 kstr.time(BigInt(@time))}"
         set cols-2 ch fg 'dark'
              
-export status
+export title
 

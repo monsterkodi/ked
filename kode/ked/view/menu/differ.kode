@@ -5,7 +5,7 @@
     ███   ███  ███  ███       ███       ███       ███   ███  
     ███████    ███  ███       ███       ████████  ███   ███  
 
-    displays git diffs
+    displays git status, history and diffs
 ###
 
 use ../../../kxk    ▪ post kseg slash nfs
@@ -226,7 +226,6 @@ function differ extends searcher
         out = ''
         out +=○ git.exec "add ."                cwd:gitDir       
         out +=○ git.exec "commit -m \"#{msg}\"" cwd:gitDir
-        out +=○ git.exec "push -q"              cwd:gitDir
 
         log r4("differ.commit\n#{b7 out}")
         

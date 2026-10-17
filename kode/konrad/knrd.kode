@@ -250,8 +250,7 @@ knrd = files=[] opt={} ○->
     
     opt.reconcile ?= true
     if opt.reconcile and not opt.dryrun
-        removed = ○ reconcile dirs, opt
-        log w5(slash.name(bundleDir())) b5('reclaimed') w5(removed.length) if removed.length and not opt.quiet
+        ○ reconcile dirs, opt
     
     transpiled
         

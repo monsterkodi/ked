@@ -6,8 +6,7 @@
     ███████    ███   ███   ███████    ███████   ███████   ███████  
 ###
 
-use ../../../kxk ▪ slash post kstr
-use ../../../kxk ◆ nfs
+use ../../../kxk ▪ slash post kstr nfs
 use ../../theme  ◆ icons 
 use ../menu      ◆ choices
 use              ◆ diritem

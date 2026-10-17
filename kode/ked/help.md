@@ -128,4 +128,109 @@
     so it reveals the file in the dir column and never toggles
     record mode.
 
-    cmd+o and ctrl+o are listed in ked.kode but have no action.
+    cmd+o and ctrl+o are listed in ked.kode but have no action..
+    
+#### source tree structure
+    
+├── ked
+├── edit
+│   ├── act
+│   │   ├── del
+│   │   ├── indent
+│   │   ├── insert
+│   │   ├── join
+│   │   ├── main
+│   │   ├── multi
+│   │   └── select
+│   ├── complete
+│   ├── draw
+│   ├── editor
+│   ├── keys
+│   ├── mode
+│   │   ├── brckts
+│   │   ├── filepos
+│   │   ├── replex
+│   │   ├── salter
+│   │   └── unype
+│   ├── mode
+│   ├── specs
+│   ├── state
+│   └── tool
+│       ├── belt
+│       ├── belt.md
+│       ├── cell
+│       ├── edit
+│       ├── misc
+│       ├── pair
+│       ├── salt
+│       └── text
+├── index
+│   ├── indexer
+│   ├── index_...
+│   └── prjcts
+├── theme
+│   ├── color
+│   ├── icons
+│   ├── theme
+│   └── theme.noon
+├── util
+│   ├── fileutil
+│   ├── fonts.noon
+│   ├── frecent
+│   ├── git
+│   ├── help
+│   ├── img
+│   │   ├── png
+│   │   ├── rounded
+│   │   ├── sircels
+│   │   └── squares
+│   ├── julia.noon
+│   ├── logfile
+│   ├── prof
+│   ├── session
+│   ├── syntax
+│   ├── walker
+│   └── watcher
+└── view
+    ├── base
+    │   ├── bubble
+    │   ├── crumbs
+    │   ├── input
+    │   ├── knob
+    │   ├── scroll
+    │   └── view
+    ├── colmns
+    │   ├── browse                           file browser:
+    │   ├── brocol                              folder content
+    │   ├── dircol                           column at left edge:
+    │   ├── dirtree                             folder structure
+    │   ├── diritem                          
+    │   ├── droop                            file list used by file history and title crumbs
+    │   ├── funcol                           column at right edge:
+    │   ├── funtree                             list of functions
+    │   ├── quicky                           quick file opener (cmd+p)
+    │   └── quicky.noon
+    ├── editor
+    │   ├── fileeditor
+    │   ├── gutter
+    │   ├── mapscr
+    │   └── mapview
+    ├── menu
+    │   ├── choices
+    │   ├── context
+    │   ├── differ                           git status, history, diff, commit
+    │   ├── finder                           search in current file
+    │   ├── greet                            splash screen
+    │   ├── inputchoice
+    │   ├── macro
+    │   ├── menu
+    │   ├── searcher                         search in project files
+    │   └── searcherfile                     header for each searcher file
+    ├── screen
+    │   ├── cells
+    │   ├── screen                           renders cells
+    │   └── ttio                             low level terminal io
+    └── status
+        ├── statusfile
+        └── status
+        
