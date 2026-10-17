@@ -84,6 +84,7 @@ function KED
         post.on 'file.open'     @openFile
         post.on 'quit'          @quit
         post.on 'file.change'   @onFileChange
+        post.on 'git.status'    @onGitStatus
         # post.on 'focus'         (name) -> log "focus: '#{name}'"
         
         @contextHandlers = [                                                                               @editor         @dircol @funcol ]
@@ -258,6 +259,10 @@ function KED
                 'delete' ➜ @newFile() # todo: load current text into new file
                 'change'
                 'rename' ➜ @reloadFile()
+        
+    onGitStatus: =>
+    
+        git.diff @currentFile
         
     # ████████   ████████  ███       ███████    ███████   ███████  
     # ███   ███  ███       ███      ███   ███  ███   ███  ███   ███
