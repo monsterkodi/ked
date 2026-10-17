@@ -131,18 +131,17 @@ function differ extends searcher
 
     status: ○=> 
     
-        @show()        
-    
         currentFile = ked_session.get 'editor▸file'
         status =○ git.status currentFile
 
-        ⮐ @hide() if empty status
-        ⮐ @hide() if empty status.gitDir
+        ⮐ if empty status
+        ⮐ if empty status.gitDir
 
         if empty status.changed and empty status.deleted and empty status.added
             log "differ.status -- no changes" status
-            ⮐ @hide()
+            ⮐
         
+        @show()        
         @input.set '▸'
         @input.state.moveCursors 'eol'
         
