@@ -90,7 +90,6 @@ function git
         
         gitDir =○ git.dir path
 
-        log "git.status --- #{gitDir} #{path}"  
         
         status =
             gitDir:  gitDir
@@ -99,7 +98,8 @@ function git
             added:   []
             files:   {}
         
-        ⮐  status if empty gitDir or @statusRequests[gitDir]
+        ⮐  status if empty gitDir 
+        ⮐  status if @statusRequests[gitDir]
         
         @statusRequests[gitDir] = true
         
@@ -132,6 +132,8 @@ function git
         for key in ['changed' 'added' 'deleted']
             for file in status[key]
                 status.files[file] = key
+        
+        log "git.status --- post #{gitDir} #{path}" status  
         
         post.emit 'git.status' status
         @statusCache[gitDir] = status
