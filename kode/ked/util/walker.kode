@@ -6,8 +6,7 @@
 ██     ██  ███   ███  ███████  ███   ███  ████████  ███   ███
 ###
 
-use ../../kxk ▪ slash
-use ../../kxk ◆ nfs 
+use ../../kxk ▪ slash nfs
 use           ◆ fileutil
 
 class walker

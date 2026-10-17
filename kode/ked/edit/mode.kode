@@ -15,8 +15,7 @@
     unype    unicode type writer
 ###
 
-use ../../kxk ▪ kseg slash post
-use ../../kxk ◆ nfs
+use ../../kxk ▪ kseg slash post nfs
 use ../theme  ◆ theme
  
 function mode
