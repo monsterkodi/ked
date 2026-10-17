@@ -161,13 +161,13 @@ searcher = (function ()
                         return 800
 
                     case 'json':
-                        return 1
+                        return 20
 
                     case 'js':
-                        return 0
+                        return 10
 
                     default:
-                        return 500
+                        return 0
                 }
 
             }

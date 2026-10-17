@@ -137,9 +137,9 @@ function searcher extends finder
                     'kode'  ➜ 1000
                     'noon'  ➜ 900
                     'md'    ➜ 800
-                    'json'  ➜ 1
-                    'js'    ➜ 0
-                            ➜ 500
+                    'json'  ➜ 20
+                    'js'    ➜ 10
+                            ➜ 0
             weight(b) - weight(a)
         files
         

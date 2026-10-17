@@ -10,6 +10,7 @@ import belt from "../../edit/tool/belt.js"
 
 import color from "../../theme/color.js"
 import theme from "../../theme/theme.js"
+import icons from "../../theme/icons.js"
 
 import view from "../base/view.js"
 import knob from "../base/knob.js"
@@ -144,7 +145,7 @@ dircol = (function ()
 
     dircol.prototype["onContext"] = function (event)
     {
-        return context.show(event.cell,this.onContextChoice,[" "," "," "])
+        return context.show(event.cell,this.onContextChoice,[" ",icons.dir_open + " "," "])
     }
 
     dircol.prototype["onContextChoice"] = async function (choice)
@@ -158,7 +159,7 @@ dircol = (function ()
                 case '':
                     return this.rename()
 
-                case '':
+                case icons.dir_open:
                     dir = current.path
                     if (current.type === 'file')
                     {

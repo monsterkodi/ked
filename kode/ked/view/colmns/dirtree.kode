@@ -6,8 +6,7 @@
 ███████    ███  ███   ███     ███     ███   ███  ████████  ████████
 ###
 
-use ../../../kxk ▪ kutil kseg kstr slash post
-use ../../../kxk ◆ nfs
+use ../../../kxk ▪ kutil kseg kstr slash post nfs
 use ../../index  ◆ prjcts 
 use ../../theme  ◆ theme icons
 use ../../util   ◆ git
@@ -206,7 +205,7 @@ function dirtree extends choices
                     
                     'click'
                     'space'
-                        
+                        ⮐ if event.button == 'right'
                         if action == 'click' and event.mods ➜ ⮐  post.emit 'dircol.root' choice.path
                         
                         if not choice.open ➜ @openDir(choice redraw:true) 
@@ -248,8 +247,10 @@ function dirtree extends choices
                     'drag'
                     'space'  ➜ ⮐  post.emit 'quicky' choice.path
                     
-                    'click'
-                    'return' ➜ ⮐  post.emit 'file.open' choice.path
+                    'click' 
+                    'return'
+                        ⮐ if event.button == 'right' 
+                        ⮐ post.emit 'file.open' choice.path
         
         super action choice event
         

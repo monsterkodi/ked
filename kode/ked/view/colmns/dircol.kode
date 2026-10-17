@@ -8,7 +8,7 @@
 
 use ../../../kxk    ▪ post slash
 use ../../edit/tool ◆ belt
-use ../../theme     ◆ color theme
+use ../../theme     ◆ color theme icons
 use ../base         ◆ view knob crumbs input
 use ../menu         ◆ context
 use                 ◆ dirtree
@@ -123,7 +123,7 @@ function dircol extends view
     
         context.show event.cell @onContextChoice [
             " " 
-            " " 
+            icons.dir_open + " "
             " " 
             ]
                 
@@ -136,7 +136,7 @@ function dircol extends view
                 ''
                     @rename()
                     
-                ''
+                icons.dir_open
                     dir = current.path
                     if current.type == 'file'
                         dir = slash.dir dir
@@ -147,6 +147,7 @@ function dircol extends view
                         
     onReveal: p ○=>
     
+        # todo: select revealed file 
         @dirtree.grabFocus()
     
         ⮐  if @dirtree.itemForPath p
@@ -211,7 +212,6 @@ function dircol extends view
     onMouse: event =>
     
         ⮐  if @hidden() or @collapsed() or not @active
-        
         ret = super event            ; ⮐  ret if ret?.redraw
         ret = @knob.onMouse event    ; ⮐  ret if ret?.redraw
         ret = @crumbs.onMouse event  ; ⮐  ret if ret?.redraw
