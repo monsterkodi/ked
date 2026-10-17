@@ -121,7 +121,7 @@ parseStatus = gitStatus gitDir ->
         file = slash.path gitDir, line.slice(3)
         while (rel = slash.dir(rel)) != ''
             dirSet.add(rel)
-
+        log "parseStatus" line
         switch line.slice 0 2
             ' D' ➜  status.deleted.push file
             'MM'
@@ -144,7 +144,7 @@ parseStatus = gitStatus gitDir ->
 # ████████  ███   ███  ███         ███████   ███   ███     ███     
 
 export (opt={}) ○->
-    
+    log "STATUS" opt
     new Promise (resolve reject) ->
 
         shopt = shell:true

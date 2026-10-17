@@ -8,8 +8,7 @@
     displays git diffs
 ###
 
-use ../../../kxk    ▪ post kseg slash
-use ../../../kxk    ◆ nfs
+use ../../../kxk    ▪ post kseg slash nfs
 use ../../edit/tool ◆ belt
 use ../../index     ◆ prjcts
 use ../../util      ◆ git fileutil
@@ -139,6 +138,8 @@ function differ extends searcher
 
         ⮐  @hide() if empty status
         ⮐  @hide() if empty status.gitDir
+
+        log "differ.status" status
         
         @input.set '▸'
         @input.state.moveCursors 'eol'

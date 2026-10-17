@@ -116,11 +116,12 @@ function git
             file   = slash.path gitDir, rel
             while (rel = slash.dir rel) != ''
                 dirSet.add rel
-                
             header = line.slice 0,2
+            # log "util.addgit.status" header
             switch header
                 ' D' ➜ status.deleted.push file
                 'MM'
+                'M '
                 ' M' ➜ status.changed.push file
                 '??' ➜ status.added  .push file
                 
@@ -146,9 +147,12 @@ function git
     
     @diff: file ○->
         
+        log "git.diff" file
+        
         gitDir =○ git.dir file
         ○ watcher.snapshot file # this prevents unwanted file change events under node when diffing
         diff   =○ git.exec "--no-pager diff --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
+        diff   +=○ git.exec "--no-pager diff --staged --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
         
         status = file:file changes:[]
         lines  = diff.split '\n'
