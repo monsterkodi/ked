@@ -139,7 +139,9 @@ function differ extends searcher
         ⮐  @hide() if empty status
         ⮐  @hide() if empty status.gitDir
 
-        log "differ.status" status
+        if empty status.changed and empty status.deleted and empty status.added
+            log "differ.status -- no changes" status
+            ⮐  @hide()
         
         @input.set '▸'
         @input.state.moveCursors 'eol'
