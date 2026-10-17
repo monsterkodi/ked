@@ -8,8 +8,7 @@
     watches for file system changes and posts notifications when changes occur
 ###
 
-use ../../kxk ▪ watch slash post
-use ../../kxk ◆ nfs
+use ../../kxk ▪ watch slash post nfs
 use fs
 
 function watcher

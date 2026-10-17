@@ -39,8 +39,10 @@ function git
     # triggers a git status update if files in .git/refs/heads change to reflect repository changes made externally
 
     onFileChange: info =>
-        log "git.onFileChange -- " @gitDirs
+        ⮐ if slash.file(info.path) == 'ked.log'
+        log "git.onFileChange --- #{slash.file(info.path)}"
         for gitDir in @gitDirs
+            log "git.onFileChange -- #{gitDir}" 
             if info.path.startsWith gitDir
                 if slash.dir(info.path).endsWith('.git/refs/heads')
                     if slash.name(info.path) in ['master' 'main']
