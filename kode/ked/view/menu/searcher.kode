@@ -117,16 +117,31 @@ function searcher extends finder
         
         post.emit 'file.open' choice.path choice.row choice.col
         
-    # ███   ███  ███  ███      ███   ███████   ███   ███  █████████        ████          ███████    ████████    ███████   ███   ███
-    # ███   ███  ███  ███      ███  ███        ███   ███     ███          ██  ██         ███   ███  ███   ███  ███   ███  ███ █ ███
-    # █████████  ███  ███      ███  ███  ████  █████████     ███           ████ ██       ███   ███  ███████    █████████  █████████
-    # ███   ███  ███  ███      ███  ███   ███  ███   ███     ███          ██  ███        ███   ███  ███   ███  ███   ███  ███   ███
-    # ███   ███  ███  ███████  ███   ███████   ███   ███     ███           █████ █       ███████    ███   ███  ███   ███  ██     ██
-
     highlightTextAndEmitRedraw: text ->
     
         @choices.state.highlightText text
         post.emit 'redraw'
+    
+    #  ███████   ███████   ████████   █████████
+    # ███       ███   ███  ███   ███     ███   
+    # ███████   ███   ███  ███████       ███   
+    #      ███  ███   ███  ███   ███     ███   
+    # ███████    ███████   ███   ███     ███   
+
+    sortFiles: files ->
+    
+        files.sort (a b) ->
+            weight = f -> 
+                ext = slash.ext f
+                switch ext 
+                    'kode'  ➜ 1000
+                    'noon'  ➜ 900
+                    'md'    ➜ 800
+                    'json'  ➜ 1
+                    'js'    ➜ 0
+                            ➜ 500
+            weight(b) - weight(a)
+        files
         
     #  ███████  ███   ███   ███████   ███   ███  
     # ███       ███   ███  ███   ███  ███ █ ███  
@@ -151,7 +166,9 @@ function searcher extends finder
         dir   = prjcts.dir   editorFile
         files = prjcts.files editorFile
 
-        # log "searcher - search #{files.length} files in #{dir} for |#{text}|"
+        files = @sortFiles files
+
+        # log "searcher - search #{files.length} files in #{dir} for |#{text}|" #files
         
         view.prototype.show.call @ # bypass finder to avoid reading selection or cursor word again
         

@@ -3,8 +3,7 @@ var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!
 import kxk from "../../kxk.js"
 let post = kxk.post
 let slash = kxk.slash
-
-import nfs from "../../kxk/nfs.js"
+let nfs = kxk.nfs
 
 import walker from "../util/walker.js"
 
@@ -20,9 +19,9 @@ class prjcts
 
     static files (path)
     {
-        var _20_49_
+        var _19_49_
 
-        return ((_20_49_=(this.projects[this.dir(path)] != null ? this.projects[this.dir(path)].files : undefined)) != null ? _20_49_ : [])
+        return ((_19_49_=(this.projects[this.dir(path)] != null ? this.projects[this.dir(path)].files : undefined)) != null ? _19_49_ : [])
     }
 
     static dir (path)
@@ -55,7 +54,7 @@ class prjcts
 
     static async index (file)
     {
-        var exists, prjPath, result, walk, _72_19_
+        var exists, prjPath, result, walk, _71_19_
 
         if (!(_k_.isStr(file)))
         {
@@ -84,7 +83,7 @@ class prjcts
             {
                 return
             }
-            this.queue = ((_72_19_=this.queue) != null ? _72_19_ : [])
+            this.queue = ((_71_19_=this.queue) != null ? _71_19_ : [])
             if (!(_k_.in(prjPath,this.queue)))
             {
                 this.queue.push(prjPath)
@@ -118,6 +117,4 @@ class prjcts
 }
 
 export default prjcts;
-
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJqY3RzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC9pbmRleC9wcmpjdHMua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7O3NCQWlCZTs7Ozs7OzBCQUVLLEtBQUMsU0FBUyxLQUFDLElBQUksaUJBQWYsS0FBQyxTQUFTLEtBQUMsSUFBSSxPQUFROzs7Ozs7O3VCQUkxQjs7WUFFTCxPQUFPLE1BQU0sU0FBUyxLQUFLLFFBQVE7Z0JBRWhDLFVBQVUsS0FBQyxTQUFTOzt1QkFDaEI7O2dCQUNKLE9BQU8sU0FBUzs7dUJBQ1osS0FBQyxTQUFTLE1BQU07OzRCQUNBLE9BQU87OzBCQUFQLE9BQU87b0JBQ3ZCLEtBQUssV0FBVzs7MkJBQ1o7Ozs7UUFDZixZQUFJLGVBQWU7ZUFDbkI7Ozs7Ozs7d0JBVU87O1lBQ0gsY0FBTSx3Q0FBd0M7OztZQUc1QyxLQUFLLFdBQVc7Ozs7UUFFdEIsT0FBTyxNQUFNLFNBQVMsS0FBSyxRQUFRO1FBSW5DLGVBQVUsSUFBSSxPQUFPO2FBRVg7Ozs7UUFFVixnQkFBVyxJQUFJLElBQUk7WUFJRCxZQUFXOztZQUE3QixVQUFVOztRQUVWLFdBQUEsa0JBQUEsVUFBVyxNQUFNLElBQUk7WUFJbEIsS0FBQzs7Z0JBQ00sS0FBQyxhQUFZOzs7O1lBQ25CLEtBQUMsa0JBQUQsS0FBQzt5QkFDRSxRQUFlLEtBQUM7O2dCQUNmLEtBQUMsTUFBTSxLQUFLOzs7O3VCQUdSLEtBQUMsU0FBUzs7OztRQUV0QixLQUFDLFdBQVc7UUFFWixXQUFXLFFBQ1AsS0FBVSxRQUNWLFNBQVUsR0FDVixTQUFVO1FBSWQsZUFBVSxLQUFLO1lBRVo7O1lBQ0MsS0FBQyxTQUFTLFlBQVcsSUFBSSxRQUFRLE1BQU0sT0FBTztnQ0FDbEMsT0FBTzs7OztnQkFDZixLQUFDLFNBQVMsUUFBUTs7WUFJdEIsS0FBSyxLQUFLLGtCQUFrQjs7ZUFFekIsS0FBQzt1QkFFQyxLQUFDOzt5QkFFSixLQUFDLE1BQU0sS0FBQyxNQUFNOzs7OztlQUVyQiJ9
 //# sourceURL=file://kode/ked/index/prjcts.kode

@@ -147,6 +147,8 @@ function dircol extends view
                         
     onReveal: p ○=>
     
+        @dirtree.grabFocus()
+    
         ⮐  if @dirtree.itemForPath p
 
         if d = @dirtree.itemForPath slash.dir(p)
@@ -163,6 +165,8 @@ function dircol extends view
                     error "dircol.onReveal already open dd? #{d}"
             else
                 @setRoot d
+                
+        @dirtree.grabFocus()
                 
     # ████████   ████████  ███   ███   ███████   ██     ██  ████████
     # ███   ███  ███       ████  ███  ███   ███  ███   ███  ███     

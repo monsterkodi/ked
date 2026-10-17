@@ -138,6 +138,44 @@ searcher = (function ()
         return post.emit('redraw')
     }
 
+    searcher.prototype["sortFiles"] = function (files)
+    {
+        files.sort(function (a, b)
+        {
+            var weight
+
+            weight = function (f)
+            {
+                var ext
+
+                ext = slash.ext(f)
+                switch (ext)
+                {
+                    case 'kode':
+                        return 1000
+
+                    case 'noon':
+                        return 900
+
+                    case 'md':
+                        return 800
+
+                    case 'json':
+                        return 1
+
+                    case 'js':
+                        return 0
+
+                    default:
+                        return 500
+                }
+
+            }
+            return weight(b) - weight(a)
+        })
+        return files
+    }
+
     searcher.prototype["show"] = async function (text)
     {
         var dir, editorFile, ext, file, files, filet, front, idx, items, segls, sfil, span, spans
@@ -151,6 +189,7 @@ searcher = (function ()
         editorFile = ked_session.get('editor▸file')
         dir = prjcts.dir(editorFile)
         files = prjcts.files(editorFile)
+        files = this.sortFiles(files)
         view.prototype.show.call(this)
         this.input.grabFocus()
         this.choices.clearEmpty()
@@ -233,6 +272,4 @@ searcher = (function ()
 })()
 
 export default searcher;
-
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2VhcmNoZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvbWVudS9zZWFyY2hlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozt5QkFpQjBCOzs7Ozs7Ozs7O2lEQUlaLEtBQUMsT0FBTyxLQUFDLE9BQU87WUFFbkIsS0FBQyxTQUFROztZQUNSLEtBQUssR0FBRyxnQkFBZ0IsS0FBQztZQUN6QixLQUFLLEdBQUcsY0FBZ0IsS0FBQzs7UUFFN0IsS0FBQzs7Ozs7eUJBV08sS0FBQyxPQUFPLE1BQU0sSUFBRSxLQUFDLE9BQU8sT0FBTyxNQUFNLE9BQUssWUFDMUMsS0FBQyxPQUFPLE1BQU0sWUFDZCxLQUFDLE9BQU8sTUFBTSxPQUFLLEtBQUMsT0FBTyxPQUFPLE1BQU0sT0FBSyxZQUM3QyxLQUFDLE9BQU8sTUFBTSxPQUFLOzs7Ozs7Ozs7NEJBT2YsS0FBQzs7OztZQUNULElBQUksS0FBQyxRQUFRLE1BQU0sSUFBSSxLQUFDLFFBQVEsTUFBTSxFQUFFLEtBQUssS0FBSyxLQUFLO1lBQ3ZELEtBQUssT0FBTyxLQUFDLFFBQVEsTUFBTSxFQUFFLEVBQUUsS0FBQyxRQUFRLE1BQU0sS0FBSzs7Ozs7Ozs7WUFVakQsS0FBQzs7Ozs7NEJBSUssS0FBQzs7OztpQkFDTixLQUFDLFFBQVEsTUFBTSxFQUFFLEtBQUssTUFBTSxLQUFLLGFBQUwsS0FBSyxZQUFZLEtBQUMsUUFBUSxNQUFNLEVBQUUsS0FBSyxLQUFHLEtBQUMsUUFBUSxNQUFNOztnQkFDcEYsS0FBSzs7Ozs7Ozs7O1lBVVAsS0FBQzs7Ozs0QkFFSyxLQUFDOzs7O1lBQ1QsTUFBTSxLQUFLLFFBQVE7aUJBQWlCLGNBQUEsSUFBSzs7dUJBQVo7OztvREFFM0I7Ozs7O1lBVUEsS0FBQzs7OztRQUVQLEtBQUM7c0JBRVcsS0FBQzs7OztzQkFDRCxLQUFDOzs7O3NCQUNEOzs7O1FBRVosS0FBSyxLQUFLLG1CQUFtQixLQUFDO2VBRXZCLEtBQUM7c0JBQ0QsS0FBQzs7Ozs7UUFZUixLQUFDLGtCQUFrQixLQUFDLE1BQU07UUFDMUIsS0FBQyxrQkFBa0IsT0FBTztlQUUxQixLQUFLLEtBQUssWUFBWSxPQUFPLEtBQUssT0FBTyxJQUFJLE9BQU87Ozs7O1FBVXBELEtBQUMsUUFBUSxNQUFNLGNBQWM7ZUFDN0IsS0FBSyxLQUFLOzs7Ozs7O1FBWVYsT0FBTyxLQUFDLFdBQVc7c0JBSVY7O1lBQ0wsS0FBQyxNQUFNOzs7UUFHWCxhQUFhLFlBQVksSUFBSTtRQUU3QixNQUFRLE9BQU8sSUFBTTtRQUNyQixRQUFRLE9BQU8sTUFBTTtRQUlyQixLQUFLLFVBQVUsS0FBSyxLQUFLO1FBRXpCLEtBQUMsTUFBTTtRQUNQLEtBQUMsUUFBUTtRQUNULEtBQUM7NEJBRWU7Ozs7WUFFWixjQUFTLElBQUksU0FBUztZQUV0QixRQUFRLEtBQUssTUFBTTtZQUNuQixRQUFRLEtBQUssaUJBQWlCLE1BQU07Z0JBRWpDLFFBQU8sTUFBTSxTQUFPOztnQkFDbkIsbUJBQU87Z0JBQ1AsS0FBQywyQkFBMkI7OzBCQUVkOztnQkFBbEI7O1lBRUEsUUFBUSxLQUFLLGVBQWU7WUFDNUIsTUFBTSxNQUFNLElBQUk7WUFFaEI7WUFDQSxNQUFNLE1BQUssS0FBSztZQUVoQixXQUFXLGFBQWEsS0FBQyxVQUFVLEtBQUMsYUFBYTtZQUNqRCxLQUFLLFlBQVksS0FBQyxRQUFRLE1BQU0sU0FBTztZQUN2QyxLQUFLLElBQUksTUFBTSxTQUFTLEtBQUs7WUFDN0IsS0FBQyxNQUFNLEtBQUs7WUFFWixNQUFNLE1BQ0YsS0FBTyxJQUNQLEtBQU8sT0FDUCxLQUFPLEtBQ1AsSUFBTyxFQUNQLElBQU87aUNBRUM7Ozs7b0JBQ0wsbUJBQVUsUUFBTyxLQUFLLEtBQUc7O29CQUN4QixNQUFNLE1BQUssS0FBSzs7Z0JBQ3BCLE1BQU0sTUFDRixLQUFPLE1BQU0sS0FBSyxJQUFJLE1BQU0sS0FBSyxLQUNqQyxLQUFPLEtBQ1AsSUFBTyxLQUFLLEdBQ1osSUFBTyxLQUFLOztZQUVwQixLQUFDLFFBQVEsT0FBTyxNQUFNO2dCQUVoQixLQUFDOzs7O2dCQUVKLFFBQU8sTUFBTSxTQUFPOztnQkFDbkIsS0FBQywyQkFBMkI7Ozs7Ozs7YUFVUixpQkFBQSxPQUFROzttQkFBakMsS0FBQyxhQUFhOztrREFFWDs7Ozs7Z0JBWUM7O2lCQUVIO3VCQUFjLEtBQUMsS0FBSzs7aUJBQ3BCOzs7aUJBQ0E7Ozs7OzBEQUVFLE9BQU87Ozs7OztlQUVkIn0=
 //# sourceURL=file://kode/ked/view/menu/searcher.kode

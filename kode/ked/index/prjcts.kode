@@ -6,8 +6,7 @@
     ███        ███   ███   ███████    ███████     ███     ███████   
 ###
 
-use ../../kxk ▪ post slash
-use ../../kxk ◆ nfs
+use ../../kxk ▪ post slash nfs
 use ../util   ◆ walker
 
 class prjcts
