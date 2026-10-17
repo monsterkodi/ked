@@ -86,9 +86,9 @@ function git
     ###
     @status: path ○->
         
-        # log 'git.status' path
-        
         gitDir =○ git.dir path
+
+        log 'git.status' gitDir path
         
         status =
             gitDir:  gitDir
