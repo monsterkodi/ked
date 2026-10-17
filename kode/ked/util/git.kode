@@ -47,8 +47,8 @@ function git
                 if slash.dir(info.path).endsWith('.git/refs/heads')
                     if slash.name(info.path) in ['master' 'main']
                         log "git.onFileChange + #{gitDir} #{info.path}"
-                        log "git.onFileChange +" @gitDirs
-                        git.status gitDir
+                        log "git.onFileChange + #{slash.dir(gitDir)}" 
+                        git.status slash.dir(gitDir)
                         ⮐ 
 
     @dir: path ○-> ○ nfs.git path
