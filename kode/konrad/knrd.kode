@@ -87,12 +87,12 @@ gatherFiles = ○->
             ⮐ false if file.endsWith ignore
         true
     
+#  ███████  █████████   ███████   ██     ██  ████████ 
+# ███          ███     ███   ███  ███   ███  ███   ███
+# ███████      ███     █████████  █████████  ████████ 
+#      ███     ███     ███   ███  ███ █ ███  ███      
+# ███████      ███     ███   ███  ███   ███  ███      
 ###
-     ███████  █████████   ███████   ██     ██  ████████   
-    ███          ███     ███   ███  ███   ███  ███   ███  
-    ███████      ███     █████████  █████████  ████████   
-         ███     ███     ███   ███  ███ █ ███  ███        
-    ███████      ███     ███   ███  ███   ███  ███        
     
     the absolute path of the source a generated file was made from, or '' if
     kode did not make it. it is the only thing telling a generated file from
