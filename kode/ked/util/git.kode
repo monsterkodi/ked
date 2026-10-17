@@ -89,7 +89,7 @@ function git
         
         gitDir =○ git.dir path
 
-        log 'git.status' gitDir path
+        log "git.status --- #{gitDir} #{path}"  
         
         status =
             gitDir:  gitDir
@@ -148,9 +148,8 @@ function git
     
     @diff: file ○->
         
-        log "git.diff" file
-        
         gitDir =○ git.dir file
+        log "git.diff --- #{gitDir} #{file}" 
         ○ watcher.snapshot file # this prevents unwanted file change events under node when diffing
         diff   =○ git.exec "--no-pager diff --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
         diff   +=○ git.exec "--no-pager diff --staged --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
