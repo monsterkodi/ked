@@ -119,7 +119,7 @@ function git
             while (rel = slash.dir rel) != ''
                 dirSet.add rel
             header = line.slice 0,2
-            # log "util.addgit.status" header
+
             switch header
                 ' D' ➜ status.deleted.push file
                 'MM'
