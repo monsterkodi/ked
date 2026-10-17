@@ -180,7 +180,7 @@ reconcile = dirs opt={} ○->
             ○ nfs.remove file
             removed.push file
 
-            log r2('🗑 ') w3(slash.tilde(file)) r4(' <- ') w3(slash.tilde(from)) if not opt.quiet
+            log r4('🗑 ') w3(slash.tilde(file)) if not opt.quiet
 
     removed
 

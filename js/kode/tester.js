@@ -6,7 +6,7 @@ var _k_ = {k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48
     return toStr(obj);
 }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, dir: function () { let url = import.meta.url.substring(7); let si = url.lastIndexOf('/'); return url.substring(0, si); }, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}};_k_.R1=_k_.k.B256(_k_.k.R(1));_k_.R2=_k_.k.B256(_k_.k.R(2));_k_.r3=_k_.k.F256(_k_.k.r(3));_k_.r4=_k_.k.F256(_k_.k.r(4));_k_.r5=_k_.k.F256(_k_.k.r(5));_k_.g1=_k_.k.F256(_k_.k.g(1));_k_.G1=_k_.k.B256(_k_.k.G(1));_k_.g3=_k_.k.F256(_k_.k.g(3));_k_.y2=_k_.k.F256(_k_.k.y(2));_k_.y3=_k_.k.F256(_k_.k.y(3));_k_.y5=_k_.k.F256(_k_.k.y(5));_k_.y6=_k_.k.F256(_k_.k.y(6));_k_.y8=_k_.k.F256(_k_.k.y(8));_k_.W1=_k_.k.B256(_k_.k.W(1));_k_.w2=_k_.k.F256(_k_.k.w(2))
 
-var allfails, allsuccs, comps, fail, fails, file, files, stack, succs, test, tester
+var allfails, allsuccs, columns, comps, fail, fails, file, files, stack, succs, test, tester
 
 import klor from "../kxk/klor.js"
 import kstr from "../kxk/kstr.js"
@@ -22,6 +22,7 @@ fails = []
 stack = []
 allfails = []
 allsuccs = 0
+columns = 60
 class Tester
 {
     constructor ()
@@ -40,7 +41,7 @@ class Tester
         depth = stack.length
         if (this.logSections !== false)
         {
-            console.log(_k_.W1(_k_.lpad(depth * 3 - 1) + ' ' + global[`g${_k_.max(1,8 - 2 * depth)}`](_k_.rpad(34 - depth * 3,t) + ' ')))
+            console.log(_k_.W1(_k_.lpad(depth * 3 - 1) + ' ' + global[`g${_k_.max(1,8 - 2 * depth)}`](_k_.rpad(columns + 1 - depth * 3,t) + ' ')))
         }
         try
         {
@@ -148,7 +149,7 @@ class Tester
                     stack.push(k)
                     if (logModules !== false)
                     {
-                        console.log(_k_.G1(_k_.y8(' ' + _k_.rpad(33,k) + ' ')))
+                        console.log(_k_.G1(_k_.y8(' ' + _k_.rpad(columns,k) + ' ')))
                     }
                     try
                     {
@@ -277,6 +278,4 @@ for (var _a_ = 0; _a_ < list.length; _a_++)
     process.exit(1)
 }
 }
-
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi9rb2RlL2tvZGUvdGVzdGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBV0EsS0FBSztBQUVMLFFBQVE7QUFDUixRQUFRO0FBQ1I7QUFDQTtBQUNBO0FBQ0EsV0FBVzs7Ozs7Ozs7Ozs7Ozs7UUFjSCxNQUFNLEtBQUs7UUFDWCxRQUFRO1FBQ1IsUUFBUSxNQUFNO1lBQ1gsS0FBQyxnQkFBZTs7WUFDZiw0QkFBWSxRQUFNLElBQUUsS0FBSyxNQUFNLG1CQUFlLEVBQUcsSUFBRSxJQUFFLG1CQUFlLEtBQUcsUUFBTSxFQUFFLEtBQUs7Ozs7WUFFcEY7O2VBQ0U7O1lBRUYsTUFBTSxNQUNGLE1BQU8sTUFBTSxRQUFRLFFBQ3JCLE1BQU8sTUFDUCxPQUFVLE1BQ1YsSUFBTzs7ZUFFZixNQUFNOzs7Ozs7O1lBV0YsT0FBTyxHQUFHLEVBQUc7O21CQUVQOztpQkFFTixPQUFPLE9BQUssT0FBTzs7bUJBRWI7OzJCQUVOLGdCQUFhOztnQkFFTixFQUFFLFdBQVUsRUFBRTs7dUJBQ1g7OytCQUNHLFNBQUksRUFBRSwwQkFBRixFQUFFLGFBQUYsRUFBRTs7cUJBQ0osS0FBQyxZQUFZLEVBQUUsR0FBSSxFQUFFOzsyQkFDdEI7OzttQkFDUjs7MkJBRU4sZ0JBQWE7O2dCQUVOLE1BQUs7O2dCQUNKLG1CQUFPLEtBQUMsVUFBVTtnQkFDbEIsbUJBQU8sS0FBQyxVQUFVO3VCQUNoQjs7bUJBQ0o7OzJCQUVOLGdCQUFhOztZQUVULFdBQVcsS0FBQyxZQUFZLE9BQU8sS0FBSyxHQUFJLE9BQU8sS0FBSztZQUNwRCxXQUFXLEtBQUMsWUFBWSxPQUFPLE9BQU8sR0FBSSxPQUFPLE9BQU87bUJBRXRELFlBQWE7O2VBRXZCLE1BQUs7Ozs7Ozs7UUFJTDtZQUVHLE9BQU8sT0FBSzs7Z0JBQ1IsRUFBRTs7Z0JBQ0Q7Ozs7WUFHTCxLQUFDLFlBQVksRUFBRzs7WUFDZjs7O1FBR0osZ0JBQVksTUFBTSxTQUFPLEtBQUc7UUFFNUIsbUJBQU8sTUFBTSxNQUFNLFFBQVEsUUFBUSxhQUFTLEtBQUMsTUFBTSxNQUFNLG9CQUFZLFVBQVUsYUFBUyxLQUFDLE1BQU07ZUFFL0YsTUFBTSxNQUNGLE1BQU8sTUFBTSxRQUFRLFFBQ3JCLE1BQU8sTUFDUCxJQUFPLEVBQ1AsSUFBTzs7Ozs7OzthQVdOLHFCQUFBLFdBQVksd0JBQVU7Ozs7UUFFM0IsUUFBUTtRQUNSLFFBQVE7UUFDUjtRQUNBO1FBRUEsT0FBTyxVQUFVLEtBQUM7UUFDbEIsT0FBTyxVQUFVLEtBQUM7UUFFbEIsYUFBYSxLQUFDOzs7Ozs7O29CQUlQLEVBQUU7O29CQUNELE1BQU0sS0FBSzt3QkFDUixlQUFjOzt3QkFDYiwwQkFBVSxlQUFXLEdBQUcsS0FBSzs7Ozt3QkFFN0I7OzJCQUNFOzt3QkFFRixNQUFNLE1BQ0YsTUFBTyxNQUFNLFFBQVEsUUFDckIsTUFBTyxNQUNQLE9BQVUsTUFDVixJQUFPOzsyQkFDZixNQUFNOzs7Ozs7Ozs7V0FmZDtRQWlCQSxZQUFZO1FBQ1osV0FBVyxTQUFTLE9BQU87eUJBRXJCOzs7Ozt3QkFVQzs7NEJBQ0k7O2VBQ1gsRUFBRSxNQUFNLE1BQU07O21CQUFXLFdBQUs7V0FBTSxLQUFLOzs7Ozs7OzRCQUk3Qjs7OztZQUNSLDBCQUFVLE1BQU0sS0FBSyxNQUFNLEtBQUssc0JBQWMsUUFBUSxLQUFLLFlBQU0sR0FBSyxZQUFRLFVBQVU7WUFDeEYsbUJBQU8sS0FBQyxVQUFVLEtBQUs7WUFDdkIsMEJBQVU7WUFDVixtQkFBTyxLQUFDLFVBQVUsS0FBSzs7WUFPeEIsWUFBWSxNQUFNOztZQUNqQixpQkFBYyxLQUFLLFFBQVE7MkJBQ2xCOztnQkFDTCx5QkFBaUIsZ0JBQVksU0FBUyxpQkFBYSxlQUFjLFNBQVMsU0FBUyxJQUFJLE9BQU87O3FCQUMxRjs7Z0JBQ0osa0JBQWMsZ0JBQVksWUFBWTs7WUFDMUMsWUFBSTs7UUFFUjtlQUNBLFdBQVc7Ozs7Ozs7c0JBVUU7O21CQUFYOztRQUVGLFNBQVMsS0FBRyxHQUFHLE1BQU07UUFFckIsSUFBSTtRQUNKOzs7Ozs7K0JBQ2E7OzJCQUNMLElBQUksS0FBRzs7Ozs7Ozs7O1dBRlA7UUFPUixRQUFRLE1BQU07O21CQUFjLEVBQUU7O1FBRTlCLEtBQUssTUFBTSxZQUFRO2VBRW5COzs7O21CQUVHOzs7SUFJUCxjQUFTLElBQUksS0FBSyxNQUFNLGVBQVc7SUFDbkMsT0FBTzt3QkFDSzs7OztRQUNJLE1BQU0sS0FBSyxLQUFLLFVBQVM7O1FBQXJDOztJQUNBLGFBQVEsT0FBTyxLQUFLO0lBQ3BCLGFBQWE7SUFDYixPQUFPLGNBQWM7SUFDckIsT0FBTyxhQUFhO0lBQ3BCLE9BQU8sU0FBWSxPQUFPLEtBQUssS0FBSzs7SUFDeEMsT0FBTztRQUNKOztJQUNDLFFBQVEsS0FBSyJ9
 //# sourceURL=file://kode/kode/tester.kode

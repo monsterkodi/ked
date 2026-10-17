@@ -1,6 +1,6 @@
 var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}, rpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s+=c} return s}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, file: function () { return import.meta.url.substring(7); }, dir: function () { let url = import.meta.url.substring(7); let si = url.lastIndexOf('/'); return url.substring(0, si); }};_k_.G2=_k_.k.B256(_k_.k.G(2));_k_.y8=_k_.k.F256(_k_.k.y(8))
 
-var file, files, hdr, lastArg, m, mod, mods, test, tests
+var columns, file, files, hdr, lastArg, m, mod, mods, test, tests
 
 import nfs from "./kxk/nfs.js"
 import slash from "./kxk/slash.js"
@@ -9,6 +9,7 @@ import tester from "./kode/tester.js"
 
 mods = ['kxk','kode','kolor','ked','konrad']
 lastArg = process.argv.slice(-1)[0]
+columns = 60
 if (lastArg === 'help')
 {
     console.log(`
@@ -33,7 +34,7 @@ for (var _a_ = 0; _a_ < list.length; _a_++)
 
 hdr = function (h)
 {
-    console.log(_k_.G2(_k_.y8(' ' + _k_.rpad(33,h) + ' ')))
+    console.log(_k_.G2(_k_.y8(' ' + _k_.rpad(columns,h) + ' ')))
 }
 if (lastArg === 'brief')
 {
@@ -88,6 +89,4 @@ for (var _d_ = 0; _d_ < list3.length; _d_++)
     }
 }
 tester.summarize()
-
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdC5qcyIsInNvdXJjZXMiOlsiLi4va29kZS90ZXN0LmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztBQVdBLFFBQVEsTUFBTSxPQUFPLFFBQVEsTUFBTTtBQUVuQyxVQUFVLFFBQVE7SUFFZixZQUFXOztJQUVWOzs7Ozs7O1lBUWdCLEtBQUssS0FBSzs7O0lBSTFCLFFBQVEsS0FBSzs7QUFFakI7b0JBQXFCOzs7O0lBQU8sTUFBTSxLQUFLOzs7QUFFdkM7O0lBQVcsMEJBQVUsZUFBVyxHQUFHLEtBQUs7O0lBR3BDLFlBQVc7O0lBRVAsT0FBTyxjQUFjOztTQUV6QixZQUFXOztJQUVQLE9BQU8sY0FBYztJQUNyQixPQUFPLGFBQWE7O2dCQUV4QixRQUFXOzt5QkFFRTs7OztRQUFPLE1BQU0sS0FBSyxNQUFLOzs7U0FFcEM7O3lCQUVhOzs7O1FBQU8sTUFBTSxLQUFLOztJQUUzQixJQUFJLFFBQVE7SUFFWixPQUFPLE1BQU0sZUFBVSxLQUFLO0lBQzVCLGFBQVEsT0FBTztJQUNmLE9BQU8sS0FBSyxLQUFLOztxQkFFZDs7OztRQUVKLE1BQU07O1FBQ0wsSUFBSTtRQUNKLGNBQVMsSUFBSSxLQUFLLE1BQU0sZUFBVSxJQUFJOzZCQUMxQjs7OztnQkFDSSxLQUFLLFNBQVE7O2dCQUF6Qjs7WUFDQSxhQUFRLE9BQU8sS0FBSztZQUNwQixPQUFPLEtBQUssS0FBSzs7OztBQUU3QixPQUFPIn0=
 //# sourceURL=file://kode/test.kode

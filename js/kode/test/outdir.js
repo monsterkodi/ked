@@ -43,11 +43,11 @@ toExport["outPath"] = function ()
     {
         compare(kode.outPath('/r/test/c.noon','/out','/r'),'/out/test/c.js')
     })
-    section("a file outside the root keeps its name and nothing else", function ()
+    section("a file outside the root keeps its name", function ()
     {
         compare(kode.outPath('/s/b.kode','/out','/r'),'/out/b.js')
     })
-    section("a file whose name starts with the root is not under the root", function ()
+    section("a file whose name starts with the root is not the root", function ()
     {
         compare(kode.outPath('/rb.kode','/out','/r'),'/out/rb.js')
     })
@@ -68,6 +68,4 @@ toExport["the root the bootstrap would pick"]._section_ = true
 toExport._test_ = true
 export default toExport
 
-
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0ZGlyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tvZGUvdGVzdC9vdXRkaXIua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7OztnQkFnQlEsS0FBSyxXQUFXLFlBQVksY0FBZ0I7Ozs7Z0JBSzVDLEtBQUssV0FBVyxpQkFBaUIsa0JBQW9COzs7O2dCQUlyRCxLQUFLLFdBQVcsY0FBZ0I7Ozs7Z0JBSWhDLEtBQUssV0FBVyxZQUFZLGNBQWdCOzs7O2dCQUk1QyxLQUFLLGNBQWdCOzs7Ozs7OztnQkFNckIsS0FBSyxRQUFRLFlBQVksT0FBTyxNQUFROzs7O2dCQUl4QyxLQUFLLFFBQVEsaUJBQWlCLE9BQU8sTUFBUTs7OztnQkFJN0MsS0FBSyxRQUFRLGdCQUFnQixPQUFPLE1BQVE7Ozs7Z0JBSTVDLEtBQUssUUFBUSxpQkFBaUIsT0FBTyxNQUFROzs7O2dCQU83QyxLQUFLLFFBQVEsWUFBWSxPQUFPLE1BQVE7Ozs7Z0JBS3hDLEtBQUssUUFBUSxXQUFXLE9BQU8sTUFBUTs7Ozs7Ozs7Z0JBTXZDLEtBQUssV0FBVyx1QkFBdUIsOEJBQWdDOzs7O2dCQUl2RSxLQUFLLFdBQVcsdUJBQXVCLHlCQUEyQiJ9
 //# sourceURL=file://kode/kode/test/outdir.kode

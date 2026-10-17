@@ -12,6 +12,7 @@ use ./kode ◆ tester
 mods = ['kxk' 'kode' 'kolor' 'ked' 'konrad']
 
 lastArg = process.argv[-1]
+columns = 60
 
 if lastArg == 'help'
     
@@ -31,7 +32,7 @@ if lastArg == 'help'
 
 tests = {}; for m in mods ➜ tests[m] = true
 
-hdr = h -> log G2(y8(' ' + rpad(33 h) + ' '))
+hdr = h -> log G2(y8(' ' + rpad(columns h) + ' '))
 
 if 
     lastArg == 'brief'
