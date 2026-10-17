@@ -40,13 +40,14 @@ function git
 
     onFileChange: info =>
         ⮐ if slash.file(info.path) == 'ked.log'
-        log "git.onFileChange --- #{slash.file(info.path)}"
+        # log "git.onFileChange --- #{slash.file(info.path)}"
         for gitDir in @gitDirs
-            log "git.onFileChange -- #{gitDir}" 
+            # log "git.onFileChange -- #{gitDir}" 
             if info.path.startsWith gitDir
                 if slash.dir(info.path).endsWith('.git/refs/heads')
                     if slash.name(info.path) in ['master' 'main']
-                        log "git.onFileChange - #{gitDir} #{info.path}"
+                        log "git.onFileChange + #{gitDir} #{info.path}"
+                        log "git.onFileChange +" @gitDirs
                         git.status gitDir
                         ⮐ 
 
