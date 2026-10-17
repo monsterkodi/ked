@@ -119,7 +119,7 @@ function differ extends searcher
         currentFile = ked_session.get 'editor▸file'
         diff =○ git.diff currentFile
                        
-        if valid diff
+        if valid diff.changes
             @show()
             @diff diff
             

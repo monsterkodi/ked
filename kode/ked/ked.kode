@@ -6,8 +6,7 @@
     ███   ███  ████████  ███████    
 ###
 
-use ../kxk        ▪ karg kstr kseg slash post
-use ../kxk        ◆ nfs
+use ../kxk        ▪ karg kstr kseg slash post nfs
 use ./index       ◆ prjcts indexer
 use ./util        ◆ logfile session help frecent watcher git 
 use ./util/img    ◆ rounded squares sircels
@@ -260,9 +259,7 @@ function KED
                 'change'
                 'rename' ➜ @reloadFile()
         
-    onGitStatus: =>
-    
-        git.diff @currentFile
+    onGitStatus: => git.diff @currentFile
         
     # ████████   ████████  ███       ███████    ███████   ███████  
     # ███   ███  ███       ███      ███   ███  ███   ███  ███   ███
