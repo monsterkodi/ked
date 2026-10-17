@@ -96,22 +96,26 @@ class kk
                 {
                     console.log(_k_.b5('🔧'),_k_.w3(info.path))
                     await knrd(info.path)
-                    return await kk.test(args.files)
+                    return await kk.test(args.files,{silent:true})
                 }
             })
         }})
     }
 
-    static async test (options)
+    static async test (files, opt)
     {
-        var cmd, file, files, opt, test
+        var cmd, file, test
 
         if (await nfs.exists("js/test.js"))
         {
             cmd = "node js/test.js"
-            if (!_k_.empty(options))
+            if (!_k_.empty(files))
             {
-                cmd += ' ' + options.join(' ')
+                cmd += ' ' + files.join(' ')
+            }
+            if ((opt != null ? opt.silent : undefined))
+            {
+                cmd += ' silent'
             }
             opt = {shell:true,cwd:kk.bundleDir()}
             return new Promise(function (resolve, reject)
@@ -136,6 +140,11 @@ class kk
         }
         else if (await nfs.isDir("js/test"))
         {
+            if ((opt != null ? opt.silent : undefined))
+            {
+                tester.logSections = false
+                tester.logModules = false
+            }
             files = await nfs.list(slash.path(process.cwd(),'js','test'))
             var list = _k_.list(files)
             for (var _a_ = 0; _a_ < list.length; _a_++)
@@ -160,6 +169,4 @@ class kk
 
 global['kk'] = kk
 export default kk.run;
-
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia2suanMiLCJzb3VyY2VzIjpbIi4uLy4uL2tvZGUva29ucmFkL2trLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7T0FlTyxHQUFHLEtBQUs7QUFFZixPQUFPLEtBQUs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7UUE2QkosUUFBUSxLQUFLO1lBQ1YsS0FBSzs7a0JBQVksWUFBSSxRQUFRLE1BQU0sS0FBSyxNQUFNLGVBQVUsV0FBVyxRQUFROztZQUMzRSxLQUFLOztrQkFBWSxRQUFnQixLQUFLLFNBQVMsTUFBSyxPQUFPOztZQUMzRCxLQUFLOztrQkFBWSxLQUFhLE1BQU07O1lBQ3BDLEtBQUs7O2tCQUFZLGNBQWMsS0FBSyxjQUFjLE1BQU07O2dCQUE2QixZQUFJOzs7WUFDekYsS0FBSzs7a0JBQVksR0FBRyxLQUFVOztZQUM5QixLQUFLOztrQkFBWSxHQUFHOztZQUNwQixLQUFLOztrQkFDRixLQUFLLEtBQUksTUFBTSxNQUFNLElBQUk7O3VCQUV0QixLQUFLOztZQUNWLFlBQUksa0JBQWtCLEtBQUs7Ozs7OztRQVUvQixZQUFJLGFBQVMsR0FBRztlQUVoQixNQUFNLE1BQU0sR0FBRyxhQUFZLFVBQVUsS0FBSzs7bUJBQ3RDLFFBQVEsR0FBRzs7b0JBRUQsTUFBTSxTQUFTLEtBQUssS0FBSzs7OzsyQkFFNUIsTUFBTSxJQUFJLEtBQUssT0FBVSxPQUFPLE1BQU0sT0FBTzs7b0JBQzVDLG1CQUFPLGFBQVMsS0FBSzswQkFDbkIsS0FBSyxLQUFLO2lDQUNWLEdBQUcsS0FBSyxLQUFLOzs7Ozs7Ozs7O2tCQVdyQixJQUFJLE9BQU87O1lBRVQsTUFBTTsyQkFDa0M7O2dCQUF4QyxPQUFPLE1BQU0sUUFBUSxLQUFLOztZQUMxQixPQUFNLE1BQU0sS0FBSyxJQUFJLEdBQUc7dUJBRXBCOzt1QkFFQSxjQUFjLEtBQUssSUFBSTs7d0JBRWhCOzt3QkFDQyxjQUFNLFFBQVE7K0JBQ2Q7Ozs7dUNBRW9COzs0QkFBcEIsWUFBSTs7K0JBQ0o7Ozs7O3VCQUVkLElBQUksTUFBTTs7WUFFUixjQUFTLElBQUksS0FBSyxNQUFNLEtBQUssUUFBUSxNQUFNLEtBQUs7Z0NBQ3BDOzs7O29CQUNJLEtBQUssU0FBUTs7b0JBQXpCOztnQkFDQSxhQUFRLE9BQU8sS0FBSztnQkFDcEIsT0FBTyxLQUFLLEtBQUs7O21CQUVyQixPQUFPOzs7Ozs7ZUFFSixRQUFROzs7O0FBRTNCLE9BQU8sUUFBUTtlQUVSLEdBQUcifQ==
 //# sourceURL=file://kode/konrad/kk.kode

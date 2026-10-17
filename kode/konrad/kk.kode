@@ -75,7 +75,7 @@ class kk
                 if slash.ext(info.path) in ['kode' 'pug' 'styl' 'noon']
                     log b5('🔧') w3(info.path)
                     ○ knrd info.path
-                    ○ kk.test args.files
+                    ○ kk.test args.files silent:true
     
     # █████████  ████████   ███████  █████████  
     #    ███     ███       ███          ███     
@@ -83,13 +83,14 @@ class kk
     #    ███     ███            ███     ███     
     #    ███     ████████  ███████      ███     
     
-    @test: options ○->
+    @test: files opt ○->
         
         if 
             ○ nfs.exists "js/test.js"
                 
                 cmd = "node js/test.js"
-                cmd += ' ' + options.join(' ') if valid options
+                cmd += ' ' + files.join(' ') if valid files
+                cmd += ' silent' if opt?.silent
                 opt = shell:true cwd:kk.bundleDir() # run tests inside the .app folder
                 
                 new Promise (resolve reject) ->
@@ -105,10 +106,15 @@ class kk
                             
             ○ nfs.isDir "js/test"
 
+                if opt?.silent
+                    tester.logSections = false
+                    tester.logModules  = false
+    
                 files =○ nfs.list slash.path(process.cwd() 'js' 'test')
                 for file in files
                     continue if file.type == 'dir' # ignore subdirectories for now
                     test =○ import(file.path) # shouldn't the file type be checked here?
+        
                     tester.test test.default
             
                 tester.summarize()
