@@ -32,7 +32,7 @@ if lastArg == 'help'
 
 tests = {}; for m in mods ➜ tests[m] = true
 
-hdr = h -> log G2(y8(' ' + rpad(columns h) + ' '))
+hdr = h -> log B5(y5(' ' + rpad(columns h) + ' '))
 
 if 
     lastArg == 'brief'

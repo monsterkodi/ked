@@ -6,6 +6,7 @@ kxk = {}
 import post from "./kxk/post.js"
 import slash from "./kxk/slash.js"
 import stash from "./kxk/stash.js"
+import watch from "./kxk/watch.js"
 import matchr from "./kxk/matchr.js"
 import immutable from "./kxk/immutable.js"
 import linediff from "./kxk/linediff.js"
@@ -28,7 +29,7 @@ import nfs from "./kxk/nfs.js"
 import walkdir from "./kxk/walkdir.js"
 import noon from "./kxk/noon.js"
 
-var list = _k_.list("post slash stash matchr immutable linediff karg krzl pretty profile keyinfo events kstr kseg kermit scooter pepe kpos util sds os nfs walkdir noon".split(' '))
+var list = _k_.list("post slash stash watch matchr immutable linediff karg krzl pretty profile keyinfo events kstr kseg kermit scooter pepe kpos util sds os nfs walkdir noon".split(' '))
 for (var _a_ = 0; _a_ < list.length; _a_++)
 {
     exp = list[_a_]
@@ -42,5 +43,5 @@ for (exp in util)
 kxk.kutil = util
 export default kxk;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia3hrLmpzIiwic291cmNlcyI6WyIuLi9rb2RlL2t4ay5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O0FBVUE7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O29CQUdXLHFKQUFxSixNQUFNOzs7O0lBQU8sSUFBSSxPQUFPLEtBQUs7O1lBRTlLOztVQUFBO0lBQU8sSUFBSSxPQUFPOztBQUVqQyxJQUFJLFFBQVE7ZUFFTCJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia3hrLmpzIiwic291cmNlcyI6WyIuLi9rb2RlL2t4ay5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O0FBVUE7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztvQkFHVywySkFBMkosTUFBTTs7OztJQUFPLElBQUksT0FBTyxLQUFLOztZQUVwTDs7VUFBQTtJQUFPLElBQUksT0FBTzs7QUFFakMsSUFBSSxRQUFRO2VBRUwifQ==
 //# sourceURL=file://kode/kxk.kode
