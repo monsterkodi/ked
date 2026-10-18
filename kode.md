@@ -264,6 +264,22 @@ use fs os                  ▸ import fs from "fs"
                              import os from "os"
 ```
 
+## ◆dir & ◆file
+
+```kode
+log ◆file                  ▸ [source file path]
+log ◆dir                   ▸ [source directory]
+```
+
+## ◆main
+
+```kode
+◆main
+    log 'executed as a script'
+```
+
+The body only runs when the module is the one node was started with.
+
 ## noon
 
 ```kode
