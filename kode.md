@@ -2,8 +2,6 @@
 
 **kode** is a programming language that transpiles to JavaScript.
 
-## ...
-
 ```kode
 a = 1...3
 for i in 0..5
@@ -156,7 +154,7 @@ class C
 l = [1,2,3]
 a = [x for x in l]                                                  ▸ [1,2,3]
 a = (x for x in l)                                                  ▸ [1,2,3]
-````
+```
 
 **kode** doesn't distuinguish between round and square brackets around list comprehensions.
 
@@ -188,20 +186,6 @@ New and old school styles can be used in the same module, but obviously not in t
 
 ## optional commata
 
-CoffeeScript has a very nice way of initializing arrays:
-
-```kode
-a = [
-        1
-        2
-        3
-    ]
-```
-
-If you decide to join these into a single line, you have a problem: 
-for each of the lines a comma must be inserted.
-The same goes for objects that span over multiple lines.
-
 In **kode**, you don't need to insert commata after number or string literals and POD structures.
 Those are all valid expressions:
 
@@ -216,8 +200,33 @@ test 'something' ->
     it 'should' ->
 
 on 'event' @myCallback
+```
 
-log 'a:' a , 'd:' 3                     # some commas still make sense :-)
+### function calls without parens
+
+```kode
+f a b     ▸ f(a, b)
+f a, b    ▸ f(a, b)
+f(a, b)   ▸ f(a, b)
+
+f a(b)    ▸ f(a(b))
+f(a(b))   ▸ f(a(b))
+```
+
+only in top-level function calls can the parens be omitted. 
+
+## use
+
+```kode
+use ./utils ▪ kc ke        ▸ import utils from "./utils.js"
+                             let kc = utils.kc
+                             let ke = utils.ke
+
+use ../kxk ◆ slash nfs     ▸ import slash from "../kxk/slash.js"
+                             import nfs from "../kxk/nfs.js"
+                             
+use fs os                  ▸ import fs from "fs"
+                             import os from "os"
 ```
 
 ## noon
@@ -251,8 +260,8 @@ If first argument is an identifier, appends its name to the file position.
 
 ```kode
 f = (a) -> ▴ a ; a                      ▸ file.kode:1:11 ▴ assert failed! a
-▴ 'good' f 1                            
-▴ 'bad'  f 0                            ▸ file.kode:3:0 ▴ bad f(0)
+▴ 'good' f(1)                             
+▴ 'bad'  f(0)                           ▸ file.kode:3:0 ▴ bad f(0)
 ```
 
 Logs file position, message and condition code if condition isn't truish. 
@@ -276,7 +285,7 @@ Logs time difference between matching `●▸` `●▪` pairs.
 
 `●` is a shortcut that can be used in functions: `●▪` is inserted automatically before the function returns.
 
-`process.hrtime.bigint` is used for the timing and the measurements come with *μs* accuracy.
+`performance.now` is used for the timing and the measurements come with *μs* accuracy.
 Due to JavaScripts just in time compilation optimizations, the initial results might be greater than later runs.
     
 ## copy & clone
@@ -300,7 +309,7 @@ Only plain Objects, Arrays and Strings are compared.
 
 ## tests 
 
-**kode** comes with its own testing 'framework' (in quotes here, because it's too much of a word for such a minimalistic thing:)
+**kode** comes with its own testing framework
 
 ```
 ▸ test
@@ -310,14 +319,20 @@ Only plain Objects, Arrays and Strings are compared.
 ```
 
 If the `▸` has nothing on its left hand side, it denotes a test section.
-Otherwise the expressions on both sides are compared. The files in `kode/test` provide plenty of examples how to use this:
+Otherwise the expressions on both sides are compared.
 
 ## ansi colors
 
-```
-log Y5 r2 'warning!'   ▸ output in dark red on bright yellow
+```kode
+log Y5('warning!') r2(' ')   ▸ output in dark red on bright yellow
 ```
 
-**kode** injects ansi color code wrappers if it discovers function calls with names like `R1` or `g8`.
+**kode** injects color functions if it discovers calls with names like `R1` or `g8`.
 Color functions: 'r' 'g' 'b' 'c' 'm' 'y' 'w' for foreground (uppercase for background) and a number between 1 and 8.
 
+## first & last
+
+```kode
+a = first [1 2 3]   ▸ 1
+b = last [1 2 3]    ▸ 3
+```
