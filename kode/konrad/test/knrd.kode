@@ -144,3 +144,182 @@ afterDirish = ○ isFile jp('dirish.js')
     ▸ a stamp naming a directory is not a source
 
         afterDirish  ▸ true
+
+
+# ███   ███  ███   ███   ███████    ███████  ███   ███  ████████  
+# ███  ███   ███  ███   ███   ███  ███       ███   ███  ███       
+# ███████    ███████    █████████  ███       █████████  ███████   
+# ███  ███   ███  ███   ███   ███  ███       ███   ███  ███       
+# ███   ███  ███   ███  ███   ███   ███████  ███   ███  ████████  
+
+cache = slash.path root, 'cache'
+
+ckfile = slash.path cache, 'x.kode'
+cjfile = slash.path cache, 'x.js'
+ckache = slash.path cache, '.kkache'
+
+cktext = 'x = 1\n'
+cjtext = 'var x = 1;\n'
+
+fpA = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+fpB = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+
+cksrc = {}
+cksrc[knrd.rel ckfile] = knrd.hash cktext
+
+cktgt = {}
+cktgt[knrd.rel cjfile] = knrd.hash cjtext
+
+○ nfs.remove cache
+○ nfs.mkdir  cache
+○ nfs.write  ckfile cktext
+○ nfs.write  cjfile cjtext
+○ nfs.remove ckache
+
+# a round trip, and the three ways of not having one
+
+wrote   = ○ knrd.saveCache ckache, null, fpA, true, cksrc, cktgt
+back    = ○ knrd.loadCache ckache
+absent  = ○ knrd.loadCache slash.path(cache,'nowhere')
+
+# noon is forgiving. these two are the ways a cache can be rubbish without
+# failing to parse, and neither may be allowed to wedge the build.
+
+○ nfs.write ckache, '- not a cache at all\n'
+junkList = ○ knrd.loadCache ckache
+
+○ nfs.write ckache, 'kode   not\n\tsource\n'
+junkMap  = ○ knrd.loadCache ckache
+
+○ nfs.remove ckache
+○ knrd.saveCache ckache, null, fpA, true, cksrc, cktgt
+back = ○ knrd.loadCache ckache
+
+# the four ways a file can fail to be current
+
+cur      = ○ knrd.isCurrent back, ckfile, cjfile, cktext
+srcMoved = ○ knrd.isCurrent back, ckfile, cjfile, 'x = 2\n'
+
+○ nfs.write cjfile, 'var x = 2;\n'
+tgtMoved = ○ knrd.isCurrent back, ckfile, cjfile, cktext
+
+○ nfs.write cjfile cjtext
+○ nfs.remove cjfile
+tgtGone  = ○ knrd.isCurrent back, ckfile, cjfile, cktext
+
+○ nfs.write cjfile cjtext
+noCache  = ○ knrd.isCurrent null,  ckfile, cjfile, cktext
+
+# a build that compiled nothing, and a build that cannot speak for the files
+# it did not compile
+
+before     = ○ nfs.read ckache
+compiledNo = ○ knrd.saveCache ckache, back, fpA, true, {}, {}
+afterNo    = ○ nfs.read ckache
+
+otherKode  = ○ knrd.saveCache ckache, back, fpB, true, cksrc, cktgt
+stillA     = ○ knrd.loadCache ckache
+
+# a build with a cache to merge into
+
+more = {}
+more[knrd.rel ckfile] = 'cccccccccccccccccccccccccccccccccccccccc'
+
+mergedOk = ○ knrd.saveCache ckache, back, fpA, true, more, cktgt
+merged   = ○ knrd.loadCache ckache
+
+# rubbish in the cache has to be replaced rather than respected, or it sits
+# there refusing every write and nothing is ever cached again
+
+○ nfs.write ckache, '- not a cache at all\n'
+junk    = ○ knrd.loadCache ckache
+healedOk = ○ knrd.saveCache ckache, junk, fpA, true, cksrc, cktgt
+healed   = ○ knrd.loadCache ckache
+
+fpOne = ○ knrd.fingerprint()
+fpTwo = ○ knrd.fingerprint()
+
+▸ cache
+
+    ▸ it round trips through noon
+
+        wrote   ▸ true
+        back.kode ▸ fpA
+        back.srcmap ▸ true
+        back.source[knrd.rel ckfile] ▸ knrd.hash cktext
+        back.target[knrd.rel cjfile] ▸ knrd.hash cjtext
+
+    ▸ a file that is not there is not a cache
+
+        absent  ▸ null
+
+    ▸ rubbish that still parses is not a cache either
+
+        knrd.shaped junkList  ▸ false
+        knrd.shaped junkMap   ▸ false
+        knrd.usable junkMap, fpA, true  ▸ false
+
+    ▸ the header is the compiler and the sourcemap, and it needs both
+
+        knrd.usable back, fpA, true   ▸ true
+        knrd.usable back, fpB, true   ▸ false
+        knrd.usable back, fpA, false  ▸ false
+        knrd.usable null,  fpA, true   ▸ false
+        knrd.usable {},   fpA, true   ▸ false
+
+    ▸ current means the source and what is on disk both still match
+
+        cur  ▸ true
+
+    ▸ a source that has moved is a miss
+
+        srcMoved  ▸ false
+
+    ▸ a target that has moved is a miss
+
+        tgtMoved  ▸ false
+
+    ▸ a target that is not there is a miss
+
+        tgtGone  ▸ false
+
+    ▸ and no cache at all is a miss
+
+        noCache  ▸ false
+
+    ▸ a build that compiled nothing writes nothing
+
+        compiledNo  ▸ false
+        afterNo     ▸ before
+
+    ▸ a partial build does not write over a cache from another compiler
+
+        otherKode      ▸ false
+        stillA.kode    ▸ fpA
+
+    ▸ and one that can, merges rather than replaces
+
+        mergedOk  ▸ true
+        merged.source[knrd.rel ckfile]  ▸ more[knrd.rel ckfile]
+        merged.target[knrd.rel cjfile] ▸ knrd.hash cjtext
+
+    ▸ but rubbish is replaced, or it would wedge the build for good
+
+        healedOk  ▸ true
+        healed.kode  ▸ fpA
+        healed.source[knrd.rel ckfile]  ▸ knrd.hash cktext
+
+    ▸ the fingerprint is a digest of the compiler, and it does not move
+
+        fpOne == fpTwo  ▸ true
+        fpOne.length  ▸ 40
+
+    ▸ the cache lives beside the sources it describes
+
+        knrd.cachePath().endsWith 'kode/.kkache'  ▸ true
+
+    ▸ hashing is hashing
+
+        knrd.hash('x') == knrd.hash('x')  ▸ true
+        knrd.hash('x') == knrd.hash('y')  ▸ false
+        knrd.hash('').length  ▸ 40

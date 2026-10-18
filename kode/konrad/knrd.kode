@@ -13,6 +13,7 @@
 use ../kode ◆ kode
 use ../kxk  ◆ nfs slash noon
 use         ◆ version
+use crypto
 
 # ████████   ███   ███  ███      ████████   ███████  
 # ███   ███  ███   ███  ███      ███       ███       
@@ -40,6 +41,7 @@ rules =
         
     ignore: [
         'kolor/lang.noon'
+        'kode/.kkache'
         ]
         
 # ███   ███  █████████  ███  ███        
@@ -173,6 +175,120 @@ reconcile = dirs opt={} ○->
             log r4('🗑 ') w3(slash.tilde(file)) if not opt.quiet
 
     removed
+    
+# ███   ███  ███   ███   ███████    ███████  ███   ███  ████████  
+# ███  ███   ███  ███   ███   ███  ███       ███   ███  ███       
+# ███████    ███████    █████████  ███       █████████  ███████   
+# ███  ███   ███  ███   ███   ███  ███       ███   ███  ███       
+# ███   ███  ███   ███  ███   ███   ███████  ███   ███  ████████  
+
+cacheFile = 'kode/.kkache'
+
+cachePath = -> bundlePath cacheFile
+
+rel = p -> slash.relative p, bundleDir()
+
+hash = text -> crypto.createHash('sha1').update(text).digest('hex')
+
+fpDirs = ['kode' 'kxk' 'kolor'] # the modules whose source can reach the compiler.
+
+fingerprint = ○-> # generates the fingerprint for the kode compiler
+
+    files = []
+
+    for d in fpDirs
+
+        dir = bundlePath "js/#{d}"
+        here = ○ nfs.isDir dir
+        if not here ➜ continue
+
+        for item in ○ nfs.list dir
+            files.push item.path if item.type == 'file' and slash.ext(item.path) == 'js'
+
+    files.sort()
+
+    parts = []
+    for f in files
+        body = ○ nfs.read f
+        parts.push "#{rel f}\0#{body}"
+
+    joined = parts.join ''
+    hash joined
+
+loadCache = path ○->
+
+    text = ○ nfs.read path
+
+    if valid text
+
+        try
+            kache = noon.parse text
+            ⮐ kache if kache is Object
+        catch err
+            ⮐ null
+    ⮐ null
+
+shaped = kache -> # checks for correct shape of the kache data
+
+    ⮐ false if empty kache
+    ⮐ false if not (kache is Object)
+    ⮐ false if kache is Array
+    ⮐ false if empty kache.kode
+    ⮐ false if empty kache.srcmap
+    ⮐ false if not (kache.source?)
+    ⮐ false if not (kache.target?)
+    true
+
+usable = (kache, fp, srcmap) ->
+
+    shaped(kache) and (kache.kode == fp) and (kache.srcmap == srcmap)
+
+isCurrent = (kache, srcFile, tgtFile, srcText) ○->
+
+    ⮐ false if empty kache
+
+    s = kache.source?[rel srcFile]
+    t = kache.target?[rel tgtFile]
+
+    ⮐ false if not (s? and t?)
+    ⮐ false if s != hash(srcText)
+
+    tgtText = ○ nfs.read tgtFile
+    ⮐ hash(tgtText) == t
+
+saveCache = (path, kache, fp, srcmap, srcs, tgts) ○->
+
+    ⮐ false if empty srcs
+
+    # the cache we read belongs to another compiler: 
+    # leave it alone and let the next whole build rewrite it.
+
+    ⮐ false if shaped(kache) and not (usable(kache, fp, srcmap))
+
+    if kache?
+        source = Object.assign({}, kache.source, srcs)
+        target = Object.assign({}, kache.target, tgts)
+    else
+        source = srcs
+        target = tgts
+
+    sorted = o ->
+        out = {}
+        for k in Object.keys(o).sort()
+            out[k] = o[k]
+        out
+    
+    source = sorted(source)
+    target = sorted(target)
+
+    out =
+        kode:   fp
+        srcmap: srcmap
+        source: source
+        target: target
+
+    ○ nfs.write path, noon.stringify(out)
+    true
 
 # ███   ███  ███   ███  ████████   ███████    
 # ███  ███   ████  ███  ███   ███  ███   ███  
@@ -206,8 +322,17 @@ knrd = files=[] opt={} ○->
         
     log icon w5(slash.name(bundleDir())) b5(files.length) if not opt.quiet
     
+    kpath  = cachePath()
+    loaded = ○ loadCache kpath
+    fp     = ○ fingerprint()
+    cache  = if usable loaded, fp, opt.map then loaded else null
+    
+    log w2('  ') w3('cache is for another compiler, ignoring it') if opt.verbose and loaded? and empty cache
+    
     transpiled = 0
     dirs      = []
+    srcs      = {}
+    tgts      = {}
         
     for file in files
         
@@ -229,6 +354,14 @@ knrd = files=[] opt={} ○->
             dirs.push dir if dir not in dirs
             
             srcText  =○ nfs.read srcFile
+            
+            # nothing to do is the common case, so it is worth not doing it
+            # twice over: ask the cache first, and only compile on a miss
+            
+            if ○ isCurrent cache, srcFile, tgtFile, srcText
+                log g2('▸') m3(slash.tilde(tgtFile)) w4('cached') if opt.verbose
+                continue
+            
             tgtText  =○ nfs.read tgtFile
             log g2('▸') m3(srcFile) m5(tgtFile) if opt.verbose
             compText = rule.compile srcText, srcFile, tgtFile, opt
@@ -245,8 +378,14 @@ knrd = files=[] opt={} ○->
                     transpiled++
                     ○ nfs.write tgtFile, compText if not opt.dryrun
                     log b5('✔ ') g5(slash.tilde(tgtFile))
+                
+                srcs[rel srcFile] = hash srcText
+                tgts[rel tgtFile] = hash compText
                     
     # ○ bump() if transpiled and not opt.dryrun
+    
+    if not opt.dryrun
+        ○ saveCache kpath, loaded, fp, opt.map, srcs, tgts
     
     opt.reconcile ?= true
     if opt.reconcile and not opt.dryrun
@@ -254,8 +393,17 @@ knrd = files=[] opt={} ○->
     
     transpiled
         
-knrd.bundlePath = bundlePath
+knrd.bundlePath  = bundlePath
 knrd.stampSource = stampSource
 knrd.reconcile   = reconcile
+knrd.cachePath   = cachePath
+knrd.fingerprint = fingerprint
+knrd.hash        = hash
+knrd.rel         = rel
+knrd.usable      = usable
+knrd.shaped      = shaped
+knrd.loadCache   = loadCache
+knrd.saveCache   = saveCache
+knrd.isCurrent   = isCurrent
     
 export knrd
