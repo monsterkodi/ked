@@ -8,7 +8,7 @@ let ke = utils.ke
 toExport["use"] = function ()
 {
     compare(kc('use blark'),'import blark from "blark"\n')
-    compare(kc('use flubb',_k_.file()),'import flubb from "flubb"\n')
+    compare(kc('use flub',_k_.file()),'import flub from "flub"\n')
     compare(kc('use ./loops',_k_.file()),'import loops from "./loops.js"\n')
     compare(kc('use ../returner',_k_.file()),'import returner from "../returner.js"\n')
     compare(kc('use ./kode/kode',_k_.file()),'import kode from "./kode/kode.js"\n')
@@ -62,5 +62,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidXNlLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tvZGUvdGVzdC91c2Uua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O1lBWUksR0FBRyxhQUEyQztZQUM5QyxHQUFHLHdCQUEyQztZQUM5QyxHQUFHLDBCQUEyQztZQUM5QyxHQUFHLDhCQUEyQztZQUM5QyxHQUFHLDhCQUEyQztZQUU5QyxHQUFHLGVBQTJDO1lBQzlDLEdBQUcsbUJBQTJDO1lBQzlDLEdBQUcsbUJBQTJDO1lBRTlDLEdBQUcsY0FBMkM7WUFFOUMsR0FBRyxpQkFBMkM7O1lBSTlDLEdBQUcsNEJBQTJDOztZQUs5QyxHQUFJOztXQUtBOzs7OztnQkFRQSxHQUFHLDBCQUF1Qzs7OztnQkFNMUMsR0FBRyxpREFBa0Q7Ozs7Ozs7OztnQkFXckQsR0FBRyxxQkFBa0M7Ozs7O2dCQU9yQyxHQUFHLGVBQWdCOzs7O2dCQU9uQixHQUFHLG1DQUFvQzs7O2dCQU12QyxHQUFHLCtCQUFnQyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidXNlLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tvZGUvdGVzdC91c2Uua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O1lBWUksR0FBRyxhQUEyQztZQUM5QyxHQUFHLHVCQUEyQztZQUM5QyxHQUFHLDBCQUEyQztZQUM5QyxHQUFHLDhCQUEyQztZQUM5QyxHQUFHLDhCQUEyQztZQUU5QyxHQUFHLGVBQTJDO1lBQzlDLEdBQUcsbUJBQTJDO1lBQzlDLEdBQUcsbUJBQTJDO1lBRTlDLEdBQUcsY0FBMkM7WUFFOUMsR0FBRyxpQkFBMkM7O1lBSTlDLEdBQUcsNEJBQTJDOztZQUs5QyxHQUFJOztXQUtBOzs7OztnQkFRQSxHQUFHLDBCQUF1Qzs7OztnQkFNMUMsR0FBRyxpREFBa0Q7Ozs7Ozs7OztnQkFXckQsR0FBRyxxQkFBa0M7Ozs7O2dCQU9yQyxHQUFHLGVBQWdCOzs7O2dCQU9uQixHQUFHLG1DQUFvQzs7O2dCQU12QyxHQUFHLCtCQUFnQyJ9
 //# sourceURL=file://kode/kode/test/use.kode

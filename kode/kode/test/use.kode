@@ -11,7 +11,7 @@ use ./utils ▪ kc ke
 ▸ use
 
     kc 'use blark'                              ▸ 'import blark from "blark"\n'
-    kc 'use flubb' ◆file                        ▸ 'import flubb from "flubb"\n'
+    kc 'use flub' ◆file                         ▸ 'import flub from "flub"\n'
     kc 'use ./loops' ◆file                      ▸ 'import loops from "./loops.js"\n'
     kc 'use ../returner' ◆file                  ▸ 'import returner from "../returner.js"\n'
     kc 'use ./kode/kode' ◆file                  ▸ 'import kode from "./kode/kode.js"\n'
