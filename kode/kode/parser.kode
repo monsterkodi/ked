@@ -962,6 +962,15 @@ function Parser extends parse
 
         exps = @exps '{' tokens '}'
 
+        # same bracket as in an implicit object, except that a '(' after an
+        # explicit brace is left to the closer below to complain about - the
+        # brace really is unclosed there, and that is the older and better
+        # thing to say. the read-something part is what keeps this off '{{',
+        # where there is nothing to have gone wrong yet
+
+        if exps.length and tokens[0]?.text != '(' and @unusableKey tokens
+            @onError "malformed object value" tokens: tokens
+
         close = @shiftClose 'curly' '}' tokens
         # if not close 
             # warn 'no close?' exps
@@ -1001,6 +1010,25 @@ function Parser extends parse
     # ███   ███  ███   ███  ███   ███  ███       ███          ███
     #  ███████   ███████     ███████   ████████   ███████     ███
 
+    # a bracket sitting where an object has to go on. a close is fine -
+    # that is how one ends - and an arrow a group later is a lambda's
+    # parameter list, which is a key. anything else is the start of
+    # something that cannot be one: 'k: f (a)', 'k: f [m]' and 'k: f {m}'
+    # each leave one of these behind, and each used to carry on into
+    # whatever came next instead of saying so
+
+    unusableKey: tokens ->
+
+        ⮐ false if empty tokens
+
+        t = tokens[0]
+
+        ⮐ false if t.type != 'paren'
+        ⮐ false if t.text in [')' ']' '}']
+        ⮐ false if @arrowAhead tokens
+
+        true
+
     object: key tokens ->
 
         @push '{'
@@ -1033,7 +1061,7 @@ function Parser extends parse
                 rest = tokens.length
                 exps = exps.concat @exps('object' tokens, ';')
                 
-                if tokens.length == rest and tokens[0].type == 'paren' and not @arrowAhead tokens
+                if tokens.length == rest and @unusableKey tokens
                     @onError "malformed object value" tokens: tokens
                     
                 break

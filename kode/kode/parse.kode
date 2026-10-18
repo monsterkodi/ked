@@ -23,55 +23,9 @@
 use ./utils ▪ firstLineCol lastLineCol
 use         ◆ print parseutils
 
-# a word that means nothing standing on its own. each one is a javascript
-# reserved word or a kode keyword that renders as one: 'else' after an if,
-# 'catch' after a try, 'in' after whatever is being iterated, 'extends'
-# inside a class, 'when' inside a switch. the parser for the construct that
-# goes with them is what normally eats them.
-#
-# at the head of an expression is the one place they can have neither a left
-# operand nor a right one, and the renderer hands node the bare word, which
-# node cannot parse. further along they are an operation or a keyword the
-# loop in @exp attaches to what came before, and all of that is fine - which
-# is why the test below is about what is left of the token list and not
-# about the token alone.
-#
-# three groups are deliberately not here. 'new' and 'delete' want an
-# operand too, but kode uses both as plain names - {new: new} and {delete:
-# delete} are what object.kode says they should compile to - and a word that
-# renders as an ordinary identifier is a name, so the compiler cannot tell a
-# forgotten call from a variable. 'break' and 'continue' want a loop around
-# them rather than an operand, and they say so by compiling to javascript
-# node refuses; what is missing there is a loop, not an operand, and
-# kode.kode:278 leans on a bare 'continue'. and every function-like keyword
-# - 'abs', 'clamp', 'empty', 'first', 'int', 'last', 'max', 'min', 'noon',
-# 'of', 'trim' and the rest - is in that same first group.
+wantsOperand = ['else' 'catch' 'finally' 'throw' 'super' 'extends' 'when' 'in' 'await' 'typeof']
 
-wantsOperand = ['else' 'catch' 'finally' 'throw' 'super' 'extends' 'when'
-                'in' 'await' 'typeof']
-
-# javascript's reserved words, and the check on them is one list rather than
-# two. kode emits a module, a module is always strict, and in a module 'let'
-# is exactly as unavailable as 'var'. there is no line in the language to
-# draw at, so a compiler that rejected one and not the other would only be
-# right by accident.
-#
-# 'null', 'true', 'false' and 'this' are left out. they are values rather
-# than names - 'x = null' is exactly right and 'this.x' is ordinary
-# javascript - and 'NaN' and 'eval' are not reserved at all, they are
-# globals a module is free to shadow.
-#
-# only words the lexer hands on as plain names, or as keywords kode does not
-# dispatch, reach the test. 'new' and 'delete' are in the list and are not
-# tested: they are kode operators, and object.kode says {new: new} and
-# {delete: delete} are what they should compile to, so the compiler cannot
-# tell one from a forgotten call. 'class' and 'while' are dispatched before
-# the test is reached and have better things to say.
-
-# the brackets are not decoration. a bare sequence of strings after an '=' is
-# a call, and 'reserved' came out as the one word 'await' - which then made
-# the test below a substring search, so 'a' matched. the same thing ate the
-# snips in srcmap.kode. the '[' has to be on this line for the same reason
+# javascript's reserved words
 
 reserved = [
     'await'  'break'    'case'      'catch'     'class'      'const'
@@ -84,13 +38,6 @@ reserved = [
     ]
 
 # the reserved words that javascript will still have as a property name.
-# there are two kinds here and the difference matters: {static: s} is fine and
-# {do: 1} is not, a.let is fine and let.a is not.
-#
-# this is what makes a method called 'if' work - 'if:', 'for:', 'while:',
-# 'class:' and 'function:' are all methods in parser.kode - and a method is a
-# property under the class, so a keyword in key position needs no exemption
-# of its own.
 
 nameable = ['await' 'enum' 'implements' 'interface' 'let' 'package' 'private' 'protected' 'public' 'static' 'yield']
 
@@ -99,31 +46,11 @@ nameable = ['await' 'enum' 'implements' 'interface' 'let' 'package' 'private' 'p
 
 wantsRight = ['+' '-' '~' '!']
 
-# operators that only ever sit between two values. at the head of an
-# expression there is nothing to their left, and that is what they are
-# missing - what is on the right, if anything, is of no use to them
+# operators that only ever sit between two values. 
 
 wantsLeft = ['*' '/' '%' '^' '&' '|' '<' '>' '=' '==']
 
-# the two ends of a slice and of a range. they belong to the value on their
-# left, and there is none.
-#
-# '...' is left out on purpose: the renderer reads a '...' straight after a
-# name in an argument list as a rest parameter - '(args...)' is '(...args)' -
-# so a '...' there is not a slice with nothing in front of it.
-
 wantsSlice = ['..']
-
-# tokens that say which of a pair something is, and so want both halves. one
-# bracket alone is unclosed rather than pairless, so it gets the message the
-# unclosed case already has
-#
-# '▴' is a callee and never a value, so what is missing is its argument
-#
-# '○' is 'await' written the short way, and '○ a' is fine - so what is
-# missing is the operand, not the operator. the message names the word
-# rather than the glyph, the same way '▴' above names assert. see the note
-# on the entry itself
 
 needsPair =
     '(':  'parens is missing closing )'
@@ -134,40 +61,9 @@ needsPair =
     ':':  ': is missing a key and a value'
     '▴':  'assert is missing what to assert'
     '○':  'await is missing an operand'
-
-    # '○' is 'await' written the short way and '○ a' is fine, so what a bare
-    # one is missing is the operand. the message names the word the way the
-    # '▴' above names assert. '○' is a token type this block was not
-    # reading, which is why it reached the output at all
-    #
-    # '◆' is a different thing from all the rest of this. it has three uses
-    # and every one of them is real: 'use ◆ name' names what a use brings
-    # in, '◆main' is the entry point of a module, and '◆dir f' is an
-    # implicit call. all three want something after the '◆'
-
     '◆':  '◆ is missing what it calls'
 
-# what closes each opener. [] is an empty array and () is an empty call, so
-# an opener followed by its own closer is not an unclosed one
-
 closers = '(':')' '[':']' '{':'}'
-
-# glyphs the lexer recognises and nothing reads. '▪' separates the module
-# from the names in a use, '▸' with a space after it starts a test section,
-# and '■' is not in the language at all: every one of them in this repo is
-# inside a string, as a character for kermit or for ked to look at.
-#
-# they all have a token type and nothing interprets it - grep the compiler
-# for 'right' and 'square' and the only hits are the lexer patterns
-# themselves. so at the head of an expression there is nothing they can be
-# doing, and they were falling through into the output as themselves.
-#
-# this is an if and not a lookup table on purpose. the check below is
-# outside the block that reads only a few token types, so it sees every
-# token there is, and a table keyed on tok.text hands back
-# Object.prototype for anything called 'constructor' or 'toString' -
-# sds.kode has 'object.constructor.name' in it and the table answered
-# with a function, which @onError then tried to print.
 
 function Parse extends parseutils
 
@@ -177,20 +73,6 @@ function Parse extends parseutils
         @verbose  = @kode.args.verbose
         
     onError: msg info -> @kode.onError msg info
-
-    # a name javascript has reserved is not a name it will take. the check in
-    # @exp covers a reserved word standing where an expression starts; this is
-    # the same list at the one other place a name gets taken, and it was
-    # missing there. all 42 of them were reaching node whole - 'function in'
-    # came out as 'var in' and an assignment of an iife to it.
-    #
-    # it lives here rather than at the check in @exp because @class is in
-    # parser.kode, and a subclass inherits the methods of its parent but not
-    # the module-level names those methods close over.
-    #
-    # the test is the text and not the type: 'in', 'if' and 'class' lex as
-    # keywords, and 'delete', 'new', 'var' and 'typeof' lex as ops, and every
-    # one of them is the same mistake
 
     nameIsReserved: name ->
 
@@ -251,7 +133,7 @@ function Parse extends parseutils
                 'if' 'then' 
                 '▸else'     ➜ tok.text == 'else'
                 '['         ➜ tok.text == ']'  
-                '{'         ➜ tok.text in ['}' '->' '=>' '○->' '○=>' '(' '▸' ':' ']']
+                '{'         ➜ tok.text in ['}' '->' '=>' '○->' '○=>' '[' '{' '(' '▸' ':' ']']
                 '('         ➜ tok.text == ')'
                 '○rgs'      ➜ tok.type == 'func'
                 '▸args'     ➜ tok.text in [']' ';' 'else' 'then']
@@ -303,11 +185,6 @@ function Parse extends parseutils
                 @verb 'exps block end, break!'
                 break
                 
-            # a closing bracket with nothing open. ')' breaks out of whatever
-            # paren is on the stack; the other two have no such escape,
-            # so they are unmatched here - which is how a stray ] or }
-            # used to sail through and render as itself
-            
             if tok.text in [')' ']' '}']
                 if '(' in @stack or 'args(' in @stack
                     @verb "exps break on #{tok.text}"
@@ -425,24 +302,6 @@ function Parse extends parseutils
 
         log Y5(w1(tok?.text)) if @debug
 
-        # this one sits above the dispatch below on purpose. 'await' and
-        # 'when' are keywords the parser does claim, and it is their own
-        # methods that hand an empty token list to @exp and get nothing back
-        # - so the token has to be judged before the dispatch hands it over.
-        #
-        # it asks not 'is anything left' but 'is there anything here this
-        # token could work with'. an expression that ends here - at the end
-        # of the tokens, at a newline, or at one of the tokens that close a
-        # bracket or separate two things - has nothing to offer.
-        #
-        # it steps aside when it is looking at the right side of a prefix
-        # operation. @operation sets @prefixOperand around its own call to
-        # @exp and has a check of its own for that case, which names the
-        # operator that came up short rather than the one it swallowed.
-        #
-        # the types are part of the test. a string that reads 'throw' is a
-        # string, and a comment that reads '*' is a comment.
-
         if tok.type in ['keyword' 'op' 'punct' 'paren' 'dots' 'assert' 'await' 'diamond'] and not @prefixOperand
 
             nxt = tokens[0]
@@ -455,10 +314,6 @@ function Parse extends parseutils
             if alone
                 if m = needsPair[tok.text]
                     @onError m tok:tok
-                # a bare '++' or '--' has nothing to increment. it cannot be
-                # read as a prefix here - there is no operand in front of it -
-                # so it is the postfix with the variable left out, and it says
-                # so in the same words as '1++'
                 if tok.text in ['++' '--']
                     @onError "#{tok.text} is missing a variable to increment" tok:tok
                 if tok.text in wantsRight
@@ -467,11 +322,7 @@ function Parse extends parseutils
                     @onError "#{tok.text} is missing an operand" tok:tok
 
         switch tok.type
-            
-            # an `error` call renders as console.error and does not raise, so these
-            # used to print on stdout and carry on parsing. @onError is the
-            # one that throws, with a location
-            
+                        
             'block'     ➜   ⮐ @onError "unexpected block token in exp!" tok:tok
             'nl'        ➜   ⮐ @onError "unexpected nl token in exp!" tok:tok
             ';'         ➜   ⮐ @onError "unexpected ; token in exp!" tok:tok
@@ -514,39 +365,15 @@ function Parse extends parseutils
         # this is the last place that can tell - by here it is
         # indistinguishable from a variable called 'var'.
         #
-        # it sits below the dispatch above rather than beside the other tests
-        # above it, because a dispatched keyword has a kode meaning to be
-        # given first. 'class' is a class with no name and 'while' is a while
-        # with no condition; neither is better described as a reserved word.
-        #
-        # 'in' is the one keyword worth testing. it only ever appears between
-        # two values and never at the head of one, so nothing that works
-        # today can reach here carrying it - while 'super' is reached every
-        # day, as 'super screen name'.
-
         if (tok.type == 'var' or tok.text == 'in') and tok.text in reserved
             key = tokens[0]?.text == ':' and (tok.type == 'keyword' or tok.text in nameable)
             if not key
                 @onError "#{tok.text} is a javascript reserved word" tok:tok
 
-        # '?' is a postfix. it turns what is in front of it into a
-        # conditional, so there is nothing it can be at the head of - a '?'
-        # here is a conditional with nothing in front of it, and it was being
-        # rendered as itself. '?=' is a different token and is not caught.
-        #
-        # a '.' or an operator behind it is not something a conditional could
-        # use, and both are handled further down where they say something
-        # better: '?.' is a property access with no property name, and
-        # '? ===' is an '=' with nothing to assign.
-
         nxt = tokens[0]
 
         if tok.text == '?' and not (nxt and (nxt.text == '.' or nxt.type == 'op'))
             @onError '? is missing a left operand' tok:tok
-
-        # a glyph that means something in one position only, standing where
-        # that position is not. each of them is a marker, and the markers
-        # are read by the use and the section rules - not here
 
         if tok.text == '■'
             @onError '■ is not a kode character' tok:tok
@@ -595,12 +422,7 @@ function Parse extends parseutils
                     if @stack[-1]?.startsWith 'op'
                         @verb 'comma in operation, break without shifting'
                         break
-                        
-                    # a comma with nothing after it, at the end of a
-                    # statement. inside a literal a trailing comma is fine
-                    # - js allows '[1,2,]' and '{a:b,}' - and those have a
-                    # closing bracket or a stack entry behind them
-                    
+                                            
                     if empty @stack and empty tokens[1]
                         @onError "missing expression after ','" tok:tok
                         
@@ -733,9 +555,6 @@ function Parse extends parseutils
                 ➜ # e is not a token anymore
                 
                     if
-                        # '[a]++' and '{a:1}++' come through here rather than
-                        # through the check above, which only ever sees a token.
-                        # a postfix ++ or -- needs something node can assign to
                         nxt.text in ['++''--']  and unspaced        ➜ @checkPostfix e nxt; e = @operation e tokens.shift();  break
                         @stack[-1] == 'call'    and nxt.text == ']' ➜ @verb 'rhs call array end';       break
                         @stack[-1] == '{'       and nxt.text == '}' ➜ @verb 'rhs curly end';            break                    
@@ -743,7 +562,6 @@ function Parse extends parseutils
                         ➜
                             print.ast "rhs no nxt match?? stack:#{@stack} e:" e if @debug
                             print.tokens "rhs no nxt match?? nxt:" nxt if @debug
-                            # log noon e
                             break
                     
             if numTokens == tokens.length
@@ -878,11 +696,6 @@ function Parse extends parseutils
                     (nxt.text not in ['if'] or not @noThenAhead(tokens)) and
                     nxt.text not in ',.;:)}]' and
                     nxt.type not in ['nl'] and
-                    # a block can be an argument - 'f' and a line under it is
-                    # 'f(a)'. a block that opens with a '.' is not: that is a
-                    # property chain continuing from here, and @exp has a
-                    # branch for it further down. taking it here instead gave
-                    # 'a(.,b)'
                     not (nxt.type == 'block' and nxt.tokens[0]?.text == '.') and
                     (nxt.type != 'op' or nxt.text in ['++''--''noon''new''not'] or nxt.text in ['+''-'] and tokens[1]?.col == nxt.col+1) and
                     @isSuitableForImplicitCall(e) )
