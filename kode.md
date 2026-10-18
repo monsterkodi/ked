@@ -244,9 +244,6 @@ b = last [1 2 3]    ▸ 3
 [1,2,3][-2]     ▸ 2
 ```
 
-`v[-n]` is a shortcut for `v[-n..-n][0]` for number literals `n`
-
-
 ### ternary
 
 ```kode
@@ -259,7 +256,6 @@ a = copy b                              # shallow copy of b
 a = clone b                             # deep copy of b
 ```
 
-Operators that return a shallow or deep copy of their argument. 
 Only plain Objects, Arrays and Strings are copied. Functions, Maps, Sets, etc. are not copied.
 ```
 ### eql
@@ -384,10 +380,6 @@ fun() for i in 1..2                     ▸ funny times 12 ms
 Logs time difference between matching `●▸` `●▪` pairs.
 
 `●` is a shortcut that can be used in functions: `●▪` is inserted automatically before the function returns.
-
-`performance.now` is used for the timing and the measurements come with *μs* accuracy.
-Due to JavaScripts just in time compilation optimizations, the initial results might be greater than later runs.
-    
 
 # tests 
 
