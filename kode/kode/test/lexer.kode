@@ -1,0 +1,59 @@
+###
+██        ██████ ██   ██  ██████ ████
+██       ██   ██ █     █ ██   ██ ██ ███
+██        ██████ █     █  ██████ ██  ███
+██       ██       █     █ ██       ██   ██
+████████  ██████ ██   ██  ██████ ██   ██
+###
+
+use ./utils ▪ kc
+use ..     ◆ kode lexer
+
+# tokenize asks every pattern the same question at every token: does this
+# match *here*, at the cursor. the answer it keeps is `match.index === 0`,
+# so a pattern that matches further along is not a match - it is a scan of
+# the whole rest of the file whose result gets thrown away. 25 of those per
+# token is what made tokenize quadratic, and tokenize was 64% of a build.
+#
+# `y` asks the question where it gets asked. without it a build spends most
+# of its time inside patterns that cannot match - a triple quote, a ▸, a / -
+# scanning past the cursor for something they are never going to be given.
+#
+# the lookarounds are unaffected, and not by luck. the loop slices the text
+# as it goes, so a lookbehind has never had anything to its left to look at
+# and `(?<!\d\s*)` could never fail; anchoring does not change that. the
+# forward lookahead is a forward lookahead either way.
+
+▸ lexer
+
+    ▸ anchored
+
+        # the invariant. nothing else here can catch it going back, and
+        # nothing but a benchmark would notice it being gone.
+
+        lx = new lexer new kode header:false
+
+        for pair in lx.regs
+
+            pair[1].sticky ▸ true
+
+    ▸ lookarounds
+
+        # the three patterns that carry a lookaround, checked at the cursor
+        # on the cases where the lookahead is what decides the token.
+        # basics.kode and array.kode carry the wider corpus.
+
+        # regex: (?<!\d\s*)\/...\/[gimsuy]*(?!\s*\d)
+
+        kc '7/7'          ▸ '7 / 7'           # nothing to close it
+        kc 'n/2/7'        ▸ 'n / 2 / 7'       # the lookahead turns /2/ away
+        kc 'a = /re/ b'   ▸ 'a = /re/\nb'     # and here it does not
+
+        # dots: (?<!\.)\.\.\.?(?!\.)
+
+        kc '[1..2]'       ▸ ';[1,2]'
+        kc '[1...2]'      ▸ ';[1]'
+
+        # test: (?<!●)▸[\s\n]+  -  a ▸ opens a section, a ●▸ is a profile
+
+        kc '●▸ foo\nbar'  ▸ "_k_.profile('foo')\nbar"

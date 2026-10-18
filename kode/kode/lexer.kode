@@ -139,17 +139,22 @@ class Lexer
         @raw      = @kode.args.raw
         @regs     = []
         
+        # 'y' asks every pattern the question tokenize is about to ask it -
+        # does this match here, at the cursor - instead of letting it search
+        # the rest of the file for a match the caller is about to throw away.
+        # see test/lexer.kode.
+        
         for key,pat of Patterns
             
             if 
                 pat is 'string'
-                    @regs.push [key new RegExp(pat)]
+                    @regs.push [key new RegExp(pat,'y')]
                     
                 pat is Array
                     
                     pat = pat.map (p) -> kstr.escapeRegexp "#{p}"
                     reg = '\\b(' + pat.join('|') + ')\\b'
-                    @regs.push [key new RegExp(reg)]
+                    @regs.push [key new RegExp(reg,'y')]
                     
     onError: msg info -> 
     
@@ -195,6 +200,12 @@ class Lexer
         while text.length
             before = text.length
             for [key,reg] in @regs
+                
+                # String.match leaves lastIndex where the last match ended
+                # on a sticky pattern, and does not reset it for us. the
+                # cursor is 0 every time.
+                
+                reg.lastIndex = 0
                 match = text.match reg
                 if match?.index == 0
 
