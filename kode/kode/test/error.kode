@@ -151,6 +151,13 @@ plain = c ->
     ▸ malformed object value
 
         codemsg 'x = {k: f (a)}\n'                  'curly is missing closing }'
+        
+        codemsg 'y = k: f [m]'                      'malformed object value'
+        codemsg 'y = {f,n:2,[m]}'                   'malformed object value'
+
+        codemsg 'y = k: f {m}'                      'malformed object value'
+        codemsg 'y = {f,n:2,{m}}'                   'malformed object value'
+        
         codemsg 'r =\n    k: f (a)\n'               'malformed object value'
         codemsg 'r =\n    k: f (a)\n    j: 2\n'     'malformed object value'
         
