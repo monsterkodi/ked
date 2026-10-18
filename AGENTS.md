@@ -31,19 +31,6 @@ usage: `./kk <flag>`
 `kolor/lang.noon` is on the ignore list and is deliberately not transpiled.
 Files are only written when content differs, so `js/` stays byte-stable.
 
-### `kode/.kkache`
-
-The build cache. `kk -i` is only fast because of it: rather than recompiling
-every source to check whether `js/` matches, it looks up what each source
-hashed to and what the compiler made of it, and hashes what is on disk now.
-A hit is still a proof of equality, just not one that requires redoing the
-work. `kk -i` reads it and writes nothing; `kk -k` creates and updates it.
-
-The key is a fingerprint of the compiler — everything under `js/kode`, `js/kxk`
-and `js/kolor` — so touching the compiler voids the whole cache and everything
-recompiles. That is the case a modification-time check cannot get right. Delete
-the file to force a cold build; nothing depends on it being there.
-
 ### `kk -b` — compiler changes only
 
 3-stage compiler bootstrapping. It is a fixed-point check that the compiler can compile itself.
