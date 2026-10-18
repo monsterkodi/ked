@@ -1,13 +1,13 @@
 ###
-██        ██████ ██   ██  ██████ ████
-██       ██   ██ █     █ ██   ██ ██ ███
-██        ██████ █     █  ██████ ██  ███
-██       ██       █     █ ██       ██   ██
-████████  ██████ ██   ██  ██████ ██   ██
+    ███      ████████  ███   ███  ████████  ████████   
+    ███      ███        ███ ███   ███       ███   ███  
+    ███      ███████     █████    ███████   ███████    
+    ███      ███        ███ ███   ███       ███   ███  
+    ███████  ████████  ███   ███  ████████  ███   ███  
 ###
 
 use ./utils ▪ kc
-use ..     ◆ kode lexer
+use ..      ◆ kode lexer
 
 # tokenize asks every pattern the same question at every token: does this
 # match *here*, at the cursor. the answer it keeps is `match.index === 0`,
