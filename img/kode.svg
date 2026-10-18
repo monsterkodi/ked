@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<svg width="1280" height="480" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" fill="none">
+ <g class="layer" stroke-width="80">
+  <title>outline</title>
+  <line id="k1"     stroke="#AAAAFF" x1="100" x2="100" y1="381" y2="83"/>
+  <line id="k2"     stroke="#AAAAFF" x1="100" x2="280" y1="256" y2="150"/>
+  <line id="k3"     stroke="#AAAAFF" x1="186" x2="276" y1="210" y2="380"/>
+  <rect id="dr"     stroke="#22AA00" x ="676" y ="157" rx="60"  ry="60" width="223" height="223" fill="#22AA00"/>
+  <line id="da"     stroke="#22AA00" x1="899" x2="899" y1="231" y2="102"/>
+  <rect id="or"     stroke="#FFAA00" x ="348" y ="159" rx="60"  ry="60" width="223" height="223" fill="#FFAA00" />
+  <line id="oel"    stroke="#FFAA00" x1="323" x2="323" y1="262" y2="234"/>
+  <line id="oer"    stroke="#FFAA00" x1="593" x2="593" y1="262" y2="234"/>
+  <path id="ep"     stroke="#FB2F93" d="m1055,382c-43,0.5 -72,-20 -72,-60c-0.0,-39 0,-78 0,-109c0,-31 25,-55 57,-55c32,-0 71,0 107,-0c36,0 55,29 55,58c0,29 -22,51 -47,51c-24,0 -132,-1 -160,0m57,115c44,0 61,0 95,0c34,0 44,-21 51,-33"/>
+ </g>
+ <g class="layer" stroke="#000" stroke-width="40">
+  <title>black</title>
+  
+  <line id="_k1"    x1="100" x2="100" y1="381" y2="83"/>
+  <line id="_k2"    x1="100" x2="280" y1="256" y2="150"/>
+  <line id="_k3"    x1="186" x2="276" y1="210" y2="380"/>
+  <rect id="_or"    x ="348" y ="159" rx="60"  ry="60" width="223" height="223"/>
+  <line id="_oel"   x1="323" x2="323" y1="262" y2="234"/>
+  <line id="_oer"   x1="593" x2="593" y1="262" y2="234"/>
+  <line id="_ole"   x1="416" x2="416" y1="272" y2="229"/>
+  <line id="_ore"   x1="502" x2="502" y1="272" y2="228"/>
+  <rect id="_dr"    x ="676" y ="157" rx="60"  ry="60" width="223" height="223"/>
+  <line id="_da"    x1="899" x2="899" y1="231" y2="102"/>
+  <line id="_dle"   x1="745" x2="745" y1="269" y2="226"/>
+  <line id="_dre"   x1="830" x2="830" y1="269" y2="226"/>
+  <path id="_ep"    d="m1055,382c-43,0.5 -72,-20 -72,-60c-0.0,-39 0,-78 0,-109c0,-31 25,-55 57,-55c32,-0 71,0 107,-0c36,0 55,29 55,58c0,29 -22,51 -47,51c-24,0 -132,-1 -160,0m57,115c44,0 61,0 95,0c34,0 44,-21 51,-33"/>
+ </g>
+</svg>
