@@ -171,18 +171,53 @@ It introduces some ambiguity in a few corner cases, which can be resolved by dif
 null ? a: 'b'                                                       ▸ {a:'b'}
 ```
 
-## old school
+## old school classes
 
-**kode** gives you the option to use the old school `function` style classes of CoffeeScript v1:
+**kode** gives you two choices for class definitions:
+
+### function
 
 ```kode
-function C
+function ES5
     @: ->
+    f: -> 1
 ```
 
-The generated code might be a bit more ugly, but the function based classes don't suffer from some of the limitations of the new class syntax.
-For example, keywords can be used as method names and super doesn't have to be called first in the constructor.
-New and old school styles can be used in the same module, but obviously not in the same class hierarchy.
+```js
+ES5 = (function ()
+{
+    function ES5 ()
+    {}
+    ES5.prototype["f"] = function ()
+    {
+        return 1
+    }
+    return ES5
+})()
+```
+
+### class
+
+```kode
+class ES2015
+    @: ->
+    f: -> 1
+```
+```js
+class ES2015
+{
+    constructor ()
+    {}
+
+    f ()
+    {
+        return 1
+    }
+}
+```
+
+Both forms can be used in the same module, but obviously not in the same class
+hierarchy. 
 
 ## optional commata
 
@@ -324,7 +359,7 @@ Otherwise the expressions on both sides are compared.
 ## ansi colors
 
 ```kode
-log Y5('warning!') r2(' ')   ▸ output in dark red on bright yellow
+log Y5(r2('warning!')) ▸ output in dark red on bright yellow
 ```
 
 **kode** injects color functions if it discovers calls with names like `R1` or `g8`.
