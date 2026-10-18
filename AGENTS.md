@@ -66,18 +66,25 @@ arr = [a b c]                # array elements. no commas needed.
 'x' + y                      # concatenation is +, as in JS
 "#{x}"                       # string interpolation
 
-f a(b) ≡  f(a(b))            # braces make the call
-f a b  ≡  f a,b  ≡  f(a, b)
+f a b     ≡  f(a, b)         # parens are the rule
+f a, b    ≡  f(a, b)
+f(a, b)   ≡  f(a, b)
+f a(b)    ≡  f(a(b))         # braces make the call
+f(a(b))   ≡  f(a(b))
 
 obj.method? arg              # trailing ? = call only if it exists
 
-if a ➜ b else c             # ➜ is the keyword 'then', spelled as one glyph
-x = if a ➜ b                # else omitted, so it yields undefined
+if a ➜ b else c              # ➜ is the keyword 'then', spelled as one glyph
+x = if a ➜ b                 # else omitted, so it yields undefined
 for x in xs ➜ body
 ⮐ value                      # explicit return
 ```
 
 see `kode.md` for more details
+
+the parenless calls are shorthand, and shorthand is positional: they read as a
+call only at the root of a statement. `(f (a))`, `[f (a)]`, `g f (a)` and
+`{ k: f (a) }` are not calls — and none of them complains.
 
 ### Checking a snippet without building anything
 
