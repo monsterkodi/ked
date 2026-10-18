@@ -48,11 +48,10 @@ If all tests pass after a self-recompile, the new compiler sources are copied ov
 
 ## Kode syntax
 
-There is no language documentation anywhere in the repo. This is the crib.
-
 ```kode
-use ◆ slash nfs              # import; ◆ separates the path from the names
-use ../kxk ◆ slash karg
+use fs os path               # import standard node modules
+use ../kxk ▪ slash karg      # import members of the default export
+use ../bla ◆ file file       # import file modules
 
 class Foo
     @: (a) ->                # constructor
@@ -62,57 +61,23 @@ class Foo
     plain: -> @a             # no-param shorthand
     async: ○-> ○ doThing()   # ○ = async, both for definitions and calls
 
-valid x                      # not null/undefined/NaN
-empty x                      # '' / null / undefined / NaN / empty object
-
-log 'hi' x                   # juxtaposition = call: log('hi', x)
-arr = [a b c]                # ... and array elements. no commas needed.
+log 'hi' x                   # console.log('hi', x)
+arr = [a b c]                # array elements. no commas needed.
 'x' + y                      # concatenation is +, as in JS
-"#{x}"                       # interpolation
+"#{x}"                       # string interpolation
 
-@insert foo.bar(baz)        # braces make the call
-f a b  ≡  f a, b  ≡  f(a, b)
+f a(b) ≡  f(a(b))            # braces make the call
+f a b  ≡  f a,b  ≡  f(a, b)
 
 obj.method? arg              # trailing ? = call only if it exists
 
 if a ➜ b else c             # ➜ is the keyword 'then', spelled as one glyph
-if a then b else c          # identical — 'then' and '➜' are the same token
 x = if a ➜ b                # else omitted, so it yields undefined
 for x in xs ➜ body
 ⮐ value                      # explicit return
 ```
 
-Other mechanics worth knowing:
-
-- **Sequence always means a comma-separated list, never grouping.** Commas and
-  juxtaposition are interchangeable and compile identically — `f a b`,
-  `f a, b` and `f(a, b)` are all `f(a, b)`. Kode inserts a comma wherever a
-  bracket could have been inserted, so a juxtaposed chain is *one* call with a
-  flat argument list. It never nests.
-- **Only braces make a call.** `f g x` is `f(g, x)`, not `f(g(x))` — and manual
-  parens do not rescue it: `f(g x)` and `f (g x)` are flat too. Put braces on
-  the inner call: `f g(x)` → `f(g(x))`. Brackets *do* group where a sequence
-  must stay whole: `f [a b]` → `f([a, b])`.
-- The `?` postfix follows the same rule: `(foo.has '')?` becomes the comma
-  expression `(foo.has, '')`, not a call. Use `(foo.has(''))`, or assign to a
-  variable first and test that.
-- **Write the commas and braces anyway.** Kode's own source leans on
-  juxtaposition for readability, but that is a style choice, not a shorthand
-  you need to imitate. Prefer `f(a, b)` and `g(x)` over `f a b` and bare
-  `g x`: the explicit forms cannot be misparsed, and they cost nothing.
-- **Last expression in a block returns implicitly.** `@returner.collect` in
-  `kode/kode/kode.kode` inserts the return; you rarely write `⮐` for it.
-- `if` is an **expression**, not a statement. In value position it renders as a
-  JS ternary: `x = if a ➜ b else c` becomes `x = a ? b : c`.
-- **`;` separates statements inside a branch, not branches.** `if a ➜ b; c; d`
-  is one `if` with a three-statement body. A second `➜` with no `if` in front
-  of it is silently dropped — `if a ➜ b; c ➜ d` compiles to `if (a) { b; c }`.
-- The AST pipeline is `@ast()` at `kode/kode/kode.kode:111`, in order: lexer →
-  parser → stripol (interpolation) → scoper (variable collection) → returner →
-  operator (precedence sort).
-- `karg """..."""` declares CLI options with an inline help block.
-- Trailing same-line comments can hide a whole body:
-  `ignore: (p) -> #log 'ignore' p; true` — the method is a no-op.
+see `kode.md` for more details
 
 ### Checking a snippet without building anything
 
