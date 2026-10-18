@@ -136,7 +136,7 @@ toExport["error"] = function ()
     })
     section("malformed object value", function ()
     {
-        codemsg('x = {k: f (a)}\n','curly is missing closing }')
+        codemsg('x = {k: f (a)}\n','malformed object value')
         codemsg('y = k: f [m]','malformed object value')
         codemsg('y = {f,n:2,[m]}','malformed object value')
         codemsg('y = k: f {m}','malformed object value')
