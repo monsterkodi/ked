@@ -1,91 +1,91 @@
-var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}}
+var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
-var firstLineCol, lastLineCol
+var firstLineCol, lastLineCol, walkFirst, walkLast
 
 
-lastLineCol = function (e)
+walkLast = function (out, e)
 {
-    var cols, _17_13_, _18_38_
+    var col, line, sub, _35_13_, _38_29_
 
     if (((e != null ? e.col : undefined) != null))
     {
-        return {line:e.line,col:e.col + (e.text != null ? e.text.length : undefined)}
-    }
-    else if ((e != null) && e instanceof Object)
-    {
-        cols = Object.values(e).map(lastLineCol)
-        if (!_k_.empty(cols))
+        line = e.line
+        col = e.col + (e.text != null ? e.text.length : undefined)
+        if (!out.found || line > out.line || line === out.line && col > out.col)
         {
-            return cols.reduce(function (a, b)
-            {
-                if (a.line > b.line)
-                {
-                    return a
-                }
-                else if (a.line === b.line)
-                {
-                    if (a.col > b.col)
-                    {
-                        return a
-                    }
-                    else
-                    {
-                        return b
-                    }
-                }
-                else
-                {
-                    return b
-                }
-            })
+            out.line = line
+            out.col = col
+        }
+        out.found = true
+        return
+    }
+    if ((e != null) && e instanceof Object)
+    {
+        var list = _k_.list(Object.values(e))
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            sub = list[_a_]
+            walkLast(out,sub)
         }
     }
-    return {line:1,col:0}
+}
+
+lastLineCol = function (e)
+{
+    var out
+
+    out = {line:-Infinity,col:-Infinity,found:false}
+    walkLast(out,e)
+    if (!out.found)
+    {
+        return {line:1,col:0}
+    }
+    return {line:out.line,col:out.col}
+}
+
+walkFirst = function (out, e)
+{
+    var col, line, sub, _71_13_
+
+    if (((e != null ? e.col : undefined) != null))
+    {
+        line = e.line
+        col = e.col
+        if (!out.found || line < out.line || line === out.line && col < out.col)
+        {
+            out.line = line
+            out.col = col
+        }
+        out.found = true
+        return
+    }
+    if ((e != null) && e instanceof Object)
+    {
+        var list = _k_.list(Object.values(e))
+        for (var _b_ = 0; _b_ < list.length; _b_++)
+        {
+            sub = list[_b_]
+            walkFirst(out,sub)
+        }
+    }
 }
 
 firstLineCol = function (e)
 {
-    var cols, _38_13_
+    var out
 
-    if (((e != null ? e.col : undefined) != null))
+    out = {line:Infinity,col:Infinity,found:false}
+    walkFirst(out,e)
+    if (!out.found)
     {
-        return {line:e.line,col:e.col}
+        return {line:Infinity,col:Infinity}
     }
-    else if ((e != null) && e instanceof Object)
-    {
-        cols = Object.values(e).map(firstLineCol)
-        if (!_k_.empty(cols))
-        {
-            return cols.reduce(function (a, b)
-            {
-                if (a.line < b.line)
-                {
-                    return a
-                }
-                else if (a.line === b.line)
-                {
-                    if (a.col < b.col)
-                    {
-                        return a
-                    }
-                    else
-                    {
-                        return b
-                    }
-                }
-                else
-                {
-                    return b
-                }
-            })
-        }
-    }
-    return {line:Infinity,col:Infinity}
+    return {line:out.line,col:out.col}
 }
 export default {
     firstLineCol:firstLineCol,
     lastLineCol:lastLineCol
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidXRpbHMuanMiLCJzb3VyY2VzIjpbIi4uLy4uL2tvZGUva29kZS91dGlscy5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7OztBQWNBOzs7O1VBRU8sWUFBQSxFQUFHOztnQkFDQSxLQUFLLEVBQUUsS0FBSyxJQUFJLEVBQUUsT0FBSSxFQUFFLGVBQUYsRUFBRSxLQUFNOztjQUM1QixjQUFPLGFBQUs7O1FBQ2hCLE9BQU8sT0FBTyxPQUFPLEdBQUcsSUFBSTt1QkFDbkI7O21CQUNFLEtBQUs7O29CQUNMLEVBQUUsT0FBTyxFQUFFOzsyQkFBVTs7eUJBQ2hCLEVBQUUsU0FBUSxFQUFFOzt3QkFDYixFQUFFLE1BQU0sRUFBRTs7K0JBQVM7Ozs7K0JBQU87Ozs7OzJCQUM1Qjs7Ozs7WUFDakIsS0FBSyxFQUNMLElBQUs7OztBQVFUOzs7O1VBRU8sWUFBQSxFQUFHOztnQkFDQSxLQUFLLEVBQUUsS0FBSyxJQUFJLEVBQUU7O2NBQ2hCLGNBQU8sYUFBSzs7UUFDaEIsT0FBTyxPQUFPLE9BQU8sR0FBRyxJQUFJO3VCQUNuQjs7bUJBQ0gsS0FBSzs7b0JBQ0EsRUFBRSxPQUFPLEVBQUU7OzJCQUFVOzt5QkFDaEIsRUFBRSxTQUFRLEVBQUU7O3dCQUNiLEVBQUUsTUFBTSxFQUFFOzsrQkFBUzs7OzsrQkFBTzs7Ozs7MkJBQzVCOzs7OztZQUNqQixLQUFLLFNBQ0wsSUFBSzs7O0lBR0wsYUFBYTtJQUNiLFlBQVkifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidXRpbHMuanMiLCJzb3VyY2VzIjpbIi4uLy4uL2tvZGUva29kZS91dGlscy5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7OztBQWdDQTs7OztVQUVPLFlBQUEsRUFBRzs7UUFFRixPQUFPLEVBQUU7UUFDVCxNQUFPLEVBQUUsT0FBTSxFQUFFLGVBQUYsRUFBRSxLQUFNO2FBRWhCLElBQUksU0FBUyxPQUFPLElBQUksUUFBUSxTQUFRLElBQUksUUFBUyxNQUFNLElBQUk7O1lBQ2xFLElBQUksT0FBTztZQUNYLElBQUksTUFBTzs7UUFFZixJQUFJLFFBQVE7OztTQUdiLGNBQU8sYUFBSzs7NEJBRUEsT0FBTyxPQUFPOzs7O1lBQ3JCLFNBQVMsSUFBSzs7Ozs7QUFFMUI7Ozs7SUFFSSxPQUFNLEtBQUssVUFBVSxJQUFJLFVBQVUsTUFBTTtJQUV6QyxTQUFTLElBQUs7U0FFUCxJQUFJOztnQkFDTCxLQUFLLEVBQUUsSUFBSTs7WUFFZixLQUFLLElBQUksS0FBSyxJQUFJLElBQUk7OztBQVE1Qjs7OztVQUVPLFlBQUEsRUFBRzs7UUFFRixPQUFPLEVBQUU7UUFDVCxNQUFPLEVBQUU7YUFFRixJQUFJLFNBQVMsT0FBTyxJQUFJLFFBQVEsU0FBUSxJQUFJLFFBQVMsTUFBTSxJQUFJOztZQUNsRSxJQUFJLE9BQU87WUFDWCxJQUFJLE1BQU87O1FBRWYsSUFBSSxRQUFROzs7U0FHYixjQUFPLGFBQUs7OzRCQUVBLE9BQU8sT0FBTzs7OztZQUNyQixVQUFVLElBQUs7Ozs7O0FBRTNCOzs7O0lBRUksT0FBTSxLQUFLLFNBQVMsSUFBSSxTQUFTLE1BQU07SUFFdkMsVUFBVSxJQUFLO1NBRVIsSUFBSTs7Z0JBQ0wsS0FBSyxTQUFTLElBQUk7O1lBRXRCLEtBQUssSUFBSSxLQUFLLElBQUksSUFBSTs7O0lBR3hCLGFBQWE7SUFDYixZQUFZIn0=
 //# sourceURL=file://kode/kode/utils.kode

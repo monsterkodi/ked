@@ -12,20 +12,40 @@
 # ███      ███   ███       ███     ███     ███      ███  ███  ████  ███       ███       ███   ███  ███      
 # ███████  ███   ███  ███████      ███     ███████  ███  ███   ███  ████████   ███████   ███████   ███████  
 
-lastLineCol = e ->
+# both of these ask the same question over the same tree - the highest or
+# the lowest line/col pair anywhere below a node - and they get asked on
+# overlapping subtrees from inside the parser, so a walk is not a once per
+# file cost.
+
+walkLast = (out, e) ->
     
     if e?.col?
-        ⮐ line:e.line col:e.col+e.text?.length
-    else if e? and e is Object
-        cols = Object.values(e).map lastLineCol
-        if valid cols
-            return cols.reduce (a,b) -> 
-                if a.line > b.line then a 
-                else if a.line == b.line
-                    if a.col > b.col then a else b
-                else b
-    line:1
-    col: 0
+        
+        line = e.line
+        col  = e.col + e.text?.length
+        
+        if not out.found or line > out.line or line == out.line and col > out.col
+            out.line = line
+            out.col  = col
+            
+        out.found = yes
+        ⮐
+        
+    if e? and e is Object
+        
+        for sub in Object.values e
+            walkLast out, sub
+
+lastLineCol = e ->
+    
+    out = line:-Infinity col:-Infinity found:no
+    
+    walkLast out, e
+    
+    if not out.found
+        ⮐ line:1 col:0
+    
+    ⮐ line:out.line col:out.col
 
 # ████████  ███  ████████    ███████  █████████  ███      ███  ███   ███  ████████   ███████   ███████   ███      
 # ███       ███  ███   ███  ███          ███     ███      ███  ████  ███  ███       ███       ███   ███  ███      
@@ -33,20 +53,35 @@ lastLineCol = e ->
 # ███       ███  ███   ███       ███     ███     ███      ███  ███  ████  ███       ███       ███   ███  ███      
 # ███       ███  ███   ███  ███████      ███     ███████  ███  ███   ███  ████████   ███████   ███████   ███████  
 
-firstLineCol = e ->
+walkFirst = (out, e) ->
     
     if e?.col?
-        ⮐ line:e.line col:e.col
-    else if e? and e is Object
-        cols = Object.values(e).map firstLineCol
-        if valid cols
-            ⮐ cols.reduce (a,b) -> 
-                if a.line < b.line then a 
-                else if a.line == b.line
-                    if a.col < b.col then a else b
-                else b
-    line:Infinity
-    col: Infinity
+        
+        line = e.line
+        col  = e.col
+        
+        if not out.found or line < out.line or line == out.line and col < out.col
+            out.line = line
+            out.col  = col
+            
+        out.found = yes
+        ⮐
+        
+    if e? and e is Object
+        
+        for sub in Object.values e
+            walkFirst out, sub
+
+firstLineCol = e ->
+    
+    out = line:Infinity col:Infinity found:no
+    
+    walkFirst out, e
+    
+    if not out.found
+        ⮐ line:Infinity col:Infinity
+    
+    ⮐ line:out.line col:out.col
             
 export
     firstLineCol:firstLineCol
