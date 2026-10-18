@@ -145,24 +145,37 @@ cache = slash.path root, 'cache'
 
 ckfile = slash.path cache, 'x.kode'
 cjfile = slash.path cache, 'x.js'
+
+# a second file, because the interesting cases are about the ones a build
+# did not compile. one file cannot show that
+
+ckfile2 = slash.path cache, 'y.kode'
+cjfile2 = slash.path cache, 'y.js'
+
 ckache = slash.path cache, '.kkache'
 
 cktext = 'x = 1\n'
 cjtext = 'var x = 1;\n'
+cktext2 = 'y = 2\n'
+cjtext2 = 'var y = 2;\n'
 
 fpA = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 fpB = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
 
 cksrc = {}
 cksrc[knrd.rel ckfile] = knrd.hash cktext
+cksrc[knrd.rel ckfile2] = knrd.hash cktext2
 
 cktgt = {}
 cktgt[knrd.rel cjfile] = knrd.hash cjtext
+cktgt[knrd.rel cjfile2] = knrd.hash cjtext2
 
 ○ nfs.remove cache
 ○ nfs.mkdir  cache
 ○ nfs.write  ckfile cktext
 ○ nfs.write  cjfile cjtext
+○ nfs.write  ckfile2 cktext2
+○ nfs.write  cjfile2 cjtext2
 ○ nfs.remove ckache
 
 wrote   = ○ knrd.saveCache ckache, null, fpA, true, cksrc, cktgt
@@ -225,6 +238,21 @@ wholeBack = ○ knrd.loadCache ckache
 
 partial   = ○ knrd.saveCache ckache, wholeBack, fpA, true, cksrc, cktgt, no
 stillB    = ○ knrd.loadCache ckache
+
+# the shape that made every other build after it recompile the tree. a build
+# records only what it compiled, so replacing the cache with that leaves the
+# files it did not compile - which were not rebuilt because they were already
+# right, which is what the cache had said - with no entry at all. the next
+# build then finds 213 misses and recompiles everything to write them back
+
+oneSrc = {}
+oneSrc[knrd.rel ckfile] = cksrc[knrd.rel ckfile]
+
+oneTgt = {}
+oneTgt[knrd.rel cjfile] = cktgt[knrd.rel cjfile]
+
+keptOk = ○ knrd.saveCache ckache, stillB, fpB, true, oneSrc, oneTgt, yes
+kept   = ○ knrd.loadCache ckache
 
 # rubbish in the cache has to be replaced rather than respected, or it sits
 # there refusing every write and nothing is ever cached again
@@ -312,6 +340,16 @@ fpTwo = ○ knrd.fingerprint()
 
         partial      ▸ false
         stillB.kode  ▸ fpB
+
+    ▸ and a whole build adds to the cache rather than replacing it, or the
+    ▸ files it did not compile lose their entry and the next build has to
+    ▸ rebuild the tree to write them back
+
+        keptOk  ▸ true
+        kept.source[knrd.rel ckfile]  ▸ cksrc[knrd.rel ckfile]
+        kept.source[knrd.rel ckfile2] ▸ cksrc[knrd.rel ckfile2]
+        kept.target[knrd.rel cjfile]  ▸ cktgt[knrd.rel cjfile]
+        kept.target[knrd.rel cjfile2] ▸ cktgt[knrd.rel cjfile2]
 
     ▸ but rubbish is replaced, or it would wedge the build for good
 

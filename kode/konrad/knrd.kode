@@ -260,28 +260,31 @@ saveCache = (path, kache, fp, srcmap, srcs, tgts, whole=no) ○->
 
     ⮐ false if empty srcs
 
-    # 'whole' is the one thing that earns the right to replace rather than
-    # merge. only a build that went over every file can speak for every file,
-    # so only it can rewrite a cache belonging to another compiler. a partial
-    # one writing it would mark the files it never looked at as current under
-    # a fingerprint they were never compiled with - and if it is also the one
-    # that declines to write, the cache stays wrong until deleted by hand.
+    # a partial build may not write over a cache belonging to another
+    # compiler: it cannot vouch for the files it never looked at, and it
+    # would leave them marked current under a fingerprint they were never
+    # compiled with. since it is also the one that declines to write, the
+    # cache would stay wrong until somebody deleted it by hand.
+    #
+    # a whole build is the one that can - it went over every file, and a
+    # cache it finds void makes every one of them a miss, so it arrives here
+    # having rewritten the lot anyway.
+    #
+    # what it may not do is replace. a build records only what it compiled,
+    # and what it did not compile was not stale - it was already right, which
+    # is what the cache it read said. replacing drops those entries, and the
+    # next build finds every one of them a miss and rebuilds the tree to put
+    # them back. so both kinds of build merge, and 'whole' waives nothing but
+    # the guard above
 
-    if whole
+    ⮐ false if not whole and shaped(kache) and not (usable(kache, fp, srcmap))
 
+    if kache?
+        source = Object.assign({}, kache.source, srcs)
+        target = Object.assign({}, kache.target, tgts)
+    else
         source = srcs
         target = tgts
-
-    else
-
-        ⮐ false if shaped(kache) and not (usable(kache, fp, srcmap))
-
-        if kache?
-            source = Object.assign({}, kache.source, srcs)
-            target = Object.assign({}, kache.target, tgts)
-        else
-            source = srcs
-            target = tgts
 
     sorted = o ->
         out = {}
