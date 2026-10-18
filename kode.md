@@ -174,81 +174,7 @@ log ◆dir                   ▸ [source directory]
 
 The body only runs when the module is the one node was started with.
 
-# misc features
-
-### ranges
-
-```kode
-for i in 0..2                                                       ▸ i : [0,1,2]
-    a = 1...3                                                       ▸ a = [1,2]
-```
-
-### is
-
-```kode
-1 is 'number' and '' is 'string' and {} is Object and [] is Array   ▸ true
-1 is Number or '' is String or [] is 'array'                        ▸ false
-```
-
-`is` is a shortcut for `typeof` and `instanceof`. 
-The first is used, when the right hand side is a string.
-
-#### num str obj
-
-```kode
-"0xFF" is num and "-4.536" is num and 42 is num                     ▸  true
-'' is str and "a" is str and new String("abc") is str               ▸  true
-{} is obj and new Object() is obj                                   ▸  true
-null is obj or new Map() is obj or [] is obj                        ▸  false
-```
-
-`is num` does a string coercion via `parseFloat` in the test.
-`is str` checks both, type == 'string' or instanceof String.
-`is obj` evaluates to true for plain Objects only.
-
-### empty
-
-```kode
-empty [] and empty {} and empty '' and empty null and empty NaN     ▸ true
-empty 0 or empty 'a' or empty [null] or empty Infinity              ▸ false
-```
-
-Returns true for null, undefined, NaN and empty array, object or string.
-
-### valid
-
-```kode
-valid 0 and valid 'a' and valid [null] and valid Infinity           ▸ true
-valid [] or valid {} or valid '' or valid null or valid NaN         ▸ false
-```
-
-Just the negation of `empty`.
-
-### copy & clone
-
-```
-a = copy b                              # shallow copy of b
-a = clone b                             # deep copy of b
-```
-
-Operators that return a shallow or deep copy of their argument. 
-Only plain Objects, Arrays and Strings are copied. Functions, Maps, Sets, etc. are not copied.
-
-### ternary
-
-```kode
-false ? 1 : 2                                                       ▸ 2
-```
-### eql
-
-```
-a eql b                                 # deep comparison
-```
-
-Does a deep comparison of its operands. 
-Only plain Objects, Arrays and Strings are compared.
-
-### optional commata
+# optional commata
 
 In **kode**, commata are optional almost anywhere.
 Those are all valid expressions:
@@ -279,6 +205,38 @@ f(a(b))   ▸ f(a(b))
 
 only in top-level function calls can the parens be omitted. 
 
+
+# misc
+
+### ranges
+
+```kode
+for i in 0..2                                                       ▸ i : [0,1,2]
+    a = 1...3                                                       ▸ a = [1,2]
+```
+
+### empty
+
+```kode
+empty [] and empty {} and empty '' and empty null and empty NaN     ▸ true
+empty 0 or empty 'a' or empty [null] or empty Infinity              ▸ false
+```
+
+Returns true for null, undefined, NaN and empty array, object or string.
+
+### valid
+
+```kode
+valid 0 and valid 'a' and valid [null] and valid Infinity           ▸ true
+valid [] or valid {} or valid '' or valid null or valid NaN         ▸ false
+```
+
+### first & last
+
+```kode
+a = first [1 2 3]   ▸ 1
+b = last [1 2 3]    ▸ 3
+```
 ### negative indexing
 
 ```kode
@@ -288,14 +246,67 @@ only in top-level function calls can the parens be omitted.
 
 `v[-n]` is a shortcut for `v[-n..-n][0]` for number literals `n`
 
-### first & last
+
+### ternary
 
 ```kode
-a = first [1 2 3]   ▸ 1
-b = last [1 2 3]    ▸ 3
+false ? 1 : 2                                                       ▸ 2
+
+### copy & clone
+
+```
+a = copy b                              # shallow copy of b
+a = clone b                             # deep copy of b
 ```
 
-# debugging & output
+Operators that return a shallow or deep copy of their argument. 
+Only plain Objects, Arrays and Strings are copied. Functions, Maps, Sets, etc. are not copied.
+```
+### eql
+
+```
+a eql b                                 # deep comparison
+```
+
+Does a deep comparison of its operands. 
+Only plain Objects, Arrays and Strings are compared.
+
+### is
+
+```kode
+1 is 'number' and '' is 'string' and {} is Object and [] is Array   ▸ true
+1 is Number or '' is String or [] is 'array'                        ▸ false
+```
+
+`is` is a shortcut for `typeof` and `instanceof`. 
+The first is used, when the right hand side is a string.
+
+#### is num 
+
+```kode
+"0xFF" is num and "-4.536" is num and 42 is num                     ▸  true
+```
+
+`is num` does a string coercion via `parseFloat` in the test.
+
+#### is str
+
+```kode
+'' is str and "a" is str and new String("abc") is str               ▸  true
+```
+
+`is str` checks both, type == 'string' or instanceof String.
+
+#### is obj
+
+```kode
+{} is obj and new Object() is obj                                   ▸  true
+null is obj or new Map() is obj or [] is obj                        ▸  false
+```
+
+`is obj` evaluates to true for plain Objects only.
+
+# output
 
 ### console
 
@@ -316,6 +327,18 @@ log s                                   ▸ a   1
 
 Operator that converts argument into string in [noon](https://github.com/monsterkodi/noon) notation.
 Handles recursion, unlike `JSON.stringify`.
+
+### ansi colors
+
+```kode
+log Y5(r2('warning!')) ▸ output in dark red on bright yellow
+```
+
+**kode** injects color functions if it discovers calls with names like `R1` or `g8`.
+Color functions: 'r' 'g' 'b' 'c' 'm' 'y' 'w' for foreground (uppercase for background) and a number between 1 and 8.
+
+
+# debugging
 
 ### dbg
 
@@ -344,7 +367,7 @@ f = (a) -> ▴ a ; a                      ▸ file.kode:1:11 ▴ assert failed! 
 Logs file position, message and condition code if condition isn't truthy. 
 If message is omitted, 'assert failed!' will be used.
 
-### profile
+# profile
 
 ```kode
 ●▸ sunny times
@@ -366,7 +389,7 @@ Logs time difference between matching `●▸` `●▪` pairs.
 Due to JavaScripts just in time compilation optimizations, the initial results might be greater than later runs.
     
 
-### tests 
+# tests 
 
 **kode** comes with its own testing framework
 
@@ -379,12 +402,3 @@ Due to JavaScripts just in time compilation optimizations, the initial results m
 
 If the `▸` has nothing on its left hand side, it denotes a test section.
 Otherwise the expressions on both sides are compared.
-
-### ansi colors
-
-```kode
-log Y5(r2('warning!')) ▸ output in dark red on bright yellow
-```
-
-**kode** injects color functions if it discovers calls with names like `R1` or `g8`.
-Color functions: 'r' 'g' 'b' 'c' 'm' 'y' 'w' for foreground (uppercase for background) and a number between 1 and 8.
