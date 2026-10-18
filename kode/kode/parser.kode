@@ -133,10 +133,6 @@ function Parser extends parse
     
     ifTail: e tok tokens ->
 
-        # 'a if' attaches the if to the value in front of it, which leaves
-        # the if with nothing to test and the value as its body. it was
-        # rendering as 'if () { a }'
-
         cond = @exp tokens
 
         if not cond
@@ -245,10 +241,6 @@ function Parser extends parse
         
         cond = @exp tokens
 
-        # 'while' is a javascript reserved word and says so much better
-        # elsewhere, but a while with nothing to test has nothing to say for
-        # itself either - it was rendering as 'while ()'
-
         if not cond
             @onError 'while is missing a condition' tok:tok
 
@@ -268,17 +260,10 @@ function Parser extends parse
     
     whileTail: e tok tokens ->
 
-        # @push 'while'
-
-        # as @ifTail: 'a while' leaves the while with nothing to test and the
-        # value as its body, and it was rendering as 'while () { a }'
-
         cond = @exp tokens
 
         if not cond
             @onError 'while is missing a condition' tok:tok
-
-        # @pop 'while'
 
         while:
             cond: cond
@@ -403,11 +388,6 @@ function Parser extends parse
             tokens.shift()
             fnlly = @block 'body' tokens
 
-        # a try with neither half compiles to a try node with two holes in
-        # it, and node reads that as a try around an empty block. the block
-        # is optional - '@try' takes what it can get and stops at the end of
-        # the tokens - so the check cannot be 'is there a body'
-
         if not ctch and not fnlly
             @onError "try is missing catch or finally" tok:tok
 
@@ -461,7 +441,6 @@ function Parser extends parse
             
             if module == '◆'
                 module = '.'
-                # log 'unshift diamond'
                 tokens.unshift token
                 break
             
@@ -484,10 +463,6 @@ function Parser extends parse
             tokens.shift()
             token = tokens.shift()
 
-            # a '▪' list is names, so a '.' in one is not a name. the type is the
-            # test rather than a list of words, so a list of keywords or of
-            # kode's own operator words is still a list of names
-
             while token and token.type != 'nl' and token.type in ['var' 'keyword' 'bool' 'op']
                 
                 item = token.text
@@ -500,23 +475,13 @@ function Parser extends parse
                     
                 break if tokens.length and (tokens[0].type == 'nl' or tokens[0].text in '▪●◆')
 
-                # before taking it, not after. a token left behind is one the
-                # dangling check at the foot of this method can speak about;
-                # one taken and dropped is one nobody says anything about
-
                 if tokens[0]?.type not in ['var' 'keyword' 'bool' 'op']
                     break
                     
                 token = tokens.shift()
 
-        # a use names its bindings with '▪' or '◆', not both. the two are
-        # alternatives, so if the list has already collected something the
-        # diamond branch is the dangling half - which is what 'use a ▪ b ◆ c'
-        # is, and it used to go through as an import and a let
-
         if tokens.length and tokens[0].text == '◆' and not items.length
             
-            # log 'use diamond'
             toUse = []
             
             tokens.shift()
@@ -621,17 +586,8 @@ function Parser extends parse
 
         name = tokens.shift()
 
-        # a newline is not a name. 'class' with nothing after it was caught,
-        # but 'class\n' took the line ending as the name and rendered an
-        # empty class, which node reads as one missing a body
-
         if not name or name.type == 'nl'
             @onError "#{type} is missing a name" tok:tok
-
-        # and a name javascript has reserved is not a name it will take.
-        # @function comes through here too, so this is both of them. the
-        # list and the wording are in parse.kode, next to the check @exp
-        # makes at the head of an expression
 
         @nameIsReserved name
 
@@ -776,15 +732,6 @@ function Parser extends parse
         
         @push "op#{op.text}"
 
-        # @exp looks at a bare token it finds at the head of an expression
-        # and asks what to make of it, and whether it is the right side of
-        # this operation is the whole of the answer. a prefix operation has
-        # no lhs, and the check below already covers that case and names the
-        # operator that came up short - 'a/-^' is a minus with nothing after
-        # it, not a caret. a binary one has a lhs, so nothing else is going
-        # to say anything about what its right side looks like and @exp has
-        # to - 'x = in' is an 'in' with nothing to iterate.
-
         wasPrefix = @prefixOperand
         @prefixOperand = not lhs
 
@@ -792,24 +739,7 @@ function Parser extends parse
 
         @prefixOperand = wasPrefix
 
-        # an operator needs a right operand. a postfix ++ or -- is the one
-        # exception: having nothing after it is what postfix means.
-        #
-        # a prefix + or - is an operation with no lhs at all, and it needs
-        # one just the same - in '-+' the minus swallowed the plus and left
-        # the expression standing on nothing. a bare op token further right
-        # of a real lhs is left alone, since that is how 'a & ~0xffff'
-        # reaches the renderer as a & ~
-        #
-        # 'is' names what it was looking for, so it says so
-
         if not (op.text in ['++' '--'] and lhs)
-
-            # a closing bracket is never the right operand of anything. when
-            # there is a paren or a call open for it to be closing it belongs
-            # to that, and 'f(a % )' is the call saying it is missing its
-            # own rather than the bracket saying it is unmatched. when
-            # nothing is open it closes nothing, and says so.
 
             if '(' not in @stack and 'args(' not in @stack
                 if rhs?.type == 'paren' and rhs.text in [')' ']' '}']
@@ -820,17 +750,6 @@ function Parser extends parse
                     @onError "'is' is missing what to test against" tok:op
                 else
                     @onError "#{op.text} is missing a right operand" tok:op
-
-        # '~' is unary. node has no binary use for it - 'n ~ i' is not a
-        # thing javascript has - and kode was rendering it as one. it says
-        # nothing here about 'p ~ +': the '+' with nothing after it answers
-        # first, from inside the rhs above, and it is the more specific of
-        # the two.
-        #
-        # 'a & ~0xffff' is fine and is not this - there the '~' is the right
-        # operand of the '&' and never reaches @operation as an operator.
-        # '~~x' is fine too: the '~' in front is a prefix still waiting for
-        # the expression behind it, not a value in front of an operator.
 
         if op.text == '~' and not (lhs?.type == 'op' and lhs.text == '~')
             @onError '~ is not a binary operator' tok:op
@@ -874,11 +793,6 @@ function Parser extends parse
         @push 'in?'
         rhs = @exp tokens
         @pop  'in?'
-
-        # 'in' is the operator, so whatever is on the right of it has to be
-        # something to test for membership of. 'log in' has nothing, and was
-        # rendering as '_k_.in(log,)' - the helper called with one argument,
-        # which node is perfectly happy with and which means nothing.
 
         if not rhs
             @onError 'in is missing a right operand' tok:intok
@@ -932,11 +846,6 @@ function Parser extends parse
             upto = null
         else
             upto = @exp tokens
-
-            # 'x[1..]' and 'x[1...]' both end at a bracket and are open
-            # ended slices. anything else that runs out of tokens is a
-            # slice with no end at all, and renders as 'for (i = a; i < ;)'
-
             if not upto
                 @onError "slice is missing the end" tok:dots
 
@@ -1065,6 +974,27 @@ function Parser extends parse
             keyvals: exps
             close:   close
 
+    arrowAhead: tokens ->
+
+        depth  = 0
+        closed = no
+
+        for t in tokens
+
+            ⮐ false if t.type in ['nl' 'block']
+
+            if not closed
+                if t.text in ['(' '[' '{']
+                    depth++
+                else if t.text in [')' ']' '}']
+                    depth--
+                    closed = yes if depth == 0
+                continue
+
+            ⮐ t.text in ['->' '=>' '○->' '○=>']
+
+        false
+
     #  ███████   ███████          ███  ████████   ███████  █████████
     # ███   ███  ███   ███        ███  ███       ███          ███
     # ███   ███  ███████          ███  ███████   ███          ███
@@ -1099,7 +1029,13 @@ function Parser extends parse
                     exps = exps.concat @exps('object' block.tokens)
                 break
             else if tokens[0]?.line == first.line and tokens[0].text not in '])};'
+                
+                rest = tokens.length
                 exps = exps.concat @exps('object' tokens, ';')
+                
+                if tokens.length == rest and tokens[0].type == 'paren' and not @arrowAhead tokens
+                    @onError "object is missing tokens in:\n#{noon tokens[0]}" tokens: tokens
+                    
                 break
             else
                 break if tokens[0].text in '])};'
@@ -1137,9 +1073,6 @@ function Parser extends parse
 
         @pop ':'
 
-        # a key with a colon and nothing after it - 'a:' - is an object
-        # with a hole in it, and renders as '{a:}'
-
         if not value
             @onError "key is missing a value" tok:key
 
@@ -1154,10 +1087,6 @@ function Parser extends parse
         else if key.prop
             
             {line, col} = firstLineCol key
-            
-            # this key is read back off the rendered text and put into the
-            # ast, so it has to be the text as it reads without a source
-            # map - a tag in there would be part of the name from here on
             
             text = @kode.renderer.plain @kode.renderer.node(key)
             if text?.startsWith('this')
@@ -1200,16 +1129,6 @@ function Parser extends parse
         dot  = tokens.shift()
         prop = tokens.shift()
         
-        # a dot wants a name after it, and not everything that follows one
-        # is a name. an opening bracket is the start of something else -
-        # 'f.(' is a call that lost its callee - and '@' is this, which is
-        # this at the head of an expression and nowhere else.
-        #
-        # the type is the test rather than a list of words, and an op counts
-        # as a name: print.noon and a.clone spell a property the way kode
-        # spells the operators, and they are the same thing once the dot is
-        # there
-
         if not prop or prop.type not in ['var' 'keyword' 'bool' 'op']
             @onError "property access is missing property name" tok:dot
             
@@ -1245,10 +1164,6 @@ function Parser extends parse
         qmrk = tokens.shift()
         rhs  = @exp tokens
 
-        # '?' turns what is in front of it into a conditional and needs
-        # something to put on the other side. 'a ?' was rendering as
-        # '(a != null ? a : )'
-
         if not rhs
             @onError "#{qmrk.text} is missing a right operand" tok:qmrk
 
@@ -1271,9 +1186,6 @@ function Parser extends parse
         
         colon = tokens.shift()
         rhs = @exp tokens
-
-        # same as the '?' above, one step further along: 'a ? b :' was
-        # rendering as '(a ? b : )'
 
         if not rhs
             @onError "#{colon.text} is missing a right operand" tok:colon
@@ -1327,11 +1239,6 @@ function Parser extends parse
             lhs: lhs
             rhs: @exp(tokens)
 
-    # for a construct that cannot be parsed at all. this has to raise the
-    # same located error @onError does. it used to print and hand back null,
-    # which put a null node into the ast and then blew up two passes later
-    # in returner or renderer, a long way from what actually went wrong
-    
     error: o tokens ->
         
         @pop o.pop if o.pop

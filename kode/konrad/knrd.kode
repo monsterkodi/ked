@@ -256,21 +256,32 @@ isCurrent = (kache, srcFile, tgtFile, srcText) ○->
     tgtText = ○ nfs.read tgtFile
     ⮐ hash(tgtText) == t
 
-saveCache = (path, kache, fp, srcmap, srcs, tgts) ○->
+saveCache = (path, kache, fp, srcmap, srcs, tgts, whole=no) ○->
 
     ⮐ false if empty srcs
 
-    # the cache we read belongs to another compiler: 
-    # leave it alone and let the next whole build rewrite it.
+    # 'whole' is the one thing that earns the right to replace rather than
+    # merge. only a build that went over every file can speak for every file,
+    # so only it can rewrite a cache belonging to another compiler. a partial
+    # one writing it would mark the files it never looked at as current under
+    # a fingerprint they were never compiled with - and if it is also the one
+    # that declines to write, the cache stays wrong until deleted by hand.
 
-    ⮐ false if shaped(kache) and not (usable(kache, fp, srcmap))
+    if whole
 
-    if kache?
-        source = Object.assign({}, kache.source, srcs)
-        target = Object.assign({}, kache.target, tgts)
-    else
         source = srcs
         target = tgts
+
+    else
+
+        ⮐ false if shaped(kache) and not (usable(kache, fp, srcmap))
+
+        if kache?
+            source = Object.assign({}, kache.source, srcs)
+            target = Object.assign({}, kache.target, tgts)
+        else
+            source = srcs
+            target = tgts
 
     sorted = o ->
         out = {}
@@ -316,7 +327,8 @@ knrd = files=[] opt={} ○->
     
     # ● 🔨
             
-    files =○ gatherFiles() if empty files
+    whole = empty files
+    files =○ gatherFiles() if whole
     
     icon = opt.dryrun ? w4(' ') : '🔨'
         
@@ -385,7 +397,7 @@ knrd = files=[] opt={} ○->
     # ○ bump() if transpiled and not opt.dryrun
     
     if not opt.dryrun
-        ○ saveCache kpath, loaded, fp, opt.map, srcs, tgts
+        ○ saveCache kpath, loaded, fp, opt.map, srcs, tgts, whole
     
     opt.reconcile ?= true
     if opt.reconcile and not opt.dryrun

@@ -4,17 +4,6 @@
     ███████    ███ █ ███  ███████    ███   ███  
     ███  ███   ███  ████  ███   ███  ███   ███  
     ███   ███  ███   ███  ███   ███  ███████    
-
-    the transpiler's bookkeeping
-
-    kode writes a sourceURL at the end of every file it generates, and it
-    names the source it was made from. that stamp is what makes a
-    generated file identifiable - js/ also holds files nobody generated,
-    and js/kolor/extlang.js and js/kxk/kxk.js have to survive this.
-
-    the whole tree below is stamped with a sourceURL and no sourcemap, on
-    purpose - that is what a tree compiled with -map off looks like, and it
-    has to be one we can still clean.
 ###
 
 use ../knrd
@@ -176,8 +165,6 @@ cktgt[knrd.rel cjfile] = knrd.hash cjtext
 ○ nfs.write  cjfile cjtext
 ○ nfs.remove ckache
 
-# a round trip, and the three ways of not having one
-
 wrote   = ○ knrd.saveCache ckache, null, fpA, true, cksrc, cktgt
 back    = ○ knrd.loadCache ckache
 absent  = ○ knrd.loadCache slash.path(cache,'nowhere')
@@ -227,6 +214,17 @@ more[knrd.rel ckfile] = 'cccccccccccccccccccccccccccccccccccccccc'
 
 mergedOk = ○ knrd.saveCache ckache, back, fpA, true, more, cktgt
 merged   = ○ knrd.loadCache ckache
+
+# a whole build may rewrite a cache from another compiler, because it can
+# vouch for every file in it. a partial one may not, because it cannot - and
+# if it writes anyway, the files it never looked at go on being marked current
+# under a fingerprint they were never compiled with
+
+wholesale = ○ knrd.saveCache ckache, merged, fpB, true, cksrc, cktgt, yes
+wholeBack = ○ knrd.loadCache ckache
+
+partial   = ○ knrd.saveCache ckache, wholeBack, fpA, true, cksrc, cktgt, no
+stillB    = ○ knrd.loadCache ckache
 
 # rubbish in the cache has to be replaced rather than respected, or it sits
 # there refusing every write and nothing is ever cached again
@@ -302,6 +300,18 @@ fpTwo = ○ knrd.fingerprint()
         mergedOk  ▸ true
         merged.source[knrd.rel ckfile]  ▸ more[knrd.rel ckfile]
         merged.target[knrd.rel cjfile] ▸ knrd.hash cjtext
+
+    ▸ and a whole build can replace a cache from another compiler
+
+        wholesale  ▸ true
+        wholeBack.kode  ▸ fpB
+        wholeBack.source[knrd.rel ckfile]  ▸ knrd.hash cktext
+
+    ▸ but a partial one cannot, or the files it never looked at go on
+    ▸ being marked current under a compiler they were never built with
+
+        partial      ▸ false
+        stillB.kode  ▸ fpB
 
     ▸ but rubbish is replaced, or it would wedge the build for good
 

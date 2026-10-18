@@ -178,6 +178,18 @@ use ./utils ▪ kc ke
             func(c - d,a + b)
             """
             
+    ▸ positional
+        
+        kc  'a b'          ▸ 'a(b)'
+        kc  'a (b)'        ▸ 'a((b))'
+        kc  'a (b + 1)'    ▸ 'a((b + 1))'
+        kc  'a (b) + 1'    ▸ 'a((b) + 1)'
+        kc  'a b {x:1}'    ▸ 'a(b,{x:1})'
+        
+        kc  '(a (b))'      ▸ ';(a,(b))'
+        kc  '[a (b)]'      ▸ ';[a,(b)]'
+        kc  'c a (b)'      ▸ 'c(a,(b))'
+        
     ▸ obj, func
       
         kc  """

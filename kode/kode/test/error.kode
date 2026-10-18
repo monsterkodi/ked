@@ -167,6 +167,21 @@ plain = c ->
 
         kc  'f(a + b)'         ▸ 'f(a + b)'
 
+    ▸ an object that loses part of itself
+
+        # {k: f (a)} inline already says 'curly is missing closing }'. over
+        # lines the brace is there, the parse just stops at the bracket, and
+        # every key after it used to go with it - silently, because nothing
+        # was left over to complain about
+        
+        codemsg 'x = {k: f (a)}\n'          'curly is missing closing }'
+        codemsg 'r =\n    k: f (a)\n'       'object is missing tokens in:'
+        codemsg 'r =\n    k: f (a)\n    j: 2\n'  'object is missing tokens in:'
+        
+        # the same key, spelled the way the parser can read
+        
+        kc  'r =\n    k: f(a)\n    j: 2\n'  ▸ 'r = {k:f(a),j:2}'
+
     ▸ property access is missing
 
         codemsg 'a.'                'property access is missing property name' 
