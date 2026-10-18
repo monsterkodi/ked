@@ -1034,7 +1034,7 @@ function Parser extends parse
                 exps = exps.concat @exps('object' tokens, ';')
                 
                 if tokens.length == rest and tokens[0].type == 'paren' and not @arrowAhead tokens
-                    @onError "object is missing tokens in:\n#{noon tokens[0]}" tokens: tokens
+                    @onError "malformed object value" tokens: tokens
                     
                 break
             else

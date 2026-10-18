@@ -119,9 +119,6 @@ plain = c ->
 
     ▸ a prefix operator with nothing to its right
 
-        # these can go in front of a value, so what is missing is the value.
-        # '-1' and '~0xff' are fine; a '-' with nothing after it is not
-
         codemsg '+'                 '+ is missing a right operand'
         codemsg '-'                 '- is missing a right operand'
         codemsg '~'                 '~ is missing a right operand'
@@ -130,33 +127,17 @@ plain = c ->
         codemsg "'s' !"             '! is missing a right operand'
         codemsg 'p ~ +'             '+ is missing a right operand'
 
-        # '~' is unary, and in between two values it is a binary operator
-        # that javascript does not have. 'p ~ +' above is not this: the '+'
-        # with nothing after it answers first and is the more specific of the
-        # two.
-        #
-        # 'a & ~0xffff' is fine - there the '~' is the right operand of the
-        # '&' and never reaches @operation as an operator - and so is '~~x',
-        # where the '~' in front is a prefix still waiting for the expression
-        # behind it rather than a value in front of an operator
+        codemsg 'n ~\ni'            '~ is not a binary operator'
+        codemsg 'd ~\n●'            '~ is not a binary operator'
+        codemsg 't ~\n@'            '~ is not a binary operator'
+        codemsg 'b  ~\n4'           '~ is not a binary operator'
+        codemsg '-- ~ \nN'          '~ is not a binary operator'
+        codemsg 'n ~ i'             '~ is not a binary operator'
 
-        codemsg 'n ~\ni'         '~ is not a binary operator'
-        codemsg 'd ~\n●'         '~ is not a binary operator'
-        codemsg 't ~\n@'         '~ is not a binary operator'
-        codemsg 'b  ~\n4'        '~ is not a binary operator'
-        codemsg '-- ~ \nN'       '~ is not a binary operator'
-        codemsg 'n ~ i'          '~ is not a binary operator'
-
-        kc  'a & ~0xffff'   ▸ 'a & ~\n0xffff'
-        kc  '~~x'            ▸ '~ ~ x'
+        kc  'a & ~0xffff'           ▸ 'a & ~\n0xffff'
+        kc  '~~x'                   ▸ '~ ~ x'
 
     ▸ an operator with a closing bracket for a right operand
-
-        # a closing bracket is not a value, and by the time one reaches
-        # @operation as a right operand there is no paren or call open for it
-        # to be closing - @rhs breaks out on those first. 'f(a % )' is not
-        # this: the bracket is the call's own, and the call says it is
-        # missing one
 
         codemsg 'a % )'             'unmatched closing bracket'
         codemsg 'e % }'             'unmatched closing bracket'
@@ -165,22 +146,17 @@ plain = c ->
 
         codemsg 'f(a % )'           'explicit call is missing closing bracket )'
 
-        kc  'f(a + b)'         ▸ 'f(a + b)'
+        kc  'f(a + b)'              ▸ 'f(a + b)'
 
-    ▸ an object that loses part of itself
+    ▸ malformed object value
 
-        # {k: f (a)} inline already says 'curly is missing closing }'. over
-        # lines the brace is there, the parse just stops at the bracket, and
-        # every key after it used to go with it - silently, because nothing
-        # was left over to complain about
-        
-        codemsg 'x = {k: f (a)}\n'          'curly is missing closing }'
-        codemsg 'r =\n    k: f (a)\n'       'object is missing tokens in:'
-        codemsg 'r =\n    k: f (a)\n    j: 2\n'  'object is missing tokens in:'
+        codemsg 'x = {k: f (a)}\n'                  'curly is missing closing }'
+        codemsg 'r =\n    k: f (a)\n'               'malformed object value'
+        codemsg 'r =\n    k: f (a)\n    j: 2\n'     'malformed object value'
         
         # the same key, spelled the way the parser can read
         
-        kc  'r =\n    k: f(a)\n    j: 2\n'  ▸ 'r = {k:f(a),j:2}'
+        kc  'r =\n    k: f(a)\n    j: 2\n'          ▸ 'r = {k:f(a),j:2}'
 
     ▸ property access is missing
 
@@ -191,10 +167,6 @@ plain = c ->
         codemsg '.'                 'property access is missing property name' 
         codemsg 'a ?.'              'property access is missing property name'
 
-        # a dot wants a name after it, and neither of these is one. 'f.(' is
-        # a call that lost its callee, and '@' is this - it is this at the
-        # head of an expression and nowhere else
-
         codemsg 'f.('               'property access is missing property name'
         codemsg 'f?.('              'property access is missing property name'
         codemsg 'a.@'               'property access is missing property name'
@@ -202,9 +174,6 @@ plain = c ->
         codemsg '?. ]'              'property access is missing property name'
         codemsg '?. )'              'property access is missing property name'
         codemsg 'y . }'             'property access is missing property name'
-
-        # a number with two dots in it lands here too: the second dot goes
-        # looking for a property on the first one and finds a digit
 
         codemsg '1.2.3'             'property access is missing property name'
 
@@ -222,37 +191,11 @@ plain = c ->
         codemsg 'a import'          'import is missing what to import'
         codemsg 'a export'          'export is missing what to export'
 
-        # an if or a while attached to the value in front of it has nothing
-        # left to test. it was rendering as 'if () { a }' - the value became
-        # the body and the condition was an empty pair of brackets
-
         codemsg 'a if'              'if is missing a condition'
-        codemsg 'm if'              'if is missing a condition'
-        codemsg 't if'              'if is missing a condition'
-        codemsg 'w if'              'if is missing a condition'
         codemsg 'a while'           'while is missing a condition'
-
-    # 'new' and 'delete' are on the list too and are not tested.
-        # object.kode says {new: new} and {delete: delete} are what they
-        # should compile to, so the compiler cannot tell a reserved word used
-        # as a name from a name that happens to be one.
+        codemsg 'a delete'          'delete is missing a right operand'
 
     ▸ a javascript reserved word used as a name
-
-        # one list, not two. kode emits a module, a module is always strict,
-        # and in a module 'let' is exactly as unavailable as 'var' - so there
-        # is nothing in the language to draw a line at, and a compiler that
-        # rejects one and not the other would only be right by accident.
-        #
-        # each case is the same rule about a different word: the lexer has no
-        # opinion and hands it on as an ordinary name, the renderer renders
-        # it as itself, and node reads 'var' or 'with' or 'in' and stops.
-        # grouped by word, because the word is what the rule is keyed on.
-        #
-        # 'class' and 'while' are in the list too and do not appear here. they
-        # are kode keywords first and javascript words second, so @exp gives
-        # them their kode meaning before this can be reached - and then they
-        # have something better to say, which is below.
 
         codemsg 'var'               'var is a javascript reserved word'
         codemsg 'var.a'             'var is a javascript reserved word'
@@ -303,78 +246,28 @@ plain = c ->
         codemsg 'a do'              'do is a javascript reserved word'
         codemsg 'case'              'case is a javascript reserved word'
         codemsg 'a case'            'case is a javascript reserved word'
-        codemsg 'x = 1\ncase'      'case is a javascript reserved word'
+        codemsg 'x = 1\ncase'       'case is a javascript reserved word'
 
         codemsg 'in.a'              'in is a javascript reserved word'
         codemsg 'in()'              'in is a javascript reserved word'
         codemsg 'in = 1'            'in is a javascript reserved word'
 
-        # and a class or a function taking one for its name. the list is the
-        # same list - @class is the one other place a name gets taken and it
-        # was not reading it - but the outcome before was different: nothing
-        # was caught at all, and all 42 of them reached node whole.
-        # 'function in' came out as 'var in' and an assignment of an iife to
-        # it, and 'class in' came out as 'class in {}'
-        #
-        # every word in the list, for both, because none of them is a
-        # special case. the test is the text and not the type: 'in', 'if'
-        # and 'class' lex as keywords and 'delete', 'new', 'var' and
-        # 'typeof' lex as ops
-
         for kw in ['await' 'break' 'case' 'catch' 'class' 'const' 'continue' 'debugger' 'default' 'delete' 'do' 'else' 'enum' 'export' 'extends' 'finally' 'for' 'function' 'if' 'implements' 'import' 'in' 'instanceof' 'interface' 'let' 'new' 'package' 'private' 'protected' 'public' 'return' 'static' 'super' 'switch' 'throw' 'try' 'typeof' 'var' 'void' 'while' 'with' 'yield']
             codemsg "function #{kw}"  "#{kw} is a javascript reserved word"
             codemsg "class #{kw}"     "#{kw} is a javascript reserved word"
 
-        # 'in' is the odd one out in this section. it is a keyword and an
-        # operator, so the reserved word check does not see it - this one
-        # gets there by a different route entirely. 'log in' was rendering as
-        # '_k_.in(log,)': the helper called with one argument, which node
-        # accepts and which means nothing. only the check in @incond can tell,
-        # and it is about the missing right operand rather than the word
-
         codemsg 'log in'            'in is missing a right operand'
         codemsg 'a in'              'in is missing a right operand'
 
-        # 'super.a' is not here and will not be. 'super' is on the same
-        # footing as 'new' and 'delete': a kode construct the compiler cannot
-        # refuse, because 'super screen name features' is how every subclass
-        # in this repo opens its constructor. 'super' and 'super.a' are the
-        # same token followed by something, so telling them apart is not a
-        # thing this check can do. it is in error_todo.
-
     ▸ a reserved word is still a kode keyword
-
-        # the words above that kode has its own meaning for. a bare 'class'
-        # is not a reserved word complaint, it is a class with no name - and
-        # that check has always been right. what was wrong was beside it: a
-        # newline counts as a name as far as @class could tell, so 'class\n'
-        # and 'class \n' took the line ending as the name and rendered an
-        # empty class
 
         codemsg 'class\n'           'class is missing a name'
         codemsg 'class \n'          'class is missing a name'
         codemsg 'undefined class\n'  'class is missing a name'
 
-        # and 'while' with nothing to test has nothing to say for itself
-        # either - it was rendering as 'while ()'
-
         codemsg 'while'             'while is missing a condition'
 
     ▸ a keyword with no operand
-
-        # every one of these is a javascript reserved word, or a kode keyword
-        # that renders as one: 'else' after an if, 'catch' after a try, 'in'
-        # after whatever is being iterated, 'extends' inside a class, 'when'
-        # inside a switch. the parser for the construct that goes with them
-        # is what normally eats them, so reaching the head of an expression
-        # means that construct is not there. left alone they render as
-        # themselves and node gets a word it cannot parse.
-        #
-        # what happens to be in front of the word does not change that. a
-        # value in front of it is not the missing if, and a finished
-        # statement on the line before is not the missing try or switch - so
-        # 'a else' and an 'else' on a line of its own are the same mistake
-        # as a bare one
 
         codemsg 'await'             'await is missing an operand'
         codemsg 'catch'             'catch is missing an operand'
@@ -414,146 +307,73 @@ plain = c ->
 
     ▸ switch with an empty when
 
-        # 'else' is the one keyword that can head a switch branch of its own,
-        # so a switch without a when is a switch with nothing in it but an
-        # else and no condition. a when, on the other hand, is a branch, and
-        # a branch has to test something
-
-        codemsg 'switch x\n    when'   'when is missing an operand'
+        codemsg 'switch x\n    when'    'when is missing an operand'
 
     ▸ try needs a catch or a finally
 
-        # a try with neither compiles to a try node with two holes in it,
-        # which node reads as a try with an empty block. either half does
-        # the job - kode only wants to know there is something to catch
-
-        codemsg 'try'                  'try is missing catch or finally'
-        codemsg 'try a'                'try is missing catch or finally'
-        codemsg 'try ->'               'try is missing catch or finally'
-        codemsg 'try\n    a'          'try is missing catch or finally'
-        codemsg 'try """triple"'      'try is missing catch or finally'
-        codemsg '-> try'               'try is missing catch or finally'
-        codemsg 'a try'                'try is missing catch or finally'
+        codemsg 'try'               'try is missing catch or finally'
+        codemsg 'try a'             'try is missing catch or finally'
+        codemsg 'try ->'            'try is missing catch or finally'
+        codemsg 'try\n    a'        'try is missing catch or finally'
+        codemsg 'try """triple"'    'try is missing catch or finally'
+        codemsg '-> try'            'try is missing catch or finally'
+        codemsg 'a try'             'try is missing catch or finally'
 
     ▸ assert has nothing to assert
 
-        # '▴' is a callee and never a value. on its own it has no argument
-        # to test, and after a value it is not an argument to anything - it
-        # was being taken as one, and the call rendered with a '▴' in it
-
-        codemsg '▴'                   'assert is missing what to assert'
-        codemsg 'a ▴'                 'assert is missing what to assert'
+        codemsg '▴'                 'assert is missing what to assert'
+        codemsg 'a ▴'               'assert is missing what to assert'
         codemsg "'s' ▴"             'assert is missing what to assert'
         codemsg '"str" ▴'           'assert is missing what to assert'
 
     ▸ a javascript operator that is not a kode operator
 
-        # twelve of these are the javascript spelling of an operator kode
-        # has under another name, and the renderer already emits the
-        # javascript one: 'a == b' comes out as 'a === b' and 'a and b' comes
-        # out as 'a && b'. so none of them is broken kode wanting a fix -
-        # it is a second spelling for something that already works, and the
-        # message names the spelling to use instead.
-        #
-        # 'a === b' used to compile to 'a === =\nb' and stop there, because
-        # '===' is not in Patterns.op: the lexer made '==' and then '=', and
-        # the renderer put them back together with a space in the wrong place.
-        # the check is in the lexer rather than in the parser because the
-        # lexer is the only place that still knows the two were written next
-        # to each other - by the time there are two tokens that is gone
+        codemsg 'a === b'           '=== is not a kode operator - == is'
+        codemsg 'a !== b'           '!== is not a kode operator - != is'
+        codemsg 'a && b'            '&& is not a kode operator - and is'
+        codemsg 'a || b'            '|| is not a kode operator - or is'
+        codemsg 'x = a && b'        '&& is not a kode operator - and is'
+        codemsg 'a === 1'           '=== is not a kode operator - == is'
 
-        codemsg 'a === b'             '=== is not a kode operator - == is'
-        codemsg 'a !== b'             '!== is not a kode operator - != is'
-        codemsg 'a && b'              '&& is not a kode operator - and is'
-        codemsg 'a || b'              '|| is not a kode operator - or is'
-        codemsg 'x = a && b'          '&& is not a kode operator - and is'
-        codemsg 'a === 1'             '=== is not a kode operator - == is'
+        codemsg 'a <<= b'           '<<= is not a kode operator'
+        codemsg 'a >>= b'           '>>= is not a kode operator'
+        codemsg 'a >>>= b'          '>>>= is not a kode operator'
+        codemsg 'a **= b'           '**= is not a kode operator'
 
-        # the compound assignments have no spelling to point at. '<<=' is
-        # '<<' and '=' that javascript joins and kode does not, so the
-        # message stops at saying that it is not one
+        codemsg 'a &&= b'           '&& is not a kode operator - and is'
+        codemsg 'a ||= b'           '|| is not a kode operator - or is'
 
-        codemsg 'a <<= b'             '<<= is not a kode operator'
-        codemsg 'a >>= b'             '>>= is not a kode operator'
-        codemsg 'a >>>= b'            '>>>= is not a kode operator'
-        codemsg 'a **= b'             '**= is not a kode operator'
+        codemsg 'a &^ b'            '&^ is not a javascript operator'
 
-        # '&&=' and '||=' name the spelling of the operator in them even
-        # though there is no compound form to write instead - 'and' and 'or'
-        # are what the operator is called, and that part is the answer
-
-        codemsg 'a &&= b'             '&& is not a kode operator - and is'
-        codemsg 'a ||= b'             '|| is not a kode operator - or is'
-
-        # '&^' is not a javascript operator at all. it is go's 'and not', and
-        # it was rendering as 'a & ^ b', which node reads as 'a & (~b)':
-        # valid, and not what anyone meant
-
-        codemsg 'a &^ b'              '&^ is not a javascript operator'
-
-        # and the operators kode does have are untouched, including the ones
-        # that share a prefix with the ones above
-
-        kc  'a == b'    ▸ 'a === b'
-        kc  'a != b'    ▸ 'a !== b'
-        kc  'a and b'   ▸ 'a && b'
-        kc  'a or b'    ▸ 'a || b'
-        kc  'a << b'    ▸ 'a << b'
-        kc  'a >> b'    ▸ 'a >> b'
-        kc  'a >>> b'   ▸ 'a >>> b'
-        kc  'a ** b'    ▸ 'a ** b'
-        kc  'a <= b'    ▸ 'a <= b'
-        kc  'a >= b'    ▸ 'a >= b'
-        kc  'a += 1'    ▸ 'a += 1'
+        kc  'a == b'                ▸ 'a === b'
+        kc  'a != b'                ▸ 'a !== b'
+        kc  'a and b'               ▸ 'a && b'
+        kc  'a or b'                ▸ 'a || b'
+        kc  'a << b'                ▸ 'a << b'
+        kc  'a >> b'                ▸ 'a >> b'
+        kc  'a >>> b'               ▸ 'a >>> b'
+        kc  'a ** b'                ▸ 'a ** b'
+        kc  'a <= b'                ▸ 'a <= b'
+        kc  'a >= b'                ▸ 'a >= b'
+        kc  'a += 1'                ▸ 'a += 1'
 
     ▸ a glyph on its own
 
-        # '■', '▪', '◆' and '▸' are markers, and each one means something in
-        # exactly one position: '▪' separates the module from the names in a
-        # use, '◆' separates a use from what it brings in, '▸' with a space
-        # after it starts a test section, and '■' is not in the language at
-        # all. every one of them in this repo is inside a string, as a
-        # character for kermit or for ked to look at.
-        #
-        # they all have a token type and nothing interprets it - grep the
-        # compiler for 'right', 'square' and 'diamond' and the only hits are
-        # the lexer patterns themselves - so they were falling through into
-        # the output as themselves and node was reading the character.
-        #
-        # '■' gets its own wording because it is the odd one: the other three
-        # mark something and are missing what they mark, and this one marks
-        # nothing that kode has
+        codemsg '■'                 '■ is not a kode character'
+        codemsg '▪'                 '▪ is missing what it goes with'
+        codemsg '▸'                 '▸ is missing what it goes with'
+        codemsg "'s' ■"             '■ is not a kode character'
+        codemsg '(x) ▪'             '▪ is missing what it goes with'
 
-        codemsg '■'                   '■ is not a kode character'
-        codemsg '▪'                   '▪ is missing what it goes with'
-        codemsg '▸'                   '▸ is missing what it goes with'
-        codemsg "'s' ■"               '■ is not a kode character'
-        codemsg '(x) ▪'               '▪ is missing what it goes with'
+        codemsg '◆'                 '◆ is missing what it calls'
+        codemsg '"str" ◆'           '◆ is missing what it calls'
 
-        # '◆' is not in this list. it has three uses and every one of them
-        # is real: 'use ◆ name' names what a use brings in, '◆main' is the
-        # entry point of a module, and '◆dir f' is an implicit call. all
-        # three want something after the '◆', and a bare one wants what it
-        # calls. the build found this the hard way - '◆dir' and '◆main' are
-        # in ked and in the compiler's own entry points
+        kc  'use ./utils ▪ kc'      ▸ 'import utils from "./utils.js"\nlet kc = utils.kc\n'
+        kc  'use ◆ print'           ▸ 'import print from "./print.js"\n'
+        kc  '◆dir f'                ▸ '_k_.dir()(f)'
 
-        codemsg '◆'                   '◆ is missing what it calls'
-        codemsg '"str" ◆'             '◆ is missing what it calls'
-
-        # and the places they do mean something are untouched
-
-        kc  'use ./utils ▪ kc'   ▸ 'import utils from "./utils.js"\nlet kc = utils.kc\n'
-        kc  'use ◆ print'        ▸ 'import print from "./print.js"\n'
-        kc  '◆dir f'            ▸ '_k_.dir()(f)'
-
-        # '○' is 'await' written the short way, and '○ a' is fine - so what a
-        # bare one is missing is the operand, not the operator. the message
-        # names the word the way the '▴' above names assert. the check is in
-        # the block that looks at a token on its own, and 'await' is a token
-        # type that block was not reading
-
-        codemsg '○'                   'await is missing an operand'
-        codemsg 'a ○'                 'await is missing an operand'
+        codemsg '○'                 'await is missing an operand'
+        codemsg 'a ○'               'await is missing an operand'
 
     ▸ a block where an expression belongs
 
@@ -573,107 +393,69 @@ plain = c ->
 
     ▸ postfix needs something assignable
 
-        codemsg '1++'    '++ is missing a variable to increment'
-        codemsg '1--'    '-- is missing a variable to increment'
-        codemsg '"s"++'  '++ is missing a variable to increment'
-        codemsg '"s"--'  '-- is missing a variable to increment'
+        codemsg '1++'               '++ is missing a variable to increment'
+        codemsg '1--'               '-- is missing a variable to increment'
+        codemsg '"s"++'             '++ is missing a variable to increment'
+        codemsg '"s"--'             '-- is missing a variable to increment'
 
-        # an array or an object is not something node can assign to. this is
-        # the same line node draws, only earlier - it throws a TypeError at
-        # runtime and says nothing, and here it gets a line and a caret
+        codemsg '[a]++'             '++ is missing a variable to increment'
+        codemsg '[a]--'             '-- is missing a variable to increment'
+        codemsg '{a:1}++'           '++ is missing a variable to increment'
+        codemsg '{a:1}--'           '-- is missing a variable to increment'
 
-        codemsg '[a]++'      '++ is missing a variable to increment'
-        codemsg '[a]--'      '-- is missing a variable to increment'
-        codemsg '{a:1}++'    '++ is missing a variable to increment'
-        codemsg '{a:1}--'    '-- is missing a variable to increment'
-
-        # and a postfix with nothing in front of it is the same mistake. a
-        # bare '++' cannot be a prefix here - there is no operand in front of
-        # it - so it is a postfix with the variable left out
-
-        codemsg '++'         '++ is missing a variable to increment'
-        codemsg '--'         '-- is missing a variable to increment'
-        codemsg 'a++++'      '++ is missing a variable to increment'
-        codemsg 'a++ ++'     '++ is missing a variable to increment'
-        codemsg 'a-- --'     '-- is missing a variable to increment'
+        codemsg '++'                '++ is missing a variable to increment'
+        codemsg '--'                '-- is missing a variable to increment'
+        codemsg 'a++++'             '++ is missing a variable to increment'
+        codemsg 'a++ ++'            '++ is missing a variable to increment'
+        codemsg 'a-- --'            '-- is missing a variable to increment'
 
     ▸ the ? needs something on both sides
-
-        # '?' is a postfix: it turns what is in front of it into a
-        # conditional. at the head of an expression there is nothing in front
-        # of it, and with nothing after it the conditional has no second arm.
-        # both were rendering as a '?' standing in the output.
-        #
-        # '??' is two of them. kode has no nullish operator and does not
-        # need one, but it lexes as two '?' and the first is at the head of
-        # an expression with nothing in front of it.
 
         codemsg '?'                 '? is missing a left operand'
         codemsg '?[0]'              '? is missing a left operand'
         codemsg "? 's'"             '? is missing a left operand'
-        codemsg 'a ??'             '? is missing a left operand'
+        codemsg 'a ??'              '? is missing a left operand'
         codemsg '??'                '? is missing a left operand'
         codemsg 'a = ?'             '? is missing a left operand'
 
         codemsg 'a ?'               '? is missing a right operand'
         codemsg 'f ?'               '? is missing a right operand'
-        codemsg "'s' ?"            '? is missing a right operand'
+        codemsg "'s' ?"             '? is missing a right operand'
         codemsg '(x) ?'             '? is missing a right operand'
         codemsg 'f a ?'             '? is missing a right operand'
-
-        # 'a ? b :' has its '?' and something to test, and stops at the colon
 
         codemsg 'a ? b :'           ': is missing a right operand'
 
     ▸ a property chain on the next line
 
-        # 'a' and a line under it that starts with a dot is one expression,
-        # not a call with a dot in the arguments. the block was being taken
-        # as an argument first - the branch that takes a block as arguments
-        # already knew to leave a 'then' and a 'when' one alone, and a '.'
-        # belongs in that list too
-
-        kc  'a\n    .b'            ▸ 'a.b'
-        kc  'a\n    .b.c'          ▸ 'a.b.c'
-        kc  'a\n    .b()'         ▸ 'a.b()'
+        kc  'a\n    .b'             ▸ 'a.b'
+        kc  'a\n    .b.c'           ▸ 'a.b.c'
+        kc  'a\n    .b()'           ▸ 'a.b()'
         kc  'x = a\n    .b\n    .c' ▸ 'x = a.b.c'
-
-        # and the blocked call it was shadowing still is one
-
-        kc  'f\n    a'        ▸ 'f(a)'
-        kc  'f\n    a\n    b' ▸ 'f(a,b)'
+        kc  'f\n    a'              ▸ 'f(a)'
+        kc  'f\n    a\n    b'       ▸ 'f(a,b)'
 
     ▸ use has one module and one list
 
-        codemsg 'use'                        'use is missing what to use'
-        codemsg 'use a ◆ b ▪ c'              'use has a dangling token'
-        codemsg 'use a ▪ b ▪ c ◆ d'          'use has a dangling token'
-        codemsg 'use a ◆ b ◆ c'              'use has a dangling token'
-
-        # a use takes its names from one list or the other. 'use a ◆ b ▪ c'
-        # has both, and the one after the other is the dangling half -
-        # 'use a ▪ b ◆ c' got through because the diamond branch did not
-        # look back at what the list had already collected
-
-        codemsg 'use a ▪ b ◆ c'            'use has a dangling token'
-
-        # and a list is names, so a '.' in one is not a name. it used to be
-        # taken as a var and rendered as 'let . = kxk..'
-
+        codemsg 'use'                       'use is missing what to use'
+        codemsg 'use a ◆ b ▪ c'             'use has a dangling token'
+        codemsg 'use a ▪ b ▪ c ◆ d'         'use has a dangling token'
+        codemsg 'use a ◆ b ◆ c'             'use has a dangling token'
+        codemsg 'use a ▪ b ◆ c'             'use has a dangling token'
         codemsg 'use ../../../kxk ▪ slse .' 'use has a dangling token'
 
     ▸ use with nothing after it
 
-        codemsg 'a use'                      'use is missing what to use'
-        codemsg 'if use'                     'use is missing what to use'
-        codemsg 'd use\n'                    'use is missing what to use'
-        codemsg 't use\n'                    'use is missing what to use'
-        codemsg 't use \n'                   'use is missing what to use'
-        codemsg 't use  \n'                  'use is missing what to use'
-        codemsg '@\n use\n'                  'use is missing what to use'
-        codemsg 'b\n use\n'                  'use is missing what to use'
-        codemsg 'g  use\n'                   'use is missing what to use'
-        codemsg 'm\n use\n'                  'use is missing what to use'
+        codemsg 'a use'             'use is missing what to use'
+        codemsg 'if use'            'use is missing what to use'
+        codemsg 'd use\n'           'use is missing what to use'
+        codemsg 't use\n'           'use is missing what to use'
+        codemsg 't use \n'          'use is missing what to use'
+        codemsg 't use  \n'         'use is missing what to use'
+        codemsg '@\n use\n'         'use is missing what to use'
+        codemsg 'b\n use\n'         'use is missing what to use'
+        codemsg 'g  use\n'          'use is missing what to use'
+        codemsg 'm\n use\n'         'use is missing what to use'
 
     ▸ unreachable code
 
