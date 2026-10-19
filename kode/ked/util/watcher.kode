@@ -35,6 +35,8 @@ function watcher
             error "watcher.watch - can't watch empty path!"
             ⮐  
         
+        # log "watcher ○○ #{y6 path}"
+        
         path = slash.untilde path
                 
         isDir =○ nfs.isDir path
@@ -84,7 +86,9 @@ function watcher
                     watcher.watch item.path
         
     @onChange: change path dir ○=>
-        
+    
+        log "watcher.onChange ○ #{y6(dir)} #{b5(path)}" if path != "ked.log"
+    
         path = slash.path dir path
 
         exists =○ nfs.exists path

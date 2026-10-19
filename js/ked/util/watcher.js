@@ -1,4 +1,4 @@
-var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}};_k_.r6=_k_.k.F256(_k_.k.r(6))
+var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}};_k_.r6=_k_.k.F256(_k_.k.r(6));_k_.b5=_k_.k.F256(_k_.k.b(5));_k_.y6=_k_.k.F256(_k_.k.y(6))
 
 var watcher
 
@@ -31,7 +31,7 @@ watcher = (function ()
 
     watcher["watch"] = async function (path, opt)
     {
-        var dir, isDir, item, items, prjPath, w, _43_22_
+        var dir, isDir, item, items, prjPath, w, _45_22_
 
         if (_k_.empty(path))
         {
@@ -41,7 +41,7 @@ watcher = (function ()
         path = slash.untilde(path)
         isDir = await nfs.isDir(path)
         opt = (opt != null ? opt : {})
-        opt.recursive = ((_43_22_=opt.recursive) != null ? _43_22_ : true)
+        opt.recursive = ((_45_22_=opt.recursive) != null ? _45_22_ : true)
         if (isDir)
         {
             dir = path
@@ -123,6 +123,10 @@ watcher = (function ()
     {
         var exists
 
+        if (path !== "ked.log")
+        {
+            console.log(`watcher.onChange ○ ${_k_.y6(dir)} ${_k_.b5(path)}`)
+        }
         path = slash.path(dir,path)
         exists = await nfs.exists(path)
         if (exists)
@@ -176,5 +180,5 @@ watcher = (function ()
 
 export default watcher;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoid2F0Y2hlci5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdXRpbC93YXRjaGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7WUE0QlcsYUFBUSxJQUFJLFdBQVc7O21CQUN0QixLQUFDLFVBQVUsUUFBUTs7Ozs7Ozs7c0JBSWQ7O1lBQ0wsY0FBTTs7O1FBR1YsT0FBTyxNQUFNLFFBQVE7UUFFckIsY0FBUyxJQUFJLE1BQU07UUFFbkIsT0FBQSxjQUFBO1FBQ0EsSUFBSSxzQkFBSixJQUFJLCtCQUFhO1lBRWQ7O1lBQ0MsTUFBTTs7OztZQUVOLGdCQUFXLElBQUksSUFBSTswQkFFVixRQUFRLFNBQVM7O2dCQUV0QixJQUFJLEdBQUcsTUFBTTtnQkFDYixFQUFFLEdBQUc7O29CQUFpQiw2QkFBcUIsZ0JBQWdCOztnQkFDM0QsRUFBRSxHQUFHOzs7OytCQUFvQyxLQUFDLFNBQVMsT0FBTyxLQUFLOzsrQkFBTSxNQUFNLElBQUk7Z0JBQy9FLFFBQVEsU0FBUyxRQUFROzswQkFFcEI7O2dCQUNMLHdCQUFZOzs7Z0JBR2IsWUFBVzs7Z0JBQ1YsTUFBTTs7OztnQkFFTixNQUFNLE1BQU0sSUFBSTs7O3NCQUVmLFFBQVEsU0FBUzs7Z0JBRUcsUUFBTyxPQUFPLFFBQU8sTUFBTSxRQUFROztnQkFBNUQsSUFBSSxZQUFZOztZQUloQixJQUFJLEdBQUcsTUFBTTtZQUNiLEVBQUUsR0FBRzs7Z0JBQWlCLDRCQUFvQixlQUFlOztZQUN6RCxFQUFFLEdBQUc7Ozs7MkJBQW9DLEtBQUMsU0FBUyxPQUFPLEtBQUs7OzJCQUFNO1lBQ3JFLFFBQVEsU0FBUyxPQUFPO2lCQUVkLElBQUk7Ozs7WUFFZCxjQUFTLElBQUksS0FBSztnQ0FDTjs7OztvQkFDTCxLQUFLLFNBQVE7OytCQUNULEtBQUssTUFBUyxlQUFlOzt3QkFDNUI7O29CQUNKLFFBQVEsTUFBTSxLQUFLOzs7Ozs7Ozs7O1FBSS9CLE9BQU8sTUFBTSxLQUFLLElBQUk7UUFFdEIsZUFBVSxJQUFJLE9BQU87WUFFbEI7O2dCQUNJLFdBQVU7O29CQUVOLEtBQUMsWUFBWTs7b0JBQ1osYUFBYSxLQUFDLFlBQVk7MkJBQ25CLEtBQUMsWUFBWTs7OztvQkFFcEIsS0FBQyxZQUFZLFFBQVE7Ozs7bUNBQXNCLEtBQUMsV0FBVzs7bUNBQUcsTUFBTTs7OztnQkFHckUsV0FBVTs7cUJBQ04sS0FBQyxVQUFVOzt3QkFDUCxLQUFDLFVBQVUsTUFBTSxTQUFRLE9BQU8sUUFBUyxLQUFDLFVBQVUsTUFBTSxZQUFXLE9BQU87Ozs7OzttQkFHdkYsS0FBSyxLQUFLLGVBQWMsS0FBSyxLQUFLLE9BQU8sT0FBUyxRQUFROzs7O21CQUUxRCxLQUFLLEtBQUssZUFBYyxLQUFLLEtBQUssT0FBTyxTQUFTLFFBQVE7Ozs7OztRQUk5RCxhQUFhLEtBQUMsWUFBWTtlQUNuQixLQUFDLFlBQVk7ZUFDcEIsS0FBSyxLQUFLLGVBQWMsS0FBSyxLQUFLLE9BQU8sU0FBUyxRQUFROzs7Ozs7ZUFFM0QifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoid2F0Y2hlci5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdXRpbC93YXRjaGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7WUE0QlcsYUFBUSxJQUFJLFdBQVc7O21CQUN0QixLQUFDLFVBQVUsUUFBUTs7Ozs7Ozs7c0JBSWQ7O1lBQ0wsY0FBTTs7O1FBS1YsT0FBTyxNQUFNLFFBQVE7UUFFckIsY0FBUyxJQUFJLE1BQU07UUFFbkIsT0FBQSxjQUFBO1FBQ0EsSUFBSSxzQkFBSixJQUFJLCtCQUFhO1lBRWQ7O1lBQ0MsTUFBTTs7OztZQUVOLGdCQUFXLElBQUksSUFBSTswQkFFVixRQUFRLFNBQVM7O2dCQUV0QixJQUFJLEdBQUcsTUFBTTtnQkFDYixFQUFFLEdBQUc7O29CQUFpQiw2QkFBcUIsZ0JBQWdCOztnQkFDM0QsRUFBRSxHQUFHOzs7OytCQUFvQyxLQUFDLFNBQVMsT0FBTyxLQUFLOzsrQkFBTSxNQUFNLElBQUk7Z0JBQy9FLFFBQVEsU0FBUyxRQUFROzswQkFFcEI7O2dCQUNMLHdCQUFZOzs7Z0JBR2IsWUFBVzs7Z0JBQ1YsTUFBTTs7OztnQkFFTixNQUFNLE1BQU0sSUFBSTs7O3NCQUVmLFFBQVEsU0FBUzs7Z0JBRUcsUUFBTyxPQUFPLFFBQU8sTUFBTSxRQUFROztnQkFBNUQsSUFBSSxZQUFZOztZQUloQixJQUFJLEdBQUcsTUFBTTtZQUNiLEVBQUUsR0FBRzs7Z0JBQWlCLDRCQUFvQixlQUFlOztZQUN6RCxFQUFFLEdBQUc7Ozs7MkJBQW9DLEtBQUMsU0FBUyxPQUFPLEtBQUs7OzJCQUFNO1lBQ3JFLFFBQVEsU0FBUyxPQUFPO2lCQUVkLElBQUk7Ozs7WUFFZCxjQUFTLElBQUksS0FBSztnQ0FDTjs7OztvQkFDTCxLQUFLLFNBQVE7OytCQUNULEtBQUssTUFBUyxlQUFlOzt3QkFDNUI7O29CQUNKLFFBQVEsTUFBTSxLQUFLOzs7Ozs7Ozs7O1lBSW9CLFNBQVE7O1lBQTNELHlDQUE2QixlQUFXOztRQUV4QyxPQUFPLE1BQU0sS0FBSyxJQUFJO1FBRXRCLGVBQVUsSUFBSSxPQUFPO1lBRWxCOztnQkFDSSxXQUFVOztvQkFFTixLQUFDLFlBQVk7O29CQUNaLGFBQWEsS0FBQyxZQUFZOzJCQUNuQixLQUFDLFlBQVk7Ozs7b0JBRXBCLEtBQUMsWUFBWSxRQUFROzs7O21DQUFzQixLQUFDLFdBQVc7O21DQUFHLE1BQU07Ozs7Z0JBR3JFLFdBQVU7O3FCQUNOLEtBQUMsVUFBVTs7d0JBQ1AsS0FBQyxVQUFVLE1BQU0sU0FBUSxPQUFPLFFBQVMsS0FBQyxVQUFVLE1BQU0sWUFBVyxPQUFPOzs7Ozs7bUJBR3ZGLEtBQUssS0FBSyxlQUFjLEtBQUssS0FBSyxPQUFPLE9BQVMsUUFBUTs7OzttQkFFMUQsS0FBSyxLQUFLLGVBQWMsS0FBSyxLQUFLLE9BQU8sU0FBUyxRQUFROzs7Ozs7UUFJOUQsYUFBYSxLQUFDLFlBQVk7ZUFDbkIsS0FBQyxZQUFZO2VBQ3BCLEtBQUssS0FBSyxlQUFjLEtBQUssS0FBSyxPQUFPLFNBQVMsUUFBUTs7Ozs7O2VBRTNEIn0=
 //# sourceURL=file://kode/ked/util/watcher.kode
