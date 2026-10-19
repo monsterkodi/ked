@@ -1,9 +1,9 @@
 ###
-    ███   ███  ████████   ███████  
-    ████  ███  ███       ███       
-    ███ █ ███  ██████    ███████   
-    ███  ████  ███            ███  
-    ███   ███  ███       ███████   
+    ███   ███  ████████   ███████   
+    ████  ███  ███       ███        
+    ███ █ ███  ██████    ███████    
+    ███  ████  ███            ███   
+    ███   ███  ███       ███████    
 ###
 
 use ◆ slash
@@ -13,20 +13,20 @@ use child_process
 import fsp from 'fs/promises'
 
 class NFS
-    
-    # ███████    ███  ████████   ███      ███   ███████  █████████  
-    # ███   ███  ███  ███   ███  ███      ███  ███          ███     
-    # ███   ███  ███  ███████    ███      ███  ███████      ███     
-    # ███   ███  ███  ███   ███  ███      ███       ███     ███     
-    # ███████    ███  ███   ███  ███████  ███  ███████      ███     
-    
+     
+    # ███████    ███  ████████   ███      ███   ███████  █████████   
+    # ███   ███  ███  ███   ███  ███      ███  ███          ███      
+    # ███   ███  ███  ███████    ███      ███  ███████      ███      
+    # ███   ███  ███  ███   ███  ███      ███       ███     ███      
+    # ███████    ███  ███   ███  ███████  ███  ███████      ███      
+     
     @listdir: dir opt ○->
-        
+         
         opt ?= {}
         opt.recursive ?= true
         opt.found ?= []
         opt.ignoreDirs ?= []
-        
+         
         dir =○ NFS.resolveSymlink dir
         
         # log 'nfs.listdir' dir
@@ -34,37 +34,37 @@ class NFS
         dirents =○ fsp.readdir dir withFileTypes:true
         
         for dirent in dirents
-    
+
             file     = dirent.name
             isDir    = dirent.isDirectory()
             absPath  = slash.path dir file
             resolved = undefined
-            
+             
             if dirent.isSymbolicLink()
                 resolved =○ fsp.readlink absPath
                 if not slash.isAbsolute resolved
                     resolved = slash.path dir resolved
                 # log 'symlink' absPath resolved
                 isDir =○ @isDir resolved
-            
+             
             if isDir # is it a good idea to hardcode this here?
                 continue if file in ['node_modules' '.git']
                 continue if file in opt.ignoreDirs
                 continue if absPath in ['/Users/Shared']
             else 
                 continue if file in ['.DS_Store' '.localized']
-            
+             
             # log "nfs.list #{absPath}"
             
             opt.found.push
                 type: isDir ? 'dir' : 'file'
                 file: file
                 path: absPath
-                
+                 
             opt.found[-1].link = resolved if resolved
-            
+             
             if isDir and opt.recursive
-    
+
                 ○ NFS.listdir absPath opt
         
         opt.found.sort (a b) -> a.path.localeCompare b.path # if not opt.recursive
@@ -74,11 +74,11 @@ class NFS
     @dirlist: NFS.listdir
     
     @resolveSymlink: p ○->
-        
+         
         if not p is str
             error "nfs.resolveSymlink needs a string! #{p}"
             ⮐  p
-        
+         
         stat =○ fsp.lstat p
         if stat.isSymbolicLink()
             r =○ fsp.readlink p
@@ -87,25 +87,25 @@ class NFS
             ⮐  r
         p
     
-    # ████████   ████████   ███████   ███████    
-    # ███   ███  ███       ███   ███  ███   ███  
-    # ███████    ███████   █████████  ███   ███  
-    # ███   ███  ███       ███   ███  ███   ███  
-    # ███   ███  ████████  ███   ███  ███████    
-    
+    # ████████   ████████   ███████   ███████     
+    # ███   ███  ███       ███   ███  ███   ███   
+    # ███████    ███████   █████████  ███   ███   
+    # ███   ███  ███       ███   ███  ███   ███   
+    # ███   ███  ████████  ███   ███  ███████     
+     
     @read: p ○-> 
         
         try
             ○ fsp.readFile p 'utf8'
         catch err
             ''
-            
-    # ███   ███  ████████   ███  █████████  ████████  
-    # ███ █ ███  ███   ███  ███     ███     ███       
-    # █████████  ███████    ███     ███     ███████   
-    # ███   ███  ███   ███  ███     ███     ███       
-    # ██     ██  ███   ███  ███     ███     ████████  
-    
+         
+    # ███   ███  ████████   ███  █████████  ████████   
+    # ███ █ ███  ███   ███  ███     ███     ███        
+    # █████████  ███████    ███     ███     ███████    
+    # ███   ███  ███   ███  ███     ███     ███        
+    # ██     ██  ███   ███  ███     ███     ████████   
+     
     @mode: p ○->
         
         ⮐ if empty p
@@ -128,7 +128,7 @@ class NFS
         try
             ○ fsp.mkdir dir recursive:true
             if ○ fsp.access dir fs.constants.W_OK ➜ ⮐ error: "can't access #{dir}"
-            
+             
             tmp = slash.tmpsib file # sibling temp, so the rename cannot cross a filesystem
             
             if ○ fsp.writeFile tmp text           ➜ ⮐ error: "can't write #{tmp}"
@@ -137,26 +137,26 @@ class NFS
             file
         catch err
             ⮐ error: "nfs.write -- #{String(err)}"
-            
-    # ███  ███   ███  ████████   ███████   
-    # ███  ████  ███  ███       ███   ███  
-    # ███  ███ █ ███  ██████    ███   ███  
-    # ███  ███  ████  ███       ███   ███  
-    # ███  ███   ███  ███        ███████   
-    
+         
+    # ███  ███   ███  ████████   ███████    
+    # ███  ████  ███  ███       ███   ███   
+    # ███  ███ █ ███  ██████    ███   ███   
+    # ███  ███  ████  ███       ███   ███   
+    # ███  ███   ███  ███        ███████    
+     
     @info: p ○->
         
         try
             ⮐  ○ fsp.stat p
         catch err
             error "nfs.info -- " + String(err)
-            
+         
     # ██     ██  ███   ███  ███████    ███  ████████   
     # ███   ███  ███  ███   ███   ███  ███  ███   ███  
     # █████████  ███████    ███   ███  ███  ███████    
     # ███ █ ███  ███  ███   ███   ███  ███  ███   ███  
     # ███   ███  ███   ███  ███████    ███  ███   ███  
-    
+     
     @mkdir: p ○->
         
         try
@@ -165,133 +165,133 @@ class NFS
             if err.code != 'EEXIST'
                 ⮐ error: "nfs.mkdir -- #{String(err)}"
         p
-        
+     
     # ████████  ███   ███  ███   ███████  █████████   ███████  
     # ███        ███ ███   ███  ███          ███     ███       
     # ███████     █████    ███  ███████      ███     ███████   
     # ███        ███ ███   ███       ███     ███          ███  
     # ████████  ███   ███  ███  ███████      ███     ███████   
-    
+     
     @exists: p ○->
         
         try
             ⮐  if not p?
             p = slash.absolute slash.removeLinePos(p) process.cwd()
             ○ fsp.stat p
-                            
+                              
         catch err
            null
-           
+            
     # █████████  ███   ███  ████████   ████████  
     #    ███      ███ ███   ███   ███  ███       
     #    ███       █████    ████████   ███████   
     #    ███        ███     ███        ███       
     #    ███        ███     ███        ████████  
-    
+     
     @type: p ○->
         
         if stat =○ NFS.exists p
             stat.isFile() ? 'file' : 'dir'
-                
-    # ████████  ███  ███      ████████  ████████  ███   ███  ███   ███████  █████████   ███████  
-    # ███       ███  ███      ███       ███        ███ ███   ███  ███          ███     ███       
-    # ██████    ███  ███      ███████   ███████     █████    ███  ███████      ███     ███████   
-    # ███       ███  ███      ███       ███        ███ ███   ███       ███     ███          ███  
-    # ███       ███  ███████  ████████  ████████  ███   ███  ███  ███████      ███     ███████   
-    
+                 
+    # ████████  ███  ███      ████████  ████████  ███   ███  ███   ███████  █████████   ███████   
+    # ███       ███  ███      ███       ███        ███ ███   ███  ███          ███     ███        
+    # ██████    ███  ███      ███████   ███████     █████    ███  ███████      ███     ███████    
+    # ███       ███  ███      ███       ███        ███ ███   ███       ███     ███          ███   
+    # ███       ███  ███████  ████████  ████████  ███   ███  ███  ███████      ███     ███████    
+     
     @fileExists: p ○->
         
         stat =○ NFS.exists p
         stat if stat?.isFile()
         
     @isFile: p ○-> NFS.fileExists p
-                
+                 
     # ███████    ███  ████████   ████████  ███   ███  ███   ███████  █████████   ███████  
     # ███   ███  ███  ███   ███  ███        ███ ███   ███  ███          ███     ███       
     # ███   ███  ███  ███████    ███████     █████    ███  ███████      ███     ███████   
     # ███   ███  ███  ███   ███  ███        ███ ███   ███       ███     ███          ███  
     # ███████    ███  ███   ███  ████████  ███   ███  ███  ███████      ███     ███████   
-    
+     
     @dirExists: p ○->
 
         stat =○ NFS.exists p
         stat if stat?.isDirectory()
         
     @isDir: p ○-> NFS.dirExists p
-        
-    # ████████   ████████  ██     ██   ███████   ███   ███  ████████  
-    # ███   ███  ███       ███   ███  ███   ███  ███   ███  ███       
-    # ███████    ███████   █████████  ███   ███   ███ ███   ███████   
-    # ███   ███  ███       ███ █ ███  ███   ███     ███     ███       
-    # ███   ███  ████████  ███   ███   ███████       █      ████████  
-    
+     
+    # ████████   ████████  ██     ██   ███████   ███   ███  ████████   
+    # ███   ███  ███       ███   ███  ███   ███  ███   ███  ███        
+    # ███████    ███████   █████████  ███   ███   ███ ███   ███████    
+    # ███   ███  ███       ███ █ ███  ███   ███     ███     ███        
+    # ███   ███  ████████  ███   ███   ███████       █      ████████   
+     
     @remove: p ○-> ○ fsp.rm p, force:true recursive:true
-    
-    #  ███████   ███████   ████████   ███   ███  
-    # ███       ███   ███  ███   ███   ███ ███   
-    # ███       ███   ███  ████████     █████    
-    # ███       ███   ███  ███           ███     
-    #  ███████   ███████   ███           ███     
-    
+     
+    #  ███████   ███████   ████████   ███   ███   
+    # ███       ███   ███  ███   ███   ███ ███    
+    # ███       ███   ███  ████████     █████     
+    # ███       ███   ███  ███           ███      
+    #  ███████   ███████   ███           ███      
+     
     @copy: from to ○-> 
         
         if ○ NFS.isDir to
             to = slash.path to, slash.file(from)
-          
+           
         ○ fsp.cp from, to, recursive:true
 
-    # ██     ██   ███████   ███   ███  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       
-    # █████████  ███   ███   ███ ███   ███████   
-    # ███ █ ███  ███   ███     ███     ███       
-    # ███   ███   ███████       █      ████████  
-    
+    # ██     ██   ███████   ███   ███  ████████   
+    # ███   ███  ███   ███  ███   ███  ███        
+    # █████████  ███   ███   ███ ███   ███████    
+    # ███ █ ███  ███   ███     ███     ███        
+    # ███   ███   ███████       █      ████████   
+     
     @move: from to ○-> 
         
         if ○ NFS.isDir to
             to = slash.path to, slash.file(from)
-    
+        
         if ○ NFS.exists from
             ○ fsp.rename from, to
-    
-    #  ███████   ███  █████████  
-    # ███        ███     ███     
-    # ███  ████  ███     ███     
-    # ███   ███  ███     ███     
-    #  ███████   ███     ███     
-    
+     
+    #  ███████   ███  █████████   
+    # ███        ███     ███      
+    # ███  ████  ███     ███      
+    # ███   ███  ███     ███      
+    #  ███████   ███     ███      
+     
     @git: p ○->
-    
+        
         git = slash.path p
         
         while git.length and git != "/"
-            
+           
             ⮐  git if ○ NFS.isDir(slash.path(git '.git'))
             
             git = slash.dir git
-    
-    # ████████   ███   ███   ███████   
-    # ███   ███  ███  ███   ███        
-    # ████████   ███████    ███  ████  
-    # ███        ███  ███   ███   ███  
-    # ███        ███   ███   ███████   
-    
-    @pkg: p ○->
-        
-        pkg = slash.path p
-        
-        while pkg.length and pkg != "/"
-            
-            ⮐  pkg if ○ NFS.isFile(slash.path(pkg 'package.json'))
-            
-            pkg = slash.dir pkg
-            
+     
     # ████████   ████████         ███  
     # ███   ███  ███   ███        ███  
     # ████████   ███████          ███  
     # ███        ███   ███  ███   ███  
     # ███        ███   ███   ███████   
-    
+     
+    @pkg: p ○->
+        
+        pkg = slash.path p
+        
+        while pkg.length and pkg != "/"
+           
+            ⮐  pkg if ○ NFS.isFile(slash.path(pkg 'package.json'))
+            
+            pkg = slash.dir pkg
+           
+    # ████████   ████████         ███   
+    # ███   ███  ███       ███   ███   
+    # ████████   ███████          ███   
+    # ███        ███   ███  ███   ███   
+    # ███        ███   ███   ███████    
+     
     @prj: p ○->
         
         pth = slash.path p
@@ -300,21 +300,21 @@ class NFS
             pth = slash.dir pth
         
         while pth.length and pth != "/"
-            
+           
             ⮐  pth if ○ NFS.isDir(slash.path(pth '.git'))
             ⮐  pth if ○ NFS.isFile(slash.path(pth 'package.json'))
             ⮐  pth if ○ NFS.isFile(slash.path(slash.dir(pth) 'kakao.kode')) # should be done differently at some point!
-            
+           
             pth = slash.dir pth
-            
+           
         pth
-    
-    # ████████   ████████   ███████   ███████    █████████  ████████  ███   ███  █████████  
-    # ███   ███  ███       ███   ███  ███   ███     ███     ███        ███ ███      ███     
-    # ███████    ███████   █████████  ███   ███     ███     ███████     █████       ███     
-    # ███   ███  ███       ███   ███  ███   ███     ███     ███        ███ ███      ███     
-    # ███   ███  ████████  ███   ███  ███████       ███     ████████  ███   ███     ███     
-    
+     
+    # ████████   ████████   ███████   ███████    █████████  ████████  ███   ███  █████████   
+    # ███   ███  ███       ███   ███  ███   ███     ███     ███        ███ ███      ███      
+    # ███████    ███████   █████████  ███   ███     ███     ███████     █████       ███      
+    # ███   ███  ███       ███   ███  ███   ███     ███     ███        ███ ███      ███      
+    # ███   ███  ████████  ███   ███  ███████       ███     ████████  ███   ███     ███      
+     
     @readText: p ○->
         
         text =○ NFS.read p 
@@ -323,26 +323,48 @@ class NFS
                 ⮐
         text
         
-    # █████████  ████████    ███████    ███████  ███   ███  
-    #    ███     ███   ███  ███   ███  ███       ███   ███  
-    #    ███     ███████    █████████  ███████   █████████  
-    #    ███     ███   ███  ███   ███       ███  ███   ███  
-    #    ███     ███   ███  ███   ███  ███████   ███   ███  
-    
+    # █████████  ████████    ███████    ███████  ███   ███   
+    #    ███     ███   ███  ███   ███  ███       ███   ███   
+    #    ███     ███████    █████████  ███████   █████████   
+    #    ███     ███   ███  ███   ███       ███  ███   ███   
+    #    ███     ███   ███  ███   ███  ███████   ███   ███   
+     
     @hfsPath: p ○-> # using ideas from https://github.com/johansatge/mac-trash
         
-        escapedPath = p.replace /"/g '\\\\\\"'
-        osascript = "tell application \\\"Finder\\\" to return posix file \\\"#{escapedPath}\\\""
+        escapedPath = p.replace /"/g '\\\"'
+        osascript = "tell application \\"Finder\\" to return posix file \\"#{escapedPath}\\""
         stdout =○ @exec "/usr/bin/osascript -e \"#{osascript}\""
         hfsPath = stdout.match /^file\s(.*)/
         trim hfsPath[1]
-    
-    @trash: p ○->  # using ideas from https://github.com/johansatge/mac-trash
-    
-        hfs =○ NFS.hfsPath p
-        shellCommand = "/usr/bin/osascript -l JavaScript -e \"Application('Finder').delete([\\\"#{hfs}\\\"])\""
-        @exec shellCommand
+     
+    @trash: p ○->
         
+        os = process.platform
+
+        if os == 'darwin' # using ideas from https://github.com/johansatge/mac-trash
+
+            hfs =○ NFS.hfsPath p
+            shellCommand = "/usr/bin/osascript -l JavaScript -e \"Application('Finder').delete([\"#{hfs}\"])\""
+            @exec shellCommand
+
+        else if os == 'linux'
+
+            trashPath = slash.path process.env.HOME '.local/share/Trash/files'
+            fileName = slash.file p
+            
+            try
+                ○ fsp.mkdir trashPath recursive:true
+                
+                newPath = slash.path trashPath fileName
+                ○ fsp.rename p newPath
+                ⮐ newPath
+            catch err
+                error "Failed to move to trash: #{err}"
+                ⮐ null
+        else
+            error "Trash functionality not supported on #{os}"
+            ⮐ null
+     
     @exec: cmd ○->
         
         new Promise (resolve reject) ->
@@ -354,12 +376,12 @@ class NFS
                         resolve stdout
             catch err
                 reject err
-
-    # ████████       ███  ███   ███  █████   
-    # ███   ███     ███   ███ █ ███     ███  
-    # ███████      ███    █████████   ███    
-    # ███   ███   ███     ███   ███          
-    # ███   ███  ███      ██     ██   ███    
+     
+    # ████████       ███  ███   ███  █████    
+    # ███   ███     ███   ███ █ ███     ███   
+    # ███████      ███    █████████   ███     
+    # ███   ███   ███     ███   ███           
+    # ███   ███  ███      ██     ██   ███     
         
     @isWritable: p ○->
         
@@ -376,6 +398,6 @@ class NFS
             ⮐ true
         catch err
             ⮐ false
-    
+        
 
 export NFS
