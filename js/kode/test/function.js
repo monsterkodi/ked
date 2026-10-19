@@ -4,9 +4,9 @@ let kc = utils.kc
 let ke = utils.ke
 let kd = utils.kd
 
-toExport["function"] = function ()
+toExport["function"] = async function ()
 {
-    section("basics", function ()
+    await section("basics", async function ()
     {
         compare(kc(`function A`),`
 A = (function ()
@@ -58,7 +58,7 @@ D = (function ()
 })()
 `)
     })
-    section("async", function ()
+    await section("async", async function ()
     {
         compare(kc(`function C
     @a: ○->
@@ -84,7 +84,7 @@ C = (function ()
 })()
 `)
     })
-    section("super", function ()
+    await section("super", async function ()
     {
         compare(kc(`function S
     @: -> super()`),`
@@ -117,7 +117,7 @@ S = (function ()
 })()
 `)
     })
-    section("extends", function ()
+    await section("extends", async function ()
     {
         compare(kc(`function A extends B.C
     @: -> `),`
@@ -133,7 +133,7 @@ A = (function ()
 })()
 `)
     })
-    section("old school", function ()
+    await section("old school", async function ()
     {
         compare(ke(`function T1
     @: ->

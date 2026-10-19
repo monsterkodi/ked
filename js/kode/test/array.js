@@ -3,9 +3,9 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["array"] = function ()
+toExport["array"] = async function ()
 {
-    section("index", function ()
+    await section("index", async function ()
     {
         compare(kc('a[1]'),'a[1]')
         compare(kc('a[1][2]'),'a[1][2]')
@@ -16,7 +16,7 @@ toExport["array"] = function ()
         compare(kc(';[d,k,v,e] = f'),'var _a_ = f; d = _a_[0]; k = _a_[1]; v = _a_[2]; e = _a_[3]\n')
         compare(kc('[d,k,v,e] = f'),'var _a_ = f; d = _a_[0]; k = _a_[1]; v = _a_[2]; e = _a_[3]\n')
         compare(kc('[d k v e] = f'),'var _a_ = f; d = _a_[0]; k = _a_[1]; v = _a_[2]; e = _a_[3]\n')
-        section("slice", function ()
+        await section("slice", async function ()
         {
             compare(kc('a[0..1]'),'a.slice(0, 2)')
             compare(kc('a[0...1]'),'a.slice(0, 1)')
@@ -27,13 +27,13 @@ toExport["array"] = function ()
 blocks.push block`),`blocks.slice(-1)[0].tokens.push(block)
 blocks.push(block)`)
         })
-        section("call", function ()
+        await section("call", async function ()
         {
             compare(kc('b[Math.floor n/7]'),'b[Math.floor(n / 7)]')
             compare(kc('b[Math.floor(n/7)]'),'b[Math.floor(n / 7)]')
         })
     })
-    section("range", function ()
+    await section("range", async function ()
     {
         compare(kc('[1..10]'),';[1,2,3,4,5,6,7,8,9,10]')
         compare(kc('[1...10]'),';[1,2,3,4,5,6,7,8,9]')
@@ -43,7 +43,7 @@ blocks.push(block)`)
         compare(kc('[1...100]'),`;(function() { var r = []; for (var i = 1; i < 100; i++){ r.push(i); } return r; }).apply(this)`)
         compare(kc('[-3..3]'),';[-3,-2,-1,0,1,2,3]')
     })
-    section("slice", function ()
+    await section("slice", async function ()
     {
         compare(kc("a[1..4]"),"a.slice(1, 5)")
         compare(kc("a[1...4]"),"a.slice(1, 4)")
@@ -69,7 +69,7 @@ blocks.push(block)`)
         compare(ke("'xyz'[0..]"),"xyz")
         compare(ke("'uvw'[0...]"),"uv")
     })
-    section("array", function ()
+    await section("array", async function ()
     {
         compare(kc('[1]'),';[1]')
         compare(kc('[1,2]'),';[1,2]')
@@ -98,7 +98,7 @@ blocks.push(block)`)
         compare(kc("a = [1 2 - 3 x 4 + 5 'a' b 'c']"),"a = [1,2 - 3,x,4 + 5,'a',b,'c']")
         compare(kc(`['1' "2" 3 4.5 [] {} true false null undefined NaN Infinity yes no]`),`;['1',"2",3,4.5,[],{},true,false,null,undefined,NaN,Infinity,true,false]`)
     })
-    section("objects", function ()
+    await section("objects", async function ()
     {
         compare(kc('[a:b]'),';[{a:b}]')
         compare(kc(`a = [{
@@ -121,14 +121,14 @@ blocks.push(block)`)
         compare(kc("[a:2 b:[1]]"),";[{a:2,b:[1]}]")
         compare(kc("[e:'e' a:[s:0 c:'C']]"),";[{e:'e',a:[{s:0,c:'C'}]}]")
     })
-    section("function", function ()
+    await section("function", async function ()
     {
         compare(kc('[a(-3)]'),';[a(-3)]')
         compare(kc('[a -3]'),';[a,-3]')
         compare(kc('[a-3]'),';[a - 3]')
         compare(kc('[a - 3]'),';[a - 3]')
     })
-    section("assign", function ()
+    await section("assign", async function ()
     {
         compare(kc('[l, r] = a'),'var _a_ = a; l = _a_[0]; r = _a_[1]\n')
         compare(kc('[l r] = a'),'var _a_ = a; l = _a_[0]; r = _a_[1]\n')
@@ -145,7 +145,7 @@ a`),3)
 [a a a] = a
 a`),-3)
     })
-    section("blocks", function ()
+    await section("blocks", async function ()
     {
         compare(kc(`[
     1,2

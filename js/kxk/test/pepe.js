@@ -3,9 +3,9 @@ var cb
 
 import pepe from "../pepe.js"
 
-toExport["pepe"] = function ()
+toExport["pepe"] = async function ()
 {
-    section("simple", function ()
+    await section("simple", async function ()
     {
         compare(pepe(1),[])
         compare(pepe(null),[])
@@ -14,7 +14,7 @@ toExport["pepe"] = function ()
         compare(pepe("A B C"),['A B C'])
         compare(pepe(" s p a c e "),[" s p a c e "])
     })
-    section("brackets", function ()
+    await section("brackets", async function ()
     {
         compare(pepe("()"),[{start:'(',content:[],end:')'}])
         compare(pepe("(())"),[{start:'(',content:[{start:'(',content:[],end:')'}],end:')'}])
@@ -23,16 +23,16 @@ toExport["pepe"] = function ()
         compare(pepe("A ({[B]}) C"),['A ',{start:'(',content:[{start:'{',content:[{start:'[',content:['B'],end:']'}],end:'}'}],end:')'},' C'])
         compare(pepe("A [[[B]]] C"),['A ',{start:'[',content:[{start:'[',content:[{start:'[',content:['B'],end:']'}],end:']'}],end:']'},' C'])
     })
-    section("multiple", function ()
+    await section("multiple", async function ()
     {
         compare(pepe("()[]"),[{start:'(',content:[],end:')'},{start:'[',content:[],end:']'}])
     })
-    section("nested multiple", function ()
+    await section("nested multiple", async function ()
     {
         compare(pepe("{()[]}"),[{start:'{',content:[{start:'(',content:[],end:')'},{start:'[',content:[],end:']'}],end:'}'}])
         compare(pepe("{[()()]}"),[{start:'{',content:[{start:'[',content:[{start:'(',content:[],end:')'},{start:'(',content:[],end:')'}],end:']'}],end:'}'}])
     })
-    section("unbalanced", function ()
+    await section("unbalanced", async function ()
     {
         compare(pepe("("),{unbalanced:[{content:[]},{start:'(',content:[]}]})
         compare(pepe(";(("),{unbalanced:[{content:[';']},{start:'(',content:[]},{start:'(',content:[]}]})
@@ -40,7 +40,7 @@ toExport["pepe"] = function ()
         compare(pepe(";(8)("),{unbalanced:[{content:[';',{start:'(',content:['8'],end:')'}]},{start:'(',content:[]}]})
         compare(pepe(";(8)(xxx"),{unbalanced:[{content:[';',{start:'(',content:['8'],end:')'}]},{start:'(',content:[]}],tail:'xxx'})
     })
-    section("mismatch", function ()
+    await section("mismatch", async function ()
     {
         compare(pepe("}"),{mismatch:[{content:[]}],tail:'}'})
         compare(pepe(")"),{mismatch:[{content:[]}],tail:')'})
@@ -50,7 +50,7 @@ toExport["pepe"] = function ()
         compare(pepe("(]xxx"),{mismatch:[{content:[]},{start:'(',content:[]}],tail:']xxx'})
         compare(pepe("(xxx]"),{mismatch:[{content:[]},{start:'(',content:['xxx']}],tail:']'})
     })
-    section("strings", function ()
+    await section("strings", async function ()
     {
         compare(pepe("''"),[{start:"'",content:[],end:"'"}])
         compare(pepe("'x'"),[{start:"'",content:['x'],end:"'"}])
@@ -62,7 +62,7 @@ toExport["pepe"] = function ()
         compare(pepe("'\"\"\"'"),[{start:"'",content:['"""'],end:"'"}])
         compare(pepe("str: '}])([{'"),['str: ',{start:"'",content:['}])([{'],end:"'"}])
     })
-    section("depepe", function ()
+    await section("depepe", async function ()
     {
         cb = function (s)
         {
@@ -71,7 +71,7 @@ toExport["pepe"] = function ()
         compare(pepe.depepe(pepe("A ( B ) C"),cb),"A ( b ) C")
         compare(pepe.depepe(pepe("A ({ B }) C"),cb),"A ({ b }) C")
     })
-    section("pairs", function ()
+    await section("pairs", async function ()
     {
         compare(pepe.pairs(""),[])
         compare(pepe.pairs("[]"),[{start:'[',rng:[0,1],end:']'}])

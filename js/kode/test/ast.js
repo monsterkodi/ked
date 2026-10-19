@@ -2,16 +2,16 @@ var toExport = {}
 import utils from "./utils.js"
 let ast = utils.ast
 
-toExport["ast"] = function ()
+toExport["ast"] = async function ()
 {
-    section("simple", function ()
+    await section("simple", async function ()
     {
         compare(ast('a'),'a')
         compare(ast('1'),'1')
         compare(ast('no'),'no')
         compare(ast('1;2'),'1\n2')
     })
-    section("operation", function ()
+    await section("operation", async function ()
     {
         compare(ast('a and b'),`operation
     lhs

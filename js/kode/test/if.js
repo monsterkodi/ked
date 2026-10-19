@@ -3,9 +3,9 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["if"] = function ()
+toExport["if"] = async function ()
 {
-    section("then", function ()
+    await section("then", async function ()
     {
         compare(kc(`if n
     b `),`if (n)
@@ -135,7 +135,7 @@ if (2)
 {
 }`)
     })
-    section("block", function ()
+    await section("block", async function ()
     {
         compare(kc(`if
     1 then 2`),`if (1)
@@ -173,7 +173,7 @@ else
     700
 }`)
     })
-    section("call arg", function ()
+    await section("call arg", async function ()
     {
         compare(kc(`t.push if
     1 ➜ 2
@@ -206,7 +206,7 @@ else
     }
 }).bind(this))())`)
     })
-    section("inline", function ()
+    await section("inline", async function ()
     {
         compare(kc("v = if k == 1 then 2 else 3"),"v = k === 1 ? 2 : 3")
         compare(kc("i = 1 if i == 0"),`if (i === 0)
@@ -274,7 +274,7 @@ nextline`)
         compare(kc("a = if 1 then 2 else if 3 then 4 else if 5 then 6 else 7"),"a = 1 ? 2 : 3 ? 4 : 5 ? 6 : 7")
         compare(kc(`a = if 0 then if 1 then if 2 then 3 else if 4 then 5 else 6 else if 7 then 8 else 9 else if 10 then 11 else 12`),`a = 0 ? 1 ? 2 ? 3 : 4 ? 5 : 6 : 7 ? 8 : 9 : 10 ? 11 : 12`)
     })
-    section("else if", function ()
+    await section("else if", async function ()
     {
         compare(kc(`if 1
     log 'yes2'
@@ -309,7 +309,7 @@ else
 }
 console.log('END')`)
     })
-    section("returns", function ()
+    await section("returns", async function ()
     {
         compare(kc(`-> if false then true`),`(function ()
 {
@@ -341,7 +341,7 @@ console.log('END')`)
     }
 })`)
     })
-    section("tail", function ()
+    await section("tail", async function ()
     {
         compare(kc(`a if b`),`if (b)
 {
@@ -362,7 +362,7 @@ console.log('END')`)
         compare(kc("if 1 then 2"),kc("if 1 then 2"))
         compare(kc("if 1 ➜ 2 else 3"),kc("if 1 then 2 else 3"))
     })
-    section("nicer", function ()
+    await section("nicer", async function ()
     {
         compare(kc(`if
     x       ➜ 1

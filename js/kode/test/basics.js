@@ -2,9 +2,9 @@ var toExport = {}
 import utils from "./utils.js"
 let kc = utils.kc
 
-toExport["basics"] = function ()
+toExport["basics"] = async function ()
 {
-    section("literals", function ()
+    await section("literals", async function ()
     {
         compare(kc(''),'')
         compare(kc(' '),'')
@@ -27,7 +27,7 @@ toExport["basics"] = function ()
         compare(kc('null'),'null')
         compare(kc('undefined'),'undefined')
     })
-    section("prop", function ()
+    await section("prop", async function ()
     {
         compare(kc('a.a'),'a.a')
         compare(kc('{a:b}.a'),'{a:b}.a')
@@ -35,7 +35,7 @@ toExport["basics"] = function ()
         compare(kc('a.b.c[d]'),'a.b.c[d]')
         compare(kc('[a.b*c[d]]'),';[a.b * c[d]]')
     })
-    section("regex", function ()
+    await section("regex", async function ()
     {
         compare(kc('/a/'),'/a/')
         compare(kc('/a|b/'),'/a|b/')
@@ -46,14 +46,14 @@ toExport["basics"] = function ()
         compare(kc('ESCAPEREGEXP = /[\-\\\^\$\*\+\?\.\(\)\|\[\]\{\}\/]/g'),'ESCAPEREGEXP = /[\-\\\^\$\*\+\?\.\(\)\|\[\]\{\}\/]/g')
         compare(kc('f c(@x/v)*v, d(@y/v)*v'),'f(c(this.x / v) * v,d(this.y / v) * v)')
     })
-    section("op", function ()
+    await section("op", async function ()
     {
-        section("eql", function ()
+        await section("eql", async function ()
         {
             compare(kc('a == b'),'a === b')
             compare(kc('a != b'),'a !== b')
         })
-        section("brackets", function ()
+        await section("brackets", async function ()
         {
             compare(kc('(1/7)'),';(1 / 7)')
             compare(kc('n/7'),'n / 7')
@@ -61,7 +61,7 @@ toExport["basics"] = function ()
             compare(kc('n/(3/7)'),'n / (3 / 7)')
             compare(kc('f n/(4/7)'),'f(n / (4 / 7))')
         })
-        section("logigal", function ()
+        await section("logigal", async function ()
         {
             compare(kc('a and b'),'a && b')
             compare(kc('1 and 2 and 3'),'1 && 2 && 3')
@@ -80,7 +80,7 @@ g or h`),`d && e || f && g || h`)
     e or f and
     g or h`),`a = d && e || f && g || h`)
         })
-        section("compchain", function ()
+        await section("compchain", async function ()
         {
             compare(kc(`b = 1 <= a < c`),`b = (1 <= a && a < c)`)
             compare(kc(`x = y > z >= 1`),`x = (y > z && z >= 1)`)
@@ -90,7 +90,7 @@ g or h`),`d && e || f && g || h`)
 {
 }`)
         })
-        section("binary", function ()
+        await section("binary", async function ()
         {
             compare(kc("f a|b, x | y, c|d | e| f"),'f(a | b,x | y,c | d | e | f)')
             compare(kc("f a|b x | y c|d | e| f"),'f(a | b,x | y,c | d | e | f)')
@@ -98,7 +98,7 @@ g or h`),`d && e || f && g || h`)
             compare(kc("f a&b x & y c&d & e& f"),'f(a & b,x & y,c & d & e & f)')
             kc('a ^= b','a ^= b')
         })
-        section("not", function ()
+        await section("not", async function ()
         {
             compare(kc('not true'),'!true')
             compare(kc('not c1 or c2'),'!c1 || c2')
@@ -107,7 +107,7 @@ g or h`),`d && e || f && g || h`)
             compare(kc('if not m = t'),'if (!(m = t))\n{\n}')
         })
     })
-    section("assign", function ()
+    await section("assign", async function ()
     {
         compare(kc('a = b'),'a = b')
         compare(kc('a = b = c = 1'),'a = b = c = 1')
@@ -130,7 +130,7 @@ b or
         compare(kc(`q = ((r) +
      (x))`),`q = ((r) + (x))`)
     })
-    section("math", function ()
+    await section("math", async function ()
     {
         compare(kc('a + b'),'a + b')
         compare(kc('a - b + c - 1'),'a - b + c - 1')
@@ -141,7 +141,7 @@ b or
         compare(kc('a + -(b-c)'),'a + -(b - c)')
         compare(kc('b --c'),'b(--c)')
     })
-    section("increment", function ()
+    await section("increment", async function ()
     {
         compare(kc('a++'),'a++')
         compare(kc('a--'),'a--')

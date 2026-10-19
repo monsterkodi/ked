@@ -5,7 +5,7 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["use"] = function ()
+toExport["use"] = async function ()
 {
     compare(kc('use blark'),'import blark from "blark"\n')
     compare(kc('use flub',_k_.file()),'import flub from "flub"\n')
@@ -25,7 +25,7 @@ use ./mod6
 use mod7`),`import mod5 from "mod5"\n
 import mod6 from "./mod6.js"\n
 import mod7 from "mod7"\n`)
-    section("items", function ()
+    await section("items", async function ()
     {
         compare(kc('use ./kxk ▪ slash noon'),`import kxk from "./kxk.js"
 let slash = kxk.slash
@@ -38,12 +38,12 @@ let fuzzy = lib_ko.fuzzy
 let pbytes = lib_ko.pbytes
 `)
     })
-    section("named", function ()
+    await section("named", async function ()
     {
         compare(kc('use ./file ● File'),`import File from "./file.js"
 `)
     })
-    section("folder", function ()
+    await section("folder", async function ()
     {
         compare(kc('use ◆ A B c'),`import A from "./A.js"
 import B from "./B.js"

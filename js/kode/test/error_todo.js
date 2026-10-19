@@ -2,7 +2,7 @@ var toExport = {}
 import utils from "./utils.js"
 let codemsg = utils.codemsg
 
-toExport["error todo"] = function ()
+toExport["error todo"] = async function ()
 {
     compare(1,1)
 }

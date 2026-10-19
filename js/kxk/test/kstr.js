@@ -5,23 +5,23 @@ var a2h, blockFillets, lineFillets, lines, n, r, s, text
 
 import kstr from "../kstr.js"
 
-toExport["kstr"] = function ()
+toExport["kstr"] = async function ()
 {
-    section("str", function ()
+    await section("str", async function ()
     {
         compare(kstr({a:1,b:2}),`a   1\nb   2`)
         compare(kstr([1,2,3]),`1\n2\n3`)
     })
-    section("encode", function ()
+    await section("encode", async function ()
     {
         compare(kstr.encode(" hello / world !?"),'%20hello%20/%20world%20!?')
         compare(kstr.encode("</>"),'%3C/%3E')
     })
-    section("escapeRegexp", function ()
+    await section("escapeRegexp", async function ()
     {
         compare(kstr.escapeRegexp('a/b.txt'),'a\\/b\\.txt')
     })
-    section("lstrip", function ()
+    await section("lstrip", async function ()
     {
         compare(kstr.lstrip(),'')
         compare(kstr.lstrip(''),'')
@@ -30,7 +30,7 @@ toExport["kstr"] = function ()
         compare(kstr.lstrip('x ','x'),' ')
         compare(kstr.lstrip(' yxy ',' y'),'xy ')
     })
-    section("rstrip", function ()
+    await section("rstrip", async function ()
     {
         compare(kstr.rstrip(),'')
         compare(kstr.rstrip(''),'')
@@ -39,7 +39,7 @@ toExport["kstr"] = function ()
         compare(kstr.rstrip(' x','x'),' ')
         compare(kstr.rstrip(' yxy ',' y'),' yx')
     })
-    section("strip", function ()
+    await section("strip", async function ()
     {
         compare(kstr.strip(),'')
         compare(kstr.strip(''),'')
@@ -49,13 +49,13 @@ toExport["kstr"] = function ()
         compare(kstr.strip('x x','x'),' ')
         compare(kstr.strip(' yxy ',' y'),'x')
     })
-    section("trim", function ()
+    await section("trim", async function ()
     {
         compare(kstr.trim('123   y  123','123'),'   y  ')
         compare(kstr.ltrim(' yxy ',' y'),'xy ')
         compare(kstr.rtrim('   y','y'),'   ')
     })
-    section("splice", function ()
+    await section("splice", async function ()
     {
         compare(kstr.splice('hello',0,1),'ello')
         compare(kstr.splice('hello',0,3),'lo')
@@ -67,7 +67,7 @@ toExport["kstr"] = function ()
         compare(kstr.splice('abc',-2,0,'d'),'adbc')
         compare(kstr.splice('abc',1,-2,'23'),'a23')
     })
-    section("lcnt", function ()
+    await section("lcnt", async function ()
     {
         s = 'abc'
         n = 123
@@ -92,7 +92,7 @@ toExport["kstr"] = function ()
         compare(kstr.lcnt('   xx',' '),3)
         compare(kstr.lcnt('12345 blub','1234'),4)
     })
-    section("rcnt", function ()
+    await section("rcnt", async function ()
     {
         s = 'abc'
         n = 123
@@ -118,19 +118,19 @@ toExport["kstr"] = function ()
         compare(kstr.rcnt('12345 blub','blub'),4)
         compare(kstr.rcnt('A4──A5  ',' '),2)
     })
-    section("lpad", function ()
+    await section("lpad", async function ()
     {
         compare(kstr.lpad('',4),'    ')
         compare(kstr.lpad('x',4),'   x')
         compare(kstr.lpad(' xxx ',2),' xxx ')
     })
-    section("rpad", function ()
+    await section("rpad", async function ()
     {
         compare(kstr.rpad('',4),'    ')
         compare(kstr.rpad('x',4),'x   ')
         compare(kstr.rpad(' xxx ',2),' xxx ')
     })
-    section("crop", function ()
+    await section("crop", async function ()
     {
         compare(kstr.crop('',4),'    ')
         compare(kstr.crop('hello',10),'hello     ')
@@ -140,7 +140,7 @@ toExport["kstr"] = function ()
         compare(kstr.crop('hello',0),'')
         compare(kstr.crop('abcdefgh',5),'abcd…')
     })
-    section("ansi2html", function ()
+    await section("ansi2html", async function ()
     {
         a2h = function (s, r)
         {
@@ -153,16 +153,16 @@ ${_k_.g5('green')}`,`<span style="color:#ff0000;">red</span>
 <span style="color:#00ff00;">green</span>`)
         a2h(`${_k_.r5('red')}${_k_.g5('green')}`,'<span style="color:#ff0000;">red</span><span style="color:#00ff00;">green</span>')
     })
-    section("stripAnsi", function ()
+    await section("stripAnsi", async function ()
     {
         compare(kstr.stripAnsi(_k_.g5('green')),'green')
     })
-    section("detab", function ()
+    await section("detab", async function ()
     {
         compare(kstr.detab('\t\t'),'        ')
         compare(kstr.detab('aa\tbb'),'aa  bb')
     })
-    section("time number", function ()
+    await section("time number", async function ()
     {
         compare(kstr.time(1),'1 ms')
         compare(kstr.time(1000),'1 second')
@@ -181,7 +181,7 @@ ${_k_.g5('green')}`,`<span style="color:#ff0000;">red</span>
         compare(kstr.time(1000 * 60 * 60 * 24 * 30 * 12),'1 year')
         compare(kstr.time(1000 * 60 * 60 * 24 * 30 * 24),'2 years')
     })
-    section("time bigint", function ()
+    await section("time bigint", async function ()
     {
         compare(kstr.time(BigInt(1)),'1 ns')
         compare(kstr.time(BigInt(1000)),'1 μs')
@@ -191,7 +191,7 @@ ${_k_.g5('green')}`,`<span style="color:#ff0000;">red</span>
         compare(kstr.time(BigInt(1000000000)),'1 second')
         compare(kstr.time(BigInt(2000000000)),'2 seconds')
     })
-    section("fillet", function ()
+    await section("fillet", async function ()
     {
         compare(kstr.fillet(),[])
         compare(kstr.fillet(''),[])
@@ -207,11 +207,11 @@ ${_k_.g5('green')}`,`<span style="color:#ff0000;">red</span>
         compare(kstr.fillet(' a_c.,:__def '),[{match:'a_c',index:1,length:3,word:true},{match:'.,:',index:4,length:3,word:false},{match:'__def',index:7,length:5,word:true}])
         compare(kstr.fillet('1-2'),[{match:'1',index:0,length:1,word:true},{match:'-',index:1,length:1,word:false},{match:'2',index:2,length:1,word:true}])
     })
-    section("unfillet", function ()
+    await section("unfillet", async function ()
     {
         compare(kstr.unfillet(kstr.fillet(' a_c.,:__def ')),'a_c.,:__def')
     })
-    section("blockFillets", function ()
+    await section("blockFillets", async function ()
     {
         text = `hello
     world`
@@ -222,13 +222,13 @@ ${_k_.g5('green')}`,`<span style="color:#ff0000;">red</span>
         })
         blockFillets = kstr.blockFillets(lineFillets)
         compare(blockFillets,[{line:0,indent:0,fillet:[{match:'hello',index:0,length:5,word:true}],blocks:[{line:1,indent:4,fillet:[{match:'world',index:4,length:5,word:true}],blocks:[]}]}])
-        section("unfilletBlocks", function ()
+        await section("unfilletBlocks", async function ()
         {
             r = kstr.unfilletBlocks(blockFillets)
             compare(r,text + '\n')
         })
     })
-    section("levensthein", function ()
+    await section("levensthein", async function ()
     {
         compare(kstr.levensthein('a','b'),1)
         compare(kstr.levensthein('a','zZ'),2)
@@ -242,7 +242,7 @@ ${_k_.g5('green')}`,`<span style="color:#ff0000;">red</span>
         compare(kstr.levensthein('wool','bool'),1)
         compare(kstr.levensthein('oxol','bool'),2)
     })
-    section("weight", function ()
+    await section("weight", async function ()
     {
         compare(kstr.weight(''),0)
         compare(kstr.weight(null),0)
@@ -254,7 +254,7 @@ ${_k_.g5('green')}`,`<span style="color:#ff0000;">red</span>
         compare(kstr.weight('b') > kstr.weight('abZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ'),true)
         compare(kstr.weight('b') > kstr.weight('B'),true)
     })
-    section("indexOfClosestNonWS", function ()
+    await section("indexOfClosestNonWS", async function ()
     {
         compare(kstr.indexOfClosestNonWhitespace('',0),-1)
         compare(kstr.indexOfClosestNonWhitespace('     ',2),-1)
@@ -283,7 +283,7 @@ ${_k_.g5('green')}`,`<span style="color:#ff0000;">red</span>
         compare(kstr.indexOfClosestNonWhitespace(' 1    6   a  ',9),10)
         compare(kstr.indexOfClosestNonWhitespace(' 1    6   a  ',10),10)
     })
-    section("rangeOfClosestChunk", function ()
+    await section("rangeOfClosestChunk", async function ()
     {
         compare(kstr.rangeOfClosestChunk('',0),undefined)
         compare(kstr.rangeOfClosestChunk('     ',2),undefined)
@@ -305,7 +305,7 @@ ${_k_.g5('green')}`,`<span style="color:#ff0000;">red</span>
         compare(kstr.rangeOfClosestChunk('  hello   word !',15),[15,16])
         compare(kstr.rangeOfClosestChunk('  hello   word !',100),[15,16])
     })
-    section("isAlphaNumeric", function ()
+    await section("isAlphaNumeric", async function ()
     {
         compare(kstr.isAlphaNumeric('A'),true)
         compare(kstr.isAlphaNumeric('a'),true)
@@ -326,7 +326,7 @@ ${_k_.g5('green')}`,`<span style="color:#ff0000;">red</span>
         compare(kstr.isAlphaNumeric('a.1'),false)
         compare(kstr.isAlphaNumeric(' a_1 '),false)
     })
-    section("rangeOfClosestWord", function ()
+    await section("rangeOfClosestWord", async function ()
     {
         compare(kstr.rangeOfClosestWord('',0),undefined)
         compare(kstr.rangeOfClosestWord('     ',2),undefined)
@@ -347,12 +347,12 @@ ${_k_.g5('green')}`,`<span style="color:#ff0000;">red</span>
         compare(kstr.rangeOfClosestWord('  hello   word !',14),[10,14])
         compare(kstr.rangeOfClosestWord('  hello   word !',15),[10,14])
     })
-    section("indexOfClosestAlphaNumeric", function ()
+    await section("indexOfClosestAlphaNumeric", async function ()
     {
         compare(kstr.indexOfClosestAlphaNumeric('  hello   word !',8),10)
         compare(kstr.indexOfClosestAlphaNumeric('  hello   word !',15),13)
     })
-    section("hexColor", function ()
+    await section("hexColor", async function ()
     {
         compare(kstr.hexColor(null),undefined)
         compare(kstr.hexColor('dead'),undefined)
@@ -384,7 +384,7 @@ ${_k_.g5('green')}`,`<span style="color:#ff0000;">red</span>
         compare(kstr.hexColor('rgba(255,100,0,1.1)'),undefined)
         compare(kstr.hexColor('rgba(255,100,0,-1)'),undefined)
     })
-    section("scaleColor", function ()
+    await section("scaleColor", async function ()
     {
         compare(kstr.scaleColor('ffff00',1),'#ffff00')
         compare(kstr.scaleColor('ffff00',0.9),'#e5e500')

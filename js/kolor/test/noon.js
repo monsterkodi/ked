@@ -7,7 +7,7 @@ let ranges = util.ranges
 let lang = util.lang
 
 lang('noon')
-toExport["noon"] = function ()
+toExport["noon"] = async function ()
 {
     rgs = ranges("    property  value")
     compare(inc(rgs,4,'property'),'property')
@@ -77,7 +77,7 @@ toExport["noon"] = function ()
     compare(inc(rgs,26,'bin'),'text dir')
     compare(inc(rgs,29,'/'),'punct dir')
     compare(inc(rgs,30,'mocha'),'text file')
-    section("comments", function ()
+    await section("comments", async function ()
     {
         rgs = ranges("   # bla blub")
         compare(inc(rgs,3,"#"),'punct comment')

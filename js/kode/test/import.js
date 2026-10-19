@@ -3,7 +3,7 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["import"] = function ()
+toExport["import"] = async function ()
 {
     compare(kc('import noon from "noon"'),'import noon from "noon"')
     compare(kc('import defaultExport from "module"'),'import defaultExport from "module"')

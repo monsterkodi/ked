@@ -3,7 +3,7 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["export"] = function ()
+toExport["export"] = async function ()
 {
     compare(kc(`export
     k: 1

@@ -3,9 +3,9 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["is"] = function ()
+toExport["is"] = async function ()
 {
-    section("misc", function ()
+    await section("misc", async function ()
     {
         compare(ke('1 is "number"'),true)
         compare(ke('a = {} is Object'),true)
@@ -30,7 +30,7 @@ a is B and a is A and a is 'object'`),true)
 {
 }`)
     })
-    section("in if block", function ()
+    await section("in if block", async function ()
     {
         compare(kc(`if
     a is Object ➜ 1
@@ -55,7 +55,7 @@ else if (a instanceof Array)
     2
 }`)
     })
-    section("str", function ()
+    await section("str", async function ()
     {
         compare(ke('a = "" is str'),true)
         compare(ke('a = "abc" is str'),true)
@@ -69,7 +69,7 @@ else if (a instanceof Array)
         compare(ke('a = null is str'),false)
         compare(ke('a = undefined is str'),false)
     })
-    section("obj", function ()
+    await section("obj", async function ()
     {
         compare(ke('a = {} is obj'),true)
         compare(ke('a = {a:1} is obj'),true)
@@ -88,7 +88,7 @@ else if (a instanceof Array)
         compare(ke('a = new Map() is obj'),false)
         compare(ke('a = new Set() is obj'),false)
     })
-    section("arr", function ()
+    await section("arr", async function ()
     {
         compare(ke('a = [] is arr'),true)
         compare(ke('a = [1 2] is arr'),true)
@@ -107,7 +107,7 @@ else if (a instanceof Array)
         compare(ke('a = new Map() is arr'),false)
         compare(ke('a = new Set() is arr'),false)
     })
-    section("func", function ()
+    await section("func", async function ()
     {
         compare(ke('a = ->\na is func'),true)
         compare(ke('a = ()->\na is func'),true)
@@ -121,7 +121,7 @@ else if (a instanceof Array)
         compare(ke('a = new Array() is func'),false)
         compare(ke('a = new Set() is func'),false)
     })
-    section("num", function ()
+    await section("num", async function ()
     {
         compare(ke('a = "-10" is num'),true)
         compare(ke('a = "0" is num'),true)

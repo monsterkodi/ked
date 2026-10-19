@@ -8,7 +8,7 @@ let dissect = util.dissect
 let lang = util.lang
 
 lang('md')
-toExport["md"] = function ()
+toExport["md"] = async function ()
 {
     rgs = ranges("**bold**")
     compare(inc(rgs,0,'*'),'punct bold')

@@ -64,9 +64,9 @@ internal = function (err)
     return _k_.in('internal kode compiler error',String(err))
 }
 REGRESSIONS = ['@.','a.','a..','a.b.','a +','a = 1 +','if','class','function','for','for x in','try','try a','import','export','a each','a each (k,v)','1 is']
-toExport["fuzz"] = function ()
+toExport["fuzz"] = async function ()
 {
-    section("nothing crashes", function ()
+    await section("nothing crashes", async function ()
     {
         crashed = []
         var list = _k_.list(REGRESSIONS)

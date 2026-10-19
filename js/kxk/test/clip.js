@@ -5,15 +5,15 @@ var known, tool
 
 import clip from "../clip.js"
 
-toExport["clip"] = function ()
+toExport["clip"] = async function ()
 {
-    section("has", function ()
+    await section("has", async function ()
     {
         compare(clip.has(''),false)
         compare(clip.has('definitely-not-a-tool'),false)
         compare(clip.has('sh'),true)
     })
-    section("detect", function ()
+    await section("detect", async function ()
     {
         tool = clip.detect()
         known = _k_.in(tool,['wl','xsel','xclip','none'])

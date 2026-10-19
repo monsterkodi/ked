@@ -4,9 +4,9 @@ var k
 import krzl from "../krzl.js"
 import slash from "../slash.js"
 
-toExport["krzl"] = function ()
+toExport["krzl"] = async function ()
 {
-    section("strings", function ()
+    await section("strings", async function ()
     {
         k = new krzl(['hello','world'])
         compare(k.filter(),[])
@@ -18,7 +18,7 @@ toExport["krzl"] = function ()
         compare(k.filter('ll'),['hello'])
         compare(k.filter('o'),['world','hello'])
     })
-    section("extract", function ()
+    await section("extract", async function ()
     {
         k = new krzl([{key:'hello'},{key:'world',evil:666}])
         k.extract = function (i)
@@ -32,14 +32,14 @@ toExport["krzl"] = function ()
         compare(k.filter('ll'),[{key:'hello'}])
         compare(k.filter('o'),[{key:'world',evil:666},{key:'hello'}])
     })
-    section("weight", function ()
+    await section("weight", async function ()
     {
         k = new krzl(['bba','aa','a','aba','acccca','aaa','akkaakka'])
         compare(k.filter('a'),['a','aa','aba','aaa','acccca','akkaakka','bba'])
         compare(k.filter('b'),['bba','aba'])
         compare(k.filter('aa'),['aa','aba','aaa','acccca','akkaakka'])
     })
-    section("custom", function ()
+    await section("custom", async function ()
     {
         k = new krzl(['a.txt','a.a','a','a.noon','a.kode'])
         compare(k.filter('a'),['a','a.a','a.txt','a.noon','a.kode'])
@@ -92,7 +92,7 @@ toExport["krzl"] = function ()
         }
         compare(k.filter('a'),['a','a.kode','a.noon','a.a','a.txt'])
     })
-    section("negative", function ()
+    await section("negative", async function ()
     {
         k = new krzl(['a.txt','a.aaa','a.blork','a.noon','a.kode'])
         k.weight = function (i)
@@ -115,7 +115,7 @@ toExport["krzl"] = function ()
         }
         compare(k.filter('a'),['a.txt','a.aaa','a.noon','a.kode','a.blork'])
     })
-    section("case insensitive", function ()
+    await section("case insensitive", async function ()
     {
         k = new krzl(['a','aA','Aa','A','BaBa','bABA'])
         compare(k.filter('a'),['a','A','aA','Aa','BaBa','bABA'])
@@ -123,7 +123,7 @@ toExport["krzl"] = function ()
         compare(k.filter('b'),['BaBa','bABA'])
         compare(k.filter('B'),['BaBa','bABA'])
     })
-    section("length insensitive", function ()
+    await section("length insensitive", async function ()
     {
         k = new krzl({values:['a','aA','Aa','A','BaBa','bABA'],sortByLength:false})
         compare(k.filter('a'),['a','aA','Aa','A','BaBa','bABA'])

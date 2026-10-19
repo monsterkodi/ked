@@ -3,10 +3,10 @@ var imm, ma, nx2, nxt
 
 import immutable from "../immutable.js"
 
-toExport["immutable"] = function ()
+toExport["immutable"] = async function ()
 {
     imm = null
-    section("simple", function ()
+    await section("simple", async function ()
     {
         imm = immutable({arr:[],obj:{},int:0,str:'hello'})
         compare(imm.arr,[])
@@ -27,7 +27,7 @@ toExport["immutable"] = function ()
         nx2 = nxt.set('arr',ma)
         compare(nx2.arr,[1,2,3])
     })
-    section("throws", function ()
+    await section("throws", async function ()
     {
         try
         {

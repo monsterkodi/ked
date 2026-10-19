@@ -202,23 +202,23 @@ kodfiles = function (dir, out = [])
     }
     return out
 }
-toExport["srcmap"] = function ()
+toExport["srcmap"] = async function ()
 {
-    section("the map is only written when asked for", function ()
+    await section("the map is only written when asked for", async function ()
     {
         has = _k_.in('sourceMappingURL',kmap('a = 1'))
         compare(has,true)
         has = _k_.in('sourceMappingURL',kplain('a = 1'))
         compare(has,false)
     })
-    section("the sourceURL is written either way", function ()
+    await section("the sourceURL is written either way", async function ()
     {
         has = _k_.in('sourceURL',kmap('a = 1'))
         compare(has,true)
         has = _k_.in('sourceURL',kplain('a = 1'))
         compare(has,true)
     })
-    section("the sourceURL without a map still names the source", function ()
+    await section("the sourceURL without a map still names the source", async function ()
     {
         url = kplain('a = 1')
         lines = url.split('\n')
@@ -228,7 +228,7 @@ toExport["srcmap"] = function ()
         })
         compare(url,`//# sourceURL=file://${slash.relative(PROBE,process.cwd())}`)
     })
-    section("and the js it wraps is untouched", function ()
+    await section("and the js it wraps is untouched", async function ()
     {
         mapped = kmap('a = 1')
         plain = kplain('a = 1')
@@ -236,7 +236,7 @@ toExport["srcmap"] = function ()
         plain = body(plain)
         compare(mapped,plain)
     })
-    section("names the file it was made from", function ()
+    await section("names the file it was made from", async function ()
     {
         json = jsonOf(kmap('a = 1'))
         src = json.sources
@@ -246,7 +246,7 @@ toExport["srcmap"] = function ()
         version = json.version
         compare(version,3)
     })
-    section("names it as a file:// uri", function ()
+    await section("names it as a file:// uri", async function ()
     {
         code = kmap('a = 1')
         mark = '//# sourceURL='
@@ -260,7 +260,7 @@ toExport["srcmap"] = function ()
         back = slash.absolute(src,process.cwd())
         compare(back,PROBE)
     })
-    section("names its source from where it is written", function ()
+    await section("names its source from where it is written", async function ()
     {
         dir = slash.path(_k_.dir(),'..','..')
         tgt = slash.path(dir,'probe.js')
@@ -269,7 +269,7 @@ toExport["srcmap"] = function ()
         back = slash.absolute(name,slash.dir(tgt))
         compare(back,PROBE)
     })
-    section("writes the same js either way", function ()
+    await section("writes the same js either way", async function ()
     {
         snips = ['a = 1','a = 1\nb = a + 2\nlog b','f = (a, b) -> a + b','class Foo\n    @: (a) ->\n        @a ?= a\n    mthd: -> @a + 1\n','x = if a ➜ 1 else 2','for i in 0...10 ➜ log i','x = "a #{b} c"','try\n    f()\ncatch e\n    log e','x = """\n    a #{b}\n    """','l = [1 2 3]\nl.map (i) -> i * 2','log b4 "hi" a','switch a\n    when 1 ➜ log "one"\n    else ➜ log "other"','x = int "42" + min 1 2 + trim " a "']
         var list = _k_.list(snips)
@@ -284,7 +284,7 @@ toExport["srcmap"] = function ()
             compare(eq,true)
         }
     })
-    section("twice over", function ()
+    await section("twice over", async function ()
     {
         c = 'class Foo\n    @bar: 1\n    mthd: -> @bar\n'
         k = new kode({header:false,map:true})
@@ -293,7 +293,7 @@ toExport["srcmap"] = function ()
         eq = body(first) === body(again)
         compare(eq,true)
     })
-    section("points at the token it maps", function ()
+    await section("points at the token it maps", async function ()
     {
         out = pairs('a = 1\nb = a + 2\nc = b + 3\nlog c\n')
         wrong = out.filter(function (t)
@@ -309,7 +309,7 @@ toExport["srcmap"] = function ()
         }).join(' ')
         compare(report,'')
     })
-    section("maps every line it can", function ()
+    await section("maps every line it can", async function ()
     {
         snips = ['a = 1\nb = a + 2\nc = b + 3\nlog c\n','f = ->\n    a = 1\n    b = a + 2\n    log b\nf()\n']
         var list1 = _k_.list(snips)
@@ -342,7 +342,7 @@ toExport["srcmap"] = function ()
             compare(missed,[])
         }
     })
-    section("a class maps its body and not its head", function ()
+    await section("a class maps its body and not its head", async function ()
     {
         code = kmap('class Foo\n    @: ->\n        @a = 1\n    mthd: -> @a\n')
         out = mapsOf(code)
@@ -352,7 +352,7 @@ toExport["srcmap"] = function ()
         })
         compare(lines,[3,3,3,4,4])
     })
-    section("finds column zero", function ()
+    await section("finds column zero", async function ()
     {
         out = mapsOf(kmap('a = 1\nb = a + 2\nlog b\n'))
         zero = out.filter(function (t)
@@ -364,13 +364,13 @@ toExport["srcmap"] = function ()
         })
         compare(zero,[3,4,5])
     })
-    section("maps a call", function ()
+    await section("maps a call", async function ()
     {
         out = mapsOf(kmap('log b\n'))
         compare(out[0],[1,0,1,0])
         compare(out[1],[1,12,1,4])
     })
-    section("maps a nested body", function ()
+    await section("maps a nested body", async function ()
     {
         c = 'f = ->\n    a = 1\n    b = a + 2\nf()\n'
         out = mapsOf(kmap(c))
@@ -396,20 +396,20 @@ toExport["srcmap"] = function ()
         text = gl[8].slice(11)
         compare(text,'b = a + 2')
     })
-    section("maps a triple string", function ()
+    await section("maps a triple string", async function ()
     {
         out = mapsOf(kmap('x = """\n    abc\n    def\n    """\n'))
         compare(out[0],[3,0,1,0])
         compare(out[1],[3,4,1,4])
     })
-    section("maps an interpolation", function ()
+    await section("maps an interpolation", async function ()
     {
         out = mapsOf(kmap('x = "a #{b + 1} c"\n'))
         compare(out[0],[3,0,1,0])
         compare(out[1],[3,9,1,9])
         compare(out[2],[3,13,1,13])
     })
-    section("ordered and monotonic", function ()
+    await section("ordered and monotonic", async function ()
     {
         snips = ['a = 1\nb = a + 2\nlog b\n','class Foo\n    @: ->\n        @a = [1 2 3]\n        for i in @a ➜ log i\n','f = (a, b) ->\n    g = -> a + b\n    g()\n']
         var list2 = _k_.list(snips)
@@ -431,7 +431,7 @@ toExport["srcmap"] = function ()
             compare(sorted,true)
         }
     })
-    section("no column twice", function ()
+    await section("no column twice", async function ()
     {
         snips = ['a = 1\nb = a + 2\nlog b\n','f = (a, b) -> if a then a + b else b - a\n']
         var list4 = _k_.list(snips)
@@ -450,7 +450,7 @@ toExport["srcmap"] = function ()
             compare(n,0)
         }
     })
-    section("the whole compiler", function ()
+    await section("the whole compiler", async function ()
     {
         dir = slash.path(_k_.dir(),'..','..','..','kode','kode')
         files = kodfiles(dir)

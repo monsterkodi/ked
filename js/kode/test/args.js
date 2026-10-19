@@ -4,9 +4,9 @@ let kc = utils.kc
 let ke = utils.ke
 let kd = utils.kd
 
-toExport["args"] = function ()
+toExport["args"] = async function ()
 {
-    section("func", function ()
+    await section("func", async function ()
     {
         compare(kc(`f = a -> a`),`
 f = function (a)
@@ -28,7 +28,7 @@ f = function (a, b = 0)
         compare(kc(`f = a() -> `),`f = a()(function ()
 {})`)
     })
-    section("function", function ()
+    await section("function", async function ()
     {
         compare(kc(`function D
     f: a b -> a + b`),`
@@ -46,7 +46,7 @@ D = (function ()
 })()
 `)
     })
-    section("class", function ()
+    await section("class", async function ()
     {
         compare(kc(`class D
     f: a b -> a + b`),`class D
@@ -58,7 +58,7 @@ D = (function ()
 }
 `)
     })
-    section("object", function ()
+    await section("object", async function ()
     {
         compare(kc(`obj =
     f: (a,b) -> a + b`),`obj = {f:function (a, b)
@@ -71,7 +71,7 @@ D = (function ()
     return a + b
 }}`)
     })
-    section("varargs", function ()
+    await section("varargs", async function ()
     {
         compare(kc(`obj = 
     zip: (args...) ->`),`obj = {zip:function (...args)
@@ -83,7 +83,7 @@ D = (function ()
     zip: a b c... ->`),`obj = {zip:function (a, b, ...c)
 {}}`)
     })
-    section("propargs", function ()
+    await section("propargs", async function ()
     {
         compare(kc(`obj = 
     pullAll: (arr, items, cmp=util.isEqual) ->`),`obj = {pullAll:function (arr, items, cmp = util.isEqual)
@@ -98,7 +98,7 @@ D = (function ()
     fnc: a b=d.c c=x.y.z ->`),`obj = {fnc:function (a, b = d.c, c = x.y.z)
 {}}`)
     })
-    section("constructor", function ()
+    await section("constructor", async function ()
     {
         compare(kc(`function D
     @: a b -> a + b`),`
@@ -122,7 +122,7 @@ D = (function ()
 }
 `)
     })
-    section("this", function ()
+    await section("this", async function ()
     {
         compare(kc(`class D
     t: @a ->`),`class D
@@ -146,7 +146,7 @@ D = (function ()
 }
 `)
     })
-    section("default", function ()
+    await section("default", async function ()
     {
         compare(kc(`class D
     d: a=1 -> a`),`class D

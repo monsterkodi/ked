@@ -3,9 +3,9 @@ var a, arr, b, def, obj
 
 import util from "../util.js"
 
-toExport["util"] = function ()
+toExport["util"] = async function ()
 {
-    section("isEqual", function ()
+    await section("isEqual", async function ()
     {
         compare(util.isEqual([1,2],[1,2]),true)
         compare(util.isEqual([1,2],[1,3]),false)
@@ -20,35 +20,35 @@ toExport["util"] = function ()
         compare(util.isEqual({a:1,b:2,c:'3',d:[[2],[1]]},{a:1,b:2,c:'3',d:[[1],[2]]}),false)
         compare(util.isEqual({a:1,b:2,c:'2',d:[[2],[1]]},{a:1,b:2,c:'3',d:[[1],[2]]}),false)
     })
-    section("zip", function ()
+    await section("zip", async function ()
     {
         a = [1,2,4]
         b = ['c','d','e']
         compare(util.zip(a,b),[[1,'c'],[2,'d'],[4,'e']])
     })
-    section("fold", function ()
+    await section("fold", async function ()
     {
         a = [1,2,3,4,5,6]
         compare(util.fold(2,a),[[1,2],[3,4],[5,6]])
         compare(util.fold(3,a),[[1,2,3],[4,5,6]])
     })
-    section("reversed", function ()
+    await section("reversed", async function ()
     {
         arr = [1,2,3]
         compare(util.reversed(arr),[3,2,1])
         compare(arr,[1,2,3])
     })
-    section("max", function ()
+    await section("max", async function ()
     {
         arr = [1,2,3]
         compare(util.max(arr),3)
     })
-    section("min", function ()
+    await section("min", async function ()
     {
         arr = [1,2,3]
         compare(util.min(arr),1)
     })
-    section("pull", function ()
+    await section("pull", async function ()
     {
         arr = [1,2,3]
         compare(util.pull(arr,2),[1,3])
@@ -61,7 +61,7 @@ toExport["util"] = function ()
         compare(util.pull(1),1)
         compare(util.pull(null),null)
     })
-    section("pullIf", function ()
+    await section("pullIf", async function ()
     {
         arr = [1,2,3]
         compare(util.pullIf(arr,function (i)
@@ -70,7 +70,7 @@ toExport["util"] = function ()
         }),[1,3])
         compare(arr,[1,3])
     })
-    section("keepIf", function ()
+    await section("keepIf", async function ()
     {
         arr = [1,2,3]
         compare(util.keepIf(arr,function (i)
@@ -79,7 +79,7 @@ toExport["util"] = function ()
         }),[2,3])
         compare(arr,[2,3])
     })
-    section("splitWith", function ()
+    await section("splitWith", async function ()
     {
         arr = [1,2,3]
         compare(util.splitWith(arr,function (i)
@@ -88,7 +88,7 @@ toExport["util"] = function ()
         }),[[2,3],[1]])
         compare(arr,[1,2,3])
     })
-    section("findIf", function ()
+    await section("findIf", async function ()
     {
         arr = [1,2,3]
         compare(util.findIf(arr,function (i)
@@ -104,7 +104,7 @@ toExport["util"] = function ()
             return i >= 8
         }),undefined)
     })
-    section("pullAll", function ()
+    await section("pullAll", async function ()
     {
         arr = [1,2,3]
         compare(util.pullAll(arr,[1,3]),[2])
@@ -119,7 +119,7 @@ toExport["util"] = function ()
         compare(util.pullAll([],[1,3],null),[])
         compare(util.pullAll([]),[])
     })
-    section("uniq", function ()
+    await section("uniq", async function ()
     {
         arr = [3,3,5,3,2]
         compare(util.uniq(arr),[3,5,2])
@@ -131,12 +131,12 @@ toExport["util"] = function ()
         compare(util.uniq([0,0,null,null,'','',null,undefined,undefined]),[0,null,'',undefined])
         compare(util.uniq(['ab','abc','abd','ab']),['ab','abc','abd'])
     })
-    section("uniqEqual", function ()
+    await section("uniqEqual", async function ()
     {
         a = [[1,2,3],[1,2,3],[1,2,3,4]]
         compare(util.uniqEqual(a),[[1,2,3],[1,2,3,4]])
     })
-    section("uniqBy", function ()
+    await section("uniqBy", async function ()
     {
         a = [{name:'a',age:1},{name:'a',age:2},{name:'c',age:1}]
         compare(util.uniqBy(a,'name'),[{name:'a',age:1},{name:'c',age:1}])
@@ -147,7 +147,7 @@ toExport["util"] = function ()
             return o.name + o.age
         }),[{name:'a',age:1},{name:'a',age:2},{name:'c',age:1}])
     })
-    section("pickBy", function ()
+    await section("pickBy", async function ()
     {
         obj = {a:1,b:2,c:4,d:8}
         compare(util.pickBy(obj,function (k, v)
@@ -155,16 +155,16 @@ toExport["util"] = function ()
             return k === 'a' || v > 3
         }),{a:1,c:4,d:8})
     })
-    section("toPairs", function ()
+    await section("toPairs", async function ()
     {
         compare(util.toPairs({a:1,b:2,c:3}),[['a',1],['b',2],['c',3]])
         compare(util.toPairs([1,2,3,4,5]),[[1,2],[3,4]])
     })
-    section("fromPairs", function ()
+    await section("fromPairs", async function ()
     {
         compare(util.fromPairs([['a',1],['b',2],['c',3]]),{a:1,b:2,c:3})
     })
-    section("defaults", function ()
+    await section("defaults", async function ()
     {
         def = {c:3,b:4}
         obj = {a:1,b:2}

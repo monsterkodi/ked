@@ -29,7 +29,7 @@ class Tester
     #      ███  ███       ███          ███     ███  ███   ███  ███  ████  
     # ███████   ████████   ███████     ███     ███   ███████   ███   ███  
     
-    section: t f =>
+    section: t f ○=>
 
         stack.push t
         comps = 0
@@ -37,7 +37,7 @@ class Tester
         if @logSections != false
             log W1(lpad(depth*3-1) + ' ' + global["g#{max(1, 8-2*depth)}"](kstr.crop(t, columns+1-depth*3) + ' '))
         try
-            f()
+            ○ f()
         catch err
             # log err
             fails.push
@@ -120,7 +120,7 @@ class Tester
     #    ███     ███            ███     ███     
     #    ███     ████████  ███████      ███     
     
-    test: testModule =>
+    test: testModule ○=>
         
         # return if not /\n\s*▸\s\w+/gm.test text
         ⮐ if testModule?._test_ != true
@@ -135,14 +135,22 @@ class Tester
         
         logModules = @logModules
             
-        testModule each (k,v) ->
-
+        # the sections are walked by key, not with each: the callback of
+        # each is a function of its own, and an await inside it would be
+        # an await in a function that is not async
+        
+        keys = Object.keys testModule
+        
+        for k in keys
+            
+            v = testModule[k]
+            
             if v._section_
                 stack.push k
                 if logModules != false
                     log G1(y8(' ' + kstr.crop(k, columns) + ' '))
                 try
-                    v()
+                    ○ v()
                 catch err
                     # log err
                     fails.push
@@ -231,7 +239,7 @@ export new Tester
         tester = new Tester
         tester.logSections = false
         tester.logModules = false
-        fail = fail or not tester.test test.default
+        fail = fail or not (○ tester.test(test.default))
     tester.summarize()
     if fail
         process.exit 1

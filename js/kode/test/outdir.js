@@ -1,65 +1,65 @@
 var toExport = {}
 import kode from "../kode.js"
 
-toExport["commonDir"] = function ()
+toExport["commonDir"] = async function ()
 {
-    section("one directory is its own root", function ()
+    await section("one directory is its own root", async function ()
     {
         compare(kode.commonDir(['/r/a.kode','/r/b.kode']),'/r')
     })
-    section("the shared directory, not the shared prefix", function ()
+    await section("the shared directory, not the shared prefix", async function ()
     {
         compare(kode.commonDir(['/r/kode/a.kode','/r/kol/b.kode']),'/r')
     })
-    section("a single file is its own root", function ()
+    await section("a single file is its own root", async function ()
     {
         compare(kode.commonDir(['/r/a.kode']),'/r')
     })
-    section("nothing in common falls back to the filesystem root", function ()
+    await section("nothing in common falls back to the filesystem root", async function ()
     {
         compare(kode.commonDir(['/r/a.kode','/s/b.kode']),'/')
     })
-    section("no files at all", function ()
+    await section("no files at all", async function ()
     {
         compare(kode.commonDir([]),'/')
     })
 }
 toExport["commonDir"]._section_ = true
-toExport["outPath"] = function ()
+toExport["outPath"] = async function ()
 {
-    section("a flat list stays flat", function ()
+    await section("a flat list stays flat", async function ()
     {
         compare(kode.outPath('/r/a.kode','/out','/r'),'/out/a.js')
     })
-    section("a nested file stays nested", function ()
+    await section("a nested file stays nested", async function ()
     {
         compare(kode.outPath('/r/test/b.kode','/out','/r'),'/out/test/b.js')
     })
-    section("two levels deep", function ()
+    await section("two levels deep", async function ()
     {
         compare(kode.outPath('/r/a/b/c.kode','/out','/r'),'/out/a/b/c.js')
     })
-    section("the extension is swapped, whatever it was", function ()
+    await section("the extension is swapped, whatever it was", async function ()
     {
         compare(kode.outPath('/r/test/c.noon','/out','/r'),'/out/test/c.js')
     })
-    section("a file outside the root keeps its name", function ()
+    await section("a file outside the root keeps its name", async function ()
     {
         compare(kode.outPath('/s/b.kode','/out','/r'),'/out/b.js')
     })
-    section("a file whose name starts with the root is not the root", function ()
+    await section("a file whose name starts with the root is not the root", async function ()
     {
         compare(kode.outPath('/rb.kode','/out','/r'),'/out/rb.js')
     })
 }
 toExport["outPath"]._section_ = true
-toExport["the root the bootstrap would pick"] = function ()
+toExport["the root the bootstrap would pick"] = async function ()
 {
-    section("the compiler and its tests share one", function ()
+    await section("the compiler and its tests share one", async function ()
     {
         compare(kode.commonDir(['kode/kode/parse.kode','kode/kode/test/error.kode']),'kode/kode')
     })
-    section("the compiler on its own", function ()
+    await section("the compiler on its own", async function ()
     {
         compare(kode.commonDir(['kode/kode/parse.kode','kode/kode/lexer.kode']),'kode/kode')
     })

@@ -3,9 +3,9 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["operator"] = function ()
+toExport["operator"] = async function ()
 {
-    section("clamp", function ()
+    await section("clamp", async function ()
     {
         compare(ke("clamp 1 10 12"),10)
         compare(ke("clamp 1 10 -1"),1)
@@ -60,7 +60,7 @@ toExport["operator"] = function ()
         compare(ke("clamp()"),NaN)
         compare(ke("clamp NaN NaN NaN"),NaN)
     })
-    section("int", function ()
+    await section("int", async function ()
     {
         compare(ke("int 1.234"),1)
         compare(ke("int '2.34'"),2)
@@ -69,33 +69,33 @@ toExport["operator"] = function ()
         compare(ke("int(1)"),1)
         compare(ke("int(-1)"),-1)
     })
-    section("float", function ()
+    await section("float", async function ()
     {
         compare(ke("float 1.234"),1.234)
         compare(ke("float '2.34'"),2.34)
         compare(ke("float(1.234)"),1.234)
         compare(ke("float('2.34')"),2.34)
     })
-    section("floor", function ()
+    await section("floor", async function ()
     {
         compare(kc("floor 0.2"),'Math.floor(0.2)')
         compare(ke("floor 0"),0)
         compare(ke("floor( 0)"),0)
         compare(ke("floor 0.2"),0)
     })
-    section("ceil", function ()
+    await section("ceil", async function ()
     {
         compare(kc("ceil 0.2"),'Math.ceil(0.2)')
         compare(ke("ceil 0.2"),1)
         compare(ke("ceil( 0.2)"),1)
     })
-    section("round", function ()
+    await section("round", async function ()
     {
         compare(kc("round 0.2"),'Math.round(0.2)')
         compare(ke("round 0.2"),0)
         compare(ke("round( 0.2)"),0)
     })
-    section("first", function ()
+    await section("first", async function ()
     {
         compare(ke("first []"),undefined)
         compare(ke("first [1]"),1)
@@ -110,7 +110,7 @@ toExport["operator"] = function ()
         compare(ke("first [1 2]  == 1"),true)
         compare(ke("a = [1 2]; first a == 1"),true)
     })
-    section("last", function ()
+    await section("last", async function ()
     {
         compare(ke("last []"),undefined)
         compare(ke("last [1]"),1)
@@ -133,7 +133,7 @@ toExport["operator"] = function ()
         compare(ke("end=4\nlast = 2\na = []\nfor i in [last...end] ➜ a.push i\na"),[2,3])
         compare(kc("last(@tokenStack).name"),"_k_.last(this.tokenStack).name")
     })
-    section("min", function ()
+    await section("min", async function ()
     {
         compare(ke("min()"),Infinity)
         compare(ke("min null"),Infinity)
@@ -154,7 +154,7 @@ toExport["operator"] = function ()
         compare(ke("min NaN, [5 6], 4 [3 2]"),2)
         compare(ke("min NaN, [8 [9 [10 [7 6]]]]"),6)
     })
-    section("max", function ()
+    await section("max", async function ()
     {
         compare(ke("max()"),-Infinity)
         compare(ke("max null"),-Infinity)
@@ -175,12 +175,12 @@ toExport["operator"] = function ()
         compare(ke("max NaN, [5 6], 4 [3 2]"),6)
         compare(ke("max NaN, [8 [9 [10 [7 16]]]]"),16)
     })
-    section("abs", function ()
+    await section("abs", async function ()
     {
         compare(kc("abs -1"),"Math.abs(-1)")
         compare(kc("abs(tmi-mi)"),"Math.abs(tmi - mi)")
     })
-    section("clone", function ()
+    await section("clone", async function ()
     {
         compare(ke(`a = b:1 c: d: 3
 c = clone a`),{b:1,c:{d:3}})
@@ -201,7 +201,7 @@ c
         compare(ke("clone a:null"),{a:null})
         compare(kc("f e+1, copy d"),'f(e + 1,_k_.copy(d))')
     })
-    section("eql", function ()
+    await section("eql", async function ()
     {
         compare(ke(`a = [1 2 3]
 b = [1 2]
@@ -213,11 +213,11 @@ p = hello:a, world:b
 q = hello:b, world:a
 p eql q`),true)
     })
-    section("shift", function ()
+    await section("shift", async function ()
     {
         compare(kc("a = 0xffff >>> 8"),"a = 0xffff >>> 8")
     })
-    section("empty", function ()
+    await section("empty", async function ()
     {
         compare(kc(`if empty [] == false
     1234`),`if (_k_.empty([]) === false)
@@ -242,7 +242,7 @@ p eql q`),true)
         compare(ke('empty "x" or valid {}'),false)
         compare(ke('empty {} and valid []'),false)
     })
-    section("valid", function ()
+    await section("valid", async function ()
     {
         compare(ke("valid []"),false)
         compare(ke("valid {}"),false)
@@ -261,7 +261,7 @@ p eql q`),true)
         compare(ke("valid 'a' or valid ''"),true)
         compare(ke("valid 'a' and empty ''"),true)
     })
-    section("lpad", function ()
+    await section("lpad", async function ()
     {
         compare(ke("lpad 10"),"          ")
         compare(ke("lpad 10 'l'"),"         l")
@@ -270,7 +270,7 @@ p eql q`),true)
         compare(ke("lpad 10 'l' '+-'"),"+-+-+-+-+-l")
         compare(ke("lpad 5  '1234567890'"),"1234567890")
     })
-    section("rpad", function ()
+    await section("rpad", async function ()
     {
         compare(ke("rpad 10"),"          ")
         compare(ke("rpad 10 'r'"),"r         ")
@@ -279,7 +279,7 @@ p eql q`),true)
         compare(ke("rpad 10 'r' '%#'"),"r%#%#%#%#%#")
         compare(ke("rpad 5  '1234567890'"),"1234567890")
     })
-    section("trim", function ()
+    await section("trim", async function ()
     {
         compare(ke("trim  '   x   '"),'x')
         compare(ke("ltrim '   x   '"),'x   ')
@@ -288,11 +288,11 @@ p eql q`),true)
         compare(ke("ltrim 'babab   x   bababa' 'ab'"),'   x   bababa')
         compare(ke("rtrim 'babab   x   bababa' 'ab'"),'babab   x   ')
     })
-    section("noon", function ()
+    await section("noon", async function ()
     {
         compare(kc('opt = noon.parse "1"'),'opt = noon.parse("1")')
     })
-    section("typeof", function ()
+    await section("typeof", async function ()
     {
         compare(kc(`if typeof pat == 'string'
     1`),`if (typeof(pat) === 'string')
@@ -300,7 +300,7 @@ p eql q`),true)
     1
 }`)
     })
-    section("instanceof", function ()
+    await section("instanceof", async function ()
     {
         compare(kc('a instanceof b'),'a instanceof b')
         compare(kc('a instanceof b == true'),'a instanceof b === true')

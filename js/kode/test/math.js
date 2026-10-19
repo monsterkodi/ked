@@ -3,7 +3,7 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["math"] = function ()
+toExport["math"] = async function ()
 {
     compare(ke("2 * 2"),4)
     compare(ke("2 + 2"),4)

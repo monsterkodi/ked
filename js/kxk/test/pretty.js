@@ -3,9 +3,9 @@ var before, now
 
 import pretty from "../pretty.js"
 
-toExport["pretty"] = function ()
+toExport["pretty"] = async function ()
 {
-    section("age", function ()
+    await section("age", async function ()
     {
         now = (new Date(Date.now())).toString()
         compare(pretty.age(now),'0 seconds')
@@ -18,12 +18,12 @@ toExport["pretty"] = function ()
         before = (new Date(Date.now() - 1000 * 60 * 60 * 24 * 30)).toString()
         compare(pretty.age(before),'1 month')
     })
-    section("number", function ()
+    await section("number", async function ()
     {
         compare(pretty.number(1),'1')
         compare(pretty.number(0.11),'0.1')
     })
-    section("bytes", function ()
+    await section("bytes", async function ()
     {
         compare(pretty.bytes(),'0 bytes')
         compare(pretty.bytes(0.99),'0 bytes')

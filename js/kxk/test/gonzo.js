@@ -1,33 +1,33 @@
 var toExport = {}
 import gonzo from "../gonzo.js"
 
-toExport["gonzo"] = function ()
+toExport["gonzo"] = async function ()
 {
-    section("single", function ()
+    await section("single", async function ()
     {
         compare(gonzo(`A
     B`),[{line:'A',indent:0,blck:[{line:'B',indent:4}]}])
     })
-    section("outdent", function ()
+    await section("outdent", async function ()
     {
         compare(gonzo(`A
     B
 C`),[{line:'A',indent:0,blck:[{line:'B',indent:4}]},{line:'C',indent:0}])
     })
-    section("double", function ()
+    await section("double", async function ()
     {
         compare(gonzo(`A
    B
      C`),[{line:'A',indent:0,blck:[{line:'B',indent:3,blck:[{line:'C',indent:5}]}]}])
     })
-    section("ioio", function ()
+    await section("ioio", async function ()
     {
         compare(gonzo(`I
   O
 i
   o`),[{line:'I',indent:0,blck:[{line:'O',indent:2}]},{line:'i',indent:0,blck:[{line:'o',indent:2}]}])
     })
-    section("sublevel", function ()
+    await section("sublevel", async function ()
     {
         compare(gonzo(`header
 level1

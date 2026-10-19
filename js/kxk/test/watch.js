@@ -7,9 +7,9 @@ import slash from "../slash.js"
 import watch from "../watch.js"
 
 gone = _k_.dir() + '/.watch-test-nonexistent'
-toExport["watch"] = function ()
+toExport["watch"] = async function ()
 {
-    section("stat", function ()
+    await section("stat", async function ()
     {
         stat = watch.stat(_k_.file())
         compare(((stat != null)),true)
@@ -24,7 +24,7 @@ toExport["watch"] = function ()
         stat = watch.stat(_k_.file() + ':12')
         compare(((stat != null)),true)
     })
-    section("ignore", function ()
+    await section("ignore", async function ()
     {
         w = watch.dir(gone)
         r = w.ignore('/a/b')
@@ -35,7 +35,7 @@ toExport["watch"] = function ()
         r = w.ignore('/a/b.js')
         compare(((r != null)),false)
     })
-    section("dirAndFile", function ()
+    await section("dirAndFile", async function ()
     {
         w = watch.dir(gone)
         compare(w.dir,slash.path(gone))
@@ -44,7 +44,7 @@ toExport["watch"] = function ()
         compare(w.file,p)
         compare(w.dir,slash.path(gone))
     })
-    section("onChange", function ()
+    await section("onChange", async function ()
     {
         w = watch.dir(gone,{emitRemove:true})
         seen = []

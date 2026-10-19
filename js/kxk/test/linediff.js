@@ -1,7 +1,7 @@
 var toExport = {}
 import linediff from "../linediff.js"
 
-toExport["linediff"] = function ()
+toExport["linediff"] = async function ()
 {
     compare(linediff('','y'),[{index:0,length:1}])
     compare(linediff('x','y'),[{index:0,length:1}])

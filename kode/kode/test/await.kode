@@ -7,7 +7,12 @@
 ###
 
 use ./utils ▪ kc ke
+use ../../kxk ▪ sleep
     
+delayed = value ○->
+    ○ sleep 10
+    value
+
 ▸ await
 
     kc 'await someFunctionCall()'      ▸ 'await someFunctionCall()'
@@ -60,4 +65,13 @@ use ./utils ▪ kc ke
             await info()
         }
         """
+    
+    ▸ the async comparison
+    
+        kc 'x ○▸ y' ▸ 'compare(await (x),await (y))'
+        kc 'x ▸ y'   ▸ 'compare(x,y)'
+    
+    ▸ an async comparison waits for both sides
+    
+        delayed 42 ○▸ 42
     

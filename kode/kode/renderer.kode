@@ -1720,7 +1720,7 @@ class Renderer
         @hint.section = true
                 
         gi = @ind()
-        s = "toExport[#{p.title.text}] = function ()\n"
+        s = "toExport[#{p.title.text}] = async function ()\n"
         s+= gi + '{\n' 
         s+= @indent + @nodes(p.exps, '\n'+@indent, true) + '\n' if valid p.exps
         s+= gi + '}\n' 
@@ -1731,7 +1731,7 @@ class Renderer
     subsect: p ->
         
         gi = @ind()
-        s = "section(#{p.title.text}, function ()\n"
+        s = "await section(#{p.title.text}, async function ()\n"
         s+= gi + '{\n'
         s+= @indent + @nodes(p.exps, '\n'+@indent) + '\n' if valid p.exps
         s+= gi + '})'
@@ -1746,10 +1746,21 @@ class Renderer
     
     compare: p ->
         
+        lhs = @node(p.lhs)
+        rhs = @node(p.rhs)
+        
+        # an async comparison waits for both sides before it looks at them.
+        # the brackets are not decoration: await binds tighter than an
+        # operator would, so 'await a + b' is '(await a) + b'
+        
+        if p.async
+            lhs = "await (#{lhs})"
+            rhs = "await (#{rhs})"
+        
         s = 'compare('   \
-          + @node(p.lhs) \
-          + ','          \
-          + @node(p.rhs) \
+          + lhs           \
+          + ','           \
+          + rhs           \
           + ')'
         s
         

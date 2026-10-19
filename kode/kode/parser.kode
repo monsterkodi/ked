@@ -1252,11 +1252,12 @@ function Parser extends parse
     
     compare: lhs tokens ->
         
-        tokens.shift()
+        tok = tokens.shift()
         
         compare:
             lhs: lhs
             rhs: @exp(tokens)
+            async: tok.async
 
     error: o tokens ->
         

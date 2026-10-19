@@ -8,9 +8,9 @@ let dissect = util.dissect
 let lang = util.lang
 
 lang('styl')
-toExport["styl"] = function ()
+toExport["styl"] = async function ()
 {
-    section("number", function ()
+    await section("number", async function ()
     {
         rgs = ranges("1em")
         compare(inc(rgs,0,"1em"),'number')
@@ -25,7 +25,7 @@ toExport["styl"] = function ()
         compare(inc(rgs,1,"."),'punct number float')
         compare(inc(rgs,2,"0"),'number float')
     })
-    section("class", function ()
+    await section("class", async function ()
     {
         rgs = ranges(".clss")
         compare(inc(rgs,0,"."),'punct class')
@@ -38,7 +38,7 @@ toExport["styl"] = function ()
         compare(inc(rgs,9,"-"),'punct class')
         compare(inc(rgs,10,"bar"),'class')
     })
-    section("id", function ()
+    await section("id", async function ()
     {
         rgs = ranges("#id")
         compare(inc(rgs,0,"#"),'punct function')
@@ -51,7 +51,7 @@ toExport["styl"] = function ()
         compare(inc(rgs,7,"-"),'punct function')
         compare(inc(rgs,8,"bar"),'function')
     })
-    section("hex", function ()
+    await section("hex", async function ()
     {
         rgs = ranges("#666")
         compare(inc(rgs,0,"#"),'punct number hex')
@@ -63,7 +63,7 @@ toExport["styl"] = function ()
         compare(inc(rgs,0,"#"),'punct number hex')
         compare(inc(rgs,1,"f0f0f0"),'number hex')
     })
-    section("comment header", function ()
+    await section("comment header", async function ()
     {
         rgs = ranges("// 000")
         compare(inc(rgs,3,"000"),'comment header')

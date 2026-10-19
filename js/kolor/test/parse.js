@@ -14,21 +14,21 @@ parse = function (c, e)
 {
     return kolor.parse(c.split('\n'),(e != null ? e : ext))
 }
-toExport["parse"] = function ()
+toExport["parse"] = async function ()
 {
-    section("comment", function ()
+    await section("comment", async function ()
     {
         lang('coffee')
         compare(parse("##"),[{chunks:[{start:0,length:1,match:"#",turd:"##",clss:'punct comment'},{start:1,length:1,match:"#",clss:'comment'}],chars:2,index:0,number:1,ext:'coffee'}])
         compare(parse(",#a"),[{chunks:[{start:0,length:1,match:",",turd:",#",clss:'punct minor'},{start:1,length:1,match:"#",clss:'punct comment'},{start:2,length:1,match:"a",clss:'comment'}],chars:3,index:0,number:1,ext:'coffee'}])
     })
-    section("function", function ()
+    await section("function", async function ()
     {
         compare(parse('->'),[{chunks:[{start:0,length:1,match:'-',turd:'->',clss:'punct function tail'},{start:1,length:1,match:'>',clss:'punct function head'}],chars:2,index:0,number:1,ext:'coffee'}])
         compare(parse('=>'),[{chunks:[{start:0,length:1,match:'=',turd:'=>',clss:'punct function bound tail'},{start:1,length:1,match:'>',clss:'punct function bound head'}],chars:2,index:0,number:1,ext:'coffee'}])
         compare(parse('f=->1'),[{chunks:[{start:0,length:1,match:'f',clss:'function'},{start:1,length:1,match:'=',turd:'=->',clss:'punct function'},{start:2,length:1,match:'-',turd:'->',clss:'punct function tail'},{start:3,length:1,match:'>',clss:'punct function head'},{start:4,length:1,match:'1',clss:'number'}],chars:5,index:0,number:1,ext:'coffee'}])
     })
-    section("minimal", function ()
+    await section("minimal", async function ()
     {
         compare(parse('1'),[{chunks:[{start:0,length:1,match:'1',clss:'number'}],chars:1,index:0,number:1,ext:'coffee'}])
         compare(parse('a'),[{chunks:[{start:0,length:1,match:'a',clss:'text'}],chars:1,index:0,number:1,ext:'coffee'}])
@@ -36,7 +36,7 @@ toExport["parse"] = function ()
         compare(parse('1.a'),[{chunks:[{start:0,length:1,match:'1',clss:'number'},{start:1,length:1,match:'.',clss:'punct property'},{start:2,length:1,match:'a',clss:'property'}],chars:3,index:0,number:1,ext:'coffee'}])
         compare(parse('++a'),[{chunks:[{start:0,length:1,match:'+',turd:'++',clss:'punct'},{start:1,length:1,match:'+',clss:'punct'},{start:2,length:1,match:'a',clss:'text'}],chars:3,index:0,number:1,ext:'coffee'}])
     })
-    section("space", function ()
+    await section("space", async function ()
     {
         b = parse("x")
         compare(b[0].chunks[0].start,0)
@@ -49,15 +49,15 @@ toExport["parse"] = function ()
         compare(b[0].chunks[1].start,6)
         compare(b[0].chunks[2].start,9)
     })
-    section("globalize", function ()
+    await section("globalize", async function ()
     {
-        section("enable", function ()
+        await section("enable", async function ()
         {
             kolor.klor.globalize()
             compare(global['red'],kolor.klor.red)
             compare(global['red']('txt'),kolor.klor.red('txt'))
         })
-        section("disable", function ()
+        await section("disable", async function ()
         {
             kolor.klor.globalize(false)
             compare(global['red']('txt'),'txt')

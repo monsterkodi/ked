@@ -8,16 +8,16 @@ import color from "../theme/color.js"
 
 import belt from "../edit/tool/belt.js"
 
-toExport["color"] = function ()
+toExport["color"] = async function ()
 {
-    section("hex", function ()
+    await section("hex", async function ()
     {
         compare(color.hex([0,0,0]),'#000000')
         compare(color.hex([0,255,0]),'#00ff00')
         compare(color.hex([255,255,0]),'#ffff00')
         compare(color.hex('#ffff00'),'#ffff00')
     })
-    section("darken", function ()
+    await section("darken", async function ()
     {
         compare(color.darken(color.values('ffff00'),1),color.values('#ffff00'))
         compare(color.darken(color.values('ffff00'),0.9),color.values('#e5e500'))
@@ -31,7 +31,7 @@ toExport["color"] = function ()
         compare(color.darken(color.values('ffff00'),0.1),color.values('#191900'))
         compare(color.darken(color.values('ffff00'),0),color.values('#000000'))
     })
-    section("colorSeglsForText", function ()
+    await section("colorSeglsForText", async function ()
     {
         compare(belt.colorSeglsForText("hello\nworld"),[[],kseg.segls("hello\nworld")])
         compare(belt.colorSeglsForText(_k_.r5("red")),[[[{x:0,fg:[255,0,0],w:3}]],kseg.segls("red")])
@@ -42,7 +42,7 @@ toExport["color"] = function ()
         compare(belt.colorSeglsForText(color.bg_rgb([12,123,234]) + color.fg_rgb([12,123,234]) + ("rgb")),[[[{x:0,bg:[12,123,234]},{x:0,fg:[12,123,234]}]],kseg.segls("rgb")])
         compare(belt.colorSeglsForText(`▸ ${color.fg_rgb([255,255,0,0])}${color.fg_rgb()} ms`),[[[{x:2,fg:[255,255,0],w:1}]],kseg.segls("▸  ms")])
     })
-    section("adjustForBackground", function ()
+    await section("adjustForBackground", async function ()
     {
         compare(color.adjustForBackground([255,255,0],[0,0,0]),[255,255,0])
         compare(color.adjustForBackground([255,255,0],[200,200,0]),[76,77,0])

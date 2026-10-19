@@ -7,7 +7,7 @@ let inc = util.inc
 let lang = util.lang
 
 lang('json')
-toExport["json"] = function ()
+toExport["json"] = async function ()
 {
     rgs = ranges(`{ "A Z": 1 }`)
     compare(inc(rgs,2,'"'),'punct dictionary')

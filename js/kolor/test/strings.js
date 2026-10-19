@@ -5,7 +5,7 @@ import util from "./util.js"
 let inc = util.inc
 let ranges = util.ranges
 
-toExport["strings"] = function ()
+toExport["strings"] = async function ()
 {
     rgs = ranges("slash = require 'kslash'")
     compare(inc(rgs,16,"'"),'punct require')
@@ -55,7 +55,7 @@ toExport["strings"] = function ()
     compare(inc(rgs,6,'"'),'string single')
     compare(inc(rgs,7,'"'),'string single')
     compare(inc(rgs,8,'"'),'string single')
-    section("interpolation", function ()
+    await section("interpolation", async function ()
     {
         rgs = ranges('"#{xxx}"')
         compare(inc(rgs,0,'"'),'punct string double')

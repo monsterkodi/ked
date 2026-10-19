@@ -3,9 +3,9 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["qmark"] = function ()
+toExport["qmark"] = async function ()
 {
-    section("nullcmp", function ()
+    await section("nullcmp", async function ()
     {
         compare(kc("a?"),";(a != null)")
         compare(kc("a.b.c?"),";(a.b.c != null)")
@@ -27,12 +27,12 @@ toExport["qmark"] = function ()
     return (m[1] != null)
 })`)
     })
-    section("?=", function ()
+    await section("?=", async function ()
     {
         compare(kc("t.a ?= {}"),`t.a = ((_1_4_=t.a) != null ? _1_4_ : {})`)
         compare(kc("x = t.b ?= {}"),`x = t.b = ((_1_8_=t.b) != null ? _1_8_ : {})`)
     })
-    section("qmrkcolon", function ()
+    await section("qmrkcolon", async function ()
     {
         compare(kc("a ? b : c"),`;(a ? b : c)`)
         compare(kc("x = a ? b : c"),`x = (a ? b : c)`)
@@ -46,7 +46,7 @@ toExport["qmark"] = function ()
         compare(kc("true or false ? a:'b' : 666"),`;(true || false ? {a:'b'} : 666)`)
         compare(ke("true or false ? a:'b' : 666"),{a:'b'})
     })
-    section("assert", function ()
+    await section("assert", async function ()
     {
         compare(kc("e?.d"),";(e != null ? e.d : undefined)")
         compare(kc("e?[1]"),";(e != null ? e[1] : undefined)")
@@ -65,7 +65,7 @@ toExport["qmark"] = function ()
 })`)
         compare(ke("e=1;e?[1]?.g"),undefined)
         compare(kc("line.turd?[..1] == 'xxx'"),";(line.turd != null ? line.turd.slice(0, 2) : undefined) === 'xxx'")
-        section("call", function ()
+        await section("call", async function ()
         {
             compare(kc("e?()"),';(typeof e === "function" ? e() : undefined)')
             compare(kc(`if 1
@@ -74,7 +74,7 @@ toExport["qmark"] = function ()
     ;(typeof a === "function" ? a() : undefined)
 }`)
         })
-        section("assign", function ()
+        await section("assign", async function ()
         {
             compare(kc(`a? = 1`),`if ((a != null)) { a = 1 }`)
             compare(kc(`a?.b = 1`),`if ((a != null)) { a.b = 1 }`)
@@ -82,14 +82,14 @@ toExport["qmark"] = function ()
             compare(kc(`a?.b.c().d[1].e = 1`),`if ((a != null)) { a.b.c().d[1].e = 1 }`)
         })
     })
-    section("combined", function ()
+    await section("combined", async function ()
     {
         compare(kc("e?.col?"),";((e != null ? e.col : undefined) != null)")
         compare(kc(`(a.b?.c.d?.e == 2)`),`;(((_1_4_=a.b) != null ? (_1_9_=_1_4_.c.d) != null ? _1_9_.e : undefined : undefined) === 2)`)
         compare(kc(`x = a[1]?.b()?.c?().d?.e`),`x = (a[1] != null ? (_1_13_=a[1].b()) != null ? typeof (_1_16_=_1_13_.c) === "function" ? (_1_21_=_1_16_().d) != null ? _1_21_.e : undefined : undefined : undefined : undefined)`)
         compare(kc(`x = a.b?[222]?(333)?.e`),`x = ((_1_7_=a.b) != null ? typeof _1_7_[222] === "function" ? (_1_19_=_1_7_[222](333)) != null ? _1_19_.e : undefined : undefined : undefined)`)
     })
-    section("functions", function ()
+    await section("functions", async function ()
     {
         compare(kc("f c ? '', 4"),"f((c != null ? c : ''),4)")
         compare(kc(`a = ->

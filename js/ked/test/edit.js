@@ -7,9 +7,9 @@ let immutable = kxk.immutable
 
 import belt from "../edit/tool/belt.js"
 
-toExport["tool edit"] = function ()
+toExport["tool edit"] = async function ()
 {
-    section("toggleCommentTypesInLineRangesAtIndices", function ()
+    await section("toggleCommentTypesInLineRangesAtIndices", async function ()
     {
         lines = belt.seglsForText(`code = true
 # comment
@@ -22,7 +22,7 @@ a
 ###
 code = 'yes' # trailing`)
     })
-    section("deleteLineRangesAndAdjustPositions", function ()
+    await section("deleteLineRangesAndAdjustPositions", async function ()
     {
         lines = belt.seglsForText(`1234567890
 abcdefghij`)
@@ -37,9 +37,9 @@ line 2
 line 3`)
         compare(belt.deleteLineRangesAndAdjustPositions(lines,[[0,0,6,1]],[[6,0],[6,1]]),[[kseg('line 3')],[[0,0]]])
     })
-    section("insertTextAtPositions", function ()
+    await section("insertTextAtPositions", async function ()
     {
-        section("single spans", function ()
+        await section("single spans", async function ()
         {
             lines = belt.seglsForText(`line 1
 line 2`)
@@ -52,7 +52,7 @@ line 2`)
             compare(belt.insertTextAtPositions(lines,'ｔ',[[0,0]]),[kseg.segls('ｔline 1\nline 2'),[[2,0]]])
             compare(belt.insertTextAtPositions(kseg.segls('ｔline 1\nline 2'),'ｔ',[[2,0]]),[kseg.segls('ｔｔline 1\nline 2'),[[4,0]]])
         })
-        section("multiple lines into single cursor", function ()
+        await section("multiple lines into single cursor", async function ()
         {
             lines = belt.seglsForText(`line 1
 line 2`)
@@ -61,7 +61,7 @@ line 2`)
             compare(belt.insertTextAtPositions(lines,'a\nb',[[0,1]]),[kseg.segls('line 1\na\nb\nline 2'),[[0,3]]])
             compare(belt.insertTextAtPositions(lines,'a\n',[[0,1]]),[kseg.segls('line 1\na\nline 2'),[[0,2]]])
         })
-        section("multiple lines into multi cursor", function ()
+        await section("multiple lines into multi cursor", async function ()
         {
             lines = belt.seglsForText(`1234
 5678`)
@@ -69,7 +69,7 @@ line 2`)
             compare(belt.insertTextAtPositions(lines,'X\nY',[[0,0],[1,0],[2,0],[3,0]]),[kseg.segls('X1Y2X3Y4\n5678'),[[1,0],[3,0],[5,0],[7,0]]])
             compare(belt.insertTextAtPositions(lines,'@\n$\n%',[[0,0],[1,0],[2,0],[3,0]]),[kseg.segls('@1$2%3@4\n5678'),[[1,0],[3,0],[5,0],[7,0]]])
         })
-        section("newlines", function ()
+        await section("newlines", async function ()
         {
             lines = belt.seglsForText(`line 1
 line 2`)
@@ -85,27 +85,27 @@ line 2`)
 ◆4`)
             compare(belt.insertTextAtPositions(lines,'\n',[[1,0],[1,1],[1,2],[1,3]]),[kseg.segls('◆\n1\n◆\n2\n◆\n3\n◆\n4'),[[0,1],[0,3],[0,5],[0,7]]])
         })
-        section("into indented lines", function ()
+        await section("into indented lines", async function ()
         {
             lines = belt.seglsForText(`◆1
     ◆2
         ◆3`)
-            section("single span", function ()
+            await section("single span", async function ()
             {
                 compare(belt.insertTextAtPositions(lines,'~!',[[4,1]]),[kseg.segls('◆1\n    ~!◆2\n        ◆3'),[[6,1]]])
                 compare(belt.insertTextAtPositions(lines,'#{',[[2,2]]),[kseg.segls('◆1\n    ◆2\n  #{      ◆3'),[[4,2]]])
             })
-            section("newline into single cursor", function ()
+            await section("newline into single cursor", async function ()
             {
                 compare(belt.insertTextAtPositions(lines,'\n',[[4,1]]),[kseg.segls('◆1\n    \n    ◆2\n        ◆3'),[[4,2]]])
             })
-            section("multiple lines into single cursor", function ()
+            await section("multiple lines into single cursor", async function ()
             {
                 compare(belt.insertTextAtPositions(lines,'a\nb',[[4,1]]),[kseg.segls('◆1\n    a\n    b\n    ◆2\n        ◆3'),[[4,3]]])
             })
         })
     })
-    section("insertSurroundAtRanges", function ()
+    await section("insertSurroundAtRanges", async function ()
     {
         lines = belt.seglsForText(`line1
 line2`)
@@ -119,7 +119,7 @@ line2`)
         compare(belt.insertSurroundAtRanges(lines,[[1,0,3,0]],"#",['#{','}']),[kseg.segls("l\#{in}e1\nline2"),[[3,0]]])
         compare(belt.insertSurroundAtRanges(lines,[[1,0,3,0],[1,1,3,1]],'"',['"','"']),[kseg.segls('l"in"e1\nl"in"e2'),[[5,0],[5,1]]])
     })
-    section("moveLineRangesAndPositionsAtIndicesInDirection", function ()
+    await section("moveLineRangesAndPositionsAtIndicesInDirection", async function ()
     {
         lines = immutable(['a','b','c'])
         rngs = immutable([])
@@ -142,7 +142,7 @@ line2`)
         compare(belt.moveLineRangesAndPositionsAtIndicesInDirection(lines,rngs,immutable([[0,1],[0,2],[0,3]]),[1,2,3],'up'),[['b','c','d','a','e'],[],[[0,0],[0,1],[0,2]]])
         compare(belt.moveLineRangesAndPositionsAtIndicesInDirection(lines,rngs,immutable([[0,1],[0,2],[0,3]]),[1,2,3],'down'),[['a','e','b','c','d'],[],[[0,2],[0,3],[0,4]]])
     })
-    section("prepareWordsForCompletion", function ()
+    await section("prepareWordsForCompletion", async function ()
     {
         words = belt.linesForText(`Alice
 Alice!
@@ -180,7 +180,7 @@ Alice’s,`)
         compare(belt.prepareWordsForCompletion('b','b',['a\n','b\n']),[])
         compare(belt.prepareWordsForCompletion('@img.pop','pop',['@img.pop()']),['pop()'])
     })
-    section("indentLineRangesAndPositionsAtIndices", function ()
+    await section("indentLineRangesAndPositionsAtIndices", async function ()
     {
         lines = belt.seglsForText(`◆1
     ◆2
@@ -189,7 +189,7 @@ Alice’s,`)
         rngs = immutable([[0,1],[1,1]])
         compare(belt.indentLineRangesAndPositionsAtIndices(lines,posl,rngs,[0,1]),[[kseg('    ◆1'),kseg('        ◆2'),kseg('        ◆3')],[[4,0,5,1]],[[4,1],[5,1]]])
     })
-    section("deindentLineRangesAndPositionsAtIndices", function ()
+    await section("deindentLineRangesAndPositionsAtIndices", async function ()
     {
         lines = belt.seglsForText(`◆1
     ◆2

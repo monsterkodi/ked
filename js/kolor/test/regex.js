@@ -7,9 +7,9 @@ let inc = util.inc
 let lang = util.lang
 
 lang('kode')
-toExport["regex"] = function ()
+toExport["regex"] = async function ()
 {
-    section("regexp", function ()
+    await section("regexp", async function ()
     {
         rgs = ranges("r=/a/")
         compare(inc(rgs,2,'/'),'punct regexp start')
@@ -58,7 +58,7 @@ toExport["regex"] = function ()
         compare(inc(rgs,10,'test'),'property')
         compare(inc(rgs,15,'s'),'text')
     })
-    section("no regexp", function ()
+    await section("no regexp", async function ()
     {
         rgs = ranges('a / b - c / d')
         compare(inc(rgs,2,'/'),'punct')

@@ -3,20 +3,20 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["func"] = function ()
+toExport["func"] = async function ()
 {
-    section("async", function ()
+    await section("async", async function ()
     {
         compare(kc('○->'),'async function ()\n{}')
         compare(kc('○=>'),'async function ()\n{}')
     })
-    section("func", function ()
+    await section("func", async function ()
     {
         compare(kc('->'),'(function ()\n{})')
         compare(kc('(a) ->'),'(function (a)\n{})')
         compare(kc('(a,b,c) ->'),'(function (a, b, c)\n{})')
         compare(kc('a = (a,b) ->'),'\na = function (a, b)\n{}')
-        section("return", function ()
+        await section("return", async function ()
         {
             compare(kc(`-> return 1`),`(function ()
 {
@@ -121,7 +121,7 @@ a`),`if (x)
 }
 a`)
         })
-        section("log", function ()
+        await section("log", async function ()
         {
             compare(kc(`a = ->
     log 'a'
@@ -138,7 +138,7 @@ b = function ()
     console.log('b')
 }`)
         })
-        section("this", function ()
+        await section("this", async function ()
         {
             compare(kc("-> @a"),`(function ()
 {
@@ -164,7 +164,7 @@ b = function ()
 })`)
         })
     })
-    section("ellipsis", function ()
+    await section("ellipsis", async function ()
     {
         compare(kc(`f = (a1, args...) -> 2`),`
 f = function (a1, ...args)
@@ -182,7 +182,7 @@ f = function (a3, ...args)
     return 2
 }`)
     })
-    section("return", function ()
+    await section("return", async function ()
     {
         compare(kc(`ff = ->
     if 232 then return`),`

@@ -4,7 +4,7 @@ let kc = utils.kc
 let ke = utils.ke
 let kf = utils.kf
 
-toExport["return"] = function ()
+toExport["return"] = async function ()
 {
     compare(kc('-> return 1'),`(function ()
 {

@@ -3,9 +3,9 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["object"] = function ()
+toExport["object"] = async function ()
 {
-    section("object", function ()
+    await section("object", async function ()
     {
         compare(kc('a:1'),'{a:1}')
         compare(kc('{a:1}'),'{a:1}')
@@ -87,7 +87,7 @@ console.log(i)`)
     new:new
     is:is`),`d = {delete:delete,empty:empty,valid:valid,noon:noon,new:new,is:is}`)
     })
-    section("stringify", function ()
+    await section("stringify", async function ()
     {
         compare(kc("a.b:1"),"{'a.b':1}")
         compare(kc("|:1"),"{'|':1}")
@@ -103,7 +103,7 @@ console.log(i)`)
         compare(kc("-:1"),"{'-':1}")
         compare(kc("/:1"),"{'/':1}")
     })
-    section("assign", function ()
+    await section("assign", async function ()
     {
         compare(kc("{x} = o"),"x = o.x\n")
         compare(kc("{x,y} = o"),"x = o.x\ny = o.y\n")

@@ -3,16 +3,16 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["punctuation"] = function ()
+toExport["punctuation"] = async function ()
 {
-    section("parens", function ()
+    await section("parens", async function ()
     {
         compare(kc('(b)'),';(b)')
         compare(kc('(b(c))'),';(b(c))')
         compare(kc('(b(--c))'),';(b(--c))')
         compare(kc('a + (b(--c))'),'a + (b(--c))')
     })
-    section("close", function ()
+    await section("close", async function ()
     {
         compare(kc(`if
     (   true and 
@@ -94,7 +94,7 @@ else if ((true && true))
     15
 }`)
     })
-    section("optional commata", function ()
+    await section("optional commata", async function ()
     {
         compare(kc("a = -1"),"a = -1")
         compare(kc("a = [ 1 2 3 ]"),"a = [1,2,3]")

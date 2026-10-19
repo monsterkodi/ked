@@ -1,10 +1,10 @@
-var _k_ = {k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}, lpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s=c+s} return s}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, isArr: function (o) {return Array.isArray(o)}, isStr: function (o) {return typeof o === 'string' || o instanceof String}, isObj: function (o) {return !(o == null || typeof o != 'object' || o.constructor.name !== 'Object')}, each_r: function (o) {return Array.isArray(o) ? [] : typeof o == 'string' ? o.split('') : {}}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, noon: function (obj) { 
+var _k_ = {k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}, lpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s=c+s} return s}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, isArr: function (o) {return Array.isArray(o)}, isStr: function (o) {return typeof o === 'string' || o instanceof String}, isObj: function (o) {return !(o == null || typeof o != 'object' || o.constructor.name !== 'Object')}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, noon: function (obj) { 
     var pad = function (s, l) { while (s.length < l) { s += ' ' }; return s }; 
     var esc = function (k, arry) { var es, sp; if (0 <= k.indexOf('\n')) { sp = k.split('\n'); es = sp.map(function (s) { return esc(s,arry) }); es.unshift('...'); es.push('...'); return es.join('\n') } if (k === '' || k === '...' || _k_.in(k[0],[' ','#','|']) || _k_.in(k[k.length - 1],[' ','#','|'])) { k = '|' + k + '|' } else if (arry && /  /.test(k)) { k = '|' + k + '|' }; return k }; 
     var pretty = function (o, ind, seen) { var k, kl, l, v, mk = 4; if (Object.keys(o).length > 1) { for (k in o) { if (Object.hasOwn(o,k)) { kl = parseInt(Math.ceil((k.length + 2) / 4) * 4); mk = Math.max(mk,kl); if (mk > 32) { mk = 32; break } } } }; l = []; var keyValue = function (k, v) { var i, ks, s, vs; s = ind; k = esc(k,true); if (k.indexOf('  ') > 0 && k[0] !== '|') { k = '|'+k+'|' } else if (k[0] !== '|' && k[k.length - 1] === '|') { k = '|' + k } else if (k[0] === '|' && k[k.length - 1] !== '|') { k += '|' }; ks = pad(k,Math.max(mk,k.length + 2)); i = pad(ind + '    ',mk); s += ks; vs = toStr(v,i,false,seen); if (vs[0] === '\n') { while (s[s.length - 1] === ' ') { s = s.substr(0,s.length - 1) } }; s += vs; while (s[s.length - 1] === ' ') { s = s.substr(0,s.length - 1) }; return s }; for (k in o) { if (Object.hasOwn(o,k)) { l.push(keyValue(k,o[k])) } }; return l.join('\n') }; 
     var toStr = function (o, ind = '', arry = false, seen = []) { var s, t, v; if (!(o != null)) { if (o === null) { return 'null' }; if (o === undefined) { return 'undefined' }; return '<?>' }; switch (t = typeof(o)) { case 'string': {return esc(o,arry)}; case 'object': { if (_k_.in(o,seen)) { return '<v>' }; seen.push(o); if ((o.constructor != null ? o.constructor.name : undefined) === 'Array') { s = ind !== '' && arry && '.' || ''; if (o.length && ind !== '') { s += '\n' }; s += (function () { var result = []; var list = _k_.list(o); for (var li = 0; li < list.length; li++)  { v = list[li];result.push(ind + toStr(v,ind + '    ',true,seen))  } return result }).bind(this)().join('\n') } else if ((o.constructor != null ? o.constructor.name : undefined) === 'RegExp') { return o.source } else { s = (arry && '.\n') || ((ind !== '') && '\n' || ''); s += pretty(o,ind,seen) }; return s } default: return String(o) }; return '<???>' }; 
     return toStr(obj);
-}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, dir: function () { let url = import.meta.url.substring(7); let si = url.lastIndexOf('/'); return url.substring(0, si); }, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}};_k_.R1=_k_.k.B256(_k_.k.R(1));_k_.R2=_k_.k.B256(_k_.k.R(2));_k_.r3=_k_.k.F256(_k_.k.r(3));_k_.r4=_k_.k.F256(_k_.k.r(4));_k_.r5=_k_.k.F256(_k_.k.r(5));_k_.g1=_k_.k.F256(_k_.k.g(1));_k_.G1=_k_.k.B256(_k_.k.G(1));_k_.g3=_k_.k.F256(_k_.k.g(3));_k_.y2=_k_.k.F256(_k_.k.y(2));_k_.y3=_k_.k.F256(_k_.k.y(3));_k_.y5=_k_.k.F256(_k_.k.y(5));_k_.y6=_k_.k.F256(_k_.k.y(6));_k_.y8=_k_.k.F256(_k_.k.y(8));_k_.W1=_k_.k.B256(_k_.k.W(1));_k_.w2=_k_.k.F256(_k_.k.w(2))
+}, each_r: function (o) {return Array.isArray(o) ? [] : typeof o == 'string' ? o.split('') : {}}, dir: function () { let url = import.meta.url.substring(7); let si = url.lastIndexOf('/'); return url.substring(0, si); }, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}};_k_.R1=_k_.k.B256(_k_.k.R(1));_k_.R2=_k_.k.B256(_k_.k.R(2));_k_.r3=_k_.k.F256(_k_.k.r(3));_k_.r4=_k_.k.F256(_k_.k.r(4));_k_.r5=_k_.k.F256(_k_.k.r(5));_k_.g1=_k_.k.F256(_k_.k.g(1));_k_.G1=_k_.k.B256(_k_.k.G(1));_k_.g3=_k_.k.F256(_k_.k.g(3));_k_.y2=_k_.k.F256(_k_.k.y(2));_k_.y3=_k_.k.F256(_k_.k.y(3));_k_.y5=_k_.k.F256(_k_.k.y(5));_k_.y6=_k_.k.F256(_k_.k.y(6));_k_.y8=_k_.k.F256(_k_.k.y(8));_k_.W1=_k_.k.B256(_k_.k.W(1));_k_.w2=_k_.k.F256(_k_.k.w(2))
 
 var allfails, allsuccs, columns, comps, fail, fails, file, files, stack, succs, test, tester
 
@@ -32,7 +32,7 @@ class Tester
         this.section = this.section.bind(this)
     }
 
-    section (t, f)
+    async section (t, f)
     {
         var depth
 
@@ -45,7 +45,7 @@ class Tester
         }
         try
         {
-            f()
+            await f()
         }
         catch (err)
         {
@@ -123,9 +123,9 @@ class Tester
         return fails.push({stack:stack.concat([comps]),comps:comps,lhs:a,rhs:b})
     }
 
-    test (testModule)
+    async test (testModule)
     {
-        var logModules
+        var k, keys, logModules, v
 
         if ((testModule != null ? testModule._test_ : undefined) !== true)
         {
@@ -138,37 +138,30 @@ class Tester
         global.compare = this.compare
         global.section = this.section
         logModules = this.logModules
-        ;        (function (o) {
-            var r = _k_.each_r(o)
-            for (var k in o)
-            {   
-                var m = (function (k, v)
+        keys = Object.keys(testModule)
+        var list = _k_.list(keys)
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            k = list[_a_]
+            v = testModule[k]
+            if (v._section_)
             {
-                if (v._section_)
+                stack.push(k)
+                if (logModules !== false)
                 {
-                    stack.push(k)
-                    if (logModules !== false)
-                    {
-                        console.log(_k_.G1(_k_.y8(' ' + kstr.crop(k,columns) + ' ')))
-                    }
-                    try
-                    {
-                        v()
-                    }
-                    catch (err)
-                    {
-                        fails.push({stack:stack.concat([comps]),comps:comps,lhs:`${err}`,rhs:''})
-                    }
-                    return stack.pop()
+                    console.log(_k_.G1(_k_.y8(' ' + kstr.crop(k,columns) + ' ')))
                 }
-            })(k, o[k])
-                if (m != null && m[0] != null)
+                try
                 {
-                    r[m[0]] = m[1]
+                    await v()
                 }
+                catch (err)
+                {
+                    fails.push({stack:stack.concat([comps]),comps:comps,lhs:`${err}`,rhs:''})
+                }
+                stack.pop()
             }
-            return typeof o == 'string' ? r.join('') : r
-        })(testModule)
+        }
         allsuccs += succs
         allfails = allfails.concat(fails)
         return _k_.empty(fails)
@@ -270,7 +263,7 @@ for (var _a_ = 0; _a_ < list.length; _a_++)
     tester = new Tester
     tester.logSections = false
     tester.logModules = false
-    fail = fail || !tester.test(test.default)
+    fail = fail || !(await tester.test(test.default))
 }
     tester.summarize()
     if (fail)
@@ -279,5 +272,5 @@ for (var _a_ = 0; _a_ < list.length; _a_++)
 }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi9rb2RlL2tvZGUvdGVzdGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBV0EsS0FBSztBQUVMLFFBQVE7QUFDUixRQUFRO0FBQ1I7QUFDQTtBQUNBO0FBQ0EsV0FBVztBQUNYLFVBQVc7Ozs7Ozs7Ozs7Ozs7O1FBY0gsTUFBTSxLQUFLO1FBQ1gsUUFBUTtRQUNSLFFBQVEsTUFBTTtZQUNYLEtBQUMsZ0JBQWU7O1lBQ2YsNEJBQVksUUFBTSxJQUFFLEtBQUssTUFBTSxtQkFBZSxFQUFHLElBQUUsSUFBRSxVQUFVLEtBQUssS0FBSyxFQUFHLFVBQVEsSUFBRSxRQUFNLEtBQUs7Ozs7WUFFakc7O2VBQ0U7O1lBRUYsTUFBTSxNQUNGLE1BQU8sTUFBTSxRQUFRLFFBQ3JCLE1BQU8sTUFDUCxPQUFVLE1BQ1YsSUFBTzs7ZUFFZixNQUFNOzs7Ozs7O1lBV0YsT0FBTyxHQUFHLEVBQUc7O21CQUVQOztpQkFFTixPQUFPLE9BQUssT0FBTzs7bUJBRWI7OzJCQUVOLGdCQUFhOztnQkFFTixFQUFFLFdBQVUsRUFBRTs7dUJBQ1g7OytCQUNHLFNBQUksRUFBRSwwQkFBRixFQUFFLGFBQUYsRUFBRTs7cUJBQ0osS0FBQyxZQUFZLEVBQUUsR0FBSSxFQUFFOzsyQkFDdEI7OzttQkFDUjs7MkJBRU4sZ0JBQWE7O2dCQUVOLE1BQUs7O2dCQUNKLG1CQUFPLEtBQUMsVUFBVTtnQkFDbEIsbUJBQU8sS0FBQyxVQUFVO3VCQUNoQjs7bUJBQ0o7OzJCQUVOLGdCQUFhOztZQUVULFdBQVcsS0FBQyxZQUFZLE9BQU8sS0FBSyxHQUFJLE9BQU8sS0FBSztZQUNwRCxXQUFXLEtBQUMsWUFBWSxPQUFPLE9BQU8sR0FBSSxPQUFPLE9BQU87bUJBRXRELFlBQWE7O2VBRXZCLE1BQUs7Ozs7Ozs7UUFJTDtZQUVHLE9BQU8sT0FBSzs7Z0JBQ1IsRUFBRTs7Z0JBQ0Q7Ozs7WUFHTCxLQUFDLFlBQVksRUFBRzs7WUFDZjs7O1FBR0osZ0JBQVksTUFBTSxTQUFPLEtBQUc7UUFFNUIsbUJBQU8sTUFBTSxNQUFNLFFBQVEsUUFBUSxhQUFTLEtBQUMsTUFBTSxNQUFNLG9CQUFZLFVBQVUsYUFBUyxLQUFDLE1BQU07ZUFFL0YsTUFBTSxNQUNGLE1BQU8sTUFBTSxRQUFRLFFBQ3JCLE1BQU8sTUFDUCxJQUFPLEVBQ1AsSUFBTzs7Ozs7OzthQVdOLHFCQUFBLFdBQVksd0JBQVU7Ozs7UUFFM0IsUUFBUTtRQUNSLFFBQVE7UUFDUjtRQUNBO1FBRUEsT0FBTyxVQUFVLEtBQUM7UUFDbEIsT0FBTyxVQUFVLEtBQUM7UUFFbEIsYUFBYSxLQUFDOzs7Ozs7O29CQUlQLEVBQUU7O29CQUNELE1BQU0sS0FBSzt3QkFDUixlQUFjOzt3QkFDYiwwQkFBVSxNQUFNLEtBQUssS0FBSyxFQUFHLFdBQVc7Ozs7d0JBRXhDOzsyQkFDRTs7d0JBRUYsTUFBTSxNQUNGLE1BQU8sTUFBTSxRQUFRLFFBQ3JCLE1BQU8sTUFDUCxPQUFVLE1BQ1YsSUFBTzs7MkJBQ2YsTUFBTTs7Ozs7Ozs7O1dBZmQ7UUFpQkEsWUFBWTtRQUNaLFdBQVcsU0FBUyxPQUFPO3lCQUVyQjs7Ozs7d0JBVUM7OzRCQUNJOztlQUNYLEVBQUUsTUFBTSxNQUFNOzttQkFBVyxXQUFLO1dBQU0sS0FBSzs7Ozs7Ozs0QkFJN0I7Ozs7WUFDUiwwQkFBVSxNQUFNLEtBQUssTUFBTSxLQUFLLHNCQUFjLFFBQVEsS0FBSyxZQUFNLEdBQUssWUFBUSxVQUFVO1lBQ3hGLG1CQUFPLEtBQUMsVUFBVSxLQUFLO1lBQ3ZCLDBCQUFVO1lBQ1YsbUJBQU8sS0FBQyxVQUFVLEtBQUs7O1lBT3hCLFlBQVksTUFBTTs7WUFDakIsaUJBQWMsS0FBSyxRQUFROzJCQUNsQjs7Z0JBQ0wseUJBQWlCLGdCQUFZLFNBQVMsaUJBQWEsZUFBYyxTQUFTLFNBQVMsSUFBSSxPQUFPOztxQkFDMUY7O2dCQUNKLGtCQUFjLGdCQUFZLFlBQVk7O1lBQzFDLFlBQUk7O1FBRVI7ZUFDQSxXQUFXOzs7Ozs7O3NCQVVFOzttQkFBWDs7UUFFRixTQUFTLEtBQUcsR0FBRyxNQUFNO1FBRXJCLElBQUk7UUFDSjs7Ozs7OytCQUNhOzsyQkFDTCxJQUFJLEtBQUc7Ozs7Ozs7OztXQUZQO1FBT1IsUUFBUSxNQUFNOzttQkFBYyxFQUFFOztRQUU5QixLQUFLLE1BQU0sWUFBUTtlQUVuQjs7OzttQkFFRzs7O0lBSVAsY0FBUyxJQUFJLEtBQUssTUFBTSxlQUFXO0lBQ25DLE9BQU87d0JBQ0s7Ozs7UUFDSSxNQUFNLEtBQUssS0FBSyxVQUFTOztRQUFyQzs7SUFDQSxhQUFRLE9BQU8sS0FBSztJQUNwQixhQUFhO0lBQ2IsT0FBTyxjQUFjO0lBQ3JCLE9BQU8sYUFBYTtJQUNwQixPQUFPLFNBQVksT0FBTyxLQUFLLEtBQUs7O0lBQ3hDLE9BQU87UUFDSjs7SUFDQyxRQUFRLEtBQUsifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi9rb2RlL2tvZGUvdGVzdGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBV0EsS0FBSztBQUVMLFFBQVE7QUFDUixRQUFRO0FBQ1I7QUFDQTtBQUNBO0FBQ0EsV0FBVztBQUNYLFVBQVc7Ozs7Ozs7Ozs7Ozs7O1FBY0gsTUFBTSxLQUFLO1FBQ1gsUUFBUTtRQUNSLFFBQVEsTUFBTTtZQUNYLEtBQUMsZ0JBQWU7O1lBQ2YsNEJBQVksUUFBTSxJQUFFLEtBQUssTUFBTSxtQkFBZSxFQUFHLElBQUUsSUFBRSxVQUFVLEtBQUssS0FBSyxFQUFHLFVBQVEsSUFBRSxRQUFNLEtBQUs7Ozs7a0JBRS9GOztlQUNBOztZQUVGLE1BQU0sTUFDRixNQUFPLE1BQU0sUUFBUSxRQUNyQixNQUFPLE1BQ1AsT0FBVSxNQUNWLElBQU87O2VBRWYsTUFBTTs7Ozs7OztZQVdGLE9BQU8sR0FBRyxFQUFHOzttQkFFUDs7aUJBRU4sT0FBTyxPQUFLLE9BQU87O21CQUViOzsyQkFFTixnQkFBYTs7Z0JBRU4sRUFBRSxXQUFVLEVBQUU7O3VCQUNYOzsrQkFDRyxTQUFJLEVBQUUsMEJBQUYsRUFBRSxhQUFGLEVBQUU7O3FCQUNKLEtBQUMsWUFBWSxFQUFFLEdBQUksRUFBRTs7MkJBQ3RCOzs7bUJBQ1I7OzJCQUVOLGdCQUFhOztnQkFFTixNQUFLOztnQkFDSixtQkFBTyxLQUFDLFVBQVU7Z0JBQ2xCLG1CQUFPLEtBQUMsVUFBVTt1QkFDaEI7O21CQUNKOzsyQkFFTixnQkFBYTs7WUFFVCxXQUFXLEtBQUMsWUFBWSxPQUFPLEtBQUssR0FBSSxPQUFPLEtBQUs7WUFDcEQsV0FBVyxLQUFDLFlBQVksT0FBTyxPQUFPLEdBQUksT0FBTyxPQUFPO21CQUV0RCxZQUFhOztlQUV2QixNQUFLOzs7Ozs7O1FBSUw7WUFFRyxPQUFPLE9BQUs7O2dCQUNSLEVBQUU7O2dCQUNEOzs7O1lBR0wsS0FBQyxZQUFZLEVBQUc7O1lBQ2Y7OztRQUdKLGdCQUFZLE1BQU0sU0FBTyxLQUFHO1FBRTVCLG1CQUFPLE1BQU0sTUFBTSxRQUFRLFFBQVEsYUFBUyxLQUFDLE1BQU0sTUFBTSxvQkFBWSxVQUFVLGFBQVMsS0FBQyxNQUFNO2VBRS9GLE1BQU0sTUFDRixNQUFPLE1BQU0sUUFBUSxRQUNyQixNQUFPLE1BQ1AsSUFBTyxFQUNQLElBQU87Ozs7Ozs7YUFXTixxQkFBQSxXQUFZLHdCQUFVOzs7O1FBRTNCLFFBQVE7UUFDUixRQUFRO1FBQ1I7UUFDQTtRQUVBLE9BQU8sVUFBVSxLQUFDO1FBQ2xCLE9BQU8sVUFBVSxLQUFDO1FBRWxCLGFBQWEsS0FBQztRQU1kLE9BQU8sT0FBTyxLQUFLOzRCQUVWOzs7O1lBRUwsSUFBSSxXQUFXO2dCQUVaLEVBQUU7O2dCQUNELE1BQU0sS0FBSztvQkFDUixlQUFjOztvQkFDYiwwQkFBVSxNQUFNLEtBQUssS0FBSyxFQUFHLFdBQVc7Ozs7MEJBRXRDOzt1QkFDQTs7b0JBRUYsTUFBTSxNQUNGLE1BQU8sTUFBTSxRQUFRLFFBQ3JCLE1BQU8sTUFDUCxPQUFVLE1BQ1YsSUFBTzs7Z0JBQ2YsTUFBTTs7O1FBRWQsWUFBWTtRQUNaLFdBQVcsU0FBUyxPQUFPO3lCQUVyQjs7Ozs7d0JBVUM7OzRCQUNJOztlQUNYLEVBQUUsTUFBTSxNQUFNOzttQkFBVyxXQUFLO1dBQU0sS0FBSzs7Ozs7Ozs0QkFJN0I7Ozs7WUFDUiwwQkFBVSxNQUFNLEtBQUssTUFBTSxLQUFLLHNCQUFjLFFBQVEsS0FBSyxZQUFNLEdBQUssWUFBUSxVQUFVO1lBQ3hGLG1CQUFPLEtBQUMsVUFBVSxLQUFLO1lBQ3ZCLDBCQUFVO1lBQ1YsbUJBQU8sS0FBQyxVQUFVLEtBQUs7O1lBT3hCLFlBQVksTUFBTTs7WUFDakIsaUJBQWMsS0FBSyxRQUFROzJCQUNsQjs7Z0JBQ0wseUJBQWlCLGdCQUFZLFNBQVMsaUJBQWEsZUFBYyxTQUFTLFNBQVMsSUFBSSxPQUFPOztxQkFDMUY7O2dCQUNKLGtCQUFjLGdCQUFZLFlBQVk7O1lBQzFDLFlBQUk7O1FBRVI7ZUFDQSxXQUFXOzs7Ozs7O3NCQVVFOzttQkFBWDs7UUFFRixTQUFTLEtBQUcsR0FBRyxNQUFNO1FBRXJCLElBQUk7UUFDSjs7Ozs7OytCQUNhOzsyQkFDTCxJQUFJLEtBQUc7Ozs7Ozs7OztXQUZQO1FBT1IsUUFBUSxNQUFNOzttQkFBYyxFQUFFOztRQUU5QixLQUFLLE1BQU0sWUFBUTtlQUVuQjs7OzttQkFFRzs7O0lBSVAsY0FBUyxJQUFJLEtBQUssTUFBTSxlQUFXO0lBQ25DLE9BQU87d0JBQ0s7Ozs7UUFDSSxNQUFNLEtBQUssS0FBSyxVQUFTOztRQUFyQzs7SUFDQSxhQUFRLE9BQU8sS0FBSztJQUNwQixhQUFhO0lBQ2IsT0FBTyxjQUFjO0lBQ3JCLE9BQU8sYUFBYTtJQUNwQixPQUFPLGdCQUFlLE9BQU8sS0FBSyxLQUFLOztJQUMzQyxPQUFPO1FBQ0o7O0lBQ0MsUUFBUSxLQUFLIn0=
 //# sourceURL=file://kode/kode/tester.kode

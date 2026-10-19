@@ -1,9 +1,20 @@
 var toExport = {}
+var delayed
+
 import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["await"] = function ()
+import kxk from "../../kxk.js"
+let sleep = kxk.sleep
+
+
+delayed = async function (value)
+{
+    await sleep(10)
+    return value
+}
+toExport["await"] = async function ()
 {
     compare(kc('await someFunctionCall()'),'await someFunctionCall()')
     compare(kc('await call(); await again()'),'await call()\nawait again()')
@@ -34,11 +45,20 @@ toExport["await"] = function ()
 {
     await info()
 }`)
+    await section("the async comparison", async function ()
+    {
+        compare(kc('x ○▸ y'),'compare(await (x),await (y))')
+        compare(kc('x ▸ y'),'compare(x,y)')
+    })
+    await section("an async comparison waits for both sides", async function ()
+    {
+        compare(await (delayed(42)),await (42))
+    })
 }
 toExport["await"]._section_ = true
 toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXdhaXQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva29kZS90ZXN0L2F3YWl0LmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7WUFZSSxHQUFHLDRCQUFrQztZQUNyQyxHQUFHLCtCQUFrQztZQUNyQyxHQUFHLCtCQUFrQztZQUVyQyxHQUFHLG1CQUFvQjtZQUN2QixHQUFHLGlCQUFrQjtZQUVyQixHQUFHLHdCQUF5QjtZQUU1QixHQUFHLGFBQWM7WUFDakIsR0FBRyxpQkFBa0I7WUFDckIsR0FBRyxnQkFBaUI7WUFNcEIsR0FBRyxxQ0FBc0M7WUFJekMsR0FBRyw2QkFBOEI7Ozs7WUFPakMsR0FBRyxvQkFBcUI7WUFDeEIsR0FBRyxtQkFBb0I7WUFDdkIsR0FBRyxtQkFBb0I7WUFFdkIsR0FBRyxzQkFBdUI7Ozs7WUFNMUIsR0FBRyxxQkFBc0I7Ozs7WUFNekIsR0FBRyxxQkFBc0IifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXdhaXQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva29kZS90ZXN0L2F3YWl0LmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7O0FBV0E7O1VBQ00sTUFBTTtXQUNSOzs7O1lBSUEsR0FBRyw0QkFBa0M7WUFDckMsR0FBRywrQkFBa0M7WUFDckMsR0FBRywrQkFBa0M7WUFFckMsR0FBRyxtQkFBb0I7WUFDdkIsR0FBRyxpQkFBa0I7WUFFckIsR0FBRyx3QkFBeUI7WUFFNUIsR0FBRyxhQUFjO1lBQ2pCLEdBQUcsaUJBQWtCO1lBQ3JCLEdBQUcsZ0JBQWlCO1lBTXBCLEdBQUcscUNBQXNDO1lBSXpDLEdBQUcsNkJBQThCOzs7O1lBT2pDLEdBQUcsb0JBQXFCO1lBQ3hCLEdBQUcsbUJBQW9CO1lBQ3ZCLEdBQUcsbUJBQW9CO1lBRXZCLEdBQUcsc0JBQXVCOzs7O1lBTTFCLEdBQUcscUJBQXNCOzs7O1lBTXpCLEdBQUcscUJBQXNCOzs7Ozs7Z0JBU3JCLEdBQUcsVUFBVztnQkFDZCxHQUFHLFNBQVk7Ozs7dUJBSWYsUUFBUSxZQUFNIn0=
 //# sourceURL=file://kode/kode/test/await.kode

@@ -3,9 +3,9 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["call"] = function ()
+toExport["call"] = async function ()
 {
-    section("calls", function ()
+    await section("calls", async function ()
     {
         compare(kc('a(b)'),'a(b)')
         compare(kc('a(b,c)'),'a(b,c)')
@@ -68,7 +68,7 @@ x = y`)
         compare(kc(`func a+b c-d`),`func(a + b,c - d)`)
         compare(kc(`func c-d a+b `),`func(c - d,a + b)`)
     })
-    section("positional", function ()
+    await section("positional", async function ()
     {
         compare(kc('a b'),'a(b)')
         compare(kc('a (b)'),'a((b))')
@@ -79,7 +79,7 @@ x = y`)
         compare(kc('[a (b)]'),';[a,(b)]')
         compare(kc('c a (b)'),'c(a,(b))')
     })
-    section("obj, func", function ()
+    await section("obj, func", async function ()
     {
         compare(kc(`g h:1, -> 2`),`g({h:1},function ()
 {
@@ -98,7 +98,7 @@ x = y`)
     return 3
 })`)
     })
-    section("if", function ()
+    await section("if", async function ()
     {
         compare(kc(`a if 1 ➜ 2
      2 ➜ 3
@@ -122,7 +122,7 @@ x = y`)
     }
 }).bind(this))())`)
     })
-    section("switch", function ()
+    await section("switch", async function ()
     {
         compare(kc(`a switch x
      2 ➜ 3
@@ -139,7 +139,7 @@ x = y`)
 
 }).bind(this))())`)
     })
-    section("lambda", function ()
+    await section("lambda", async function ()
     {
         compare(kc("a = (-> 1)()"),`a = (function ()
 {
@@ -151,7 +151,7 @@ x = y`)
     return 1
 })()`)
     })
-    section("parens", function ()
+    await section("parens", async function ()
     {
         compare(kc(`a(
     '1'
@@ -164,7 +164,7 @@ x = y`)
     ]
 )`),`a('1',2,3.4,true,[null,undefined])`)
     })
-    section("block", function ()
+    await section("block", async function ()
     {
         compare(kc(`a
     b
@@ -264,13 +264,13 @@ f if 1 then 2 else 3`),2)
 
 f 
     if 1 then 2 else 3`),2)
-        section("comma", function ()
+        await section("comma", async function ()
         {
             compare(kc(`c 1,
   2`),`c(1,2)`)
         })
     })
-    section("chain", function ()
+    await section("chain", async function ()
     {
         compare(kc(`c = []
     .map (t) -> t

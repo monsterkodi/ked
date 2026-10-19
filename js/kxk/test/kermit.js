@@ -3,9 +3,9 @@ var lm
 
 import kermit from "../kermit.js"
 
-toExport["kermit"] = function ()
+toExport["kermit"] = async function ()
 {
-    section("pattern", function ()
+    await section("pattern", async function ()
     {
         compare(kermit.pattern(`header ●header
 ■level1
@@ -16,7 +16,7 @@ toExport["kermit"] = function ()
     ■level2
         ●prefix ●suffix`),[[['header','●header'],[]],[['sub','●sub'],['level1']],[['●prefix','●suffix'],['level1','level2']]])
     })
-    section("lineMatch", function ()
+    await section("lineMatch", async function ()
     {
         lm = kermit.lineMatch
         compare(lm("","class ●class"),undefined)
@@ -36,7 +36,7 @@ toExport["kermit"] = function ()
         compare(lm('nofunc = args','●name = ○args ->'),undefined)
         compare(lm("function test hello(arg1, arg2)","function test ●name(○args)",['(',')']),{name:"hello",args:"arg1, arg2"})
     })
-    section("simple", function ()
+    await section("simple", async function ()
     {
         compare(kermit(`commit  ●commit
 Author: ●author
@@ -50,12 +50,12 @@ commit      another     commit
 Author: another         author
 another msg`),[{commit:'some commit',author:'some author',msg:'some msg'},{commit:'another commit',author:'another author',msg:'another msg'}])
     })
-    section("inline", function ()
+    await section("inline", async function ()
     {
         compare(kermit("@@ ●lineinfo @@ ●context",`@@ -111 +222 @@ one two ...
 @@ -333 +444 @@ three four`),[{lineinfo:'-111 +222',context:'one two ...'},{lineinfo:'-333 +444',context:'three four'}])
     })
-    section("array1", function ()
+    await section("array1", async function ()
     {
         compare(kermit(`commit  ●commit
 ■files
@@ -70,7 +70,7 @@ M   modified/other
 C   changed/other
 `),[{commit:'id',files:[{type:'M',path:'modified/file'},{type:'C',path:'changed/file'}]},{commit:'other',files:[{type:'M',path:'modified/other'},{type:'C',path:'changed/other'}]}])
     })
-    section("array2", function ()
+    await section("array2", async function ()
     {
         compare(kermit(`commit  ●commit
 Author: ●author
@@ -95,7 +95,7 @@ M   modified/file
 C   changed/file
 `),[{commit:'5255e93531d91abee2583fded9c13559f2445489',author:'monsterkodi <monsterkodi@gmx.net>',date:'Thu Apr 4 00:15:12 2024 +0200',msg:'misc',files:[{type:'M',path:'kakao.app/kode/ko/tools/Git.kode'}]},{commit:'85cfa741ce4e17f142c06d02a857b6646a26d34a',author:'monsterkodi <monsterkodi@gmx.net>',date:'Wed Apr 3 01:10:28 2024 +0200',msg:'git status',files:[{type:'M',path:'modified/file'},{type:'C',path:'changed/file'}]}])
     })
-    section("nested", function ()
+    await section("nested", async function ()
     {
         compare(kermit(`header ●header
 ■level1
@@ -105,7 +105,7 @@ C   changed/file
     sub s1
         1p1 1s1`),[{header:'h1',level1:[{sub:'s1',level2:[{prefix:'1p1',suffix:'1s1'}]}]}])
     })
-    section("nested array", function ()
+    await section("nested array", async function ()
     {
         compare(kermit(`header ●header
 ■level1
@@ -120,12 +120,12 @@ C   changed/file
         2p2 2s2
         2p3 2s3`),[{header:'h1',level1:[{sub:'s1',level2:[{prefix:'1p1',suffix:'1s1'},{prefix:'1p2',suffix:'1s2'}]},{sub:'s2',level2:[{prefix:'2p1',suffix:'2s1'},{prefix:'2p2',suffix:'2s2'},{prefix:'2p3',suffix:'2s3'}]}]}])
     })
-    section("pre", function ()
+    await section("pre", async function ()
     {
         compare(kermit(`○line`,"               GitInfo.diff()"),[{line:'               GitInfo.diff()'}])
         compare(kermit(`●type ○line`,"+               GitInfo.diff()\n-               more stuff"),[{type:'+',line:'               GitInfo.diff()'},{type:'-',line:'               more stuff'}])
     })
-    section("patch", function ()
+    await section("patch", async function ()
     {
         compare(kermit(`diff --git ●path
 index ●refs
@@ -142,7 +142,7 @@ index a6bb5d7..10b7d0a 100644
 -                GitInfo.diff()
 +                GitInfo.diff(cmds)`),[{path:'a/kakao.app/js/ko/commands/macro.js b/kakao.app/js/ko/commands/macro.js',refs:'a6bb5d7..10b7d0a 100644',srcfile:'a/kakao.app/js/ko/commands/macro.js',tgtfile:'b/kakao.app/js/ko/commands/macro.js',changes:[{lineinfo:'-122 +122',context:'Macro = (function ()',changedlines:[{type:'-',line:'                GitInfo.diff()'},{type:'+',line:'                GitInfo.diff(cmds)'}]}]}])
     })
-    section("patch deleted", function ()
+    await section("patch deleted", async function ()
     {
         return
         compare(kermit(`diff --git ●path

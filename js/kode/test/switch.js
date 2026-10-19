@@ -4,9 +4,9 @@ let kc = utils.kc
 let kd = utils.kd
 let ke = utils.ke
 
-toExport["switch"] = function ()
+toExport["switch"] = async function ()
 {
-    section("should be nicer", function ()
+    await section("should be nicer", async function ()
     {
         kc(`switch todo
     a ➜ 'works'
@@ -15,7 +15,7 @@ toExport["switch"] = function ()
     c ➜ 
         'does not work! but it should!'`)
     })
-    section("switches", function ()
+    await section("switches", async function ()
     {
         compare(kc(`switch a
     when 1 then 2`),`switch (a)
@@ -129,7 +129,7 @@ toExport["switch"] = function ()
         break
 }\n`)
     })
-    section("match", function ()
+    await section("match", async function ()
     {
         compare(kc(`switch typeof t 
     when 'string'
@@ -141,7 +141,7 @@ toExport["switch"] = function ()
 }
 `)
     })
-    section("assign", function ()
+    await section("assign", async function ()
     {
         compare(kc(`b = switch c
     when 'c'
@@ -192,7 +192,7 @@ toExport["switch"] = function ()
 
 }).bind(this))()`)
     })
-    section("qmrkop", function ()
+    await section("qmrkop", async function ()
     {
         compare(kc(`switch ext ? require('path').extname p
     '.json' ➜ JSON.parse str
@@ -206,7 +206,7 @@ toExport["switch"] = function ()
 }
 `)
     })
-    section("typeof", function ()
+    await section("typeof", async function ()
     {
         compare(kc(`switch typeof t
     'string' ➜ 1`),`switch (typeof(t))
@@ -217,7 +217,7 @@ toExport["switch"] = function ()
 }
 `)
     })
-    section("nicer", function ()
+    await section("nicer", async function ()
     {
         compare(kc(`switch x
     'bla'   ➜ bla

@@ -5,17 +5,17 @@ let ke = utils.ke
 
 import slash from "../../kxk/slash.js"
 
-toExport["misc"] = function ()
+toExport["misc"] = async function ()
 {
-    section("dir", function ()
+    await section("dir", async function ()
     {
         compare(kc('◆dir',import.meta.url.slice(7)),'_k_.dir()')
     })
-    section("file", function ()
+    await section("file", async function ()
     {
         compare(kc('◆file',import.meta.url.slice(7)),'_k_.file()')
     })
-    section("main", function ()
+    await section("main", async function ()
     {
         compare(kc(`◆main
     log 'hello'
@@ -25,7 +25,7 @@ toExport["misc"] = function ()
     console.log('main')
 }`)
     })
-    section("this", function ()
+    await section("this", async function ()
     {
         compare(kc('@'),'this')
         compare(kc('@a'),'this.a')
@@ -55,7 +55,7 @@ toExport["misc"] = function ()
         compare(kc(`a @, file`),`a(this,file)`)
         compare(kc(`a = @ == b`),`a = this === b`)
     })
-    section("try", function ()
+    await section("try", async function ()
     {
         compare(kc(`try 
     somethg
@@ -96,7 +96,7 @@ finally
 {
     cleanup
 }`)
-        section("try returns", function ()
+        await section("try returns", async function ()
         {
             compare(kc(`a = ->
     try
@@ -115,7 +115,7 @@ a = function ()
     }
 }`)
         })
-        section("if try returns", function ()
+        await section("if try returns", async function ()
         {
             compare(kc(`a = ->
     if 1
@@ -139,11 +139,11 @@ a = function ()
 }`)
         })
     })
-    section("throw", function ()
+    await section("throw", async function ()
     {
         compare(kc("throw 'msg'"),"throw 'msg'")
     })
-    section("delete", function ()
+    await section("delete", async function ()
     {
         compare(kc("delete a"),"delete a")
         compare(kc("delete @a"),"delete this.a")
@@ -153,7 +153,7 @@ a = function ()
         compare(kc('[delete a.b, a:b]'),';[delete a.b,{a:b}]')
         compare(kc('delete a.b == false'),'delete a.b === false')
     })
-    section("require", function ()
+    await section("require", async function ()
     {
         compare(kc("noon  = require 'noon'"),"noon = require('noon')")
         compare(kc(`slash = require 'kslash'
@@ -171,7 +171,7 @@ noon = kxk.noon
 valid = kxk.valid
 `)
     })
-    section("in condition", function ()
+    await section("in condition", async function ()
     {
         compare(kc("a in l"),"_k_.in(a,l)")
         compare(kc("a in 'xyz'"),"_k_.in(a,'xyz')")
@@ -192,7 +192,7 @@ valid = kxk.valid
     2
 }`)
     })
-    section("primes", function ()
+    await section("primes", async function ()
     {
         compare(ke(`eratosthenes = (n) ->
     

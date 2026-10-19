@@ -7,7 +7,7 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["color"] = function ()
+toExport["color"] = async function ()
 {
     compare(kc("R1 'Red' + g1(' green')"),"_k_.R1('Red' + _k_.g1(' green'))")
     return

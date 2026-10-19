@@ -3,15 +3,15 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["class"] = function ()
+toExport["class"] = async function ()
 {
-    section("empty", function ()
+    await section("empty", async function ()
     {
         compare(kc(`class A`),`class A
 {}
 `)
     })
-    section("constructor", function ()
+    await section("constructor", async function ()
     {
         compare(kc(`class B
     @: ->`),`class B
@@ -21,7 +21,7 @@ toExport["class"] = function ()
 }
 `)
     })
-    section("async", function ()
+    await section("async", async function ()
     {
         compare(kc(`class C
     @a: ○->
@@ -35,7 +35,7 @@ toExport["class"] = function ()
 }
 `)
     })
-    section("static", function ()
+    await section("static", async function ()
     {
         compare(kc(`class C
     @a: ->
@@ -121,7 +121,7 @@ toExport["class"] = function ()
     }
 }
 `)
-        section("var", function ()
+        await section("var", async function ()
         {
             compare(kc(`class SV
     @x: 1`),`class SV
@@ -131,12 +131,12 @@ toExport["class"] = function ()
 `)
         })
     })
-    section("new", function ()
+    await section("new", async function ()
     {
         compare(kc(`a = new app
     dir: __dirname`),`a = new app({dir:__dirname})`)
     })
-    section("bind", function ()
+    await section("bind", async function ()
     {
         compare(kc(`class D
     a: =>`),`class D
@@ -219,7 +219,7 @@ toExport["class"] = function ()
 }
 `)
     })
-    section("extends", function ()
+    await section("extends", async function ()
     {
         compare(kc(`class A extends B.C
     @: -> `),`class A extends B.C

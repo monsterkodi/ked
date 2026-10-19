@@ -38,7 +38,7 @@ sel = function (...r)
 {
     return compare(s.allSelections(),r)
 }
-toExport["state"] = function ()
+toExport["state"] = async function ()
 {
     text = `line 1
 line 2
@@ -46,7 +46,7 @@ line 3`
     s.syntax.ext = 'kode'
     s.loadLines(belt.linesForText(text))
     txt(text)
-    section("editing", function ()
+    await section("editing", async function ()
     {
         s.setMainCursor(1,1)
         cur(1,1)
@@ -59,7 +59,7 @@ line 3`)
         cur(1,1)
         txt(text)
     })
-    section("move lines", function ()
+    await section("move lines", async function ()
     {
         s.moveSelectionOrCursorLines('up')
         cur(1,0)
@@ -70,7 +70,7 @@ line 3`)
         cur(1,1)
         txt(text)
     })
-    section("multiple", function ()
+    await section("multiple", async function ()
     {
         s.expandCursors('up')
         mul([1,0],[1,1])
@@ -105,7 +105,7 @@ line 3`)
 
 3`)
     })
-    section("unicode", function ()
+    await section("unicode", async function ()
     {
         text = `s = "🧑🌾"
 line 3`
@@ -117,7 +117,7 @@ line 3`
 line 3`)
         s.toggleCommentAtSelectionOrCursorLines()
         txt(text)
-        section("selection", function ()
+        await section("selection", async function ()
         {
             text = `'a'        ▸ 1
 '🔧'       ▸ 2
@@ -183,7 +183,7 @@ line 3`)
 '💩'▸`)
         })
     })
-    section("empty", function ()
+    await section("empty", async function ()
     {
         s.syntax.ext = 'kode'
         s.loadLines(belt.linesForText(''))
@@ -194,7 +194,7 @@ line 3`)
         cur(0,1)
         compare(s.s.lines,[[],[]])
     })
-    section("delete back", function ()
+    await section("delete back", async function ()
     {
         text = `xxxx            1
 xxxx         .  2
@@ -219,7 +219,7 @@ xxxx    .       3`
         s.delete('back')
         mul([4,0],[4,1],[4,2])
     })
-    section("cloneSelectionAndCursorLines", function ()
+    await section("cloneSelectionAndCursorLines", async function ()
     {
         text = `line 1
 line 2
@@ -255,7 +255,7 @@ line 1
 line 2
 line 3`)
     })
-    section("deleteRanges", function ()
+    await section("deleteRanges", async function ()
     {
         text = `line 1
 line 2
@@ -271,7 +271,7 @@ line 3`)
         s.deleteRanges([[6,0,0,1]])
         txt(`nene 2line 3`)
     })
-    section("joinLines", function ()
+    await section("joinLines", async function ()
     {
         text = `line 1
 line 2

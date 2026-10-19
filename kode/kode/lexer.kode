@@ -27,6 +27,7 @@ Patterns =
     profile: "●▸"
     profilend: "●▪"
     prof: "●"
+    atest: "○▸"
     await: "○"
     assert: "▴"
     down: "▾"
@@ -267,6 +268,27 @@ class Lexer
                                 line += lines.length-1
                                 if lines.length > 1 ➜ col = lines[-1].length
                                                     ➜ col += match[0].length
+                                
+                        key == 'atest'
+                            # the async comparison: an operator like ▸, but
+                            # one that waits for both sides before it looks
+                            # at them. in the place of a section title it
+                            # means the same thing ▸ does there - every
+                            # section is async anyway
+                            
+                            if not tokens[-2]? or tokens[-2].type == 'nl' or tokens[-2].type == 'ws' and tokens[-3]?.type == 'nl'
+                                end = text.indexOf '\n'
+                                end = text.length if end < 0
+                                txt = trim text[2...end]
+                                tokens[-1].type = 'section'
+                                tokens[-1].text = txt
+                                if end >= text.length then text = '' else text = text[end..]
+                                break
+                            else
+                                tokens[-1].type = 'op'
+                                tokens[-1].text = '▸'
+                                tokens[-1].async = true
+                                col += match[0].length
                                 
                         key.startsWith('prof') and empty pullIf(linetokens, (t) -> t.text != 'use')
                         

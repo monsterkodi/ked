@@ -3,13 +3,13 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["loops"] = function ()
+toExport["loops"] = async function ()
 {
-    section("for", function ()
+    await section("for", async function ()
     {
-        section("in", function ()
+        await section("in", async function ()
         {
-            section("range", function ()
+            await section("range", async function ()
             {
                 compare(kc("for x in [3...4]"),`for (x = 3; x < 4; x++)
 {
@@ -52,9 +52,9 @@ toExport["loops"] = function ()
 }`)
             })
         })
-        section("in", function ()
+        await section("in", async function ()
         {
-            section("list", function ()
+            await section("list", async function ()
             {
                 compare(kc(`for t in l
     t`),`var list = _k_.list(l)
@@ -116,7 +116,7 @@ for (k = 0; k < list.length; k++)
 }`)
             })
         })
-        section("of", function ()
+        await section("of", async function ()
         {
             compare(kc(`for key,val of @patts
     log key, val`),`for (key in this.patts)
@@ -126,7 +126,7 @@ for (k = 0; k < list.length; k++)
 }`)
             compare(kc(`matches = ([k, r.exec(t)] for k,r of rgs)`),`matches = (function () { var r_a_ = []; for (var k in rgs)  { var r = rgs[k];r_a_.push([k,r.exec(t)])  } return r_a_ }).bind(this)()`)
         })
-        section("tail", function ()
+        await section("tail", async function ()
         {
             compare(kc(`f e for e in l ? []`),`var list = (l != null ? l : [])
 for (var _a_ = 0; _a_ < list.length; _a_++)
@@ -136,7 +136,7 @@ for (var _a_ = 0; _a_ < list.length; _a_++)
 }`)
         })
     })
-    section("list comprehension", function ()
+    await section("list comprehension", async function ()
     {
         compare(kc("m = ([k, r.exec(t)] for k,r of rgs)"),`m = (function () { var r_a_ = []; for (var k in rgs)  { var r = rgs[k];r_a_.push([k,r.exec(t)])  } return r_a_ }).bind(this)()`)
         compare(kc("m = ([i, k] for k,i in rgs)"),`m = (function () { var r_a_ = []; var list = _k_.list(rgs); for (i = 0; i < list.length; i++)  { var k = list[i];r_a_.push([i,k])  } return r_a_ }).bind(this)()`)
@@ -152,7 +152,7 @@ for (var _a_ = 0; _a_ < list.length; _a_++)
         compare(ke("(''+i+' '+v for i,v of [5,4,3])"),['0 5','1 4','2 3'])
         compare(ke('((-> (a={})[v]=k; a)() for k,v of {a:1,b:2,c:3})'),[{'1':'a'},{'2':'b'},{'3':'c'}])
     })
-    section("each", function ()
+    await section("each", async function ()
     {
         compare(ke("a = {a:1,b:2}"),{a:1,b:2})
         compare(ke("a = {a:1,b:2} each (k,v) -> [k, v*3]"),{a:3,b:6})
@@ -164,7 +164,7 @@ for (var _a_ = 0; _a_ < list.length; _a_++)
         compare(ke("a = 'hello' each (i,c) -> [i,c+c]"),"hheelllloo")
         compare(ke("a = 'hello world' each (i,c) -> [i,i%2 and c.toUpperCase() or c]"),"hElLo wOrLd")
         compare(ke("a = 'hello again' each (i,c) -> [i,((i%2) ? c.toUpperCase() : c)]"),"hElLo aGaIn")
-        section("single", function ()
+        await section("single", async function ()
         {
             compare(ke("a = '' each ->"),'')
             compare(ke("a = {} each ->"),{})
@@ -177,7 +177,7 @@ for (var _a_ = 0; _a_ < list.length; _a_++)
             compare(ke("f = (a) -> a\nr = f [0,1,2] each (v) -> 2*v"),[0,2,4])
         })
     })
-    section("while", function ()
+    await section("while", async function ()
     {
         compare(kc(`while true
     log 4`),`while (true)

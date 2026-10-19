@@ -9,9 +9,9 @@ let kc = utils.kc
 import kode from "../kode.js"
 import lexer from "../lexer.js"
 
-toExport["lexer"] = function ()
+toExport["lexer"] = async function ()
 {
-    section("anchored", function ()
+    await section("anchored", async function ()
     {
         lx = new lexer(new kode({header:false}))
         var list = _k_.list(lx.regs)
@@ -21,7 +21,7 @@ toExport["lexer"] = function ()
             compare(pair[1].sticky,true)
         }
     })
-    section("lookarounds", function ()
+    await section("lookarounds", async function ()
     {
         compare(kc('7/7'),'7 / 7')
         compare(kc('n/2/7'),'n / 2 / 7')

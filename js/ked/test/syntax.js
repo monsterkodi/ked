@@ -3,9 +3,9 @@ var blank, calls, ch, classes, clss, exp, hole, lim, lines, origGetClass, s, x, 
 
 import syntax from "../util/syntax.js"
 
-toExport["syntax"] = function ()
+toExport["syntax"] = async function ()
 {
-    section("getClass argument", function ()
+    await section("getClass argument", async function ()
     {
         s = new syntax('test')
         s.setExt('kode')
@@ -30,7 +30,7 @@ toExport["syntax"] = function ()
         s.getChar(x,y,ch)
         compare(calls,2)
     })
-    section("getClasses", function ()
+    await section("getClasses", async function ()
     {
         s = new syntax('test')
         s.setExt('kode')

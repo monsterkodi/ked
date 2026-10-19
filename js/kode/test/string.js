@@ -3,14 +3,14 @@ import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
 
-toExport["string"] = function ()
+toExport["string"] = async function ()
 {
-    section("unicode", function ()
+    await section("unicode", async function ()
     {
         compare(kc('"▾"'),'"▾"')
         compare(kc('cs += "#{s.links[li][0]}#{s.links[li][1]} "'),'cs += `${s.links[li][0]}${s.links[li][1]} `')
     })
-    section("triple", function ()
+    await section("triple", async function ()
     {
         compare(ke(`a =\"\"\"
     hello
@@ -51,7 +51,7 @@ world
         compare(ke('("""\n' + 'class A\n' + '{\n' + '    constructor ()\n' + '    {\n' + '        this.b = this.b.bind(this)\n' + '        this.f()\n' + '    }\n' + '\n' + '    b ()\n' + '    {\n' + '        console.log(1)\n' + '    }\n' + '\n' + '    f ()\n' + '    {\n' + '        var g\n' + '\n' + '        g = (function ()\n' + '        {\n' + '            return this.b()\n' + '        }).bind(this)\n' + '        return g()\n' + '    }\n' + '}\n' + '\n' + '""")'),'class A\n' + '{\n' + '    constructor ()\n' + '    {\n' + '        this.b = this.b.bind(this)\n' + '        this.f()\n' + '    }\n' + '\n' + '    b ()\n' + '    {\n' + '        console.log(1)\n' + '    }\n' + '\n' + '    f ()\n' + '    {\n' + '        var g\n' + '\n' + '        g = (function ()\n' + '        {\n' + '            return this.b()\n' + '        }).bind(this)\n' + '        return g()\n' + '    }\n' + '}\n')
         true
     })
-    section("interpolation", function ()
+    await section("interpolation", async function ()
     {
         compare(kc("''"),"''")
         compare(kc('"1234#{}890"'),'"1234890"')

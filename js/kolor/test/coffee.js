@@ -8,9 +8,9 @@ let dissect = util.dissect
 let lang = util.lang
 
 lang('coffee')
-toExport["coffee"] = function ()
+toExport["coffee"] = async function ()
 {
-    section("misc", function ()
+    await section("misc", async function ()
     {
         rgs = ranges("util = require 'util'")
         compare(inc(rgs,7,'require'),'require')
@@ -79,7 +79,7 @@ toExport["coffee"] = function ()
         compare(inc(rgs,1,'height'),'text this')
         compare(inc(rgs,8,"2"),'number')
     })
-    section("function", function ()
+    await section("function", async function ()
     {
         rgs = ranges("obj.prop.call 1")
         compare(inc(rgs,0,'obj'),'obj')
@@ -154,7 +154,7 @@ toExport["coffee"] = function ()
         rgs = ranges("i == 3")
         compare(inc(rgs,0,'i'),'text')
     })
-    section("triple regexp", function ()
+    await section("triple regexp", async function ()
     {
         rgs = ranges("///a///,b")
         compare(inc(rgs,0,"/"),'punct regexp triple')
@@ -192,7 +192,7 @@ toExport["coffee"] = function ()
       ]`)
         compare(inc(dss[1],8,'key'),'dictionary key')
     })
-    section("comment header", function ()
+    await section("comment header", async function ()
     {
         rgs = ranges("# 0 00 0000")
         compare(inc(rgs,0,"#"),'punct comment')

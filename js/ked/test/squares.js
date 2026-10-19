@@ -1,10 +1,10 @@
 var toExport = {}
 import squares from "../util/img/squares.js"
 
-toExport["squares"] = function ()
+toExport["squares"] = async function ()
 {
     squares.csz = [10,20]
-    section("tilesInRect", function ()
+    await section("tilesInRect", async function ()
     {
         compare(squares.tilesInRect(0,0,10,10),[[0,0,0,0,10,10]])
         compare(squares.tilesInRect(5,5,5,5),[[0,0,5,5,5,5]])
