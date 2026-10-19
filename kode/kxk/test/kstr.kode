@@ -150,6 +150,22 @@ use .. ◆ kstr
         kstr.rpad('' 4)        ▸ '    '
         kstr.rpad('x' 4)       ▸ 'x   '
         kstr.rpad(' xxx ' 2)   ▸ ' xxx '
+
+    # ███████    ███████   ███████   ███████
+    # ███   ███  ███   ███  ███   ███  ███   ███
+    # ███        ███████   ███   ███  █████████
+    # ███   ███  ███   ███  ███   ███  ███   ███
+    # ███████    ███   ███  ███████   ███   ███
+    
+    ▸ crop
+        
+        kstr.crop('' 4)            ▸ '    '
+        kstr.crop('hello' 10)      ▸ 'hello     '
+        kstr.crop('hello' 5)       ▸ 'hello'
+        kstr.crop('hello' 4)       ▸ 'hel…'
+        kstr.crop('hello' 1)       ▸ '…'
+        kstr.crop('hello' 0)       ▸ ''
+        kstr.crop('abcdefgh' 5)    ▸ 'abcd…'
  
     #  ███████   ███   ███   ███████  ███  
     # ███   ███  ████  ███  ███       ███  

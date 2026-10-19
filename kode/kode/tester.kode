@@ -35,7 +35,7 @@ class Tester
         comps = 0
         depth = stack.length
         if @logSections != false
-            log W1(lpad(depth*3-1) + ' ' + global["g#{max(1, 8-2*depth)}"](rpad(columns+1-depth*3 t) + ' '))
+            log W1(lpad(depth*3-1) + ' ' + global["g#{max(1, 8-2*depth)}"](kstr.crop(t, columns+1-depth*3) + ' '))
         try
             f()
         catch err
@@ -140,7 +140,7 @@ class Tester
             if v._section_
                 stack.push k
                 if logModules != false
-                    log G1(y8(' ' + rpad(columns k) + ' '))
+                    log G1(y8(' ' + kstr.crop(k, columns) + ' '))
                 try
                     v()
                 catch err

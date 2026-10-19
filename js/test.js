@@ -1,9 +1,10 @@
-var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}, rpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s+=c} return s}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, file: function () { return import.meta.url.substring(7); }, dir: function () { let url = import.meta.url.substring(7); let si = url.lastIndexOf('/'); return url.substring(0, si); }};_k_.B5=_k_.k.B256(_k_.k.B(5));_k_.y5=_k_.k.F256(_k_.k.y(5))
+var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, file: function () { return import.meta.url.substring(7); }, dir: function () { let url = import.meta.url.substring(7); let si = url.lastIndexOf('/'); return url.substring(0, si); }};_k_.B5=_k_.k.B256(_k_.k.B(5));_k_.y5=_k_.k.F256(_k_.k.y(5))
 
 var columns, file, files, hdr, lastArg, m, mod, mods, test, tests
 
 import nfs from "./kxk/nfs.js"
 import slash from "./kxk/slash.js"
+import kstr from "./kxk/kstr.js"
 
 import tester from "./kode/tester.js"
 
@@ -34,7 +35,7 @@ for (var _a_ = 0; _a_ < list.length; _a_++)
 
 hdr = function (h)
 {
-    console.log(_k_.B5(_k_.y5(' ' + _k_.rpad(columns,h) + ' ')))
+    console.log(_k_.B5(_k_.y5(' ' + kstr.crop(h,columns) + ' ')))
 }
 if (lastArg === 'brief')
 {
@@ -90,5 +91,5 @@ for (var _d_ = 0; _d_ < list3.length; _d_++)
 }
 tester.summarize()
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdC5qcyIsInNvdXJjZXMiOlsiLi4va29kZS90ZXN0LmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztBQVdBLFFBQVEsTUFBTSxPQUFPLFFBQVEsTUFBTTtBQUVuQyxVQUFVLFFBQVE7QUFDbEIsVUFBVTtJQUVQLFlBQVc7O0lBRVY7Ozs7Ozs7WUFRZ0IsS0FBSyxLQUFLOzs7SUFJMUIsUUFBUSxLQUFLOztBQUVqQjtvQkFBcUI7Ozs7SUFBTyxNQUFNLEtBQUs7OztBQUV2Qzs7SUFBVywwQkFBVSxlQUFXLFFBQVEsS0FBSzs7SUFHekMsWUFBVzs7SUFFUCxPQUFPLGNBQWM7O1NBRXpCLFlBQVc7O0lBRVAsT0FBTyxjQUFjO0lBQ3JCLE9BQU8sYUFBYTs7Z0JBRXhCLFFBQVc7O3lCQUVFOzs7O1FBQU8sTUFBTSxLQUFLLE1BQUs7OztTQUVwQzs7eUJBRWE7Ozs7UUFBTyxNQUFNLEtBQUs7O0lBRTNCLElBQUksUUFBUTtJQUVaLE9BQU8sTUFBTSxlQUFVLEtBQUs7SUFDNUIsYUFBUSxPQUFPO0lBQ2YsT0FBTyxLQUFLLEtBQUs7O3FCQUVkOzs7O1FBRUosTUFBTTs7UUFDTCxJQUFJO1FBQ0osY0FBUyxJQUFJLEtBQUssTUFBTSxlQUFVLElBQUk7NkJBQzFCOzs7O2dCQUNJLEtBQUssU0FBUTs7Z0JBQXpCOztZQUNBLGFBQVEsT0FBTyxLQUFLO1lBQ3BCLE9BQU8sS0FBSyxLQUFLOzs7O0FBRTdCLE9BQU8ifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdC5qcyIsInNvdXJjZXMiOlsiLi4va29kZS90ZXN0LmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7QUFXQSxRQUFRLE1BQU0sT0FBTyxRQUFRLE1BQU07QUFFbkMsVUFBVSxRQUFRO0FBQ2xCLFVBQVU7SUFFUCxZQUFXOztJQUVWOzs7Ozs7O1lBUWdCLEtBQUssS0FBSzs7O0lBSTFCLFFBQVEsS0FBSzs7QUFFakI7b0JBQXFCOzs7O0lBQU8sTUFBTSxLQUFLOzs7QUFFdkM7O0lBQVcsMEJBQVUsTUFBTSxLQUFLLEtBQUssRUFBRyxXQUFXOztJQUcvQyxZQUFXOztJQUVQLE9BQU8sY0FBYzs7U0FFekIsWUFBVzs7SUFFUCxPQUFPLGNBQWM7SUFDckIsT0FBTyxhQUFhOztnQkFFeEIsUUFBVzs7eUJBRUU7Ozs7UUFBTyxNQUFNLEtBQUssTUFBSzs7O1NBRXBDOzt5QkFFYTs7OztRQUFPLE1BQU0sS0FBSzs7SUFFM0IsSUFBSSxRQUFRO0lBRVosT0FBTyxNQUFNLGVBQVUsS0FBSztJQUM1QixhQUFRLE9BQU87SUFDZixPQUFPLEtBQUssS0FBSzs7cUJBRWQ7Ozs7UUFFSixNQUFNOztRQUNMLElBQUk7UUFDSixjQUFTLElBQUksS0FBSyxNQUFNLGVBQVUsSUFBSTs2QkFDMUI7Ozs7Z0JBQ0ksS0FBSyxTQUFROztnQkFBekI7O1lBQ0EsYUFBUSxPQUFPLEtBQUs7WUFDcEIsT0FBTyxLQUFLLEtBQUs7Ozs7QUFFN0IsT0FBTyJ9
 //# sourceURL=file://kode/test.kode

@@ -6,7 +6,7 @@
    ███     ████████  ███████      ███   
 ###
 
-use ./kxk  ◆ nfs slash
+use ./kxk  ◆ nfs slash kstr
 use ./kode ◆ tester
 
 mods = ['kxk' 'kode' 'kolor' 'ked' 'konrad']
@@ -32,7 +32,7 @@ if lastArg == 'help'
 
 tests = {}; for m in mods ➜ tests[m] = true
 
-hdr = h -> log B5(y5(' ' + rpad(columns h) + ' '))
+hdr = h -> log B5(y5(' ' + kstr.crop(h, columns) + ' '))
 
 if 
     lastArg == 'brief'
