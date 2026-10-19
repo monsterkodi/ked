@@ -40,38 +40,24 @@ mapHereText = mapped '../kode/here.kode'
 
 write = src text -> nfs.write jp(src) text
 
-○ nfs.remove root
-○ nfs.mkdir  jdir
-○ nfs.mkdir  kdir
-○ nfs.write  kp('here.kode') 'x = 1\n'
-
-○ write 'kept.js' hereText
-○ write 'stale.js' goneJsText
-○ write 'hand.js' 'export default {}\n'
-○ write 'stale.json' goneNoText
-
 opt  = {srcDir:kdir quiet:true}
 dirs = [jdir]
 
-gone1 = ○ knrd.reconcile dirs opt
+# the js directory, from scratch: a file whose source is still there, one
+# whose source is gone, one that nobody generated, and one whose source is
+# gone and is not kode
 
-afterKept = ○ isFile jp('kept.js')
-afterHand = ○ isFile jp('hand.js')
-
-nothing = ○ knrd.reconcile dirs opt
-nowhere = ○ knrd.reconcile [slash.path(root,'nowhere')] opt
-
-away     = slash.path root 'elsewhere' 'here.kode'
-relAway  = fromCwd away
-strayText = stamped relAway
-○ nfs.write jp('stray.js') strayText
-○ knrd.reconcile dirs opt
-afterStray = ○ isFile jp('stray.js')
-
-dirText = stamped (fromCwd(kdir))
-○ nfs.write jp('dirish.js') dirText
-○ knrd.reconcile dirs opt
-afterDirish = ○ isFile jp('dirish.js')
+setup = ○->
+    
+    ○ nfs.remove root
+    ○ nfs.mkdir  jdir
+    ○ nfs.mkdir  kdir
+    ○ nfs.write  kp('here.kode') 'x = 1\n'
+    
+    ○ write 'kept.js' hereText
+    ○ write 'stale.js' goneJsText
+    ○ write 'hand.js' 'export default {}\n'
+    ○ write 'stale.json' goneNoText
 
 ▸ stampSource
 
@@ -104,35 +90,66 @@ afterDirish = ○ isFile jp('dirish.js')
 
     ▸ what has lost its source goes, and only that
 
-        gone1.length  ▸ 2
+        ○ setup()
+        gone = ○ knrd.reconcile dirs opt
+
+        gone.length  ▸ 2
 
     ▸ and it is the right two
 
-        gone1.join ' '  ▸ "#{jp('stale.js')} #{jp('stale.json')}"
+        ○ setup()
+        gone = ○ knrd.reconcile dirs opt
+
+        gone.join ' '  ▸ "#{jp('stale.js')} #{jp('stale.json')}"
 
     ▸ a generated file whose source is still there stays
 
-        afterKept  ▸ true
+        ○ setup()
+        ○ knrd.reconcile dirs opt
+
+        isFile jp('kept.js') ○▸ true
 
     ▸ a file nobody generated stays
 
-        afterHand  ▸ true
+        ○ setup()
+        ○ knrd.reconcile dirs opt
+
+        isFile jp('hand.js') ○▸ true
 
     ▸ a second pass has nothing to do
+
+        ○ setup()
+        ○ knrd.reconcile dirs opt
+        nothing = ○ knrd.reconcile dirs opt
 
         nothing  ▸ []
 
     ▸ a directory that is not there is not an error
 
+        nowhere = ○ knrd.reconcile [slash.path(root,'nowhere')] opt
+
         nowhere  ▸ []
 
     ▸ the source is resolved, not guessed
 
-        afterStray  ▸ true
+        ○ setup()
+        ○ knrd.reconcile dirs opt
+        
+        away = slash.path root 'elsewhere' 'here.kode'
+        ○ nfs.write jp('stray.js') (stamped (fromCwd away))
+        ○ knrd.reconcile dirs opt
+
+        isFile jp('stray.js') ○▸ true
 
     ▸ a stamp naming a directory is not a source
 
-        afterDirish  ▸ true
+        ○ setup()
+        ○ knrd.reconcile dirs opt
+        
+        ○ nfs.write jp('dirish.js') (stamped (fromCwd kdir))
+        ○ knrd.reconcile dirs opt
+
+        isFile jp('dirish.js') ○▸ true
 
 
 # ███   ███  ███   ███   ███████    ███████  ███   ███  ████████  
@@ -170,80 +187,11 @@ cktgt = {}
 cktgt[knrd.rel cjfile] = knrd.hash cjtext
 cktgt[knrd.rel cjfile2] = knrd.hash cjtext2
 
-○ nfs.remove cache
-○ nfs.mkdir  cache
-○ nfs.write  ckfile cktext
-○ nfs.write  cjfile cjtext
-○ nfs.write  ckfile2 cktext2
-○ nfs.write  cjfile2 cjtext2
-○ nfs.remove ckache
-
-wrote   = ○ knrd.saveCache ckache, null, fpA, true, cksrc, cktgt
-back    = ○ knrd.loadCache ckache
-absent  = ○ knrd.loadCache slash.path(cache,'nowhere')
-
-# noon is forgiving. these two are the ways a cache can be rubbish without
-# failing to parse, and neither may be allowed to wedge the build.
-
-○ nfs.write ckache, '- not a cache at all\n'
-junkList = ○ knrd.loadCache ckache
-
-○ nfs.write ckache, 'kode   not\n\tsource\n'
-junkMap  = ○ knrd.loadCache ckache
-
-○ nfs.remove ckache
-○ knrd.saveCache ckache, null, fpA, true, cksrc, cktgt
-back = ○ knrd.loadCache ckache
-
-# the four ways a file can fail to be current
-
-cur      = ○ knrd.isCurrent back, ckfile, cjfile, cktext
-srcMoved = ○ knrd.isCurrent back, ckfile, cjfile, 'x = 2\n'
-
-○ nfs.write cjfile, 'var x = 2;\n'
-tgtMoved = ○ knrd.isCurrent back, ckfile, cjfile, cktext
-
-○ nfs.write cjfile cjtext
-○ nfs.remove cjfile
-tgtGone  = ○ knrd.isCurrent back, ckfile, cjfile, cktext
-
-○ nfs.write cjfile cjtext
-noCache  = ○ knrd.isCurrent null,  ckfile, cjfile, cktext
-
-# a build that compiled nothing, and a build that cannot speak for the files
-# it did not compile
-
-before     = ○ nfs.read ckache
-compiledNo = ○ knrd.saveCache ckache, back, fpA, true, {}, {}
-afterNo    = ○ nfs.read ckache
-
-otherKode  = ○ knrd.saveCache ckache, back, fpB, true, cksrc, cktgt
-stillA     = ○ knrd.loadCache ckache
-
-# a build with a cache to merge into
-
 more = {}
 more[knrd.rel ckfile] = 'cccccccccccccccccccccccccccccccccccccccc'
 
-mergedOk = ○ knrd.saveCache ckache, back, fpA, true, more, cktgt
-merged   = ○ knrd.loadCache ckache
-
-# a whole build may rewrite a cache from another compiler, because it can
-# vouch for every file in it. a partial one may not, because it cannot - and
-# if it writes anyway, the files it never looked at go on being marked current
-# under a fingerprint they were never compiled with
-
-wholesale = ○ knrd.saveCache ckache, merged, fpB, true, cksrc, cktgt, yes
-wholeBack = ○ knrd.loadCache ckache
-
-partial   = ○ knrd.saveCache ckache, wholeBack, fpA, true, cksrc, cktgt, no
-stillB    = ○ knrd.loadCache ckache
-
-# the shape that made every other build after it recompile the tree. a build
-# records only what it compiled, so replacing the cache with that leaves the
-# files it did not compile - which were not rebuilt because they were already
-# right, which is what the cache had said - with no entry at all. the next
-# build then finds 213 misses and recompiles everything to write them back
+# the entry for one file only, because the interesting cases are about the
+# ones a build did not compile
 
 oneSrc = {}
 oneSrc[knrd.rel ckfile] = cksrc[knrd.rel ckfile]
@@ -251,41 +199,79 @@ oneSrc[knrd.rel ckfile] = cksrc[knrd.rel ckfile]
 oneTgt = {}
 oneTgt[knrd.rel cjfile] = cktgt[knrd.rel cjfile]
 
-keptOk = ○ knrd.saveCache ckache, stillB, fpB, true, oneSrc, oneTgt, yes
-kept   = ○ knrd.loadCache ckache
+# the cache directory, from scratch: the two files with their sources and
+# their targets, and no cache file
 
-# rubbish in the cache has to be replaced rather than respected, or it sits
-# there refusing every write and nothing is ever cached again
+setupCache = ○->
+    
+    ○ nfs.remove cache
+    ○ nfs.mkdir  cache
+    ○ nfs.write  ckfile cktext
+    ○ nfs.write  cjfile cjtext
+    ○ nfs.write  ckfile2 cktext2
+    ○ nfs.write  cjfile2 cjtext2
+    ○ nfs.remove ckache
 
-○ nfs.write ckache, '- not a cache at all\n'
-junk    = ○ knrd.loadCache ckache
-healedOk = ○ knrd.saveCache ckache, junk, fpA, true, cksrc, cktgt
-healed   = ○ knrd.loadCache ckache
+# a build with the given fingerprint, over the cache that is already there.
+# a whole build may write over a cache from another compiler; a partial one
+# may not, because it cannot vouch for the files it never looked at
 
-fpOne = ○ knrd.fingerprint()
-fpTwo = ○ knrd.fingerprint()
+built = fp srcs tgts whole ○->
+    
+    back = ○ knrd.loadCache ckache
+    ok = ○ knrd.saveCache ckache, back, fp, true, srcs, tgts, whole
+    
+    ⮐ {ok: ok, cache: ○ knrd.loadCache(ckache)}
+
+# the two files and a cache for them, from scratch, and what came back off
+# the disk
+
+cached = fp ○->
+    
+    ○ setupCache()
+    ○ knrd.saveCache ckache, null, fp, true, cksrc, cktgt, no
+    
+    ⮐ ○ knrd.loadCache ckache
 
 ▸ cache
 
     ▸ it round trips through noon
 
-        wrote   ▸ true
-        back.kode ▸ fpA
-        back.srcmap ▸ true
+        ○ setupCache()
+        wrote = ○ knrd.saveCache ckache, null, fpA, true, cksrc, cktgt
+        back = ○ knrd.loadCache ckache
+
+        wrote        ▸ true
+        back.kode    ▸ fpA
+        back.srcmap  ▸ true
         back.source[knrd.rel ckfile] ▸ knrd.hash cktext
         back.target[knrd.rel cjfile] ▸ knrd.hash cjtext
 
     ▸ a file that is not there is not a cache
 
-        absent  ▸ null
+        knrd.loadCache slash.path(cache,'nowhere')  ○▸ null
 
     ▸ rubbish that still parses is not a cache either
+
+        # noon is forgiving. these two are the ways a cache can be rubbish
+        # without failing to parse, and neither may be allowed to wedge the
+        # build.
+
+        ○ setupCache()
+        
+        ○ nfs.write ckache, '- not a cache at all\n'
+        junkList = ○ knrd.loadCache ckache
+        
+        ○ nfs.write ckache, 'kode   not\n\tsource\n'
+        junkMap  = ○ knrd.loadCache ckache
 
         knrd.shaped junkList  ▸ false
         knrd.shaped junkMap   ▸ false
         knrd.usable junkMap, fpA, true  ▸ false
 
     ▸ the header is the compiler and the sourcemap, and it needs both
+
+        back = ○ cached fpA
 
         knrd.usable back, fpA, true   ▸ true
         knrd.usable back, fpB, true   ▸ false
@@ -295,69 +281,126 @@ fpTwo = ○ knrd.fingerprint()
 
     ▸ current means the source and what is on disk both still match
 
-        cur  ▸ true
+        # the four ways a file can fail to be current
+
+        back = ○ cached fpA
+
+        knrd.isCurrent back, ckfile, cjfile, cktext  ○▸ true
 
     ▸ a source that has moved is a miss
 
-        srcMoved  ▸ false
+        back = ○ cached fpA
+
+        knrd.isCurrent back, ckfile, cjfile, 'x = 2\n'  ○▸ false
 
     ▸ a target that has moved is a miss
 
-        tgtMoved  ▸ false
+        back = ○ cached fpA
+        ○ nfs.write cjfile, 'var x = 2;\n'
+
+        knrd.isCurrent back, ckfile, cjfile, cktext  ○▸ false
 
     ▸ a target that is not there is a miss
 
-        tgtGone  ▸ false
+        back = ○ cached fpA
+        ○ nfs.remove cjfile
+
+        knrd.isCurrent back, ckfile, cjfile, cktext  ○▸ false
 
     ▸ and no cache at all is a miss
 
-        noCache  ▸ false
+        knrd.isCurrent null, ckfile, cjfile, cktext  ○▸ false
 
     ▸ a build that compiled nothing writes nothing
+
+        first = ○ built fpA, cksrc, cktgt, no
+        before = ○ nfs.read ckache
+        compiledNo = ○ knrd.saveCache ckache, first.cache, fpA, true, {}, {}
+        afterNo = ○ nfs.read ckache
 
         compiledNo  ▸ false
         afterNo     ▸ before
 
     ▸ a partial build does not write over a cache from another compiler
 
-        otherKode      ▸ false
-        stillA.kode    ▸ fpA
+        ○ built fpA, cksrc, cktgt, no
+        other = ○ built fpB, cksrc, cktgt, no
+
+        other.ok          ▸ false
+        other.cache.kode  ▸ fpA
 
     ▸ and one that can, merges rather than replaces
 
-        mergedOk  ▸ true
-        merged.source[knrd.rel ckfile]  ▸ more[knrd.rel ckfile]
-        merged.target[knrd.rel cjfile] ▸ knrd.hash cjtext
+        ○ built fpA, cksrc, cktgt, no
+        merged = ○ built fpA, more, cktgt, no
+
+        merged.ok  ▸ true
+        merged.cache.source[knrd.rel ckfile]  ▸ more[knrd.rel ckfile]
+        merged.cache.target[knrd.rel cjfile] ▸ knrd.hash cjtext
 
     ▸ and a whole build can replace a cache from another compiler
 
-        wholesale  ▸ true
-        wholeBack.kode  ▸ fpB
-        wholeBack.source[knrd.rel ckfile]  ▸ knrd.hash cktext
+        ○ built fpA, cksrc, cktgt, no
+        ○ built fpA, more, cktgt, no
+        whole = ○ built fpB, cksrc, cktgt, yes
+
+        whole.ok  ▸ true
+        whole.cache.kode  ▸ fpB
+        whole.cache.source[knrd.rel ckfile]  ▸ knrd.hash cktext
 
     ▸ but a partial one cannot, or the files it never looked at go on
     ▸ being marked current under a compiler they were never built with
 
-        partial      ▸ false
-        stillB.kode  ▸ fpB
+        ○ built fpA, cksrc, cktgt, no
+        ○ built fpA, more, cktgt, no
+        ○ built fpB, cksrc, cktgt, yes
+        still = ○ built fpA, cksrc, cktgt, no
+
+        still.ok  ▸ false
+        still.cache.kode  ▸ fpB
 
     ▸ and a whole build adds to the cache rather than replacing it, or the
     ▸ files it did not compile lose their entry and the next build has to
     ▸ rebuild the tree to write them back
 
-        keptOk  ▸ true
-        kept.source[knrd.rel ckfile]  ▸ cksrc[knrd.rel ckfile]
-        kept.source[knrd.rel ckfile2] ▸ cksrc[knrd.rel ckfile2]
-        kept.target[knrd.rel cjfile]  ▸ cktgt[knrd.rel cjfile]
-        kept.target[knrd.rel cjfile2] ▸ cktgt[knrd.rel cjfile2]
+        # the shape that made every other build after it recompile the tree.
+        # a build records only what it compiled, so replacing the cache with
+        # that leaves the files it did not compile - which were not rebuilt
+        # because they were already right, which is what the cache had said -
+        # with no entry at all. the next build then finds 213 misses and
+        # recompiles everything to write them back
+
+        first = ○ built fpA, cksrc, cktgt, no
+        merged = ○ built fpA, more, cktgt, no
+        whole = ○ built fpB, cksrc, cktgt, yes
+        still = ○ built fpA, cksrc, cktgt, no
+        kept = ○ built fpB, oneSrc, oneTgt, yes
+        
+        kept.ok  ▸ true
+        kept.cache.source[knrd.rel ckfile]  ▸ cksrc[knrd.rel ckfile]
+        kept.cache.source[knrd.rel ckfile2] ▸ cksrc[knrd.rel ckfile2]
+        kept.cache.target[knrd.rel cjfile]  ▸ cktgt[knrd.rel cjfile]
+        kept.cache.target[knrd.rel cjfile2] ▸ cktgt[knrd.rel cjfile2]
 
     ▸ but rubbish is replaced, or it would wedge the build for good
+
+        # rubbish in the cache has to be replaced rather than respected, or
+        # it sits there refusing every write and nothing is ever cached again
+
+        ○ setupCache()
+        ○ nfs.write ckache, '- not a cache at all\n'
+        junk = ○ knrd.loadCache ckache
+        healedOk = ○ knrd.saveCache ckache, junk, fpA, true, cksrc, cktgt
+        healed = ○ knrd.loadCache ckache
 
         healedOk  ▸ true
         healed.kode  ▸ fpA
         healed.source[knrd.rel ckfile]  ▸ knrd.hash cktext
 
     ▸ the fingerprint is a digest of the compiler, and it does not move
+
+        fpOne = ○ knrd.fingerprint()
+        fpTwo = ○ knrd.fingerprint()
 
         fpOne == fpTwo  ▸ true
         fpOne.length  ▸ 40
