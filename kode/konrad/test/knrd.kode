@@ -404,6 +404,12 @@ cached = fp ○->
 
         fpOne == fpTwo  ▸ true
         fpOne.length  ▸ 40
+        
+        # the hash of nothing is what a tree without a compiler in it gets,
+        # and it is the same for every version of the compiler - which would
+        # leave a side project building with a compiler it never saw change
+        
+        fpOne != knrd.hash('')  ▸ true
 
     ▸ the cache lives beside the sources it describes
 

@@ -192,13 +192,21 @@ hash = text -> crypto.createHash('sha1').update(text).digest('hex')
 
 fpDirs = ['kode' 'kxk' 'kolor'] # the modules whose source can reach the compiler.
 
+# the compiler is the one next to this file. it is not the one in the tree
+# being built: a side project has its own js directory and no compiler in
+# it, and a fingerprint taken from there would be the hash of nothing -
+# the same for every version of the compiler, which is the one thing a
+# fingerprint must not be.
+
+compilerDir = -> slash.path(◆dir, '..')
+
 fingerprint = ○-> # generates the fingerprint for the kode compiler
 
     files = []
 
     for d in fpDirs
 
-        dir = bundlePath "js/#{d}"
+        dir = slash.path(compilerDir(), d)
         here = ○ nfs.isDir dir
         if not here ➜ continue
 
@@ -210,7 +218,7 @@ fingerprint = ○-> # generates the fingerprint for the kode compiler
     parts = []
     for f in files
         body = ○ nfs.read f
-        parts.push "#{rel f}\0#{body}"
+        parts.push "#{slash.relative f, compilerDir()}\0#{body}"
 
     joined = parts.join ''
     hash joined
@@ -242,6 +250,22 @@ shaped = kache -> # checks for correct shape of the kache data
 usable = (kache, fp, srcmap) ->
 
     shaped(kache) and (kache.kode == fp) and (kache.srcmap == srcmap)
+
+# the cache says which compiler built the tree. if that is not the one
+# that would build it now, the tree is older than the compiler, and a
+# test run against it is a test run against something else
+
+stale = ○->
+
+    path = cachePath()
+    here = ○ nfs.isFile path
+    ⮐ false if not here
+
+    kache = ○ loadCache path
+    ⮐ false if not kache
+    ⮐ false if empty kache.kode
+
+    kache.kode != (○ fingerprint())
 
 isCurrent = (kache, srcFile, tgtFile, srcText) ○->
 
@@ -413,6 +437,7 @@ knrd.stampSource = stampSource
 knrd.reconcile   = reconcile
 knrd.cachePath   = cachePath
 knrd.fingerprint = fingerprint
+knrd.stale       = stale
 knrd.hash        = hash
 knrd.rel         = rel
 knrd.usable      = usable

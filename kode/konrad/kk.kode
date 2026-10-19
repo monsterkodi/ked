@@ -81,6 +81,13 @@ class kk
     
     @test: files opt ○->
         
+        # a tree built by another compiler is a tree the tests do not fit.
+        # it fails quietly - the sections come out one deeper than the last
+        # - so it says so here
+        
+        if ○ knrd.stale()
+            log y5('⚠ ') r5('the tree is older than the compiler - run kk -k')
+        
         if 
             ○ nfs.exists "js/test.js"
                 
