@@ -8,7 +8,7 @@
 
 use ../kxk  ▪ sleep karg watch nfs util slash os
 use ../kode ◆ tester kode
-use         ◆ knrd version
+use         ◆ knrd
 use           child_process
 
 args = karg """
@@ -41,7 +41,7 @@ class kk
     @run: ○->
     
         files = args.files    
-        if args.version ➜ ○ log version slash.name(slash.path(◆dir '../../')) process.cwd()
+        if args.version ➜ ○ log (○ knrd.fingerprint()) slash.name(slash.path(◆dir '../../')) process.cwd()
         if args.info    ➜ ○ knrd         [] util.defaults(args dryrun:true)
         if args.knrd    ➜ ○ knrd         files args 
         if args.build   ➜ ○ child_process.exec "pnpm build" {shell:true} (err stdout stderr) -> log stdout

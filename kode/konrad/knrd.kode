@@ -12,7 +12,6 @@
 
 use ../kode ◆ kode
 use ../kxk  ◆ nfs slash noon
-use         ◆ version
 use crypto
 
 # ████████   ███   ███  ███      ████████   ███████  
@@ -68,10 +67,6 @@ bundleDir = ->
     # make sure we execute relative to those.
     process.cwd()
   
-bump = ○->
-    
-    ○ nfs.write bundlePath('kode/konrad/version.kode') "export #{version+1}\n"
-    
 #  ███████    ███████   █████████  ███   ███  ████████  ████████   
 # ███        ███   ███     ███     ███   ███  ███       ███   ███  
 # ███  ████  █████████     ███     █████████  ███████   ███████    
@@ -421,8 +416,6 @@ knrd = files=[] opt={} ○->
                 srcs[rel srcFile] = hash srcText
                 tgts[rel tgtFile] = hash compText
                     
-    # ○ bump() if transpiled and not opt.dryrun
-    
     if not opt.dryrun
         ○ saveCache kpath, loaded, fp, opt.map, srcs, tgts, whole
     
