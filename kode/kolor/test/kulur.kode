@@ -28,7 +28,7 @@ dissect = c -> kulur.dissect kstr.lines(c) ext
         rgs = ranges "🌈"
         inc rgs 0 '🌈' ▸  'text unicode'
         
-        rgs[0] ▸ start:0 length:2 match:'🌈' turd: '🌈' clss: 'text unicode'
+        rgs[0] ▸ start:0 length:2 match:'🌈' text:'🌈' turd: '🌈' clss: 'text unicode'
         
         rgs = ranges "🌈🌱"
 
@@ -842,6 +842,159 @@ dissect = c -> kulur.dissect kstr.lines(c) ext
     # ███      ███   ███  ███ █ ███  ███  ████  ███      ███  ███ █ ███  ███████   ███████ 
     # ███      ███   ███  ███  ████  ███   ███  ███      ███  ███  ████  ███            ███
     # ███████   ███████   ███   ███   ███████   ███████  ███  ███   ███  ████████  ███████ 
+
+    ▸ a quote in front of a contraction is not an apostrophe
+
+        # 't', 'd', 's', 'll' and 're' are the english contractions -
+        # don't, it's, we'd, we'll, you're. the highlighter took a quote
+        # in front of one of them for an apostrophe and did not open a
+        # string there. the quote that was supposed to close the string
+        # then opened one, and that one was never closed - so everything
+        # after the line was a string.
+        #
+        # an apostrophe sits right against the word in front of it. a
+        # quote that opens a string has a space or a bracket in front of
+        # it, and that is what tells the two apart.
+
+        lang 'kode'
+
+        rgs = ranges "'t x'"
+        inc rgs 0 "'" ▸ 'punct string single'
+        inc rgs 1 't'  ▸ 'string single'
+        inc rgs 3 'x'  ▸ 'string single'
+        inc rgs 4 "'" ▸ 'punct string single'
+
+        rgs = ranges "'s parent'"
+        inc rgs 0 "'" ▸ 'punct string single'
+        inc rgs 1 's'  ▸ 'string single'
+
+        rgs = ranges "'d.txt'"
+        inc rgs 0 "'" ▸ 'punct string single'
+        inc rgs 1 'd'  ▸ 'string single'
+
+        # a string that is only the contraction is not affected - the
+        # quote in front of it is closed right away
+
+        rgs = ranges "'t'"
+        inc rgs 0 "'" ▸ 'punct string single'
+        inc rgs 1 't'  ▸ 'string single'
+
+        # and the apostrophe in a contraction is still an apostrophe
+
+        rgs = ranges "don't"
+        inc rgs 3 "'" ▸ 'punct'
+        inc rgs 4 't'  ▸ 'text'
+
+        # the string must not outlive the line it is on
+
+        dss = dissect """
+            x = 't x'
+            y = 1
+        """
+        inc dss[0] 4 "'" ▸ 'punct string single'
+        inc dss[1] 4 '1'  ▸ 'number'
+
+        # the same thing in the files that broke: ked/kode/kode/test/
+        # error.kode, occ/js/query.js, occ/kode/query.kode and
+        # kit/kode/test/integration.kode
+
+        rgs = ranges "codemsg 't >> *'"
+        inc rgs 8  "'" ▸ 'punct string single'
+        inc rgs 9  't'  ▸ 'string single'
+
+        rgs = ranges "CHILD_FILTER = 's.parent_id IS NULL'"
+        inc rgs 15 "'" ▸ 'punct string single'
+        inc rgs 16 's'  ▸ 'string single'
+
+        rgs = ranges "GIT_AUTHOR_EMAIL: 't@e.st'"
+        inc rgs 18 "'" ▸ 'punct string single'
+        inc rgs 19 't'  ▸ 'string single'
+
+        lang 'js'
+
+        rgs = ranges "codemsg('t >> *','* is missing an operand')"
+        inc rgs 8 "'" ▸ 'punct string single'
+        inc rgs 9 't'  ▸ 'string single'
+
+    ▸ a delimiter with a combining mark on it is still a delimiter
+
+        # a chunk is a grapheme, and a grapheme can be more than one
+        # character. a quote with a combining mark on it - \u0336 is the
+        # long stroke overlay - is one grapheme of two characters, so the
+        # comparison with the quote character failed. the string was never
+        # opened, the quote that closed it opened a string that was never
+        # closed, and the rest of the file was a string.
+
+        lang 'json'
+
+        rgs = ranges '"\u0336"'
+        inc rgs 0 '"' ▸ 'punct string double'
+        inc rgs 1 '"' ▸ 'punct string double'
+
+        # ked/js/ked/util/julia.json - the value of 'sout' is a combining
+        # mark, and it rides on the quote in front of it
+
+        rgs = ranges '"sout": "\u0336",'
+        inc rgs 8  '"' ▸ 'punct string double'
+        inc rgs 9  '"' ▸ 'punct string double'
+        inc rgs 10 ',' ▸ 'punct minor'
+
+        # and the string must not outlive the line it is on
+
+        dss = dissect """
+            {"a": "\u0336"}
+            {"b": "c"}
+        """
+        inc dss[0] 6  '"' ▸ 'punct string double'
+        inc dss[0] 7  '"' ▸ 'punct string double'
+        inc dss[0] 8  '}' ▸ 'punct minor'
+        inc dss[1] 1  '"' ▸ 'punct dictionary'
+        inc dss[1] 7  'c'  ▸ 'string double'
+
+        # the combining mark is still part of the chunk
+
+        kulur.ranges('"\u0336"' 'json')[0].text ▸ '"\u0336'
+
+    ▸ a line that comes in as text has the same columns
+
+        # the highlighter cuts a line into graphemes itself. a line that
+        # comes in as text would be cut into code units, and the columns
+        # of a line with a combining mark or an emoji on it come out
+        # wrong - the chunks after it are one column off.
+
+        lang 'json'
+
+        prs = kulur.parse ['{"a": "\u0336"}'] 'json'
+        dss = kulur.dissect ['{"a": "\u0336"}'] 'json'
+
+        compare prs[0].chunks[7].start, dss[0][7].start
+        compare prs[0].chunks[7].start, 8
+
+    ▸ a letter that is not on the punct list is not punctuation
+
+        # PUNCT knows the letters it does not want to split words at by
+        # hand, and it does not know all of them. a letter that is not on
+        # the list is punctuation: it splits the word around it and it
+        # gets a different colour than the letters that are on the list.
+
+        lang 'kode'
+
+        rgs = ranges 'Ðelta'
+        inc rgs 0 'Ðelta' ▸ 'text'
+
+        rgs = ranges 'Škoda'
+        inc rgs 0 'Škoda' ▸ 'text'
+
+        # ked/kode/ked/util/julia.noon - the value of AA is a letter and
+        # so is the value of DH, so they have to get the same colour
+
+        lang 'noon'
+
+        rgs = ranges "AA    Å"
+        inc rgs 6 'Å' ▸ 'text'
+
+        rgs = ranges "DH    Ð"
+        inc rgs 6 'Ð' ▸ 'text'
 
     ▸ longlines
 

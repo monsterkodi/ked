@@ -22,7 +22,18 @@ for ext in exts
 
 SPACE   = /\s/
 HEADER  = /^[0█]+$/u
-PUNCT   =  /[^\wäöüßÄÖÜáéíóúÁÉÍÓÚñÑçÇàèìòùÀÈÌÒÙâêîôûÂÊÎÔÛãõÃÕåÅæÆœŒøØłŁđĐ]+/u
+
+# the letters that are not punctuation. a letter that is not on this list
+# splits the word around it and gets a different colour than the letters
+# that are on it, so the list has to have all of them.
+#
+# it is the latin letters, and only the latin letters - the greek letters
+# and the modifier letters stay punctuation, because a noon file with a
+# greek symbol in it looks better that way.
+#
+# \u0100-\u017f is latin extended-a. the rest is latin-1, by hand.
+
+PUNCT   =  /[^\wäöüßÄÖÜáéíóúÁÉÍÓÚñÑçÇàèìòùÀÈÌÒÙâêîôûÂÊÎÔÛãõÃÕåÅæÆœŒøØłŁđĐÀËÏÐÝÞëïðþÿĀ-ſ]+/u
 NUMBER  = /^\d+$/
 FLOAT   = /^\d+f$/
 HEXNUM  = /^0x[a-fA-F\d]+$/
@@ -31,6 +42,14 @@ NEWLINE = /\r?\n/
 LI      = /(\sli\d\s|\sh\d\s)/
 
 codeTypes = ['interpolation' 'code triple']
+
+# the character a grapheme is built on. a grapheme can be more than one
+# character - a quote with a combining mark on it is two - and the
+# highlighter compares characters, not graphemes.
+base = s ->
+    ⮐  '' if not s
+    ⮐  s if s.length == 1
+    String.fromCodePoint s.codePointAt(0)
 
 #  ███████  ███   ███  ███   ███  ███   ███  ███   ███  ████████  ███████
 # ███       ███   ███  ███   ███  ████  ███  ███  ███   ███       ███   ███
@@ -64,6 +83,12 @@ chunked = segls ext ->
     
     for segs in segls
 
+        # a line that comes in as text is cut into code units, and the
+        # columns of a line with a combining mark or an emoji on it come
+        # out wrong. cut it into graphemes, like the rest of it.
+
+        segs = kseg.segl segs
+
         chnks =
             chunks: []
             chars:  0
@@ -93,7 +118,7 @@ chunked = segls ext ->
         pushLastWord = ->
             
             if lastWord != null
-                chnks.chunks.push start:widths[lastWordIndex] length:kseg.width(lastWord) match:kseg.str(lastWord) clss:'text'
+                chnks.chunks.push start:widths[lastWordIndex] length:kseg.width(lastWord) match:kseg.str(lastWord) text:kseg.str(lastWord) clss:'text'
                 lastWord = null
                 lastWordIndex = -1
         
@@ -108,28 +133,31 @@ chunked = segls ext ->
                     if isu ➜ ⮐ false if ch in '■▪◆●○▸➜⮐'
                     isu
                 
-                if m = PUNCT.exec(s)
+                b = base s
+                
+                if m = PUNCT.exec b
 
                     pushLastWord()
                     
                     turd = ''
                     for t in chnk.segl[segIndex..]
 
-                        if PUNCT.test t
-                            turd += t
+                        tb = base t
+                        if PUNCT.test tb
+                            turd += tb
                         else
                             break
     
                     clss = 'punct'
     
-                    if isUniko s s.charCodeAt(0)
+                    if isUniko b b.charCodeAt(0)
                         clss = 'text unicode'
                     else
                         clss = 'punct' 
-                        if s in [','';''{''}''('')']
+                        if b in [','';''{''}''('')']
                             clss += ' minor'
 
-                    chnks.chunks.push start:widths[chnk.index+segIndex] length:kseg.width(s) match:s turd:turd clss:clss
+                    chnks.chunks.push start:widths[chnk.index+segIndex] length:kseg.width(s) match:b text:s turd:turd clss:clss
                 else
                     if lastWord == null
                         lastWord = []
@@ -905,7 +933,7 @@ simpleString = ->
                 if next.start == chunk.start + chunk.length
                     scnd = getChunk 2
                     if not scnd or scnd.match != "'"
-                        ⮐  stacked()
+                        ⮐  stacked() if afterWord()
         
         if chunk.clss == 'punct code triple'
             ⮐ 0
@@ -927,6 +955,19 @@ simpleString = ->
         ⮐  1
 
     escape()
+
+# true if the chunk in front of this one is a word and sits right against
+# it. a quote behind a word is an apostrophe - 'don't', 'it's', 'we'll' -
+# and a quote that opens a string has a space or a bracket in front of it.
+afterWord = ->
+
+    prev = getChunk -1
+    ⮐  false if not prev
+    
+    if prev.start + prev.length < chunk.start
+        ⮐  false
+    
+    not PUNCT.test prev.match[prev.match.length-1]
 
 tripleString = ->
 
@@ -1365,6 +1406,7 @@ addAndJoinValues = n value ->
     line.chunks[chunkIndex].clss += ' ' + value
     for i in 1...n
         line.chunks[chunkIndex].match  += line.chunks[chunkIndex+i].match
+        line.chunks[chunkIndex].text   += line.chunks[chunkIndex+i].text
         line.chunks[chunkIndex].length += 1
     line.chunks.splice chunkIndex+1 n-1
     1
@@ -1552,29 +1594,31 @@ parse = segls ext='kode' -> blocked(chunked(segls ext))
 
 kolorize = chunk -> 
     
+    txt = chunk.text ? chunk.match
+    
     if cn = klor.map[chunk.clss]
         if cn is Array
-            v = chunk.match
+            v = txt
             for cr in cn
                 v = klor[cr] v
             ⮐ v
         else
-            ⮐ klor[cn] chunk.match
+            ⮐ klor[cn] txt
             
     if chunk.clss.endsWith 'file'
-        w8 chunk.match
+        w8 txt
     else if chunk.clss.endsWith 'ext'
-        w3 chunk.match
+        w3 txt
     else if chunk.clss.startsWith 'punct'
         if LI.test chunk.clss
-            kolorize match:chunk.match, clss:chunk.clss.replace(LI ' ')
+            kolorize match:txt, clss:chunk.clss.replace(LI ' ')
         else
-            w2 chunk.match
+            w2 txt
     else
         if LI.test chunk.clss
-            kolorize match:chunk.match, clss:chunk.clss.replace(LI ' ')
+            kolorize match:txt, clss:chunk.clss.replace(LI ' ')
         else
-            chunk.match
+            txt
 
 kolorizeChunks = chunks=[] ->
     
