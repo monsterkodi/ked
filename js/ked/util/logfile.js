@@ -4,7 +4,7 @@ var _k_ = {dir: function () { let url = import.meta.url.substring(7); let si = u
     var pretty = function (o, ind, seen) { var k, kl, l, v, mk = 4; if (Object.keys(o).length > 1) { for (k in o) { if (Object.hasOwn(o,k)) { kl = parseInt(Math.ceil((k.length + 2) / 4) * 4); mk = Math.max(mk,kl); if (mk > 32) { mk = 32; break } } } }; l = []; var keyValue = function (k, v) { var i, ks, s, vs; s = ind; k = esc(k,true); if (k.indexOf('  ') > 0 && k[0] !== '|') { k = '|'+k+'|' } else if (k[0] !== '|' && k[k.length - 1] === '|') { k = '|' + k } else if (k[0] === '|' && k[k.length - 1] !== '|') { k += '|' }; ks = pad(k,Math.max(mk,k.length + 2)); i = pad(ind + '    ',mk); s += ks; vs = toStr(v,i,false,seen); if (vs[0] === '\n') { while (s[s.length - 1] === ' ') { s = s.substr(0,s.length - 1) } }; s += vs; while (s[s.length - 1] === ' ') { s = s.substr(0,s.length - 1) }; return s }; for (k in o) { if (Object.hasOwn(o,k)) { l.push(keyValue(k,o[k])) } }; return l.join('\n') }; 
     var toStr = function (o, ind = '', arry = false, seen = []) { var s, t, v; if (!(o != null)) { if (o === null) { return 'null' }; if (o === undefined) { return 'undefined' }; return '<?>' }; switch (t = typeof(o)) { case 'string': {return esc(o,arry)}; case 'object': { if (_k_.in(o,seen)) { return '<v>' }; seen.push(o); if ((o.constructor != null ? o.constructor.name : undefined) === 'Array') { s = ind !== '' && arry && '.' || ''; if (o.length && ind !== '') { s += '\n' }; s += (function () { var result = []; var list = _k_.list(o); for (var li = 0; li < list.length; li++)  { v = list[li];result.push(ind + toStr(v,ind + '    ',true,seen))  } return result }).bind(this)().join('\n') } else if ((o.constructor != null ? o.constructor.name : undefined) === 'RegExp') { return o.source } else { s = (arry && '.\n') || ((ind !== '') && '\n' || ''); s += pretty(o,ind,seen) }; return s } default: return String(o) }; return '<???>' }; 
     return toStr(obj);
-}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}};_k_.r4=_k_.k.F256(_k_.k.r(4));_k_.r5=_k_.k.F256(_k_.k.r(5));_k_.m6=_k_.k.F256(_k_.k.m(6));_k_.y8=_k_.k.F256(_k_.k.y(8));_k_.w2=_k_.k.F256(_k_.k.w(2));_k_.w3=_k_.k.F256(_k_.k.w(3))
+}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}};_k_.r4=_k_.k.F256(_k_.k.r(4));_k_.r5=_k_.k.F256(_k_.k.r(5));_k_.m6=_k_.k.F256(_k_.k.m(6));_k_.y8=_k_.k.F256(_k_.k.y(8));_k_.w2=_k_.k.F256(_k_.k.w(2))
 
 var logfile
 
@@ -68,7 +68,7 @@ logfile = (function ()
         {
             return
         }
-        return this.stream.write(_k_.w3(this.name.slice(3)) + txt + '\n')
+        return this.stream.write(txt + '\n')
     }
 
     logfile.prototype["close"] = function (cb)
@@ -82,5 +82,5 @@ logfile = (function ()
 
 export default logfile;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibG9nZmlsZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdXRpbC9sb2dmaWxlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztRQWNRLHNCQUFpQjtRQUVqQixLQUFDLFNBQVMsR0FBRyxrQkFBa0IsU0FBUSxNQUFNLElBQUksVUFBVTtRQUMzRCxRQUFROzs7O2dCQUVELEtBQUssb0JBQVcsS0FBSzs7b0JBQ2pCLEtBQUssU0FBUzs7b0JBQ2IsTUFBTSxXQUFLOzt5QkFDUCxLQUFLLFdBQVU7O29CQUNuQixNQUFNLEtBQUs7O2dCQUNmLEtBQUMsYUFBUyxlQUFXLEtBQUs7b0JBQ04sS0FBSyxTQUFTOzsyQkFBbEMsS0FBQyxnQkFBVzs7Ozs7dUJBRVosS0FBQyxNQUFNLGtCQUFXOzs7UUFFMUIsUUFBUTs7bUJBRUosS0FBQyxhQUFTLEtBQUs7OzhCQUFjLGtCQUFXO2VBQUksS0FBSzs7UUFFckQsUUFBUTs7bUJBRUosS0FBQyxhQUFTLEtBQUs7OzhCQUFjLGtCQUFXO2VBQUksS0FBSzs7Ozs7O1lBSS9DLEtBQUMsT0FBTyxXQUFjLEtBQUMsT0FBTzs7OztlQUVwQyxLQUFDLE9BQU8sYUFBUyxLQUFDLFdBQUssTUFBUSxNQUFNOzs7OztRQUlyQyxLQUFDLE9BQU8sV0FBTztlQUNmLEtBQUMsT0FBTyxNQUFNOzs7Ozs7ZUFFZiJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibG9nZmlsZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdXRpbC9sb2dmaWxlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztRQWNRLHNCQUFpQjtRQUVqQixLQUFDLFNBQVMsR0FBRyxrQkFBa0IsU0FBUSxNQUFNLElBQUksVUFBVTtRQUMzRCxRQUFROzs7O2dCQUVELEtBQUssb0JBQVcsS0FBSzs7b0JBQ2pCLEtBQUssU0FBUzs7b0JBQ2IsTUFBTSxXQUFLOzt5QkFDUCxLQUFLLFdBQVU7O29CQUNuQixNQUFNLEtBQUs7O2dCQUNmLEtBQUMsYUFBUyxlQUFXLEtBQUs7b0JBQ04sS0FBSyxTQUFTOzsyQkFBbEMsS0FBQyxnQkFBVzs7Ozs7dUJBRVosS0FBQyxNQUFNLGtCQUFXOzs7UUFFMUIsUUFBUTs7bUJBRUosS0FBQyxhQUFTLEtBQUs7OzhCQUFjLGtCQUFXO2VBQUksS0FBSzs7UUFFckQsUUFBUTs7bUJBRUosS0FBQyxhQUFTLEtBQUs7OzhCQUFjLGtCQUFXO2VBQUksS0FBSzs7Ozs7O1lBSS9DLEtBQUMsT0FBTyxXQUFjLEtBQUMsT0FBTzs7OztlQUdwQyxLQUFDLE9BQU8sTUFBTSxNQUFNOzs7OztRQUlwQixLQUFDLE9BQU8sV0FBTztlQUNmLEtBQUMsT0FBTyxNQUFNOzs7Ozs7ZUFFZiJ9
 //# sourceURL=file://kode/ked/util/logfile.kode

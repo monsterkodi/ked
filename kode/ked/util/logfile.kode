@@ -39,7 +39,8 @@ function logfile
         
         ⮐  if @stream.closed or not @stream.writable
 
-        @stream.write w3(@name[3..]) + txt + '\n'
+        # @stream.write w3(@name[3..]) + txt + '\n'
+        @stream.write txt + '\n'
         
     close: cb ->
         
