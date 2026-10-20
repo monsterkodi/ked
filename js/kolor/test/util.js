@@ -8,7 +8,10 @@ var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ?
 
 var ext
 
-import kolor from "../kolor.js"
+import kxk from "../../kxk.js"
+let kstr = kxk.kstr
+
+import kulur from "../kulur.js"
 
 ext = 'kode'
 export default {
@@ -18,11 +21,11 @@ export default {
     },
     ranges:function (s)
     {
-        return kolor.ranges(s,ext)
+        return kulur.ranges(s,ext)
     },
     dissect:function (c)
     {
-        return kolor.dissect(c.split('\n'),ext)
+        return kulur.dissect(kstr.lines(c),ext)
     },
     inc:function (rgs, start, match)
     {
@@ -41,5 +44,5 @@ export default {
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidXRpbC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rb2xvci90ZXN0L3V0aWwua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7O0FBVUEsTUFBTTs7SUFHRjs7ZUFBYSxNQUFNOztJQUNuQjs7ZUFBZSxNQUFNLE9BQU8sRUFBRzs7SUFDL0I7O2VBQWdCLE1BQU0sUUFBUSxFQUFFLE1BQU0sTUFBTzs7SUFFN0M7Ozs7NEJBQ2E7Ozs7Z0JBQVMsRUFBRSxVQUFTLFNBQVUsRUFBRSxVQUFTOzt1QkFBVSxFQUFFOzs7UUFDOUQsZ0NBQWUsa0JBQVksc0JBQWlCLGlCQUFZLHNCQUFpQiJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidXRpbC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rb2xvci90ZXN0L3V0aWwua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7O0FBV0EsTUFBTTs7SUFHRjs7ZUFBYSxNQUFNOztJQUNuQjs7ZUFBZSxNQUFNLE9BQU8sRUFBRzs7SUFDL0I7O2VBQWdCLE1BQU0sUUFBUSxLQUFLLE1BQU0sR0FBSTs7SUFFN0M7Ozs7NEJBQ2E7Ozs7Z0JBQVMsRUFBRSxVQUFTLFNBQVUsRUFBRSxVQUFTOzt1QkFBVSxFQUFFOzs7UUFDOUQsZ0NBQWUsa0JBQVksc0JBQWlCLGlCQUFZLHNCQUFpQiJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/kolor/test/util.kode

@@ -114,13 +114,14 @@ lang 'coffee'
         inc rgs, 4 'prop'       ▸ 'property'
         inc rgs, 9 'call'       ▸ 'function call'
         
+        #  the arrow is a single chunk. the highlighter does not split
+        #  it into a tail and a head, so the two are one match.
+        
         rgs = ranges "dolater =>"
-        inc rgs, 8 '='          ▸ 'punct function bound tail'
-        inc rgs, 9 '>'          ▸ 'punct function bound head'
+        inc rgs, 8 '=>'         ▸ 'punct function bound'
 
         rgs = ranges "dolater ->"
-        inc rgs, 8 '-'          ▸ 'punct function tail'
-        inc rgs, 9 '>'          ▸ 'punct function head'
+        inc rgs, 8 '->'         ▸ 'punct function'
 
         rgs = ranges "async ○->"
         inc rgs, 6 '○'          ▸ 'punct function async'
@@ -284,7 +285,10 @@ lang 'coffee'
         inc rgs, 2 '0'      ▸ 'comment'
         inc rgs, 6 '0'      ▸ 'comment'
         
+        #  a triple comment is a comment, but the numbers in it are
+        #  still numbers - only a header makes the whole line one.
+        
         dss = dissect "###\n 0 1 0 \n###"
-        inc dss[1], 1 "0"   ▸ 'comment triple'
+        inc dss[1], 1 "0"   ▸ 'number'
                 
         

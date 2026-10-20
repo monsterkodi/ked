@@ -6,14 +6,15 @@
  ███████      ███     ███  ███████
 ###
 
-use ../kolor
+use ../../kxk ▪ kstr
+use ..        ◆ kulur
 
 ext = 'kode'
 
 export
     lang: (l) -> ext = l
-    ranges: (s) -> kolor.ranges s, ext
-    dissect: (c) -> kolor.dissect c.split('\n'), ext
+    ranges: (s) -> kulur.ranges s, ext
+    dissect: (c) -> kulur.dissect kstr.lines(c), ext
     
     inc: (rgs, start, match) -> 
         for r in rgs ➜ if r.start == start and r.match == match ➜ ⮐ r.clss

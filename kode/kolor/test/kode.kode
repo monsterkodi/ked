@@ -108,17 +108,26 @@ lang 'kode'
     
     ▸ range
         
+        #  the dots of a range are one chunk each - the highlighter does
+        #  not merge them into a ligature, so '..' is two dots.
+        
         rgs = ranges "a[...2]"
-        inc rgs, 2 '...'        ▸ 'punct range ligature'
+        inc rgs, 2 '.'          ▸ 'punct range'
+        inc rgs, 3 '.'          ▸ 'punct range'
+        inc rgs, 4 '.'          ▸ 'punct range'
     
         rgs = ranges "a[ -1 .. ]"
-        inc rgs, 6 '..'         ▸ 'punct range ligature'
+        inc rgs, 6 '.'          ▸ 'punct range'
+        inc rgs, 7 '.'          ▸ 'punct range'
     
         rgs = ranges "a[1..n]"
-        inc rgs, 3 '..'         ▸ 'punct range ligature'
+        inc rgs, 3 '.'          ▸ 'punct range'
+        inc rgs, 4 '.'          ▸ 'punct range'
     
         rgs = ranges "a[ .... ]"
-        inc rgs, 3 '...'        ▸ 'punct ligature'
+        inc rgs, 3 '.'          ▸ 'punct'
+        inc rgs, 4 '.'          ▸ 'punct'
+        inc rgs, 5 '.'          ▸ 'punct'
         inc rgs, 6 '.'          ▸ 'punct'
         
         # rgs = ranges "@f [1]"
@@ -159,14 +168,15 @@ lang 'kode'
         # inc rgs, 9 'call'       ▸ 'property'
         
         rgs = ranges "dolate: => "
-        inc rgs, 8 '=>'          ▸ 'punct function bound tail ligature'
+        inc rgs, 8 '=>'          ▸ 'punct function bound'
     
         rgs = ranges "dolate: -> "
-        inc rgs, 8 '->'          ▸ 'punct function tail ligature'
+        inc rgs, 8 '->'          ▸ 'punct function'
     
         rgs = ranges "async ○->"
         inc rgs, 6 '○'          ▸ 'punct function async'
-        inc rgs, 7 '->'         ▸ 'punct function tail ligature'
+        inc rgs, 7 '-'          ▸ 'punct function tail'
+        inc rgs, 8 '>'          ▸ 'punct function head'
                 
         # rgs = ranges "@a @b 'c'"
         # inc rgs, 0 '@'          ▸ 'punct function call'
@@ -219,14 +229,14 @@ lang 'kode'
         rgs = ranges "f = a b ->"
         inc rgs, 4 'a'              ▸ 'function argument'
         inc rgs, 6 'b'              ▸ 'function argument'
-        inc rgs, 8 '->'             ▸ 'punct function tail ligature'
+        inc rgs, 8 '->'             ▸ 'punct function'
 
     ▸ args
     
         rgs = ranges "    f: a b ->"
         inc rgs, 7 'a'              ▸ 'function argument'
         inc rgs, 9 'b'              ▸ 'function argument'
-        inc rgs, 11 '->'            ▸ 'punct function tail ligature'
+        inc rgs, 11 '->'            ▸ 'punct function'
 
     ▸ args
     
@@ -234,7 +244,8 @@ lang 'kode'
         inc rgs, 7 'a'              ▸ 'function argument'
         inc rgs, 9 'b'              ▸ 'function argument'
         inc rgs, 11 '○'             ▸ 'punct function async'
-        inc rgs, 12 '->'            ▸ 'punct function tail ligature'
+        inc rgs, 12 '-'             ▸ 'punct function tail'
+        inc rgs, 13 '>'             ▸ 'punct function head'
         
     # ███   ███   ███████          ███████   ███████   ███      ███      
     # ████  ███  ███   ███        ███       ███   ███  ███      ███      
@@ -300,12 +311,12 @@ lang 'kode'
         rgs = ranges " @: ->"
         inc rgs, 1 "@"  ▸ 'method'
         inc rgs, 2 ":"  ▸ 'punct method'
-        inc rgs, 4 "->" ▸ 'punct function tail ligature'
+        inc rgs, 4 "->" ▸ 'punct function'
     
         rgs = ranges " @:->a"
         inc rgs, 1 "@"  ▸ 'method'
         inc rgs, 2 ":"  ▸ 'punct method'
-        inc rgs, 3 "->" ▸ 'punct function tail ligature'
+        inc rgs, 3 "->" ▸ 'punct function'
     
     # ███   ███  ████████  ███   ███  ███   ███   ███████   ████████   ███████    
     # ███  ███   ███        ███ ███   ███ █ ███  ███   ███  ███   ███  ███   ███  
@@ -481,17 +492,17 @@ lang 'kode'
         rgs = ranges " a: =>"
         inc rgs, 1 "a"      ▸ 'method'
         inc rgs, 2 ":"      ▸ 'punct method'
-        inc rgs, 4 "=>"     ▸ 'punct function bound tail ligature'
+        inc rgs, 4 "=>"     ▸ 'punct function bound'
         
         rgs = ranges " a: ->"
         inc rgs, 1 "a"      ▸ 'method'
         inc rgs, 2 ":"      ▸ 'punct method'
-        inc rgs, 4 "->"     ▸ 'punct function tail ligature'
+        inc rgs, 4 "->"     ▸ 'punct function'
         
         rgs = ranges "mthd:  (arg)    => @member memarg"
         inc rgs, 0  'mthd'  ▸ 'method'
         inc rgs, 4  ':'     ▸ 'punct method'
-        inc rgs, 16 '=>'    ▸ 'punct function bound tail ligature'
+        inc rgs, 16 '=>'    ▸ 'punct function bound'
         
         rgs = ranges "@mthd: (arg) ->"
         inc rgs, 0 '@'      ▸ 'punct method class'

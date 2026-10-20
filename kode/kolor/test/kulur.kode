@@ -14,6 +14,7 @@ ext     = 'kode'
 lang    = l -> ext = l
 ranges  = s -> kulur.ranges s ext
 dissect = c -> kulur.dissect kstr.lines(c) ext
+parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
 
 ▸ kulur
 
@@ -252,6 +253,11 @@ dissect = c -> kulur.dissect kstr.lines(c) ext
         
         rgs = ranges ' ###' 'kode' 
         inc rgs 1 '###' ▸ 'punct comment triple'
+        
+        # an extension with a dot in front of it is the extension
+        
+        rgs = ranges '###' '.coffee'
+        inc rgs 0 '###' ▸ 'punct comment triple'
                 
     #  ███████   ███████   ██     ██  ██     ██  ████████  ███   ███  █████████   ███████  
     # ███       ███   ███  ███   ███  ███   ███  ███       ████  ███     ███     ███       
@@ -304,6 +310,30 @@ dissect = c -> kulur.dissect kstr.lines(c) ext
         
         dss = dissect "###\n 0 1 0 \n###"
         inc dss[1] 1 "0"   ▸ 'number'
+        
+        #  headers spelled with the block character are headers too -
+        #  zero2blocks rewrites the old zero-ascii-art into these.
+        #  note they chunk one at a time where zeros merge into runs
+        
+        rgs = ranges "# █ ██ ███"
+        inc rgs 0  "#"     ▸ 'punct comment'
+        inc rgs 2  "█"     ▸ 'comment header'
+        inc rgs 4  "█"     ▸ 'comment header'
+        inc rgs 5  "█"     ▸ 'comment header'
+        inc rgs 7  "█"     ▸ 'comment header'
+        inc rgs 8  "█"     ▸ 'comment header'
+        inc rgs 9  "█"     ▸ 'comment header'
+        
+        dss = dissect "###\n █ ██ █ \n###"
+        inc dss[1] 1 "█"   ▸ 'comment triple header'
+        inc dss[1] 3 "█"   ▸ 'comment triple header'
+        inc dss[1] 4 "█"   ▸ 'comment triple header'
+        inc dss[1] 6 "█"   ▸ 'comment triple header'
+        
+        dss = dissect "###\n 0 █ 0 \n###"
+        inc dss[1] 1 "0"   ▸ 'comment triple header'
+        inc dss[1] 3 "█"   ▸ 'comment triple header'
+        inc dss[1] 5 "0"   ▸ 'comment triple header'
         
         lang 'styl'
         
@@ -1020,3 +1050,90 @@ dissect = c -> kulur.dissect kstr.lines(c) ext
         inc dss[0] 0 'const' ▸ 'keyword'
         compare (segWidthCalls < 20 * line.length), true
         
+    ▸ parse
+        
+        # the shape of what parse answers: a line per entry, the chunks
+        # of the line, and the counters that go with them.
+        
+        lang 'coffee'
+        
+        parse "##" ▸ [{
+                        chunks: [
+                            {start:0 length:1 match:"#" text:"#" turd:"##" clss:'punct comment'}
+                            {start:1 length:1 match:"#" text:"#" turd:"#" clss:'comment'}
+                        ], chars:2 index:0 number:1 ext:'coffee'
+                    }]
+        
+        parse ",#a" ▸ [{
+                        chunks: [
+                            {start:0 length:1 match:"," text:"," turd:",#" clss:'punct minor'}
+                            {start:1 length:1 match:"#" text:"#" turd:"#" clss:'punct comment'}
+                            {start:2 length:1 match:"a" text:"a" clss:'comment'}
+                        ], chars:3 index:0 number:1 ext:'coffee'
+                    }]
+                        
+        parse "->" ▸ [{
+                        chunks: [
+                            {start:0 length:2 match:"->" text:"->" turd:"->" clss:'punct function'}
+                        ], chars:2 index:0 number:1 ext:'coffee'
+                    }]
+                        
+        parse "=>" ▸ [{
+                        chunks: [
+                            {start:0 length:2 match:"=>" text:"=>" turd:"=>" clss:'punct function bound'}
+                        ], chars:2 index:0 number:1 ext:'coffee'
+                    }]
+                        
+        parse "f=->1" ▸ [{
+                        chunks: [
+                            {start:0 length:1 match:"f" text:"f" clss:'function'}
+                            {start:1 length:1 match:"=" text:"=" turd:"=->" clss:'punct function'}
+                            {start:2 length:2 match:"->" text:"->" turd:"->" clss:'punct function'}
+                            {start:4 length:1 match:"1" text:"1" clss:'number'}
+                        ], chars:5 index:0 number:1 ext:'coffee'
+                    }]
+                        
+        parse "1" ▸ [{chunks:[{start:0 length:1 match:'1' text:'1' clss:'number'}], chars:1 index:0 number:1 ext:'coffee' }]
+        parse "a" ▸ [{chunks:[{start:0 length:1 match:'a' text:'a' clss:'text'}],   chars:1 index:0 number:1 ext:'coffee' }]
+        parse "." ▸ [{chunks:[{start:0 length:1 match:'.' text:'.' turd:'.' clss:'punct'}], chars:1 index:0 number:1 ext:'coffee' }]
+        
+        parse "1.a" ▸ [{chunks:[
+                      {start:0  length:1 match:'1' text:'1' clss:'number'}
+                      {start:1  length:1 match:'.' text:'.' turd:'.' clss:'punct property'}
+                      {start:2  length:1 match:'a' text:'a' clss:'property'}
+                      ], chars:3 index:0 number:1 ext:'coffee' }]
+                        
+        parse "++a" ▸ [{chunks:[
+                      {start:0  length:1 match:'+' text:'+' turd:'++' clss:'punct'}
+                      {start:1  length:1 match:'+' text:'+' turd:'+' clss:'punct'}
+                      {start:2  length:1 match:'a' text:'a' clss:'text'}
+                      ], chars:3 index:0 number:1 ext:'coffee'}]
+                      
+        #  the columns of a chunk are where they are on the line, spaces
+        #  and all.
+        
+        b = parse "x"
+        b[0].chunks[0].start ▸ 0
+        
+        b = parse " xx"
+        b[0].chunks[0].start ▸ 1
+        
+        b = parse "    xxx"
+        b[0].chunks[0].start ▸ 4
+        
+        b = parse "    x 1  , "
+        b[0].chunks[0].start ▸ 4
+        b[0].chunks[1].start ▸ 6
+        b[0].chunks[2].start ▸ 9
+        
+    ▸ globalize
+        
+        ▸ enable
+            kulur.klor.globalize()
+            global['red'] ▸ kulur.klor.red
+            global['red']('txt') ▸ kulur.klor.red 'txt'
+    
+        ▸ disable  
+            kulur.klor.globalize false
+            global['red']('txt') ▸ 'txt'
+            kulur.klor.globalize()

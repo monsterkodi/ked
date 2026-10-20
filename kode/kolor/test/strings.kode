@@ -68,10 +68,10 @@ use ./util ▪ inc ranges
         
         rgs = ranges '"#{xxx}"'
         inc rgs, 0 '"'          ▸ 'punct string double'
-        inc rgs, 1 "#"          ▸ 'punct string interpolation start'
-        inc rgs, 2 "{"          ▸ 'punct string interpolation start'
+        inc rgs, 1 "#"          ▸ 'punct string interpolation'
+        inc rgs, 2 "{"          ▸ 'punct string interpolation'
         inc rgs, 3 'xxx'        ▸ 'text'
-        inc rgs, 6 "}"          ▸ 'punct string interpolation end'
+        inc rgs, 6 "}"          ▸ 'punct string interpolation'
         inc rgs, 7 '"'          ▸ 'punct string double'
     
         rgs = ranges '"#{666}"'
@@ -79,20 +79,26 @@ use ./util ▪ inc ranges
         inc rgs, 3 '666'        ▸ 'number'
         inc rgs, 7 '"'          ▸ 'punct string double'
     
+        #  a triple string is a strong string: its content is not parsed,
+        #  so an interpolation inside it is string content too. the old
+        #  highlighter broke it out, because a triple string used to be
+        #  called 'string double triple' and the interpolation looked
+        #  for a string that starts with 'string double'.
+        
         rgs = ranges '"""#{777}"""'
-        inc rgs, 0  '"'         ▸ 'punct string double triple'
-        inc rgs, 1  '"'         ▸ 'punct string double triple'
-        inc rgs, 2  '"'         ▸ 'punct string double triple'
-        inc rgs, 3  '#'         ▸ 'punct string interpolation start'
-        inc rgs, 4  '{'         ▸ 'punct string interpolation start'
-        inc rgs, 5  '777'       ▸ 'number'
-        inc rgs, 8  '}'         ▸ 'punct string interpolation end'
-        inc rgs, 9  '"'         ▸ 'punct string double triple'
-        inc rgs, 10 '"'         ▸ 'punct string double triple'
-        inc rgs, 11 '"'         ▸ 'punct string double triple'
+        inc rgs, 0  '"'         ▸ 'punct string triple'
+        inc rgs, 1  '"'         ▸ 'punct string triple'
+        inc rgs, 2  '"'         ▸ 'punct string triple'
+        inc rgs, 3  '#'         ▸ 'string triple'
+        inc rgs, 4  '{'         ▸ 'string triple'
+        inc rgs, 5  '777'       ▸ 'string triple'
+        inc rgs, 8  '}'         ▸ 'string triple'
+        inc rgs, 9  '"'         ▸ 'punct string triple'
+        inc rgs, 10 '"'         ▸ 'punct string triple'
+        inc rgs, 11 '"'         ▸ 'punct string triple'
         
         rgs = ranges '"#{__dirname}/../"'
-        inc rgs, 12, '}'        ▸ 'punct string interpolation end'
+        inc rgs, 12, '}'        ▸ 'punct string interpolation'
         inc rgs, 13, '/'        ▸ 'string double'
             
         rgs = ranges "p = 'c:\\\\path\\\\'; 1"

@@ -44,10 +44,14 @@ lang 'json'
     inc rgs, 15 'com'           ▸ 'url tld'
     inc rgs, 18 '/'             ▸ 'punct dir'
      
+    #  a file name inside a string is string content. the file classes
+    #  are for file names the highlighter is looking at, not for the ones
+    #  a string happens to spell out.
+    
     rgs = ranges '"file.coffee"'
-    inc rgs, 1 'file'           ▸ 'coffee file'
-    inc rgs, 5 '.'              ▸ 'punct coffee'
-    inc rgs, 6 'coffee'         ▸ 'coffee ext'
+    inc rgs, 1 'file'           ▸ 'string double'
+    inc rgs, 5 '.'              ▸ 'string double'
+    inc rgs, 6 'coffee'         ▸ 'string double'
 
     rgs = ranges '"/some/path"'
     inc rgs, 2 'some'           ▸ 'text dir'
@@ -58,7 +62,7 @@ lang 'json'
     inc rgs, 0 '"'              ▸ 'punct string double'
     inc rgs, 1  '/'             ▸ 'punct dir'
     inc rgs, 2  'some'          ▸ 'text dir'
-    inc rgs, 16 '.'             ▸ 'punct txt'
+    inc rgs, 16 '.'             ▸ 'string double'
     inc rgs, 20 ':'             ▸ 'string double'
     inc rgs, 23 '"'             ▸ 'punct string double'
 

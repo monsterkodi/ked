@@ -67,9 +67,9 @@ lang 'noon'
     inc rgs, 21 '/'         ▸ 'punct dir'
     
     rgs = ranges "    file.coffee"
-    inc rgs, 4 'file'       ▸ 'coffee file'
-    inc rgs, 8 '.'          ▸ 'punct coffee'
-    inc rgs, 9 'coffee'     ▸ 'coffee ext'
+    inc rgs, 4 'file'       ▸ 'file_coffee'
+    inc rgs, 8 '.'          ▸ 'file_punct_coffee'
+    inc rgs, 9 'coffee'     ▸ 'file_ext_coffee'
 
     rgs = ranges "    /some/path"
     inc rgs, 5 'some'       ▸ 'text dir'
@@ -80,7 +80,7 @@ lang 'noon'
     inc rgs, 4  '/'         ▸ 'punct dir'
     inc rgs, 5  'some'      ▸ 'text dir'
     inc rgs, 9  '\\'        ▸ 'punct dir'
-    inc rgs, 19 '.'         ▸ 'punct txt'
+    inc rgs, 19 '.'         ▸ 'file_punct_txt'
     inc rgs, 23 ':'         ▸ 'punct'
     
     rgs = ranges "    test  ./node_modules/.bin/mocha"
