@@ -79,23 +79,44 @@ use ./util ▪ inc ranges
         inc rgs, 3 '666'        ▸ 'number'
         inc rgs, 7 '"'          ▸ 'punct string double'
     
-        #  a triple string is a strong string: its content is not parsed,
-        #  so an interpolation inside it is string content too. the old
-        #  highlighter broke it out, because a triple string used to be
-        #  called 'string double triple' and the interpolation looked
-        #  for a string that starts with 'string double'.
+        #  a triple string breaks its interpolations out too. the string
+        #  is strong - its content is not parsed - but the interpolation
+        #  is not string content: it is code, and it is coloured as code.
         
         rgs = ranges '"""#{777}"""'
         inc rgs, 0  '"'         ▸ 'punct string triple'
         inc rgs, 1  '"'         ▸ 'punct string triple'
         inc rgs, 2  '"'         ▸ 'punct string triple'
-        inc rgs, 3  '#'         ▸ 'string triple'
-        inc rgs, 4  '{'         ▸ 'string triple'
-        inc rgs, 5  '777'       ▸ 'string triple'
-        inc rgs, 8  '}'         ▸ 'string triple'
+        inc rgs, 3  '#'         ▸ 'punct string interpolation'
+        inc rgs, 4  '{'         ▸ 'punct string interpolation'
+        inc rgs, 5  '777'       ▸ 'number'
+        inc rgs, 8  '}'         ▸ 'punct string interpolation'
         inc rgs, 9  '"'         ▸ 'punct string triple'
         inc rgs, 10 '"'         ▸ 'punct string triple'
         inc rgs, 11 '"'         ▸ 'punct string triple'
+
+        rgs = ranges '"""a#{xxx}b"""'
+        inc rgs, 3  'a'         ▸ 'string triple'
+        inc rgs, 4  '#'         ▸ 'punct string interpolation'
+        inc rgs, 5  '{'         ▸ 'punct string interpolation'
+        inc rgs, 6  'xxx'       ▸ 'text'
+        inc rgs, 9  '}'         ▸ 'punct string interpolation'
+        inc rgs, 10 'b'         ▸ 'string triple'
+
+        #  a triple single quoted string is not a string of its own here.
+        #  only the double quoted one is a triple string, and that is on
+        #  purpose - the single quoted one was left out.
+        
+        rgs = ranges '\'\'\''
+        inc rgs, 0  "'"         ▸ 'punct string single'
+        inc rgs, 1  "'"         ▸ 'punct string single'
+        inc rgs, 2  "'"         ▸ 'punct string single'
+        
+        rgs = ranges '\'\'\'#{777}\'\'\''
+        inc rgs, 3  '#'         ▸ 'string single'
+        inc rgs, 4  '{'         ▸ 'string single'
+        inc rgs, 5  '777'       ▸ 'string single'
+        inc rgs, 8  '}'         ▸ 'string single'
         
         rgs = ranges '"#{__dirname}/../"'
         inc rgs, 12, '}'        ▸ 'punct string interpolation'

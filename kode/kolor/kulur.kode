@@ -1215,7 +1215,19 @@ mdPunct = ->
 
 interpolation = ->
 
-    if topType?.startsWith 'string double'
+    #  the interpolation breaks out of a double quoted string, and out of
+    #  a triple quoted one too. a triple quoted string is strong - its
+    #  content is not parsed - but the interpolation is not string
+    #  content: it is code, and it is coloured as code.
+    #
+    #  'string triple' is the triple quoted string. the lua string is
+    #  called that as well, but lua has no interpolation to break out of
+    #  and no handler that would ask for one.
+    #
+    #  the call has its parens: a parenless call takes the 'or' with it
+    #  and the whole condition ends up inside the call.
+
+    if topType?.startsWith('string double') or topType == 'string triple'
 
         if chunk.turd?.startsWith "\#{"
             pushStack type:'interpolation' weak:true
