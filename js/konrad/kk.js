@@ -38,7 +38,7 @@ class kk
 {
     static async run ()
     {
-        var files
+        var files, ok
 
         files = args.files
         if (args.version)
@@ -62,7 +62,11 @@ class kk
         }
         if (args.test)
         {
-            await kk.test(files)
+            ok = await kk.test(files)
+            if (!ok)
+            {
+                process.exitCode = 1
+            }
         }
         if (args.watch)
         {
@@ -101,12 +105,13 @@ class kk
 
     static async test (files, opt)
     {
-        var cmd, file, test
+        var cmd, file, ok, result, test
 
         if (await knrd.stale())
         {
             console.log(_k_.y5('⚠ '),_k_.r5('the tree is older than the compiler - run kk -k'))
         }
+        ok = true
         if (await nfs.exists("js/test.js"))
         {
             cmd = "node js/test.js"
@@ -119,23 +124,19 @@ class kk
                 cmd += ' silent'
             }
             opt = {shell:true,cwd:kk.bundleDir()}
-            return new Promise(function (resolve, reject)
+            ok = await new Promise(function (resolve, reject)
             {
                 return child_process.exec(cmd,opt,function (err, stdout, stderr)
                 {
-                    if (err)
+                    if (!_k_.empty(stdout))
                     {
-                        console.error('ERROR',err)
-                        return resolve()
+                        console.log(stdout)
                     }
-                    else
+                    if (!_k_.empty(stderr))
                     {
-                        if (!_k_.empty(stdout))
-                        {
-                            console.log(stdout)
-                        }
-                        return resolve()
+                        console.log(stderr)
                     }
+                    return resolve(!err)
                 })
             })
         }
@@ -156,10 +157,12 @@ class kk
                     continue
                 }
                 test = await import(file.path)
-                await tester.test(test.default)
+                result = await tester.test(test.default)
+                ok = ok && ((result != null ? result : true))
             }
-            return tester.summarize()
+            tester.summarize()
         }
+        return ok
     }
 
     static bundleDir ()
@@ -171,5 +174,5 @@ class kk
 global['kk'] = kk
 export default kk.run;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia2suanMiLCJzb3VyY2VzIjpbIi4uLy4uL2tvZGUva29ucmFkL2trLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBYUEsT0FBTyxLQUFLOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O1FBNkJKLFFBQVEsS0FBSztZQUNWLEtBQUs7O2tCQUFZLHlCQUFTLEtBQUssc0JBQWtCLE1BQU0sS0FBSyxNQUFNLGVBQVUsbUJBQWUsUUFBUTs7WUFDbkcsS0FBSzs7a0JBQVksUUFBZ0IsS0FBSyxTQUFTLE1BQUssT0FBTzs7WUFDM0QsS0FBSzs7a0JBQVksS0FBYSxNQUFNOztZQUNwQyxLQUFLOztrQkFBWSxjQUFjLEtBQUssY0FBYyxNQUFNOztnQkFBNkIsWUFBSTs7O1lBQ3pGLEtBQUs7O2tCQUFZLEdBQUcsS0FBVTs7WUFDOUIsS0FBSzs7a0JBQVksR0FBRzs7WUFDcEIsS0FBSzs7a0JBQVksS0FBSyxLQUFJLE1BQU0sTUFBTSxJQUFJOzt1QkFFcEMsS0FBSzs7WUFDVixZQUFJLGtCQUFrQixLQUFLOzs7Ozs7UUFVL0IsWUFBSSxhQUFTLEdBQUc7ZUFFaEIsTUFBTSxNQUFNLEdBQUcsYUFBWSxVQUFVLEtBQUs7O21CQUN0QyxRQUFRLEdBQUc7O29CQUVELE1BQU0sU0FBUyxLQUFLLEtBQUs7Ozs7MkJBRTVCLE1BQU0sSUFBSSxLQUFLLE9BQVUsT0FBTyxNQUFNLE9BQU87O29CQUM1QyxtQkFBTyxhQUFTLEtBQUs7MEJBQ25CLEtBQUssS0FBSztpQ0FDVixHQUFHLEtBQUssS0FBSyxPQUFNLE9BQU87Ozs7Ozs7Ozs7a0JBY25DLEtBQUs7O1lBQ04sbUJBQU8sYUFBUzs7a0JBR2QsSUFBSSxPQUFPOztZQUVULE1BQU07MkJBQ2dDOztnQkFBdEMsT0FBTyxNQUFNLE1BQU0sS0FBSzs7aUJBQ0osY0FBQSxJQUFLOztnQkFBekIsT0FBTzs7WUFDUCxPQUFNLE1BQU0sS0FBSyxJQUFJLEdBQUc7dUJBRXBCOzt1QkFFQSxjQUFjLEtBQUssSUFBSTs7d0JBRWhCOzt3QkFDQyxjQUFNLFFBQVE7K0JBQ2Q7Ozs7dUNBRW9COzs0QkFBcEIsWUFBSTs7K0JBQ0o7Ozs7O3VCQUVkLElBQUksTUFBTTs7aUJBRUwsY0FBQSxJQUFLOztnQkFDSixPQUFPLGNBQWM7Z0JBQ3JCLE9BQU8sYUFBYzs7WUFFekIsY0FBUyxJQUFJLEtBQUssTUFBTSxLQUFLLFFBQVEsTUFBTSxLQUFLO2dDQUNwQzs7OztvQkFDSSxLQUFLLFNBQVE7O29CQUF6Qjs7Z0JBQ0EsYUFBUSxPQUFPLEtBQUs7c0JBRWxCLE9BQU8sS0FBSyxLQUFLOzttQkFFdkIsT0FBTzs7Ozs7O2VBRUosUUFBUTs7OztBQUUzQixPQUFPLFFBQVE7ZUFFUixHQUFHIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia2suanMiLCJzb3VyY2VzIjpbIi4uLy4uL2tvZGUva29ucmFkL2trLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBYUEsT0FBTyxLQUFLOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O1FBNkJKLFFBQVEsS0FBSztZQUNWLEtBQUs7O2tCQUFZLHlCQUFTLEtBQUssc0JBQWtCLE1BQU0sS0FBSyxNQUFNLGVBQVUsbUJBQWUsUUFBUTs7WUFDbkcsS0FBSzs7a0JBQVksUUFBZ0IsS0FBSyxTQUFTLE1BQUssT0FBTzs7WUFDM0QsS0FBSzs7a0JBQVksS0FBYSxNQUFNOztZQUNwQyxLQUFLOztrQkFBWSxjQUFjLEtBQUssY0FBYyxNQUFNOztnQkFBNkIsWUFBSTs7O1lBQ3pGLEtBQUs7O1lBS0osV0FBTyxHQUFHLEtBQUs7aUJBQ1I7O2dCQUNILFFBQVEsV0FBVzs7O1lBQ3hCLEtBQUs7O2tCQUFZLEdBQUc7O1lBQ3BCLEtBQUs7O2tCQUFZLEtBQUssS0FBSSxNQUFNLE1BQU0sSUFBSTs7dUJBRXBDLEtBQUs7O1lBQ1YsWUFBSSxrQkFBa0IsS0FBSzs7Ozs7O1FBVS9CLFlBQUksYUFBUyxHQUFHO2VBRWhCLE1BQU0sTUFBTSxHQUFHLGFBQVksVUFBVSxLQUFLOzttQkFDdEMsUUFBUSxHQUFHOztvQkFFRCxNQUFNLFNBQVMsS0FBSyxLQUFLOzs7OzJCQUU1QixNQUFNLElBQUksS0FBSyxPQUFVLE9BQU8sTUFBTSxPQUFPOztvQkFDNUMsbUJBQU8sYUFBUyxLQUFLOzBCQUNuQixLQUFLLEtBQUs7aUNBQ1YsR0FBRyxLQUFLLEtBQUssT0FBTSxPQUFPOzs7Ozs7Ozs7O2tCQWNuQyxLQUFLOztZQUNOLG1CQUFPLGFBQVM7O1FBRXBCLEtBQUs7a0JBR0MsSUFBSSxPQUFPOztZQUVULE1BQU07MkJBQ2dDOztnQkFBdEMsT0FBTyxNQUFNLE1BQU0sS0FBSzs7aUJBQ0osY0FBQSxJQUFLOztnQkFBekIsT0FBTzs7WUFDUCxPQUFNLE1BQU0sS0FBSyxJQUFJLEdBQUc7WUFLeEIsZUFBVzs7dUJBRVAsY0FBYyxLQUFLLElBQUk7O21DQUtDOzt3QkFBcEIsWUFBSTs7bUNBQ2dCOzt3QkFBcEIsWUFBSTs7MkJBRUosU0FBWTs7Ozt1QkFFdEIsSUFBSSxNQUFNOztpQkFFTCxjQUFBLElBQUs7O2dCQUNKLE9BQU8sY0FBYztnQkFDckIsT0FBTyxhQUFjOztZQUV6QixjQUFTLElBQUksS0FBSyxNQUFNLEtBQUssUUFBUSxNQUFNLEtBQUs7Z0NBRXBDOzs7O29CQUNJLEtBQUssU0FBUTs7b0JBQXpCOztnQkFDQSxhQUFRLE9BQU8sS0FBSztnQkFLcEIsZUFBVSxPQUFPLEtBQUssS0FBSztnQkFDM0IsS0FBSyxRQUFRLGlCQUFBLFNBQVM7O1lBRTFCLE9BQU87O2VBRWY7Ozs7O2VBRVcsUUFBUTs7OztBQUUzQixPQUFPLFFBQVE7ZUFFUixHQUFHIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/konrad/kk.kode

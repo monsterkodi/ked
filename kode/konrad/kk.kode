@@ -45,7 +45,14 @@ class kk
         if args.info    ➜ ○ knrd         [] util.defaults(args dryrun:true)
         if args.knrd    ➜ ○ knrd         files args 
         if args.build   ➜ ○ child_process.exec "pnpm build" {shell:true} (err stdout stderr) -> log stdout
-        if args.test    ➜ ○ kk.test      files
+        if args.test
+            #  a failing test is a failing command: the exit code says so.
+            #  the watch runs the tests too, and it must not stop for it,
+            #  so only the run that was asked for sets the code.
+            
+            ok = ○ kk.test files
+            if not ok
+                process.exitCode = 1
         if args.watch   ➜ ○ kk.watch()                            
         if args.run     ➜ ○ kode.run files:files run:true
         
@@ -87,6 +94,8 @@ class kk
         if ○ knrd.stale()
             log y5('⚠ ') r5('the tree is older than the compiler - run kk -k')
         
+        ok = true
+        
         if 
             ○ nfs.exists "js/test.js"
                 
@@ -95,17 +104,21 @@ class kk
                 cmd += ' silent' if opt?.silent
                 opt = shell:true cwd:kk.bundleDir() # run tests inside the .app folder
                 
-                new Promise (resolve reject) ->
+                #  the runner answers with its own exit code, so the run is
+                #  known to have failed when the child says so
+                
+                ok = ○ new Promise (resolve reject) ->
                 
                     child_process.exec cmd opt (err stdout stderr) -> 
                         
-                        if err
-                            error 'ERROR' err
-                            resolve() # don't reject here to keep test watch running
-                        else
-                            log stdout if valid stdout
-                            resolve()
-                            
+                        #  the summary is on stdout, and it is there whether
+                        #  the run worked or not, so it is logged either way
+                        
+                        log stdout if valid stdout
+                        log stderr if valid stderr
+                        
+                        resolve(not err)
+            
             ○ nfs.isDir "js/test"
 
                 if opt?.silent
@@ -113,13 +126,20 @@ class kk
                     tester.logModules  = false
     
                 files =○ nfs.list slash.path(process.cwd() 'js' 'test')
+                
                 for file in files
                     continue if file.type == 'dir' # ignore subdirectories for now
                     test =○ import(file.path) # shouldn't the file type be checked here?
         
-                    ○ tester.test test.default
+                    #  the tester answers with the failures of the module, and
+                    #  with nothing at all when the module has no sections
+                    
+                    result =○ tester.test test.default
+                    ok = ok and (result ? true)
             
                 tester.summarize()
+        
+        ok
                     
     @bundleDir: -> process.cwd()
         
