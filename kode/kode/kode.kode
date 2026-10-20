@@ -8,7 +8,7 @@
 
 use ../kxk ◆ slash karg ansi nfs
 use ◆ lexer print parser scoper stripol returner operator renderer
-use ../kolor ◆ kolor
+use ../kolor ◆ kulur
 
 class Kode
 
@@ -97,7 +97,7 @@ class Kode
 
     caret: text col ->
 
-        hi = if text then kolor.kolorizeChunks kolor.ranges(text) else ''
+        hi = if text then kulur.kolorizeChunks kulur.ranges(text) else ''
 
         # col is a character offset, but ^ has to land under the same
         # character on screen, so tabs ahead of it count for what they

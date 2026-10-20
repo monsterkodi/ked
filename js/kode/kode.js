@@ -16,7 +16,7 @@ import returner from "./returner.js"
 import operator from "./operator.js"
 import renderer from "./renderer.js"
 
-import kolor from "../kolor/kolor.js"
+import kulur from "../kolor/kulur.js"
 
 class Kode
 {
@@ -83,7 +83,7 @@ class Kode
     {
         var ch, hi, pad
 
-        hi = text ? kolor.kolorizeChunks(kolor.ranges(text)) : ''
+        hi = text ? kulur.kolorizeChunks(kulur.ranges(text)) : ''
         if (!_k_.empty(col))
         {
             pad = ''
