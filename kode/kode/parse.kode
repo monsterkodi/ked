@@ -641,10 +641,17 @@ function Parse extends parseutils
                     e.text not in ['[' '('] and                     
                     '▸arg' not in @stack)
                     
+                    #  there was a guard here once: 'if the operation is
+                    #  already on the stack, stop the lhs'. it was dead -
+                    #  the condition it tested was a call with the whole
+                    #  condition as its argument, so it could only ever be
+                    #  false - and it could not be turned on. the parser
+                    #  reads an expression to the right and the renderer
+                    #  flattens the chain, so an operator that stopped the
+                    #  lhs would change what the compiler makes of
+                    #  'a <= b < c', of 'x + y = z' and of 'not a is Array'.
+                    
                     if 
-                        @stack[-1]?.startsWith 'op' and @stack[-1] != 'op='
-                            @verb 'lhs stop on operation' e nxt
-                            break
                         @stack[-1] in ['in?' 'opempty' 'opvalid']
                             @verb "lhs stop on #{@stack[-1]}" e nxt
                             break
