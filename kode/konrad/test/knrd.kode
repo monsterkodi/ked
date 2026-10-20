@@ -73,9 +73,21 @@ setup = ○->
 
         knrd.stampSource hereText, jdir  ▸ kp('here.kode')
 
+    ▸ an absolute sourceURL is taken as it stands
+
+        # kode writes the path of the file itself into the sourceURL, so
+        # there is nothing to resolve it against, and nothing to get
+        # wrong by resolving it
+
+        knrd.stampSource(stamped(kp('here.kode')), jdir)  ▸ kp('here.kode')
+
     ▸ and the sourcemap still works on its own
 
         knrd.stampSource mapHereText, jp('x.js')  ▸ kp('here.kode')
+
+    ▸ and a sourcemap naming an absolute source
+
+        knrd.stampSource(mapped(kp('here.kode')), jp('x.js'))  ▸ kp('here.kode')
 
     ▸ a sourcemap that is not base64 is not a stamp
 
@@ -94,6 +106,17 @@ setup = ○->
         gone = ○ knrd.reconcile dirs opt
 
         gone.length  ▸ 2
+
+    ▸ and a file stamped with an absolute path goes too
+
+        # the sourceURL is written as the path of the file itself, so this
+        # is the shape reconcile actually meets
+
+        ○ setup()
+        ○ nfs.write(jp('abs.js'), stamped(kp('gone.kode')))
+        ○ knrd.reconcile dirs opt
+
+        isFile jp('abs.js') ○▸ false
 
     ▸ and it is the right two
 
@@ -136,7 +159,7 @@ setup = ○->
         ○ knrd.reconcile dirs opt
         
         away = slash.path root 'elsewhere' 'here.kode'
-        ○ nfs.write jp('stray.js') (stamped (fromCwd away))
+        ○ nfs.write(jp('stray.js'), stamped(fromCwd(away)))
         ○ knrd.reconcile dirs opt
 
         isFile jp('stray.js') ○▸ true
@@ -146,7 +169,7 @@ setup = ○->
         ○ setup()
         ○ knrd.reconcile dirs opt
         
-        ○ nfs.write jp('dirish.js') (stamped (fromCwd kdir))
+        ○ nfs.write(jp('dirish.js'), stamped(fromCwd(kdir)))
         ○ knrd.reconcile dirs opt
 
         isFile jp('dirish.js') ○▸ true

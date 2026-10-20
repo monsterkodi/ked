@@ -223,7 +223,23 @@ kodfiles = (dir, out=[]) ->
         url = kplain 'a = 1'
         lines = url.split '\n'
         url = lines.find (l) -> l.startsWith '//# sourceURL='
-        url ▸ "//# sourceURL=file://#{slash.relative PROBE, process.cwd()}"
+        url ▸ "//# sourceURL=file://#{PROBE}"
+
+    ▸ and it names the file by its own path
+
+        # a path relative to the working directory means something
+        # different in every directory, and names a file that is not there
+        # from any of the others. the sourceURL is what a terminal turns
+        # into a link and what a reader opens in an editor, so it has to
+        # say where the file is, and not where the build was run from.
+
+        url = kplain 'a = 1'
+        lines = url.split '\n'
+        url = lines.find (l) -> l.startsWith '//# sourceURL='
+        url = url.replace '//# sourceURL=file://', ''
+
+        slash.isAbsolute url  ▸ true
+        url ▸ PROBE
 
     ▸ and the js it wraps is untouched
 
@@ -269,7 +285,7 @@ kodfiles = (dir, out=[]) ->
 
         url.startsWith 'file://' ▸ true
 
-        # and it still points at the probe file, from the working directory
+        # and it still points at the probe file, wherever it is read from
 
         src = url.replace 'file://', ''
         src.endsWith 'kode/srcmap-probe.kode' ▸ true

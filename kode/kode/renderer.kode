@@ -40,7 +40,12 @@ class Renderer
         
         @file = source
         if source and globalThis.process
-            @source = slash.relative source, globalThis.process.cwd()
+            # the name of the file, and not a name for it. a path relative
+            # to the working directory means something different in every
+            # directory and names a file that is not there from any of the
+            # others - and the one thing this name is for is to be read
+            # from somewhere else.
+            @source = slash.absolute source, globalThis.process.cwd()
         # log @file, @source
         
         # a map left over from a previous run of this renderer has no
@@ -51,8 +56,8 @@ class Renderer
         if @kode.args.map and @source
             # the map names its source from where it is written, so that a
             # stack trace in the js points at the kode file beside it. the
-            # name the rest of the renderer uses stays relative to the
-            # working directory.
+            # name the rest of the renderer uses is the file itself, and
+            # says nothing about where it is read from.
             
             name = if target then slash.relative(source, slash.dir(target))
             
@@ -117,6 +122,10 @@ class Renderer
             # hand written one - konrad's reconcile can see that nothing
             # else can - so tying it to -map meant a tree compiled without
             # maps was a tree nobody could ever clean up.
+            #
+            # the path in it is the path of the file, and not a path to it
+            # from the working directory: this is the line a reader clicks
+            # to open the file it names, and a reader is somewhere else.
 
             s += "\n//# sourceURL=file://#{@source}\n"
 

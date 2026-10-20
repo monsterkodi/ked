@@ -95,11 +95,10 @@ gatherFiles = ○->
     kode did not make it. it is the only thing telling a generated file from
     a hand written one.
     
-    there are two ways a compiled file says where it came from and they are
-    measured from different places, so both are normalised here rather than
-    at the call site:
+    there are two ways a compiled file says where it came from, and both are
+    resolved here rather than at the call site:
     
-      //# sourceURL=file://<path>   from the working directory. written
+      //# sourceURL=file://<path>   the path of the file itself. written
                                     whether or not there is a sourcemap
       the map's sources[0]          from the file carrying it, the way a
                                     stack frame is
@@ -112,10 +111,10 @@ stampSource = (text, file) =>
 
     for line in lines
 
-        rel = line.replace '//# sourceURL=file://' ''
+        src = line.replace '//# sourceURL=file://' ''
 
-        if rel != line
-            from = slash.absolute slash.path(process.cwd(), rel)
+        if src != line
+            from = slash.absolute src, process.cwd()
 
     if from
         ⮐ from
@@ -127,7 +126,7 @@ stampSource = (text, file) =>
     map = JSON.parse b64.toString('utf8')
     if not (valid map.sources and valid map.sources[0]) ➜ ⮐ ''
 
-    slash.absolute slash.path(slash.dir(file), map.sources[0])
+    slash.absolute map.sources[0], slash.dir(file)
 
 # ████████   ████████   ███████   ███████   ███   ███   ███████  ███  ███      ████████
 # ███   ███  ███       ███       ███   ███  ████  ███  ███       ███  ███      ███     

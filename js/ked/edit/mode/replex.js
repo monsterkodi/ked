@@ -52,4 +52,4 @@ replex = (function ()
 export default replex;
 
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVwbGV4LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L21vZGUvcmVwbGV4LmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7MEJBWWdCOzs7OztRQUlSLEtBQUMsT0FBTzs7Ozs7OztRQVVSLFNBQVMsS0FBQyxNQUFNO1FBQ2hCOzRCQUVhOzs7O1lBQ1QsTUFBTSxZQUFNO2dCQUNULE9BQU8sTUFBTSxPQUFPOztnQkFDbkIsTUFBTSxLQUFLOzs7WUFHaEIsTUFBTSxXQUFVLEtBQUMsTUFBTSxFQUFFLFFBQVE7O1lBQ2hDLEtBQUMsTUFBTSxPQUFPO1lBQ2QsS0FBQyxNQUFNLE9BQU87bUJBQ2QsS0FBQyxNQUFNLE9BQU8sTUFBTSxLQUFLOzs7Ozs7O2VBRTlCIn0=
-//# sourceURL=file://kode/ked/edit/mode/replex.kode
+//# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/mode/replex.kode
