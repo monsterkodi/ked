@@ -408,6 +408,30 @@ use ./utils ▪ kc ke
         ke  "lpad 10 'l' '+-'"      ▸  "+-+-+-+-+-l"
         ke  "lpad 5  '1234567890'"  ▸  "1234567890"
         
+    ▸ the operators in front of a value
+    
+        #  an operator that stands in front of a value is not a call. it
+        #  takes one operand, and the operand is an expression, so an
+        #  operator after it stays outside. a call is the other way round:
+        #  its arguments are expressions too, and the operator after them
+        #  is part of the last one.
+        
+        kc  'not a and b'        ▸ '!a && b'
+        kc  'delete a and b'     ▸ 'delete a && b'
+        kc  'new a and b'        ▸ 'new a && b'
+        kc  'copy a and b'       ▸ '_k_.copy(a) && b'
+        kc  'clone a and b'      ▸ '_k_.clone(a) && b'
+        kc  'empty a and b'      ▸ '_k_.empty(a) && b'
+        kc  'valid a and b'      ▸ '!_k_.empty(a) && b'
+        kc  'first a and b'      ▸ '_k_.first(a) && b'
+        kc  'last a and b'       ▸ '_k_.last(a) && b'
+        kc  'empty [] and empty {}' ▸ '_k_.empty([]) && _k_.empty({})'
+        
+        #  a call does the opposite, and that is what makes the two read
+        #  so differently:
+        
+        kc  'f a and b'          ▸ 'f(a && b)'
+        
     ▸ rpad
     
         ke  "rpad 10"               ▸  "          "

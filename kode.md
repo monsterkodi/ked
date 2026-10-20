@@ -205,6 +205,38 @@ f(a(b))   ▸ f(a(b))
 
 only in top-level function calls can the parens be omitted. 
 
+#### what a call without parens takes
+
+The arguments are expressions, and expressions separated by spaces are the
+arguments. An operator inside an expression belongs to the expression, so
+it does not end the argument list:
+
+```kode
+f a b         ▸ f(a, b)
+f a and b     ▸ f(a && b)
+f a, b and c  ▸ f(a, b && c)
+```
+
+A call that wants two arguments needs the parens or the comma. Without
+them the second one is part of the first:
+
+```kode
+f('op') and b != 'op='   ▸ f('op') && b !== 'op=')
+```
+
+#### the operators in front of a value
+
+These are not calls. They take one operand, and the operand is an
+expression, so an operator after it stays outside - the other way round
+from a call:
+
+```kode
+not a and b   ▸ !a && b
+```
+
+They are `not`, `delete`, `new`, `noon`, `copy`, `clone`, `empty`,
+`valid`, `first` and `last`.
+
 
 # misc
 
