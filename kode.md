@@ -221,7 +221,7 @@ A call that wants two arguments needs the parens or the comma. Without
 them the second one is part of the first:
 
 ```kode
-f('op') and b != 'op='   ▸ f('op') && b !== 'op=')
+f('op') and b != 'op='   ▸ f('op') && b !== 'op='
 ```
 
 #### the operators in front of a value
