@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
 
 var saveas
 
@@ -11,6 +11,8 @@ let nfs = kxk.nfs
 import color from "../../theme/color.js"
 import theme from "../../theme/theme.js"
 import icons from "../../theme/icons.js"
+
+import fileutil from "../../util/fileutil.js"
 
 import belt from "../../edit/tool/belt.js"
 
@@ -30,16 +32,14 @@ saveas = (function ()
         this["onWheel"] = this["onWheel"].bind(this)
         this["onMouse"] = this["onMouse"].bind(this)
         this["draw"] = this["draw"].bind(this)
-        this["onBrocolAction"] = this["onBrocolAction"].bind(this)
         this["onChoicesAction"] = this["onChoicesAction"].bind(this)
+        this["doSaveAs"] = this["doSaveAs"].bind(this)
         this["applyChoice"] = this["applyChoice"].bind(this)
         this["targetPath"] = this["targetPath"].bind(this)
-        this["goToParent"] = this["goToParent"].bind(this)
-        this["enterDir"] = this["enterDir"].bind(this)
         this["onKey"] = this["onKey"].bind(this)
         this["onInputChange"] = this["onInputChange"].bind(this)
         this["preview"] = this["preview"].bind(this)
-        this["showPathItems"] = this["showPathItems"].bind(this)
+        this["setFilePath"] = this["setFilePath"].bind(this)
         this["gotoDir"] = this["gotoDir"].bind(this)
         this["open"] = this["open"].bind(this)
         this["arrange"] = this["arrange"].bind(this)
@@ -49,7 +49,6 @@ saveas = (function ()
         this.setColor('frame',theme.quicky.frame)
         this.brocol = new brocol(this.screen,'saveas_brocol')
         this.brocol.setColor('bg',color.darken(this.color.bg,0.7))
-        this.brocol.on('action',this.onBrocolAction)
         this.choices.mapscr.rowOffset = 1
         this.choices.frontRoundOffset = 2
         this.userNamed = false
@@ -80,14 +79,17 @@ saveas = (function ()
         return this.cells.layout(x,y,w,h)
     }
 
-    saveas.prototype["open"] = async function (dir, name)
+    saveas.prototype["open"] = async function (dir, file)
     {
-        this.userNamed = false
+        var path
+
+        console.log("OPEN",dir,file)
         this.input.show()
-        await this.gotoDir(dir)
-        if (name)
+        path = slash.path(dir,file)
+        await this.gotoDir(dir,path)
+        if (file)
         {
-            this.input.set(name)
+            this.input.set(file)
             this.input.state.moveCursors('eol')
         }
         return this.input.grabFocus()
@@ -117,51 +119,55 @@ saveas = (function ()
         return this.showPathItems(items,select)
     }
 
-    saveas.prototype["showPathItems"] = function (items, select)
+    saveas.prototype["setFilePath"] = function (path)
     {
-        var idx, item, selectIndex
-
-        selectIndex = 0
-        if (select)
-        {
-            select = slash.untilde(select)
-            var list = _k_.list(items)
-            for (idx = 0; idx < list.length; idx++)
-            {
-                item = list[idx]
-                if (slash.samePath(item.path,select))
-                {
-                    selectIndex = idx
-                    break
-                }
-            }
-        }
-        this.preview(items[selectIndex])
-        this.choices.set(items,'tilde')
-        this.choices.state.selectLine(selectIndex)
-        this.choices.state.setMainCursor(0,selectIndex)
-        this.choices.state.setView([0,0])
-        this.show()
-        return this.input.grabFocus()
+        console.log("SET FILE",slash.file(path))
+        this.input.set(slash.file(path))
+        this.input.state.moveCursors('eol')
+        this.arrange()
+        return post.emit('redraw')
     }
 
-    saveas.prototype["preview"] = function (item)
+    saveas.prototype["preview"] = async function (item)
     {
-        this.input.grabFocus()
-        if (!this.userNamed && (item != null ? item.type : undefined) === 'file')
+        var segls, text
+
+        if (_k_.empty((item != null ? item.path : undefined)))
         {
-            this.input.set(item.file)
-            this.input.state.moveCursors('eol')
+            return this.hideMap()
         }
-        if ((item != null ? item.type : undefined) === 'dir' && !item.tilde.endsWith('..'))
+        if (item.type === 'file')
         {
-            this.brocol.show(item.path)
-            this.choices.hoverForSubmenu = true
+            this.brocol.hide()
+            if (_k_.in(slash.ext(item.path),fileutil.sourceFileExtensions))
+            {
+                text = await nfs.read(item.path)
+                if (this.brocol.visible())
+                {
+                    return
+                }
+                segls = belt.seglsForText(text)
+                this.choices.mapscr.setSyntaxSegls(slash.ext(item.path),segls)
+                this.choices.mapscr.show()
+            }
+            else
+            {
+                this.hideMap()
+            }
         }
         else
         {
-            this.brocol.hide()
-            this.choices.hoverForSubmenu = false
+            this.hideMap()
+            if (!item.tilde.endsWith('..'))
+            {
+                this.brocol.show(item.path)
+                this.choices.hoverForSubmenu = true
+            }
+            else
+            {
+                this.brocol.hide()
+                this.choices.hoverForSubmenu = false
+            }
         }
         this.arrange()
         return post.emit('redraw')
@@ -190,34 +196,6 @@ saveas = (function ()
         return saveas.__super__.onKey.call(this,key,event)
     }
 
-    saveas.prototype["enterDir"] = function ()
-    {
-        var choice
-
-        choice = this.choices.current()
-        if (!choice)
-        {
-            return
-        }
-        if (choice.type !== 'dir')
-        {
-            return
-        }
-        return this.gotoDir(choice.path)
-    }
-
-    saveas.prototype["goToParent"] = function ()
-    {
-        var up
-
-        up = slash.dir(this.currentDir)
-        if (_k_.empty(up))
-        {
-            return
-        }
-        return this.gotoDir(up,this.currentDir)
-    }
-
     saveas.prototype["targetPath"] = function (name)
     {
         if (slash.isAbsolute(name))
@@ -229,6 +207,41 @@ saveas = (function ()
 
     saveas.prototype["applyChoice"] = function (choice)
     {
+        switch (this.input.current())
+        {
+            case '/':
+                return this.gotoDir('/')
+
+            case '~':
+                return this.gotoDir('~')
+
+            case '.':
+                return this.gotoDir(this.currentDir)
+
+            case '..':
+                return this.gotoDir(slash.dir(this.currentDir))
+
+        }
+
+        if (_k_.empty(choice) && !_k_.empty(this.input.current()))
+        {
+            this.gotoDirOrOpenFile(this.input.current())
+            return {redraw:true}
+        }
+        if (_k_.empty(choice))
+        {
+            return {redraw:false}
+        }
+        if (_k_.empty(choice.path))
+        {
+            return {redraw:false}
+        }
+        this.gotoDir(choice.path)
+        return {redraw:true}
+    }
+
+    saveas.prototype["doSaveAs"] = function ()
+    {
         var name, path
 
         name = this.input.current()
@@ -239,39 +252,59 @@ saveas = (function ()
         path = this.targetPath(name)
         this.hide()
         post.emit('focus','editor')
-        return post.emit('file.saveas',path)
+        console.log("WOULD SAVE FILE AS",path)
     }
 
     saveas.prototype["onChoicesAction"] = function (action, choice)
     {
+        var upDir
+
         switch (action)
         {
-            case 'click':
-                if ((choice != null ? choice.type : undefined) === 'dir')
+            case 'right':
+                if (choice.path)
                 {
-                    this.enterDir()
+                    if (choice.tilde === ' ..')
+                    {
+                        return this.moveSelection('down')
+                    }
+                    if (choice.type === 'file')
+                    {
+                        console.log("CHOICE",choice)
+                        this.setFilePath(choice.path)
+                        return
+                    }
+                    else
+                    {
+                        this.hideMap()
+                        return this.gotoDir(choice.path)
+                    }
                 }
-                else
+                break
+            case 'left':
+            case 'delete':
+                if (choice.path)
                 {
-                    this.preview(choice)
+                    upDir = slash.dir(this.currentDir)
+                    if (_k_.empty(upDir))
+                    {
+                        return
+                    }
+                    this.hideMap()
+                    return this.gotoDir(upDir,this.currentDir)
                 }
-                return true
-
+                break
+            case 'space':
+                if (choice.path && choice.type === 'file')
+                {
+                    console.log("SPACE",choice.path)
+                    this.setFilePath(choice.path)
+                    return
+                }
+                break
         }
 
         return saveas.__super__.onChoicesAction.call(this,action,choice)
-    }
-
-    saveas.prototype["onBrocolAction"] = function (action, choice)
-    {
-        switch (action)
-        {
-            case 'click':
-                return this.onChoicesAction('click',choice)
-
-        }
-
-        return saveas.__super__.onBrocolAction.call(this,action,choice)
     }
 
     saveas.prototype["draw"] = function ()
@@ -343,5 +376,5 @@ saveas = (function ()
 
 export default saveas;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2F2ZWFzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2NvbG1ucy9zYXZlYXMua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O3VCQWV3Qjs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OytDQUlWLEtBQUMsT0FBTztRQUVkLEtBQUMsWUFBWTtRQUViLEtBQUMsU0FBUyxLQUFTLE1BQU0sT0FBTztRQUNoQyxLQUFDLFNBQVMsUUFBUyxNQUFNLE9BQU87UUFFaEMsS0FBQyxhQUFhLE9BQU8sS0FBQyxPQUFPO1FBQzdCLEtBQUMsT0FBTyxTQUFTLEtBQUssTUFBTSxPQUFPLEtBQUMsTUFBTSxHQUFHO1FBQzdDLEtBQUMsT0FBTyxHQUFHLFNBQVcsS0FBQztRQUV2QixLQUFDLFFBQVEsT0FBTyxZQUFZO1FBQzVCLEtBQUMsUUFBUSxtQkFBbUI7UUFFNUIsS0FBQyxZQUFZOzs7Ozs7O1FBT2IsZUFBVSxLQUFDLE9BQU8sT0FBSztRQUN2QixlQUFVLEtBQUMsT0FBTyxPQUFLO1FBRXZCLEtBQUs7UUFDTCxLQUFLO1FBRUwsY0FBUyxLQUFDLE9BQU8sT0FBSztRQUN0QixhQUFTLE1BQU0sS0FBRyxJQUFJO1FBRXRCLE1BQUssS0FBQyxPQUFPLFlBQVksSUFBSTtRQUM3QixNQUFLLEtBQUMsT0FBTyxZQUFZLGFBQVMsR0FBRyxLQUFDLFFBQVE7UUFFOUMsb0JBQWEsS0FBQyxPQUFPLEtBQUssWUFBUSxZQUFPLEtBQUMsT0FBTyxPQUFLO1FBQ3RELE1BQUssS0FBQyxPQUFPLFlBQVksSUFBRSxJQUFJO1FBQy9CLEtBQUssSUFBRSxLQUFHO1FBRVYsYUFBUyxNQUFJLElBQUU7UUFFZixJQUFLLEtBQUssS0FBSyxLQUFLO1FBQ3BCLE1BQUssS0FBQyxPQUFPLFlBQVksS0FBSztRQUU5QixLQUFDLE1BQU0sT0FBVSxJQUFFLEVBQU8sSUFBRSxFQUFTLElBQUUsRUFBSTtRQUMzQyxLQUFDLE9BQU8sT0FBUyxJQUFFLEVBQU8sSUFB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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2F2ZWFzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2NvbG1ucy9zYXZlYXMua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7dUJBZ0J3Qjs7Ozs7Ozs7Ozs7Ozs7Ozs7OzsrQ0FJVixLQUFDLE9BQU87UUFFZCxLQUFDLFlBQVk7UUFFYixLQUFDLFNBQVMsS0FBUyxNQUFNLE9BQU87UUFDaEMsS0FBQyxTQUFTLFFBQVMsTUFBTSxPQUFPO1FBRWhDLEtBQUMsYUFBYSxPQUFPLEtBQUMsT0FBTztRQUM3QixLQUFDLE9BQU8sU0FBUyxLQUFLLE1BQU0sT0FBTyxLQUFDLE1BQU0sR0FBRztRQUc3QyxLQUFDLFFBQVEsT0FBTyxZQUFZO1FBQzVCLEtBQUMsUUFBUSxtQkFBbUI7UUFFNUIsS0FBQyxZQUFZOzs7Ozs7O1FBSWIsZUFBVSxLQUFDLE9BQU8sT0FBSztRQUN2QixlQUFVLEtBQUMsT0FBTyxPQUFLO1FBRXZCLEtBQUs7UUFDTCxLQUFLO1FBRUwsY0FBUyxLQUFDLE9BQU8sT0FBSztRQUN0QixhQUFTLE1BQU0sS0FBRyxJQUFJO1FBRXRCLE1BQUssS0FBQyxPQUFPLFlBQVksSUFBSTtRQUM3QixNQUFLLEtBQUMsT0FBTyxZQUFZLGFBQVMsR0FBRyxLQUFDLFFBQVE7UUFFOUMsb0JBQWEsS0FBQyxPQUFPLEtBQUssWUFBUSxZQUFPLEtBQUMsT0FBTyxPQUFLO1FBQ3RELE1BQUssS0FBQyxPQUFPLFlBQVksSUFBRSxJQUFJO1FBQy9CLEtBQUssSUFBRSxLQUFHO1FBRVYsYUFBUyxNQUFJLElBQUU7UUFFZixJQUFLLEtBQUssS0FBSyxLQUFLO1FBQ3BCLE1BQUssS0FBQyxPQUFPLFlBQVksS0FBSztRQUU5QixLQUFDLE1BQU0sT0FBVSxJQUFFLEVBQU8sSUFBRSxFQUFTLElBQUUsRUFBSTtRQUMzQyxLQUFDLE9BQU8sT0FBUyxJQUFFLEVBQU8sSUFBRSxJQUFFLEdBQU8sSUFBRSxFQUFJO1FBQzNDLEtB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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/saveas.kode

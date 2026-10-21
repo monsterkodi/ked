@@ -10,6 +10,7 @@
 
 use ../../../kxk    ▪ kstr slash post nfs
 use ../../theme     ◆ color theme icons
+use ../../util      ◆ fileutil 
 use ../../edit/tool ◆ belt
 use                 ◆ quicky brocol diritem dirlist
 
@@ -26,15 +27,12 @@ function saveas extends quicky
         
         @brocol = new brocol @screen 'saveas_brocol'
         @brocol.setColor 'bg' color.darken(@color.bg 0.7)
-        @brocol.on 'action'   @onBrocolAction
+        # @brocol.on 'action'   @onBrocolAction
         
         @choices.mapscr.rowOffset = 1
         @choices.frontRoundOffset = 2
         
         @userNamed = false
-    
-    #  the field at the top is the name of the file to write, and it is
-    #  there all the time: the browser below it does not filter
     
     arrange: =>
         
@@ -65,18 +63,19 @@ function saveas extends quicky
         @brocol.layout   x+1+cw   y+1+ih+cr  bw    fh
         @cells.layout    x        y           w     h
     
-    #  the dialog opens in a directory, with a name in the field
-    
-    open: dir name ○=>
+    open: dir file ○=>
         
-        @userNamed = false
+        log "OPEN" dir file
+        # @userNamed = false
         
         @input.show()
         
-        ○ @gotoDir dir
+        path = slash.path dir file
         
-        if name
-            @input.set name
+        ○ @gotoDir dir path
+        
+        if file
+            @input.set file
             @input.state.moveCursors 'eol'
         
         @input.grabFocus()
@@ -99,51 +98,42 @@ function saveas extends quicky
         
         @showPathItems items select
     
-    #  the field keeps the name, so the list is not filtered
-    
-    showPathItems: items select =>
-        
-        selectIndex = 0
-        
-        if select
-            select = slash.untilde select
-            for item,idx in items
-                if slash.samePath item.path select
-                    selectIndex = idx
-                    break
-        
-        @preview items[selectIndex]
-        
-        @choices.set items 'tilde'
-        @choices.state.selectLine selectIndex
-        @choices.state.setMainCursor 0 selectIndex
-        @choices.state.setView [0 0]
-        
-        @show()
-        
-        @input.grabFocus()
-    
-    #  the tree puts the name of the file it is on into the field, but
-    #  not when a name was typed: then the name is the one of the user
-    #  
-    #  the column of the directory that is selected is shown as well
-    
-    preview: item =>
-        
-        @input.grabFocus()
-        
-        if not @userNamed and item?.type == 'file'
-            @input.set item.file
-            @input.state.moveCursors 'eol'
-        
-        if item?.type == 'dir' and not item.tilde.endsWith '..'
-            @brocol.show item.path
-            @choices.hoverForSubmenu = true
-        else
-            @brocol.hide()
-            @choices.hoverForSubmenu = false
-        
+    setFilePath: path =>
+        log "SET FILE" slash.file(path)
+        @input.set slash.file(path)
+        @input.state.moveCursors 'eol'
         @arrange()
+        post.emit 'redraw'
+ 
+    preview: item ○=>
+        # log "PREVIEW~~~" item
+        ⮐  @hideMap() if empty item?.path
+        
+        if item.type == 'file' 
+        
+            @brocol.hide()
+        
+            if slash.ext(item.path) in fileutil.sourceFileExtensions
+                text =○ nfs.read item.path
+                ⮐  if @brocol.visible()
+                segls = belt.seglsForText text
+                @choices.mapscr.setSyntaxSegls slash.ext(item.path) segls
+                @choices.mapscr.show()
+            else
+                @hideMap()
+                
+        else # if item.type == 'dir'
+        
+            @hideMap()
+        
+            if not item.tilde.endsWith '..'
+                @brocol.show item.path
+                @choices.hoverForSubmenu = true
+            else
+                @brocol.hide()
+                @choices.hoverForSubmenu = false
+                
+        @arrange()    
         post.emit 'redraw'
     
     onInputChange: text =>
@@ -160,34 +150,7 @@ function saveas extends quicky
                 @moveSelection event.combo
                 ⮐  true
                 
-            # 'left'
-            #     if @input.state.mainCursor()[0] <= 0
-            #         @goToParent()
-            #         ⮐  true
-            #         
-            # 'right'
-            #     if @input.state.mainCursor()[0] >= @input.current().length
-            #         @enterDir()
-            #         ⮐  true
-        
         super key event
-    
-    enterDir: =>
-        
-        choice = @choices.current()
-        
-        ⮐  if not choice
-        ⮐  if choice.type != 'dir'
-        
-        @gotoDir choice.path
-    
-    goToParent: =>
-        
-        up = slash.dir @currentDir
-        
-        ⮐  if empty up
-        
-        @gotoDir up @currentDir
     
     targetPath: name =>
         
@@ -196,7 +159,27 @@ function saveas extends quicky
         
         slash.path @currentDir, name
     
+    
     applyChoice: choice =>
+        
+        switch @input.current()
+            
+            '/'  ➜ ⮐  @gotoDir '/'
+            '~'  ➜ ⮐  @gotoDir '~'
+            '.'  ➜ ⮐  @gotoDir @currentDir
+            '..' ➜ ⮐  @gotoDir slash.dir(@currentDir)
+            
+        if empty choice and valid @input.current()
+            @gotoDirOrOpenFile @input.current()
+            ⮐  redraw:true
+            
+        if empty choice      ➜ ⮐  redraw:false 
+        if empty choice.path ➜ ⮐  redraw:false 
+
+        @gotoDir choice.path 
+        redraw:true
+        
+    doSaveAs: =>
         
         name = @input.current()
         
@@ -207,32 +190,49 @@ function saveas extends quicky
         @hide()
         
         post.emit 'focus' 'editor'
-        post.emit 'file.saveas' path
-    
-    #  a click on a file puts its name into the field, it does not save
+        
+        log "WOULD SAVE FILE AS" path
+        # post.emit 'file.saveas' path
     
     onChoicesAction: action choice =>
-        
-        switch action
-            'click'
-                if choice?.type == 'dir'
-                    @enterDir()
-                else
-                    @preview choice
-                ⮐  true
-        
-        super action choice
     
-    onBrocolAction: action choice =>
-        
+        # log 'onChoicesAction' action choice @currentDir
+            
         switch action
-            'click' ➜ ⮐  @onChoicesAction 'click' choice
-        
+            
+            'right' 
+                
+                if choice.path
+                    if choice.tilde == ' ..'
+                        ⮐  @moveSelection 'down'
+                    if choice.type == 'file'
+                        log "CHOICE" choice
+                        @setFilePath choice.path
+                        ⮐ 
+                    else
+                        @hideMap()
+                        ⮐ @gotoDir choice.path
+                        
+            'left' 'delete'
+                
+                if choice.path
+                    upDir = slash.dir @currentDir
+                    ⮐  if empty upDir
+                    @hideMap()
+                    ⮐  @gotoDir upDir @currentDir
+            'space'            
+                
+                if choice.path and choice.type == 'file'
+                    # ⮐  post.emit 'quicky' choice.path
+                    log "SPACE" choice.path
+                    @setFilePath choice.path
+                    ⮐ 
+                    
         super action choice
 
     draw: =>
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
          
         super()
         
@@ -261,7 +261,6 @@ function saveas extends quicky
                 @choices.cells.fill_row     y choice.tilde.length x-1 ' ' bg cc
                 @choices.cells.set          x y '' cc bg 
         
-    
     onMouse: event =>
 
         ⮐  if @hidden()

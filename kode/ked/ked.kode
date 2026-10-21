@@ -96,7 +96,6 @@ function KED
         
         @t.on 'key'    @onKey
         @t.on 'mouse'  @onMouse
-        @t.on 'wheel'  @onWheel
         @t.on 'resize' @onResize
         @t.on 'paste'  @onPaste
                                     

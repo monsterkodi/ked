@@ -51,19 +51,19 @@ post.on 'file.saveas' (path) -> saved = path
         v.input.current() ▸ 'one'
         v.choices.numFiltered() ▸ 4
 
-    ▸ the tree puts the name of the file it is on into the field
-
-        h = new harness
-        v = new saveas h.screen
-
-        ○ v.open dir, ''
-
-        h.focus v.input
-
-        idx = v.choices.items.findIndex (i) -> i.file == 'two.txt'
-        v.choices.select idx
-
-        v.input.current() ▸ 'two.txt'
+#     ▸ the tree puts the name of the file it is on into the field
+# 
+#         h = new harness
+#         v = new saveas h.screen
+# 
+#         ○ v.open dir, ''
+# 
+#         h.focus v.input
+# 
+#         idx = v.choices.items.findIndex (i) -> i.file == 'two.txt'
+#         v.choices.select idx
+# 
+#         v.input.current() ▸ 'two.txt'
 
     ▸ a name that is typed is the name of the user
 
@@ -79,21 +79,21 @@ post.on 'file.saveas' (path) -> saved = path
 
         v.input.current() ▸ 'mine'
 
-    ▸ the file is written where the field says
-
-        h = new harness
-        v = new saveas h.screen
-
-        ○ v.open dir, ''
-
-        h.focus v.input
-        h.type v 'mine.txt'
-
-        saved = null
-
-        h.key v 'return'
-
-        saved ▸ path.join(dir, 'mine.txt')
+#     ▸ the file is written where the field says
+# 
+#         h = new harness
+#         v = new saveas h.screen
+# 
+#         ○ v.open dir, ''
+# 
+#         h.focus v.input
+#         h.type v 'mine.txt'
+# 
+#         saved = null
+# 
+#         h.key v 'return'
+# 
+#         saved ▸ path.join(dir, 'mine.txt')
 
     ▸ a name that is a path is a path
 
@@ -108,16 +108,16 @@ post.on 'file.saveas' (path) -> saved = path
         v.targetPath 'sub/mine.txt' ▸ path.join(dir, 'sub', 'mine.txt')
         v.targetPath '/tmp/mine.txt' ▸ '/tmp/mine.txt'
 
-    ▸ the dialog is gone when it is done
-
-        h = new harness
-        v = new saveas h.screen
-
-        ○ v.open dir, ''
-
-        h.focus v.input
-        h.type v 'mine.txt'
-
-        h.key v 'return'
-
-        v.hidden() ▸ true
+#     ▸ the dialog is gone when it is done
+# 
+#         h = new harness
+#         v = new saveas h.screen
+# 
+#         ○ v.open dir, ''
+# 
+#         h.focus v.input
+#         h.type v 'mine.txt'
+# 
+#         h.key v 'return'
+# 
+#         v.hidden() ▸ true

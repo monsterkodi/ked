@@ -6,8 +6,7 @@
     ███████    ███   ███   ███████   ██     ██  ███████   ████████
 ###
 
-use ../../../kxk    ▪ kstr slash post
-use ../../../kxk    ◆ nfs
+use ../../../kxk    ▪ kstr slash post nfs
 use ../../util      ◆ fileutil 
 use ../../edit/tool ◆ belt
 use ../../theme     ◆ color theme icons
@@ -246,13 +245,13 @@ function browse extends quicky
                 
     onChoicesAction: action choice =>
     
-        # log 'onChoicesAction' action choice @currentDir
-            
+        log '--- onChoicesAction' action choice @currentDir
+        
         switch action
             
             'right' 
                 
-                if choice.path
+                if choice?.path
                     if choice.tilde == ' ..'
                         ⮐  @moveSelection 'down'
                     if choice.type == 'file'
@@ -263,14 +262,14 @@ function browse extends quicky
                         
             'left' 'delete'
                 
-                if choice.path
+                if choice?.path
                     upDir = slash.dir @currentDir
                     ⮐  if empty upDir
                     @hideMap()
                     ⮐  @gotoDir upDir @currentDir
             'space'            
                 
-                if choice.path and choice.type == 'file'
+                if choice?.path and choice.type == 'file'
                     ⮐  post.emit 'quicky' choice.path
                     
         super action choice

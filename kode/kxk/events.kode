@@ -13,7 +13,8 @@ function events
         @dispatcher = new EventTarget
         
     on: eventName cb ->
-        
+    
+        if not cb is func ➜ ⮐ error 'cb NOT A FUNCTION' eventName cb
         @dispatcher.addEventListener eventName, (e) -> cb.apply(cb, e.args)
         
     emit: eventName args... ->
