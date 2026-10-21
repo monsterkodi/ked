@@ -156,17 +156,21 @@ function TTIO extends events
     #  the input of a headless editor is a script, and it is played when
     #  the editor is ready for it
     
-    playScript: =>
+    steps: =>
         
         ⮐  if empty @inputChunks
         
-        script = Buffer.concat(@inputChunks).toString 'utf8'
+        text = Buffer.concat(@inputChunks).toString 'utf8'
         @inputChunks = []
         
-        bytes = keyscript.script script
+        keyscript.steps text
+        
+    #  play a key of the script
+    
+    play: bytes =>
         
         @onData Buffer.from(bytes)
-        
+    
     #  the input is over
     
     onEnd: =>
@@ -671,10 +675,25 @@ function TTIO extends events
                                                       ➜ 'raw'
             e = s+1
             
-            while e < data.length
-                break if data[e] == 0x1b
-                e += 1
-                                                      
+            if type == 'csi'
+                #  a csi sequence ends with its final byte, and the byte
+                #  after it is a key of its own
+                
+                e = s+2
+                
+                while e < data.length
+                    break if 0x40 <= data[e] <= 0x7e
+                    e += 1
+                
+                #  the final byte is the last of the sequence
+                
+                e = min(e+1, data.length)
+                    
+            else
+                while e < data.length
+                    break if data[e] == 0x1b
+                    e += 1
+                                                       
             raw = data[s...e]
             seq = type:type data:raw
                 

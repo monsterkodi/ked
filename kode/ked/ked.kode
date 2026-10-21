@@ -150,8 +150,8 @@ function KED
     # ███████   ███████  ███████  ███  ██████   ███   ███   ███ ███   
     
     #  the headless mode: the editor runs without a terminal, the keys come
-    #  from the standard input, and the screen is written out as text when
-    #  the input ends
+    #  from the standard input, and the screen is written out as text after
+    #  every key of the script
     
     runHeadless: ○=>
         
@@ -166,19 +166,34 @@ function KED
         if @t.input
             ○ ended
         
-        @t.playScript()
-        
-        #  the modes are loaded in the background, and a key may have
-        #  started something that is still running, so the screen is given
-        #  a moment to settle
+        #  the modes are loaded in the background, so the screen is given a
+        #  moment to settle before it is written out
         
         ○ sleep 100
         
-        @draw()
+        @dump 'start'
         
-        process.stdout.write @screen.text().join('\n') + '\n'
+        for step in @t.steps()
+            
+            @t.play step[1]
+            
+            #  a key may have started something that is still running
+            
+            ○ @currentLoad if valid @currentLoad
+            ○ sleep 50
+            
+            @dump step[0]
         
         @quit()
+    
+    #  the screen, as text
+    
+    dump: label =>
+        
+        @draw()
+        
+        process.stdout.write "\n=== #{label}\n"
+        process.stdout.write @screen.text().join('\n') + '\n'
 
     #  ███████  ████████   ███████   ███████  ███   ███████   ███   ███
     # ███       ███       ███       ███       ███  ███   ███  ████  ███

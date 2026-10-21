@@ -119,6 +119,16 @@ printf 'cmd+o' | node bin/ked -H <file>
 the terminal: the ttio keeps what would have been written, and the screen is
 a buffer of cells that can be read as text.
 
+The screen is written out after every key of the script, so a script can be
+followed step by step:
+
+```
+=== start
+<the screen>
+=== down
+<the screen>
+```
+
 The keys are a script of key names: a word that names a key is that key, and
 a word that names nothing is the characters it is made of. A word can have
 modifiers: `cmd+o`, `shift+cmd+s`, `cmd+down`. A space is a key of its own:

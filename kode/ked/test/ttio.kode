@@ -1,0 +1,39 @@
+###
+    ███  ███   ███████   ████████   ███   ███  █████████   ███████  
+    ███  ███  ███   ███  ███   ███  ███ █ ███        ███    ███ ███  
+    ███████   ███████   ████████   ███████      █████    █████    
+    ███  ███  ███   ███  ███   ███  ███   ███        ███    ███ ███  
+    ███   ███ ███████   ████████   ███   ███  █████████   ███████  
+###
+
+use ../view/screen ◆ ttio
+
+▸ ttio
+
+    ▸ a csi sequence ends with its final byte
+
+        t = new ttio headless:true input:false
+
+        seqs = t.parseData Buffer.from('\x1b[B\r')
+
+        seqs.length ▸ 2
+        seqs[0].csi ▸ 'B'
+        seqs[1].raw ▸ '\r'
+
+    ▸ a sequence that is not a csi one ends where the next escape is
+
+        seqs = t.parseData Buffer.from('\x1bOP\x1b[B')
+
+        seqs.length ▸ 2
+        seqs[0].esc ▸ 'OP'
+        seqs[1].csi ▸ 'B'
+
+    ▸ the keys of a chunk are keys of their own
+
+        keys = []
+
+        t.on 'key' (combo) -> keys.push combo
+
+        t.onData Buffer.from('\x1b[B\x1b[B\r')
+
+        keys ▸ ['down' 'down' 'return']

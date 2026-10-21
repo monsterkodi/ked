@@ -48,3 +48,9 @@ use ../util ◆ keyscript
         keyscript.script 'cmd+o down' ▸ '\x1b[111;9u\x1b[B'
         keyscript.script 'a b' ▸ 'ab'
         keyscript.script '  ' ▸ ''
+
+    ▸ the steps of a script are the words of it, one by one
+
+        keyscript.steps 'cmd+o down' ▸ [['cmd+o' '\x1b[111;9u'] ['down' '\x1b[B']]
+        keyscript.steps 'ab' ▸ [['ab' 'ab']]
+        keyscript.steps '' ▸ []

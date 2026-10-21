@@ -138,5 +138,19 @@ function keyscript
         for word in text.split(/\s+/).filter((w) -> w.length)
             out += keyscript.bytes word
         out
+    
+    #  the steps of a script: the name of a word and the bytes of it
+    #  
+    #  a word is a step of the script, and the steps can be played apart
+    
+    @steps: text =>
+        
+        out = []
+        
+        for word in text.split(/\s+/).filter((w) -> w.length)
+            bytes = keyscript.bytes word
+            out.push [word bytes]
+        
+        out
 
 export keyscript
