@@ -1,20 +1,14 @@
 ###
-    ███████   ███   ███  ███████   ███████   ███   ███  ███████ 
-    ███       ███   ███  ███   ███ ███   ███ ███   ███ ███   
-    ███████   ███   ███  ███████   ███   ███ ███   ███ ███████ 
-    ███       ███   ███  ███       ███   ███  ██ ██    ███ ███   
-    ███████   ███████   ███████   ███████   ███   ███  ███████ 
+     ███████   ███████   ███   ███  ████████   ███████    ███████  
+    ███       ███   ███  ███   ███  ███       ███   ███  ███       
+    ███████   █████████   ███ ███   ███████   █████████  ███████   
+         ███  ███   ███     ███     ███       ███   ███       ███  
+    ███████   ███   ███      █      ████████  ███   ███  ███████   
     
     the dialog to save the buffer under another name
-
-    the field at the top is the name of the file to write, and it is there
-    all the time: the browser below it does not filter, the name is what
-    the tree puts into the field, and the tree stops doing that as soon as
-    a name is typed
 ###
 
-use ../../../kxk    ▪ kstr slash post
-use ../../../kxk    ◆ nfs
+use ../../../kxk    ▪ kstr slash post nfs
 use ../../theme     ◆ color theme icons
 use ../../edit/tool ◆ belt
 use                 ◆ quicky brocol diritem dirlist
@@ -80,9 +74,6 @@ function saveas extends quicky
         @input.show()
         
         ○ @gotoDir dir
-        
-        #  the name of the file comes after the tree, so that the tree does
-        #  not put the name of the file it is on into the field
         
         if name
             @input.set name
@@ -155,15 +146,9 @@ function saveas extends quicky
         @arrange()
         post.emit 'redraw'
     
-    #  a name that is typed is the name of the user, and the tree stops
-    #  putting names into the field
-    
     onInputChange: text =>
         
         @userNamed = true
-    
-    #  the field has the focus, so the keys of the tree are handled here:
-    #  the input would move the selection and eat them
     
     onKey: key event =>
         
@@ -175,19 +160,17 @@ function saveas extends quicky
                 @moveSelection event.combo
                 ⮐  true
                 
-            'left'
-                if @input.state.mainCursor()[0] <= 0
-                    @goToParent()
-                    ⮐  true
-                    
-            'right'
-                if @input.state.mainCursor()[0] >= @input.current().length
-                    @enterDir()
-                    ⮐  true
+            # 'left'
+            #     if @input.state.mainCursor()[0] <= 0
+            #         @goToParent()
+            #         ⮐  true
+            #         
+            # 'right'
+            #     if @input.state.mainCursor()[0] >= @input.current().length
+            #         @enterDir()
+            #         ⮐  true
         
         super key event
-    
-    #  the directory the cursor is on
     
     enterDir: =>
         
@@ -198,8 +181,6 @@ function saveas extends quicky
         
         @gotoDir choice.path
     
-    #  the directory above the current one
-    
     goToParent: =>
         
         up = slash.dir @currentDir
@@ -208,16 +189,12 @@ function saveas extends quicky
         
         @gotoDir up @currentDir
     
-    #  the path the name is written to
-    
     targetPath: name =>
         
         if slash.isAbsolute name
             ⮐  name
         
         slash.path @currentDir, name
-    
-    #  the file is written by the editor, not by the dialog
     
     applyChoice: choice =>
         
@@ -296,6 +273,5 @@ function saveas extends quicky
         ⮐  if @hidden()
         ret = @brocol.onWheel event ; ⮐  ret if ret?.redraw
         super event
-                
 
 export saveas

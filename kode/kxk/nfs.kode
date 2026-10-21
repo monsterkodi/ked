@@ -31,7 +31,11 @@ class NFS
         
         # log 'nfs.listdir' dir
         
-        dirents =○ fsp.readdir dir withFileTypes:true
+        try
+            dirents =○ fsp.readdir dir withFileTypes:true
+        catch err
+            log err
+            ⮐ opt.found
         
         for dirent in dirents
 

@@ -1,9 +1,9 @@
 ###
-    ███████   ███████  █████████  ███   ███████   ███   ███  
-    ███   ███  ███   ███ ███    ███ ███   ███  ████  ███ ███   
-    ███████   ███████  ███████  ███ ███   ███  ███ █ ███  █████    
-    ███   ███  ███   ███ ███   ███ ███   ███  ███  ███ ███   ███   
-    ███████   ███████  ███████  ███  ██████   ███   ███   ███ ███   
+     ███████   ███████   ███   ███  ████████   ███████    ███████
+    ███       ███   ███  ███   ███  ███       ███   ███  ███     
+    ███████   █████████   ███ ███   ███████   █████████  ███████ 
+         ███  ███   ███     ███     ███       ███   ███       ███
+    ███████   ███   ███      █      ████████  ███   ███  ███████ 
 ###
 
 use fs os path
@@ -78,31 +78,6 @@ post.on 'file.saveas' (path) -> saved = path
         h.key v 'down'
 
         v.input.current() ▸ 'mine'
-
-    ▸ the tree goes into a directory and back out of it
-
-        h = new harness
-        v = new saveas h.screen
-
-        ○ v.open dir, ''
-
-        h.focus v.input
-
-        v.currentDir ▸ dir
-
-        h.key v 'right'
-
-        #  the directory is listed before it is shown
-        
-        ○ sleep 30
-
-        v.currentDir ▸ path.join(dir, 'sub')
-
-        h.key v 'left'
-
-        ○ sleep 30
-
-        v.currentDir ▸ dir
 
     ▸ the file is written where the field says
 

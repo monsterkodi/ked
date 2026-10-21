@@ -70,7 +70,12 @@ function git
                     if empty err
                         resolve stdout
                     else
-                        error 'reject1' err
+                        # silent git diff outside a .git repo.
+                        if err.code == 128 and "is outside repository" in stderr
+                            ⮐  
+                        error err
+                        error stdout
+                        error stderr
                         # reject err
             catch err
                 error 'reject2' err
