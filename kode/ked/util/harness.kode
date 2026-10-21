@@ -1,0 +1,84 @@
+###
+    ███   ███   ███████   ████████   ███   ███  ████████   ███████   ███████  
+    ███   ███  ███   ███  ███   ███  ████  ███  ███       ███       ███       
+    █████████  █████████  ███████    ███ █ ███  ███████   ███████   ███████   
+    ███   ███  ███   ███  ███   ███  ███  ████  ███            ███       ███  
+    ███   ███  ███   ███  ███   ███  ███   ███  ████████  ███████   ███████   
+    
+    an editor without a terminal
+
+    the screen is a buffer of cells, and nothing goes to a terminal: the
+    ttio keeps what would have been written, so a test can look at the
+    screen as text, and can send keys to a view as if a person typed them
+
+    the same ttio runs the editor in the headless mode of the -H option,
+    so a test and a run of the editor see the same screen
+###
+
+use ../../kxk       ▪ post
+use ../view/screen ◆ screen ttio
+
+function harness
+
+    @: opt ->
+        
+        opt ?= {}
+        
+        @rows = opt.rows ? 24
+        @cols = opt.cols ? 80
+        
+        @t = new ttio headless:true input:false cols:@cols rows:@rows
+        
+        @screen = new screen @t
+        
+    #  the event of a key, the way a terminal sends it
+    #  
+    #  a printable key carries the character, the other keys carry nothing
+    
+    event: combo char =>
+        
+        key:    combo
+        type:   'press'
+        combo:  combo
+        char:   char ? ''
+        
+    #  send a key to a view
+    
+    key: view combo char =>
+        
+        event = @event combo char
+        view.onKey combo event
+        
+    #  type a text into a view, one character at a time
+    
+    type: view text =>
+        
+        for ch in text.split ''
+            @key view ch ch
+    
+    #  give a view the focus
+    #  
+    #  the focus is a name, and every editor listens for it, so the view
+    #  with that name is the one that has it
+    
+    focus: view =>
+        
+        post.emit 'focus' view.name
+        
+    #  the screen as text, one line per row
+    
+    text: => @screen.text()
+    
+    #  a line of the screen
+    
+    row: y => @screen.text()[y]
+    
+    #  the character at a position
+    
+    at: x y => @screen.get_char x y
+    
+    #  what would have been written to the terminal
+    
+    written: => @t.written()
+
+export harness

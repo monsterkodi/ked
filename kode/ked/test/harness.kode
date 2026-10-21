@@ -1,0 +1,89 @@
+###
+    ███   ███   ███████   ████████   ███   ███  ████████   ███████   ███████
+    ███   ███  ███   ███  ███   ███  ████  ███  ███       ███       ███     
+    █████████  █████████  ███████    ███ █ ███  ███████   ███████   ███████ 
+    ███   ███  ███   ███  ███   ███  ███  ████  ███            ███       ███
+    ███   ███  ███   ███  ███   ███  ███   ███  ████████  ███████   ███████ 
+###
+
+use ../util      ◆ harness
+use ../view/base ◆ input crumbs
+use ../view/menu ◆ choices
+
+▸ harness
+
+    #  a headless editor talks to no terminal: what would have been written
+    #  is kept, so a test can look at it
+
+    ▸ the terminal is left alone
+
+        h = new harness
+
+        h.t.written() ▸ ''
+
+        h.t.write 'hello'
+
+        h.t.written() ▸ 'hello'
+
+    #  the screen is a buffer of cells, and it is read as text
+
+    ▸ the screen is text
+
+        h = new harness
+
+        c = new crumbs h.screen 'test_crumbs'
+        c.layout 0 0 30 1
+        c.set '/home/kodi/s'
+        c.draw()
+
+        row = h.row 0
+
+        row.includes 'kodi' ▸ true
+        row.includes 's' ▸ true
+
+        h.row 1 ▸ ''
+
+    #  a key goes to a view, the way a terminal would send it
+
+    ▸ a key goes to the view
+
+        h = new harness
+
+        c = new choices h.screen 'test_choices'
+        c.layout 0 0 20 3
+        c.set ['one' 'two' 'three']
+        c.select 0
+
+        c.currentIndex() ▸ 0
+
+        h.key c 'down'
+
+        c.currentIndex() ▸ 1
+
+    #  the focus is a name, and the view with that name has it
+
+    ▸ the focus goes to a view
+
+        h = new harness
+
+        i = new input h.screen 'test_input'
+        i.layout 0 0 20 1
+
+        h.focus i
+
+        i.hasFocus() ▸ true
+
+    #  a text goes into a view, one character at a time
+
+    ▸ a text goes into a view
+
+        h = new harness
+
+        i = new input h.screen 'test_input'
+        i.layout 0 0 20 1
+
+        h.focus i
+
+        h.type i 'xyz'
+
+        i.current() ▸ 'xyz'

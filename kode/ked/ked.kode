@@ -6,7 +6,7 @@
     ███   ███  ████████  ███████    
 ###
 
-use ../kxk        ▪ karg kstr kseg slash post nfs
+use ../kxk        ▪ karg kstr kseg slash post nfs sleep
 use ./index       ◆ prjcts indexer
 use ./util        ◆ logfile session help frecent watcher git 
 use ./util/img    ◆ rounded squares sircels
@@ -33,6 +33,7 @@ function KED
                 fresh      don't load previous session      = false
                 timeout    session save timeout in ms       = 1000
                 version    log version                      = false
+                headless   run without a terminal           = false -H
                 
             """ preHelp:help.header() version:@version
         
@@ -42,7 +43,7 @@ function KED
         global.ked_session = @session
         
         @session.on 'loaded' @onSessionLoaded
-        @t = new ttio
+        @t = new ttio headless:@args.headless
         
         @screen   = new screen @t
         
@@ -107,7 +108,7 @@ function KED
             if line
                post.emit 'file.open' file line-1 column-1
             else
-                @loadFile file
+                @currentLoad = @loadFile file
         else if @args.fresh
             @hideEditor()
             @menu.show true
@@ -134,7 +135,44 @@ function KED
     # ███   ███  ███   ███  ███  ████  
     # ███   ███   ███████   ███   ███  
     
-    @run: -> new KED()
+    @run: ○->
+        
+        ked = new KED
+        
+        ○ ked.runHeadless() if ked.args.headless
+        
+        ked
+        
+    #  ███████   ███████  █████████  ███   ███████   ███   ███  
+    # ███   ███  ███   ███ ███    ███ ███   ███  ████  ███ ███   
+    # ███████   ███████  ███████  ███ ███   ███  ███ █ ███  █████    
+    # ███   ███  ███   ███ ███   ███ ███   ███  ███  ███ ███   ███   
+    # ███████   ███████  ███████  ███  ██████   ███   ███   ███ ███   
+    
+    #  the headless mode: the editor runs without a terminal, the keys come
+    #  from the standard input, and the screen is written out as text when
+    #  the input ends
+    
+    runHeadless: ○=>
+        
+        ended = new Promise (resolve) =>
+            @t.on 'end' resolve
+        
+        ○ @currentLoad if valid @currentLoad
+        
+        ○ ended
+        
+        #  the modes are loaded in the background, and a key may have
+        #  started something that is still running, so the screen is given
+        #  a moment to settle
+        
+        ○ sleep 100
+        
+        @draw()
+        
+        process.stdout.write @screen.text().join('\n') + '\n'
+        
+        @quit()
 
     #  ███████  ████████   ███████   ███████  ███   ███████   ███   ███
     # ███       ███       ███       ███       ███  ███   ███  ████  ███
@@ -283,7 +321,7 @@ function KED
     
     openFile: path row col view =>
         
-        @loadFile path row col view
+        @currentLoad = @loadFile path row col view
         @editor.grabFocus()
         
     #  ███████   ███   ███  ███   ███████  ███   ███  ███   ███  

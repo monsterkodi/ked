@@ -106,6 +106,39 @@ Keep the snippet in **single quotes**: `#` begins a Kode comment, and many
 operators are non-ASCII (`➜`, `○`, `⮐`, `◆`), so anything the shell touches
 will corrupt it.
 
+## Headless mode
+
+The editor runs without a terminal:
+
+```sh
+node bin/ked -H <file>          # the keys come from stdin, the screen is dumped as text
+node bin/ked -H <file> < keys   # a script of keys: '\x1b[B' is the down arrow
+```
+
+`COLUMNS` and `LINES` set the size (80x24 without them). Nothing is written to
+the terminal: the ttio keeps what would have been written, and the screen is
+a buffer of cells that can be read as text.
+
+`kode/ked/util/harness.kode` is the same thing for a test: a headless ttio, a
+screen, and helpers to send keys to a view and to read the screen.
+
+```kode
+use ../util ◆ harness
+
+h = new harness
+v = new saveas h.screen
+
+h.focus v.input
+h.type v 'foo'
+h.key v 'down'
+
+h.row 0            # a line of the screen
+h.t.written()      # what would have been written to the terminal
+```
+
+The kitty keyboard protocol is what a terminal sends, so a key is an escape
+sequence: `\x1b[B` is down, `\x1b[111;9u` is cmd+o.
+
 ## Never
 
 - **Never edit anything under `js/`.** It is generated and will be overwritten.

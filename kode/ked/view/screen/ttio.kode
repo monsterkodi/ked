@@ -16,9 +16,31 @@ use ../../util/img ◆ rounded
 
 function TTIO extends events
 
-    @: ->
+    @: opt ->
         
-        @store()
+        opt ?= {}
+        
+        #  a headless ttio has no terminal to talk to: it keeps what would
+        #  have been written, and it takes its size from the options
+        
+        @headless = opt.headless ? false
+        @input    = opt.input ? true
+        
+        cols = opt.cols ? 0
+        rows = opt.rows ? 0
+        
+        if not cols and valid process.env.COLUMNS
+            cols = int process.env.COLUMNS
+        if not rows and valid process.env.LINES
+            rows = int process.env.LINES
+        
+        cols = 80 if cols != cols or cols < 1
+        rows = 24 if rows != rows or rows < 1
+        
+        @size = [cols rows]
+        
+        @out = []
+        @inputChunks = []
         
         @hasFocus = true
         
@@ -29,42 +51,66 @@ function TTIO extends events
         @modifiers  = ['cmd' 'ctrl' 'alt' 'shift']
         @activeMods = {}
         
-        @hideCursor()
-        
-        if process.stdin.isTTY ➜ process.stdin.setRawMode true
-            
-        @write '\x1b[?1000h'    # mouse events
-        @write '\x1b[?1002h'    # cell motion tracking
-        @write '\x1b[?1003h'    # mouse move events
-        @write '\x1b[?1004h'    # focus events        
-        @write '\x1b[?1006h'    # mouse SGR mode
-        @write '\x1b[?1016h'    # mouse SGR pixel mode
-        @write '\x1b[?1049h'    # alternate screen buffer
-        @write '\x1b[?2004h'    # bracketed paste mode
-        @write '\x1b[>1s'       # send shift in mouse press events
-        @write '\x1b[>1u'       # kitty keyboard protocol
-        @write '\x1b[=31;1u'    # 1 disambiguate escape codes
-                                # 2 event types
-                                # 4 alternate keys
-                                # 8 all keys as escape codes
-                                # 16 associated text
-        
-        process.stdout.on 'resize' @onResize
-        process.stdin.on  'data'   @onData
-        post.on 'pointer'          @onPointer
-        
-        @setTitle 'kėd'
-        
         global.ked_ttio = @
         
-        setTimeout @onResize 10 # delay screen size request due to ghostty bug
+        if @headless
+        
+            if @input
+                process.stdin.on 'data' @onInputData
+                process.stdin.on 'end'  @onEnd
+            
+            setTimeout @onHeadlessResize 0
+            
+        else
+        
+            @store()
+            
+            @hideCursor()
+            
+            if process.stdin.isTTY ➜ process.stdin.setRawMode true
+                
+            @write '\x1b[?1000h'    # mouse events
+            @write '\x1b[?1002h'    # cell motion tracking
+            @write '\x1b[?1003h'    # mouse move events
+            @write '\x1b[?1004h'    # focus events        
+            @write '\x1b[?1006h'    # mouse SGR mode
+            @write '\x1b[?1016h'    # mouse SGR pixel mode
+            @write '\x1b[?1049h'    # alternate screen buffer
+            @write '\x1b[?2004h'    # bracketed paste mode
+            @write '\x1b[>1s'       # send shift in mouse press events
+            @write '\x1b[>1u'       # kitty keyboard protocol
+            @write '\x1b[=31;1u'    # 1 disambiguate escape codes
+                                    # 2 event types
+                                    # 4 alternate keys
+                                    # 8 all keys as escape codes
+                                    # 16 associated text
+            
+            process.stdout.on 'resize' @onResize
+            process.stdin.on  'data'   @onData
+            post.on 'pointer'          @onPointer
+            
+            @setTitle 'kėd'
+            
+            setTimeout @onResize 10 # delay screen size request due to ghostty bug
                             
-    write: str => process.stdout.write str
+    write: str =>
+        
+        if @headless
+            @out.push str
+            ⮐
+            
+        process.stdout.write str
+    
+    #  what would have been written to the terminal
+    
+    written: => @out.join ''
     
     quit: =>
         
         process.stdout.removeListener 'resize' @onResize
         process.stdin.removeListener  'data'   @onData
+        process.stdin.removeListener  'data'   @onInputData
+        process.stdin.removeListener  'end'    @onEnd
         
         @clear()
         @write '\x1b[>0s'    # end sending shift in mouse press
@@ -85,8 +131,30 @@ function TTIO extends events
         @write '\x1b[2J' # clear screen
         @write '\x1b[H'  # cursor home
     
-    cols: => process.stdout.columns
-    rows: => process.stdout.rows  
+    cols: => @headless ? @size[0] : process.stdout.columns
+    rows: => @headless ? @size[1] : process.stdout.rows  
+    
+    #  the size of a headless screen is known, so it is not asked for
+    #  the way it is asked for in a terminal
+    
+    onHeadlessResize: =>
+        
+        @emit 'resize' @cols() @rows() null ([0 0])
+    
+    #  the input of a headless editor is a script, and it is read as a
+    #  whole: a key that a read splits in two is still a key
+    
+    onInputData: data =>
+        
+        @inputChunks.push data
+        
+    #  the input is over
+    
+    onEnd: =>
+        
+        @onData Buffer.concat(@inputChunks) if @inputChunks.length
+        
+        @emit 'end'
     
     setTitle: t -> @write "\x1b]2;#{t}\x1b\\"
     

@@ -198,7 +198,7 @@ function cells
             @fill_col x1+1+x y1+1 y2-1 ' ' fg bg
             @fill_col x2-1-x y1+1 y2-1 ' ' fg bg
         
-        for y in opt.hdiv
+        for y in opt.hdiv ? []
             # @set  x1  y '├' fg bg
             # @set  x2  y '┤' fg bg
             @set  x1  y '' fg bg
@@ -222,6 +222,13 @@ function cells
         opt ?= {}
         fg     = opt.fg ? '#888'
         zLayer = opt.zLayer ? 1000
+        
+        #  there are no kitty graphics in a headless screen, so the border
+        #  is drawn with the box drawing characters instead
+        
+        if @screen.t.headless
+            @draw_frame x1 y1 x2 y2 opt
+            ⮐
         
         @img x1 y1 'rounded.border.tl' fg zLayer  
         @img x2 y1 'rounded.border.tr' fg zLayer  
