@@ -139,17 +139,32 @@ function keyscript
             out += keyscript.bytes word
         out
     
-    #  the steps of a script: the name of a word and the bytes of it
+    #  the steps of a script: the name of a key and the bytes of it
     #  
-    #  a word is a step of the script, and the steps can be played apart
+    #  a step is a key, and the steps can be played apart.  a word that
+    #  names no key is the characters it is made of, and every character of
+    #  it is a key of its own
     
     @steps: text =>
         
         out = []
         
         for word in text.split(/\s+/).filter((w) -> w.length)
-            bytes = keyscript.bytes word
-            out.push [word bytes]
+            
+            if known = @keys[word]
+                out.push [word known]
+                continue
+            
+            if combo = keyscript.combo word
+                out.push [word combo]
+                continue
+            
+            if word.startsWith '\x1b'
+                out.push [word word]
+                continue
+            
+            for ch in word.split ''
+                out.push [ch ch]
         
         out
 

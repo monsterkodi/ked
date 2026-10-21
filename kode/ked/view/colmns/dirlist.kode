@@ -1,0 +1,56 @@
+###
+    ███  ███   ███████   ████████   ███   ███  █████████   ███████  
+    ███  ███  ███   ███  ███   ███  ███ █ ███        ███    ███ ███  
+    ███████   ███████   ████████   ███████      █████    █████    
+    ███  ███  ███   ███  ███   ███  ███   ███        ███    ███ ███  
+    ███   ███ ███████   ████████   ███   ███  █████████   ███████  
+    
+    the items of a directory, for the dialogs that browse one
+###
+
+use ../../../kxk ▪ kstr slash
+use ../../../kxk ◆ nfs
+use ../../theme  ◆ icons
+use              ◆ diritem
+
+function dirlist
+
+    #  the items of a directory: the files and the directories in it, and
+    #  the parent of the directory first
+    #  
+    #  the parent is not there when the directory is the root
+    
+    @items: dir ○=>
+        
+        items =○ nfs.list dir recursive:false
+        
+        for item in items
+            item.tilde = diritem.symbolName(item)
+        
+        items.sort (a b) -> dirlist.weight(a) - dirlist.weight(b)
+        
+        parent = slash.dir dir
+        
+        items.unshift
+            type: 'dir'
+            file: slash.name(parent)
+            path: parent
+            tilde: parent ? (icons.dir + '\u00A0..') : ''
+        
+        items
+    
+    #  the weight of an item: the files first, the dot directories last,
+    #  the name decides among them
+    
+    @weight: item =>
+        
+        p = slash.parse item.path
+        
+        w = 0
+        w += 10000 if item.type == 'file'
+        w += 1000  if item.tilde.startsWith icons.dir + ' .'
+        w += 1     if slash.ext(item.tilde) in ['js' 'json']
+        w += kstr.weight(p.file)
+        w
+
+export dirlist

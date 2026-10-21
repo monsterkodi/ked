@@ -11,7 +11,7 @@ use ../../../kxk    ◆ nfs
 use ../../util      ◆ fileutil 
 use ../../edit/tool ◆ belt
 use ../../theme     ◆ color theme icons
-use                 ◆ quicky brocol diritem
+use                 ◆ quicky brocol diritem dirlist
 
 import rgxs from './quicky.json' with { type: "json" }
 
@@ -119,43 +119,15 @@ function browse extends quicky
         dir = slash.untilde dir
         
         try
-            items =○ nfs.list dir recursive:false
+            items =○ dirlist.items dir
         catch err
             log 'list error' err
             ⮐ 
 
         @currentDir = dir
         @crumbs.show @currentDir
-            
-        weight = item =>
-
-            p = slash.parse item.path
-
-            w = 0
-            if item.tilde == icons.dir + ' ..'
-                log 'is this ever reached?'
-                ⮐  w 
-            w += 10000 if item.type == 'file'
-            w += 1000  if item.tilde.startsWith icons.dir + ' .'
-            w += 1     if slash.ext(item.tilde) in ['js' 'json']
-            w += kstr.weight(p.file)
-            w
         
-        for item in items
-            item.tilde = diritem.symbolName(item)
-
-        items.sort (a b) -> weight(a) - weight(b)
-        
-        parent = slash.dir @currentDir
-
-        items.unshift # add the .. item
-            type: 'dir'
-            file: slash.name(parent)
-            path: parent
-            tilde: parent ? (icons.dir + '\u00A0..') : ''
-            # prevents icon from growing    ▴▴▴▴
-            
-        select ?= items[1].path
+        select ?= items[1]?.path
                
         @showPathItems items select
             

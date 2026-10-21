@@ -1,0 +1,301 @@
+###
+    ███████   ███   ███  ███████   ███████   ███   ███  ███████ 
+    ███       ███   ███  ███   ███ ███   ███ ███   ███ ███   
+    ███████   ███   ███  ███████   ███   ███ ███   ███ ███████ 
+    ███       ███   ███  ███       ███   ███  ██ ██    ███ ███   
+    ███████   ███████   ███████   ███████   ███   ███  ███████ 
+    
+    the dialog to save the buffer under another name
+
+    the field at the top is the name of the file to write, and it is there
+    all the time: the browser below it does not filter, the name is what
+    the tree puts into the field, and the tree stops doing that as soon as
+    a name is typed
+###
+
+use ../../../kxk    ▪ kstr slash post
+use ../../../kxk    ◆ nfs
+use ../../theme     ◆ color theme icons
+use ../../edit/tool ◆ belt
+use                 ◆ quicky brocol diritem dirlist
+
+function saveas extends quicky
+
+    @: @screen ->
+        
+        super @screen 'saveas'
+        
+        @isVisible = false
+        
+        @setColor 'bg'     theme.quicky.bg
+        @setColor 'frame'  theme.quicky.frame
+        
+        @brocol = new brocol @screen 'saveas_brocol'
+        @brocol.setColor 'bg' color.darken(@color.bg 0.7)
+        @brocol.on 'action'   @onBrocolAction
+        
+        @choices.mapscr.rowOffset = 1
+        @choices.frontRoundOffset = 2
+        
+        @userNamed = false
+    
+    #  the field at the top is the name of the file to write, and it is
+    #  there all the time: the browser below it does not filter
+    
+    arrange: =>
+        
+        scx = int @screen.cols/2
+        scy = int @screen.rows/2
+        
+        ih = 2
+        iz = 1
+        
+        hs = int @screen.rows/2
+        y  = int scy - hs/2 - ih
+        
+        cr = @crumbs.visible() ? 1 : 0
+        ch = @crumbs.visible() ? hs : min(hs @choices.numFiltered())
+        
+        w  = min min(@screen.cols 42) max(32 int(@screen.cols/2))
+        bw = @brocol.visible() ? w/2 : 0
+        cw = w-bw-2
+        
+        x  = int scx-w/2
+        
+        h  = ch + ih + cr + 2
+        fh = @brocol.visible() ? ch : 0
+        
+        @input.layout    x+2      y+1        w-4   iz
+        @crumbs.layout   x+2      y+1+ih     w-4   cr
+        @choices.layout  x+1      y+1+ih+cr  cw    ch
+        @brocol.layout   x+1+cw   y+1+ih+cr  bw    fh
+        @cells.layout    x        y           w     h
+    
+    #  the dialog opens in a directory, with a name in the field
+    
+    open: dir name ○=>
+        
+        @userNamed = false
+        
+        @input.show()
+        
+        ○ @gotoDir dir
+        
+        #  the name of the file comes after the tree, so that the tree does
+        #  not put the name of the file it is on into the field
+        
+        if name
+            @input.set name
+            @input.state.moveCursors 'eol'
+        
+        @input.grabFocus()
+    
+    gotoDir: dir select ○=>
+        
+        dir = process.cwd() if empty dir
+        dir = slash.untilde dir
+        
+        try
+            items =○ dirlist.items dir
+        catch err
+            log 'list error' err
+            ⮐ 
+        
+        @currentDir = dir
+        @crumbs.show dir
+        
+        select ?= items[1]?.path
+        
+        @showPathItems items select
+    
+    #  the field keeps the name, so the list is not filtered
+    
+    showPathItems: items select =>
+        
+        selectIndex = 0
+        
+        if select
+            select = slash.untilde select
+            for item,idx in items
+                if slash.samePath item.path select
+                    selectIndex = idx
+                    break
+        
+        @preview items[selectIndex]
+        
+        @choices.set items 'tilde'
+        @choices.state.selectLine selectIndex
+        @choices.state.setMainCursor 0 selectIndex
+        @choices.state.setView [0 0]
+        
+        @show()
+        
+        @input.grabFocus()
+    
+    #  the tree puts the name of the file it is on into the field, but
+    #  not when a name was typed: then the name is the one of the user
+    #  
+    #  the column of the directory that is selected is shown as well
+    
+    preview: item =>
+        
+        @input.grabFocus()
+        
+        if not @userNamed and item?.type == 'file'
+            @input.set item.file
+            @input.state.moveCursors 'eol'
+        
+        if item?.type == 'dir' and not item.tilde.endsWith '..'
+            @brocol.show item.path
+            @choices.hoverForSubmenu = true
+        else
+            @brocol.hide()
+            @choices.hoverForSubmenu = false
+        
+        @arrange()
+        post.emit 'redraw'
+    
+    #  a name that is typed is the name of the user, and the tree stops
+    #  putting names into the field
+    
+    onInputChange: text =>
+        
+        @userNamed = true
+    
+    #  the field has the focus, so the keys of the tree are handled here:
+    #  the input would move the selection and eat them
+    
+    onKey: key event =>
+        
+        ⮐  if @hidden()
+        
+        switch event.combo
+            
+            'up' 'down'
+                @moveSelection event.combo
+                ⮐  true
+                
+            'left'
+                if @input.state.mainCursor()[0] <= 0
+                    @goToParent()
+                    ⮐  true
+                    
+            'right'
+                if @input.state.mainCursor()[0] >= @input.current().length
+                    @enterDir()
+                    ⮐  true
+        
+        super key event
+    
+    #  the directory the cursor is on
+    
+    enterDir: =>
+        
+        choice = @choices.current()
+        
+        ⮐  if not choice
+        ⮐  if choice.type != 'dir'
+        
+        @gotoDir choice.path
+    
+    #  the directory above the current one
+    
+    goToParent: =>
+        
+        up = slash.dir @currentDir
+        
+        ⮐  if empty up
+        
+        @gotoDir up @currentDir
+    
+    #  the path the name is written to
+    
+    targetPath: name =>
+        
+        if slash.isAbsolute name
+            ⮐  name
+        
+        slash.path @currentDir, name
+    
+    #  the file is written by the editor, not by the dialog
+    
+    applyChoice: choice =>
+        
+        name = @input.current()
+        
+        ⮐  if empty name
+        
+        path = @targetPath name
+        
+        @hide()
+        
+        post.emit 'focus' 'editor'
+        post.emit 'file.saveas' path
+    
+    #  a click on a file puts its name into the field, it does not save
+    
+    onChoicesAction: action choice =>
+        
+        switch action
+            'click'
+                if choice?.type == 'dir'
+                    @enterDir()
+                else
+                    @preview choice
+                ⮐  true
+        
+        super action choice
+    
+    onBrocolAction: action choice =>
+        
+        switch action
+            'click' ➜ ⮐  @onChoicesAction 'click' choice
+        
+        super action choice
+
+    draw: =>
+
+        ⮐  if @hidden()
+         
+        super()
+        
+        if @crumbs.visible()
+            # add left and right padding to crumbs
+            cry = @crumbs.cells.wy(0)-@cells.y
+            @cells.set 1                    cry ' ' null @color.bg
+            @cells.set @crumbs.cells.cols+2 cry ' ' null @color.bg
+        
+        if @brocol.visible()
+        
+            @brocol.draw()
+            
+            bg = @color.bg
+            fg = @color.frame
+            
+            x = @choices.cells.cols+2
+    
+            if choice = @choices.current()
+            
+                x = @choices.cells.cols-1
+                y = @choices.currentIndex()-@choices.state.s.view[1]
+                
+                cc = @choices.hasFocus() ? @choices.color.hover.bg : @choices.color.hover.blur
+                
+                @choices.cells.fill_row     y choice.tilde.length x-1 ' ' bg cc
+                @choices.cells.set          x y '' cc bg 
+        
+    
+    onMouse: event =>
+
+        ⮐  if @hidden()
+        ret = @brocol.onMouse event  ; ⮐  ret if ret?.redraw
+        super event
+
+    onWheel: event =>
+        
+        ⮐  if @hidden()
+        ret = @brocol.onWheel event ; ⮐  ret if ret?.redraw
+        super event
+                
+
+export saveas

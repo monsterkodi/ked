@@ -18,7 +18,7 @@ use ./view/title  ◆ title
 use ./view/editor ◆ fileeditor
 use ./view/screen ◆ screen ttio
 use ./view/menu   ◆ context menu macro finder searcher differ 
-use ./view/colmns ◆ browse dircol funcol quicky droop
+use ./view/colmns ◆ browse dircol funcol quicky droop saveas
 
 function KED
 
@@ -55,6 +55,7 @@ function KED
         @macro    = new macro      @screen        
         @quicky   = new quicky     @screen 
         @browse   = new browse     @screen 
+        @saveas   = new saveas     @screen 
         @editor   = new fileeditor @screen 'editor'
         @droop    = new droop      @screen @editor 
         @dircol   = new dircol     @screen @editor  ['scroll' 'knob']
@@ -82,15 +83,16 @@ function KED
         post.on 'file.new'      @newFile
         post.on 'file.reload'   @reloadFile
         post.on 'file.open'     @openFile
+        post.on 'file.saveas'   @onSaveAs
         post.on 'quit'          @quit
         post.on 'file.change'   @onFileChange
         post.on 'git.status'    @onGitStatus
         # post.on 'focus'         (name) -> log "focus: '#{name}'"
         
         @contextHandlers = [                                                                               @editor         @dircol @funcol ]
-        @mouseHandlers   = [ @input @context @finder @searcher @differ @quicky @browse @droop @menu @macro @editor @title @dircol @funcol ]
-        @wheelHandlers   = [                 @finder @searcher @differ @quicky @browse @droop       @macro @editor         @dircol @funcol ]
-        @keyHandlers     = [ @input @context @finder @searcher @differ @quicky @browse @droop @menu @macro @editor         @dircol @funcol ]
+        @mouseHandlers   = [ @input @context @finder @searcher @differ @quicky @browse @saveas @droop @menu @macro @editor @title @dircol @funcol ]
+        @wheelHandlers   = [                 @finder @searcher @differ @quicky @browse @saveas @droop       @macro @editor         @dircol @funcol ]
+        @keyHandlers     = [ @input @context @finder @searcher @differ @quicky @browse @saveas @droop @menu @macro @editor         @dircol @funcol ]
         
         @t.on 'key'    @onKey
         @t.on 'mouse'  @onMouse
@@ -478,7 +480,55 @@ function KED
                 
         @session.set 'files▸recent' frecent.store('file')
             
-    saveAs: => log 'todo: saveAs'
+    #  the dialog to save the buffer under another name
+    
+    saveAs: =>
+        
+        dir = process.cwd()
+        name = ''
+        
+        if valid @currentFile
+            dir = slash.dir @currentFile
+            name = slash.file @currentFile
+        
+        @saveas.open dir name
+    
+    #  the file is written here, not in the dialog: the editor keeps the
+    #  name of the file it shows
+    
+    onSaveAs: path ○=>
+        
+        text = kseg.str @editor.state.s.lines
+        
+        ○ nfs.write path text
+        
+        @editor.state.clearHistory()
+        
+        @currentFile = path
+        
+        @title.setFile slash.tilde(path)
+        @t.setTitle slash.file(path)
+        
+        ked_session.set 'editor▸file' path
+        @editor.setCurrentFile path
+        
+        #  the buffer is highlighted for the extension it had before, so it
+        #  is highlighted again for the one it has now.  the state is not
+        #  loaded: that would take the cursor and the history away
+        
+        @editor.state.syntax.setExt slash.ext(path)
+        @editor.state.syntax.clear()
+        @editor.state.syntax.setSegls @editor.state.s.lines
+        
+        @indexer.index path
+        prjcts.index path
+        git.diff path
+        
+        watcher.watch path
+        
+        @saveSessionFile path 'saved'
+        
+        @redraw()
     
     # ████████    ███████    ███████  █████████  ████████  
     # ███   ███  ███   ███  ███          ███     ███       
@@ -691,6 +741,7 @@ function KED
         @macro.draw()
         @quicky.draw()
         @browse.draw()
+        @saveas.draw()
         @droop.draw()
         @finder.draw()
         @searcher.draw()

@@ -1,0 +1,148 @@
+###
+    ███████   ███████  █████████  ███   ███████   ███   ███  
+    ███   ███  ███   ███ ███    ███ ███   ███  ████  ███ ███   
+    ███████   ███████  ███████  ███ ███   ███  ███ █ ███  █████    
+    ███   ███  ███   ███ ███   ███ ███   ███  ███  ███ ███   ███   
+    ███████   ███████  ███████  ███  ██████   ███   ███   ███ ███   
+###
+
+use fs os path
+use ../../kxk    ▪ post sleep
+use ../util      ◆ harness
+use ../view/colmns ◆ saveas
+
+#  a directory to save in, with a file in it and a directory in it
+
+dir = fs.mkdtempSync path.join(os.tmpdir(), 'ked-saveas-')
+
+fs.writeFileSync path.join(dir, 'one.txt'), 'one'
+fs.writeFileSync path.join(dir, 'two.txt'), 'two'
+fs.mkdirSync path.join(dir, 'sub')
+
+#  the path the dialog asked to save
+
+saved = null
+
+post.on 'file.saveas' (path) -> saved = path
+
+▸ saveas
+
+    ▸ the field is there and it has the focus
+
+        h = new harness
+        v = new saveas h.screen
+
+        ○ v.open dir, 'one.txt'
+
+        v.input.visible() ▸ true
+        v.input.hasFocus() ▸ true
+        v.input.current() ▸ 'one.txt'
+
+    ▸ the list is not filtered
+
+        h = new harness
+        v = new saveas h.screen
+
+        ○ v.open dir, ''
+
+        h.focus v.input
+        h.type v 'one'
+
+        v.input.current() ▸ 'one'
+        v.choices.numFiltered() ▸ 4
+
+    ▸ the tree puts the name of the file it is on into the field
+
+        h = new harness
+        v = new saveas h.screen
+
+        ○ v.open dir, ''
+
+        h.focus v.input
+
+        idx = v.choices.items.findIndex (i) -> i.file == 'two.txt'
+        v.choices.select idx
+
+        v.input.current() ▸ 'two.txt'
+
+    ▸ a name that is typed is the name of the user
+
+        h = new harness
+        v = new saveas h.screen
+
+        ○ v.open dir, ''
+
+        h.focus v.input
+        h.type v 'mine'
+
+        h.key v 'down'
+
+        v.input.current() ▸ 'mine'
+
+    ▸ the tree goes into a directory and back out of it
+
+        h = new harness
+        v = new saveas h.screen
+
+        ○ v.open dir, ''
+
+        h.focus v.input
+
+        v.currentDir ▸ dir
+
+        h.key v 'right'
+
+        #  the directory is listed before it is shown
+        
+        ○ sleep 30
+
+        v.currentDir ▸ path.join(dir, 'sub')
+
+        h.key v 'left'
+
+        ○ sleep 30
+
+        v.currentDir ▸ dir
+
+    ▸ the file is written where the field says
+
+        h = new harness
+        v = new saveas h.screen
+
+        ○ v.open dir, ''
+
+        h.focus v.input
+        h.type v 'mine.txt'
+
+        saved = null
+
+        h.key v 'return'
+
+        saved ▸ path.join(dir, 'mine.txt')
+
+    ▸ a name that is a path is a path
+
+        h = new harness
+        v = new saveas h.screen
+
+        ○ v.open dir, ''
+
+        h.focus v.input
+        h.type v 'sub/mine.txt'
+
+        v.targetPath 'sub/mine.txt' ▸ path.join(dir, 'sub', 'mine.txt')
+        v.targetPath '/tmp/mine.txt' ▸ '/tmp/mine.txt'
+
+    ▸ the dialog is gone when it is done
+
+        h = new harness
+        v = new saveas h.screen
+
+        ○ v.open dir, ''
+
+        h.focus v.input
+        h.type v 'mine.txt'
+
+        h.key v 'return'
+
+        v.hidden() ▸ true

@@ -9,7 +9,7 @@
 # files
 
     ctrl+s          cmd+s               save
-    shift+cmd+s     shift+ctrl+s        save as (todo)
+    shift+cmd+s     shift+ctrl+s        save as
     ctrl+r          cmd+r               reload file from disk
     ctrl+n          cmd+n               new file
     ctrl+q   alt+q  cmd+esc             quit

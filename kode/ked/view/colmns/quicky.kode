@@ -24,7 +24,7 @@ function quicky extends inputchoice
 
         super @screen @name ['mapview' 'scroll']
         
-        @crumbs = new crumbs  @screen 'quicky_crumbs'
+        @crumbs = new crumbs  @screen "#{@name}_crumbs"
 
         @crumbs.padLast = true
         @crumbs.setColor 'empty' @color.bg
