@@ -21,11 +21,18 @@ function saveas extends browse
 
     inputIsActive: -> true
         
-    showDialog: dir file =>
+    showDialog: dir file ○=>
     
-        log "saveas.showDialog" dir file
+        log "---- saveas.showDialog #{dir} #{file}"
         
-        @gotoDir dir slash.path(dir file)
+        ○ @gotoDir dir slash.path(dir file)
+        
+        @input.set file
+        @input.state.moveCursors 'eol'
+        if valid slash.ext file
+            for i in 0..slash.ext(file).length
+                @input.state.moveCursors 'left'
+        @input.grabFocus()
 
     onChoicesAction: action choice =>
     

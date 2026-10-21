@@ -126,6 +126,10 @@ function state extends events
     # ███      ███  ███  ████  ███            ███
     # ███████  ███  ███   ███  ████████  ███████
 
+    setText: text => 
+    
+        @setLines text.split(/\r?\n/)
+
     setLines: lines =>
         
         if empty lines ➜ lines = ['']

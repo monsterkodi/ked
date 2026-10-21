@@ -45,7 +45,7 @@ function browse extends quicky
         
         scx = int @screen.cols/2
         scy = int @screen.rows/2
-        log "#{@name}.arrange" @inputIsActive()
+
         ih = @inputIsActive() ? 2 : 0
         iz = max 0 ih - 1
         

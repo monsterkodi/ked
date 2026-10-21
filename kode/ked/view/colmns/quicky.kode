@@ -176,8 +176,9 @@ function quicky extends inputchoice
     
     showPathItems: items select =>
 
-        @input.set ''
-        @input.hide() if @autoHideInput
+        if @autoHideInput
+            @input.set ''
+            @input.hide() 
         
         selectIndex = 0
         

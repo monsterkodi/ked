@@ -46,7 +46,7 @@ function input extends editor
     current:  => kseg.str @state.s.lines[0]
 
     set: text ->
-    
+        log "INPUT TEXT: #{text}"
         @state.loadLines [text]
 
     selectAll: -> 
@@ -106,6 +106,8 @@ function input extends editor
     draw: ->
         
         ⮐ if @hidden() or @collapsed()
+
+        log "input #{@name} draw #{@current()}"
         
         @setColor 'bg' @hasFocus() ? @color.bg_focus : @color.bg_blur
         @setColor 'empty' @color.bg
