@@ -39,7 +39,7 @@ function inputchoice extends view
         else 
             @input.show()
             
-        log "#{@name}.isVisible: #{@input.isVisible} #{@input.visible()}"
+        # log "#{@name}.isVisible: #{@input.isVisible} #{@input.visible()}"
             
         @choices.show()
 
@@ -226,7 +226,7 @@ function inputchoice extends view
             if result = @input.onKey key event
                 @autoHide()
                 ⮐  result
-            log "focused input didn't handle key #{key}?"
+            # log "focused input didn't handle key #{key}?"
 
         if result = @choices.onKey key event
 

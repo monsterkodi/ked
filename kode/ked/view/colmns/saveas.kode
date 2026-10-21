@@ -20,6 +20,24 @@ function saveas extends browse
         super @screen @name
 
     inputIsActive: -> true
+    
+    autoHide: => 
+
+    onInputAction: action text =>
+        log "++ onInputAction #{action} #{text}"
+        switch action
+            'submit' ➜ ⮐  log "SUBMIT #{text}" 
+            'up'          
+            'down'   ➜ ⮐  @choices.moveSelection action
+
+    onInputChange: text => log "swallow input change #{text}"
+        
+    moveFocus: -> # called on tab
+        
+        if @choices.hasFocus()
+            @input.grabFocus()
+        else
+            @choices.grabFocus()
         
     showDialog: dir file ○=>
     
@@ -42,16 +60,40 @@ function saveas extends browse
             
             'right' 
             'space'            
-                
-                if choice?.path and choice.type == 'file'
-                    log "SETSAVENAME" choice.path
-                    ⮐  
-                    
             'return'
                 if choice?.path and choice.type == 'file'
-                    log "RETURN" choice
+                    log "action #{choice.path}" 
+                    @input.set slash.file(choice.path)
+                    @input.grabFocus()
                     ⮐ 
                     
         super action choice
+        
+    onKey: key event =>
+
+        ⮐ if @hidden()
+
+        switch event.combo
+            'tab' 
+                ⮐ @moveFocus()
+            'esc'     
+                post.emit 'focus' 'editor'
+                ⮐ @hide()
+
+        if @input.hasFocus()
+            if key == 'down'
+                ⮐ @choices.grabFocus()
+            if key in 'return'
+                log "RETURN"
+            if event.char not in '\t\n' 
+                if result = @input.onKey key event
+                    ⮐ result
+            ⮐ 
+        else
+            if event.char and event.char not in ' \n\t'
+                log "event with char swallowed '#{event.char}'"
+                ⮐ 
+            
+        super key event
         
 export saveas

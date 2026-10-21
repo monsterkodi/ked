@@ -107,7 +107,7 @@ function input extends editor
         
         ⮐ if @hidden() or @collapsed()
 
-        log "input #{@name} draw #{@current()}"
+        # log "input #{@name} draw #{@current()}"
         
         @setColor 'bg' @hasFocus() ? @color.bg_focus : @color.bg_blur
         @setColor 'empty' @color.bg

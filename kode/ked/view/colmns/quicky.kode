@@ -319,7 +319,7 @@ function quicky extends inputchoice
             
             'right' 
                 
-                if choice.path
+                if choice?.path
                     if choice.tilde == ' ..'
                         ⮐  @moveSelection 'down'
                     if choice.type == 'file'
@@ -339,14 +339,14 @@ function quicky extends inputchoice
                 
             'delete'
                 
-                if choice.path
+                if choice?.path
                     upDir = slash.dir @currentDir
                     ⮐  if empty upDir
                     @hideMap()
                     ⮐  @gotoDir upDir @currentDir
             'space'            
                 
-                if choice.path and choice.type == 'file'
+                if choice?.path and choice.type == 'file'
                     ⮐  post.emit 'quicky' choice.path
                     
         super action choice
