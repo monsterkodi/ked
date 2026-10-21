@@ -484,13 +484,13 @@ function KED
     saveAs: =>
         
         dir = process.cwd()
-        name = ''
+        file = ''
         
         if valid @currentFile
             dir = slash.dir @currentFile
-            name = slash.file @currentFile
+            file = slash.file @currentFile
         
-        @saveas.open dir name
+        @saveas.showDialog dir file
     
     #  the file is written here, not in the dialog: the editor keeps the
     #  name of the file it shows

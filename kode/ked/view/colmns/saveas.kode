@@ -8,269 +8,39 @@
     the dialog to save the buffer under another name
 ###
 
-use ../../../kxk    ▪ kstr slash post nfs
-use ../../theme     ◆ color theme icons
-use ../../util      ◆ fileutil 
-use ../../edit/tool ◆ belt
-use                 ◆ quicky brocol diritem dirlist
+use ../../../kxk ▪ slash post
+use              ◆ browse
 
-function saveas extends quicky
+function saveas extends browse
 
     @: @screen ->
         
         super @screen 'saveas'
         
-        @isVisible = false
-        
-        @setColor 'bg'     theme.quicky.bg
-        @setColor 'frame'  theme.quicky.frame
-        
-        @brocol = new brocol @screen 'saveas_brocol'
-        @brocol.setColor 'bg' color.darken(@color.bg 0.7)
-        # @brocol.on 'action'   @onBrocolAction
-        
-        @choices.mapscr.rowOffset = 1
-        @choices.frontRoundOffset = 2
-        
-        @userNamed = false
+    showDialog: dir file =>
     
-    arrange: =>
+        log "saveas.showDialog" dir file
         
-        scx = int @screen.cols/2
-        scy = int @screen.rows/2
-        
-        ih = 2
-        iz = 1
-        
-        hs = int @screen.rows/2
-        y  = int scy - hs/2 - ih
-        
-        cr = @crumbs.visible() ? 1 : 0
-        ch = @crumbs.visible() ? hs : min(hs @choices.numFiltered())
-        
-        w  = min min(@screen.cols 42) max(32 int(@screen.cols/2))
-        bw = @brocol.visible() ? w/2 : 0
-        cw = w-bw-2
-        
-        x  = int scx-w/2
-        
-        h  = ch + ih + cr + 2
-        fh = @brocol.visible() ? ch : 0
-        
-        @input.layout    x+2      y+1        w-4   iz
-        @crumbs.layout   x+2      y+1+ih     w-4   cr
-        @choices.layout  x+1      y+1+ih+cr  cw    ch
-        @brocol.layout   x+1+cw   y+1+ih+cr  bw    fh
-        @cells.layout    x        y           w     h
-    
-    open: dir file ○=>
-        
-        log "OPEN" dir file
-        # @userNamed = false
-        
-        @input.show()
-        
-        path = slash.path dir file
-        
-        ○ @gotoDir dir path
-        
-        if file
-            @input.set file
-            @input.state.moveCursors 'eol'
-        
-        @input.grabFocus()
-    
-    gotoDir: dir select ○=>
-        
-        dir = process.cwd() if empty dir
-        dir = slash.untilde dir
-        
-        try
-            items =○ dirlist.items dir
-        catch err
-            log 'list error' err
-            ⮐ 
-        
-        @currentDir = dir
-        @crumbs.show dir
-        
-        select ?= items[1]?.path
-        
-        @showPathItems items select
-    
-    setFilePath: path =>
-        log "SET FILE" slash.file(path)
-        @input.set slash.file(path)
-        @input.state.moveCursors 'eol'
-        @arrange()
-        post.emit 'redraw'
- 
-    preview: item ○=>
-        # log "PREVIEW~~~" item
-        ⮐  @hideMap() if empty item?.path
-        
-        if item.type == 'file' 
-        
-            @brocol.hide()
-        
-            if slash.ext(item.path) in fileutil.sourceFileExtensions
-                text =○ nfs.read item.path
-                ⮐  if @brocol.visible()
-                segls = belt.seglsForText text
-                @choices.mapscr.setSyntaxSegls slash.ext(item.path) segls
-                @choices.mapscr.show()
-            else
-                @hideMap()
-                
-        else # if item.type == 'dir'
-        
-            @hideMap()
-        
-            if not item.tilde.endsWith '..'
-                @brocol.show item.path
-                @choices.hoverForSubmenu = true
-            else
-                @brocol.hide()
-                @choices.hoverForSubmenu = false
-                
-        @arrange()    
-        post.emit 'redraw'
-    
-    onInputChange: text =>
-        
-        @userNamed = true
-    
-    onKey: key event =>
-        
-        ⮐  if @hidden()
-        
-        switch event.combo
-            
-            'up' 'down'
-                @moveSelection event.combo
-                ⮐  true
-                
-        super key event
-    
-    targetPath: name =>
-        
-        if slash.isAbsolute name
-            ⮐  name
-        
-        slash.path @currentDir, name
-    
-    
-    applyChoice: choice =>
-        
-        switch @input.current()
-            
-            '/'  ➜ ⮐  @gotoDir '/'
-            '~'  ➜ ⮐  @gotoDir '~'
-            '.'  ➜ ⮐  @gotoDir @currentDir
-            '..' ➜ ⮐  @gotoDir slash.dir(@currentDir)
-            
-        if empty choice and valid @input.current()
-            @gotoDirOrOpenFile @input.current()
-            ⮐  redraw:true
-            
-        if empty choice      ➜ ⮐  redraw:false 
-        if empty choice.path ➜ ⮐  redraw:false 
+        @gotoDir dir slash.path(dir file)
 
-        @gotoDir choice.path 
-        redraw:true
-        
-    doSaveAs: =>
-        
-        name = @input.current()
-        
-        ⮐  if empty name
-        
-        path = @targetPath name
-        
-        @hide()
-        
-        post.emit 'focus' 'editor'
-        
-        log "WOULD SAVE FILE AS" path
-        # post.emit 'file.saveas' path
-    
     onChoicesAction: action choice =>
     
-        # log 'onChoicesAction' action choice @currentDir
-            
+        log '--- onChoicesAction' action choice @currentDir
+        
         switch action
             
             'right' 
-                
-                if choice.path
-                    if choice.tilde == ' ..'
-                        ⮐  @moveSelection 'down'
-                    if choice.type == 'file'
-                        log "CHOICE" choice
-                        @setFilePath choice.path
-                        ⮐ 
-                    else
-                        @hideMap()
-                        ⮐ @gotoDir choice.path
-                        
-            'left' 'delete'
-                
-                if choice.path
-                    upDir = slash.dir @currentDir
-                    ⮐  if empty upDir
-                    @hideMap()
-                    ⮐  @gotoDir upDir @currentDir
             'space'            
                 
-                if choice.path and choice.type == 'file'
-                    # ⮐  post.emit 'quicky' choice.path
-                    log "SPACE" choice.path
-                    @setFilePath choice.path
+                if choice?.path and choice.type == 'file'
+                    log "SETSAVENAME" choice.path
+                    ⮐  
+                    
+            'return'
+                if choice?.path and choice.type == 'file'
+                    log "RETURN" choice
                     ⮐ 
                     
         super action choice
-
-    draw: =>
-
-        ⮐ if @hidden()
-         
-        super()
         
-        if @crumbs.visible()
-            # add left and right padding to crumbs
-            cry = @crumbs.cells.wy(0)-@cells.y
-            @cells.set 1                    cry ' ' null @color.bg
-            @cells.set @crumbs.cells.cols+2 cry ' ' null @color.bg
-        
-        if @brocol.visible()
-        
-            @brocol.draw()
-            
-            bg = @color.bg
-            fg = @color.frame
-            
-            x = @choices.cells.cols+2
-    
-            if choice = @choices.current()
-            
-                x = @choices.cells.cols-1
-                y = @choices.currentIndex()-@choices.state.s.view[1]
-                
-                cc = @choices.hasFocus() ? @choices.color.hover.bg : @choices.color.hover.blur
-                
-                @choices.cells.fill_row     y choice.tilde.length x-1 ' ' bg cc
-                @choices.cells.set          x y '' cc bg 
-        
-    onMouse: event =>
-
-        ⮐  if @hidden()
-        ret = @brocol.onMouse event  ; ⮐  ret if ret?.redraw
-        super event
-
-    onWheel: event =>
-        
-        ⮐  if @hidden()
-        ret = @brocol.onWheel event ; ⮐  ret if ret?.redraw
-        super event
-
 export saveas
