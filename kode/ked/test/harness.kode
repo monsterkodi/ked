@@ -88,10 +88,10 @@ use ../view/menu ◆ choices
 
         i.current() ▸ 'xyz'
 
-    #  there are no kitty graphics in a headless screen, so the cursor is a
-    #  character of its own
+    #  there are no kitty graphics in a headless screen, so the cursor is the
+    #  character in the colors of the other way round
 
-    ▸ the cursor is a character
+    ▸ the cursor is marked
 
         h = new harness
 
@@ -103,4 +103,7 @@ use ../view/menu ◆ choices
         i.state.setMainCursor 1 0
         i.draw()
 
-        h.row 0 ▸ 'a_c'
+        #  the character is there, and it is marked
+        
+        h.row 0 ▸ 'abc'
+        h.rowMarked 0 ▸ 'a\x1b[7;4:3mb\x1b[0mc'

@@ -259,11 +259,11 @@ function cells
     draw_rounded_cursor: x y fg =>
         
         #  there are no kitty graphics in a headless screen, so the cursor
-        #  is a character of its own
+        #  is the character in the colors of the other way round
         
         if @screen.t.headless
-            @set_char x y '_'
-            @set_bg x y fg
+            @set_mark x y 'main'
+            @swap_fg_bg x y
             ⮐
             
         @img x y "rounded.cursor" fg
@@ -271,11 +271,26 @@ function cells
     draw_rounded_multi_cursor: x y fg =>
         
         if @screen.t.headless
-            @set_char x y '+'
-            @set_bg x y fg
+            @set_mark x y 'multi'
+            @swap_fg_bg x y
             ⮐
             
         @img x y "rounded.multi" fg
+        
+    #  a cell that carries a cursor
+    
+    set_mark: x y kind =>
+        
+        if @inside(x y) ➜ @screen.set_mark @wx(x) @wy(y) kind
+        
+    #  the character of a cell in the colors of the other way round
+    
+    swap_fg_bg: x y =>
+        
+        fg = @get_fg x y
+        bg = @get_bg x y
+        
+        @set_fg_bg x y bg fg
         
     img: x y name fg zLayer=1000 xe ye =>
     

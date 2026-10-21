@@ -130,8 +130,9 @@ followed step by step:
 ```
 
 The cursor is drawn with kitty graphics, which a headless screen has none of,
-so it is a character there: the main cursor is an underscore, the other
-cursors a plus.
+so it is marked with escape sequences there: the character under the cursor is
+in the colors of the other way round, and the main cursor is underlined as
+well.
 
 The keys are a script of key names: a word that names a key is that key, and
 a word that names nothing is the characters it is made of. A word can have

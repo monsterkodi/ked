@@ -73,6 +73,14 @@ function harness
     
     row: y => @screen.text()[y]
     
+    #  the screen as text, with the cursors marked
+    
+    textMarked: => @screen.textMarked()
+    
+    #  a line of the screen, with the cursors marked
+    
+    rowMarked: y => @screen.textMarked()[y]
+    
     #  the character at a position
     
     at: x y => @screen.get_char x y

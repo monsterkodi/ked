@@ -193,7 +193,7 @@ function KED
         @draw()
         
         process.stdout.write "\n=== #{label}\n"
-        process.stdout.write @screen.text().join('\n') + '\n'
+        process.stdout.write @screen.textMarked().join('\n') + '\n'
 
     #  ███████  ████████   ███████   ███████  ███   ███████   ███   ███
     # ███       ███       ███       ███       ███  ███   ███  ████  ███

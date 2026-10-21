@@ -143,6 +143,45 @@ function screen
             lines.push line.replace(/\s+$/ '')
         
         lines
+    
+    #  the buffer as text, with the cursors marked
+    #  
+    #  a cursor is a character with escape sequences around it: the main
+    #  cursor is in the colors of the other way round and underlined, the
+    #  other cursors are in the colors of the other way round
+    
+    textMarked: =>
+        
+        lines = []
+        
+        for y in 0...@rows
+            
+            line = ''
+            
+            for x in 0...@cols
+                
+                ch = @c[y][x].char
+                ch = ' ' if not valid ch
+                
+                if mark = @c[y][x].mark
+                    if mark == 'main'
+                        line += '\x1b[7;4:3m'
+                    else
+                        line += '\x1b[7m'
+                    line += ch + '\x1b[0m'
+                else
+                    line += ch
+            
+            lines.push line.replace(/\s+$/ '')
+        
+        lines
+    
+    #  a cell that carries a cursor
+    
+    set_mark: x y kind =>
+        
+        if 0 <= x < @cols and 0 <= y < @rows
+            @c[y][x].mark = kind
         
     # ████████   ████████  ███   ███  ███████    ████████  ████████   
     # ███   ███  ███       ████  ███  ███   ███  ███       ███   ███  

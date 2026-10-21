@@ -17,6 +17,8 @@ harness = (function ()
 
         this["written"] = this["written"].bind(this)
         this["at"] = this["at"].bind(this)
+        this["rowMarked"] = this["rowMarked"].bind(this)
+        this["textMarked"] = this["textMarked"].bind(this)
         this["row"] = this["row"].bind(this)
         this["text"] = this["text"].bind(this)
         this["focus"] = this["focus"].bind(this)
@@ -70,6 +72,16 @@ harness = (function ()
         return this.screen.text()[y]
     }
 
+    harness.prototype["textMarked"] = function ()
+    {
+        return this.screen.textMarked()
+    }
+
+    harness.prototype["rowMarked"] = function (y)
+    {
+        return this.screen.textMarked()[y]
+    }
+
     harness.prototype["at"] = function (x, y)
     {
         return this.screen.get_char(x,y)
@@ -85,5 +97,5 @@ harness = (function ()
 
 export default harness;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaGFybmVzcy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdXRpbC9oYXJuZXNzLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7UUF3QlEsT0FBQSxjQUFBO1FBRUEsS0FBQyxpQkFBTyxJQUFJLDBCQUFPO1FBQ25CLEtBQUMsaUJBQU8sSUFBSSwwQkFBTztRQUVuQixLQUFDLFFBQVEsTUFBSyxTQUFTLEtBQUssTUFBTSxNQUFNLEtBQUssS0FBQyxLQUFLLEtBQUssS0FBQztRQUV6RCxLQUFDLGFBQWEsT0FBTyxLQUFDOzs7OztnQkFRdEIsSUFBUSxNQUNSLEtBQVEsUUFDUixNQUFRLE1BQ1IsTUFBUSxlQUFBLE9BQU87Ozs7Ozs7UUFNZixRQUFRLEtBQUMsTUFBTSxNQUFNO2VBQ3JCLEtBQUssTUFBTSxNQUFNOzs7Ozs7OzRCQU1QLEtBQUssTUFBTTs7OztZQUNqQixLQUFDLElBQUksS0FBSyxHQUFHOzs7Ozs7ZUFTakIsS0FBSyxLQUFLLFFBQVEsS0FBSzs7Ozs7ZUFJbEIsS0FBQyxPQUFPOzs7OztlQUlQLEtBQUMsT0FBTyxPQUFPOzs7OztlQUlkLEtBQUMsT0FBTyxTQUFTLEVBQUU7Ozs7O2VBSWxCLEtBQUMsRUFBRTs7Ozs7O2VBRVoifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaGFybmVzcy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdXRpbC9oYXJuZXNzLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztRQXdCUSxPQUFBLGNBQUE7UUFFQSxLQUFDLGlCQUFPLElBQUksMEJBQU87UUFDbkIsS0FBQyxpQkFBTyxJQUFJLDBCQUFPO1FBRW5CLEtBQUMsUUFBUSxNQUFLLFNBQVMsS0FBSyxNQUFNLE1BQU0sS0FBSyxLQUFDLEtBQUssS0FBSyxLQUFDO1FBRXpELEtBQUMsYUFBYSxPQUFPLEtBQUM7Ozs7O2dCQVF0QixJQUFRLE1BQ1IsS0FBUSxRQUNSLE1BQVEsTUFDUixNQUFRLGVBQUEsT0FBTzs7Ozs7OztRQU1mLFFBQVEsS0FBQyxNQUFNLE1BQU07ZUFDckIsS0FBSyxNQUFNLE1BQU07Ozs7Ozs7NEJBTVAsS0FBSyxNQUFNOzs7O1lBQ2pCLEtBQUMsSUFBSSxLQUFLLEdBQUc7Ozs7OztlQVNqQixLQUFLLEtBQUssUUFBUSxLQUFLOzs7OztlQUlsQixLQUFDLE9BQU87Ozs7O2VBSVAsS0FBQyxPQUFPLE9BQU87Ozs7O2VBSVYsS0FBQyxPQUFPOzs7OztlQUlQLEtBQUMsT0FBTyxhQUFhOzs7OztlQUkxQixLQUFDLE9BQU8sU0FBUyxFQUFFOzs7OztlQUlsQixLQUFDLEVBQUU7Ozs7OztlQUVaIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/util/harness.kode
