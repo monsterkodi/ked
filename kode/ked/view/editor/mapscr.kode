@@ -120,9 +120,11 @@ function mapscr extends mapview
     
     onResize: =>
         
-        @csz = @cells.screen.t.cellsz
+        csz = @cells.screen.t.cellsz
         
-        ⮐  if empty @csz
+        ⮐  if empty csz
+        
+        @csz = csz
         
         @calcView()
         @redraw = true
@@ -213,7 +215,7 @@ function mapscr extends mapview
         
         super()
         
-        if @csz
+        if not empty @csz
         
             @drawCursors()    
             @drawHighlights() 
@@ -249,9 +251,11 @@ function mapscr extends mapview
 
     drawKnob: =>
     
+        ⮐  if empty @csz
+        
         @calcView()
                 
-        ⮐  if empty @csz or @hidden() or @collapsed()
+        ⮐  if @hidden() or @collapsed()
         
         ky = @lineOffset @state.s.view[1]
         

@@ -60,6 +60,11 @@ function TTIO extends events
             
             @input = @input and not process.stdin.isTTY
             
+            #  there are no cells in a headless screen, so there is no cell
+            #  size either: the views that draw pictures skip themselves
+            
+            @cellsz = []
+            
             if @input
                 process.stdin.on 'data' @onInputData
                 process.stdin.on 'end'  @onEnd
@@ -141,10 +146,12 @@ function TTIO extends events
     
     #  the size of a headless screen is known, so it is not asked for
     #  the way it is asked for in a terminal
+    #  
+    #  there are no cells, so there is no cell size to report either
     
     onHeadlessResize: =>
         
-        @emit 'resize' @cols() @rows() null ([0 0])
+        @emit 'resize' @cols() @rows() null ([])
     
     #  the input of a headless editor is a script, and it is read as a
     #  whole: a key that a read splits in two is still a key

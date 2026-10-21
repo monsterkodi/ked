@@ -137,7 +137,11 @@ function mapview extends view
 
     lineData: =>
         
-        w = @cells.cols * @cells.screen.t.cellsz[0]
+        csz = @cells.screen.t.cellsz
+        
+        ⮐  if empty csz
+        
+        w = @cells.cols * csz[0]
         bytes = w*3
         
         ⮐  if bytes <= 0

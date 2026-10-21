@@ -10,6 +10,15 @@ use ../view/screen ◆ ttio
 
 ▸ ttio
 
+    ▸ a headless ttio has no cells
+
+        #  there is no cell size, so the views that draw pictures skip
+        #  themselves: that is what the guards are for
+        
+        t = new ttio headless:true input:false
+
+        t.cellsz ▸ []
+
     ▸ a csi sequence ends with its final byte
 
         t = new ttio headless:true input:false

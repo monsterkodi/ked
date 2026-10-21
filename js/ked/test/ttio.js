@@ -5,6 +5,11 @@ import ttio from "../view/screen/ttio.js"
 
 toExport["ttio"] = async function ()
 {
+    await section("a headless ttio has no cells", async function ()
+    {
+        t = new ttio({headless:true,input:false})
+        compare(t.cellsz,[])
+    })
     await section("a csi sequence ends with its final byte", async function ()
     {
         t = new ttio({headless:true,input:false})
@@ -36,5 +41,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHRpby5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC90dGlvLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztRQWNRLFFBQVEsTUFBSyxTQUFTLEtBQUssTUFBTTtRQUVqQyxPQUFPLEVBQUUsVUFBVSxPQUFPLEtBQUs7Z0JBRS9CLEtBQUssT0FBUztnQkFDZCxLQUFLLEdBQUcsSUFBTTtnQkFDZCxLQUFLLEdBQUcsSUFBTTs7OztRQUlkLE9BQU8sRUFBRSxVQUFVLE9BQU8sS0FBSztnQkFFL0IsS0FBSyxPQUFTO2dCQUNkLEtBQUssR0FBRyxJQUFNO2dCQUNkLEtBQUssR0FBRyxJQUFNOzs7O1FBSWQ7UUFFQSxFQUFFLEdBQUc7O21CQUFpQixLQUFLLEtBQUs7O1FBRWhDLEVBQUUsT0FBTyxPQUFPLEtBQUs7Z0JBRXJCLE1BQVEsT0FBTyxPQUFPIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHRpby5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC90dGlvLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztRQWlCUSxRQUFRLE1BQUssU0FBUyxLQUFLLE1BQU07Z0JBRWpDLEVBQUU7Ozs7UUFJRixRQUFRLE1BQUssU0FBUyxLQUFLLE1BQU07UUFFakMsT0FBTyxFQUFFLFVBQVUsT0FBTyxLQUFLO2dCQUUvQixLQUFLLE9BQVM7Z0JBQ2QsS0FBSyxHQUFHLElBQU07Z0JBQ2QsS0FBSyxHQUFHLElBQU07Ozs7UUFJZCxPQUFPLEVBQUUsVUFBVSxPQUFPLEtBQUs7Z0JBRS9CLEtBQUssT0FBUztnQkFDZCxLQUFLLEdBQUcsSUFBTTtnQkFDZCxLQUFLLEdBQUcsSUFBTTs7OztRQUlkO1FBRUEsRUFBRSxHQUFHOzttQkFBaUIsS0FBSyxLQUFLOztRQUVoQyxFQUFFLE9BQU8sT0FBTyxLQUFLO2dCQUVyQixNQUFRLE9BQU8sT0FBTyJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/test/ttio.kode
