@@ -41,9 +41,12 @@ saveas = (function ()
                 }
                 break
             case 'return':
-                console.log("RETURN",choice)
-                return
-
+                if ((choice != null ? choice.path : undefined) && choice.type === 'file')
+                {
+                    console.log("RETURN",choice)
+                    return
+                }
+                break
         }
 
         return saveas.__super__.onChoicesAction.call(this,action,choice)
@@ -54,5 +57,5 @@ saveas = (function ()
 
 export default saveas;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2F2ZWFzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2NvbG1ucy9zYXZlYXMua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozt1QkFhd0I7Ozs7Ozs7K0NBSVYsS0FBQyxPQUFPOzs7OztRQUlkLFlBQUksb0JBQW9CLElBQUk7ZUFFNUIsS0FBQyxRQUFRLElBQUksTUFBTSxLQUFLLElBQUk7Ozs7O1FBSTVCLFlBQUksc0JBQXNCLE9BQU8sT0FBTyxLQUFDO2dCQUVsQzs7aUJBRUg7aUJBQ0E7cUJBRU8saUJBQUEsT0FBUSxxQkFBUyxPQUFPLFNBQVE7O29CQUMvQixZQUFJLGNBQWMsT0FBTzs7OztpQkFHakM7Z0JBRUksWUFBSSxTQUFTOzs7OzswREFHZixPQUFPOzs7Ozs7ZUFFZCJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2F2ZWFzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2NvbG1ucy9zYXZlYXMua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozt1QkFhd0I7Ozs7Ozs7K0NBSVYsS0FBQyxPQUFPOzs7OztRQUlkLFlBQUksb0JBQW9CLElBQUk7ZUFFNUIsS0FBQyxRQUFRLElBQUksTUFBTSxLQUFLLElBQUk7Ozs7O1FBSTVCLFlBQUksc0JBQXNCLE9BQU8sT0FBTyxLQUFDO2dCQUVsQzs7aUJBRUg7aUJBQ0E7cUJBRU8saUJBQUEsT0FBUSxxQkFBUyxPQUFPLFNBQVE7O29CQUMvQixZQUFJLGNBQWMsT0FBTzs7OztpQkFHakM7cUJBQ08saUJBQUEsT0FBUSxxQkFBUyxPQUFPLFNBQVE7O29CQUMvQixZQUFJLFNBQVM7Ozs7OzswREFHbkIsT0FBTzs7Ozs7O2VBRWQifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/saveas.kode
