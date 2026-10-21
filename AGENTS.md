@@ -129,6 +129,10 @@ followed step by step:
 <the screen>
 ```
 
+The cursor is drawn with kitty graphics, which a headless screen has none of,
+so it is a character there: the main cursor is an underscore, the other
+cursors a plus.
+
 The keys are a script of key names: a word that names a key is that key, and
 a word that names nothing is the characters it is made of. A word can have
 modifiers: `cmd+o`, `shift+cmd+s`, `cmd+down`. A space is a key of its own:

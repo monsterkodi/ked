@@ -87,3 +87,20 @@ use ../view/menu ◆ choices
         h.type i 'xyz'
 
         i.current() ▸ 'xyz'
+
+    #  there are no kitty graphics in a headless screen, so the cursor is a
+    #  character of its own
+
+    ▸ the cursor is a character
+
+        h = new harness
+
+        i = new input h.screen 'test_input'
+        i.layout 0 0 20 1
+        i.state.loadLines ['abc']
+
+        h.focus i
+        i.state.setMainCursor 1 0
+        i.draw()
+
+        h.row 0 ▸ 'a_c'
