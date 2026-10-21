@@ -1,0 +1,50 @@
+###
+    ███  ███   ███████   ████████   ███   ███  █████████   ███████  
+    ███  ███  ███   ███  ███   ███  ███ █ ███        ███    ███ ███  
+    ███████   ███████   ████████   ███████      █████    █████    
+    ███  ███  ███   ███  ███   ███  ███   ███        ███    ███ ███  
+    ███   ███ ███████   ████████   ███   ███  █████████   ███████  
+###
+
+use ../util ◆ keyscript
+
+▸ keyscript
+
+    ▸ a word that names a key
+
+        keyscript.bytes 'down' ▸ '\x1b[B'
+        keyscript.bytes 'up' ▸ '\x1b[A'
+        keyscript.bytes 'left' ▸ '\x1b[D'
+        keyscript.bytes 'right' ▸ '\x1b[C'
+        keyscript.bytes 'return' ▸ '\r'
+        keyscript.bytes 'space' ▸ ' '
+        keyscript.bytes 'esc' ▸ '\x1b[27u'
+
+    ▸ a word that names nothing is the characters it is made of
+
+        keyscript.bytes 'ab' ▸ 'ab'
+        keyscript.bytes 'a' ▸ 'a'
+
+    ▸ a word can have modifiers
+
+        keyscript.bytes 'cmd+o' ▸ '\x1b[111;9u'
+        keyscript.bytes 'ctrl+s' ▸ '\x1b[115;5u'
+        keyscript.bytes 'alt+r' ▸ '\x1b[114;3u'
+        keyscript.bytes 'shift+cmd+s' ▸ '\x1b[115;10u'
+        keyscript.bytes 'cmd+down' ▸ '\x1b[1;9B'
+        keyscript.bytes 'cmd+tab' ▸ '\x1b[9;9u'
+
+    ▸ a word that is not a modifier is not a combination
+
+        keyscript.bytes 'cmd+foo' ▸ 'cmd+foo'
+        keyscript.bytes 'o+' ▸ 'o+'
+
+    ▸ an escape sequence is a sequence already
+
+        keyscript.bytes '\x1b[B' ▸ '\x1b[B'
+
+    ▸ a script is the words of it
+
+        keyscript.script 'cmd+o down' ▸ '\x1b[111;9u\x1b[B'
+        keyscript.script 'a b' ▸ 'ab'
+        keyscript.script '  ' ▸ ''

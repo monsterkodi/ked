@@ -1,0 +1,143 @@
+###
+    ███  ███   ███████   ████████   ███   ███  █████████   ███████  
+    ███  ███  ███   ███  ███   ███  ███ █ ███        ███    ███ ███  
+    ███████   ███████   ████████   ███████      █████    █████    
+    ███  ███  ███   ███  ███   ███  ███   ███        ███    ███ ███  
+    ███   ███ ███████   ████████   ███   ███  █████████   ███████  
+    
+    a script of key names, and the bytes a terminal would send
+
+    a script is a text of words: a word that names a key is that key, and
+    a word that names nothing is the characters it is made of.  the words
+    are separated by spaces, and a space is a key of its own: 'space'
+
+    a word can have modifiers: 'cmd+o' is the cmd and the o together
+###
+
+function keyscript
+
+    #  the bytes of a key, the way a terminal sends them
+    
+    @keys:
+        'up':        '\x1b[A'
+        'down':      '\x1b[B'
+        'right':     '\x1b[C'
+        'left':      '\x1b[D'
+        'home':      '\x1b[H'
+        'end':       '\x1b[F'
+        'pageup':    '\x1b[5~'
+        'pagedown':  '\x1b[6~'
+        'insert':    '\x1b[2~'
+        'delete':    '\x1b[3~'
+        'enter':     '\r'
+        'return':    '\r'
+        'tab':       '\t'
+        'esc':       '\x1b[27u'
+        'space':     ' '
+        'backspace': '\x7f'
+        'f1':        '\x1bOP'
+        'f2':        '\x1bOQ'
+        'f3':        '\x1bOR'
+        'f4':        '\x1bOS'
+        
+    #  the keys that a csi sequence ends with, for a modifier on them
+    
+    @csi:
+        'up':    'A'
+        'down':  'B'
+        'right': 'C'
+        'left':  'D'
+        'home':  'H'
+        'end':   'F'
+        
+    #  the keys that the kitty protocol has a number for
+    
+    @kitty:
+        'tab':       9
+        'return':    13
+        'enter':     13
+        'esc':       27
+        'space':     32
+        'backspace': 127
+        
+    #  the bits of a modifier, the way the kitty protocol counts them
+    
+    @modbits:
+        'shift': 1
+        'alt':   2
+        'ctrl':  4
+        'cmd':   8
+        'super': 8
+        'meta':  8
+        
+    #  the bytes of a word of a script
+    
+    @bytes: word =>
+        
+        ⮐  if empty word
+        
+        #  an escape sequence is a sequence already
+        
+        if word.startsWith '\x1b'
+            ⮐  word
+        
+        if known = @keys[word]
+            ⮐  known
+        
+        if combo = keyscript.combo word
+            ⮐  combo
+        
+        #  a word that names nothing is the characters it is made of
+        
+        chars = ''
+        
+        for ch in word.split ''
+            chars += ch
+        
+        chars
+    
+    #  the bytes of a word with modifiers, or nothing
+    
+    @combo: word =>
+        
+        parts = word.split '+'
+        
+        ⮐  if parts.length < 2
+        
+        mod = 0
+        
+        for part in parts[0...-1]
+            m = @modbits[part]
+            ⮐  if not m
+            mod += m
+        
+        base = parts[-1]
+        
+        ⮐  if empty base
+        
+        if code = @kitty[base]
+            ⮐  "\x1b[#{code};#{mod+1}u"
+        
+        if c = @csi[base]
+            ⮐  "\x1b[1;#{mod+1}#{c}"
+        
+        ⮐  if base.length != 1
+        
+        code = base.charCodeAt 0
+        
+        ⮐  if not code
+        
+        "\x1b[#{code};#{mod+1}u"
+    
+    #  the bytes of a whole script
+    
+    @script: text =>
+        
+        out = ''
+        
+        for word in text.split(/\s+/).filter((w) -> w.length)
+            out += keyscript.bytes word
+        
+        out
+
+export keyscript

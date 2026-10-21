@@ -158,9 +158,15 @@ function KED
         ended = new Promise (resolve) =>
             @t.on 'end' resolve
         
+        #  the file is loaded before the keys are played, so a key is never
+        #  played on an editor that is not ready for it
+        
         ○ @currentLoad if valid @currentLoad
         
-        ○ ended
+        if @t.input
+            ○ ended
+        
+        @t.playScript()
         
         #  the modes are loaded in the background, and a key may have
         #  started something that is still running, so the screen is given
