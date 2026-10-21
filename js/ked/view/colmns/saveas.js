@@ -19,6 +19,8 @@ saveas = (function ()
     
         this["onKey"] = this["onKey"].bind(this)
         this["onChoicesAction"] = this["onChoicesAction"].bind(this)
+        this["closeDialog"] = this["closeDialog"].bind(this)
+        this["doSaveAs"] = this["doSaveAs"].bind(this)
         this["showDialog"] = this["showDialog"].bind(this)
         this["onInputChange"] = this["onInputChange"].bind(this)
         this["onInputAction"] = this["onInputAction"].bind(this)
@@ -37,12 +39,9 @@ saveas = (function ()
 
     saveas.prototype["onInputAction"] = function (action, text)
     {
-        console.log(`++ onInputAction ${action} ${text}`)
+        console.log(`+++ onInputAction ${action} ${text}`)
         switch (action)
         {
-            case 'submit':
-                return console.log(`SUBMIT ${text}`)
-
             case 'up':
             case 'down':
                 return this.choices.moveSelection(action)
@@ -72,7 +71,6 @@ saveas = (function ()
     {
         var i
 
-        console.log(`---- saveas.showDialog ${dir} ${file}`)
         await this.gotoDir(dir,slash.path(dir,file))
         this.input.set(file)
         this.input.state.moveCursors('eol')
@@ -86,9 +84,27 @@ saveas = (function ()
         return this.input.grabFocus()
     }
 
+    saveas.prototype["doSaveAs"] = function ()
+    {
+        var path
+
+        if (_k_.empty(this.input.current()))
+        {
+            return
+        }
+        path = slash.path(this.crumbs.path,this.input.current())
+        post.emit('file.saveas',path)
+        return this.closeDialog()
+    }
+
+    saveas.prototype["closeDialog"] = function ()
+    {
+        post.emit('focus','editor')
+        return this.hide()
+    }
+
     saveas.prototype["onChoicesAction"] = function (action, choice)
     {
-        console.log('--- onChoicesAction',action,choice,this.currentDir)
         switch (action)
         {
             case 'right':
@@ -96,7 +112,6 @@ saveas = (function ()
             case 'return':
                 if ((choice != null ? choice.path : undefined) && choice.type === 'file')
                 {
-                    console.log(`action ${choice.path}`)
                     this.input.set(slash.file(choice.path))
                     this.input.grabFocus()
                     return
@@ -121,8 +136,7 @@ saveas = (function ()
                 return this.moveFocus()
 
             case 'esc':
-                post.emit('focus','editor')
-                return this.hide()
+                return this.closeDialog()
 
         }
 
@@ -134,7 +148,7 @@ saveas = (function ()
             }
             if (_k_.in(key,'return'))
             {
-                console.log("RETURN")
+                return this.doSaveAs()
             }
             if (!(_k_.in(event.char,'\t\n')))
             {
@@ -161,5 +175,5 @@ saveas = (function ()
 
 export default saveas;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2F2ZWFzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2NvbG1ucy9zYXZlYXMua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozt1QkFhd0I7Ozs7Ozs7Ozs7OztRQUloQixLQUFDLGdCQUFnQjsrQ0FFWCxLQUFDLE9BQU8sS0FBQzs7Ozs7ZUFFRDs7Ozs7Ozs7UUFLZCxnQ0FBd0IsVUFBVTtnQkFDM0I7O2lCQUNIO3VCQUFjLHNCQUFjOztpQkFDNUI7aUJBQ0E7dUJBQWMsS0FBQyxRQUFRLGNBQWM7Ozs7Ozs7O1FBRXRCLG9DQUE0Qjs7Ozs7WUFJNUMsS0FBQyxRQUFROzttQkFDUixLQUFDLE1BQU07Ozs7bUJBRVAsS0FBQyxRQUFROzs7Ozs7OztRQUliLHNDQUE4QixPQUFPO2NBRW5DLEtBQUMsUUFBUSxJQUFJLE1BQU0sS0FBSyxJQUFJO1FBRTlCLEtBQUMsTUFBTSxJQUFJO1FBQ1gsS0FBQyxNQUFNLE1BQU0sWUFBWTt1QkFDaEIsTUFBTSxJQUFJOzsrQkFDTixTQUFHLE1BQU0sSUFBSSxNQUFNLDJCQUFoQixNQUFNLElBQUksTUFBTSxjQUFoQixNQUFNLElBQUksTUFBTTs7Z0JBQ3hCLEtBQUMsTUFBTSxNQUFNLFlBQVk7OztlQUNqQyxLQUFDLE1BQU07Ozs7O1FBSVAsWUFBSSxzQkFBc0IsT0FBTyxPQUFPLEtBQUM7Z0JBRWxDOztpQkFFSDtpQkFDQTtpQkFDQTtxQkFDTyxpQkFBQSxPQUFRLHFCQUFTLE9BQU8sU0FBUTs7b0JBQy9CLHNCQUFjLE9BQU87b0JBQ3JCLEtBQUMsTUFBTSxJQUFJLE1BQU0sS0FBSyxPQUFPO29CQUM3QixLQUFDLE1BQU07Ozs7OzswREFHYixPQUFPOzs7Ozs7O1lBSVIsS0FBQzs7OztnQkFFQyxNQUFNOztpQkFDVDt1QkFDTSxLQUFDOztpQkFDUDtnQkFDSSxLQUFLLEtBQUssUUFBUTt1QkFDaEIsS0FBQzs7OztZQUVSLEtBQUMsTUFBTTs7Z0JBQ0gsUUFBTzs7dUJBQ0osS0FBQyxRQUFROzt1QkFDWixJQUFPOztnQkFDTixZQUFJOzt5QkFDTCxNQUFNLEtBQVk7O29CQUNkLFNBQVMsS0FBQyxNQUFNLE1BQU0sSUFBSTs7MkJBQ3ZCOzs7Ozs7O2dCQUdQLE1BQU0saUJBQVMsTUFBTSxLQUFZOztnQkFDaEMsMENBQWtDLE1BQU07Ozs7Z0RBRzFDLElBQUk7Ozs7OztlQUVYIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2F2ZWFzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2NvbG1ucy9zYXZlYXMua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozt1QkFhd0I7Ozs7Ozs7Ozs7Ozs7O1FBSWhCLEtBQUMsZ0JBQWdCOytDQUVYLEtBQUMsT0FBTyxLQUFDOzs7OztlQUVEOzs7Ozs7OztRQUtkLGlDQUF5QixVQUFVO2dCQUM1Qjs7aUJBQ0g7aUJBQ0E7dUJBQWMsS0FBQyxRQUFRLGNBQWM7Ozs7Ozs7O1FBRXRCLG9DQUE0Qjs7Ozs7WUFJNUMsS0FBQyxRQUFROzttQkFDUixLQUFDLE1BQU07Ozs7bUJBRVAsS0FBQyxRQUFROzs7Ozs7OztjQUlYLEtBQUMsUUFBUSxJQUFJLE1BQU0sS0FBSyxJQUFJO1FBRTlCLEtBQUMsTUFBTSxJQUFJO1FBQ1gsS0FBQyxNQUFNLE1BQU0sWUFBWTt1QkFDaEIsTUFBTSxJQUFJOzsrQkFDTixTQUFHLE1BQU0sSUFBSSxNQUFNLDJCQUFoQixNQUFNLElBQUksTUFBTSxjQUFoQixNQUFNLElBQUksTUFBTTs7Z0JBQ3hCLEtBQUMsTUFBTSxNQUFNLFlBQVk7OztlQUNqQyxLQUFDLE1BQU07Ozs7Ozs7c0JBSUksS0FBQyxNQUFNOzs7O1FBQ2xCLE9BQU8sTUFBTSxLQUFLLEtBQUMsT0FBTyxLQUFLLEtBQUMsTUFBTTtRQUN0QyxLQUFLLEtBQUssY0FBYztlQUN4QixLQUFDOzs7OztRQUlELEtBQUssS0FBSyxRQUFRO2VBQ2xCLEtBQUM7Ozs7O2dCQUlNOztpQkFFSDtpQkFDQTtpQkFDQTtxQkFDTyxpQkFBQSxPQUFRLHFCQUFTLE9BQU8sU0FBUTs7b0JBQy9CLEtBQUMsTUFBTSxJQUFJLE1BQU0sS0FBSyxPQUFPO29CQUM3QixLQUFDLE1BQU07Ozs7OzswREFHYixPQUFPOzs7Ozs7O1lBSVIsS0FBQzs7OztnQkFFQyxNQUFNOztpQkFDVDt1QkFDTSxLQUFDOztpQkFDUDt1QkFDTSxLQUFDOzs7O1lBRVIsS0FBQyxNQUFNOztnQkFDSCxRQUFPOzt1QkFDSixLQUFDLFFBQVE7O3VCQUNaLElBQU87O3VCQUNKLEtBQUM7O3lCQUNKLE1BQU0sS0FBWTs7b0JBQ2QsU0FBUyxLQUFDLE1BQU0sTUFBTSxJQUFJOzsyQkFDdkI7Ozs7Ozs7Z0JBR1AsTUFBTSxpQkFBUyxNQUFNLEtBQVk7O2dCQUNoQywwQ0FBa0MsTUFBTTs7OztnREFHMUMsSUFBSTs7Ozs7O2VBRVgifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/saveas.kode

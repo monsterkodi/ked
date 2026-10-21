@@ -71,8 +71,9 @@ function git
                         resolve stdout
                     else
                         # silent git diff outside a .git repo.
-                        if err.code == 128 and "is outside repository" in stderr
-                            ⮐  
+                        ⮐ if err.code == 128 and "is outside repository" in stderr
+                        # silent git diff for removed files.
+                        ⮐ if err.code == 'ENOENT' and 'diff' in args
                         error err
                         error stdout
                         error stderr

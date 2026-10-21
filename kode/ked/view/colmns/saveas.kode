@@ -24,9 +24,8 @@ function saveas extends browse
     autoHide: => 
 
     onInputAction: action text =>
-        log "++ onInputAction #{action} #{text}"
+        log "+++ onInputAction #{action} #{text}"
         switch action
-            'submit' ➜ ⮐  log "SUBMIT #{text}" 
             'up'          
             'down'   ➜ ⮐  @choices.moveSelection action
 
@@ -41,8 +40,6 @@ function saveas extends browse
         
     showDialog: dir file ○=>
     
-        log "---- saveas.showDialog #{dir} #{file}"
-        
         ○ @gotoDir dir slash.path(dir file)
         
         @input.set file
@@ -52,17 +49,26 @@ function saveas extends browse
                 @input.state.moveCursors 'left'
         @input.grabFocus()
 
+    doSaveAs: =>
+    
+        ⮐ if empty @input.current()
+        path = slash.path @crumbs.path @input.current()
+        post.emit 'file.saveas' path
+        @closeDialog()
+        
+    closeDialog: =>
+    
+        post.emit 'focus' 'editor'
+        @hide()
+
     onChoicesAction: action choice =>
     
-        log '--- onChoicesAction' action choice @currentDir
-        
         switch action
             
             'right' 
             'space'            
             'return'
                 if choice?.path and choice.type == 'file'
-                    log "action #{choice.path}" 
                     @input.set slash.file(choice.path)
                     @input.grabFocus()
                     ⮐ 
@@ -76,15 +82,14 @@ function saveas extends browse
         switch event.combo
             'tab' 
                 ⮐ @moveFocus()
-            'esc'     
-                post.emit 'focus' 'editor'
-                ⮐ @hide()
+            'esc'
+                ⮐ @closeDialog()     
 
         if @input.hasFocus()
             if key == 'down'
                 ⮐ @choices.grabFocus()
             if key in 'return'
-                log "RETURN"
+                ⮐ @doSaveAs()
             if event.char not in '\t\n' 
                 if result = @input.onKey key event
                     ⮐ result

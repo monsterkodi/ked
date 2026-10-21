@@ -373,7 +373,7 @@ function KED
 
     loadFile: p row col view ○=>
     
-        log "ked.loadFile #{p} #{row} #{col} #{@loadingFile}"
+        # log "ked.loadFile #{p} #{row} #{col} #{@loadingFile}"
         
         start = process.hrtime()
         
@@ -384,7 +384,7 @@ function KED
             
         ⮐  if slash.samePath absFile @loadingFile
         
-        log "ked.loadFile absFile #{absFile}"
+        # log "ked.loadFile absFile #{absFile}"
         
         @loadingFile = absFile
         
