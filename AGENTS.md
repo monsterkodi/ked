@@ -66,11 +66,12 @@ arr = [a b c]                # array elements. no commas needed.
 'x' + y                      # concatenation is +, as in JS
 "#{x}"                       # string interpolation
 
-f a b     ≡  f(a, b)         # parens are the rule
+f a b     ≡  f(a, b)         # parens are inserted for the 1st call
 f a, b    ≡  f(a, b)
 f(a, b)   ≡  f(a, b)
-f a(b)    ≡  f(a(b))         # braces make the call
+f a(b)    ≡  f(a(b))         # if nested, only braces make the call
 f(a(b))   ≡  f(a(b))
+[f a]     ≡  [f, a]
 
 obj.method? arg              # trailing ? = call only if it exists
 
@@ -81,10 +82,6 @@ for x in xs ➜ body
 ```
 
 see `kode.md` for more details
-
-the parenless calls are shorthand, and shorthand is positional: they read as a
-call only at the root of a statement. `(f (a))`, `[f (a)]`, `g f (a)` and
-`{ k: f (a) }` are not calls — and none of them complains.
 
 ### Checking a snippet without building anything
 
@@ -97,68 +94,6 @@ node js/kode/kode.js -c 'x = if a ➜ b else c'   # transpile, print JS
 node js/kode/kode.js -e '1 + 2'                 # evaluate, print result -> 3
 node js/kode/kode.js -c 'x = 1' -d              # also dump the token/AST trace
 ```
-
-`-c` writes nothing and runs nothing — it just shows what the code becomes.
-Prefer it. `-e` executes the compiled result, so it is the one to reach for
-only when you actually need the value.
-
-Keep the snippet in **single quotes**: `#` begins a Kode comment, and many
-operators are non-ASCII (`➜`, `○`, `⮐`, `◆`), so anything the shell touches
-will corrupt it.
-
-## Headless mode
-
-The editor runs without a terminal:
-
-```sh
-node bin/ked -H <file>               # the screen is dumped as text
-printf 'cmd+o' | node bin/ked -H <file>
-```
-
-`COLUMNS` and `LINES` set the size (80x24 without them). Nothing is written to
-the terminal: the ttio keeps what would have been written, and the screen is
-a buffer of cells that can be read as text.
-
-The screen is written out after every key of the script, so a script can be
-followed step by step:
-
-```
-=== start
-<the screen>
-=== down
-<the screen>
-```
-
-The cursor is drawn with kitty graphics, which a headless screen has none of,
-so it is marked with escape sequences there: the character under the cursor is
-in the colors of the other way round, and the main cursor is underlined as
-well.
-
-The keys are a script of key names: a word that names a key is that key, and
-a word that names nothing is the characters it is made of. A word can have
-modifiers: `cmd+o`, `shift+cmd+s`, `cmd+down`. A space is a key of its own:
-`space`. The words are separated by spaces, and a space between them is not
-a key.
-
-`kode/ked/util/keyscript.kode` turns such a script into the bytes a terminal
-sends, and `kode/ked/util/harness.kode` is the same thing for a test: a
-headless ttio, a screen, and helpers to send keys to a view and to read the
-screen.
-
-```kode
-use ../util ◆ harness
-
-h = new harness
-v = new saveas h.screen
-
-h.focus v.input
-h.type v 'foo'
-h.key v 'down'
-
-h.row 0            # a line of the screen
-h.t.written()      # what would have been written to the terminal
-```
-
 ## Never
 
 - **Never edit anything under `js/`.** It is generated and will be overwritten.

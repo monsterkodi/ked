@@ -13,9 +13,13 @@ use              ◆ browse
 
 function saveas extends browse
 
-    @: @screen ->
+    @: @screen @name='saveas' ->
         
-        super @screen 'saveas'
+        @autoHideInput = false
+        
+        super @screen @name
+
+    inputIsActive: -> true
         
     showDialog: dir file =>
     

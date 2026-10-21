@@ -16,23 +16,24 @@ import rgxs from './quicky.json' with { type: "json" }
 
 function browse extends quicky
 
-    @: @screen ->
+    @: @screen @name='browse' ->
 
-        super @screen 'browse' 
+        super @screen @name 
 
         @isVisible = false
         
         @setColor 'bg'     theme.quicky.bg
         @setColor 'frame'  theme.quicky.frame
         
-        @brocol = new brocol @screen 'browse_brocol'
+        @brocol = new brocol @screen "#{@name}_brocol"
         @brocol.setColor 'bg' color.darken(@color.bg 0.7)
         @brocol.on 'action'   @onBrocolAction
 
         @choices.mapscr.rowOffset = 1
         @choices.frontRoundOffset = 2
 
-        post.on 'browse.dir' @gotoDir
+        if @name == 'browse'
+            post.on 'browse.dir' @gotoDir
 
     #  ███████   ████████   ████████    ███████   ███   ███   ███████   ████████
     # ███   ███  ███   ███  ███   ███  ███   ███  ████  ███  ███        ███     
@@ -44,7 +45,7 @@ function browse extends quicky
         
         scx = int @screen.cols/2
         scy = int @screen.rows/2
-        
+        log "#{@name}.arrange" @inputIsActive()
         ih = @inputIsActive() ? 2 : 0
         iz = max 0 ih - 1
         

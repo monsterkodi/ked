@@ -22,7 +22,6 @@ function finder extends inputchoice
         super @screen name ['gutter' 'scroll']
         
         @autoHideInput = false
-        
         post.on 'finder.show' @show if @name == 'finder'
         
         @setColor 'bg'    theme.finder.bg

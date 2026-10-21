@@ -20,7 +20,10 @@ function inputchoice extends view
 
         super @screen @name features
         
-        @autoHideInput = true
+        @autoHideInput ?= true
+        
+        log "#{@name}.autoHideInput: #{@autoHideInput}" 
+        
         @isVisible = false
         @isPopup   = true
         
@@ -31,8 +34,13 @@ function inputchoice extends view
         @setColor 'frame' theme.quicky.frame
 
         @choices.mapscr?.hide()       
-        
-        @input.hide()
+        if @autoHideInput
+            @input.hide()
+        else 
+            @input.show()
+            
+        log "#{@name}.isVisible: #{@input.isVisible} #{@input.visible()}"
+            
         @choices.show()
 
         @input.on   'action'  @onInputAction
