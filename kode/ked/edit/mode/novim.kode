@@ -41,12 +41,21 @@ function novim
     @: @state ->
 
         @name = 'novim'
-        @reset()
+        @reset false
 
-    reset: ->
+    reset: announce=true ->
 
         @count = ''
         @operator = null
+        log 'novim reset' if announce
+
+    resetOrExit: ->
+
+        if @operator or @count
+            @reset()
+        else
+            log 'novim exit'
+            @state.stopMode 'novim'
 
     countNumber: -> if empty @count then 1 else parseInt @count
 
@@ -60,7 +69,7 @@ function novim
 
         n = @countNumber()
         log "#{novim.operators[@operator]} #{motion(n)}"
-        @reset()
+        @reset false
 
     # ███   ███  ████████  ███   ███
     # ███  ███   ███        ███ ███
@@ -78,7 +87,7 @@ function novim
             ⮐  'unhandled'
 
         if combo in ['esc' 'escape']
-            @reset()
+            @resetOrExit()
             ⮐  true
 
         # swallow every other non text key
@@ -102,7 +111,7 @@ function novim
         else if command = novim.commands[char]
 
             log "delete #{command(@countNumber())}"
-            @reset()
+            @reset false
 
         else if char in '0123456789'
 
