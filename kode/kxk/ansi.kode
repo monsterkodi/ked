@@ -330,9 +330,9 @@ class Ansi
                     28  ➜   delStyle 'display:none'
                     22  ➜   delStyle 'font-weight:bold'; delStyle 'opacity:0.5'
                         ➜   if 
-                                 30 <= code <= 37  ➜ fg = STYLES["f#{code - 30}"] # normal intensity
-                                 40 <= code <= 47  ➜ bg = STYLES["b#{code - 40}"]
-                                 90 <= code <= 97  ➜ fg = STYLES["f#{8+code - 90}"] # high intensity
+                                30  <= code <= 37  ➜ fg = STYLES["f#{code - 30}"] # normal intensity
+                                40  <= code <= 47  ➜ bg = STYLES["b#{code - 40}"]
+                                90  <= code <= 97  ➜ fg = STYLES["f#{8+code - 90}"] # high intensity
                                 100 <= code <= 107 ➜ bg = STYLES["b#{8+code - 100}"]
                 break if code in [38 48]
             ''
