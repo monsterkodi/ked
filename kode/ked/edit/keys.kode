@@ -102,6 +102,7 @@ handleKey = key event -> # will be bound to state
         'shift+cmd+g' 'shift+ctrl+g'        ➜ ⮐  @selectWordAtCursor_highlightSelection_selectPrevHighlight()
                                                  
         'alt+y'                             ➜ ⮐  @toggleMode 'unype'
+        'alt+n'                             ➜ ⮐  @toggleMode 'novim'
         'alt+r'                             ➜ ⮐  @toggleMode 'record'
         'alt+u'                             ➜ ⮐  @toggleMode 'uniko'
         'alt+;'                             ➜ ⮐  @toggleMode 'vimple'

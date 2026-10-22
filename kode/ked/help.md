@@ -149,6 +149,7 @@
 
     alt+3                               salter mode: ascii art headers
     alt+y                               unype mode: unicode type writer
+    alt+n                               novim mode: vi style commands
     alt+u                               uniko mode
     alt+;                               vimple mode
     alt+r                               record mode (shadowed, see below)
@@ -186,6 +187,7 @@
 │   ├── mode
 │   │   ├── brckts
 │   │   ├── filepos
+│   │   ├── novim
 │   │   ├── replex
 │   │   ├── salter
 │   │   └── unype
