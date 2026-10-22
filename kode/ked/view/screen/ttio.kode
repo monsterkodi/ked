@@ -836,8 +836,7 @@ function TTIO extends events
                 text = data.toString 'utf8'
                 
                 if text.length > 1
-                    log 'paste?' text
-                    # @emit 'paste' kstr.clean(text)
+                    @emit 'paste' kstr.clean(text)
                     continue
                             
             # log "unhandled sequence:" seq
