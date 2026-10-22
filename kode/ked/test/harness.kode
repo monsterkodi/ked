@@ -8,7 +8,7 @@
 
 use ../util      ◆ harness
 use ../view/base ◆ input crumbs
-use ../view/menu ◆ choices
+use ../view/menu ◆ choices greet
 
 ▸ harness
 
@@ -107,3 +107,48 @@ use ../view/menu ◆ choices
         
         h.row 0 ▸ 'abc'
         h.rowMarked 0 ▸ 'a\x1b[7;4:3mb\x1b[0mc'
+
+    #  the greeter draws a glow on black, so the whole window is black
+    #  while it is shown, whatever background color the terminal has
+
+    ▸ the greeter blacks out the window
+
+        h = new harness
+
+        g = new greet h.screen
+        g.show()
+        g.layout 0 0
+        g.draw()
+
+        #  the corners are outside of the greeting header
+
+        h.screen.get_bg 0  23 ▸ [0 0 0]
+        h.screen.get_bg 79 0  ▸ [0 0 0]
+
+    #  the screen can be written out with the colors of the cells
+
+    ▸ the colored screen has the colors of the cells
+
+        h = new harness
+
+        h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+
+        line = h.screen.textColored()[0]
+
+        line.includes '\x1b[48;2;1;2;3m'     ▸ true
+        line.includes '\x1b[38;2;10;20;30m'  ▸ true
+        line.includes 'a'                    ▸ true
+        line.endsWith '\x1b[0m'              ▸ true
+
+    #  the cursor is marked in a colored screen too
+
+    ▸ the colored screen marks the cursor
+
+        h = new harness
+
+        h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+        h.screen.set_mark 0 0 'main'
+
+        line = h.screen.textColored()[0]
+
+        line.includes '\x1b[7;4:3ma\x1b[0m' ▸ true

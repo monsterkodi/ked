@@ -34,6 +34,7 @@ function KED
                 timeout    session save timeout in ms       = 1000
                 version    log version                      = false
                 headless   run without a terminal           = false -H
+                colors     headless with terminal colors    = false -C
                 
             """ preHelp:help.header() version:@version
         
@@ -43,7 +44,7 @@ function KED
         global.ked_session = @session
         
         @session.on 'loaded' @onSessionLoaded
-        @t = new ttio headless:@args.headless
+        @t = new ttio headless:(@args.headless or @args.colors)
         
         @screen   = new screen @t
         
@@ -140,7 +141,7 @@ function KED
         
         ked = new KED
         
-        ○ ked.runHeadless() if ked.args.headless
+        ○ ked.runHeadless() if ked.args.headless or ked.args.colors
         
         ked
         
@@ -150,9 +151,9 @@ function KED
     # ███   ███  ███   ███ ███   ███ ███   ███  ███  ███ ███   ███   
     # ███████   ███████  ███████  ███  ██████   ███   ███   ███ ███   
     
-    #  the headless mode: the editor runs without a terminal, the keys come
-    #  from the standard input, and the screen is written out as text after
-    #  every key of the script
+    #  the headless mode (-H or -C): the editor runs without a terminal, the
+    #  keys come from the standard input, and the screen is written out as
+    #  text after every key of the script
     
     runHeadless: ○=>
         
@@ -188,13 +189,19 @@ function KED
         @quit()
     
     #  the screen, as text
+    #  
+    #  with -C the text carries the colors of the screen
     
     dump: label =>
         
         @draw()
         
         process.stdout.write "\n=== #{label}\n"
-        process.stdout.write @screen.textMarked().join('\n') + '\n'
+        
+        if @args.colors
+            process.stdout.write @screen.textColored().join('\n') + '\n'
+        else
+            process.stdout.write @screen.textMarked().join('\n') + '\n'
 
     #  ███████  ████████   ███████   ███████  ███   ███████   ███   ███
     # ███       ███       ███       ███       ███  ███   ███  ████  ███

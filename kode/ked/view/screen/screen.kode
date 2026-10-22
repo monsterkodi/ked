@@ -81,6 +81,14 @@ function screen
             @c[y][x].fg = fg
             @c[y][x].bg = bg
             
+    #  fill the background of every cell of the screen
+    
+    fill_bg: bg =>
+        
+        for row in @c
+            for cell in row
+                cell.bg = bg
+            
     # ██     ██  ████████  █████████   ███████ 
     # ███   ███  ███          ███     ███   ███
     # █████████  ███████      ███     █████████
@@ -173,6 +181,53 @@ function screen
                     line += ch
             
             lines.push line.replace(/\s+$/ '')
+        
+        lines
+    
+    #  the buffer as text, with the colors of the cells and the cursors
+    #  
+    #  a line ends with a reset, so its colors do not run into the text
+    #  that follows it
+    #  
+    #  a cursor is a character with escape sequences around it, the same
+    #  way it is marked in textMarked
+    
+    textColored: =>
+        
+        lines = []
+        
+        for y in 0...@rows
+            
+            line = ''
+            pbg = ''
+            pfg = ''
+            
+            for x in 0...@cols
+                
+                cell = @c[y][x]
+                ch = cell.char
+                ch = ' ' if not valid ch
+                
+                bg = color.bg_rgb cell.bg
+                if bg != pbg
+                    line += bg
+                    pbg = bg
+                
+                fg = color.fg_rgb cell.fg
+                if fg != pfg
+                    line += fg
+                    pfg = fg
+                
+                if mark = cell.mark
+                    line += mark == 'main' ? '\x1b[7;4:3m' : '\x1b[7m'
+                    line += ch + '\x1b[0m'
+                    #  the reset also clears the colors, so they are set again
+                    pbg = ''
+                    pfg = ''
+                else
+                    line += ch
+            
+            lines.push line + '\x1b[0m'
         
         lines
     

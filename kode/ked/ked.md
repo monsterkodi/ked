@@ -19,8 +19,12 @@ The editor runs without a terminal:
 
 ```sh
 node bin/ked -H <file>               # the screen is dumped as text
+node bin/ked -C <file>               # the screen is dumped with its colors
 printf 'cmd+o' | node bin/ked -H <file>
 ```
+
+`-C` is headless as well, and the dump carries the colors of the screen as
+terminal escape codes instead of plain text.
 
 `COLUMNS` and `LINES` set the size (80x24 without them). Nothing is written to
 the terminal: the ttio keeps what would have been written, and the screen is

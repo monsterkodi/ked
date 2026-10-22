@@ -60,7 +60,12 @@ function greet extends view
     draw: =>
         
         ⮐  if @hidden()
-
+        
+        #  the glow is drawn on black: the whole window is black while the
+        #  greeter is shown, so the terminal background color does not show
+        
+        @screen.fill_bg [0 0 0]
+        
         duration = 480
         @a += 1
         @a = 0 if @a > duration

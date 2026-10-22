@@ -11,8 +11,8 @@
     ttio keeps what would have been written, so a test can look at the
     screen as text, and can send keys to a view as if a person typed them
 
-    the same ttio runs the editor in the headless mode of the -H option,
-    so a test and a run of the editor see the same screen
+    the same ttio runs the editor in the headless mode of the -H and -C
+    options, so a test and a run of the editor see the same screen
 ###
 
 use ../../kxk       ▪ post
