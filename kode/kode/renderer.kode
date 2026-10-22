@@ -140,7 +140,7 @@ class Renderer
         # the renderer builds tokens of its own - the bind(this) lines and
         # friends - and those have no place in the source to point back to
         
-        if @srcmap and valid tok.line then @srcmap.mark s, tok else s
+        if @srcmap and tok and valid tok.line then @srcmap.mark s, tok else s
     
     # the same text with those tags taken out again, for the places where
     # the renderer matches or slices what it rendered
@@ -521,7 +521,7 @@ class Renderer
     class: n ->
 
         s = ''
-        s += "class #{n.name.text}"
+        s += @mark('class', n.keyword) + ' ' + @mark(n.name.text, n.name)
 
         if n.extends
             s += " extends " + n.extends.map((e) => @node e).join(', ')
@@ -609,7 +609,9 @@ class Renderer
         @fncnName = n.name.text
         
         s = '\n'
-        s += "#{@fncnName} = (function ()\n"
+        s += "#{@mark @fncnName, n.name} = ("
+        s += @mark 'function', n.keyword
+        s += " ()\n"
         s += '{\n'
 
         if n.extends
@@ -655,7 +657,7 @@ class Renderer
             
         delete @fncnName
             
-        s += "    return #{n.name.text}\n"
+        s += "    return #{@mark n.name.text, n.name}\n"
         s += '})()\n'
         s
         
@@ -671,7 +673,12 @@ class Renderer
         if f = n.keyval?.val?.func
             if f.name.text == 'constructor'
                 @fncsName = 'constructor'
-                s = @indent + @func(f, 'function ' + className)
+                # the constructor is written as a function named after
+                # the class, but in the source it is the @ key
+                name = 'function ' + className
+                at = name.lastIndexOf className
+                name = name[...at] + @mark(className, f.name) + name[(at + className.length)..]
+                s = @indent + @func(f, name)
                 s += '\n'
             else if f.name.text.startsWith 'static'
                 @fncsName = f.name.text[7..]
@@ -745,6 +752,22 @@ class Renderer
             else
                 name = 'async ' + name
 
+        # tag the name where it stands in the header, whether this is a
+        # plain method or one the old style writes as a quoted property.
+        # 'static foo' is written as just 'foo' in a property.
+
+        if n.name?.text and valid n.name.line
+            
+            mark = n.name.text
+            at   = name.lastIndexOf mark
+            
+            if at < 0 and mark.startsWith 'static '
+                mark = mark[7..]
+                at   = name.lastIndexOf mark
+            
+            if at >= 0
+                name = name[...at] + @mark(mark, n.name) + name[(at + mark.length)..]
+
         s = name
         s += ' ('
 
@@ -812,9 +835,16 @@ class Renderer
 
         args = args.map (a) =>
             
-            # this one cuts the rendered text up, so it has to work on the
-            # text as it looks without a source map - a tag in there would
-            # be a character the offsets below never counted
+            # the text of an argument is cut up here, so the marking goes
+            # on after the cutting: a tag inside would be a character the
+            # string offsets below never counted. a name is a name even
+            # when the arrow is drawn a different way, so whatever token
+            # the argument starts with is the one the text points back at.
+            
+            tok = a
+            if not tok.type and a.obj then tok = a.obj
+            if not tok.type and a.prop?.obj then tok = a.prop.obj
+            if not tok.type and a.operation?.lhs then tok = a.operation.lhs
             
             t = @plain @node(a)
             if t?.startsWith 'this.'
@@ -827,11 +857,11 @@ class Renderer
                             ths.push "this.#{txt} = #{txt+i}"
                             txt += i
                             used[txt] = txt
-                            ⮐ "#{txt}" + (t.split('=')[1] ? '')
+                            ⮐ @mark "#{txt}" + (t.split('=')[1] ? ''), tok
                 else
                     ths.push "#{l} = #{txt}"
-                ⮐ t[5..]
-            t
+                ⮐ @mark t[5..], tok
+            @mark t, tok
                 
         str = args.join ', '
 
@@ -1137,18 +1167,18 @@ class Renderer
         if n.vals.text
             s += gi+"for (var #{iterVar} = 0; #{iterVar} < #{listVar}.length; #{iterVar}++)" + nl
             s += gi+"{"+nl
-            s += g2+"#{n.vals.text} = #{listVar}[#{iterVar}]" + eb
+            s += g2+"#{@mark n.vals.text, n.vals} = #{listVar}[#{iterVar}]" + eb
         else if n.vals.array?.items
             s += gi+"for (var #{iterVar} = 0; #{iterVar} < #{listVar}.length; #{iterVar}++)" + nl
             s += gi+"{"+nl
             for j in 0...n.vals.array.items.length
                 v = n.vals.array.items[j]
-                s += g2+"#{v.text} = #{listVar}[#{iterVar}][#{j}]" + eb
+                s += g2+"#{@mark v.text, v} = #{listVar}[#{iterVar}][#{j}]" + eb
         else if n.vals.length > 1
             iterVar = n.vals[1].text
             s += gi+"for (#{iterVar} = 0; #{iterVar} < #{listVar}.length; #{iterVar}++)" + nl
             s += gi+"{" + nl
-            s += g2+"#{varPrefix}#{n.vals[0].text} = #{listVar}[#{iterVar}]" + eb
+            s += g2+"#{varPrefix}#{@mark n.vals[0].text, n.vals[0]} = #{listVar}[#{iterVar}]" + eb
 
         for e in n.then
             prefix = if lastPrefix and e == n.then[-1] then lastPrefix else ''
@@ -1178,6 +1208,7 @@ class Renderer
         g2 = if lineBreak then '' else @indent
         
         iterVar   = n.vals.text ? n.vals[0].text
+        iterTok   = if n.vals.text then n.vals else n.vals[0]
         
         iterStart = @node slice.from
         iterEnd   = @node slice.upto
@@ -1195,7 +1226,7 @@ class Renderer
                 iterCmp = if slice.dots.text == '...' then '>' else '>='
                 iterDir = '--'
                 
-            loopStart = "#{iterVar} = #{iterStart}"
+            loopStart = "#{@mark iterVar, iterTok} = #{iterStart}"
             loopCheck = "#{iterVar} #{iterCmp} #{iterEnd}"
             loopUpdate = "#{iterVar}#{iterDir}"
             
@@ -1207,7 +1238,7 @@ class Renderer
             lv = @makeVar llc
             rv = @makeVar rlc
             
-            loopStart  = "var #{lv} = #{iterVar} = #{iterStart}, #{rv} = #{iterEnd}"
+            loopStart  = "var #{lv} = #{@mark iterVar, iterTok} = #{iterStart}, #{rv} = #{iterEnd}"
             loopCheck  = "(#{lv} <= #{rv} ? #{iterVar} #{iterCmp} #{iterEnd} : #{iterVar} #{invCmp} #{iterEnd})"
             loopUpdate = "(#{lv} <= #{rv} ? ++#{iterVar} : --#{iterVar})"
                 

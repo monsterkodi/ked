@@ -405,21 +405,57 @@ writeJs = c file=JS_FILE ○->
             missed = sl.filter (l) -> l not in got
             missed ▸ []
 
-    ▸ a class maps its body and not its head
+    ▸ maps every name
 
-        # the class name and every method header are rendered without a tag
-        # on them, so the line a class was declared on and the line its
-        # constructor was declared on have nothing in the map pointing back
-        # at them. that is a gap in the class method of the renderer, not in
-        # the map - the body maps exactly where it should. written down here
-        # so it is something to close rather than something to rediscover.
+        # a map is for finding where a name came from again, so every name
+        # in the source has to be the start of some mapping. not every
+        # token: an operator or a delimiter is not a name, and a keyword
+        # is often syntax the renderer writes out itself.
+        #
+        # the tests below name the class and function cases one by one.
+        # this one is the net under them: a header the renderer builds by
+        # hand is a header nobody tagged, and it shows up here as a name
+        # with no position of its own.
+
+        snips = [
+            'a = 1\nb = a + 2\nlog b\n'
+            'f = (a, b) -> a + b\nf 1 2\n'
+            'g = (x) -> x * 2\n'
+            'class Foo\n    @: (a) ->\n        @a = a\n    mthd: (b) -> @a + b\n'
+            'function Bar\n    @: (x) ->\n        @x = x\n    mthd: (y) -> @x + y\n'
+            'for i in 0...10 ➜ log i\n'
+            'l = [1 2 3]\nl.map (i) -> i * 2\n'
+            'try\n    f()\ncatch e\n    log e\n'
+            'switch a\n    when 1 ➜ log "one"\n    else ➜ log "other"\n'
+            ]
+
+        for c in snips
+
+            # names are the tokens with a name in them: variables and the
+            # @ of a this reference
+
+            names = (new kode header:false).lexer.tokenize(c).filter (t) -> t.type in ['var' 'this']
+
+            got = mapsOf(kmap(c)).map (t) -> "#{t[2]}:#{t[3]}"
+
+            missed = names.filter (t) -> "#{t.line}:#{t.col}" not in got
+            report = missed.map((t) -> "#{t.text} at #{t.line}:#{t.col}").join ' '
+
+            report ▸ ''
+
+    ▸ a class maps its head and its body
+
+        # the name, the keyword and every method header are as much a part
+        # of the class as the assignment in its constructor. this used to
+        # be a gap here, with only the body mapping; it is pinned down now
+        # so the head cannot quietly go back to being untagged.
 
         code = kmap 'class Foo\n    @: ->\n        @a = 1\n    mthd: -> @a\n'
 
         out = mapsOf code
         lines = out.map (t) -> t[2]
 
-        lines ▸ [3 3 3 4 4]
+        lines ▸ [1 1 2 3 3 3 4 4 4]
 
     ▸ finds column zero
 
@@ -590,12 +626,13 @@ writeJs = c file=JS_FILE ○->
         pos.line ▸ 1
         pos.col  ▸ 0
 
-    ▸ sourcePosition says nothing where the map says nothing
+    ▸ sourcePosition says nothing before the first mapping
 
-        # a class maps its body and not its head, so the first line of
-        # the js has nothing pointing back at the kode
+        # the var declaration is written by the renderer and not from a
+        # token, so the map starts at the assignment below it and a lookup
+        # above that has nothing to answer with
 
-        file = ○ writeJs 'class Foo\n    @: ->\n        @a = 1\n    mthd: -> @a\n'
+        file = ○ writeJs 'a = 1\n'
         pos  = ○ smap.sourcePosition file, 1, 0
 
         pos ▸ undefined

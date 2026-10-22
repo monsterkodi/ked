@@ -105,7 +105,10 @@ function ParseUtils
             for m in mthds
                 if name = m.keyval?.key?.text
                     if m.keyval.val?.func?
-                        m.keyval.val.func.name = type:'name' text:name
+                        # the name is the key, so it stands where the key
+                        # stood - a name built without a place is a name
+                        # the source map cannot point back at
+                        m.keyval.val.func.name = type:'name' text:name line:m.keyval.key.line col:m.keyval.key.col
         mthds
         
     # █████████  ███   ███  ████████  ███   ███ 

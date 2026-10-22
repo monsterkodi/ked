@@ -593,6 +593,7 @@ function Parser extends parse
 
         e = {}
         e[type] = name:name
+        e[type].keyword = tok if tok
 
         if tokens[0]?.text == 'extends'
             tokens.shift()
