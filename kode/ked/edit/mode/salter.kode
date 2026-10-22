@@ -79,8 +79,6 @@ function salterMode
             ●▪ salted cursor
         
     stop: ->
-    
-        # @state.setMainCursor @state.mainCursor()
         
     findCursors:    -> belt.findPositionsForSaltInsert @state.s.lines @state.mainCursor()
     isSaltedLine: y -> belt.isSaltedLine @state.s.lines[y]
@@ -127,7 +125,6 @@ function salterMode
 
     handleKey: key event ->
     
-        # switch key
         switch event.combo
         
             'up'

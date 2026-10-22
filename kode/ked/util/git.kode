@@ -40,13 +40,12 @@ function git
 
     onFileChange: info =>
         ⮐ if slash.file(info.path) == 'ked.log'
-        # log "git.onFileChange --- #{slash.file(info.path)}"
+
         for gitDir in @gitDirs
-            # log "git.onFileChange -- #{gitDir}" 
+
             if info.path.startsWith gitDir
                 if slash.dir(info.path).endsWith('.git/refs/heads')
                     if slash.name(info.path) in ['master' 'main']
-                        # log "git.onFileChange + #{slash.dir(gitDir)} #{info.path}"
                         git.status slash.dir(gitDir)
                         ⮐ 
 
@@ -63,7 +62,6 @@ function git
         new Promise (resolve reject) ->
         
             try
-                # log "#{r3 'git.exec'} #{b6 cmd}" opt 
                 cmd = '/usr/bin/git ' + args
                 child_process.exec cmd opt (err stdout stderr) ->
 
@@ -134,8 +132,6 @@ function git
             for file in status[key]
                 status.files[file] = key
         
-        # log "git.status --- post #{gitDir} #{path}"  
-        
         post.emit 'git.status' status
         @statusCache[gitDir] = status
                 
@@ -153,7 +149,7 @@ function git
     @diff: file ○->
         
         gitDir =○ git.dir file
-        # log "git.diff --- #{gitDir} #{file}" 
+
         ○ watcher.snapshot file # this prevents unwanted file change events under node when diffing
         diff   =○ git.exec "--no-pager diff --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
         diff   +=○ git.exec "--no-pager diff --staged --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
@@ -234,7 +230,6 @@ function git
                     """ 'diff --git ' + diffgit
                 patches = patches.concat r
             catch err
-                # error err
                 true
 
         patches

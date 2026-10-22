@@ -63,9 +63,6 @@ function filepos
                     kutil.pullIf fposl (fp) -> fp[0] == file
                     fposl.push [file curview]
                 
-            # for fp in fposl
-            #     log "○ #{b6 slash.file(fp[0])} #{fp[1][0]} #{fp[1][1]} #{fp[1][2]} #{fp[1][3]}"
-                
             post.emit 'status.filepos' fposl filepos.offset
             ked_session.set "editor▸filepos▸#{file}" curview
             
@@ -78,11 +75,9 @@ function filepos
     fileLoaded: file row col view ->
         
         if row?
-            # log "filepos.fileLoaded post goto.line #{row} #{col} #{view?[0]} #{view?[1]}"
             post.emit 'goto.line' row col view
         else
             if posview = ked_session.get "editor▸filepos▸#{file}"
-                # log "filepos.fileLoaded apply session #{posview} #{file}"
                 @state.setCursors [posview[0..1]]
                 @state.setView posview[2..]
 

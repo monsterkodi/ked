@@ -31,7 +31,6 @@ function replex
             end = chunk[-2..-1]
             if repl = specs.replex[end]
                 repls.push repl
-                # log "▸ repl #{repl}"
                 
         if repls.length == @state.s.cursors.length
             @state.delete 'back'

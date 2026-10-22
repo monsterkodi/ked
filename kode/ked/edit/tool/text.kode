@@ -336,7 +336,6 @@ function text
                     deletes.push oi
                     oi += 1
 
-                # else if ol == nl or kseg.str(ol) == kseg.str(nl) # same lines in old and new
                 else if ol == nl # same lines in old and new
 
                     oi += 1
@@ -371,8 +370,6 @@ function text
 
                     else # change
                     
-                        # log '' ['✘' kseg.str(ol) kseg.str(nl)]
-
                         changes.push ni
                         oi += 1
                         ol = oldLines[oi]

@@ -22,18 +22,15 @@ function frecent
             error "frecent.sample - needs key to sample! got" key
             ⮐      
     
-        # log "frecent.sample #{bucket} #{key} #{delta}"
-        
         @buckets[bucket][key] ?= rank:1 time:@now()
         
         rec = @buckets[bucket][key]
         
         rec.rank += delta
         rec.time  = @now()
-        # log b8('sampled') + ' ' + r5(key)
+
         for bi in @list(bucket)
             item = @buckets[bucket][bi]
-            # log bi item pretty.age(item.time) @frecent(item)
 
     @score: bucket ->
         for pth,rec of @buckets[bucket]
@@ -73,7 +70,6 @@ post.on 'session.merge' (recent) ->
     
     if valid recent.files
         if valid recent.files.recent
-            # log """frecent.on session.merge #{g5 "#{noon(recent.files.recent)}"}"""
             maxRecent = 60
             newRecent = {}
             for file in Object.keys(recent.files.recent)[0...maxRecent]

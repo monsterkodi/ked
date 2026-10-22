@@ -4,20 +4,10 @@
     ███████    ███████     █████    ███████   ███       ███████    ███  ████████      ███     
     ███  ███   ███          ███          ███  ███       ███   ███  ███  ███           ███     
     ███   ███  ████████     ███     ███████    ███████  ███   ███  ███  ███           ███     
-    
-    a script of key names, and the bytes a terminal would send
-
-    a script is a text of words: a word that names a key is that key, and
-    a word that names nothing is the characters it is made of.  the words
-    are separated by spaces, and a space is a key of its own: 'space'
-
-    a word can have modifiers: 'cmd+o' is the cmd and the o together
 ###
 
 function keyscript
 
-    #  the bytes of a key, the way a terminal sends them
-    
     @keys:
         'up':        '\x1b[A'
         'down':      '\x1b[B'
@@ -40,8 +30,6 @@ function keyscript
         'f3':        '\x1bOR'
         'f4':        '\x1bOS'
         
-    #  the keys that a csi sequence ends with, for a modifier on them
-    
     @csi:
         'up':    'A'
         'down':  'B'
@@ -50,8 +38,6 @@ function keyscript
         'home':  'H'
         'end':   'F'
         
-    #  the keys that the kitty protocol has a number for
-    
     @kitty:
         'tab':       9
         'return':    13
@@ -60,8 +46,6 @@ function keyscript
         'space':     32
         'backspace': 127
         
-    #  the bits of a modifier, the way the kitty protocol counts them
-    
     @modbits:
         'shift': 1
         'alt':   2
@@ -70,13 +54,9 @@ function keyscript
         'super': 8
         'meta':  8
         
-    #  the bytes of a word of a script
-    
     @bytes: word =>
         
         ⮐  if empty word
-        
-        #  an escape sequence is a sequence already
         
         if word.startsWith '\x1b'
             ⮐  word
@@ -87,16 +67,12 @@ function keyscript
         if combo = keyscript.combo word
             ⮐  combo
         
-        #  a word that names nothing is the characters it is made of
-        
         chars = ''
         
         for ch in word.split ''
             chars += ch
         
         chars
-    
-    #  the bytes of a word with modifiers, or nothing
     
     @combo: word =>
         
@@ -129,8 +105,6 @@ function keyscript
         
         "\x1b[#{code};#{mod+1}u"
     
-    #  the bytes of a whole script
-    
     @script: text =>
         
         out = ''
@@ -138,12 +112,6 @@ function keyscript
         for word in text.split(/\s+/).filter((w) -> w.length)
             out += keyscript.bytes word
         out
-    
-    #  the steps of a script: the name of a key and the bytes of it
-    #  
-    #  a step is a key, and the steps can be played apart.  a word that
-    #  names no key is the characters it is made of, and every character of
-    #  it is a key of its own
     
     @steps: text =>
         

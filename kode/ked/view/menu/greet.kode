@@ -5,7 +5,7 @@
     ███   ███  ███   ███  ███       ███          ███     
      ███████   ███   ███  ████████  ████████     ███     
 
-    the fancy glowing app name ascii art thingy
+    the fancy glowing animated ascii art thingy
 ###
 
 use ../../../kxk    ▪ kstr post
@@ -60,9 +60,6 @@ function greet extends view
     draw: =>
         
         ⮐  if @hidden()
-        
-        #  the glow is drawn on black: the whole window is black while the
-        #  greeter is shown, so the terminal background color does not show
         
         @screen.fill_bg [0 0 0]
         

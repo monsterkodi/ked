@@ -4,27 +4,9 @@
     ███████   ███████    ███       █████████  █████████  ████████ 
          ███  ███   ███  ███       ███ █ ███  ███   ███  ███      
     ███████   ███   ███   ███████  ███   ███  ███   ███  ███      
-
-    maps locations in a single generated js file back to locations in the original source file
-    the renderer hands every token it renders to mark, which tags the token's
-    text with a number of its own. the tag rides along with the text through
-    whatever the renderer does to the string it is building, and strip reads
-    the tags back out of the finished js - so strip is the only place that has
-    to know where anything ended up, and the rest of the rendering does not
-    have to keep track of a position at all.
-    a tag goes behind the text of its token, not in front of it: the renderer
-    still sees what it rendered at the head of a string, which is most of what
-    it looks at. where it does look at the middle - the two places that slice
-    or match what they rendered - it goes through plain first.
-      
-    a private use codepoint, so a tag can never be confused with anything the
-    renderer wrote itself, whatever the source held. plain and strip look for
-    tags with a regular expression, and it has to be this shape.
 ###
 
 use ../kxk ◆ kstr slash
-
-TAG = '\u0001'
 
 class SourceMap
     
@@ -35,9 +17,6 @@ class SourceMap
         @stripped = 0  # tags read back out of the finished js
         @verbose  = false
 
-    # sourcemap tracing: silent unless --verbose or a tree dumping
-    # flag was given, so a normal compile prints only its result
-
     verb: -> if @verbose then console.log.apply console.log, arguments
 
     # tag a token's rendered text with its own number
@@ -46,16 +25,14 @@ class SourceMap
         
         @toks.push [s, tok]
         i = @toks.length-1
-        s + TAG + i + TAG
+        s + '\u0001' + i + '\u0001'
 
     # the same text with the tags taken out again. the renderer matches and
     # slices its own output in places, and that has to go on text looking
-    # the way it would look without a map - a tag would be characters the
-    # comparisons and offsets never saw.
+    # the way it would look without a map
     
     plain: (s) -> s.replaceAll /\u0001\d+\u0001/g, ''
     
-
     # take every tag out of the finished js, remembering where each one
     # stood: that is where its token landed in the generated file
     
@@ -121,9 +98,6 @@ class SourceMap
         @verb b7('t'), @stripped, 'of', @toks.length
         
         out + code[pos..]
-    
-    # print the finished js, with the positions that were found on it
-    # behind every mapped token
     
     done: (s) ->
         
@@ -224,14 +198,8 @@ class SourceMap
         encoded = @base64encode JSON.stringify(v3Map)
         dataURL = "//# sourceMappingURL=data:application/json;base64,#{encoded}"
         
-        # file:// so that a terminal reading the output can turn it into a
-        # link, and so that node reads the kode behind it for the frame it
-        # prints under an error. it resolves against the working directory,
-        # the same as the rest of the relative naming here.
-        
         sourceURL = "//# sourceURL=file://#{@source}"
         "\n\n#{dataURL}\n#{sourceURL}\n"
-        
         
     decodejs: (encoded) ->
         
@@ -287,7 +255,6 @@ class LineMap
         @columns = []
         @verbose = false
 
-    # sourcemap tracing, see SourceMap.verb
     verb: -> if @verbose then console.log.apply console.log, arguments
     
     add: (column, srcloc, jsstr) ->

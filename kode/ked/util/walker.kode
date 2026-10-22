@@ -17,8 +17,8 @@ class walker
         @cfg.maxDepth    ?= 3
         @cfg.dotFiles    ?= false
         @cfg.maxFiles    ?= 15000
-        @cfg.ignore      ?= ['node_modules' 'build' 'Build' 'Library' 'Applications'] #, 'resources' 'ThirdParty' 'Binaries' 'Intermediate' 'Saved' 'Programs' 'Shaders' 'DerivedDataCache' 'Content' 'Samples']
-        @cfg.include     ?= ['.konrad.noon' '.gitignore' '.npmignore' '.kkache' 'ked.log']
+        @cfg.ignore      ?= ['node_modules' 'build' 'Build' 'Library' 'Applications' '.kkache' 'ked.log'] #, 'resources' 'ThirdParty' 'Binaries' 'Intermediate' 'Saved' 'Programs' 'Shaders' 'DerivedDataCache' 'Content' 'Samples']
+        @cfg.include     ?= ['.konrad.noon' '.gitignore' '.npmignore']
         @cfg.ignoreExt   ?= ['asar']
         @cfg.includeExt  ?= fileutil.sourceFileExtensions # this should be set by prjcts instead
         
@@ -83,7 +83,6 @@ class walker
                     
         @running = false
         @cfg.done? @
-        # log 'walker done' #@cfg
         @cfg
                 
     #  ███████  █████████   ███████   ████████ 

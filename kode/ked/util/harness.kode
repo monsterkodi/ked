@@ -6,13 +6,6 @@
     ███   ███  ███   ███  ███   ███  ███   ███  ████████  ███████   ███████   
     
     an editor without a terminal
-
-    the screen is a buffer of cells, and nothing goes to a terminal: the
-    ttio keeps what would have been written, so a test can look at the
-    screen as text, and can send keys to a view as if a person typed them
-
-    the same ttio runs the editor in the headless mode of the -H and -C
-    options, so a test and a run of the editor see the same screen
 ###
 
 use ../../kxk       ▪ post
@@ -55,11 +48,6 @@ function harness
         
         for ch in text.split ''
             @key view ch ch
-    
-    #  give a view the focus
-    #  
-    #  the focus is a name, and every editor listens for it, so the view
-    #  with that name is the one that has it
     
     focus: view =>
         

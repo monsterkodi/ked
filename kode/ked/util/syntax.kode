@@ -47,7 +47,6 @@ function syntax
                     if ds.clss is arr
                         ds.clss = trim ds.clss.map(kstr.trim).join(' ') 
                 @diss.push dss
-            # log "#{@name} diss" @diss if @name == "funcol_funtree.state.syntax"
         else
             ⮐  if @partialUpdate segls
         
@@ -92,7 +91,6 @@ function syntax
         
     appendSegls: segls ext =>
     
-        # @diss = @diss.concat kulur.dissect(segls ext)
         for segl in segls
             @addSegl segl ext
             
@@ -109,10 +107,6 @@ function syntax
                 ⮐  dss.clss
         'text'
         
-    # the classes of a whole line in one scan, indexed by column. columns no
-    # chunk covers are holes, so a caller defaulting them nullish - with ?=
-    # not with ?, to keep '' - gets what getClass would have answered.
-    
     getClasses: y =>
         
         classes = []
@@ -136,9 +130,6 @@ function syntax
                 clss = @getClass x y
             else
                 clss = x
-        
-        # if empty theme.syntax[clss] and not clss.endsWith 'italic'
-            # log "syntax.getColor - no syntax color for '#{clss}'" # @diss[y] 
         
         theme.syntax[clss] ? [255 0 0]
         
