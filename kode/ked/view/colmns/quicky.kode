@@ -8,7 +8,7 @@
 
 use ../../../kxk    ▪ kstr slash post kutil nfs
 use ../../index     ◆ prjcts
-use ../../util      ◆ fileutil
+use ../../util      ◆ fileutil frecent
 use ../../edit/tool ◆ belt
 use ../../theme     ◆ icons
 use ../base         ◆ crumbs 
@@ -110,11 +110,17 @@ function quicky extends inputchoice
         @crumbs.hide()
         @calcWidthAndShowPathItems items
         
+    showRecentFiles: =>
+    
+        @showFiles frecent.list('file')
+        
     # ████████   ████████    ███████         ███  ████████   ███████  █████████  ████████  ███  ███      ████████   ███████  
     # ███   ███  ███   ███  ███   ███        ███  ███       ███          ███     ███       ███  ███      ███       ███       
     # ████████   ███████    ███   ███        ███  ███████   ███          ███     ██████    ███  ███      ███████   ███████   
     # ███        ███   ███  ███   ███  ███   ███  ███       ███          ███     ███       ███  ███      ███            ███  
     # ███        ███   ███   ███████    ███████   ████████   ███████     ███     ███       ███  ███████  ████████  ███████   
+    
+    gotoDirOrOpenFile: =>
     
     showProjectFiles: @currentFile =>
         
@@ -123,7 +129,7 @@ function quicky extends inputchoice
         
         items = items.concat ked_session.recentFiles()[0...10]
                 
-        ⮐  @gotoDir process.cwd() if empty items
+        ⮐ @gotoDirOrOpenFile process.cwd() if empty items
         
         items = kutil.uniq items
         

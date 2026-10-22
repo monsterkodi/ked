@@ -6,7 +6,11 @@
     ███   ███  ████████  ███████  ███
 ###
 
-# files
+# ████████  ███  ███      ████████   ███████
+# ███       ███  ███      ███       ███     
+# ██████    ███  ███      ███████   ███████ 
+# ███       ███  ███      ███            ███
+# ███       ███  ███████  ████████  ███████ 
 
     ctrl+s          cmd+s               save
     shift+cmd+s     shift+ctrl+s        save as
@@ -19,8 +23,12 @@
     cmd+1                               filepos: swap previous
     alt+h                               show filepos history
                                         
-# views                                 
-                                        
+# ███   ███  ███  ████████  ███   ███   ███████
+# ███   ███  ███  ███       ███ █ ███  ███     
+#  ███ ███   ███  ███████   █████████  ███████ 
+#    ███     ███  ███       ███   ███       ███
+#     █      ███  ████████  ██     ██  ███████ 
+
     alt+m                               menu
     cmd+p           ctrl+p              quicky: project files
     cmd+f           ctrl+f              finder, or searcher if finder is open
@@ -36,7 +44,11 @@
     alt+\                               focus dir column
     alt+'                               focus function column
     
-# cursor
+#  ███████  ███   ███  ████████    ███████   ███████   ████████ 
+# ███       ███   ███  ███   ███  ███       ███   ███  ███   ███
+# ███       ███   ███  ███████    ███████   ███   ███  ███████  
+# ███       ███   ███  ███   ███       ███  ███   ███  ███   ███
+#  ███████   ███████   ███   ███  ███████    ███████   ███   ███
 
     ctrl+alt+up     ctrl+alt+down       page up / down
     shift+ctrl+alt+up|down              move 16 lines up / down
@@ -57,7 +69,11 @@
     shift+alt+cmd+left                  shift+alt+cmd+right
                                         paint: move main cursor, keep others
 
-# multiple cursors
+#### ██     ██  ███   ███  ███      █████████  ███  ████████   ███      ████████
+#### ███   ███  ███   ███  ███         ███     ███  ███   ███  ███      ███     
+#### █████████  ███   ███  ███         ███     ███  ████████   ███      ███████ 
+#### ███ █ ███  ███   ███  ███         ███     ███  ███        ███      ███     
+#### ███   ███   ███████   ███████     ███     ███  ███        ███████  ████████
 
     cmd+up          ctrl+up             add cursor line up
     cmd+down        ctrl+down           add cursor line down
@@ -67,14 +83,22 @@
     alt+up          alt+down            move selection or cursor lines
     shift+alt+up    shift+alt+down      clone selection or cursor lines
 
-# selection
+#  ███████  ████████  ███      ████████   ███████  █████████  ███   ███████   ███   ███
+# ███       ███       ███      ███       ███          ███     ███  ███   ███  ████  ███
+# ███████   ███████   ███      ███████   ███          ███     ███  ███   ███  ███ █ ███
+#      ███  ███       ███      ███       ███          ███     ███  ███   ███  ███  ████
+# ███████   ████████  ███████  ████████   ███████     ███     ███   ███████   ███   ███
 
     cmd+a           ctrl+a              select all lines (press again to deselect)
     cmd+l           ctrl+l              select more lines
     shift+cmd+l     shift+ctrl+l        select less lines
     esc                                 clear selections, highlights, cursors
 
-# delete
+# ███████    ████████  ███      ████████  █████████  ████████
+# ███   ███  ███       ███      ███          ███     ███     
+# ███   ███  ███████   ███      ███████      ███     ███████ 
+# ███   ███  ███       ███      ███          ███     ███     
+# ███████    ████████  ███████  ████████     ███     ████████
 
     delete                              delete backwards
     ctrl+delete     cmd+delete          delete to previous word boundary
@@ -82,7 +106,11 @@
     shift+ctrl+k    entf                delete forwards
     ctrl+k                              delete to end of line
 
-# edit
+# ████████  ███████    ███  █████████
+# ███       ███   ███  ███     ███   
+# ███████   ███   ███  ███     ███   
+# ███       ███   ███  ███     ███   
+# ████████  ███████    ███     ███   
 
     tab                                 insert tab
     shift+tab                           deindent selected or cursor lines
@@ -96,7 +124,11 @@
     cmd+/           ctrl+/              toggle comment on lines
     alt+cmd+/       ctrl+alt+/          toggle comment type
 
-# highlights
+# ███   ███  ███   ███████   ███   ███  ███      ███   ███████   ███   ███  █████████   ███████
+# ███   ███  ███  ███        ███   ███  ███      ███  ███        ███   ███     ███     ███     
+# █████████  ███  ███  ████  █████████  ███      ███  ███  ████  █████████     ███     ███████ 
+# ███   ███  ███  ███   ███  ███   ███  ███      ███  ███   ███  ███   ███     ███          ███
+# ███   ███  ███   ███████   ███   ███  ███████  ███   ███████   ███   ███     ███     ███████ 
 
     cmd+e           ctrl+e              highlight word, go to next highlight
     shift+cmd+e     shift+ctrl+e        highlight word, go to prev highlight
@@ -106,7 +138,11 @@
     shift+cmd+g     shift+ctrl+g        select word, select prev highlight
     alt+cmd+d       alt+ctrl+d          select word, select all highlights
 
-# modes
+# ██     ██   ███████   ███████    ████████   ███████
+# ███   ███  ███   ███  ███   ███  ███       ███     
+# █████████  ███   ███  ███   ███  ███████   ███████ 
+# ███ █ ███  ███   ███  ███   ███  ███            ███
+# ███   ███   ███████   ███████    ████████  ███████ 
 
     alt+3                               salter mode: ascii art headers
     alt+y                               unype mode: unicode type writer
@@ -128,8 +164,6 @@
     so it reveals the file in the dir column and never toggles
     record mode.
 
-    cmd+o and ctrl+o are listed in ked.kode but have no action..
-    
 #### source tree structure
     
 ├── ked

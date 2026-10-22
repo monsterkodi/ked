@@ -81,14 +81,17 @@ class NFS
          
         if not p is str
             error "nfs.resolveSymlink needs a string! #{p}"
-            ⮐  p
-         
-        stat =○ fsp.lstat p
-        if stat.isSymbolicLink()
-            r =○ fsp.readlink p
-            if not slash.isAbsolute r
-                r = slash.path slash.dir(p) r
-            ⮐  r
+            ⮐ p
+        
+        try 
+            stat =○ fsp.lstat p
+            if stat.isSymbolicLink()
+                r =○ fsp.readlink p
+                if not slash.isAbsolute r
+                    r = slash.path slash.dir(p) r
+                ⮐  r
+        catch err
+            warn "nfs.resolveSymlink --" err
         p
     
     # ████████   ████████   ███████   ███████     

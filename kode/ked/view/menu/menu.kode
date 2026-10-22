@@ -123,6 +123,19 @@ function menu extends inputchoice
     
         @greet.hide()
         super()
+        
+    onEscape: =>
+    
+        currentFile = ked_session.get 'editor▸file'
+        if valid currentFile
+            super()
+        else
+            @onNewFile()
+            
+    onNewFile: =>
+     
+        @hide()
+        post.emit 'file.new'       
     
     #  ███████   ████████   ████████   ███      ███   ███  
     # ███   ███  ███   ███  ███   ███  ███       ███ ███   
@@ -135,7 +148,7 @@ function menu extends inputchoice
         # log "applyChoice ▸#{choice}◂"
         
         switch choice
-            'new'        ➜ @hide(); post.emit 'file.new'
+            'new'        ➜ @onNewFile()
             'about'      ➜ @show true # reopen with greeting header
             'quit'       ➜ @greet.hide(); post.emit 'quit'                    
             'open ...'   ➜ post.emit 'browse.dir' process.cwd()

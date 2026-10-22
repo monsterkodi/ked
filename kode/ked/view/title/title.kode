@@ -266,15 +266,16 @@ function title extends view
             add ' ' null 'dark'
             
         add '' 'dark' @color.gutter 
-            
-        ci = clamp 0 3 int((@time/(1000*1000)-8)/8)
-        ch = ' •'[ci] # 
-        fg = [[32 32 32] [0 96 0] [255 0 0] [255 255 0]][ci]
-        switch ch
-            '•' ➜ 1 #log "#{g1 ch} #{w3 kstr.time(BigInt(@time))}"
-            '' ➜ 1 #log "#{r3 ch} #{w3 kstr.time(BigInt(@time))}"
-            '' ➜ 1 #log "#{y5 ch} #{w3 kstr.time(BigInt(@time))}"
-        set cols-2 ch fg 'dark'
+        
+        if false   
+            ci = clamp 0 3 int((@time/(1000*1000)-8)/8)
+            ch = ' •'[ci] # 
+            fg = [[32 32 32] [0 96 0] [255 0 0] [255 255 0]][ci]
+            switch ch
+                '•' ➜ 1 #log "#{g1 ch} #{w3 kstr.time(BigInt(@time))}"
+                '' ➜ 1 #log "#{r3 ch} #{w3 kstr.time(BigInt(@time))}"
+                '' ➜ 1 #log "#{y5 ch} #{w3 kstr.time(BigInt(@time))}"
+            set cols-2 ch fg 'dark'
              
 export title
 

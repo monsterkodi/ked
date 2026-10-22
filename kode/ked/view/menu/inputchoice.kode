@@ -200,6 +200,11 @@ function inputchoice extends view
         else
             @choices.grabFocus()
             @autoHide()
+            
+    onEscape: ->
+    
+        post.emit 'focus' 'editor'
+        @hide()
 
     # ███   ███  ████████  ███   ███
     # ███  ███   ███        ███ ███
@@ -213,14 +218,8 @@ function inputchoice extends view
 
         switch event.combo
             
-            'tab' 
-            
-                ⮐  @moveFocus()
-            
-            'esc'     
-
-                post.emit 'focus' 'editor'
-                ⮐  @hide()
+            'tab' ➜ ⮐ @moveFocus()
+            'esc' ➜ ⮐ @onEscape()    
 
         if @input.hasFocus()
             if result = @input.onKey key event

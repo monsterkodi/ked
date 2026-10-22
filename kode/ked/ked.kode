@@ -619,6 +619,7 @@ function KED
             'cmd+n' 'ctrl+n'             ➜ ⮐  @newFile()
             'alt+m'                      ➜ ⮐  @menu.show()
             'cmd+p' 'ctrl+p'             ➜ ⮐  @quicky.showProjectFiles @currentFile
+            'shift+cmd+p' 'shift+ctrl+p' ➜ ⮐  @quicky.showRecentFiles @currentFile
             'cmd+f' 'ctrl+f'             ➜ ⮐  @showFinderOrSearcher()
             'shift+cmd+f' 'shift+ctrl+f' ➜ ⮐  @searcher.show()
             'alt+o'                      ➜ ⮐  @editor.jumpToCounterpart()
