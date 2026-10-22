@@ -605,6 +605,39 @@ writeJs = c file=JS_FILE ○->
         report = wrong.join ' '
         report ▸ ''
 
+    ▸ maps every name in the compiler
+
+        # the generic test above is a net under snippets. this is the same
+        # net under every file of kode/kode: each name a compiler source
+        # has must start a mapping in the js compiled from it, or a stack
+        # trace into the compiler loses the name it was looking at.
+
+        dir = slash.path ◆dir, '..', '..', '..', 'kode', 'kode'
+        files = kodfiles dir
+
+        files.length > 20 ▸ true
+
+        missed = []
+
+        for file in files
+
+            continue if file.endsWith 'srcmap-probe.kode'
+
+            text = fs.readFileSync file, 'utf8'
+            code = (new kode header:false, map:true).compile text, file
+
+            continue if not code?
+
+            got = mapsOf(code).map (t) -> "#{t[2]}:#{t[3]}"
+            names = (new kode header:false).lexer.tokenize(text).filter (t) -> t.type in ['var' 'this']
+
+            for name in names
+                if "#{name.line}:#{name.col}" not in got
+                    missed.push "#{slash.relative file, dir}:#{name.line}:#{name.col} #{name.text}"
+
+        report = missed.join ' '
+        report ▸ ''
+
     ▸ sourcePosition finds where a position came from
 
         # the argument of the call sits at column 12 of the one line of
