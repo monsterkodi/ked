@@ -392,6 +392,12 @@ class Renderer
     use: n ->
 
         s = ''
+
+        # a use has a module and maybe a name or a list of items. the
+        # tokens for both are kept by the parser so the import can point
+        # back at the source it came from.
+
+        path = (m, text) => @mark text, (m.base ? m.base : m)
         
         if valid n.items
             
@@ -399,18 +405,20 @@ class Renderer
                 error 'items for multiple modules?!'
                             
             m   = n.toUse[0]
-            mod = m.text ? m
+            mod = m.text
+            ⮐ s if not mod
             
             name = slash.name mod
-            s += 'import ' + name
+            s += 'import ' + @mark(name, m)
 
             if mod[0] == '.'
-                s += " from \"#{slash.swapExt mod, 'js'}\"\n"
+                s += " from \"" + path(m, slash.swapExt(mod, 'js')) + "\"\n"
             else
-                s += " from \"#{mod}\"\n"
+                s += " from \"" + path(m, mod) + "\"\n"
                 
             for item in n.items
-                s += "let #{item} = #{name}.#{item}\n"
+                it = item.text
+                s += "let " + @mark(it, item) + " = #{name}.#{it}\n"
                 
         else if valid n.name
 
@@ -418,30 +426,31 @@ class Renderer
                 error 'named import for multiple modules?!'
             
             m   = n.toUse[0]
-            mod = m.text ? m
+            mod = m.text
+            ⮐ s if not mod
             
             name = slash.name mod
-            s += 'import ' + n.name
+            nm = n.name.text
+            s += 'import ' + @mark(nm, n.name)
 
             if mod[0] == '.'
-                s += " from \"#{slash.swapExt mod, 'js'}\"\n"
+                s += " from \"" + path(m, slash.swapExt(mod, 'js')) + "\"\n"
             else
-                s += " from \"#{mod}\"\n"
+                s += " from \"" + path(m, mod) + "\"\n"
                 
         else
         
             for m in n.toUse
     
-                name = slash.name m.text
-                s += 'import ' + name
-                
-                mod = m.text ? m
+                mod = m.text
+                continue if not mod
+                name = slash.name mod
+                s += 'import ' + @mark(name, m)
     
-                if true
-                    if mod[0] == '.'
-                        s += " from \"#{slash.swapExt mod 'js'}\"\n"
-                    else
-                        s += " from \"#{mod}\"\n"
+                if mod[0] == '.'
+                    s += " from \"" + path(m, slash.swapExt(mod, 'js')) + "\"\n"
+                else
+                    s += " from \"" + path(m, mod) + "\"\n"
         s
         
     # ███  ██     ██  ████████    ███████   ████████   █████████  
@@ -494,21 +503,22 @@ class Renderer
         
     dirFile: n ->
         
+        name = n.text ? n
         s = ''
-        if n == 'dir'
+        if name == 'dir'
             @hint._k_.dir = true
             s = "_k_.dir()"
-        if n == 'file'
+        if name == 'file'
             @hint._k_.file = true
             s = "_k_.file()"
-        s
+        @mark s, n
         
     main: n ->
         
         idt = rpad 4
-        s = 'if (((globalThis.process != null ? globalThis.process.argv : undefined) != null) && import.meta.filename === process.argv[1])'
+        s = @mark('if', n.token) + ' (((globalThis.process != null ? globalThis.process.argv : undefined) != null) && import.meta.filename === process.argv[1])'
         s += '\n{\n'
-        s += idt + @nodes(n '\n' + idt)
+        s += idt + @nodes(n.exps '\n' + idt)
         s += '\n}'
         s
         
@@ -593,7 +603,10 @@ class Renderer
                 delete @mthdName
             else
                 if n.keyval.key.text.startsWith '@'
-                    s += @indent + 'static ' + n.keyval.key.text[1..] + ' = ' + @node(n.keyval.val)
+                    key = n.keyval.key
+                    member = key.text[1..]
+                    memberTok = type:'var', text:member, line:key.line, col:key.col+1
+                    s += @indent + @mark('static', key) + ' ' + @mark(member, memberTok) + ' = ' + @node(n.keyval.val)
                 else
                     log 'what is this?' n if @debug
         s
@@ -682,7 +695,7 @@ class Renderer
                 s += '\n'
             else if f.name.text.startsWith 'static'
                 @fncsName = f.name.text[7..]
-                s = @indent + @func(f, "#{className}[\"#{@fncsName}\"] = function")
+                s = @indent + @func(f, "#{@mark className, f.name}[\"#{@fncsName}\"] = function")
                 s += '\n'
             else
                 @fncsName = f.name.text
@@ -691,8 +704,10 @@ class Renderer
             delete @fncsName
         else
             if n.keyval?.key?.text?[0] == '@'
-                member = n.keyval.key.text[1..]
-                s = @indent + "#{className}[\"#{member}\"] = " + @node(n.keyval.val)
+                key = n.keyval.key
+                member = key.text[1..]
+                memberTok = type:'var', text:member, line:key.line, col:key.col+1
+                s = @indent + @mark(className, key) + "[\"" + @mark(member, memberTok) + "\"] = " + @node(n.keyval.val)
         s
         
     # ████████   ████████   ████████  ████████   ██     ██  ████████  █████████  ███   ███
@@ -759,14 +774,20 @@ class Renderer
         if n.name?.text and valid n.name.line
             
             mark = n.name.text
-            at   = name.lastIndexOf mark
-            
-            if at < 0 and mark.startsWith 'static '
-                mark = mark[7..]
-                at   = name.lastIndexOf mark
-            
-            if at >= 0
-                name = name[...at] + @mark(mark, n.name) + name[(at + mark.length)..]
+
+            if mark.startsWith 'static '
+                member = mark[7..]
+                at = name.lastIndexOf member
+                if at >= 0
+                    memberTok = type:'var', text:member, line:n.name.line, col:n.name.col+1
+                    name = name[...at] + @mark(member, memberTok) + name[(at + member.length)..]
+                at = name.lastIndexOf 'static'
+                if at >= 0
+                    name = name[...at] + @mark('static', n.name) + name[(at + 6)..]
+            else
+                at = name.lastIndexOf mark
+                if at >= 0
+                    name = name[...at] + @mark(mark, n.name) + name[(at + mark.length)..]
 
         s = name
         s += ' ('
@@ -841,27 +862,34 @@ class Renderer
             # when the arrow is drawn a different way, so whatever token
             # the argument starts with is the one the text points back at.
             
+            prop = a.prop ? a.operation?.lhs?.prop
+
             tok = a
             if not tok.type and a.obj then tok = a.obj
-            if not tok.type and a.prop?.obj then tok = a.prop.obj
+            if not tok.type and prop?.obj
+                tok = if prop.obj.type == 'this' then prop.prop else prop.obj
             if not tok.type and a.operation?.lhs then tok = a.operation.lhs
+
+            thisTok = if prop?.obj?.type == 'this' then prop.obj else null
+            thisThis = if thisTok and valid thisTok.line then @mark('this', thisTok) else 'this'
             
             t = @plain @node(a)
             if t?.startsWith 'this.'
                 l = trim t.split('=')[0]
+                lThis = if thisTok then thisThis + l[4..] else l
                 
                 txt = l[5..]
                 if used[txt]
                     for i in [1..100]
                         if not used[txt+i]
-                            ths.push "this.#{txt} = #{txt+i}"
+                            ths.push "#{thisThis}.#{txt} = #{txt+i}"
                             txt += i
                             used[txt] = txt
                             ⮐ @mark "#{txt}" + (t.split('=')[1] ? ''), tok
                 else
-                    ths.push "#{l} = #{txt}"
+                    ths.push "#{lThis} = #{txt}"
                 ⮐ @mark t[5..], tok
-            @mark t, tok
+            @node a
                 
         str = args.join ', '
 
@@ -907,12 +935,12 @@ class Renderer
             if name.length == 2 and /[1-8]/.test(name[1]) and name[0].toLowerCase() in kolorNames
                 @hint._k_.k = true
                 @hint._k_[name] = true
-                ⮐ "_k_.#{name}(#{@nodes p.args, ','})"
+                ⮐ @mark("_k_.#{name}", p.callee) + "(#{@nodes p.args, ','})"
 
             if name.length == 3 and /[1-8]/.test(name[2]) and name[0].toLowerCase() in kolorNames and name[1] in kolorNames
                 @hint._k_.k = true
                 @hint._k_[name] = true
-                ⮐ "_k_.#{name}(#{@nodes p.args, ','})"
+                ⮐ @mark("_k_.#{name}", p.callee) + "(#{@nodes p.args, ','})"
                 
             switch name
                 'throw'
@@ -1176,7 +1204,7 @@ class Renderer
                 s += g2+"#{@mark v.text, v} = #{listVar}[#{iterVar}][#{j}]" + eb
         else if n.vals.length > 1
             iterVar = n.vals[1].text
-            s += gi+"for (#{iterVar} = 0; #{iterVar} < #{listVar}.length; #{iterVar}++)" + nl
+            s += gi+"for (#{@mark iterVar, n.vals[1]} = 0; #{iterVar} < #{listVar}.length; #{iterVar}++)" + nl
             s += gi+"{" + nl
             s += g2+"#{varPrefix}#{@mark n.vals[0].text, n.vals[0]} = #{listVar}[#{iterVar}]" + eb
 
@@ -1268,15 +1296,17 @@ class Renderer
         eb = lineBreak and ';' or '\n'
         g2 = if lineBreak then '' else @indent
 
-        key = n.vals.text ? n.vals[0]?.text
-        val = n.vals[1]?.text
+        keyTok = n.vals.text ? n.vals : n.vals[0]
+        key = keyTok?.text
+        valTok = n.vals[1]
+        val = valTok?.text
 
         obj = @node n.list
         s = ''
-        s += "for (#{varPrefix}#{key} in #{obj})"+nl
+        s += "for (#{varPrefix}#{@mark key, keyTok} in #{obj})"+nl
         s += gi+"{"+nl
         if val
-            s += g2+"#{varPrefix}#{val} = #{obj}[#{key}]" + eb
+            s += g2+"#{varPrefix}#{@mark val, valTok} = #{obj}[#{key}]" + eb
         for e in n.then
             prefix = if lastPrefix and e == n.then[-1] then lastPrefix else ''
             postfix = if lastPostfix and e == n.then[-1] then lastPostfix else ''
@@ -1486,7 +1516,7 @@ class Renderer
                     s = ''
                     for keyval in op.lhs.object.keyvals
                         ind = if op.lhs.object.keyvals.indexOf(keyval) > 0 then @indent else ''
-                        s += ind + "#{keyval.text} = #{@atom(op.rhs)}.#{keyval.text}\n"
+                        s += ind + "#{@mark keyval.text, keyval} = #{@atom(op.rhs)}.#{keyval.text}\n"
                     ⮐ s
                     
                 
@@ -1495,7 +1525,7 @@ class Renderer
                     s = "var #{v} = #{@atom(op.rhs)}"
                     for val in op.lhs.array.items
                         i = op.lhs.array.items.indexOf val
-                        s += "; #{val.text} = #{v}[#{i}]"
+                        s += "; #{@mark val.text, val} = #{v}[#{i}]"
                     ⮐ s + '\n'
                     
                 if op.lhs and @containsAssert op.lhs
@@ -1552,7 +1582,7 @@ class Renderer
                         op.rhs?.text == 'num'
                             lhs = @atom op.lhs
                             @hint._k_.isNum = true
-                            ⮐ "_k_.isNum(#{lhs})"
+                            ⮐ "#{@mark '_k_.isNum', op.rhs}(#{lhs})"
                             
                         op.rhs?.text == 'obj'
                             if op.lhs.type == 'num'
@@ -1560,7 +1590,7 @@ class Renderer
                             else
                                 lhs = @atom op.lhs
                                 @hint._k_.isObj = true
-                                ⮐ "_k_.isObj(#{lhs})"                                
+                                ⮐ "#{@mark '_k_.isObj', op.rhs}(#{lhs})"                                
 
                         op.rhs?.text == 'arr'
                             if op.lhs.type == 'num'
@@ -1568,22 +1598,22 @@ class Renderer
                             else
                                 lhs = @atom op.lhs
                                 @hint._k_.isArr = true
-                                ⮐ "_k_.isArr(#{lhs})"
+                                ⮐ "#{@mark '_k_.isArr', op.rhs}(#{lhs})"
                                 
                         op.rhs?.text == 'str'
                             lhs = @atom op.lhs
                             @hint._k_.isStr = true                            
-                            ⮐ "_k_.isStr(#{lhs})"
+                            ⮐ "#{@mark '_k_.isStr', op.rhs}(#{lhs})"
 
                         op.rhs?.text == 'func'
                             lhs = @atom op.lhs
                             @hint._k_.isFunc = true
-                            ⮐ "_k_.isFunc(#{lhs})"
+                            ⮐ "#{@mark '_k_.isFunc', op.rhs}(#{lhs})"
 
                         op.rhs?.text == 'elem'
                             lhs = @atom op.lhs
                             @hint._k_.isElem = true
-                            ⮐ "_k_.isElem(#{lhs})"
+                            ⮐ "#{@mark '_k_.isElem', op.rhs}(#{lhs})"
                             
                         else
                             ⮐ "#{@atom op.lhs} instanceof #{@atom op.rhs}"

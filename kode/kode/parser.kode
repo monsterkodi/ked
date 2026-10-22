@@ -435,9 +435,17 @@ function Parser extends parse
         if not token or token.type == 'nl'
             @onError 'use is missing what to use' tok:obj
             
+        # the source tokens behind a use: the module's first name is the
+        # part before ◆, and its last name is the module itself or the
+        # file to import. both are kept so the map can point at them.
+        
+        moduleToks = []
+
         while token
             
             module = token.text
+            moduleToks = []
+            moduleToks.push token if token.type == 'var'
             
             if module == '◆'
                 module = '.'
@@ -447,10 +455,14 @@ function Parser extends parse
             while tokens.length and tokens[0].type != 'nl' and tokens[0].col == token.col + token.text.length
                 token = tokens.shift()
                 module += token.text
+                moduleToks.push token if token.type == 'var'
             
             toUse.push
                 type: 'var'
                 text:  module
+                line:  moduleToks[-1]?.line
+                col:   moduleToks[-1]?.col
+                base:  moduleToks[0]
                 
             break if tokens.length and (tokens[0].type == 'nl' or tokens[0].text in '▪●◆')
             
@@ -465,13 +477,18 @@ function Parser extends parse
 
             while token and token.type != 'nl' and token.type in ['var' 'keyword' 'bool' 'op']
                 
+                itemTok = token
                 item = token.text
                 
                 while tokens.length and tokens[0].type != 'nl' and tokens[0].col == token.col + token.text.length
                     token = tokens.shift()
                     item += token.text
                 
-                items.push item
+                items.push
+                    type: 'var'
+                    text: item
+                    line: itemTok?.line
+                    col:  itemTok?.col
                     
                 break if tokens.length and (tokens[0].type == 'nl' or tokens[0].text in '▪●◆')
 
@@ -489,6 +506,7 @@ function Parser extends parse
 
             while token and token.type != 'nl'
                 
+                itemTok = token
                 item = module + '/' + token.text
                 
                 while tokens.length and tokens[0].type != 'nl' and tokens[0].col == token.col + token.text.length
@@ -497,7 +515,10 @@ function Parser extends parse
                 
                 toUse.push
                     type: 'var'
-                    text:  item
+                    text: item
+                    line: itemTok?.line
+                    col:  itemTok?.col
+                    base: moduleToks[0]
                     
                 break if tokens.length and (tokens[0].type == 'nl' or tokens[0].text in '▪●◆')
                 
@@ -508,11 +529,14 @@ function Parser extends parse
             tokens.shift()
             token = tokens.shift()
 
+            nameTok = token
             name = token?.text
             
             while tokens.length and tokens[0].type != 'nl' and tokens[0].col == token.col + token.text.length
                 token = tokens.shift()
                 name += token.text
+
+            name = type:'var', text:name, line:nameTok?.line, col:nameTok?.col
                 
         if tokens.length and tokens[0].type != 'nl'
             @onError 'use has a dangling token' tok:tokens[0]
@@ -560,7 +584,13 @@ function Parser extends parse
     
     dirFile: tok tokens ->
         
-        dirFile: tokens.shift().text
+        token = tokens.shift()
+        
+        dirFile:
+            type: 'var'
+            text: token?.text
+            line: token?.line
+            col:  token?.col
         
     # ██     ██   ███████   ███  ███   ███  
     # ███   ███  ███   ███  ███  ████  ███  
@@ -570,9 +600,11 @@ function Parser extends parse
     
     main: tok tokens ->
         
-        tokens.shift()
+        name = tokens.shift()
         
-        main: @block('main' tokens)
+        main:
+            exps:  @block('main' tokens)
+            token: name
             
     #  ███████  ███       ███████    ███████   ███████
     # ███       ███      ███   ███  ███       ███
