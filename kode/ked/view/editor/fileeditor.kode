@@ -6,6 +6,7 @@
 ███       ███  ███████  ████████  ████████  ███████    ███     ███      ███████   ███   ███
 ###
 
+use ../../../kode   ◆ srcmap
 use ../../../kxk    ▪ post kstr slash
 use ../../../kxk    ◆ nfs
 use ../../edit/tool ◆ belt
@@ -146,7 +147,7 @@ function fileeditor extends editor
     # ███   ███  ███   ███  ███ █ ███  ███                 ███     ███   ███        ███   ███  ███   ███  ███   ███  ███   ███
     #  ███████    ███████   ███   ███  ███                 ███      ███████         ██     ██   ███████   ███   ███  ███████  
 
-    jumpToWord: word =>
+    jumpToWord: word ○=>
     
         log "fileeditor.jumpToWord '#{word}'"
         # log 'fileeditor.jumpToWord classes' Object.keys(indexer.singleton.classes)
@@ -168,7 +169,15 @@ function fileeditor extends editor
                 if func is arr
                     func = func[0]
             if valid func.file
-                log "func.file" func.file
+                if slash.ext(func.file) == 'js'
+                    log "JS func.file file://#{func.file}:#{func.line}"
+                    log "FUNC" func 
+                    map = new srcmap()
+                    src =○ map.sourcePosition func.file func.line
+                    if valid src
+                        log "JS MAP" src
+                        post.emit 'file.open' src.file src.line 'ind'
+                        ⮐ true
                 post.emit 'file.open' func.file func.line-1 'ind'
                 ⮐ true
         else 

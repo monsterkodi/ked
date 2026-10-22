@@ -26,13 +26,13 @@ use fs
 
 B64 = buffer.Buffer
 
-# a filename is not optional: the renderer takes the source path from it,
-# and that path is what a map names as its source
+JS_FILE = '/tmp/probe.js'
+SRCFILE = '/tmp/probe.kode'
 
-PROBE = slash.path ◆dir '..' '..' '..' 'kode' 'srcmap-probe.kode'
+smap = new srcmap
 
-kmap   = (c) -> (new kode header:false, map:true).compile c, PROBE
-kplain = (c) -> (new kode header:false).compile c, PROBE
+kmap   = (c s=SRCFILE) -> (new kode header:false, map:true).compile c, s
+kplain = (c) -> (new kode header:false).compile c, SRCFILE
 
 # the js on its own, without the map or the sourceURL at the foot of it. a
 # map counts lines as they are written, so the tests here work on the whole
@@ -189,21 +189,17 @@ kodfiles = (dir, out=[]) ->
 
     out
 
-# sourcePosition reads the map back out of a compiled file on disk, so
-# these tests compile a snippet and write the js to a temp file first -
-# node's own sourcemap reader is what answers the lookup
+writeJs = c file=JS_FILE ○->
 
-root    = '/tmp/opencode/kedsrcmap'
-tmpfile = slash.path root, 'probe.js'
-
-smap = new srcmap
-
-writeJs = c ○->
-
-    js = kmap c
-    ○ nfs.write tmpfile, js
-    tmpfile
-
+    s = slash.swapExt file 'kode'
+    js = kmap c, s
+    # log "------------ #{s}"
+    # log js
+    # log "------------"
+    
+    ○ nfs.write file, js
+    file
+    
 #  ███████  ████████    ███████  ██     ██   ███████   ████████ 
 # ███       ███   ███  ███       ███   ███  ███   ███  ███   ███
 # ███████   ███████    ███       █████████  █████████  ████████ 
@@ -239,7 +235,7 @@ writeJs = c ○->
         url = kplain 'a = 1'
         lines = url.split '\n'
         url = lines.find (l) -> l.startsWith '//# sourceURL='
-        url ▸ "//# sourceURL=file://#{PROBE}"
+        url ▸ "//# sourceURL=file://#{SRCFILE}"
 
     ▸ and it names the file by its own path
 
@@ -255,7 +251,7 @@ writeJs = c ○->
         url = url.replace '//# sourceURL=file://', ''
 
         slash.isAbsolute url  ▸ true
-        url ▸ PROBE
+        url ▸ SRCFILE
 
     ▸ and the js it wraps is untouched
 
@@ -278,7 +274,7 @@ writeJs = c ○->
         src = json.sources
         src.length ▸ 1
 
-        names = src[0].endsWith 'kode/srcmap-probe.kode'
+        names = src[0].endsWith 'probe.kode'
         names ▸ true
 
         version = json.version
@@ -304,10 +300,10 @@ writeJs = c ○->
         # and it still points at the probe file, wherever it is read from
 
         src = url.replace 'file://', ''
-        src.endsWith 'kode/srcmap-probe.kode' ▸ true
+        src.endsWith 'probe.kode' ▸ true
 
         back = slash.absolute src, process.cwd()
-        back ▸ PROBE
+        back ▸ SRCFILE
 
     ▸ names its source from where it is written
 
@@ -318,12 +314,12 @@ writeJs = c ○->
         dir = slash.path ◆dir, '..', '..'
         tgt = slash.path dir, 'probe.js'
 
-        out = (new kode header:false, map:true).compile 'a = 1', PROBE, tgt
+        out = (new kode header:false, map:true).compile 'a = 1', SRCFILE, tgt
 
         name = jsonOf(out).sources[0]
         back = slash.absolute name, slash.dir(tgt)
 
-        back ▸ PROBE
+        back ▸ SRCFILE
 
     ▸ writes the same js either way
 
@@ -372,8 +368,8 @@ writeJs = c ○->
 
         k = new kode header:false, map:true
 
-        first = k.compile c, PROBE
-        again = k.compile c, PROBE
+        first = k.compile c, SRCFILE
+        again = k.compile c, SRCFILE
 
         eq = body(first) == body(again)
         eq ▸ true
@@ -567,7 +563,7 @@ writeJs = c ○->
         file = ○ writeJs 'log b\n'
         pos  = ○ smap.sourcePosition file, 1, 12
 
-        pos.file ▸ PROBE
+        pos.file ▸ SRCFILE
         pos.line ▸ 1
         pos.col  ▸ 4
 
@@ -590,7 +586,7 @@ writeJs = c ○->
         file = ○ writeJs 'a = 1\n'
         pos  = ○ smap.sourcePosition file, 3, 0
 
-        pos.file ▸ PROBE
+        pos.file ▸ SRCFILE
         pos.line ▸ 1
         pos.col  ▸ 0
 
@@ -610,14 +606,14 @@ writeJs = c ○->
         # is nothing to ask
 
         js = kplain 'a = 1\n'
-        ○ nfs.write tmpfile, js
-        pos = ○ smap.sourcePosition tmpfile, 1, 0
+        ○ nfs.write JS_FILE, js
+        pos = ○ smap.sourcePosition JS_FILE, 1, 0
 
         pos ▸ undefined
 
     ▸ sourcePosition says nothing for a file that is not there
 
-        pos = ○ smap.sourcePosition slash.path(root, 'gone.js'), 1, 0
+        pos = ○ smap.sourcePosition slash.path('/tmp', 'gone.js'), 1, 0
 
         pos ▸ undefined
 
@@ -631,20 +627,72 @@ writeJs = c ○->
         file = ○ writeJs c
         pos  = ○ smap.sourcePosition file, 4, 0
 
-        pos.file ▸ PROBE
+        pos.file ▸ SRCFILE
         pos.line ▸ 2
         pos.col  ▸ 0
+        
+    ▸ sourcePosition for function
+    
+        tmpjs = slash.tmpfile() + ".js"
+        
+        #var test
+        #
+        #
+        #test = function ()
+        #{
+        #    console.log("hello")
+        #}
+             
+        file = ○ writeJs """
+            test = ->
+                log "hello"
+            """ tmpjs
+            
+        pos = ○ smap.sourcePosition file, 4, 0
+        pos.line ▸ 1
+        pos.col  ▸ 0
+    
+    ▸ sourcePosition for function method
+    
+        tmpjs = slash.tmpfile() + ".js"
+         
+        file = ○ writeJs """
+            function Test
+                @: ->
+                method: -> log "hello"
+            """ tmpjs
+            
+        # var Test
+        # 
+        # 
+        # Test = (function ()
+        # {
+        #     function Test ()
+        #     {}
+        # 
+        #     Test.prototype["method"] = function ()
+        #     {
+        #         console.log("hello")
+        #     }
+        # 
+        #     return Test
+        # })()
+        #        
+ 
+        pos = ○ smap.sourcePosition file, 9, 5
+        # log "POS" pos
+        valid pos ▸ true
 
     ▸ sourcePosition names the source from where the map was written
 
         # a runtime reads the map against the file it is written into, so
         # a source named relative to that file resolves the same way here
 
-        out = (new kode header:false, map:true).compile 'a = 1\n', PROBE, tmpfile
-        ○ nfs.write tmpfile, out
+        out = (new kode header:false, map:true).compile 'a = 1\n', SRCFILE, JS_FILE
+        ○ nfs.write JS_FILE, out
 
-        pos = ○ smap.sourcePosition tmpfile, 3, 0
+        pos = ○ smap.sourcePosition JS_FILE, 3, 0
 
-        pos.file ▸ PROBE
+        pos.file ▸ SRCFILE
         pos.line ▸ 1
         pos.col  ▸ 0

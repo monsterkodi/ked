@@ -14,7 +14,7 @@ use module
 
 NodeSourceMap = module.SourceMap
 
-class SourceMap
+function SourceMap
     
     @: (@source, @name) ->
         
@@ -238,9 +238,12 @@ class SourceMap
             sm    = new NodeSourceMap(map)
             entry = sm.findEntry line-1, col
         catch err
+            error err
             ⮐
         
-        ⮐ if not entry.originalSource
+        if not entry.originalSource
+            # warn 'NO ORIGINAL SOURCE' entry
+            ⮐ 
         
         # the map names its source from where the map itself was written,
         # so a relative name is read against the directory of the file
