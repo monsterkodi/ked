@@ -6,9 +6,12 @@
         { operator: 'delete', motion: { kind: 'word', count: 3 } }
         { operator: 'move',   motion: { kind: 'left', count: 2 } }
         { operator: 'undo',   count: 3 }
+        { operator: 'repeat', count: 2 }
 
     the mode decodes keys into such a value
     this module turns the value into buffer edits
+
+    the last change is remembered so that . can repeat it
 ###
 
 use ../../../kxk ▪ kseg
@@ -21,10 +24,28 @@ export
         log 'novim command ▸' cmd
 
         switch cmd.operator
-            'delete' ➜ @deleteByMotion cmd.motion
+            'delete' ➜ @applyChange cmd
             'move'   ➜ @moveByMotion cmd.motion
             'undo'   ➜ @undoCommand cmd.count
+            'repeat' ➜ @repeatChange cmd.count
             else     ➜ log 'novim unknown operator ▸' cmd.operator
+
+    applyChange: cmd ->
+
+        @lastChange = cmd
+        @deleteByMotion cmd.motion
+
+    repeatChange: count ->
+
+        ⮐  if not @lastChange
+
+        spec = copy @lastChange.motion
+
+        # a count on . replaces the count of the change,
+        # one means the count of the change is used again
+        spec.count = count if count > 1
+
+        @deleteByMotion spec
 
     deleteByMotion: spec ->
 

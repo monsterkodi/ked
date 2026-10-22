@@ -16,6 +16,7 @@
         line            count lines, starting with the current one
         lineDown        current line and count lines below
         lineUp          count lines above and the current one
+        textObject      an inner or around word, quoted string or bracket pair
 ###
 
 use ../../../kxk ▪ kseg
@@ -76,6 +77,7 @@ function motion
             'line'     ➜ @rangeForLines    lines y y+count-1
             'lineDown' ➜ @rangeForLines    lines y y+count
             'lineUp'   ➜ @rangeForLines    lines y-count y
+            'textObject' ➜ @rangeForTextObject lines x y spec
 
     # ranges for a single line
 
@@ -249,5 +251,334 @@ function motion
                 i -= 1
 
             ⮐  [@widthAt(segs i) y]
+
+    # text objects
+    # the cursor can sit one past the last character,
+    # text objects then act on the last character of the line
+    @objectX: lines y x ->
+        segs  = lines[y]
+        width = kseg.width segs
+        if width > 0 and x >= width
+            ⮐  @widthAt(segs segs.length-1)
+        clamp 0 width x
+
+    @widthAtOrEnd: segs i ->
+        if i >= segs.length
+            ⮐  kseg.width segs
+        @widthAt(segs i)
+
+    @isEscaped: segs i ->
+        n = 0
+        j = i-1
+        while j >= 0 and segs[j] == '\\'
+            n += 1
+            j -= 1
+        n % 2 == 1
+
+    @rangeForTextObject: lines x y spec ->
+
+        count = max 1 (spec.count ? 1)
+        area  = spec.area ? 'inner'
+        x     = @objectX lines y x
+
+        switch spec.target
+            'word' ➜ @rangeForWordObject lines x y count (area == 'inner')
+            else   ➜ @rangeForPairObject lines x y spec.target (area == 'inner')
+
+    # words
+
+    @wordBoundsAt: segs i ->
+
+        cat = @category segs[i]
+        s   = i
+        e   = i
+
+        while s > 0 and @category(segs[s-1]) == cat
+            s -= 1
+
+        while e+1 < segs.length and @category(segs[e+1]) == cat
+            e += 1
+
+        [s e+1]
+
+    @trailingWsEnd: segs i ->
+        e = i
+        while e < segs.length and @category(segs[e]) == 'ws'
+            e += 1
+        e
+
+    @leadingWsStart: segs i ->
+        s = i
+        while s > 0 and @category(segs[s-1]) == 'ws'
+            s -= 1
+        s
+
+    # the start of the next word after an exclusive index,
+    # crossing lines but never part of a word
+    @nextWordAfterIndex: lines y i ->
+
+        while true
+
+            segs = lines[y]
+
+            while i < segs.length and @category(segs[i]) == 'ws'
+                i += 1
+
+            if i < segs.length
+                [s e] = @wordBoundsAt(segs i)
+                ⮐  [y s e]
+
+            if y+1 >= lines.length
+                ⮐  null
+
+            y += 1
+            i  = 0
+
+    @rangeForWordObject: lines x y count inner ->
+
+        segs = lines[y]
+
+        ⮐  if empty segs
+
+        i = kseg.indexAtWidth segs x
+        i = segs.length-1 if i >= segs.length
+
+        if @category(segs[i]) == 'ws'
+
+            # on white space the inner object is the white space run
+            if inner
+                s = @leadingWsStart segs i
+                e = @trailingWsEnd segs i
+                ⮐  [@widthAt(segs s) y @widthAtOrEnd(segs e) y]
+
+            # around white space means the next word on this line
+            next = @nextWordAfterIndex lines y i
+
+            if not next
+                s = @leadingWsStart segs i
+                e = @trailingWsEnd segs i
+                ⮐  [@widthAt(segs s) y @widthAtOrEnd(segs e) y]
+
+            [wy ws we] = next
+            ⮐  @rangeForWords lines wy ws we count true
+
+        [s e] = @wordBoundsAt(segs i)
+
+        @rangeForWords lines y s e count (not inner)
+
+    @rangeForWords: lines y s e count around ->
+
+        firstLine  = y
+        firstStart = s
+        lastLine   = y
+        lastEnd    = e
+
+        for n in 1...count
+            next = @nextWordAfterIndex lines lastLine lastEnd
+            break if not next
+            [nl ns ne] = next
+            lastLine = nl
+            lastEnd  = ne
+
+        if not around
+            ⮐  [@widthAt(lines[firstLine] firstStart) firstLine @widthAt(lines[lastLine] lastEnd) lastLine]
+
+        # around includes the white space after the word,
+        # or the white space before it when the word ends the line
+        lastSegs = lines[lastLine]
+        tEnd     = @trailingWsEnd lastSegs lastEnd
+
+        if tEnd > lastEnd
+            ⮐  [@widthAt(lines[firstLine] firstStart) firstLine @widthAtOrEnd(lastSegs tEnd) lastLine]
+
+        firstSegs = lines[firstLine]
+        lStart    = @leadingWsStart firstSegs firstStart
+
+        [@widthAt(firstSegs lStart) firstLine @widthAtOrEnd(lastSegs lastEnd) lastLine]
+
+    # quoted strings and bracket pairs
+
+    @rangeForPairObject: lines x y target inner ->
+
+        opens =
+            ')': '('
+            ']': '['
+            '}': '{'
+            'b': '('
+            'B': '{'
+
+        closes =
+            '(': ')'
+            '[': ']'
+            '{': '}'
+
+        open  = opens[target] ? target
+
+        if open == '"' or open == "'"
+            ⮐  @rangeForQuoteObject lines x y open inner
+
+        close = closes[open]
+
+        ⮐  null if not close
+
+        @rangeForBracketObject lines x y open close inner
+
+    @rangeForQuoteObject: lines x y quote inner ->
+
+        segs = lines[y]
+
+        ⮐  null if empty segs
+
+        xi = kseg.indexAtWidth segs x
+        xi = segs.length-1 if xi >= segs.length
+
+        pairs = []
+        open  = -1
+
+        for seg, i in segs
+
+            continue if seg != quote
+            continue if @isEscaped segs i
+
+            if open < 0
+                open = i
+            else
+                pairs.push [open i]
+                open = -1
+
+        ⮐  null if empty pairs
+
+        chosen = null
+
+        for pair in pairs
+            if pair[0] <= xi and xi <= pair[1]
+                chosen = pair
+                break
+
+        # a cursor before a string takes the next pair
+        if not chosen
+            for pair in pairs
+                if pair[0] > xi
+                    chosen = pair
+                    break
+
+        ⮐  null if not chosen
+
+        [o c] = chosen
+
+        if inner
+            ⮐  [@widthAt(segs o+1) y @widthAt(segs c) y]
+
+        # around takes the trailing white space, or the leading one
+        tEnd = @trailingWsEnd segs c+1
+
+        if tEnd > c+1
+            ⮐  [@widthAt(segs o) y @widthAtOrEnd(segs tEnd) y]
+
+        lStart = @leadingWsStart segs o
+
+        [@widthAt(segs lStart) y @widthAtOrEnd(segs c+1) y]
+
+    @flatChars: lines ->
+
+        chars = []
+
+        for line, li in lines
+            w = 0
+            for seg in line
+                chars.push [seg li w]
+                w += kseg.segWidth seg
+
+        chars
+
+    @flatIndexForPos: lines x y ->
+
+        i = 0
+
+        for li in 0...y
+            i += lines[li].length
+
+        segs = lines[y]
+
+        if not empty segs
+            si = kseg.indexAtWidth segs x
+            i += min si segs.length-1
+
+        i
+
+    @rangeForBracketObject: lines x y open close inner ->
+
+        chars = @flatChars lines
+
+        ⮐  null if empty chars
+
+        ci = @flatIndexForPos lines x y
+        ci = chars.length-1 if ci >= chars.length
+
+        ⮐  null if ci < 0
+
+        oi = -1
+
+        if chars[ci][0] == open
+            oi = ci
+        else
+            depth = 0
+            i     = ci
+
+            if chars[ci][0] == close
+                i -= 1
+
+            while i >= 0
+                c = chars[i][0]
+                if c == close
+                    depth += 1
+                else if c == open
+                    if depth > 0
+                        depth -= 1
+                    else
+                        oi = i
+                        break
+                i -= 1
+
+        # a cursor before a pair takes the next one
+        if oi < 0
+            i = ci
+            while i < chars.length
+                if chars[i][0] == open
+                    oi = i
+                    break
+                i += 1
+
+        ⮐  null if oi < 0
+
+        depth = 0
+        ei    = -1
+        i     = oi+1
+
+        while i < chars.length
+            c = chars[i][0]
+            if c == open
+                depth += 1
+            else if c == close
+                if depth == 0
+                    ei = i
+                    break
+                depth -= 1
+            i += 1
+
+        ⮐  null if ei < 0
+
+        ol = chars[oi][1]
+        ow = chars[oi][2]
+        el = chars[ei][1]
+        ew = chars[ei][2]
+
+        owEnd = ow + kseg.segWidth(chars[oi][0])
+        ewEnd = ew + kseg.segWidth(chars[ei][0])
+
+        if inner
+            [owEnd ol ew el]
+        else
+            [ow ol ewEnd el]
 
 export motion

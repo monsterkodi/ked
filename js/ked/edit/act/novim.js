@@ -1,4 +1,4 @@
-var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
+var _k_ = {copy: function (o) { return Array.isArray(o) ? o.slice() : typeof o == 'object' && o.constructor.name == 'Object' ? Object.assign({}, o) : typeof o == 'string' ? ''+o : o }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
 
 import kxk from "../../../kxk.js"
 let kseg = kxk.kseg
@@ -13,7 +13,7 @@ export default {
         switch (cmd.operator)
         {
             case 'delete':
-                return this.deleteByMotion(cmd.motion)
+                return this.applyChange(cmd)
     
             case 'move':
                 return this.moveByMotion(cmd.motion)
@@ -21,10 +21,33 @@ export default {
             case 'undo':
                 return this.undoCommand(cmd.count)
     
+            case 'repeat':
+                return this.repeatChange(cmd.count)
+    
             default:
                 console.log('novim unknown operator ▸',cmd.operator)
         }
     
+    },
+    applyChange:function (cmd)
+    {
+        this.lastChange = cmd
+        return this.deleteByMotion(cmd.motion)
+    },
+    repeatChange:function (count)
+    {
+        var spec
+    
+        if (!this.lastChange)
+        {
+            return
+        }
+        spec = _k_.copy(this.lastChange.motion)
+        if (count > 1)
+        {
+            spec.count = count
+        }
+        return this.deleteByMotion(spec)
     },
     deleteByMotion:function (spec)
     {
@@ -59,9 +82,9 @@ export default {
     },
     moveByMotion:function (spec)
     {
-        var i, n, _60_30_
+        var i, n, _81_30_
     
-        n = _k_.max(1,(((_60_30_=spec.count) != null ? _60_30_ : 1)))
+        n = _k_.max(1,(((_81_30_=spec.count) != null ? _81_30_ : 1)))
         if (_k_.in(spec.kind,['left','right']))
         {
             for (var _b_ = i = 0, _c_ = n; (_b_ <= _c_ ? i < n : i > n); (_b_ <= _c_ ? ++i : --i))
@@ -110,5 +133,5 @@ export default {
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibm92aW0uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvYWN0L25vdmltLmtvZGUiXSwibWFwcGluZ3MiOiI7O09BYWEsVUFBQTtJQUFNOztPQUNMLFdBQVA7T0FBWSxhQUFaOzs7SUFJSCx1QkFBYzs7UUFFVixZQUFJLGtCQUFrQjtnQkFFZixJQUFJOztpQkFDUDt1QkFBVyxLQUFDLGVBQWUsSUFBSTs7aUJBQy9CO3VCQUFXLEtBQUMsYUFBYSxJQUFJOztpQkFDN0I7dUJBQVcsS0FBQyxZQUFZLElBQUk7OztnQkFDakIsWUFBSSwyQkFBMkIsSUFBSTs7OztJQUV0RCx5QkFBZ0I7Ozs7UUFFWixRQUFRLEtBQUMsRUFBRTtRQUNYOzRCQUVjLEtBQUM7OztZQUFYO1lBRUEsTUFBTSxPQUFPLE1BQU0sTUFBTSxPQUFPO2lCQUNoQjs7Z0JBQWhCOztnQkFJWSxLQUFLLGFBQWEsU0FBYSxPQUFPLFdBQVc7O2dCQUE3RDs7WUFFQSxLQUFLLEtBQUs7O1FBRWQsWUFBSSxpQkFBaUI7c0JBRVQ7Ozs7UUFHWixPQUFPLE9BQU8sWUFBWTtRQUUxQixLQUFDO1FBRUQsS0FBQyxhQUFhLEtBQUssS0FBQyxhQUFhLE9BQU8sV0FBVztlQUVuRCxLQUFDOztJQUVMLHVCQUFjOzs7O1FBRVYsWUFBUSxhQUFHLEtBQUssMkJBQVE7bUJBSXJCLEtBQUssTUFBUyxPQUFPOzsyQkFDaEIsSUFBSyxTQUFJLHFCQUFBLFFBQUE7O2dCQUNULEtBQUMsWUFBWSxLQUFLOzs7OztZQUV0QixLQUFDLFlBQVksS0FBSyxNQUFLLE1BQU07O2VBRWpDLEtBQUM7O0lBRUw7Ozs7UUFFSSxVQUFVLEtBQUM7UUFDWCxVQUFVOzRCQUVEOzs7WUFBTDtZQUVBLFFBQVEsS0FBSyxNQUFNLEtBQUMsRUFBRSxNQUFNLEVBQUU7WUFDOUIsY0FBYyxFQUFFLE1BQU0sRUFBRTtnQkFFckIsTUFBSyxFQUFFOztnQkFDTixFQUFFLEtBQVE7Z0JBQ1YsVUFBVTs7O1lBRWY7O21CQUNDLEtBQUMsV0FBVyxTQUFRLEtBQUssS0FBQyxFQUFFOzs7SUFFcEMsc0JBQWE7Ozs7UUFFVCxZQUFRLElBQUcsZ0JBQUEsUUFBUTt1QkFFZixJQUFLLFNBQUkscUJBQUEsUUFBQTs7WUFDVCxLQUFDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibm92aW0uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvYWN0L25vdmltLmtvZGUiXSwibWFwcGluZ3MiOiI7O09BZ0JhLFVBQUE7SUFBTTs7T0FDTCxXQUFQO09BQVksYUFBWjs7O0lBSUgsdUJBQWM7O1FBRVYsWUFBSSxrQkFBa0I7Z0JBRWYsSUFBSTs7aUJBQ1A7dUJBQVcsS0FBQyxZQUFZOztpQkFDeEI7dUJBQVcsS0FBQyxhQUFhLElBQUk7O2lCQUM3Qjt1QkFBVyxLQUFDLFlBQVksSUFBSTs7aUJBQzVCO3VCQUFXLEtBQUMsYUFBYSxJQUFJOzs7Z0JBQ2xCLFlBQUksMkJBQTJCLElBQUk7Ozs7SUFFdEQsc0JBQWE7O1FBRVQsS0FBQyxhQUFhO2VBQ2QsS0FBQyxlQUFlLElBQUk7O0lBRXhCLHVCQUFjOzs7O2FBRUEsS0FBQzs7OztRQUVYLGdCQUFZLEtBQUMsV0FBVztZQUlGLFFBQVE7O1lBQTlCLEtBQUssUUFBUTs7ZUFFYixLQUFDLGVBQWU7O0lBRXBCLHlCQUFnQjs7OztRQUVaLFFBQVEsS0FBQyxFQUFFO1FBQ1g7NEJBRWMsS0FBQzs7O1lBQVg7WUFFQSxNQUFNLE9BQU8sTUFBTSxNQUFNLE9BQU87aUJBQ2hCOztnQkFBaEI7O2dCQUlZLEtBQUssYUFBYSxTQUFhLE9BQU8sV0FBVzs7Z0JBQTdEOztZQUVBLEtBQUssS0FBSzs7UUFFZCxZQUFJLGlCQUFpQjtzQkFFVDs7OztRQUdaLE9BQU8sT0FBTyxZQUFZO1FBRTFCLEtBQUM7UUFFRCxLQUFDLGFBQWEsS0FBSyxLQUFDLGFBQWEsT0FBTyxXQUFXO2VBRW5ELEtBQUM7O0lBRUwsdUJBQWM7Ozs7UUFFVixZQUFRLGFBQUcsS0FBSywyQkFBUTttQkFJckIsS0FBSyxNQUFTLE9BQU87OzJCQUNoQixJQUFLLFNBQUkscUJBQUEsUUFBQTs7Z0JBQ1QsS0FBQyxZQUFZLEtBQUs7Ozs7O1lBRXRCLEtBQUMsWUFBWSxLQUFLLE1BQUssTUFBTTs7ZUFFakMsS0FBQzs7SUFFTDs7OztRQUVJLFVBQVUsS0FBQztRQUNYLFVBQVU7NEJBRUQ7OztZQUFMO1lBRUEsUUFBUSxLQUFLLE1BQU0sS0FBQyxFQUFFLE1BQU0sRUFBRTtZQUM5QixjQUFjLEVBQUUsTUFBTSxFQUFFO2dCQUVyQixNQUFLLEVBQUU7O2dCQUNOLEVBQUUsS0FBUTtnQkFDVixVQUFVOzs7WUFFZjs7bUJBQ0MsS0FBQyxXQUFXLFNBQVEsS0FBSyxLQUFDLEVBQUU7OztJQUVwQyxzQkFBYTs7OztRQUVULFlBQVEsSUFBRyxnQkFBQSxRQUFRO3VCQUVmLElBQUssU0FBSSxxQkFBQSxRQUFBOztZQUNULEtBQUMifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/act/novim.kode

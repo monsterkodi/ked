@@ -95,6 +95,88 @@ mrange = lines x y m -> motion.range lines [x y] m
     # two cursors on one empty line remove it once
     motion.mergeRanges [[0 0 0 0] [0 0 0 0]] ▸ [[0 0 0 0]]
 
+▸ text object ranges
+
+    words = kseg.segls "one two three four"
+
+    wobj = (x area count) -> mrange(words, x, 0, {kind:'textObject', area:area, target:'word', count:count})
+
+    wobj(5, 'inner', 1)  ▸ [4 0 7 0]
+    wobj(5, 'around', 1) ▸ [4 0 8 0]
+    wobj(0, 'inner', 1)  ▸ [0 0 3 0]
+    wobj(0, 'around', 1) ▸ [0 0 4 0]
+
+    # around takes the leading white space when the word ends the line
+    wobj(14, 'around', 1) ▸ [13 0 18 0]
+
+    # on white space the inner object is the white space run
+    wobj(3, 'inner', 1)  ▸ [3 0 4 0]
+
+    # around white space means the next word
+    wobj(3, 'around', 1) ▸ [4 0 8 0]
+
+    # counts cover more words
+    wobj(0, 'inner', 2)  ▸ [0 0 7 0]
+    wobj(0, 'around', 2) ▸ [0 0 8 0]
+    wobj(0, 'inner', 3)  ▸ [0 0 13 0]
+    wobj(0, 'around', 4) ▸ [0 0 18 0]
+
+    # a count can cross a line break, a word cannot
+    mrange(kseg.segls("foo\nbar"), 0, 0, {kind:'textObject', area:'inner', target:'word', count:2}) ▸ [0 0 3 1]
+
+    quoted = kseg.segls 'say "hello there" ok'
+    qobj = (x area) -> mrange(quoted, x, 0, {kind:'textObject', area:area, target:'"', count:1})
+
+    qobj(7, 'inner')  ▸ [5 0 16 0]
+    qobj(7, 'around') ▸ [4 0 18 0]
+
+    # a cursor before the string takes the next pair
+    qobj(0, 'inner')  ▸ [5 0 16 0]
+
+    # after the last pair there is no object
+    mrange(quoted, 20, 0, {kind:'textObject', area:'inner', target:'"', count:1}) ▸ null
+
+    # around falls back to the leading white space
+    lead = kseg.segls 'x = "abc"'
+    lobj = (x area) -> mrange(lead, x, 0, {kind:'textObject', area:area, target:'"', count:1})
+
+    lobj(5, 'inner')  ▸ [5 0 8 0]
+    lobj(5, 'around') ▸ [3 0 9 0]
+
+    single = kseg.segls "a 'b c' d"
+    sobj = (x) -> mrange(single, x, 0, {kind:'textObject', area:'inner', target:"'", count:1})
+
+    sobj(4) ▸ [3 0 6 0]
+
+    parens = kseg.segls 'call(one, two) end'
+    pobj = (x area) -> mrange(parens, x, 0, {kind:'textObject', area:area, target:'(', count:1})
+
+    pobj(8, 'inner')  ▸ [5 0 13 0]
+    pobj(8, 'around') ▸ [4 0 14 0]
+
+    # other bracket kinds inside do not hide the pair
+    mrange(kseg.segls('f(a[1]) x'), 4, 0, {kind:'textObject', area:'inner', target:'(', count:1}) ▸ [2 0 6 0]
+
+    # a cursor before the pair takes it too
+    pobj(0, 'inner') ▸ [5 0 13 0]
+
+    brackets = kseg.segls 'x[one] y{two}'
+    mrange(brackets, 3, 0,  {kind:'textObject', area:'inner', target:'[', count:1}) ▸ [2 0 5 0]
+    mrange(brackets, 10, 0, {kind:'textObject', area:'inner', target:'{', count:1}) ▸ [9 0 12 0]
+
+    # a pair can span lines
+    multiline = kseg.segls """
+        foo(
+          bar
+        )
+        """
+
+    mrange(multiline, 3, 1, {kind:'textObject', area:'inner',  target:'(', count:1}) ▸ [4 0 0 2]
+    mrange(multiline, 3, 1, {kind:'textObject', area:'around', target:'(', count:1}) ▸ [3 0 1 2]
+
+    # no pair, no object
+    mrange(kseg.segls('nothing here'), 0, 0, {kind:'textObject', area:'inner', target:'(', count:1}) ▸ null
+
 ▸ cursor movement
 
     s.loadLines belt.linesForText("one two three\nfour five")
@@ -300,6 +382,130 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     txt "alpha\nbeta"
 
+▸ execute text objects
+
+    s.loadLines belt.linesForText("one two three four")
+    s.setMainCursor 5 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+    txt "one  three four"
+
+    s.loadLines belt.linesForText("one two three four")
+    s.setMainCursor 5 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}}
+    txt "one three four"
+
+    # one past the end acts on the last word
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 7 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+    txt "one "
+
+    # quotes lose their quotes only on the inside
+    s.loadLines belt.linesForText('say "hello there" ok')
+    s.setMainCursor 7 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'"', count:1}}
+    txt 'say "" ok'
+
+    s.loadLines belt.linesForText('say "hello there" ok')
+    s.setMainCursor 7 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'"', count:1}}
+    txt 'say ok'
+
+    # a pair across lines is removed as a whole
+    s.loadLines belt.linesForText("foo(\n  bar\n)")
+    s.setMainCursor 3 1
+
+    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'(', count:1}}
+    txt "foo"
+
+    # dh and dl
+    s.loadLines belt.linesForText("alpha")
+    s.setMainCursor 3 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'charBack', count:1}}
+    txt "alha"
+
+    s.loadLines belt.linesForText("alpha")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+    txt "lpha"
+
+    # at the very start dh deletes nothing
+    s.loadLines belt.linesForText("alpha")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'charBack', count:1}}
+    txt "alpha"
+
+▸ repeat command
+
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+    txt "bcdef"
+
+    s.executeNovim {operator:'repeat', count:1}
+    txt "cdef"
+
+    # a count on the repeat replaces the count of the change
+    s.executeNovim {operator:'repeat', count:2}
+    txt "ef"
+
+    # without a count the change keeps its own count
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
+    txt "cdef"
+
+    s.executeNovim {operator:'repeat', count:1}
+    txt "ef"
+
+    # movement is not repeated
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+    s.executeNovim {operator:'move', motion:{kind:'right', count:1}}
+    s.executeNovim {operator:'repeat', count:1}
+    txt "bdef"
+
+    # undo is not repeated either, and the change survives it
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+    s.executeNovim {operator:'undo', count:1}
+    txt "abcdef"
+
+    s.executeNovim {operator:'repeat', count:1}
+    txt "bcdef"
+
+    # text objects repeat
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}}
+    txt "two three"
+
+    s.executeNovim {operator:'repeat', count:1}
+    txt "three"
+
+    # with no change there is nothing to repeat
+    s.lastChange = null
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'repeat', count:1}
+    txt "abc"
+
 ▸ keys
 
     text = """
@@ -385,3 +591,127 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'u'
 
     txt text
+
+    # arrows complete a pending operator like h j k l
+
+    s.loadLines belt.linesForText("abc def")
+    s.setMainCursor 4 0
+
+    key 'd'
+    m.handleKey 'left' {combo:'left'}
+    txt "abcdef"
+
+    s.loadLines belt.linesForText("abc def")
+    s.setMainCursor 4 0
+
+    key 'd'
+    m.handleKey 'right' {combo:'right'}
+    txt "abc ef"
+
+    s.loadLines belt.linesForText("abc\ndef\nghi")
+    s.setMainCursor 0 1
+
+    key 'd'
+    m.handleKey 'down' {combo:'down'}
+    txt "abc"
+
+    s.loadLines belt.linesForText("abc\ndef\nghi")
+    s.setMainCursor 0 1
+
+    key 'd'
+    m.handleKey 'up' {combo:'up'}
+    txt "ghi"
+
+    # h and l are motions for an operator too
+
+    s.loadLines belt.linesForText("alpha")
+    s.setMainCursor 3 0
+
+    key 'd'
+    key 'h'
+    txt "alha"
+
+    s.loadLines belt.linesForText("alpha")
+    s.setMainCursor 0 0
+
+    key 'd'
+    key 'l'
+    txt "lpha"
+
+    # text objects after an operator
+
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 5 0
+
+    key 'd'
+    key 'i'
+    key 'w'
+    txt "one  three"
+    m.operator ▸ null
+
+    s.loadLines belt.linesForText('say "hello there" ok')
+    s.setMainCursor 7 0
+
+    key 'd'
+    key 'a'
+    key '"'
+    txt "say ok"
+
+    # a count can come before the text object
+
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 0 0
+
+    key 'd'
+    key '2'
+    key 'i'
+    key 'w'
+    txt " three"
+
+    # escape leaves a pending text object
+
+    s.loadLines belt.linesForText("abc")
+
+    key 'd'
+    key 'i'
+    m.handleKey 'esc' {combo:'esc'}
+    txt "abc"
+    m.area ▸ null
+
+    # . repeats the last change
+
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 0 0
+
+    key 'x'
+    txt "bcdef"
+
+    key '.'
+    txt "cdef"
+
+    key '2'
+    key '.'
+    txt "ef"
+
+    # a movement does not replace the change
+
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 0 0
+
+    key 'x'
+    key 'l'
+    key '.'
+    txt "bdef"
+
+    # a text object change repeats too
+
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 0 0
+
+    key 'd'
+    key 'a'
+    key 'w'
+    txt "two three"
+
+    key '.'
+    txt "three"

@@ -18,8 +18,33 @@ function novim
     @operators:
         d: 'delete'
 
+    # arrow keys mean the same as these
+    @arrows:
+        left:  'h'
+        right: 'l'
+        up:    'k'
+        down:  'j'
+
+    # i and a start a text object, these are the objects they know
+    @areas:
+        i: 'inner'
+        a: 'around'
+
+    @textObjects:
+        w: 'word'
+        '"': '"'
+        "'": "'"
+        '(': '('
+        ')': '('
+        b: '('
+        '[': '['
+        ']': '['
+        '{': '{'
+        '}': '{'
+        B: '{'
+
     # standalone commands
-    # deletes carry an implicit motion, the others move or undo
+    # deletes carry an implicit motion, the others move, undo or repeat
     @commands:
         x: (n) -> { operator: 'delete', motion: { kind: 'char'     count: n } }
         X: (n) -> { operator: 'delete', motion: { kind: 'charBack' count: n } }
@@ -29,6 +54,7 @@ function novim
         k: (n) -> { operator: 'move',   motion: { kind: 'up'    count: n } }
         l: (n) -> { operator: 'move',   motion: { kind: 'right' count: n } }
         u: (n) -> { operator: 'undo',   count: n }
+        '.': (n) -> { operator: 'repeat', count: n }
 
     # motions complete a pending operator
     # each receives the count and returns a motion value
@@ -39,6 +65,8 @@ function novim
         b: (n) -> { kind: 'wordBack' count: n }
         '0': -> { kind: 'bol' }
         '$': -> { kind: 'eol' }
+        h: (n) -> { kind: 'charBack' count: n }
+        l: (n) -> { kind: 'char'     count: n }
         j: (n) -> { kind: 'lineDown' count: n }
         k: (n) -> { kind: 'lineUp'   count: n }
 
@@ -49,8 +77,9 @@ function novim
 
     reset: announce=true ->
 
-        @count = ''
+        @count    = ''
         @operator = null
+        @area     = null
         log 'novim reset' if announce
 
     resetOrExit: ->
@@ -65,13 +94,21 @@ function novim
 
     logPending: ->
 
-        log 'novim pending ▸' @operator @count
+        log 'novim pending ▸' @operator @area @count
 
-    complete: spec ->
+    complete: build ->
 
         operator = novim.operators[@operator]
 
-        @execute { operator: operator, motion: spec(@countNumber()) }
+        @execute { operator: operator, motion: build(@countNumber()) }
+        @reset false
+
+    completeTextObject: target ->
+
+        area     = @area
+        operator = novim.operators[@operator]
+
+        @execute { operator: operator, motion: { kind: 'textObject', area: area, target: target, count: @countNumber() } }
         @reset false
 
     execute: cmd -> @state.executeNovim cmd
@@ -95,22 +132,27 @@ function novim
             @resetOrExit()
             ⮐  true
 
-        # arrow keys move the cursor, unless an operator is pending
-        if char in ['left' 'right' 'up' 'down']
-            if @operator
-                @reset()
-            else
-                @execute { operator: 'move', motion: { kind: char, count: @countNumber() } }
-                @reset false
-            ⮐  true
+        # arrows mean the same as h j k l
+        if arrow = novim.arrows[char]
+            char = arrow
 
         # swallow every other non text key
         ⮐  true if char.length != 1
 
-        if @operator
+        if @area
+
+            if target = novim.textObjects[char]
+                @completeTextObject target
+            else
+                @reset()
+
+        else if @operator
 
             if build = novim.motions[char]
                 @complete build
+            else if area = novim.areas[char]
+                @area = area
+                @logPending()
             else if char in '0123456789'
                 @count += char
                 @logPending()
