@@ -148,14 +148,15 @@ function fileeditor extends editor
 
     jumpToWord: word =>
     
-        # log "fileeditor.jumpToWord '#{word}'"
+        log "fileeditor.jumpToWord '#{word}'"
         # log 'fileeditor.jumpToWord classes' Object.keys(indexer.singleton.classes)
         # log 'fileeditor.jumpToWord funcs'   Object.keys(indexer.singleton.funcs)
         
         if clss = indexer.singleton.classes[word]
-
+            log "clss.file" clss.file
             post.emit 'file.open' clss.file clss.line-1
-            ⮐  true
+            ⮐ true
+            
         else if func = indexer.singleton.funcs[word]
 
             if func is arr
@@ -167,8 +168,9 @@ function fileeditor extends editor
                 if func is arr
                     func = func[0]
             if valid func.file
+                log "func.file" func.file
                 post.emit 'file.open' func.file func.line-1 'ind'
-                ⮐  true
+                ⮐ true
         else 
             log "fileeditor.jumpToWord(#{word}) nothing found to jump to"
         false
