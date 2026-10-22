@@ -27,13 +27,9 @@ HEADER  = /^[0█]+$/u
 # splits the word around it and gets a different colour than the letters
 # that are on it, so the list has to have all of them.
 #
-# it is the latin letters, and only the latin letters - the greek letters
-# and the modifier letters stay punctuation, because a noon file with a
-# greek symbol in it looks better that way.
-#
 # \u0100-\u017f is latin extended-a. the rest is latin-1, by hand.
 
-PUNCT   =  /[^\wäöüßÄÖÜáéíóúÁÉÍÓÚñÑçÇàèìòùÀÈÌÒÙâêîôûÂÊÎÔÛãõÃÕåÅæÆœŒøØłŁđĐÀËÏÐÝÞëïðþÿĀ-ſ]+/u
+PUNCT   = /[^\wäöüßÄÖÜáéíóúÁÉÍÓÚñÑçÇàèìòùÀÈÌÒÙâêîôûÂÊÎÔÛãõÃÕåÅæÆœŒøØłŁđĐÀËÏÐÝÞëïðþÿĀ-ſ]+/u
 NUMBER  = /^\d+$/
 FLOAT   = /^\d+f$/
 HEXNUM  = /^0x[a-fA-F\d]+$/
@@ -46,6 +42,7 @@ codeTypes = ['interpolation' 'code triple']
 # the character a grapheme is built on. a grapheme can be more than one
 # character - a quote with a combining mark on it is two - and the
 # highlighter compares characters, not graphemes.
+
 base = s ->
     ⮐  '' if not s
     ⮐  s if s.length == 1
@@ -83,10 +80,6 @@ chunked = segls ext ->
     
     for segs in segls
 
-        # a line that comes in as text is cut into code units, and the
-        # columns of a line with a combining mark or an emoji on it come
-        # out wrong. cut it into graphemes, like the rest of it.
-
         segs = kseg.segl segs
 
         chnks =
@@ -104,9 +97,7 @@ chunked = segls ext ->
 
         continue if empty chunks
 
-        # width of the first i graphemes of the line, built once so that
-        # start columns come out in linear instead of quadratic time
-        widths = [0]
+        widths = [0] # widths of the graphemes of the line
         wsum = 0
         for sg in segs
             wsum += kseg.width sg
@@ -283,8 +274,6 @@ luaComment = ->
     ⮐  if chunk.turd.length < 2
 
     type = 'comment triple'
-
-    # ⮐  if topType and topType not in ['interpolation' type]
 
     if chunk.turd[0..4] in ["--[[" "--]]"]
         
@@ -956,9 +945,6 @@ simpleString = ->
 
     escape()
 
-# true if the chunk in front of this one is a word and sits right against
-# it. a quote behind a word is an apostrophe - 'don't', 'it's', 'we'll' -
-# and a quote that opens a string has a space or a bracket in front of it.
 afterWord = ->
 
     prev = getChunk -1
@@ -1215,18 +1201,6 @@ mdPunct = ->
 
 interpolation = ->
 
-    #  the interpolation breaks out of a double quoted string, and out of
-    #  a triple quoted one too. a triple quoted string is strong - its
-    #  content is not parsed - but the interpolation is not string
-    #  content: it is code, and it is coloured as code.
-    #
-    #  'string triple' is the triple quoted string. the lua string is
-    #  called that as well, but lua has no interpolation to break out of
-    #  and no handler that would ask for one.
-    #
-    #  the call has its parens: a parenless call takes the 'or' with it
-    #  and the whole condition ends up inside the call.
-
     if topType?.startsWith('string double') or topType == 'string triple'
 
         if chunk.turd?.startsWith "\#{"
@@ -1263,7 +1237,6 @@ keyword = ->
     prev = getChunk(-1)
 
     if lang[ext].hasOwnProperty(chunk.match) and (not prev or (prev.match not in ['.'] and (spaced() or (prev.match in ['@''[']) or (prev.clss != 'punct'))))
-    # if lang[ext].hasOwnProperty(chunk.match) and getChunk(-1)?.match not in ['.'] and getChunk(-1)?.clss not in ['punct']
         chunk.clss = lang[ext][chunk.match]
         ⮐  # give coffeeFunc a chance, number bails for us
 
