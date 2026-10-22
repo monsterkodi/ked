@@ -6,7 +6,13 @@
     ███████   ███   ███   ███████  ███   ███  ███   ███  ███      
 ###
 
-use ../kxk ◆ kstr slash
+use ../kxk ◆ kstr slash nfs
+use module
+
+# node's own source map reader carries this file's class name too, so it
+# comes off the module object under one of its own
+
+NodeSourceMap = module.SourceMap
 
 class SourceMap
     
@@ -203,7 +209,49 @@ class SourceMap
         
     decodejs: (encoded) ->
         
-        JSON.parse @base64decode encoded
+        JSON.parse @base64decode(encoded)
+        
+    # where in the source a position in a compiled file came from: the map
+    # sits at the foot of the js, and node's own reader answers the lookup.
+    # lines run from one and columns from zero, the way tokens and
+    # splitFileLine count them. a file that cannot be read, one with no map
+    # in it, and a position before the first mapping all read as nothing.
+    
+    sourcePosition: file line col=0 ○-> # returns file:srcfile line:srcline col:srccol or undefined
+        
+        text = ○ nfs.read file
+        ⮐ if not text
+        
+        # the marker also stands inside the code of any file that writes
+        # one - this file's own js carries it in a string - so the map is
+        # the last marker in the text, at the foot
+        
+        mark = 'sourceMappingURL=data:application/json;base64,'
+        at   = text.lastIndexOf mark
+        ⮐ if at < 0
+        
+        rg = /^[A-Za-z0-9+\/=]*/.exec text[(at + mark.length)..]
+        ⮐ if not rg[0]
+        
+        try
+            map   = @decodejs rg[0]
+            sm    = new NodeSourceMap(map)
+            entry = sm.findEntry line-1, col
+        catch err
+            ⮐
+        
+        ⮐ if not entry.originalSource
+        
+        # the map names its source from where the map itself was written,
+        # so a relative name is read against the directory of the file
+        
+        src = slash.absolute entry.originalSource, slash.dir(file)
+        
+        {
+            file: src
+            line: entry.originalLine+1
+            col:  entry.originalColumn
+        }
         
     # Note that SourceMap VLQ encoding is "backwards".  MIDI-style VLQ encoding puts
     # the most-significant-bit (MSB) from the original value into the MSB of the VLQ

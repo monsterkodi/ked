@@ -15,7 +15,8 @@
 # the map says it does, and that a decoder can make sense of the segments.
 
 use ../kode
-use ../../kxk ◆ slash
+use ../srcmap
+use ../../kxk ◆ slash nfs
 use buffer
 use fs
 
@@ -187,6 +188,21 @@ kodfiles = (dir, out=[]) ->
         else if p.endsWith '.kode'        ➜ out.push p
 
     out
+
+# sourcePosition reads the map back out of a compiled file on disk, so
+# these tests compile a snippet and write the js to a temp file first -
+# node's own sourcemap reader is what answers the lookup
+
+root    = '/tmp/opencode/kedsrcmap'
+tmpfile = slash.path root, 'probe.js'
+
+smap = new srcmap
+
+writeJs = c ○->
+
+    js = kmap c
+    ○ nfs.write tmpfile, js
+    tmpfile
 
 #  ███████  ████████    ███████  ██     ██   ███████   ████████ 
 # ███       ███   ███  ███       ███   ███  ███   ███  ███   ███
@@ -542,3 +558,93 @@ kodfiles = (dir, out=[]) ->
 
         report = wrong.join ' '
         report ▸ ''
+
+    ▸ sourcePosition finds where a position came from
+
+        # the argument of the call sits at column 12 of the one line of
+        # js, and at column 4 of the one line of kode it was written on
+
+        file = ○ writeJs 'log b\n'
+        pos  = ○ smap.sourcePosition file, 1, 12
+
+        pos.file ▸ PROBE
+        pos.line ▸ 1
+        pos.col  ▸ 4
+
+    ▸ sourcePosition takes columns from zero
+
+        # the default column is the start of the line, so asking without
+        # one asks about the start of the line
+
+        file = ○ writeJs 'log b\n'
+        pos  = ○ smap.sourcePosition file, 1
+
+        pos.line ▸ 1
+        pos.col  ▸ 0
+
+    ▸ sourcePosition takes lines from one
+
+        # the third line of the js is the one the assignment landed on,
+        # and the map counts the source from one too
+
+        file = ○ writeJs 'a = 1\n'
+        pos  = ○ smap.sourcePosition file, 3, 0
+
+        pos.file ▸ PROBE
+        pos.line ▸ 1
+        pos.col  ▸ 0
+
+    ▸ sourcePosition says nothing where the map says nothing
+
+        # a class maps its body and not its head, so the first line of
+        # the js has nothing pointing back at the kode
+
+        file = ○ writeJs 'class Foo\n    @: ->\n        @a = 1\n    mthd: -> @a\n'
+        pos  = ○ smap.sourcePosition file, 1, 0
+
+        pos ▸ undefined
+
+    ▸ sourcePosition says nothing for a file with no map
+
+        # -plain writes a sourceURL but no map, and without a map there
+        # is nothing to ask
+
+        js = kplain 'a = 1\n'
+        ○ nfs.write tmpfile, js
+        pos = ○ smap.sourcePosition tmpfile, 1, 0
+
+        pos ▸ undefined
+
+    ▸ sourcePosition says nothing for a file that is not there
+
+        pos = ○ smap.sourcePosition slash.path(root, 'gone.js'), 1, 0
+
+        pos ▸ undefined
+
+    ▸ sourcePosition reads the map at the foot and not the marker in the code
+
+        # the marker is what a file carrying one writes, so it stands in
+        # the code of this very snippet: the map is the last one in the
+        # text, and the one in the string is not a map at all
+
+        c    = 'x = "//# sourceMappingURL=data:application/json;base64,"\nlog x\n'
+        file = ○ writeJs c
+        pos  = ○ smap.sourcePosition file, 4, 0
+
+        pos.file ▸ PROBE
+        pos.line ▸ 2
+        pos.col  ▸ 0
+
+    ▸ sourcePosition names the source from where the map was written
+
+        # a runtime reads the map against the file it is written into, so
+        # a source named relative to that file resolves the same way here
+
+        out = (new kode header:false, map:true).compile 'a = 1\n', PROBE, tmpfile
+        ○ nfs.write tmpfile, out
+
+        pos = ○ smap.sourcePosition tmpfile, 3, 0
+
+        pos.file ▸ PROBE
+        pos.line ▸ 1
+        pos.col  ▸ 0
