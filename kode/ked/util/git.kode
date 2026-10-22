@@ -59,21 +59,18 @@ function git
     # ████████  ███   ███  ████████   ███████  
     
     @exec: args opt ○->
-    
+
         new Promise (resolve reject) ->
         
             try
                 # log "#{r3 'git.exec'} #{b6 cmd}" opt 
                 cmd = '/usr/bin/git ' + args
                 child_process.exec cmd opt (err stdout stderr) ->
-                    # log "git.exec err:#{err} stdout:#{stdout} stderr:#{stderr}"
+
                     if empty err
                         resolve stdout
                     else
-                        # silent git diff outside a .git repo.
-                        ⮐ if err.code == 128 and "is outside repository" in stderr
-                        # silent git diff for removed files.
-                        ⮐ if err.code == 'ENOENT' and 'diff' in args
+                        ⮐ if 'pager diff' in args # silent git diff errors
                         error err
                         error stdout
                         error stderr
