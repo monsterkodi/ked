@@ -21,6 +21,7 @@ saveas = (function ()
         this["onChoicesAction"] = this["onChoicesAction"].bind(this)
         this["closeDialog"] = this["closeDialog"].bind(this)
         this["doSaveAs"] = this["doSaveAs"].bind(this)
+        this["setFile"] = this["setFile"].bind(this)
         this["showDialog"] = this["showDialog"].bind(this)
         this["onInputChange"] = this["onInputChange"].bind(this)
         this["onInputAction"] = this["onInputAction"].bind(this)
@@ -39,6 +40,7 @@ saveas = (function ()
 
     saveas.prototype["onInputAction"] = function (action, text)
     {
+        console.log(`+++ onInputAction ${action} ${text}`)
         switch (action)
         {
             case 'up':
@@ -68,9 +70,14 @@ saveas = (function ()
 
     saveas.prototype["showDialog"] = async function (dir, file)
     {
+        await this.gotoDir(dir,slash.path(dir,file))
+        return this.setFile(file)
+    }
+
+    saveas.prototype["setFile"] = function (file)
+    {
         var i
 
-        await this.gotoDir(dir,slash.path(dir,file))
         this.input.set(file)
         this.input.state.moveCursors('eol')
         if (!_k_.empty(slash.ext(file)))
@@ -108,12 +115,11 @@ saveas = (function ()
         {
             case 'right':
             case 'space':
+            case 'click':
             case 'return':
                 if ((choice != null ? choice.path : undefined) && choice.type === 'file')
                 {
-                    this.input.set(slash.file(choice.path))
-                    this.input.grabFocus()
-                    return
+                    return this.setFile(slash.file(choice.path))
                 }
                 break
         }
@@ -145,11 +151,11 @@ saveas = (function ()
             {
                 return this.choices.grabFocus()
             }
-            if (_k_.in(key,'return'))
+            else if (_k_.in(key,'return'))
             {
                 return this.doSaveAs()
             }
-            if (!(_k_.in(event.char,'\t\n')))
+            else if (!(_k_.in(event.char,'\t\n')))
             {
                 if (result = this.input.onKey(key,event))
                 {
@@ -158,13 +164,10 @@ saveas = (function ()
             }
             return
         }
-        else
+        if (event.char && !(_k_.in(event.char,' \n\t')))
         {
-            if (event.char && !(_k_.in(event.char,' \n\t')))
-            {
-                console.log(`event with char swallowed '${event.char}'`)
-                return
-            }
+            console.log(`event with char swallowed '${event.char}'`)
+            return
         }
         return saveas.__super__.onKey.call(this,key,event)
     }
@@ -174,5 +177,5 @@ saveas = (function ()
 
 export default saveas;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2F2ZWFzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2NvbG1ucy9zYXZlYXMua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozt1QkFhd0I7Ozs7Ozs7Ozs7Ozs7O1FBSWhCLEtBQUMsZ0JBQWdCOytDQUVYLEtBQUMsT0FBTyxLQUFDOzs7OztlQUVEOzs7Ozs7OztnQkFNUDs7aUJBQ0g7aUJBQ0E7dUJBQWMsS0FBQyxRQUFRLGNBQWM7Ozs7Ozs7O1FBRXRCLG9DQUE0Qjs7Ozs7WUFJNUMsS0FBQyxRQUFROzttQkFDUixLQUFDLE1BQU07Ozs7bUJBRVAsS0FBQyxRQUFROzs7Ozs7OztjQUlYLEtBQUMsUUFBUSxJQUFJLE1BQU0sS0FBSyxJQUFJO1FBRTlCLEtBQUMsTUFBTSxJQUFJO1FBQ1gsS0FBQyxNQUFNLE1BQU0sWUFBWTt1QkFDaEIsTUFBTSxJQUFJOzsrQkFDTixTQUFHLE1BQU0sSUFBSSxNQUFNLDJCQUFoQixNQUFNLElBQUksTUFBTSxjQUFoQixNQUFNLElBQUksTUFBTTs7Z0JBQ3hCLEtBQUMsTUFBTSxNQUFNLFlBQVk7OztlQUNqQyxLQUFDLE1BQU07Ozs7Ozs7c0JBSUksS0FBQyxNQUFNOzs7O1FBQ2xCLE9BQU8sTUFBTSxLQUFLLEtBQUMsT0FBTyxLQUFLLEtBQUMsTUFBTTtRQUN0QyxLQUFLLEtBQUssY0FBYztlQUN4QixLQUFDOzs7OztRQUlELEtBQUssS0FBSyxRQUFRO2VBQ2xCLEtBQUM7Ozs7O2dCQUlNOztpQkFFSDtpQkFDQTtpQkFDQTtxQkFDTyxpQkFBQSxPQUFRLHFCQUFTLE9BQU8sU0FBUTs7b0JBQy9CLEtBQUMsTUFBTSxJQUFJLE1BQU0sS0FBSyxPQUFPO29CQUM3QixLQUFDLE1BQU07Ozs7OzswREFHYixPQUFPOzs7Ozs7O1lBSVIsS0FBQzs7OztnQkFFQyxNQUFNOztpQkFDVDt1QkFDTSxLQUFDOztpQkFDUDt1QkFDTSxLQUFDOzs7O1lBRVIsS0FBQyxNQUFNOztnQkFDSCxRQUFPOzt1QkFDSixLQUFDLFFBQVE7O3VCQUNaLElBQU87O3VCQUNKLEtBQUM7O3lCQUNKLE1BQU0sS0FBWTs7b0JBQ2QsU0FBUyxLQUFDLE1BQU0sTUFBTSxJQUFJOzsyQkFDdkI7Ozs7Ozs7Z0JBR1AsTUFBTSxpQkFBUyxNQUFNLEtBQVk7O2dCQUNoQywwQ0FBa0MsTUFBTTs7OztnREFHMUMsSUFBSTs7Ozs7O2VBRVgifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2F2ZWFzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2NvbG1ucy9zYXZlYXMua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozt1QkFXd0I7Ozs7Ozs7Ozs7Ozs7OztRQUloQixLQUFDLGdCQUFnQjsrQ0FFWCxLQUFDLE9BQU8sS0FBQzs7Ozs7ZUFFRDs7Ozs7Ozs7UUFLZCxpQ0FBeUIsVUFBVTtnQkFDNUI7O2lCQUNIO2lCQUNBO3VCQUFjLEtBQUMsUUFBUSxjQUFjOzs7Ozs7OztRQUV0QixvQ0FBNEI7Ozs7O1lBSTVDLEtBQUMsUUFBUTs7bUJBQ1IsS0FBQyxNQUFNOzs7O21CQUVQLEtBQUMsUUFBUTs7Ozs7O2NBSVgsS0FBQyxRQUFRLElBQUksTUFBTSxLQUFLLElBQUk7ZUFDOUIsS0FBQyxRQUFROzs7Ozs7O1FBSVQsS0FBQyxNQUFNLElBQUk7UUFDWCxLQUFDLE1BQU0sTUFBTSxZQUFZO3VCQUNoQixNQUFNLElBQUk7OytCQUNOLFNBQUcsTUFBTSxJQUFJLE1BQU0sMkJBQWhCLE1BQU0sSUFBSSxNQUFNLGNBQWhCLE1BQU0sSUFBSSxNQUFNOztnQkFDeEIsS0FBQyxNQUFNLE1BQU0sWUFBWTs7O2VBQ2pDLEtBQUMsTUFBTTs7Ozs7OztzQkFJSSxLQUFDLE1BQU07Ozs7UUFDbEIsT0FBTyxNQUFNLEtBQUssS0FBQyxPQUFPLEtBQUssS0FBQyxNQUFNO1FBQ3RDLEtBQUssS0FBSyxjQUFjO2VBQ3hCLEtBQUM7Ozs7O1FBSUQsS0FBSyxLQUFLLFFBQVE7ZUFDbEIsS0FBQzs7Ozs7Z0JBSU07O2lCQUVIO2lCQUNBO2lCQUNBO2lCQUNBO3FCQUNPLGlCQUFBLE9BQVEscUJBQVMsT0FBTyxTQUFROzsyQkFDN0IsS0FBQyxRQUFRLE1BQU0sS0FBSyxPQUFPOzs7OzswREFFbkMsT0FBTzs7Ozs7OztZQUlSLEtBQUM7Ozs7Z0JBRUMsTUFBTTs7aUJBQ1Q7dUJBQVUsS0FBQzs7aUJBQ1g7dUJBQVUsS0FBQzs7OztZQUVaLEtBQUMsTUFBTTs7Z0JBRUYsUUFBTzs7dUJBQWEsS0FBQyxRQUFROzs0QkFDN0IsSUFBTzs7dUJBQWEsS0FBQzs7OEJBQ3JCLE1BQU0sS0FBWTs7b0JBQ1gsU0FBUyxLQUFDLE1BQU0sTUFBTSxJQUFJOzsyQkFDdkI7Ozs7O1lBRWYsTUFBTSxpQkFBUyxNQUFNLEtBQVk7O1lBQ2hDLDBDQUFrQyxNQUFNOzs7Z0RBR3RDLElBQUk7Ozs7OztlQUVYIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/saveas.kode

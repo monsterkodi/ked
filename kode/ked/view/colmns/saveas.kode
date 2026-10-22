@@ -4,8 +4,6 @@
     ███████   █████████   ███ ███   ███████   █████████  ███████   
          ███  ███   ███     ███     ███       ███   ███       ███  
     ███████   ███   ███      █      ████████  ███   ███  ███████   
-    
-    the dialog to save the buffer under another name
 ###
 
 use ../../../kxk ▪ slash post
@@ -24,7 +22,7 @@ function saveas extends browse
     autoHide: => 
 
     onInputAction: action text =>
-        # log "+++ onInputAction #{action} #{text}"
+        log "+++ onInputAction #{action} #{text}"
         switch action
             'up'          
             'down'   ➜ ⮐  @choices.moveSelection action
@@ -41,6 +39,9 @@ function saveas extends browse
     showDialog: dir file ○=>
     
         ○ @gotoDir dir slash.path(dir file)
+        @setFile file
+        
+    setFile: file =>
         
         @input.set file
         @input.state.moveCursors 'eol'
@@ -66,12 +67,11 @@ function saveas extends browse
         switch action
             
             'right' 
-            'space'            
+            'space'
+            'click'            
             'return'
                 if choice?.path and choice.type == 'file'
-                    @input.set slash.file(choice.path)
-                    @input.grabFocus()
-                    ⮐ 
+                    ⮐ @setFile slash.file(choice.path)
                     
         super action choice
         
@@ -80,24 +80,20 @@ function saveas extends browse
         ⮐ if @hidden()
 
         switch event.combo
-            'tab' 
-                ⮐ @moveFocus()
-            'esc'
-                ⮐ @closeDialog()     
+            'tab' ➜ ⮐ @moveFocus()
+            'esc' ➜ ⮐ @closeDialog()     
 
         if @input.hasFocus()
-            if key == 'down'
-                ⮐ @choices.grabFocus()
-            if key in 'return'
-                ⮐ @doSaveAs()
-            if event.char not in '\t\n' 
-                if result = @input.onKey key event
-                    ⮐ result
+            if 
+                key == 'down'   ➜ ⮐ @choices.grabFocus()
+                key in 'return' ➜ ⮐ @doSaveAs()
+                event.char not in '\t\n' 
+                    if result = @input.onKey key event
+                        ⮐ result
             ⮐ 
-        else
-            if event.char and event.char not in ' \n\t'
-                log "event with char swallowed '#{event.char}'"
-                ⮐ 
+        if event.char and event.char not in ' \n\t'
+            log "event with char swallowed '#{event.char}'"
+            ⮐ 
             
         super key event
         

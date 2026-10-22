@@ -59,7 +59,7 @@ function gutter extends view
             idx = pos[1]+@state.s.view[1]
             if @gitChanges[idx]
                 if event.type == 'press'
-                    log 'todo: press on git change!' @gitChanges[idx]
+                    log 'todo: press on git change!' idx @gitChanges
                 else if event.type == 'move'
                     if @gitChanges[idx].old
                         @preview = [idx]
