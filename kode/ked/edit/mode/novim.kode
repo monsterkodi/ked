@@ -18,12 +18,17 @@ function novim
     @operators:
         d: 'delete'
 
-    # standalone delete commands
-    # each one is a delete with an implicit motion
+    # standalone commands
+    # deletes carry an implicit motion, the others move or undo
     @commands:
-        x: (n) -> { kind: 'char'     count: n }
-        X: (n) -> { kind: 'charBack' count: n }
-        D: -> { kind: 'eol' }
+        x: (n) -> { operator: 'delete', motion: { kind: 'char'     count: n } }
+        X: (n) -> { operator: 'delete', motion: { kind: 'charBack' count: n } }
+        D: -> { operator: 'delete', motion: { kind: 'eol' } }
+        h: (n) -> { operator: 'move',   motion: { kind: 'left'  count: n } }
+        j: (n) -> { operator: 'move',   motion: { kind: 'down'  count: n } }
+        k: (n) -> { operator: 'move',   motion: { kind: 'up'    count: n } }
+        l: (n) -> { operator: 'move',   motion: { kind: 'right' count: n } }
+        u: (n) -> { operator: 'undo',   count: n }
 
     # motions complete a pending operator
     # each receives the count and returns a motion value
@@ -90,6 +95,15 @@ function novim
             @resetOrExit()
             ⮐  true
 
+        # arrow keys move the cursor, unless an operator is pending
+        if char in ['left' 'right' 'up' 'down']
+            if @operator
+                @reset()
+            else
+                @execute { operator: 'move', motion: { kind: char, count: @countNumber() } }
+                @reset false
+            ⮐  true
+
         # swallow every other non text key
         ⮐  true if char.length != 1
 
@@ -110,7 +124,7 @@ function novim
 
         else if command = novim.commands[char]
 
-            @execute { operator: 'delete', motion: command(@countNumber()) }
+            @execute command(@countNumber())
             @reset false
 
         else if char in '0123456789'

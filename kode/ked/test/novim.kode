@@ -95,6 +95,65 @@ mrange = lines x y m -> motion.range lines [x y] m
     # two cursors on one empty line remove it once
     motion.mergeRanges [[0 0 0 0] [0 0 0 0]] ▸ [[0 0 0 0]]
 
+▸ cursor movement
+
+    s.loadLines belt.linesForText("one two three\nfour five")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'move', motion:{kind:'right', count:2}}
+    cur 2 0
+
+    s.executeNovim {operator:'move', motion:{kind:'left', count:1}}
+    cur 1 0
+
+    s.executeNovim {operator:'move', motion:{kind:'down', count:1}}
+    cur 1 1
+
+    s.executeNovim {operator:'move', motion:{kind:'up', count:1}}
+    cur 1 0
+
+    # horizontal movement stays on the line
+
+    s.setMainCursor 13 0
+    s.executeNovim {operator:'move', motion:{kind:'right', count:2}}
+    cur 13 0
+
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'move', motion:{kind:'left', count:3}}
+    cur 0 0
+
+    # vertical movement keeps the column, clamped to the line it lands on
+
+    s.setMainCursor 13 0
+    s.executeNovim {operator:'move', motion:{kind:'down', count:1}}
+    cur 9 1
+
+    # and it stays inside the buffer
+
+    s.executeNovim {operator:'move', motion:{kind:'down', count:9}}
+    cur 9 1
+
+    s.executeNovim {operator:'move', motion:{kind:'up', count:9}}
+    cur 9 0
+
+    # every cursor moves
+
+    s.loadLines belt.linesForText("abc\ndef")
+    s.setCursors [[0 0] [1 1]]
+    s.executeNovim {operator:'move', motion:{kind:'right', count:1}}
+    s.allCursors() ▸ [[1 0] [2 1]]
+
+    # moving edits nothing and adds no undo step
+
+    s.loadLines belt.linesForText("abc\ndef")
+    s.setMainCursor 0 0
+
+    history = s.h.length
+    s.executeNovim {operator:'move', motion:{kind:'right', count:2}}
+    s.h.length ▸ history
+
+    txt "abc\ndef"
+
 ▸ execute command
 
     text = """
@@ -180,6 +239,30 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     txt text
 
+▸ undo command
+
+    s.loadLines belt.linesForText("alpha beta\ngamma delta")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'word', count:1}}
+    txt "beta\ngamma delta"
+
+    s.executeNovim {operator:'undo', count:1}
+    txt "alpha beta\ngamma delta"
+    cur 0 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
+    s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
+    txt ""
+
+    s.executeNovim {operator:'undo', count:2}
+    txt "alpha beta\ngamma delta"
+
+    # there is nothing left to undo
+
+    s.executeNovim {operator:'undo', count:5}
+    txt "alpha beta\ngamma delta"
+
 ▸ execute command with multiple cursors
 
     text = """
@@ -258,3 +341,47 @@ mrange = lines x y m -> motion.range lines [x y] m
         lpha beta
         gamma delta
         """
+
+    # movement keys and arrows
+
+    s.loadLines belt.linesForText(text)
+    s.setMainCursor 0 0
+
+    key 'l'
+    cur 1 0
+
+    key '2'
+    key 'l'
+    cur 3 0
+
+    m.handleKey 'down' {combo:'down'}
+    cur 3 1
+
+    key 'k'
+    cur 3 0
+
+    m.handleKey 'up' {combo:'up'}
+    cur 3 0
+
+    m.handleKey 'left' {combo:'left'}
+    cur 2 0
+
+    key '2'
+    m.handleKey 'right' {combo:'right'}
+    cur 4 0
+
+    # undo is a command too
+
+    s.setMainCursor 0 0
+
+    key 'd'
+    key 'w'
+
+    txt """
+        beta
+        gamma delta
+        """
+
+    key 'u'
+
+    txt text

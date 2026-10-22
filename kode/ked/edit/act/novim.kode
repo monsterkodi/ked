@@ -4,11 +4,14 @@
     a novim command is a plain value
 
         { operator: 'delete', motion: { kind: 'word', count: 3 } }
+        { operator: 'move',   motion: { kind: 'left', count: 2 } }
+        { operator: 'undo',   count: 3 }
 
     the mode decodes keys into such a value
     this module turns the value into buffer edits
 ###
 
+use ../../../kxk ▪ kseg
 use ../tool ◆ belt motion
 
 export
@@ -19,6 +22,8 @@ export
 
         switch cmd.operator
             'delete' ➜ @deleteByMotion cmd.motion
+            'move'   ➜ @moveByMotion cmd.motion
+            'undo'   ➜ @undoCommand cmd.count
             else     ➜ log 'novim unknown operator ▸' cmd.operator
 
     deleteByMotion: spec ->
@@ -49,3 +54,41 @@ export
         @deleteRanges rngs @allCursors() motion.isLinewise(spec)
 
         @end()
+
+    moveByMotion: spec ->
+
+        n = max 1 (spec.count ? 1)
+
+        # a horizontal move never wraps to the next line,
+        # so a count is a number of single steps
+        if spec.kind in ['left' 'right']
+            for i in 0...n
+                @moveCursors spec.kind
+        else
+            @moveCursors spec.kind count:n
+
+        @clampCursorsToLines()
+
+    clampCursorsToLines: ->
+
+        cursors = @allCursors()
+        changed = false
+
+        for c in cursors
+
+            width = kseg.width @s.lines[c[1]]
+            x     = clamp 0 width c[0]
+
+            if x != c[0]
+                c[0]    = x
+                changed = true
+
+        if changed
+            @setCursors cursors main:@s.main
+
+    undoCommand: count ->
+
+        n = max 1 (count ? 1)
+
+        for i in 0...n
+            @undo()
