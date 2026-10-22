@@ -1,0 +1,253 @@
+###
+    motions
+
+    a motion is a plain value like {kind:'word', count:3}
+
+    range turns one into a line range [startX startY endX endY]
+    for a given position, without touching the editor state
+
+    kinds
+
+        char charBack   count characters after or before the cursor
+        word            to the start of the count-th word after
+        wordEnd         to the end of the count-th word after
+        wordBack        to the start of the count-th word before
+        bol eol         to the start or end of the line
+        line            count lines, starting with the current one
+        lineDown        current line and count lines below
+        lineUp          count lines above and the current one
+###
+
+use ../../../kxk ▪ kseg
+
+function motion
+
+    @isLinewise: spec -> spec.kind in ['line' 'lineDown' 'lineUp']
+
+    # cursors can share a line, so their ranges can overlap or repeat.
+    # one merged range per region keeps deleteRanges from deleting twice.
+    @mergeRanges: rngs ->
+
+        ⮐  [] if empty rngs
+
+        rngs.sort (a b) -> if a[1] == b[1] then a[0]-b[0] else a[1]-b[1]
+
+        merged = []
+
+        for rng in rngs
+
+            if empty merged
+                merged.push rng
+                continue
+
+            tail = merged[-1]
+
+            sameLine = rng[1] == tail[3]
+            overlaps = rng[1] < tail[3] or (sameLine and rng[0] < tail[2])
+            touches  = sameLine and rng[0] == tail[2]
+
+            if overlaps or touches
+                if rng[3] > tail[3] or (rng[3] == tail[3] and rng[2] > tail[2])
+                    tail[2] = rng[2]
+                    tail[3] = rng[3]
+            else
+                merged.push rng
+
+        merged
+
+    @range: lines pos spec ->
+
+        ⮐  null if empty lines
+
+        [x y] = pos
+
+        y     = clamp 0 lines.length-1 y
+        x     = clamp 0 kseg.width(lines[y]) x
+        count = max 1 (spec.count ? 1)
+
+        switch spec.kind
+            'char'     ➜ @rangeForChars    lines x y count
+            'charBack' ➜ @rangeForCharsBack lines x y count
+            'word'     ➜ @rangeForWord     lines x y count
+            'wordEnd'  ➜ @rangeForWordEnd  lines x y count
+            'wordBack' ➜ @rangeForWordBack lines x y count
+            'bol'      ➜ @rangeForBol      lines x y
+            'eol'      ➜ @rangeForEol      lines x y
+            'line'     ➜ @rangeForLines    lines y y+count-1
+            'lineDown' ➜ @rangeForLines    lines y y+count
+            'lineUp'   ➜ @rangeForLines    lines y-count y
+
+    # ranges for a single line
+
+    @rangeForChars: lines x y count ->
+        width = kseg.width lines[y]
+        x     = min x width
+        [x y min(x+count width) y]
+
+    @rangeForCharsBack: lines x y count ->
+        x = min x kseg.width(lines[y])
+        [max(0 x-count) y x y]
+
+    @rangeForBol: lines x y ->
+        [0 y min(x kseg.width(lines[y])) y]
+
+    @rangeForEol: lines x y ->
+        width = kseg.width lines[y]
+        [min(x width) y width y]
+
+    @rangeForLines: lines startLine endLine ->
+        startLine = clamp 0 lines.length-1 startLine
+        endLine   = clamp 0 lines.length-1 endLine
+        [0 startLine kseg.width(lines[endLine]) endLine]
+
+    # ranges for word motions
+
+    @rangeForWord: lines x y count ->
+
+        pos = [x y]
+
+        for n in 0...count
+
+            # as in vim, the last step of a word motion with an operator
+            # stops at the end of the line instead of crossing it
+            pos = @wordStartAfter lines pos (n == count-1)
+
+        # an exclusive motion that ends in column 0 of a later line
+        # ends at the end of the line before it, so no line is joined
+        if pos[0] == 0 and pos[1] > y
+            pos = [kseg.width(lines[pos[1]-1]) pos[1]-1]
+
+        [x y pos[0] pos[1]]
+
+    @rangeForWordEnd: lines x y count ->
+
+        pos = [x y]
+
+        for n in 0...count
+            pos = @wordEndAfter lines pos
+
+        [x y pos[0] pos[1]]
+
+    @rangeForWordBack: lines x y count ->
+
+        pos = [x y]
+
+        for n in 0...count
+            pos = @wordStartBefore lines pos
+
+        [pos[0] pos[1] x y]
+
+    # scanning graphemes
+
+    @category: seg ->
+
+        if empty seg
+            ⮐  'empty'
+        if /\s+/.test seg
+            ⮐  'ws'
+        if /\w+/.test seg
+            ⮐  'word'
+        'punct'
+
+    @widthAt: segs i -> kseg.widthAtSegi segs i
+
+    # start of the next word, crossing lines and skipping empty ones
+    # with eol the motion stops at the end of the current line,
+    # which is what an operator wants for its last word step
+    @wordStartAfter: lines pos eol=false ->
+
+        [x y] = pos
+
+        segs = lines[y]
+        i    = kseg.indexAtWidth segs x
+
+        if i < segs.length
+
+            cat = @category segs[i]
+
+            if cat != 'ws'
+                while i < segs.length and @category(segs[i]) == cat
+                    i += 1
+
+            while i < segs.length and @category(segs[i]) == 'ws'
+                i += 1
+
+            ⮐  [@widthAt(segs i) y] if i < segs.length
+
+        ⮐  [kseg.width(segs) y] if eol
+
+        for yy in (y+1)...lines.length
+
+            line = lines[yy]
+            j    = 0
+
+            while j < line.length and @category(line[j]) == 'ws'
+                j += 1
+
+            ⮐  [@widthAt(line j) yy] if j < line.length
+
+        [kseg.width(segs) y]
+
+    # position just after the last character of the next word
+    @wordEndAfter: lines pos ->
+
+        [x y] = pos
+
+        segs = lines[y]
+        i    = kseg.indexAtWidth segs x
+
+        while true
+
+            if i >= segs.length
+                if y+1 >= lines.length
+                    ⮐  [kseg.width(segs) y]
+                y   += 1
+                segs = lines[y]
+                i    = 0
+                continue
+
+            cat = @category segs[i]
+
+            if cat == 'ws'
+                i += 1
+                continue
+
+            j = i
+
+            while j+1 < segs.length and @category(segs[j+1]) == cat
+                j += 1
+
+            ⮐  [@widthAt(segs j+1) y] if j > i
+
+            # already on the last character of this word
+            i = j+1
+
+    # start of the previous word, crossing lines and skipping empty ones
+    @wordStartBefore: lines pos ->
+
+        [x y] = pos
+
+        segs = lines[y]
+        i    = kseg.indexAtWidth segs x
+
+        while true
+
+            if i <= 0
+                ⮐  [0 0] if y <= 0
+                y   -= 1
+                segs = lines[y]
+                i    = segs.length
+                continue
+
+            i -= 1
+
+            cat = @category segs[i]
+
+            continue if cat == 'ws'
+
+            while i > 0 and @category(segs[i-1]) == cat
+                i -= 1
+
+            ⮐  [@widthAt(segs i) y]
+
+export motion

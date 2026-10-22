@@ -7,7 +7,7 @@
 
 vi style commands
 swallows text input while active and maps keys to actions
-actions are logged for now, the buffer is not modified
+an action is a command value executed by edit▸act▸novim
 ###
 
 use ../../theme ◆ color
@@ -19,24 +19,23 @@ function novim
         d: 'delete'
 
     # standalone delete commands
+    # each one is a delete with an implicit motion
     @commands:
-        x: (n) -> novim.plural n 'character' 'characters'
-        X: (n) -> novim.plural(n 'character' 'characters') + ' before'
-        D: -> 'to end of line'
+        x: (n) -> { kind: 'char'     count: n }
+        X: (n) -> { kind: 'charBack' count: n }
+        D: -> { kind: 'eol' }
 
     # motions complete a pending operator
-    # each motion receives the count and returns the action description
+    # each receives the count and returns a motion value
     @motions:
-        d: (n) -> novim.plural n 'line' 'lines'
-        w: (n) -> novim.plural n 'word' 'words'
-        e: (n) -> 'to end of ' + novim.plural(n 'word' 'words')
-        b: (n) -> novim.plural(n 'word' 'words') + ' back'
-        '0': -> 'to start of line'
-        '$': -> 'to end of line'
-        j: (n) -> novim.plural(n 'line' 'lines') + ' down'
-        k: (n) -> novim.plural(n 'line' 'lines') + ' up'
-
-    @plural: n one many -> if n == 1 then one else "#{n} #{many}"
+        d: (n) -> { kind: 'line'     count: n }
+        w: (n) -> { kind: 'word'     count: n }
+        e: (n) -> { kind: 'wordEnd'  count: n }
+        b: (n) -> { kind: 'wordBack' count: n }
+        '0': -> { kind: 'bol' }
+        '$': -> { kind: 'eol' }
+        j: (n) -> { kind: 'lineDown' count: n }
+        k: (n) -> { kind: 'lineUp'   count: n }
 
     @: @state ->
 
@@ -61,15 +60,16 @@ function novim
 
     logPending: ->
 
-        count = @count ? ''
-        count += ' ' if count
-        log "#{novim.operators[@operator]} #{count}..."
+        log 'novim pending ▸' @operator @count
 
-    complete: motion ->
+    complete: spec ->
 
-        n = @countNumber()
-        log "#{novim.operators[@operator]} #{motion(n)}"
+        operator = novim.operators[@operator]
+
+        @execute { operator: operator, motion: spec(@countNumber()) }
         @reset false
+
+    execute: cmd -> @state.executeNovim cmd
 
     # ███   ███  ████████  ███   ███
     # ███  ███   ███        ███ ███
@@ -95,8 +95,8 @@ function novim
 
         if @operator
 
-            if motion = novim.motions[char]
-                @complete motion
+            if build = novim.motions[char]
+                @complete build
             else if char in '0123456789'
                 @count += char
                 @logPending()
@@ -110,7 +110,7 @@ function novim
 
         else if command = novim.commands[char]
 
-            log "delete #{command(@countNumber())}"
+            @execute { operator: 'delete', motion: command(@countNumber()) }
             @reset false
 
         else if char in '0123456789'

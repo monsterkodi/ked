@@ -117,7 +117,7 @@ export
     
         @deleteRanges @allSelections() @allCursors()
         
-    deleteRanges: rngs posl ->
+    deleteRanges: rngs posl linewise=true ->
         
         ⮐  if empty rngs
         
@@ -125,7 +125,7 @@ export
         
         @pushState() if not @beginIndex
 
-        [lines cursors] = belt.deleteLineRangesAndAdjustPositions @s.lines rngs posl
+        [lines cursors] = belt.deleteLineRangesAndAdjustPositions @s.lines rngs posl linewise
 
         @deselect()
         @clearHighlights()

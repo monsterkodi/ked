@@ -1,0 +1,260 @@
+###
+    novim
+
+    keys become command values, command values become buffer edits.
+    the motions are pure: lines and a position in, a range out.
+###
+
+use ../../kxk       ▪ kseg
+use ../edit/tool    ◆ belt motion
+use ../edit         ◆ state
+use ../edit/mode ◆ novim
+
+cells = cols:55 rows:66
+s = new state cells 'test'
+
+txt = t -> kseg.str(s.s.lines) ▸ t
+cur = x y -> s.mainCursor() ▸ [x y]
+
+mrange = lines x y m -> motion.range lines [x y] m
+
+▸ motion ranges
+
+    segls  = kseg.segls """
+        one two three
+        four five
+        """
+
+    ▸ words
+
+        mrange(segls, 0, 0, {kind:'word',     count:1}) ▸ [0 0 4 0]
+        mrange(segls, 4, 0, {kind:'word',     count:1}) ▸ [4 0 8 0]
+
+        # the last word of a line: the motion stops at the end of the line,
+        # the newline is not part of the range
+        mrange(segls, 8, 0, {kind:'word',     count:1}) ▸ [8 0 13 0]
+
+        # the last character of the buffer: there is nowhere to go
+        mrange(segls, 8, 1, {kind:'word',     count:1}) ▸ [8 1 9 1]
+
+        mrange(segls, 0, 0, {kind:'wordEnd',  count:1}) ▸ [0 0 3 0]
+        mrange(segls, 4, 0, {kind:'wordEnd',  count:2}) ▸ [4 0 13 0]
+        mrange(segls, 8, 0, {kind:'wordBack', count:1}) ▸ [4 0 8 0]
+        mrange(segls, 4, 0, {kind:'wordBack', count:1}) ▸ [0 0 4 0]
+
+        # at the very start there is nothing to delete backwards
+        mrange(segls, 0, 0, {kind:'wordBack', count:1}) ▸ [0 0 0 0]
+
+    ▸ words across lines
+
+        across = kseg.segls """
+            foo
+              bar
+              baz
+            """
+
+        # the last step of an operator motion stops at the end of its line,
+        # so deleting a word does not join lines
+        mrange(across, 0, 0, {kind:'word', count:1}) ▸ [0 0 3 0]
+        mrange(across, 0, 0, {kind:'word', count:2}) ▸ [0 0 5 1]
+
+    ▸ lines
+
+        mrange(segls, 3, 1, {kind:'line',     count:1}) ▸ [0 1 9 1]
+        mrange(segls, 3, 0, {kind:'line',     count:2}) ▸ [0 0 9 1]
+
+        # a count past the end is clamped
+        mrange(segls, 3, 0, {kind:'line',     count:9}) ▸ [0 0 9 1]
+
+        mrange(segls, 3, 0, {kind:'lineDown', count:1}) ▸ [0 0 9 1]
+        mrange(segls, 3, 0, {kind:'lineDown', count:9}) ▸ [0 0 9 1]
+        mrange(segls, 3, 1, {kind:'lineUp',   count:1}) ▸ [0 0 9 1]
+        mrange(segls, 3, 0, {kind:'lineUp',   count:1}) ▸ [0 0 13 0]
+
+    ▸ chars
+
+        mrange(segls, 0, 0,  {kind:'char',     count:2}) ▸ [0 0 2 0]
+        mrange(segls, 11, 0, {kind:'char',     count:5}) ▸ [11 0 13 0]
+        mrange(segls, 3, 0,  {kind:'charBack', count:2}) ▸ [1 0 3 0]
+        mrange(segls, 3, 0,  {kind:'charBack', count:9}) ▸ [0 0 3 0]
+
+        mrange(segls, 11, 0, {kind:'bol'}) ▸ [0 0 11 0]
+        mrange(segls, 11, 0, {kind:'eol'}) ▸ [11 0 13 0]
+        mrange(segls, 13, 0, {kind:'eol'}) ▸ [13 0 13 0]
+
+▸ merging ranges
+
+    motion.mergeRanges [[0 0 1 0] [1 0 2 0]] ▸ [[0 0 2 0]]
+    motion.mergeRanges [[0 0 3 0] [0 0 3 0]] ▸ [[0 0 3 0]]
+    motion.mergeRanges [[0 0 3 0] [1 0 3 0]] ▸ [[0 0 3 0]]
+    motion.mergeRanges [[0 0 5 1] [0 1 3 1]] ▸ [[0 0 5 1]]
+
+    # ranges on different lines stay apart
+    motion.mergeRanges [[0 0 3 0] [0 1 3 1]] ▸ [[0 0 3 0] [0 1 3 1]]
+
+    # two cursors on one empty line remove it once
+    motion.mergeRanges [[0 0 0 0] [0 0 0 0]] ▸ [[0 0 0 0]]
+
+▸ execute command
+
+    text = """
+        alpha beta
+        gamma delta
+        """
+
+    s.loadLines belt.linesForText(text)
+
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'delete', motion:{kind:'word', count:1}}
+
+    txt """
+        beta
+        gamma delta
+        """
+    cur 0 0
+
+    s.setMainCursor 2 1
+    s.executeNovim {operator:'delete', motion:{kind:'eol'}}
+
+    txt """
+        beta
+        ga
+        """
+    cur 2 1
+
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
+
+    txt """
+        ga
+        """
+    cur 0 0
+
+    s.loadLines belt.linesForText(text)
+
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'delete', motion:{kind:'char', count:3}}
+
+    txt """
+        ha beta
+        gamma delta
+        """
+
+    s.setMainCursor 5 1
+    s.executeNovim {operator:'delete', motion:{kind:'charBack', count:3}}
+
+    txt """
+        ha beta
+        ga delta
+        """
+
+    # a charwise delete of a whole line leaves an empty line
+
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'delete', motion:{kind:'eol'}}
+
+    txt """
+        
+        ga delta
+        """
+
+▸ execute command undo
+
+    text = """
+        alpha beta
+        gamma delta
+        """
+
+    s.loadLines belt.linesForText(text)
+
+    before = s.h.length
+
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'delete', motion:{kind:'line', count:2}}
+
+    txt """
+        """
+    (s.h.length - before) ▸ 1
+
+    s.undo()
+
+    txt text
+
+▸ execute command with multiple cursors
+
+    text = """
+        alpha beta
+        gamma delta
+        """
+
+    s.loadLines belt.linesForText(text)
+
+    s.setCursors [[0 0] [0 1]]
+
+    s.executeNovim {operator:'delete', motion:{kind:'word', count:1}}
+
+    txt """
+        beta
+        delta
+        """
+    s.allCursors().length ▸ 2
+
+    # two cursors on the same line delete one merged range
+
+    s.loadLines belt.linesForText("abc def")
+    s.setCursors [[0 0] [1 0]]
+
+    s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
+
+    txt " def"
+
+    # an empty line is still a line to delete
+
+    s.loadLines belt.linesForText("\nalpha\nbeta")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
+
+    txt "alpha\nbeta"
+
+▸ keys
+
+    text = """
+        alpha beta
+        gamma delta
+        """
+
+    s.loadLines belt.linesForText(text)
+
+    m = new novim s
+
+    key = c -> m.handleKey c {combo:c, char:c}
+
+    key 'd'
+    key '2'
+    key 'w'
+
+    txt """
+        
+        gamma delta
+        """
+
+    # escape throws the pending operator away
+
+    s.loadLines belt.linesForText(text)
+    s.setMainCursor 0 0
+
+    key 'd'
+    m.handleKey 'esc' {combo:'esc'}
+
+    txt text
+    m.operator ▸ null
+
+    # a standalone command is a delete with an implicit motion
+
+    key 'x'
+
+    txt """
+        lpha beta
+        gamma delta
+        """

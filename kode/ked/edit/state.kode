@@ -15,7 +15,7 @@
 use ../../kxk ▪ immutable kstr kseg events absMin
 use ../../kxk ◆ clip
 use ../util   ◆ syntax
-use ./act     ◆ del insert select join indent multi main
+use ./act     ◆ del insert select join indent multi main novim
 use ./tool    ◆ belt
 use           ◆ keys mode
 
@@ -27,7 +27,7 @@ function state extends events
         
         @allowedModes = {}
 
-        for act in [del insert select join indent multi main]
+        for act in [del insert select join indent multi main novim]
             for k,v of act
                 @[k] = v.bind @
                 

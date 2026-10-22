@@ -64,6 +64,9 @@ use ../edit/tool ◆ belt
             """
             
         belt.deleteLineRangesAndAdjustPositions lines [[0 0 6 1]] [[6 0] [6 1]] ▸ [[kseg('line 3')] [[0 0]]]
+
+        # a charwise range that covers a whole line keeps the line
+        belt.deleteLineRangesAndAdjustPositions lines [[0 0 6 0]] [[0 0]] false ▸ [[kseg('') kseg('line 2') kseg('line 3')] [[0 0]]]
                 
     # ███  ███   ███   ███████  ████████  ████████   █████████  
     # ███  ████  ███  ███       ███       ███   ███     ███     

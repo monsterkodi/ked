@@ -132,7 +132,7 @@ function edit
     # ███   ███  ███       ███      ███          ███     ███       
     # ███████    ████████  ███████  ████████     ███     ████████  
     
-    @deleteLineRangesAndAdjustPositions: lines rngs posl ->
+    @deleteLineRangesAndAdjustPositions: lines rngs posl linewise=true ->
         
         lines = lines.map (l) -> l
         posl  = clone posl
@@ -151,7 +151,7 @@ function edit
             
             if rng[1] == rng[3] # single line range
                 
-                if rng[0] == 0 and rng[2] == lines[rng[1]].length
+                if linewise and rng[0] == 0 and rng[2] == lines[rng[1]].length
                     lines.splice rng[1] 1
                 else
                     lines.splice rng[1] 1 lines[rng[1]][0...rng[0]].concat(lines[rng[1]][rng[2]..])   

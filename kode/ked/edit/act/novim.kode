@@ -1,0 +1,51 @@
+###
+    novim commands
+
+    a novim command is a plain value
+
+        { operator: 'delete', motion: { kind: 'word', count: 3 } }
+
+    the mode decodes keys into such a value
+    this module turns the value into buffer edits
+###
+
+use ../tool ◆ belt motion
+
+export
+
+    executeNovim: cmd ->
+
+        log 'novim command ▸' cmd
+
+        switch cmd.operator
+            'delete' ➜ @deleteByMotion cmd.motion
+            else     ➜ log 'novim unknown operator ▸' cmd.operator
+
+    deleteByMotion: spec ->
+
+        lines = @s.lines
+        rngs  = []
+
+        for cursor in @allCursors()
+
+            rng = motion.range lines cursor spec
+            continue if not rng
+
+            # a linewise motion on an empty line is an empty range,
+            # but there is still a line to remove
+            continue if belt.isEmptyRange(rng) and not motion.isLinewise(spec)
+
+            rngs.push rng
+
+        log 'novim ranges ▸' rngs
+
+        ⮐  if empty rngs
+
+        # cursors can share a line, so ranges can overlap
+        rngs = motion.mergeRanges rngs
+
+        @begin()
+
+        @deleteRanges rngs @allCursors() motion.isLinewise(spec)
+
+        @end()
