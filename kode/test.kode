@@ -32,10 +32,6 @@ if lastArg == 'help'
 
 tests = {}; for m in mods ➜ tests[m] = true
 
-#  a run that failed is a run that failed: the tester answers with the
-#  failures of a module, and with nothing at all when the module carries no
-#  sections.  both are told apart here.
-
 fail = false
 
 hdr = h -> log B5(y5(' ' + kstr.crop(h, columns) + ' '))
@@ -77,9 +73,6 @@ for mod in mods
             fail = fail or not (result ? true)
         
 tester.summarize()
-
-#  the code is set, not the exit taken: the summary is on stdout, and it
-#  should have all of it before the process goes
 
 if fail
     process.exitCode = 1
