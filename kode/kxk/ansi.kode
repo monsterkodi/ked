@@ -267,7 +267,7 @@ class Ansi
                         if fg.length
                             style += "background-color:#{fg};" 
                         else
-                            style += 'background-color:#fff;'                            
+                            style += 'background-color:#fff;'
                     else
                         style += "color:#{fg};"            if fg.length
                         style += "background-color:#{bg};" if bg.length
