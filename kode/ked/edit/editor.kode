@@ -161,16 +161,15 @@ function editor extends draw
     grabFocus: =>
     
         @show() if @hidden()
+        log "#{@name} grabFocus"
         post.emit 'focus' @name
         @redraw()
         
-    hasFocus: =>
-        
-        @state.hasFocus
+    hasFocus: => @state.hasFocus
         
     onFocus: name =>
-        
         @state.hasFocus = (name == @name)
+        log "#{@name} hasFocus #{@hasFocus()}"
         
     # ████████   ████████  ███████    ████████    ███████   ███   ███  
     # ███   ███  ███       ███   ███  ███   ███  ███   ███  ███ █ ███  

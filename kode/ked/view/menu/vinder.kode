@@ -25,7 +25,7 @@ function vinder extends view
         @isInputPopup = true
 
         @input = new input @screen "#{@name}_input"
-        @input.show() # ???
+        # @input.show() # ???
 
         @input.on 'action' @onInputAction
         
@@ -108,13 +108,12 @@ function vinder extends view
     onKey: key event =>
 
         ⮐  if @hidden()
-
+        
         if event.combo in ['esc' 'escape'] or event.combo.startsWith('alt+') or event.combo.startsWith('ctrl+') or event.combo.startsWith('cmd+')
 
-            ⮐  if event.combo in ['esc' 'escape']
+            if event.combo in ['esc' 'escape']
                 @onInputAction 'cancel'
                 ⮐  true
-
             ⮐  'unhandled'
 
         if result = @input.onKey key event

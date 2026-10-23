@@ -70,7 +70,7 @@ function KED
         @differ   = new differ     @screen @editor
         @title    = new title      @screen @editor
         @context  = new context    @screen
-        @input    = new input      @screen
+        @input    = new input      @screen 'ked_input'
 
         @input.on 'action' @onInputAction
         

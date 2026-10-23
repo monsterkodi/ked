@@ -62,7 +62,11 @@ function input extends editor
 
     onKey: key event ->
         
-        ⮐  if not @hasFocus()
+        log "#{@name} focus #{@hasFocus()}"
+        
+        ⮐ false if not @hasFocus()
+        
+        log "#{@name} onKey #{key}}"
         
         switch event.combo
             
