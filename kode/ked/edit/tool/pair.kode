@@ -230,7 +230,7 @@ function pair
                 spans = spans.concat sps
         spans
         
-    @openCloseSpansForPosition: lines idx pos ->
+    @openCloseSpansForPosition: lines idx pos kind ->
                 
         open =
             '[': ']'
@@ -240,6 +240,9 @@ function pair
             ']': '['
             '}': '{'
             ')': '('
+
+        isOpen  = (c) -> opns.has(c) and (not kind or c == kind)
+        isClose = (c) -> clos.has(c) and (not kind or c == open[kind])
 
         ⮐  if @isInvalidLineIndex lines pos[1]
         
@@ -254,7 +257,7 @@ function pair
         lastOpenLine  = pos[1]
         lastOpenIndex = -1
         
-        if opns.has line[si]
+        if isOpen line[si]
         
             lastOpen      = line[si]
             lastOpenLine  = pos[1]
@@ -272,7 +275,7 @@ function pair
                 e = idx[j]
                 prev = e[2]
                 
-                if opns.has prev
+                if isOpen prev
                     if stack.length
                         if open[prev] == last(stack)
                             openEncounters += prev
@@ -285,7 +288,7 @@ function pair
                     lastOpenLine  = e[0]
                     lastOpenIndex = e[1]
                     break
-                else
+                else if isClose prev
                     stack.push prev
                 j -= 1
         
@@ -296,7 +299,7 @@ function pair
         stack = []
         
         ai = si
-        if opns.has line[si]
+        if isOpen line[si]
             ai = si+1
         
         j = @indexOfBracketAtOrAfter idx pos[1] ai
@@ -306,7 +309,7 @@ function pair
             e = idx[j]
             next = e[2]
             
-            if clos.has next
+            if isClose next
                 if stack.length
                     if open[last(stack)] == next
                         stack.pop()
@@ -317,7 +320,7 @@ function pair
                     firstCloseLine  = e[0]
                     firstCloseIndex = e[1]
                     break
-            else
+            else if isOpen next
                 stack.push next
 
             j += 1
@@ -327,8 +330,8 @@ function pair
             #  a cursor sitting just after a closing bracket should still
             #  highlight that pair - retry from one grapheme to the left
             
-            if si-1 >= 0 and clos.has(line[si-1]) and revs[line[si-1]] in openEncounters
-                ⮐  @openCloseSpansForPosition lines idx [kseg.widthAtSegi(line si-1) pos[1]]
+            if si-1 >= 0 and isClose(line[si-1]) and revs[line[si-1]] in openEncounters
+                ⮐  @openCloseSpansForPosition lines idx [kseg.widthAtSegi(line si-1) pos[1]] kind
             ⮐
         
         if open[lastOpen] == firstClose
@@ -337,5 +340,31 @@ function pair
             oc = kseg.widthAtSegi oline lastOpenIndex
             cc = kseg.widthAtSegi cline firstCloseIndex
             ⮐  [[oc lastOpenLine oc+1] [cc firstCloseLine cc+1]]
+        
+    # the innermost pair of one bracket kind around or at a position,
+    # the same line pairs know about strings, the bracket scan finds
+    # pairs across lines
+        
+    @pairSpansAtPosition: lines pos kind ->
+        
+        chosen = null
+        
+        for f in @pairsAtPositions lines [pos]
+            if f[1].start == kind
+                chosen = f
+        
+        if chosen
+            [li pair] = chosen
+            line = lines[li]
+            c0 = @columnForCodeunitIndex line pair.rng[0]
+            c1 = @columnForCodeunitIndex line pair.rng[1]
+            ⮐  [[c0 li c0+1] [c1 li c1+1]]
+        
+        # a bracket inside a string does not open a pair
+        ⮐  null if @isRangeInString lines [pos[0] pos[1] pos[0]+1 pos[1]]
+        
+        idx = @bracketIndex lines
+        
+        @openCloseSpansForPosition lines idx pos kind
 
 export pair

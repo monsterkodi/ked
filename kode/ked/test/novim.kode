@@ -164,6 +164,31 @@ mrange = lines x y m -> motion.range lines [x y] m
     mrange(brackets, 3, 0,  {kind:'textObject', area:'inner', target:'[', count:1}) ▸ [2 0 5 0]
     mrange(brackets, 10, 0, {kind:'textObject', area:'inner', target:'{', count:1}) ▸ [9 0 12 0]
 
+    # a bracket inside a string does not close the surrounding pair
+    array = kseg.segls "if seg not in ['', undefined, ' ', '}', ']', ')']"
+    aobj  = (x area) -> mrange(array, x, 0, {kind:'textObject', area:area, target:'[', count:1})
+
+    aobj(21, 'inner')  ▸ [15 0 48 0]
+    aobj(21, 'around') ▸ [14 0 49 0]
+
+    # the same pair holds the cursor on either of its brackets
+    # and on the bracket inside the string
+    aobj(14, 'inner') ▸ [15 0 48 0]
+    aobj(41, 'inner') ▸ [15 0 48 0]
+    aobj(48, 'inner') ▸ [15 0 48 0]
+
+    # a bracket inside a string does not open a pair
+    instring = kseg.segls "x = '[' + y]"
+    iobj = (x) -> mrange(instring, x, 0, {kind:'textObject', area:'inner', target:'[', count:1})
+
+    iobj(5) ▸ null
+
+    # the next pair skips an opener inside a string
+    afterstring = kseg.segls "x = '[' ; a[b]"
+    nobj = (x) -> mrange(afterstring, x, 0, {kind:'textObject', area:'inner', target:'[', count:1})
+
+    nobj(0) ▸ [12 0 13 0]
+
     # a pair can span lines
     multiline = kseg.segls """
         foo(
@@ -416,6 +441,19 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'"', count:1}}
     txt 'say ok'
 
+    # a bracket inside a string does not close the surrounding pair
+    s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
+    s.setMainCursor 21 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'[', count:1}}
+    txt "if seg not in []"
+
+    s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
+    s.setMainCursor 21 0
+
+    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'[', count:1}}
+    txt "if seg not in "
+
     # a pair across lines is removed as a whole
     s.loadLines belt.linesForText("foo(\n  bar\n)")
     s.setMainCursor 3 1
@@ -656,6 +694,16 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'a'
     key '"'
     txt "say ok"
+
+    # a bracket inside a string does not close the surrounding pair
+
+    s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
+    s.setMainCursor 21 0
+
+    key 'd'
+    key 'i'
+    key '['
+    txt "if seg not in []"
 
     # a count can come before the text object
 

@@ -20,6 +20,7 @@
 ###
 
 use ../../../kxk ▪ kseg
+use              ◆ belt
 
 function motion
 
@@ -417,11 +418,9 @@ function motion
         if open == '"' or open == "'"
             ⮐  @rangeForQuoteObject lines x y open inner
 
-        close = closes[open]
+        ⮐  null if not closes[open]
 
-        ⮐  null if not close
-
-        @rangeForBracketObject lines x y open close inner
+        @rangeForBracketObject lines x y open inner
 
     @rangeForQuoteObject: lines x y quote inner ->
 
@@ -491,94 +490,42 @@ function motion
 
         chars
 
-    @flatIndexForPos: lines x y ->
+    # the opened and closed spans of the pair around or at a position,
+    # pairs on one line come from the same parser that highlights them,
+    # the bracket scan finds pairs across lines
 
-        i = 0
+    @pairSpansForPosition: lines x y open ->
 
-        for li in 0...y
-            i += lines[li].length
+        spans = belt.pairSpansAtPosition lines [x y] open
 
-        segs = lines[y]
-
-        if not empty segs
-            si = kseg.indexAtWidth segs x
-            i += min si segs.length-1
-
-        i
-
-    @rangeForBracketObject: lines x y open close inner ->
-
-        chars = @flatChars lines
-
-        ⮐  null if empty chars
-
-        ci = @flatIndexForPos lines x y
-        ci = chars.length-1 if ci >= chars.length
-
-        ⮐  null if ci < 0
-
-        oi = -1
-
-        if chars[ci][0] == open
-            oi = ci
-        else
-            depth = 0
-            i     = ci
-
-            if chars[ci][0] == close
-                i -= 1
-
-            while i >= 0
-                c = chars[i][0]
-                if c == close
-                    depth += 1
-                else if c == open
-                    if depth > 0
-                        depth -= 1
-                    else
-                        oi = i
-                        break
-                i -= 1
+        ⮐  spans if spans
 
         # a cursor before a pair takes the next one
-        if oi < 0
-            i = ci
-            while i < chars.length
-                if chars[i][0] == open
-                    oi = i
-                    break
-                i += 1
+        for ch in @flatChars lines
+            [c li w] = ch
 
-        ⮐  null if oi < 0
+            continue if li < y or (li == y and w < x)
+            continue if c != open
+            continue if belt.isRangeInString lines [w li w+1 li]
 
-        depth = 0
-        ei    = -1
-        i     = oi+1
+            spans = belt.pairSpansAtPosition lines [w li] open
 
-        while i < chars.length
-            c = chars[i][0]
-            if c == open
-                depth += 1
-            else if c == close
-                if depth == 0
-                    ei = i
-                    break
-                depth -= 1
-            i += 1
+            if spans and spans[0][0] == w and spans[0][1] == li
+                ⮐  spans
 
-        ⮐  null if ei < 0
+        null
 
-        ol = chars[oi][1]
-        ow = chars[oi][2]
-        el = chars[ei][1]
-        ew = chars[ei][2]
+    @rangeForBracketObject: lines x y open inner ->
 
-        owEnd = ow + kseg.segWidth(chars[oi][0])
-        ewEnd = ew + kseg.segWidth(chars[ei][0])
+        spans = @pairSpansForPosition lines x y open
+
+        ⮐  null if not spans
+
+        [osp csp] = spans
 
         if inner
-            [owEnd ol ew el]
+            [osp[2] osp[1] csp[0] csp[1]]
         else
-            [ow ol ewEnd el]
+            [osp[0] osp[1] csp[2] csp[1]]
 
 export motion
