@@ -107,6 +107,8 @@ handleKey = key event -> # will be bound to state
         'alt+u'                             ➜ ⮐  @toggleMode 'uniko'
         'alt+;'                             ➜ ⮐  @toggleMode 'vimple'
         'alt+3'                             ➜ ⮐  @toggleMode 'salter'
+
+        'alt+cmd+c' 'alt+ctrl+c'            ➜ ⮐  mode.modes.novim?.toggleClipboard()
                                                  
         'cmd+3' 'ctrl+3'                    ➜ ⮐  @insertAsciiHeaderForSelectionOrWordAtCursor()
         'alt+cmd+d' 'alt+ctrl+d'            ➜ ⮐  @selectWordAtCursor_highlightSelection_selectAllHighlights()

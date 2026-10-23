@@ -81,17 +81,48 @@ function novim
         @name = 'novim'
         @reset false
 
+    # the clipboard toggle, null means the default:
+    # on in ked, off in a headless editor
+    @clipboardSync: null
+
+    @isHeadless: ->
+
+        screen = global.ked_screen
+
+        ⮐ true if not screen
+        ⮐ true if screen.t and screen.t.headless
+        false
+
+    @clipboardEnabled: ->
+
+        if novim.clipboardSync == null
+            ⮐  not novim.isHeadless()
+
+        novim.clipboardSync
+
+    @toggleClipboard: ->
+
+        enabled = not novim.clipboardEnabled()
+
+        novim.clipboardSync = enabled
+
+        log 'novim clipboard ▸' (enabled ? 'on' : 'off')
+
+        enabled
+
     reset: announce=true ->
 
-        @count    = ''
-        @operator = null
-        @area     = null
-        @prefix   = null
+        @count           = ''
+        @operator        = null
+        @area            = null
+        @prefix          = null
+        @register        = null
+        @registerPending = false
         log 'novim reset' if announce
 
     resetOrExit: ->
 
-        if @operator or @count or @prefix
+        if @operator or @count or @prefix or @registerPending or @register
             @reset()
         else
             log 'novim exit'
@@ -101,7 +132,7 @@ function novim
 
     logPending: ->
 
-        log 'novim pending ▸' @operator @area @prefix @count
+        log 'novim pending ▸' @operator @area @prefix @count @register
 
     complete: build ->
 
@@ -118,7 +149,12 @@ function novim
         @execute { operator: operator, motion: { kind: 'textObject', area: area, target: target, count: @countNumber() } }
         @reset false
 
-    execute: cmd -> @state.executeNovim cmd
+    execute: cmd ->
+
+        if @register
+            cmd.register = @register
+
+        @state.executeNovim cmd
 
     # ███   ███  ████████  ███   ███
     # ███  ███   ███        ███ ███
@@ -142,6 +178,22 @@ function novim
         # arrows mean the same as h j k l
         if arrow = novim.arrows[char]
             char = arrow
+
+        # " selects the next register, + and * mean the system clipboard
+        if @registerPending
+
+            @registerPending = false
+
+            if char in ['+' '*']
+                @register = 'clipboard'
+            else if char in ['"' '0']
+                @register = null
+            else
+                @reset()
+                ⮐  true
+
+            @logPending()
+            ⮐  true
 
         # swallow every other non text key
         ⮐  true if char.length != 1
@@ -183,6 +235,11 @@ function novim
         else if novim.operators[char]
 
             @operator = char
+            @logPending()
+
+        else if char == '"'
+
+            @registerPending = true
             @logPending()
 
         else if char == 'g'

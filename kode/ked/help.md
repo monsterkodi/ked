@@ -154,6 +154,15 @@
     alt+;                               vimple mode
     alt+r                               record mode (shadowed, see below)
 
+# mode: novim (alt+n)
+
+    alt+cmd+c   alt+ctrl+c              toggle clipboard sync for yank, delete, put
+    "+y  "+p  "*y  "*p                  use the system clipboard register
+
+    clipboard sync writes yanks and deletes to the clipboard and reads puts
+    from it. it is on by default, off in a headless editor. the explicit +
+    and * registers always use the clipboard.
+
 # mode: brckts (auto, on selection)
 
     alt+cmd+'                           swap ' and " around cursor

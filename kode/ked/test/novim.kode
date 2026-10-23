@@ -6,6 +6,7 @@
 ###
 
 use ../../kxk       ▪ kseg
+use ../../kxk       ◆ clip
 use ../edit/tool    ◆ belt motion
 use ../edit         ◆ state mode
 use ../edit/mode    ◆ novim brckts
@@ -424,6 +425,192 @@ mrange = lines x y m -> motion.range lines [x y] m
     (s.h.length - before) ▸ 1
     s.executeNovim {operator:'undo', count:1}
     txt "abc\ndef"
+
+▸ delete fills the register
+
+    s.loadLines belt.linesForText("one two\nthree")
+    s.setMainCursor 0 0
+
+    # dd keeps the line, so p can bring it back
+    s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
+    s.novimRegister.lines ▸ ['one two']
+    s.novimRegister.linewise ▸ true
+    txt "three"
+
+    s.executeNovim {operator:'put', after:false}
+    txt "one two\nthree"
+
+    # x keeps a character
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 1 0
+    s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+    s.novimRegister.lines ▸ ['b']
+    s.novimRegister.linewise ▸ false
+    txt "ac"
+
+    # D keeps the rest of the line
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 3 0
+    s.executeNovim {operator:'delete', motion:{kind:'eol'}}
+    s.novimRegister.lines ▸ [' two']
+    s.novimRegister.linewise ▸ false
+    txt "one"
+
+    # . deletes again and fills the register again
+    s.loadLines belt.linesForText("abcd")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
+    s.executeNovim {operator:'repeat', count:1}
+    s.novimRegister.lines ▸ ['cd']
+    txt ""
+
+▸ clipboard registers
+
+    # never touch the system clipboard from a test
+    copies = []
+    savedCopy  = clip.copy
+    savedPaste = clip.paste
+    savedTool  = clip.tool
+    pasted     = ''
+
+    # make the transport deterministic, the stubs stand in for the tool
+    clip.tool  = 'wl'
+    clip.copy  = (text) -> copies.push text
+    clip.paste = -> pasted
+
+    novim.clipboardSync = null
+
+    # a real ked has a screen, so the default there is on
+    global.ked_screen = {}
+    novim.isHeadless() ▸ false
+    novim.clipboardEnabled() ▸ true
+    global.ked_screen = undefined
+
+    # a headless editor has the clipboard sync off by default
+    novim.isHeadless() ▸ true
+    novim.clipboardEnabled() ▸ false
+
+    s.loadLines belt.linesForText("one\ntwo")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+    copies ▸ []
+
+    # sync is off, so p uses the internal register
+    s.executeNovim {operator:'put', after:true}
+    txt "one\none\ntwo"
+
+    # the toggle turns sync on
+    novim.toggleClipboard() ▸ true
+    novim.clipboardEnabled() ▸ true
+
+    s.loadLines belt.linesForText("one\ntwo")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+    copies ▸ ['one\n']
+
+    # a trailing newline means linewise text on the way back in
+    pasted = "shared\n"
+    s.executeNovim {operator:'put', after:true}
+    txt "one\nshared\ntwo"
+
+    # without the newline it is charwise text
+    pasted = "XYZ"
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 1 0
+    s.executeNovim {operator:'put', after:true}
+    txt "abXYZc"
+
+    # deleting also writes to the clipboard while sync is on
+    s.loadLines belt.linesForText("gone\nkept")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
+    copies[-1] ▸ 'gone\n'
+
+    # an explicit + register writes even with sync off
+    novim.clipboardSync = false
+    novim.clipboardEnabled() ▸ false
+
+    s.loadLines belt.linesForText("alpha\nbeta")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}, register:'clipboard'}
+    copies[-1] ▸ 'alpha\n'
+    s.novimRegister.linewise ▸ true
+
+    # and a clipboard put reads the clipboard even with sync off
+    pasted = "plus\n"
+    s.executeNovim {operator:'put', after:true, register:'clipboard'}
+    txt "alpha\nplus\nbeta"
+
+    # the * register is the same clipboard one
+    pasted = "star"
+    s.loadLines belt.linesForText("ab")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'put', after:true, register:'clipboard'}
+    txt "astarb"
+
+    # an unknown register is dropped and the next key starts over
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+    s.novimRegister.lines ▸ ['a']
+
+    # the mode decodes " before an operator
+    m = new novim s
+    key = c -> m.handleKey c {combo:c, char:c}
+
+    s.loadLines belt.linesForText("one\ntwo")
+    s.setMainCursor 0 0
+
+    key '"'
+    key '+'
+    key 'y'
+    key 'y'
+    copies[-1] ▸ 'one\n'
+    s.novimRegister.lines ▸ ['one']
+
+    key '"'
+    key '*'
+    key 'y'
+    key 'y'
+    copies[-1] ▸ 'one\n'
+
+    # "" selects the unnamed register again, so nothing is copied
+    before = copies.length
+    key '"'
+    key '"'
+    key 'y'
+    key 'y'
+    copies.length ▸ before
+
+    # escape throws a pending register away
+    s.loadLines belt.linesForText("one\ntwo")
+    s.setMainCursor 0 0
+    key '"'
+    m.handleKey 'esc' {combo:'esc'}
+    key 'x'
+    txt "ne\ntwo"
+
+    # without a clipboard tool the fallback buffer still does +y and +p
+    clip.tool = 'none'
+    clip.text = ''
+
+    s.loadLines belt.linesForText("fall\nback")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}, register:'clipboard'}
+    clip.text ▸ 'fall\n'
+
+    s.loadLines belt.linesForText("fall\nback")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'put', after:true, register:'clipboard'}
+    txt "fall\nfall\nback"
+
+    clip.tool  = 'wl'
+    novim.clipboardSync = null
+    clip.copy  = savedCopy
+    clip.paste = savedPaste
+    clip.tool  = savedTool
 
 ▸ execute command
 

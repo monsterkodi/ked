@@ -17,7 +17,9 @@
 ###
 
 use ../../../kxk ▪ kseg
-use ../tool ◆ belt motion
+use ../../../kxk ◆ clip
+use ../mode    ◆ novim
+use ../tool    ◆ belt motion
 
 export
 
@@ -27,8 +29,8 @@ export
 
         switch cmd.operator
             'delete' ➜ @applyChange cmd
-            'yank'   ➜ @yankByMotion cmd.motion
-            'put'    ➜ @putRegister cmd.count cmd.after
+            'yank'   ➜ @yankByMotion cmd.motion cmd.register
+            'put'    ➜ @putRegister cmd.count cmd.after cmd.register
             'move'   ➜ @moveByMotion cmd.motion
             'undo'   ➜ @undoCommand cmd.count
             'repeat' ➜ @repeatChange cmd.count
@@ -37,7 +39,7 @@ export
     applyChange: cmd ->
 
         @lastChange = cmd
-        @deleteByMotion cmd.motion
+        @deleteByMotion cmd.motion cmd.register
 
     repeatChange: count ->
 
@@ -49,9 +51,45 @@ export
         # one means the count of the change is used again
         spec.count = count if count > 1
 
-        @deleteByMotion spec
+        @deleteByMotion spec @lastChange.register
 
-    deleteByMotion: spec ->
+    # an explicit register is the clipboard one, a plain operator uses
+    # the clipboard only when the clipboard sync is on
+    usesClipboard: register ->
+
+        ⮐ true  if register == 'clipboard'
+        ⮐ false if register
+
+        novim.clipboardEnabled()
+
+    copyRegisterToClipboard: reg ->
+
+        text = reg.lines.join '\n'
+        text += '\n' if reg.linewise
+
+        # no tool means no system clipboard: keep the text in the
+        # fallback buffer without logging a tool error on every yank
+        if clip.detect() == 'none'
+            clip.text = text
+        else
+            clip.copy text
+
+    registerFromClipboard: ->
+
+        text = clip.detect() == 'none' ? clip.text : clip.paste()
+
+        ⮐  null if empty text
+
+        # a trailing newline marks linewise text, the clipboard is plain text
+        # and cannot carry the register type any other way
+        linewise = text.endsWith '\n'
+        lines    = text.split '\n'
+
+        lines.pop() if linewise
+
+        { lines: lines, linewise: linewise }
+
+    deleteByMotion: spec register ->
 
         lines = @s.lines
         rngs  = []
@@ -74,15 +112,25 @@ export
         # cursors can share a line, so ranges can overlap
         rngs = motion.mergeRanges rngs
 
+        linewise = motion.isLinewise spec
+        texts    = []
+
+        for rng in rngs
+            texts.push belt.textForLineRange(lines, rng)
+
+        @novimRegister = { lines: texts.join('\n').split('\n'), linewise: linewise }
+
+        @copyRegisterToClipboard @novimRegister if @usesClipboard(register)
+
         @begin()
 
-        @deleteRanges rngs @allCursors() motion.isLinewise(spec)
+        @deleteRanges rngs @allCursors() linewise
 
         @end()
 
     # the last yanked text is kept here so that p and P can put it.
     # linewise text is a list of lines, charwise text is joined by newlines
-    yankByMotion: spec ->
+    yankByMotion: spec register ->
 
         lines    = @s.lines
         linewise = motion.isLinewise spec
@@ -102,13 +150,17 @@ export
 
         @novimRegister = { lines: texts.join('\n').split('\n'), linewise: linewise }
 
+        @copyRegisterToClipboard @novimRegister if @usesClipboard(register)
+
         if not linewise
             @setCursors cursors main:@s.main
             @clampCursorsToLines()
 
-    putRegister: count after ->
+    putRegister: count after register ->
 
         reg = @novimRegister
+
+        reg = @registerFromClipboard() if @usesClipboard(register)
 
         ⮐  if not reg or empty reg.lines
 
