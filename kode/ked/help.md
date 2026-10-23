@@ -159,6 +159,7 @@
     w  b  e                             next word, previous word, end of word
     W  B  E                             same, but a WORD skips punctuation
     f{char}  t{char}  ;                 find a character, till before it, repeat
+    iw  aw  iW  aW                      inner and around word or WORD text objects
     alt+cmd+c   alt+ctrl+c              toggle clipboard sync for yank, delete, put
     "+y  "+p  "*y  "*p                  use the system clipboard register
 

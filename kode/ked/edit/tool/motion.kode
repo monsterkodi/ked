@@ -339,21 +339,22 @@ function motion
         x     = @objectX lines y x
 
         switch spec.target
-            'word' ➜ @rangeForWordObject lines x y count (area == 'inner')
-            else   ➜ @rangeForPairObject lines x y spec.target (area == 'inner')
+            'word'    ➜ @rangeForWordObject lines x y count (area == 'inner') false
+            'wordBig' ➜ @rangeForWordObject lines x y count (area == 'inner') true
+            else      ➜ @rangeForPairObject lines x y spec.target (area == 'inner')
 
     # words
 
-    @wordBoundsAt: segs i ->
+    @wordBoundsAt: segs i big=false ->
 
-        cat = @category segs[i]
+        cat = @wordCategory segs[i] big
         s   = i
         e   = i
 
-        while s > 0 and @category(segs[s-1]) == cat
+        while s > 0 and @wordCategory(segs[s-1], big) == cat
             s -= 1
 
-        while e+1 < segs.length and @category(segs[e+1]) == cat
+        while e+1 < segs.length and @wordCategory(segs[e+1], big) == cat
             e += 1
 
         [s e+1]
@@ -372,17 +373,17 @@ function motion
 
     # the start of the next word after an exclusive index,
     # crossing lines but never part of a word
-    @nextWordAfterIndex: lines y i ->
+    @nextWordAfterIndex: lines y i big=false ->
 
         while true
 
             segs = lines[y]
 
-            while i < segs.length and @category(segs[i]) == 'ws'
+            while i < segs.length and @wordCategory(segs[i], big) == 'ws'
                 i += 1
 
             if i < segs.length
-                [s e] = @wordBoundsAt(segs i)
+                [s e] = @wordBoundsAt segs i big
                 ⮐  [y s e]
 
             if y+1 >= lines.length
@@ -391,7 +392,7 @@ function motion
             y += 1
             i  = 0
 
-    @rangeForWordObject: lines x y count inner ->
+    @rangeForWordObject: lines x y count inner big=false ->
 
         segs = lines[y]
 
@@ -400,7 +401,7 @@ function motion
         i = kseg.indexAtWidth segs x
         i = segs.length-1 if i >= segs.length
 
-        if @category(segs[i]) == 'ws'
+        if @wordCategory(segs[i], big) == 'ws'
 
             # on white space the inner object is the white space run
             if inner
@@ -409,7 +410,7 @@ function motion
                 ⮐  [@widthAt(segs s) y @widthAtOrEnd(segs e) y]
 
             # around white space means the next word on this line
-            next = @nextWordAfterIndex lines y i
+            next = @nextWordAfterIndex lines y i big
 
             if not next
                 s = @leadingWsStart segs i
@@ -417,13 +418,13 @@ function motion
                 ⮐  [@widthAt(segs s) y @widthAtOrEnd(segs e) y]
 
             [wy ws we] = next
-            ⮐  @rangeForWords lines wy ws we count true
+            ⮐  @rangeForWords lines wy ws we count true big
 
-        [s e] = @wordBoundsAt(segs i)
+        [s e] = @wordBoundsAt segs i big
 
-        @rangeForWords lines y s e count (not inner)
+        @rangeForWords lines y s e count (not inner) big
 
-    @rangeForWords: lines y s e count around ->
+    @rangeForWords: lines y s e count around big=false ->
 
         firstLine  = y
         firstStart = s
@@ -431,7 +432,7 @@ function motion
         lastEnd    = e
 
         for n in 1...count
-            next = @nextWordAfterIndex lines lastLine lastEnd
+            next = @nextWordAfterIndex lines lastLine lastEnd big
             break if not next
             [nl ns ne] = next
             lastLine = nl

@@ -33,6 +33,7 @@ function novim
 
     @textObjects:
         w: 'word'
+        W: 'wordBig'
         '"': '"'
         "'": "'"
         '(': '('

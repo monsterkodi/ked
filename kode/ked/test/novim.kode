@@ -125,6 +125,20 @@ mrange = lines x y m -> motion.range lines [x y] m
     # a count can cross a line break, a word cannot
     mrange(kseg.segls("foo\nbar"), 0, 0, {kind:'textObject', area:'inner', target:'word', count:2}) ▸ [0 0 3 1]
 
+    # a WORD object treats punctuation as part of the word
+    bigwords = kseg.segls "foo.bar baz, qux"
+
+    Wobj = (x area count) -> mrange(bigwords, x, 0, {kind:'textObject', area:area, target:'wordBig', count:count})
+
+    Wobj(0, 'inner', 1)  ▸ [0 0 7 0]
+    Wobj(0, 'around', 1) ▸ [0 0 8 0]
+    Wobj(2, 'inner', 1)  ▸ [0 0 7 0]
+    Wobj(8, 'inner', 1)  ▸ [8 0 12 0]
+
+    # counts cover more WORDs, white space between them included
+    Wobj(0, 'inner', 2)  ▸ [0 0 12 0]
+    Wobj(0, 'around', 3) ▸ [0 0 16 0]
+
     quoted = kseg.segls 'say "hello there" ok'
     qobj = (x area) -> mrange(quoted, x, 0, {kind:'textObject', area:area, target:'"', count:1})
 
@@ -1354,6 +1368,46 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'd'
     key 'E'
     txt " baz"
+
+    # W works as a text object too
+
+    s.loadLines belt.linesForText("foo.bar baz")
+    s.setMainCursor 0 0
+    key 'd'
+    key 'i'
+    key 'W'
+    txt " baz"
+
+    s.loadLines belt.linesForText("foo.bar baz")
+    s.setMainCursor 0 0
+    key 'd'
+    key 'a'
+    key 'W'
+    txt "baz"
+
+    # the same position with a lower case w only takes the first word
+    s.loadLines belt.linesForText("foo.bar")
+    s.setMainCursor 0 0
+    key 'd'
+    key 'i'
+    key 'w'
+    txt ".bar"
+
+    s.loadLines belt.linesForText("foo.bar")
+    s.setMainCursor 0 0
+    key 'd'
+    key 'i'
+    key 'W'
+    txt ""
+
+    s.loadLines belt.linesForText("foo.bar baz")
+    s.setMainCursor 0 0
+    key 'y'
+    key 'i'
+    key 'W'
+    key '$'
+    key 'p'
+    txt "foo.bar bazfoo.bar"
 
     # f finds a character on the line
 
