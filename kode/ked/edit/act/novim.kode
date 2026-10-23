@@ -215,10 +215,9 @@ export
 
     putText: text after ->
 
-        insertls = text.split '\n'
-        lines    = @s.lines
-        cursors  = @allCursors()
-        posl     = []
+        lines   = @s.lines
+        cursors = @allCursors()
+        posl    = []
 
         for c in cursors
             width = kseg.width lines[c[1]]
@@ -227,21 +226,10 @@ export
 
         [newLines newPosl] = belt.insertTextAtPositions lines text posl
 
-        newCursors = []
-
-        # the insert helper returns the end of the inserted text,
-        # a single line put ends on its last character,
-        # a put across lines ends on the start of the inserted text
-        for pos in newPosl
-
-            if insertls.length > 1
-                lastWidth = kseg.width kseg(insertls[-1])
-                newCursors.push [max(0 pos[0]-lastWidth) pos[1]-(insertls.length-1)]
-            else
-                newCursors.push [max(0 pos[0]-1) pos[1]]
-
+        # the insert helper returns the end of the inserted text
+        # the cursor goes behind the pasted text, not onto its last character
         @setLines newLines
-        @setCursors newCursors
+        @setCursors newPosl
 
     moveByMotion: spec ->
 

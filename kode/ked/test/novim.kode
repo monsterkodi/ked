@@ -397,7 +397,7 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.setMainCursor 3 1
     s.executeNovim {operator:'put', after:true}
     txt "abc\ndefabc"
-    cur 5 1
+    cur 6 1
 
     s.loadLines belt.linesForText("abc\ndef")
     s.setMainCursor 0 0
@@ -405,6 +405,15 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.setMainCursor 1 1
     s.executeNovim {operator:'put', after:false}
     txt "abc\ndabcef"
+    cur 4 1
+
+    # after a paste the cursor is behind the pasted text, not on its last
+    # character: the ked cursor is a thin line at the left edge of a character
+    s.novimRegister = { lines: ['one' 'two'], linewise: false }
+    s.loadLines belt.linesForText("ab")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'put', after:true}
+    txt "aone\ntwob"
     cur 3 1
 
     # with no register a put does nothing
@@ -1193,7 +1202,7 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     key 'p'
     txt "one twotwo"
-    cur 9 0
+    cur 10 0
 
     # y takes a text object too
     s.loadLines belt.linesForText("one two three")
