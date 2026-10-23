@@ -14,9 +14,10 @@ use ../../theme ◆ color
 
 function novim
 
-    # operators start a pending command, d is delete
+    # operators start a pending command
     @operators:
         d: 'delete'
+        y: 'yank'
 
     # arrow keys mean the same as these
     @arrows:
@@ -55,6 +56,8 @@ function novim
         l: (n) -> { operator: 'move',   motion: { kind: 'right' count: n } }
         '$': (n) -> { operator: 'move', motion: { kind: 'eol'   count: n } }
         G:   (n) -> { operator: 'move', motion: { kind: 'eof'   count: n } }
+        p:   (n) -> { operator: 'put',  count: n, after: true  }
+        P:   (n) -> { operator: 'put',  count: n, after: false }
         u: (n) -> { operator: 'undo',   count: n }
         '.': (n) -> { operator: 'repeat', count: n }
 
@@ -62,6 +65,7 @@ function novim
     # each receives the count and returns a motion value
     @motions:
         d: (n) -> { kind: 'line'     count: n }
+        y: (n) -> { kind: 'line'     count: n }
         w: (n) -> { kind: 'word'     count: n }
         e: (n) -> { kind: 'wordEnd'  count: n }
         b: (n) -> { kind: 'wordBack' count: n }

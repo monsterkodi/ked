@@ -266,14 +266,15 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.loadLines belt.linesForText("one two\nfour")
     s.setMainCursor 0 0
 
-    # $ lands on the last character, as in vim, not past it
+    # $ lands behind the last character, the ked cursor is a thin line
+    # at the left edge of a character, not a block cursor on it
     s.executeNovim {operator:'move', motion:{kind:'eol'}}
-    cur 6 0
+    cur 7 0
 
     # a count on $ goes down count-1 lines first
     s.setMainCursor 0 0
     s.executeNovim {operator:'move', motion:{kind:'eol', count:2}}
-    cur 3 1
+    cur 4 1
 
     # 0 goes to the first column
     s.setMainCursor 6 0
@@ -317,6 +318,112 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     # moving to a line edits nothing
     txt text
+
+▸ yank motions
+
+    s.loadLines belt.linesForText("one two three\nfour five")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
+    s.novimRegister.lines ▸ ['one ']
+    s.novimRegister.linewise ▸ false
+    cur 0 0
+
+    # a charwise yank moves the cursor to the start of the text
+    s.setMainCursor 8 0
+    s.executeNovim {operator:'yank', motion:{kind:'wordBack', count:1}}
+    s.novimRegister.lines ▸ ['two ']
+    cur 4 0
+
+    # a linewise yank keeps the cursor where it is
+    s.loadLines belt.linesForText("alpha\nbeta\ngamma")
+    s.setMainCursor 3 1
+
+    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+    s.novimRegister.lines ▸ ['beta']
+    s.novimRegister.linewise ▸ true
+    cur 3 1
+
+    # a count covers more lines
+    s.executeNovim {operator:'yank', motion:{kind:'lineDown', count:1}}
+    s.novimRegister.lines ▸ ['beta' 'gamma']
+
+    # yanking edits nothing and adds no undo step
+    history = s.h.length
+    s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
+    s.h.length ▸ history
+    txt "alpha\nbeta\ngamma"
+
+▸ put
+
+    s.loadLines belt.linesForText("alpha\nbeta")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+
+    # p puts a linewise yank below the cursor line
+    s.executeNovim {operator:'put', after:true}
+    txt "alpha\nalpha\nbeta"
+    cur 0 1
+
+    # P puts it above
+    s.executeNovim {operator:'put', after:false}
+    txt "alpha\nalpha\nalpha\nbeta"
+    cur 0 1
+
+    # a linewise put lands on the first non-blank of the inserted line
+    s.loadLines belt.linesForText("  alpha\nbeta")
+    s.setMainCursor 2 0
+    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+    s.setMainCursor 0 1
+    s.executeNovim {operator:'put', after:false}
+    txt "  alpha\n  alpha\nbeta"
+    cur 2 1
+
+    # a count puts the text more than once
+    s.loadLines belt.linesForText("x\ny")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+    s.setMainCursor 0 1
+    s.executeNovim {operator:'put', after:true, count:2}
+    txt "x\ny\nx\nx"
+    cur 0 3
+
+    # p puts charwise text after the cursor, P before it
+    s.loadLines belt.linesForText("abc\ndef")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'yank', motion:{kind:'eol'}}
+    s.setMainCursor 3 1
+    s.executeNovim {operator:'put', after:true}
+    txt "abc\ndefabc"
+    cur 5 1
+
+    s.loadLines belt.linesForText("abc\ndef")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'yank', motion:{kind:'eol'}}
+    s.setMainCursor 1 1
+    s.executeNovim {operator:'put', after:false}
+    txt "abc\ndabcef"
+    cur 3 1
+
+    # with no register a put does nothing
+    s.novimRegister = null
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'put', after:true}
+    txt "abc"
+
+    # a put is a single undo step
+    s.loadLines belt.linesForText("abc\ndef")
+    s.setMainCursor 0 0
+    before = s.h.length
+
+    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+    s.executeNovim {operator:'put', after:true, count:3}
+
+    (s.h.length - before) ▸ 1
+    s.executeNovim {operator:'undo', count:1}
+    txt "abc\ndef"
 
 ▸ execute command
 
@@ -853,14 +960,14 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'G'
     cur 2 2
 
-    # $ goes to the last character
+    # $ goes behind the last character
     key '$'
-    cur 6 2
+    cur 7 2
 
     # a lone g is thrown away by the next key
     key 'g'
     key 'l'
-    cur 6 2
+    cur 7 2
 
     # escape leaves a pending g
     s.setMainCursor 0 0
@@ -868,6 +975,61 @@ mrange = lines x y m -> motion.range lines [x y] m
     m.handleKey 'esc' {combo:'esc'}
     key 'G'
     cur 2 2
+
+    # y yanks and p and P put
+
+    s.loadLines belt.linesForText("one\ntwo")
+    s.setMainCursor 0 0
+
+    key 'y'
+    key 'y'
+    cur 0 0
+
+    key 'p'
+    txt "one\none\ntwo"
+    cur 0 1
+
+    key 'P'
+    txt "one\none\none\ntwo"
+    cur 0 1
+
+    # y takes a motion
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 4 0
+
+    key 'y'
+    key 'w'
+    cur 4 0
+
+    key '$'
+    cur 7 0
+
+    key 'p'
+    txt "one twotwo"
+    cur 9 0
+
+    # y takes a text object too
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 4 0
+
+    key 'y'
+    key 'i'
+    key 'w'
+    cur 4 0
+
+    key '$'
+    key 'p'
+    txt "one two threetwo"
+
+    # a yank does not replace the change that . repeats
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 0 0
+
+    key 'x'
+    key 'y'
+    key 'l'
+    key '.'
+    txt "cdef"
 
 ▸ brckts lets novim handle text keys
 

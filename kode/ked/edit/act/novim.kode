@@ -4,6 +4,8 @@
     a novim command is a plain value
 
         { operator: 'delete', motion: { kind: 'word', count: 3 } }
+        { operator: 'yank',   motion: { kind: 'line', count: 1 } }
+        { operator: 'put',    count: 2, after: true }
         { operator: 'move',   motion: { kind: 'left', count: 2 } }
         { operator: 'undo',   count: 3 }
         { operator: 'repeat', count: 2 }
@@ -25,6 +27,8 @@ export
 
         switch cmd.operator
             'delete' ➜ @applyChange cmd
+            'yank'   ➜ @yankByMotion cmd.motion
+            'put'    ➜ @putRegister cmd.count cmd.after
             'move'   ➜ @moveByMotion cmd.motion
             'undo'   ➜ @undoCommand cmd.count
             'repeat' ➜ @repeatChange cmd.count
@@ -76,6 +80,117 @@ export
 
         @end()
 
+    # the last yanked text is kept here so that p and P can put it.
+    # linewise text is a list of lines, charwise text is joined by newlines
+    yankByMotion: spec ->
+
+        lines    = @s.lines
+        linewise = motion.isLinewise spec
+        cursors  = @allCursors()
+        texts    = []
+
+        for cursor, idx in cursors
+
+            rng = motion.range lines cursor spec
+            continue if not rng
+            continue if belt.isEmptyRange(rng) and not linewise
+
+            texts.push belt.textForLineRange(lines, rng)
+            cursors[idx] = [rng[0] rng[1]] if not linewise
+
+        ⮐  if empty texts
+
+        @novimRegister = { lines: texts.join('\n').split('\n'), linewise: linewise }
+
+        if not linewise
+            @setCursors cursors main:@s.main
+            @clampCursorsToLines()
+
+    putRegister: count after ->
+
+        reg = @novimRegister
+
+        ⮐  if not reg or empty reg.lines
+
+        n = max 1 (count ? 1)
+
+        @begin()
+
+        for i in 0...n
+            if reg.linewise
+                @putLines reg.lines after
+            else
+                @putText reg.lines.join('\n') after
+
+        @end()
+
+    putLines: insertLines after ->
+
+        segls   = kseg.segls insertLines
+        lines   = @s.lines.map (l) -> l
+        cursors = @allCursors()
+        order   = []
+
+        for c, idx in cursors
+            order.push idx
+
+        # insert from the top, so the offset stays simple
+        order.sort (a b) ->
+            if cursors[a][1] == cursors[b][1]
+                cursors[a][0] - cursors[b][0]
+            else
+                cursors[a][1] - cursors[b][1]
+
+        newCursors = []
+        offset     = 0
+
+        for idx in order
+
+            y  = cursors[idx][1] + offset
+            at = after ? y+1 : y
+
+            lines = lines[0...at].concat(segls).concat(lines[at..])
+
+            # as in vim the cursor lands on the first non-blank
+            first = segls[0]
+            x     = min belt.numIndent(first) max(0 kseg.width(first)-1)
+
+            newCursors.push [x at]
+            offset += segls.length
+
+        @setLines lines
+        @setCursors newCursors
+
+    putText: text after ->
+
+        insertls = text.split '\n'
+        lines    = @s.lines
+        cursors  = @allCursors()
+        posl     = []
+
+        for c in cursors
+            width = kseg.width lines[c[1]]
+            x     = after ? min(c[0]+1 width) : min(c[0] width)
+            posl.push [x c[1]]
+
+        [newLines newPosl] = belt.insertTextAtPositions lines text posl
+
+        newCursors = []
+
+        # the insert helper returns the end of the inserted text,
+        # a single line put ends on its last character,
+        # a put across lines ends on the start of the inserted text
+        for pos in newPosl
+
+            if insertls.length > 1
+                lastWidth = kseg.width kseg(insertls[-1])
+                newCursors.push [max(0 pos[0]-lastWidth) pos[1]-(insertls.length-1)]
+            else
+                newCursors.push [max(0 pos[0]-1) pos[1]]
+
+        @setLines newLines
+        @setCursors newCursors
+
     moveByMotion: spec ->
 
         n = max 1 (spec.count ? 1)
@@ -91,24 +206,13 @@ export
             if n > 1
                 @moveCursors 'down' count:n-1
 
-            @moveCursorsToEndOfLine()
+            @moveCursors 'eol'
         else if spec.kind in ['bof' 'eof']
             @moveCursorsToLine spec.kind n
         else
             @moveCursors spec.kind count:n
 
         @clampCursorsToLines()
-
-    # in vim a cursor on a line sits on its last character,
-    # one past the end is a position only insert needs
-    moveCursorsToEndOfLine: ->
-
-        cursors = @allCursors()
-
-        for c in cursors
-            c[0] = max 0 kseg.width(@s.lines[c[1]]) - 1
-
-        @setCursors cursors main:@s.main
 
     # bof and eof take a count as the line number to go to,
     # a count of one means the first or the last line
