@@ -1,20 +1,8 @@
-###
-    novim commands
-
-    a novim command is a plain value
-
-        { operator: 'delete', motion: { kind: 'word', count: 3 } }
-        { operator: 'yank',   motion: { kind: 'line', count: 1 } }
-        { operator: 'put',    count: 2, after: true }
-        { operator: 'move',   motion: { kind: 'left', count: 2 } }
-        { operator: 'undo',   count: 3 }
-        { operator: 'repeat', count: 2 }
-
-    the mode decodes keys into such a value
-    this module turns the value into buffer edits
-
-    the last change is remembered so that . can repeat it
-###
+# ███   ███   ███████   ███   ███  ███  ██     ██  
+# ████  ███  ███   ███  ███   ███  ███  ███   ███  
+# ███ █ ███  ███   ███   ███ ███   ███  █████████  
+# ███  ████  ███   ███     ███     ███  ███ █ ███  
+# ███   ███   ███████       █      ███  ███   ███  
 
 use ../../../kxk ▪ kseg
 use ../../../kxk ◆ clip
@@ -25,16 +13,49 @@ export
 
     executeNovim: cmd ->
 
-        log 'novim command ▸' cmd
+        # log 'novim command ▸' cmd
 
         switch cmd.operator
-            'delete' ➜ @applyChange cmd
-            'yank'   ➜ @yankByMotion cmd.motion cmd.register
-            'put'    ➜ @putRegister cmd.count cmd.after cmd.register
-            'move'   ➜ @moveByMotion cmd.motion
-            'undo'   ➜ @undoCommand cmd.count
-            'repeat' ➜ @repeatChange cmd.count
-            else     ➜ log 'novim unknown operator ▸' cmd.operator
+            'delete'      ➜ @applyChange cmd
+            'yank'        ➜ @yankByMotion       cmd.motion  cmd.register
+            'put'         ➜ @putRegister        cmd.count   cmd.after cmd.register
+            'move'        ➜ @moveByMotion       cmd.motion
+            'searchNext'  ➜ @jumpByHighlight    cmd.count true
+            'searchPrev'  ➜ @jumpByHighlight    cmd.count false
+            'undo'        ➜ @undoCommand        cmd.count
+            'repeat'      ➜ @repeatChange       cmd.count
+            else          ➜ log 'novim unknown operator ▸' cmd.operator
+
+    jumpByHighlight: count=1 forward=true ->
+
+        ⮐ if empty @s.highlights
+
+        pos = @mainCursor()
+
+        for i in 0...count
+
+            target = null
+
+            for span in @s.highlights
+
+                sameStart = span[1] == pos[1] and span[0] == pos[0]
+                if sameStart ➜ continue # the cursor is already on this highlight
+
+                after  = span[1]  > pos[1] or (span[1] == pos[1] and span[0] > pos[0])
+                before = span[1]  < pos[1] or (span[1] == pos[1] and span[0] < pos[0])
+
+                if  forward and after
+                    target = span
+                    break
+                if not forward and before
+                    target = span
+
+            if not target
+                break
+
+            pos = [target[0] target[1]]
+
+        @setMainCursor pos
 
     applyChange: cmd ->
 
@@ -47,14 +68,10 @@ export
 
         spec = copy @lastChange.motion
 
-        # a count on . replaces the count of the change,
-        # one means the count of the change is used again
         spec.count = count if count > 1
 
         @deleteByMotion spec @lastChange.register
 
-    # an explicit register is the clipboard one, a plain operator uses
-    # the clipboard only when the clipboard sync is on
     usesClipboard: register ->
 
         ⮐ true  if register == 'clipboard'
@@ -67,8 +84,6 @@ export
         text = reg.lines.join '\n'
         text += '\n' if reg.linewise
 
-        # no tool means no system clipboard: keep the text in the
-        # fallback buffer without logging a tool error on every yank
         if clip.detect() == 'none'
             clip.text = text
         else
@@ -80,8 +95,6 @@ export
 
         ⮐  null if empty text
 
-        # a trailing newline marks linewise text, the clipboard is plain text
-        # and cannot carry the register type any other way
         linewise = text.endsWith '\n'
         lines    = text.split '\n'
 
@@ -99,17 +112,14 @@ export
             rng = motion.range lines cursor spec
             continue if not rng
 
-            # a linewise motion on an empty line is an empty range,
-            # but there is still a line to remove
             continue if belt.isEmptyRange(rng) and not motion.isLinewise(spec)
 
             rngs.push rng
 
-        log 'novim ranges ▸' rngs
+        # log 'novim ranges ▸' rngs
 
         ⮐  if empty rngs
 
-        # cursors can share a line, so ranges can overlap
         rngs = motion.mergeRanges rngs
 
         linewise = motion.isLinewise spec
@@ -128,8 +138,6 @@ export
 
         @end()
 
-    # the last yanked text is kept here so that p and P can put it.
-    # linewise text is a list of lines, charwise text is joined by newlines
     yankByMotion: spec register ->
 
         lines    = @s.lines
@@ -186,7 +194,6 @@ export
         for c, idx in cursors
             order.push idx
 
-        # insert from the top, so the offset stays simple
         order.sort (a b) ->
             if cursors[a][1] == cursors[b][1]
                 cursors[a][0] - cursors[b][0]
@@ -203,7 +210,6 @@ export
 
             lines = lines[0...at].concat(segls).concat(lines[at..])
 
-            # as in vim the cursor lands on the first non-blank
             first = segls[0]
             x     = min belt.numIndent(first) max(0 kseg.width(first)-1)
 
@@ -226,8 +232,6 @@ export
 
         [newLines newPosl] = belt.insertTextAtPositions lines text posl
 
-        # the insert helper returns the end of the inserted text
-        # the cursor goes behind the pasted text, not onto its last character
         @setLines newLines
         @setCursors newPosl
 
@@ -235,14 +239,11 @@ export
 
         n = max 1 (spec.count ? 1)
 
-        # a horizontal move never wraps to the next line,
-        # so a count is a number of single steps
         if spec.kind in ['left' 'right']
             for i in 0...n
                 @moveCursors spec.kind
         else if spec.kind == 'eol'
 
-            # as in vim a count on $ goes down count-1 lines first
             if n > 1
                 @moveCursors 'down' count:n-1
 
@@ -258,8 +259,6 @@ export
 
         @clampCursorsToLines()
 
-    # standalone word movement, unlike an operator it may cross lines
-    # and does not stop at the end of the current line
     moveByWordMotion: kind count ->
 
         n       = max 1 (count ? 1)
@@ -280,14 +279,7 @@ export
                 else
                     pos = motion.wordEndAfter lines pos big
 
-            # wordStartAfter already stops behind the last character when
-            # there is no next word, so w lands there: the position after
-            # the last word is not reserved for $
-
             if kind in ['wordEnd' 'wordEndBig']
-
-                # wordEndAfter returns the position after the last character,
-                # e lands on the character itself
                 pos = @widthBefore lines pos
 
             cursors[idx] = pos
@@ -304,8 +296,6 @@ export
 
             pos = motion.charFindPosition lines cursor spec.target n spec.till forward
 
-            # a repeated t that would not move searches past that target,
-            # so ; keeps advancing instead of getting stuck
             if pos and spec.repeat and spec.till and pos[0] == cursor[0] and pos[1] == cursor[1]
                 pos = motion.charFindPosition lines cursor spec.target n+1 spec.till forward
 
@@ -316,7 +306,6 @@ export
 
         @highlightCharFind spec
 
-    # underline every target of the find that just moved the cursor
     highlightCharFind: spec ->
 
         spans   = []
@@ -340,8 +329,6 @@ export
 
         [kseg.widthAtSegi(segs, i) pos[1]]
 
-    # bof and eof take a count as the line number to go to,
-    # a count of one means the first or the last line
     moveCursorsToLine: kind n ->
 
         lines  = @s.lines

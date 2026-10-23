@@ -4,6 +4,8 @@ var novim
 
 import color from "../../theme/color.js"
 
+import post from "../../../kxk/post.js"
+
 
 novim = (function ()
 {
@@ -11,51 +13,57 @@ novim = (function ()
     novim["arrows"] = {left:'h',right:'l',up:'k',down:'j'}
     novim["areas"] = {i:'inner',a:'around'}
     novim["textObjects"] = {w:'word',W:'wordBig','"':'"',"'":"'",'(':'(',')':'(',b:'(','[':'[',']':'[','{':'{','}':'{',B:'{'}
-    novim["commands"] = {x:function (n)
-    {
-        return {operator:'delete',motion:{kind:'char',count:n}}
-    },X:function (n)
-    {
-        return {operator:'delete',motion:{kind:'charBack',count:n}}
-    },D:function ()
+    novim["commands"] = {D:function ()
     {
         return {operator:'delete',motion:{kind:'eol'}}
+    },x:function (n)
+    {
+        return {operator:'delete',count:n,motion:{kind:'char'}}
+    },X:function (n)
+    {
+        return {operator:'delete',count:n,motion:{kind:'charBack'}}
     },h:function (n)
     {
-        return {operator:'move',motion:{kind:'left',count:n}}
+        return {operator:'move',count:n,motion:{kind:'left'}}
     },j:function (n)
     {
-        return {operator:'move',motion:{kind:'down',count:n}}
+        return {operator:'move',count:n,motion:{kind:'down'}}
     },k:function (n)
     {
-        return {operator:'move',motion:{kind:'up',count:n}}
+        return {operator:'move',count:n,motion:{kind:'up'}}
     },l:function (n)
     {
-        return {operator:'move',motion:{kind:'right',count:n}}
+        return {operator:'move',count:n,motion:{kind:'right'}}
     },w:function (n)
     {
-        return {operator:'move',motion:{kind:'word',count:n}}
+        return {operator:'move',count:n,motion:{kind:'word'}}
     },b:function (n)
     {
-        return {operator:'move',motion:{kind:'wordBack',count:n}}
+        return {operator:'move',count:n,motion:{kind:'wordBack'}}
     },e:function (n)
     {
-        return {operator:'move',motion:{kind:'wordEnd',count:n}}
+        return {operator:'move',count:n,motion:{kind:'wordEnd'}}
     },W:function (n)
     {
-        return {operator:'move',motion:{kind:'wordBig',count:n}}
+        return {operator:'move',count:n,motion:{kind:'wordBig'}}
     },B:function (n)
     {
-        return {operator:'move',motion:{kind:'wordBackBig',count:n}}
+        return {operator:'move',count:n,motion:{kind:'wordBackBig'}}
     },E:function (n)
     {
-        return {operator:'move',motion:{kind:'wordEndBig',count:n}}
+        return {operator:'move',count:n,motion:{kind:'wordEndBig'}}
     },'$':function (n)
     {
-        return {operator:'move',motion:{kind:'eol',count:n}}
+        return {operator:'move',count:n,motion:{kind:'eol'}}
     },G:function (n)
     {
-        return {operator:'move',motion:{kind:'eof',count:n}}
+        return {operator:'move',count:n,motion:{kind:'eof'}}
+    },n:function (n)
+    {
+        return {operator:'searchNext',count:n}
+    },N:function (n)
+    {
+        return {operator:'searchPrev',count:n}
     },p:function (n)
     {
         return {operator:'put',count:n,after:true}
@@ -69,7 +77,13 @@ novim = (function ()
     {
         return {operator:'repeat',count:n}
     }}
-    novim["motions"] = {d:function (n)
+    novim["motions"] = {'0':function ()
+    {
+        return {kind:'bol'}
+    },'$':function ()
+    {
+        return {kind:'eol'}
+    },d:function (n)
     {
         return {kind:'line',count:n}
     },y:function (n)
@@ -93,12 +107,6 @@ novim = (function ()
     },B:function (n)
     {
         return {kind:'wordBackBig',count:n}
-    },'0':function ()
-    {
-        return {kind:'bol'}
-    },'$':function ()
-    {
-        return {kind:'eol'}
     },h:function (n)
     {
         return {kind:'charBack',count:n}
@@ -118,7 +126,7 @@ novim = (function ()
     
         this.name = 'novim'
         this.lastFind = null
-        this.reset(false)
+        this.reset()
     }
 
     novim["clipboardSync"] = null
@@ -157,7 +165,7 @@ novim = (function ()
         return enabled
     }
 
-    novim.prototype["reset"] = function (announce = true)
+    novim.prototype["reset"] = function ()
     {
         this.count = ''
         this.operator = null
@@ -165,11 +173,7 @@ novim = (function ()
         this.prefix = null
         this.register = null
         this.registerPending = false
-        this.find = null
-        if (announce)
-        {
-            console.log('novim reset')
-        }
+        return this.find = null
     }
 
     novim.prototype["resetOrExit"] = function ()
@@ -198,9 +202,7 @@ novim = (function ()
     }
 
     novim.prototype["logPending"] = function ()
-    {
-        console.log('novim pending ▸',this.operator,this.area,this.prefix,this.count,this.register,this.find)
-    }
+    {}
 
     novim.prototype["complete"] = function (build)
     {
@@ -208,7 +210,7 @@ novim = (function ()
 
         operator = novim.operators[this.operator]
         this.execute({operator:operator,motion:build(this.countNumber())})
-        return this.reset(false)
+        return this.reset()
     }
 
     novim.prototype["completeTextObject"] = function (target)
@@ -218,7 +220,7 @@ novim = (function ()
         area = this.area
         operator = novim.operators[this.operator]
         this.execute({operator:operator,motion:{kind:'textObject',area:area,target:target,count:this.countNumber()}})
-        return this.reset(false)
+        return this.reset()
     }
 
     novim.prototype["completeFind"] = function (target)
@@ -237,7 +239,7 @@ novim = (function ()
         {
             this.execute({operator:'move',motion:motion})
         }
-        return this.reset(false)
+        return this.reset()
     }
 
     novim.prototype["repeatFind"] = function (reverse = false)
@@ -258,7 +260,7 @@ novim = (function ()
         {
             this.execute({operator:'move',motion:motion})
         }
-        return this.reset(false)
+        return this.reset()
     }
 
     novim.prototype["execute"] = function (cmd)
@@ -272,9 +274,9 @@ novim = (function ()
 
     novim.prototype["handleKey"] = function (key, event)
     {
-        var area, arrow, build, char, combo, command, prefix, target, _210_28_
+        var area, arrow, build, char, combo, command, prefix, target, _204_28_
 
-        combo = ((_210_28_=event.combo) != null ? _210_28_ : key)
+        combo = ((_204_28_=event.combo) != null ? _204_28_ : key)
         char = (!_k_.empty((event.char)) ? event.char : combo)
         if (combo.includes('alt+') || combo.includes('ctrl+') || combo.includes('cmd+'))
         {
@@ -286,7 +288,7 @@ novim = (function ()
             this.resetOrExit()
             return true
         }
-        if (!this.find && !(_k_.in(char,[',',';'])))
+        if (!this.find && !(_k_.in(char,[',',';','n','N'])) && !(char.length === 1 && +char >= 0 && +char <= 9))
         {
             this.state.setHighlights([])
         }
@@ -336,7 +338,13 @@ novim = (function ()
             if (prefix === 'g' && char === 'g')
             {
                 this.execute({operator:'move',motion:{kind:'bof',count:this.countNumber()}})
-                this.reset(false)
+                this.reset()
+            }
+            else if (prefix === '/' && char === '/')
+            {
+                console.log("VINDER.SHOW")
+                post.emit('vinder.show')
+                this.reset()
             }
             else
             {
@@ -417,17 +425,23 @@ novim = (function ()
             this.prefix = 'g'
             this.logPending()
         }
+        else if (char === '/')
+        {
+            console.log('vinder.show')
+            post.emit('vinder.show')
+            this.reset()
+        }
         else if (command = novim.commands[char])
         {
             this.execute(command(this.countNumber()))
-            this.reset(false)
+            this.reset()
         }
         else if (_k_.in(char,'0123456789'))
         {
             if (char === '0' && _k_.empty(this.count))
             {
                 this.execute({operator:'move',motion:{kind:'bol'}})
-                this.reset(false)
+                this.reset()
             }
             else
             {
@@ -457,5 +471,5 @@ novim = (function ()
 
 export default novim;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibm92aW0uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvbW9kZS9ub3ZpbS5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BWWtCLFlBQVI7OztBQUVELFNBQVQ7O0lBR0ksT0FBQyxlQUNHLEVBQUcsU0FDSCxFQUFHO0lBR1AsT0FBQyxZQUNHLEtBQU8sSUFDUCxNQUFPLElBQ1AsR0FBTyxJQUNQLEtBQU87SUFHWCxPQUFDLFdBQ0csRUFBRyxRQUNILEVBQUc7SUFFUCxPQUFDLGlCQUNHLEVBQUcsT0FDSCxFQUFHLFVBQ0gsSUFBSyxJQUNMLElBQUssSUFDTCxJQUFLLElBQ0wsSUFBSyxJQUNMLEVBQUcsSUFDSCxJQUFLLElBQ0wsSUFBSyxJQUNMLElBQUssSUFDTCxJQUFLLElBQ0wsRUFBRztJQUlQLE9BQUMsY0FDRyxZQUFJOztnQkFBUSxTQUFVLFNBQVUsUUFBVSxLQUFNLE9BQVcsTUFBTztNQUNsRSxZQUFJOztnQkFBUSxTQUFVLFNBQVUsUUFBVSxLQUFNLFdBQVcsTUFBTztNQUNsRTs7Z0JBQVEsU0FBVSxTQUFVLFFBQVUsS0FBTTtNQUM1QyxZQUFJOztnQkFBUSxTQUFVLE9BQVUsUUFBVSxLQUFNLE9BQVEsTUFBTztNQUMvRCxZQUFJOztnQkFBUSxTQUFVLE9BQVUsUUFBVSxLQUFNLE9BQVEsTUFBTztNQUMvRCxZQUFJOztnQkFBUSxTQUFVLE9BQVUsUUFBVSxLQUFNLEtBQVEsTUFBTztNQUMvRCxZQUFJOztnQkFBUSxTQUFVLE9BQVUsUUFBVSxLQUFNLFFBQVEsTUFBTztNQUMvRCxZQUFJOztnQkFBUSxTQUFVLE9BQVUsUUFBVSxLQUFNLE9BQVEsTUFBTztNQUMvRCxZQUFJOztnQkFBUSxTQUFVLE9BQVUsUUFBVSxLQUFNLFdBQVcsTUFBTztNQUNsRSxZQUFJOztnQkFBUSxTQUFVLE9BQVUsUUFBVSxLQUFNLFVBQVcsTUFBTztNQUNsRSxZQUFJOztnQkFBUSxTQUFVLE9BQVUsUUFBVSxLQUFNLFVBQWMsTUFBTztNQUNyRSxZQUFJ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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibm92aW0uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvbW9kZS9ub3ZpbS5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BV2tCLFlBQVI7O09BQ1MsV0FBTjs7O0FBRUosU0FBVDs7SUFFSSxPQUFDLGVBQ0csRUFBRyxTQUNILEVBQUc7SUFFUCxPQUFDLFlBQ0csS0FBTyxJQUNQLE1BQU8sSUFDUCxHQUFPLElBQ1AsS0FBTztJQUVYLE9BQUMsV0FDRyxFQUFHLFFBQ0gsRUFBRztJQUVQLE9BQUMsaUJBQ0csRUFBRyxPQUNILEVBQUcsVUFDSCxJQUFLLElBQ0wsSUFBSyxJQUNMLElBQUssSUFDTCxJQUFLLElBQ0wsRUFBRyxJQUNILElBQUssSUFDTCxJQUFLLElBQ0wsSUFBSyxJQUNMLElBQUssSUFDTCxFQUFHO0lBRVAsT0FBQyxjQUNHOztnQkFBZSxTQUFVLFNBQTRCLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLFNBQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLFNBQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLE9BQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLE9BQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLE9BQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLE9BQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLE9BQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLE9BQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLE9BQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLE9BQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLE9BQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLE9BQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxjQUFROztnQkFBTyxTQUFVLE9BQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLE9BQWUsTUFBTyxFQUFNLFFBQVUsS0FBTTtNQUNyRSxZQUFROztnQkFBTyxTQUFVLGFBQWUsTUFBTztNQUMvQyxZQUFROztnQkFBTyxTQUFVLGFBQWUsTUFBTztNQUMvQyxZQUFROztnQkFBTyxTQUFVLE1BQWUsTUFBTyxFQUFNLE1BQU87TUFDNUQsWUFBUTs7Z0JBQU8sU0FBVSxNQUFlLE1BQU8sRUFBTSxNQUFPO01BQzVELFlBQVE7O2dCQUFPLFNBQVUsT0FBZSxNQUFPO01BQy9DLGNBQVE7O2dCQUFPLFNBQVUsU0FBZSxNQUFPOztJQUduRCxPQUFDLGFBQ0c7O2dCQUFlLEtBQU07TUFDckI7O2dCQUFlLEtBQU07TUFDckIsWUFBUTs7Z0JBQU8sS0FBTSxPQUFtQixNQUFPO01BQy9DLFlBQVE7O2dCQUFPLEtBQU0sT0FBbUIsTUFBTztNQUMvQyxZQUFROztnQkFBTyxLQUFNLE9BQW1CLE1BQU87TUFDL0MsWUFBUTs7Z0JBQU8sS0FBTSxVQUFtQixNQUFPO01BQy9DLFlBQVE7O2dCQUFPLEtBQU0sV0FBbUIsTUFBTztNQUMvQyxZQUFROztnQkFBTyxLQUFNLFVBQW1CLE1BQU87TUFDL0MsWUFBUTs7Z0JBQU8sS0FBTSxhQUFtQixNQUFPO01BQy9DLFlBQVE7O2dCQUFPLEtBQU0sY0FBbUIsTUFBTztNQUMvQyxZQUFROztnQkFBTyxLQUFNLFdBQW1CLE1BQU87TUFDL0MsWUFBUTs7Z0JBQU8sS0FBTSxPQUFtQixNQUFPO01BQy9DLFlBQVE7O2dCQUFPLEtBQU0sV0FBbUIsTUFBTztNQUMvQyxZQUFROztnQkFBTyxLQUFNLFNBQW1CLE1BQU87O2FBR25ELE9BQUk7O1FBQUQ7O1FBRUMsS0FBQyxPQUFXO1FBQ1osS0FBQyxXQUFXO1FBQ1osS0FBQzs7O0lBRUwsT0FBQyxrQkFBZTtJQUVoQixPQUFDOzs7O1FBRUcsU0FBUyxPQUFPO2FBRUY7O21CQUFaOztZQUNRLE9BQU8sS0FBTSxPQUFPLEVBQUU7O21CQUE5Qjs7ZUFDRjs7O0lBRUosT0FBQzs7WUFFTSxNQUFNLGtCQUFpQjs7b0JBQ2YsTUFBTTs7ZUFFakIsTUFBTTs7O0lBRVYsT0FBQzs7OztRQUVHLFdBQWMsTUFBTTtRQUVwQixNQUFNLGdCQUFnQjtRQUV0QixZQUFJLHNCQUFxQixVQUFVLE9BQU87ZUFFMUM7OztxQkFFSjs7UUFFSSxLQUFDLFFBQWtCO1FBQ25CLEtBQUMsV0FBa0I7UUFDbkIsS0FBQyxPQUFrQjtRQUNuQixLQUFDLFNBQWtCO1FBQ25CLEtBQUMsV0FBa0I7UUFDbkIsS0FBQyxrQkFBa0I7ZUFDbkIsS0FBQyxPQUFrQjs7O3FCQUV2Qjs7WUFFTyxLQUFDLFlBQVksS0FBQyxTQUFTLEtBQUMsVUFBVSxLQUFDLG1CQUFtQixLQUFDLFlBQVksS0FBQzs7bUJBQ25FLEtBQUM7Ozs7WUFFRCxZQUFJO21CQUNKLEtBQUMsTUFBTSxTQUFTOzs7O3FCQUV4Qjs7c0JBQXlCLEtBQUM7O21CQUFXOzs7O21CQUFPLFNBQVMsS0FBQzs7OztxQkFFdEQ7OztxQkFJQSx1QkFBVTs7OztRQUVOLFdBQVcsTUFBTSxVQUFVLEtBQUM7UUFFNUIsS0FBQyxTQUFVLFNBQVUsU0FBVSxPQUFRLE1BQU0sS0FBQztlQUM5QyxLQUFDOzs7cUJBRUwsaUNBQW9COzs7O1FBRWhCLE9BQVcsS0FBQztRQUNaLFdBQVcsTUFBTSxVQUFVLEtBQUM7UUFFNUIsS0FBQyxTQUFVLFNBQVUsU0FBVSxRQUFVLEtBQU0sYUFBYyxLQUFNLEtBQU0sT0FBUSxPQUFRLE1BQU8sS0FBQztlQUNqRyxLQUFDOzs7cUJBRUwsMkJBQWM7Ozs7UUFFVixjQUFVLEtBQUMsTUFBUyxJQUFJO1FBQ3hCLGlCQUFVLEtBQUMsTUFBUyxJQUFJO1FBRXhCLEtBQUMsWUFBYSxPQUFRLE9BQVEsS0FBTSxLQUFNLFFBQVM7UUFFbkQsVUFBVyxLQUFNLFdBQVksT0FBUSxPQUFRLEtBQU0sS0FBTSxRQUFTLFFBQVMsTUFBTyxLQUFDO1lBRWhGLEtBQUM7O1lBQ0EsS0FBQyxTQUFVLFNBQVUsTUFBTSxVQUFVLEtBQUMsVUFBVyxPQUFROzs7O1lBRXpELEtBQUMsU0FBVSxTQUFVLE9BQVEsT0FBUTs7ZUFFekMsS0FBQzs7O3FCQUVMLHlCQUFZLFVBQVE7Ozs7YUFFTixLQUFDOzs7O1FBRVgsV0FBVSxXQUFjLEtBQUMsU0FBUyxVQUFVLEtBQUMsU0FBUztRQUV0RCxVQUFXLEtBQU0sV0FBWSxPQUFRLEtBQUMsU0FBUyxPQUFRLEtBQU0sS0FBQyxTQUFTLEtBQU0sUUFBUyxRQUFTLE1BQU8sS0FBQyxjQUFlLE9BQVE7WUFFM0gsS0FBQzs7WUFDQSxLQUFDLFNBQVUsU0FBVSxNQUFNLFVBQVUsS0FBQyxVQUFXLE9BQVE7Ozs7WUFFekQsS0FBQyxTQUFVLFNBQVUsT0FBUSxPQUFROztlQUV6QyxLQUFDOzs7cUJBRUwsc0JBQVM7O1lBRUYsS0FBQzs7WUFDQSxJQUFJLFdBQVcsS0FBQzs7ZUFFcEIsS0FBQyxNQUFNLGFBQWE7OztxQkFReEIsd0JBQVcsS0FBSTs7OztRQUVYLG1CQUFRLE1BQU0sNEJBQVE7UUFDdEIsb0JBQWMsTUFBTSxTQUFRLE1BQU0sT0FBTztZQUd0QyxNQUFNLFNBQVMsV0FBVyxNQUFNLFNBQVMsWUFBWSxNQUFNLFNBQVM7O21CQUNoRTs7bUJBRUosT0FBVSxNQUFNOztZQUNmLEtBQUMsTUFBTTtZQUNQLEtBQUM7bUJBQ0U7O2FBTXdCLEtBQUMsaUJBQVMsTUFBYSxJQUFJLElBQUksSUFBSSxZQUFjLEtBQUssV0FBVSxNQUFPLFFBQVEsTUFBTyxRQUFROztZQUE3SCxLQUFDLE1BQU07O1lBR0osS0FBQzs7Z0JBRUcsS0FBSyxXQUFVOztnQkFDZCxLQUFDLGFBQWE7Ozs7Z0JBRWQsS0FBQzs7bUJBRUY7O1lBRUosUUFBUSxNQUFNLE9BQU87O1lBQ3BCLE9BQU87O1lBRVIsS0FBQzs7WUFDQSxLQUFDLGtCQUFrQjt1QkFHaEIsTUFBUyxJQUFJOztnQkFDWixLQUFDLFdBQVc7OzRCQUNSLE1BQVMsSUFBSTs7Z0JBQ2pCLEtBQUMsV0FBVzs7OztnQkFFWixLQUFDO3VCQUNFOztZQUVQLEtBQUM7bUJBQ0U7O1lBR0ksS0FBSyxXQUFVOzttQkFBdkI7O1lBR0EsS0FBQzs7WUFDQSxTQUFVLEtBQUM7WUFDWCxLQUFDLFNBQVM7Z0JBRVAsV0FBVSxPQUFRLFNBQVE7O2dCQUN6QixLQUFDLFNBQVUsU0FBVSxPQUFRLFFBQVUsS0FBTSxNQUFPLE1BQU8sS0FBQztnQkFDNUQsS0FBQzs7cUJBQ0csV0FBVSxPQUFRLFNBQVE7O2dCQUM5QixZQUFJO2dCQUNKLEtBQUssS0FBSztnQkFDVixLQUFDOzs7O2dCQUVELEtBQUM7O21CQUVGOztZQUVKLEtBQUM7O2dCQUVHLFNBQVMsTUFBTSxZQUFZOztnQkFDMUIsS0FBQyxtQkFBbUI7Ozs7Z0JBRXBCLEtBQUM7OztpQkFFRCxLQUFDOztnQkFFRixRQUFRLE1BQU0sUUFBUTs7Z0JBQ3JCLEtBQUMsU0FBUzs7NEJBQ04sTUFBUyxJQUFJLElBQUksSUFBSTs7Z0JBQ3pCLEtBQUMsT0FBTztnQkFDUixLQUFDOztxQkFDRyxTQUFROztnQkFDWixLQUFDOztxQkFDRyxTQUFROztnQkFDWixLQUFDLFdBQVc7O3FCQUNSLE9BQU8sTUFBTSxNQUFNOztnQkFDdkIsS0FBQyxPQUFPO2dCQUNSLEtBQUM7OzRCQUNHLEtBQVE7O2dCQUNaLEtBQUMsU0FBUztnQkFDVixLQUFDOzs7O2dCQUVELEtBQUM7Ozt3QkFFRCxNQUFTLElBQUksSUFBSSxJQUFJOztZQUV6QixLQUFDLE9BQU87WUFDUixLQUFDOztpQkFFRyxTQUFROztZQUVaLEtBQUM7O2lCQUVHLFNBQVE7O1lBRVosS0FBQyxXQUFXOztpQkFFUixNQUFNLFVBQVU7O1lBRXBCLEtBQUMsV0FBVztZQUNaLEtBQUM7O2lCQUVHLFNBQVE7O1lBRVosS0FBQyxrQkFBa0I7WUFDbkIsS0FBQzs7aUJBRUcsU0FBUTs7WUFFWixLQUFDLFNBQVM7WUFDVixLQUFDOztpQkFFRyxTQUFROztZQUNaLFlBQUk7WUFDSixLQUFLLEtBQUs7WUFDVixLQUFDOztpQkFFRyxVQUFVLE1BQU0sU0FBUzs7WUFFN0IsS0FBQyxRQUFRLFFBQVEsS0FBQztZQUNsQixLQUFDOzt3QkFFRyxLQUFROztnQkFHVCxTQUFRLGlCQUFjLEtBQUM7O2dCQUN0QixLQUFDLFNBQVUsU0FBVSxPQUFRLFFBQVUsS0FBTTtnQkFDN0MsS0FBQzs7OztnQkFFRCxLQUFDLFNBQVM7OztlQUdsQjs7O3FCQVFKLHlCQUFZLFdBQVU7O2dCQUVYOztpQkFDSDt1QkFBb0IsTUFBTSxPQUFPOztpQkFDakM7dUJBQW9CLE1BQU0sT0FBTzs7OztlQUVyQzs7O1dBeFZDOzs7ZUEwVkYifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/mode/novim.kode

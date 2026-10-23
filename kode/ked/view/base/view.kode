@@ -84,7 +84,7 @@ function view extends events
     # ███   ███   ███████    ███████   ███████   ████████  
     
     onMouse: event => @handleHover event
-    onWheel: event => log "view.onWheel #{@name}"
+    onWheel: event => #log "view.onWheel #{@name}"
     
     onMouseLeave: event => post.emit 'redraw'
     onMouseEnter: event => 

@@ -87,7 +87,7 @@ function watcher
         
     @onChange: change path dir ○=>
     
-        log "watcher.onChange ○ #{y6(dir)} #{b5(path)}" if path != "ked.log"
+        # log "watcher.onChange ○ #{y6(dir)} #{b5(path)}" if path != "ked.log"
     
         path = slash.path dir path
 

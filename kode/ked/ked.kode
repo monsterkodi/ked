@@ -17,7 +17,7 @@ use ./view/base   ◆ view input
 use ./view/title  ◆ title 
 use ./view/editor ◆ fileeditor
 use ./view/screen ◆ screen ttio
-use ./view/menu   ◆ context menu macro finder searcher differ 
+use ./view/menu   ◆ context menu macro finder searcher differ vinder
 use ./view/colmns ◆ browse dircol funcol quicky droop saveas
 
 function KED
@@ -63,6 +63,7 @@ function KED
         @funcol   = new funcol     @screen @editor  ['scroll' 'knob']
         @finder   = new finder     @screen @editor
         @searcher = new searcher   @screen @editor
+        @vinder   = new vinder     @screen @editor
         @differ   = new differ     @screen @editor
         @title    = new title      @screen @editor
         @context  = new context    @screen
@@ -90,10 +91,10 @@ function KED
         post.on 'git.status'    @onGitStatus
         # post.on 'focus'         (name) -> log "focus: '#{name}'"
         
-        @contextHandlers = [                                                                               @editor         @dircol @funcol ]
-        @mouseHandlers   = [ @input @context @finder @searcher @differ @quicky @browse @saveas @droop @menu @macro @editor @title @dircol @funcol ]
-        @wheelHandlers   = [                 @finder @searcher @differ @quicky @browse @saveas @droop       @macro @editor         @dircol @funcol ]
-        @keyHandlers     = [ @input @context @finder @searcher @differ @quicky @browse @saveas @droop @menu @macro @editor         @dircol @funcol ]
+        @contextHandlers = [                                                                                               @editor         @dircol @funcol ]
+        @mouseHandlers   = [ @input @context @finder @searcher @vinder @differ @quicky @browse @saveas @droop @menu @macro @editor @title  @dircol @funcol ]
+        @wheelHandlers   = [                 @finder @searcher @vinder @differ @quicky @browse @saveas @droop       @macro @editor         @dircol @funcol ]
+        @keyHandlers     = [ @input @context @finder @searcher @vinder @differ @quicky @browse @saveas @droop @menu @macro @editor         @dircol @funcol ]
         
         @t.on 'key'    @onKey
         @t.on 'mouse'  @onMouse
@@ -752,6 +753,7 @@ function KED
         @droop.draw()
         @finder.draw()
         @searcher.draw()
+        @vinder.draw()
         @differ.draw()
         @context.draw()
         @input.draw()

@@ -1,0 +1,126 @@
+###
+    ███   ███  ███  ███   ███  ███████    ████████  ████████   
+    ███   ███  ███  ████  ███  ███   ███  ███       ███   ███  
+     ███ ███   ███  ███ █ ███  ███   ███  ███████   ███████    
+       ███     ███  ███  ████  ███   ███  ███       ███   ███  
+        █      ███  ███   ███  ███████    ████████  ███   ███  
+
+    incremental search input for the novim mode
+###
+
+use ../../../kxk    ▪ post
+use ../../theme     ◆ theme
+use ../base        ◆ view input
+
+function vinder extends view
+
+    @: @screen @editor name='vinder' ->
+
+        super @screen @name
+
+        @state        = @editor.state
+        @isPopup      = true
+        @isInputPopup = true
+
+        @input   = new input @screen "#{@name}_input"
+        @input.show()
+
+        @input.on 'action' @onInputAction
+
+        @setColor 'bg'    theme.vinder.bg ? theme.finder.bg
+        @setColor 'frame' theme.vinder.frame ? theme.finder.frame
+
+        post.on 'vinder.show' @show if @name == 'vinder'
+
+    arrange: =>
+
+        x = @editor.cells.x
+        w = @editor.cells.cols
+        y = @editor.cells.y + @editor.cells.rows - 1
+        @input.layout  x+1  y  w-2  1
+        @cells.layout  x    y  w    1
+
+    show: text =>
+
+        log "vinder.show #{@name} #{text}"
+
+        if empty text
+            text = @state.textOfSelectionOrWordAtCursor()
+
+        text ?= ''
+
+        if text != @input.current()
+            @input.set text
+            @input.selectAll()
+            @input.state.moveCursors 'eol'
+            @input.grabFocus()
+
+        @state.highlightText text
+
+        super()
+
+    hide: => super()
+
+    draw: ->
+
+        ⮐  if @hidden()
+
+        @arrange()
+
+        @cells.draw_rounded_border 0 0 -1 -1 fg:@color.frame
+
+        @input.draw()
+
+    onInputAction: action text =>
+
+        switch action
+
+            'submit'
+                post.emit 'focus' 'editor'
+                @hide()
+
+            'change'
+                if valid text
+                    @state.highlightText text
+                else
+                    @state.setHighlights []
+
+            'cancel'
+            'escape'
+            'esc'
+                post.emit 'focus' 'editor'
+                @state.setHighlights []
+                @hide()
+
+        true
+
+    onMouse: event =>
+
+        ⮐  if @hidden()
+
+        ret = @input.onMouse event ; ⮐ ret if ret?.redraw
+
+        if event.type == 'press' and not @cells.isInsideEvent event
+            @onInputAction 'cancel'
+            ⮐  redraw:true
+
+        redraw:true
+
+    onKey: key event =>
+
+        ⮐  if @hidden()
+
+        if event.combo in ['esc' 'escape'] or event.combo.startsWith('alt+') or event.combo.startsWith('ctrl+') or event.combo.startsWith('cmd+')
+
+            ⮐  if event.combo in ['esc' 'escape']
+                @onInputAction 'cancel'
+                ⮐  true
+
+            ⮐  'unhandled'
+
+        if result = @input.onKey key event
+            ⮐  result
+
+        false
+
+export vinder

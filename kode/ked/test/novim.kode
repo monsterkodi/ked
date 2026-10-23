@@ -30,20 +30,13 @@ mrange = lines x y m -> motion.range lines [x y] m
 
         mrange(segls, 0, 0, {kind:'word',     count:1}) ▸ [0 0 4 0]
         mrange(segls, 4, 0, {kind:'word',     count:1}) ▸ [4 0 8 0]
-
-        # the last word of a line: the motion stops at the end of the line,
-        # the newline is not part of the range
         mrange(segls, 8, 0, {kind:'word',     count:1}) ▸ [8 0 13 0]
-
-        # the last character of the buffer: there is nowhere to go
         mrange(segls, 8, 1, {kind:'word',     count:1}) ▸ [8 1 9 1]
-
         mrange(segls, 0, 0, {kind:'wordEnd',  count:1}) ▸ [0 0 3 0]
         mrange(segls, 4, 0, {kind:'wordEnd',  count:2}) ▸ [4 0 13 0]
         mrange(segls, 8, 0, {kind:'wordBack', count:1}) ▸ [4 0 8 0]
         mrange(segls, 4, 0, {kind:'wordBack', count:1}) ▸ [0 0 4 0]
 
-        # at the very start there is nothing to delete backwards
         mrange(segls, 0, 0, {kind:'wordBack', count:1}) ▸ [0 0 0 0]
 
     ▸ words across lines
@@ -54,8 +47,6 @@ mrange = lines x y m -> motion.range lines [x y] m
               baz
             """
 
-        # the last step of an operator motion stops at the end of its line,
-        # so deleting a word does not join lines
         mrange(across, 0, 0, {kind:'word', count:1}) ▸ [0 0 3 0]
         mrange(across, 0, 0, {kind:'word', count:2}) ▸ [0 0 5 1]
 
@@ -63,10 +54,7 @@ mrange = lines x y m -> motion.range lines [x y] m
 
         mrange(segls, 3, 1, {kind:'line',     count:1}) ▸ [0 1 9 1]
         mrange(segls, 3, 0, {kind:'line',     count:2}) ▸ [0 0 9 1]
-
-        # a count past the end is clamped
         mrange(segls, 3, 0, {kind:'line',     count:9}) ▸ [0 0 9 1]
-
         mrange(segls, 3, 0, {kind:'lineDown', count:1}) ▸ [0 0 9 1]
         mrange(segls, 3, 0, {kind:'lineDown', count:9}) ▸ [0 0 9 1]
         mrange(segls, 3, 1, {kind:'lineUp',   count:1}) ▸ [0 0 9 1]
@@ -78,7 +66,6 @@ mrange = lines x y m -> motion.range lines [x y] m
         mrange(segls, 11, 0, {kind:'char',     count:5}) ▸ [11 0 13 0]
         mrange(segls, 3, 0,  {kind:'charBack', count:2}) ▸ [1 0 3 0]
         mrange(segls, 3, 0,  {kind:'charBack', count:9}) ▸ [0 0 3 0]
-
         mrange(segls, 11, 0, {kind:'bol'}) ▸ [0 0 11 0]
         mrange(segls, 11, 0, {kind:'eol'}) ▸ [11 0 13 0]
         mrange(segls, 13, 0, {kind:'eol'}) ▸ [13 0 13 0]
@@ -87,23 +74,13 @@ mrange = lines x y m -> motion.range lines [x y] m
 
         findlines = kseg.segls "a-b\nc-d"
 
-        # f searches the whole buffer, not only the current line
         mrange(findlines, 0, 0, {kind:'charFind', target:'-', count:1}) ▸ [0 0 2 0]
         mrange(findlines, 0, 0, {kind:'charFind', target:'-', count:2}) ▸ [0 0 2 1]
-
-        # t stops one character before the target
         mrange(findlines, 0, 0, {kind:'charFind', target:'-', count:1, till:true}) ▸ [0 0 1 0]
         mrange(findlines, 0, 0, {kind:'charFind', target:'-', count:2, till:true}) ▸ [0 0 1 1]
-
-        # capital F searches backwards
         mrange(findlines, 3, 1, {kind:'charFind', target:'-', count:1, forward:false}) ▸ [1 1 3 1]
         mrange(findlines, 3, 1, {kind:'charFind', target:'-', count:2, forward:false}) ▸ [1 0 3 1]
-
-        # a backward till stops one character after the target
         mrange(findlines, 3, 1, {kind:'charFind', target:'-', count:1, forward:false, till:true}) ▸ [2 1 3 1]
-
-        # forward till skips a target at the very start of a line,
-        # there is no character before it to stop on
         mrange(kseg.segls("x\n-a\nb-c"), 0, 0, {kind:'charFind', target:'-', count:1, till:true}) ▸ [0 0 1 2]
 
 ▸ merging ranges
@@ -112,11 +89,7 @@ mrange = lines x y m -> motion.range lines [x y] m
     motion.mergeRanges [[0 0 3 0] [0 0 3 0]] ▸ [[0 0 3 0]]
     motion.mergeRanges [[0 0 3 0] [1 0 3 0]] ▸ [[0 0 3 0]]
     motion.mergeRanges [[0 0 5 1] [0 1 3 1]] ▸ [[0 0 5 1]]
-
-    # ranges on different lines stay apart
     motion.mergeRanges [[0 0 3 0] [0 1 3 1]] ▸ [[0 0 3 0] [0 1 3 1]]
-
-    # two cursors on one empty line remove it once
     motion.mergeRanges [[0 0 0 0] [0 0 0 0]] ▸ [[0 0 0 0]]
 
 ▸ text object ranges
@@ -129,26 +102,16 @@ mrange = lines x y m -> motion.range lines [x y] m
     wobj(5, 'around', 1) ▸ [4 0 8 0]
     wobj(0, 'inner', 1)  ▸ [0 0 3 0]
     wobj(0, 'around', 1) ▸ [0 0 4 0]
-
-    # around takes the leading white space when the word ends the line
     wobj(14, 'around', 1) ▸ [13 0 18 0]
-
-    # on white space the inner object is the white space run
     wobj(3, 'inner', 1)  ▸ [3 0 4 0]
-
-    # around white space means the next word
     wobj(3, 'around', 1) ▸ [4 0 8 0]
-
-    # counts cover more words
     wobj(0, 'inner', 2)  ▸ [0 0 7 0]
     wobj(0, 'around', 2) ▸ [0 0 8 0]
     wobj(0, 'inner', 3)  ▸ [0 0 13 0]
     wobj(0, 'around', 4) ▸ [0 0 18 0]
 
-    # a count can cross a line break, a word cannot
     mrange(kseg.segls("foo\nbar"), 0, 0, {kind:'textObject', area:'inner', target:'word', count:2}) ▸ [0 0 3 1]
 
-    # a WORD object treats punctuation as part of the word
     bigwords = kseg.segls "foo.bar baz, qux"
 
     Wobj = (x area count) -> mrange(bigwords, x, 0, {kind:'textObject', area:area, target:'wordBig', count:count})
@@ -157,8 +120,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     Wobj(0, 'around', 1) ▸ [0 0 8 0]
     Wobj(2, 'inner', 1)  ▸ [0 0 7 0]
     Wobj(8, 'inner', 1)  ▸ [8 0 12 0]
-
-    # counts cover more WORDs, white space between them included
     Wobj(0, 'inner', 2)  ▸ [0 0 12 0]
     Wobj(0, 'around', 3) ▸ [0 0 16 0]
 
@@ -167,14 +128,10 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     qobj(7, 'inner')  ▸ [5 0 16 0]
     qobj(7, 'around') ▸ [4 0 18 0]
-
-    # a cursor before the string takes the next pair
     qobj(0, 'inner')  ▸ [5 0 16 0]
 
-    # after the last pair there is no object
     mrange(quoted, 20, 0, {kind:'textObject', area:'inner', target:'"', count:1}) ▸ null
 
-    # around falls back to the leading white space
     lead = kseg.segls 'x = "abc"'
     lobj = (x area) -> mrange(lead, x, 0, {kind:'textObject', area:area, target:'"', count:1})
 
@@ -192,42 +149,33 @@ mrange = lines x y m -> motion.range lines [x y] m
     pobj(8, 'inner')  ▸ [5 0 13 0]
     pobj(8, 'around') ▸ [4 0 14 0]
 
-    # other bracket kinds inside do not hide the pair
     mrange(kseg.segls('f(a[1]) x'), 4, 0, {kind:'textObject', area:'inner', target:'(', count:1}) ▸ [2 0 6 0]
 
-    # a cursor before the pair takes it too
     pobj(0, 'inner') ▸ [5 0 13 0]
 
     brackets = kseg.segls 'x[one] y{two}'
     mrange(brackets, 3, 0,  {kind:'textObject', area:'inner', target:'[', count:1}) ▸ [2 0 5 0]
     mrange(brackets, 10, 0, {kind:'textObject', area:'inner', target:'{', count:1}) ▸ [9 0 12 0]
 
-    # a bracket inside a string does not close the surrounding pair
     array = kseg.segls "if seg not in ['', undefined, ' ', '}', ']', ')']"
     aobj  = (x area) -> mrange(array, x, 0, {kind:'textObject', area:area, target:'[', count:1})
 
     aobj(21, 'inner')  ▸ [15 0 48 0]
     aobj(21, 'around') ▸ [14 0 49 0]
-
-    # the same pair holds the cursor on either of its brackets
-    # and on the bracket inside the string
     aobj(14, 'inner') ▸ [15 0 48 0]
     aobj(41, 'inner') ▸ [15 0 48 0]
     aobj(48, 'inner') ▸ [15 0 48 0]
 
-    # a bracket inside a string does not open a pair
     instring = kseg.segls "x = '[' + y]"
     iobj = (x) -> mrange(instring, x, 0, {kind:'textObject', area:'inner', target:'[', count:1})
 
     iobj(5) ▸ null
 
-    # the next pair skips an opener inside a string
     afterstring = kseg.segls "x = '[' ; a[b]"
     nobj = (x) -> mrange(afterstring, x, 0, {kind:'textObject', area:'inner', target:'[', count:1})
 
     nobj(0) ▸ [12 0 13 0]
 
-    # a pair can span lines
     multiline = kseg.segls """
         foo(
           bar
@@ -237,7 +185,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     mrange(multiline, 3, 1, {kind:'textObject', area:'inner',  target:'(', count:1}) ▸ [4 0 0 2]
     mrange(multiline, 3, 1, {kind:'textObject', area:'around', target:'(', count:1}) ▸ [3 0 1 2]
 
-    # no pair, no object
     mrange(kseg.segls('nothing here'), 0, 0, {kind:'textObject', area:'inner', target:'(', count:1}) ▸ null
 
 ▸ cursor movement
@@ -257,8 +204,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'move', motion:{kind:'up', count:1}}
     cur 1 0
 
-    # horizontal movement stays on the line
-
     s.setMainCursor 13 0
     s.executeNovim {operator:'move', motion:{kind:'right', count:2}}
     cur 13 0
@@ -267,13 +212,9 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'move', motion:{kind:'left', count:3}}
     cur 0 0
 
-    # vertical movement keeps the column, clamped to the line it lands on
-
     s.setMainCursor 13 0
     s.executeNovim {operator:'move', motion:{kind:'down', count:1}}
     cur 9 1
-
-    # and it stays inside the buffer
 
     s.executeNovim {operator:'move', motion:{kind:'down', count:9}}
     cur 9 1
@@ -281,14 +222,10 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'move', motion:{kind:'up', count:9}}
     cur 9 0
 
-    # every cursor moves
-
     s.loadLines belt.linesForText("abc\ndef")
     s.setCursors [[0 0] [1 1]]
     s.executeNovim {operator:'move', motion:{kind:'right', count:1}}
     s.allCursors() ▸ [[1 0] [2 1]]
-
-    # moving edits nothing and adds no undo step
 
     s.loadLines belt.linesForText("abc\ndef")
     s.setMainCursor 0 0
@@ -304,22 +241,17 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.loadLines belt.linesForText("one two\nfour")
     s.setMainCursor 0 0
 
-    # $ lands behind the last character, the ked cursor is a thin line
-    # at the left edge of a character, not a block cursor on it
     s.executeNovim {operator:'move', motion:{kind:'eol'}}
     cur 7 0
 
-    # a count on $ goes down count-1 lines first
     s.setMainCursor 0 0
     s.executeNovim {operator:'move', motion:{kind:'eol', count:2}}
     cur 4 1
 
-    # 0 goes to the first column
     s.setMainCursor 6 0
     s.executeNovim {operator:'move', motion:{kind:'bol'}}
     cur 0 0
 
-    # an empty line has nowhere else to go
     s.loadLines belt.linesForText("\nabc")
     s.setMainCursor 0 0
     s.executeNovim {operator:'move', motion:{kind:'eol'}}
@@ -329,7 +261,6 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     text = "  one\n  two\n  three"
 
-    # gg goes to the first line, G to the last
     s.loadLines belt.linesForText(text)
     s.setMainCursor 3 1
 
@@ -340,7 +271,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'move', motion:{kind:'eof'}}
     cur 2 2
 
-    # a count is the line number to go to
     s.setMainCursor 0 0
     s.executeNovim {operator:'move', motion:{kind:'eof', count:2}}
     cur 2 1
@@ -349,12 +279,10 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'move', motion:{kind:'bof', count:3}}
     cur 2 2
 
-    # a count past the last line is clamped
     s.setMainCursor 0 0
     s.executeNovim {operator:'move', motion:{kind:'eof', count:9}}
     cur 2 2
 
-    # moving to a line edits nothing
     txt text
 
 ▸ yank motions
@@ -367,13 +295,11 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.novimRegister.linewise ▸ false
     cur 0 0
 
-    # a charwise yank moves the cursor to the start of the text
     s.setMainCursor 8 0
     s.executeNovim {operator:'yank', motion:{kind:'wordBack', count:1}}
     s.novimRegister.lines ▸ ['two ']
     cur 4 0
 
-    # a linewise yank keeps the cursor where it is
     s.loadLines belt.linesForText("alpha\nbeta\ngamma")
     s.setMainCursor 3 1
 
@@ -382,11 +308,9 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.novimRegister.linewise ▸ true
     cur 3 1
 
-    # a count covers more lines
     s.executeNovim {operator:'yank', motion:{kind:'lineDown', count:1}}
     s.novimRegister.lines ▸ ['beta' 'gamma']
 
-    # yanking edits nothing and adds no undo step
     history = s.h.length
     s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
     s.h.length ▸ history
@@ -399,17 +323,14 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
 
-    # p puts a linewise yank below the cursor line
     s.executeNovim {operator:'put', after:true}
     txt "alpha\nalpha\nbeta"
     cur 0 1
 
-    # P puts it above
     s.executeNovim {operator:'put', after:false}
     txt "alpha\nalpha\nalpha\nbeta"
     cur 0 1
 
-    # a linewise put lands on the first non-blank of the inserted line
     s.loadLines belt.linesForText("  alpha\nbeta")
     s.setMainCursor 2 0
     s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
@@ -418,7 +339,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     txt "  alpha\n  alpha\nbeta"
     cur 2 1
 
-    # a count puts the text more than once
     s.loadLines belt.linesForText("x\ny")
     s.setMainCursor 0 0
     s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
@@ -427,7 +347,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     txt "x\ny\nx\nx"
     cur 0 3
 
-    # p puts charwise text after the cursor, P before it
     s.loadLines belt.linesForText("abc\ndef")
     s.setMainCursor 0 0
     s.executeNovim {operator:'yank', motion:{kind:'eol'}}
@@ -444,8 +363,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     txt "abc\ndabcef"
     cur 4 1
 
-    # after a paste the cursor is behind the pasted text, not on its last
-    # character: the ked cursor is a thin line at the left edge of a character
     s.novimRegister = { lines: ['one' 'two'], linewise: false }
     s.loadLines belt.linesForText("ab")
     s.setMainCursor 0 0
@@ -453,14 +370,12 @@ mrange = lines x y m -> motion.range lines [x y] m
     txt "aone\ntwob"
     cur 3 1
 
-    # with no register a put does nothing
     s.novimRegister = null
     s.loadLines belt.linesForText("abc")
     s.setMainCursor 0 0
     s.executeNovim {operator:'put', after:true}
     txt "abc"
 
-    # a put is a single undo step
     s.loadLines belt.linesForText("abc\ndef")
     s.setMainCursor 0 0
     before = s.h.length
@@ -477,7 +392,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.loadLines belt.linesForText("one two\nthree")
     s.setMainCursor 0 0
 
-    # dd keeps the line, so p can bring it back
     s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
     s.novimRegister.lines ▸ ['one two']
     s.novimRegister.linewise ▸ true
@@ -486,7 +400,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'put', after:false}
     txt "one two\nthree"
 
-    # x keeps a character
     s.loadLines belt.linesForText("abc")
     s.setMainCursor 1 0
     s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
@@ -494,7 +407,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.novimRegister.linewise ▸ false
     txt "ac"
 
-    # D keeps the rest of the line
     s.loadLines belt.linesForText("one two")
     s.setMainCursor 3 0
     s.executeNovim {operator:'delete', motion:{kind:'eol'}}
@@ -502,7 +414,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.novimRegister.linewise ▸ false
     txt "one"
 
-    # . deletes again and fills the register again
     s.loadLines belt.linesForText("abcd")
     s.setMainCursor 0 0
     s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
@@ -512,27 +423,23 @@ mrange = lines x y m -> motion.range lines [x y] m
 
 ▸ clipboard registers
 
-    # never touch the system clipboard from a test
     copies = []
     savedCopy  = clip.copy
     savedPaste = clip.paste
     savedTool  = clip.tool
     pasted     = ''
 
-    # make the transport deterministic, the stubs stand in for the tool
     clip.tool  = 'wl'
     clip.copy  = (text) -> copies.push text
     clip.paste = -> pasted
 
     novim.clipboardSync = null
 
-    # a real ked has a screen, so the default there is on
     global.ked_screen = {}
     novim.isHeadless() ▸ false
     novim.clipboardEnabled() ▸ true
     global.ked_screen = undefined
 
-    # a headless editor has the clipboard sync off by default
     novim.isHeadless() ▸ true
     novim.clipboardEnabled() ▸ false
 
@@ -542,11 +449,9 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
     copies ▸ []
 
-    # sync is off, so p uses the internal register
     s.executeNovim {operator:'put', after:true}
     txt "one\none\ntwo"
 
-    # the toggle turns sync on
     novim.toggleClipboard() ▸ true
     novim.clipboardEnabled() ▸ true
 
@@ -555,25 +460,21 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
     copies ▸ ['one\n']
 
-    # a trailing newline means linewise text on the way back in
     pasted = "shared\n"
     s.executeNovim {operator:'put', after:true}
     txt "one\nshared\ntwo"
 
-    # without the newline it is charwise text
     pasted = "XYZ"
     s.loadLines belt.linesForText("abc")
     s.setMainCursor 1 0
     s.executeNovim {operator:'put', after:true}
     txt "abXYZc"
 
-    # deleting also writes to the clipboard while sync is on
     s.loadLines belt.linesForText("gone\nkept")
     s.setMainCursor 0 0
     s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
     copies[-1] ▸ 'gone\n'
 
-    # an explicit + register writes even with sync off
     novim.clipboardSync = false
     novim.clipboardEnabled() ▸ false
 
@@ -584,53 +485,42 @@ mrange = lines x y m -> motion.range lines [x y] m
     copies[-1] ▸ 'alpha\n'
     s.novimRegister.linewise ▸ true
 
-    # and a clipboard put reads the clipboard even with sync off
     pasted = "plus\n"
     s.executeNovim {operator:'put', after:true, register:'clipboard'}
     txt "alpha\nplus\nbeta"
 
-    # the * register is the same clipboard one
     pasted = "star"
     s.loadLines belt.linesForText("ab")
     s.setMainCursor 0 0
     s.executeNovim {operator:'put', after:true, register:'clipboard'}
     txt "astarb"
 
-    # an unknown register is dropped and the next key starts over
     s.loadLines belt.linesForText("abc")
     s.setMainCursor 0 0
     s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
     s.novimRegister.lines ▸ ['a']
 
-    # the mode decodes " before an operator
     m = new novim s
     key = c -> m.handleKey c {combo:c, char:c}
+    keys = s x y -> 
+        for c in s
+            key c
+        cur x y if x?
 
     s.loadLines belt.linesForText("one\ntwo")
     s.setMainCursor 0 0
 
-    key '"'
-    key '+'
-    key 'y'
-    key 'y'
+    keys '"+yy'
     copies[-1] ▸ 'one\n'
     s.novimRegister.lines ▸ ['one']
 
-    key '"'
-    key '*'
-    key 'y'
-    key 'y'
+    keys '"*yy'
     copies[-1] ▸ 'one\n'
 
-    # "" selects the unnamed register again, so nothing is copied
     before = copies.length
-    key '"'
-    key '"'
-    key 'y'
-    key 'y'
+    keys '""yy'
     copies.length ▸ before
 
-    # escape throws a pending register away
     s.loadLines belt.linesForText("one\ntwo")
     s.setMainCursor 0 0
     key '"'
@@ -638,7 +528,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'x'
     txt "ne\ntwo"
 
-    # without a clipboard tool the fallback buffer still does +y and +p
     clip.tool = 'none'
     clip.text = ''
 
@@ -711,8 +600,6 @@ mrange = lines x y m -> motion.range lines [x y] m
         ga delta
         """
 
-    # a charwise delete of a whole line leaves an empty line
-
     s.setMainCursor 0 0
     s.executeNovim {operator:'delete', motion:{kind:'eol'}}
 
@@ -762,8 +649,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'undo', count:2}
     txt "alpha beta\ngamma delta"
 
-    # there is nothing left to undo
-
     s.executeNovim {operator:'undo', count:5}
     txt "alpha beta\ngamma delta"
 
@@ -786,16 +671,12 @@ mrange = lines x y m -> motion.range lines [x y] m
         """
     s.allCursors().length ▸ 2
 
-    # two cursors on the same line delete one merged range
-
     s.loadLines belt.linesForText("abc def")
     s.setCursors [[0 0] [1 0]]
 
     s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
 
     txt " def"
-
-    # an empty line is still a line to delete
 
     s.loadLines belt.linesForText("\nalpha\nbeta")
     s.setMainCursor 0 0
@@ -818,14 +699,12 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}}
     txt "one three four"
 
-    # one past the end acts on the last word
     s.loadLines belt.linesForText("one two")
     s.setMainCursor 7 0
 
     s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
     txt "one "
 
-    # quotes lose their quotes only on the inside
     s.loadLines belt.linesForText('say "hello there" ok')
     s.setMainCursor 7 0
 
@@ -838,7 +717,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'"', count:1}}
     txt 'say ok'
 
-    # a bracket inside a string does not close the surrounding pair
     s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
     s.setMainCursor 21 0
 
@@ -851,14 +729,12 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'[', count:1}}
     txt "if seg not in "
 
-    # a pair across lines is removed as a whole
     s.loadLines belt.linesForText("foo(\n  bar\n)")
     s.setMainCursor 3 1
 
     s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'(', count:1}}
     txt "foo"
 
-    # dh and dl
     s.loadLines belt.linesForText("alpha")
     s.setMainCursor 3 0
 
@@ -871,7 +747,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
     txt "lpha"
 
-    # at the very start dh deletes nothing
     s.loadLines belt.linesForText("alpha")
     s.setMainCursor 0 0
 
@@ -889,11 +764,9 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'repeat', count:1}
     txt "cdef"
 
-    # a count on the repeat replaces the count of the change
     s.executeNovim {operator:'repeat', count:2}
     txt "ef"
 
-    # without a count the change keeps its own count
     s.loadLines belt.linesForText("abcdef")
     s.setMainCursor 0 0
 
@@ -903,7 +776,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'repeat', count:1}
     txt "ef"
 
-    # movement is not repeated
     s.loadLines belt.linesForText("abcdef")
     s.setMainCursor 0 0
 
@@ -912,7 +784,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'repeat', count:1}
     txt "bdef"
 
-    # undo is not repeated either, and the change survives it
     s.loadLines belt.linesForText("abcdef")
     s.setMainCursor 0 0
 
@@ -923,7 +794,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'repeat', count:1}
     txt "bcdef"
 
-    # text objects repeat
     s.loadLines belt.linesForText("one two three")
     s.setMainCursor 0 0
 
@@ -933,7 +803,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'repeat', count:1}
     txt "three"
 
-    # with no change there is nothing to repeat
     s.lastChange = null
     s.loadLines belt.linesForText("abc")
     s.setMainCursor 0 0
@@ -953,17 +822,17 @@ mrange = lines x y m -> motion.range lines [x y] m
     m = new novim s
 
     key = c -> m.handleKey c {combo:c, char:c}
+    keys = s x y -> 
+        log "KEYS" s x y 
+        for c in s
+            key c
+        cur x y if x?
 
-    key 'd'
-    key '2'
-    key 'w'
-
+    keys 'd2w'
     txt """
         
         gamma delta
         """
-
-    # escape throws the pending operator away
 
     s.loadLines belt.linesForText(text)
     s.setMainCursor 0 0
@@ -974,8 +843,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     txt text
     m.operator ▸ null
 
-    # a standalone command is a delete with an implicit motion
-
     key 'x'
 
     txt """
@@ -983,51 +850,17 @@ mrange = lines x y m -> motion.range lines [x y] m
         gamma delta
         """
 
-    # movement keys and arrows
-
     s.loadLines belt.linesForText(text)
     s.setMainCursor 0 0
 
-    key 'l'
-    cur 1 0
-
-    key '2'
-    key 'l'
-    cur 3 0
-
-    m.handleKey 'down' {combo:'down'}
-    cur 3 1
-
-    key 'k'
-    cur 3 0
-
-    m.handleKey 'up' {combo:'up'}
-    cur 3 0
-
-    m.handleKey 'left' {combo:'left'}
-    cur 2 0
-
-    key '2'
-    m.handleKey 'right' {combo:'right'}
-    cur 4 0
-
-    # undo is a command too
-
-    s.setMainCursor 0 0
-
-    key 'd'
-    key 'w'
-
+    keys 'dw'
     txt """
         beta
         gamma delta
         """
 
     key 'u'
-
     txt text
-
-    # arrows complete a pending operator like h j k l
 
     s.loadLines belt.linesForText("abc def")
     s.setMainCursor 4 0
@@ -1057,73 +890,49 @@ mrange = lines x y m -> motion.range lines [x y] m
     m.handleKey 'up' {combo:'up'}
     txt "ghi"
 
-    # h and l are motions for an operator too
-
     s.loadLines belt.linesForText("alpha")
     s.setMainCursor 3 0
 
-    key 'd'
-    key 'h'
+    keys 'dh'
     txt "alha"
 
     s.loadLines belt.linesForText("alpha")
     s.setMainCursor 0 0
 
-    key 'd'
-    key 'l'
+    keys 'dl'
     txt "lpha"
-
-    # text objects after an operator
 
     s.loadLines belt.linesForText("one two three")
     s.setMainCursor 5 0
 
-    key 'd'
-    key 'i'
-    key 'w'
+    keys 'diw'
     txt "one  three"
     m.operator ▸ null
 
     s.loadLines belt.linesForText('say "hello there" ok')
     s.setMainCursor 7 0
 
-    key 'd'
-    key 'a'
-    key '"'
+    keys 'da"'
     txt "say ok"
-
-    # a bracket inside a string does not close the surrounding pair
 
     s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
     s.setMainCursor 21 0
 
-    key 'd'
-    key 'i'
-    key '['
+    keys 'di['
     txt "if seg not in []"
-
-    # a count can come before the text object
 
     s.loadLines belt.linesForText("one two three")
     s.setMainCursor 0 0
 
-    key 'd'
-    key '2'
-    key 'i'
-    key 'w'
+    keys 'd2iw'
     txt " three"
-
-    # escape leaves a pending text object
 
     s.loadLines belt.linesForText("abc")
 
-    key 'd'
-    key 'i'
+    keys 'di'
     m.handleKey 'esc' {combo:'esc'}
     txt "abc"
     m.area ▸ null
-
-    # . repeats the last change
 
     s.loadLines belt.linesForText("abcdef")
     s.setMainCursor 0 0
@@ -1134,99 +943,52 @@ mrange = lines x y m -> motion.range lines [x y] m
     key '.'
     txt "cdef"
 
-    key '2'
-    key '.'
+    keys '2.'
     txt "ef"
-
-    # a movement does not replace the change
 
     s.loadLines belt.linesForText("abcdef")
     s.setMainCursor 0 0
 
-    key 'x'
-    key 'l'
-    key '.'
+    keys 'xl.'
     txt "bdef"
-
-    # a text object change repeats too
 
     s.loadLines belt.linesForText("one two three")
     s.setMainCursor 0 0
 
-    key 'd'
-    key 'a'
-    key 'w'
+    keys 'daw'
     txt "two three"
 
     key '.'
     txt "three"
 
-    # 0 $ gg and G
-
     s.loadLines belt.linesForText("one\n  two\n  three")
     s.setMainCursor 0 0
 
-    key 'G'
-    cur 2 2
-
-    key 'g'
-    key 'g'
-    cur 0 0
-
-    # a count selects the line
-    key '2'
-    key 'G'
-    cur 2 1
-
-    key '3'
-    key 'g'
-    key 'g'
-    cur 2 2
-
-    # 0 goes to the start, unless a count is being typed
-    key '0'
-    cur 0 2
+    keys 'gg'   0 0
+    keys '3gg'  2 2
+    keys '0'    0 2
 
     s.setMainCursor 0 0
-    key '1'
-    key '0'
-    key 'G'
-    cur 2 2
+    keys '10G'  2 2
 
-    # $ goes behind the last character
-    key '$'
-    cur 7 2
+    keys '$'    7 2
+    keys 'gl'   7 2
 
-    # a lone g is thrown away by the next key
-    key 'g'
-    key 'l'
-    cur 7 2
-
-    # escape leaves a pending g
     s.setMainCursor 0 0
     key 'g'
     m.handleKey 'esc' {combo:'esc'}
-    key 'G'
-    cur 2 2
-
-    # y yanks and p and P put
+    keys 'G' 2 2
 
     s.loadLines belt.linesForText("one\ntwo")
     s.setMainCursor 0 0
 
-    key 'y'
-    key 'y'
-    cur 0 0
-
-    key 'p'
+    keys 'yy'   0 0 
+    keys 'p'    0 1
     txt "one\none\ntwo"
-    cur 0 1
 
-    key 'P'
+    keys 'P'    0 1
     txt "one\none\none\ntwo"
-    cur 0 1
 
-    # y takes a motion
     s.loadLines belt.linesForText("one two")
     s.setMainCursor 4 0
 
@@ -1241,7 +1003,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     txt "one twotwo"
     cur 10 0
 
-    # y takes a text object too
     s.loadLines belt.linesForText("one two three")
     s.setMainCursor 4 0
 
@@ -1254,7 +1015,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'p'
     txt "one two threetwo"
 
-    # a yank does not replace the change that . repeats
     s.loadLines belt.linesForText("abcdef")
     s.setMainCursor 0 0
 
@@ -1263,8 +1023,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'l'
     key '.'
     txt "cdef"
-
-    # w, b and e also move on their own
 
     s.loadLines belt.linesForText("one two\nthree four")
     s.setMainCursor 0 0
@@ -1278,7 +1036,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'w'
     cur 6 1
 
-    # at the last word w goes behind the last character
     key 'w'
     cur 10 1
 
@@ -1294,11 +1051,9 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'b'
     cur 0 0
 
-    # b at the very start stays there
     key 'b'
     cur 0 0
 
-    # e lands on the last character of a word
     key 'e'
     cur 2 0
 
@@ -1308,23 +1063,16 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'e'
     cur 4 1
 
-    # counts apply to all three
     s.loadLines belt.linesForText("one two three")
     s.setMainCursor 0 0
 
     key '2'
     key 'w'
-    cur 8 0
 
     key '2'
     key 'b'
     cur 0 0
 
-    key '2'
-    key 'e'
-    cur 6 0
-
-    # from behind the last character w stays there, e goes back onto it
     s.loadLines belt.linesForText("abc")
     s.setMainCursor 3 0
 
@@ -1335,119 +1083,60 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'e'
     cur 2 0
 
-    # W, B and E treat punctuation as part of a WORD
-
     s.loadLines belt.linesForText("foo.bar baz, qux")
     s.setMainCursor 0 0
 
-    key 'W'
-    cur 8 0
-
-    key 'W'
-    cur 13 0
-
-    key 'W'
-    cur 16 0
-
-    key 'B'
-    cur 13 0
-
-    key 'B'
-    cur 8 0
-
-    key 'B'
-    cur 0 0
+    keys 'W'  8 0
+    keys 'WW' 16 0
+    keys 'BB' 8 0
+    keys 'B'  0 0
 
     s.setMainCursor 0 0
     key 'E'
     cur 6 0
 
-    key 'E'
-    cur 11 0
-
-    key 'E'
-    cur 15 0
-
-    # counts apply
-    s.setMainCursor 0 0
-    key '2'
-    key 'W'
-    cur 13 0
-
-    s.setMainCursor 0 0
-    key '2'
-    key 'E'
-    cur 11 0
-
-    # W and E work as operator motions too
     s.loadLines belt.linesForText("foo.bar baz")
     s.setMainCursor 0 0
-    key 'd'
-    key 'W'
+    keys 'dW'
     txt "baz"
 
     s.loadLines belt.linesForText("foo.bar baz")
     s.setMainCursor 0 0
-    key 'd'
-    key 'E'
-    txt " baz"
-
-    # W works as a text object too
-
-    s.loadLines belt.linesForText("foo.bar baz")
-    s.setMainCursor 0 0
-    key 'd'
-    key 'i'
-    key 'W'
+    keys 'dE'
     txt " baz"
 
     s.loadLines belt.linesForText("foo.bar baz")
     s.setMainCursor 0 0
-    key 'd'
-    key 'a'
-    key 'W'
+    keys 'diW'
+    txt " baz"
+
+    s.loadLines belt.linesForText("foo.bar baz")
+    s.setMainCursor 0 0
+    keys 'daW'
     txt "baz"
 
-    # the same position with a lower case w only takes the first word
     s.loadLines belt.linesForText("foo.bar")
     s.setMainCursor 0 0
-    key 'd'
-    key 'i'
-    key 'w'
+    keys 'diw'
     txt ".bar"
 
     s.loadLines belt.linesForText("foo.bar")
     s.setMainCursor 0 0
-    key 'd'
-    key 'i'
-    key 'W'
+    keys 'diW'
     txt ""
 
     s.loadLines belt.linesForText("foo.bar baz")
     s.setMainCursor 0 0
-    key 'y'
-    key 'i'
-    key 'W'
-    key '$'
-    key 'p'
+    keys 'yiW$p'
     txt "foo.bar bazfoo.bar"
-
-    # f finds a character in the whole buffer
 
     s.loadLines belt.linesForText("a-b-c-d")
     s.setMainCursor 0 0
 
-    key 'f'
-    key '-'
-    cur 1 0
+    keys 'f-' 1 0
+    keys ';'  3 0
+    keys ';'  5 0
 
-    key ';'
-    cur 3 0
-
-    key ';'
-    cur 5 0
-
-    # every target is highlighted while the find is active
     s.loadLines belt.linesForText("a-b\nc-d")
     s.setMainCursor 0 0
 
@@ -1460,22 +1149,18 @@ mrange = lines x y m -> motion.range lines [x y] m
     cur 1 1
     s.s.highlights ▸ [[1 0 2 0] [1 1 2 1]]
 
-    # another command clears the find highlights
     key 'l'
     s.s.highlights ▸ []
 
-    # a count finds the count-th occurrence
     s.setMainCursor 0 0
     key '2'
     key 'f'
     key '-'
     cur 1 1
 
-    # , repeats the find the other way
     key ','
     cur 1 0
 
-    # F searches backwards
     s.setMainCursor 3 1
     key 'F'
     key '-'
@@ -1484,14 +1169,12 @@ mrange = lines x y m -> motion.range lines [x y] m
     key ';'
     cur 1 0
 
-    # counts work backwards too
     s.setMainCursor 3 1
     key '2'
     key 'F'
     key '-'
     cur 1 0
 
-    # t stops one character before the target
     s.loadLines belt.linesForText("a-b-c")
     s.setMainCursor 0 0
     key 't'
@@ -1504,7 +1187,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     key '-'
     cur 2 0
 
-    # ; repeats t as well
     s.setMainCursor 0 0
     key 't'
     key '-'
@@ -1513,14 +1195,12 @@ mrange = lines x y m -> motion.range lines [x y] m
     key ';'
     cur 2 0
 
-    # t keeps crossing lines, a target at the start of a line is skipped
     s.loadLines belt.linesForText("x\n-a\nb-c")
     s.setMainCursor 0 0
     key 't'
     key '-'
     cur 0 2
 
-    # T stops just after a target to the left
     s.loadLines belt.linesForText("a-b\nc-d")
     s.setMainCursor 3 1
     key 'T'
@@ -1530,7 +1210,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     key ';'
     cur 2 0
 
-    # f and t are operator motions, and cross lines like the cursor
     s.loadLines belt.linesForText("a-b-c")
     s.setMainCursor 0 0
     key 'd'
@@ -1552,10 +1231,66 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'd'
     txt "ad"
 
-▸ brckts lets novim handle text keys
+▸ search highlights
 
-    # brckts is auto-started in every editor, it must not handle text input
-    # while novim owns the keys
+    s.loadLines belt.linesForText("foo\nbar\nfoo\nbar\nfoo")
+    s.setMainCursor 0 0
+
+    s.setHighlights [[0 0 3 0] [0 2 3 2] [0 4 3 4]]
+
+    key 'n'
+    cur 0 2
+
+    key 'n'
+    cur 0 4
+
+    key 'n'
+    cur 0 4
+
+    s.setMainCursor 0 4
+    key 'N'
+    cur 0 2
+
+    key 'N'
+    cur 0 0
+
+    s.setMainCursor 0 0
+
+    key '2'
+    key 'n'
+    cur 0 4
+
+    s.setMainCursor 0 0
+
+    key 'N'
+    cur 0 0
+
+    s.setMainCursor 0 0
+
+    key 'n'
+    s.s.highlights ▸ [[0 0 3 0] [0 2 3 2] [0 4 3 4]]
+
+    key 'N'
+    s.s.highlights ▸ [[0 0 3 0] [0 2 3 2] [0 4 3 4]]
+
+    key 'j'
+    s.s.highlights ▸ []
+
+    s.setMainCursor 0 0
+
+    key 'n'
+    cur 0 0
+
+    key 'N'
+    cur 0 0
+
+    s.loadLines belt.linesForText("foo\nbar")
+    s.setMainCursor 0 0
+
+    key '/'
+    txt "foo\nbar"
+
+▸ brckts lets novim handle text keys
 
     stack = new state cells 'stack'
 
@@ -1575,7 +1310,6 @@ mrange = lines x y m -> motion.range lines [x y] m
         for c in keys
             press c
 
-    # a quote on its border is still a text object
     onKeys 'say "hello there" ok' 4 0 ['d' 'i' '"']
     stxt 'say "" ok'
 
@@ -1588,7 +1322,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     onKeys "a 'b c' d" 6 0 ['d' 'i' "'"]
     stxt "a '' d"
 
-    # closing brackets have the same border
     onKeys 'call(x)' 6 0 ['d' 'i' ')']
     stxt 'call()'
 
@@ -1610,7 +1343,6 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     pkey = c -> mode.handleKey plain c {combo:c, char:c}
 
-    # on a quote it steps over the existing delimiter
     plain.loadLines belt.linesForText('say "hi" ok')
     plain.setMainCursor 4 0
     pkey '"'
@@ -1618,7 +1350,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     plain.mainCursor() ▸ [5 0]
     kseg.str(plain.s.lines) ▸ 'say "hi" ok'
 
-    # on white space it inserts a pair and puts the cursor inside
     plain.loadLines belt.linesForText('x = ')
     plain.setMainCursor 4 0
     pkey '"'

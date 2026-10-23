@@ -83,9 +83,13 @@ scroll
     dot                                     #88f   
                                               
 finder
-    bg                                      #111   
-    frame                                   #222   
-                                              
+    bg                                      #111
+    frame                                   #222
+
+vinder
+    bg                                      #1a1a1a
+    frame                                   #44a
+
 quicky
     bg                                      #111   
     frame                                   #000   

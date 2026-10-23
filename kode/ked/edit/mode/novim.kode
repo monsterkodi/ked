@@ -1,32 +1,29 @@
 ###
-███   ███   ███████   ██     ██  ███  ███   ███
-████  ███  ███   ███  ███   ███  ███  ████ ████
-███ █ ███  ███   ███  █████████  ███  ███ █ ███
-███  ████  ███   ███  ███ █ ███  ███  ███  ████
-███   ███   ███████   ███   ███  ███  ███   ███
+███   ███   ███████   ███   ███  ███  ██     ██
+████  ███  ███   ███  ███   ███  ███  ███   ███
+███ █ ███  ███   ███   ███ ███   ███  █████████
+███  ████  ███   ███     ███     ███  ███ █ ███
+███   ███   ███████       █      ███  ███   ███
 
-vi style commands
-swallows text input while active and maps keys to actions
-an action is a command value executed by edit▸act▸novim
+swallows text input while active and maps keys 
+to actions which are executed by edit▸act▸novim
 ###
 
 use ../../theme ◆ color
+use ../../../kxk ◆ post
 
 function novim
 
-    # operators start a pending command
     @operators:
         d: 'delete'
         y: 'yank'
 
-    # arrow keys mean the same as these
     @arrows:
         left:  'h'
         right: 'l'
         up:    'k'
         down:  'j'
 
-    # i and a start a text object, these are the objects they know
     @areas:
         i: 'inner'
         a: 'around'
@@ -45,56 +42,54 @@ function novim
         '}': '{'
         B: '{'
 
-    # standalone commands
-    # deletes carry an implicit motion, the others move, undo or repeat
-    @commands:
-        x: (n) -> { operator: 'delete', motion: { kind: 'char'     count: n } }
-        X: (n) -> { operator: 'delete', motion: { kind: 'charBack' count: n } }
-        D: -> { operator: 'delete', motion: { kind: 'eol' } }
-        h: (n) -> { operator: 'move',   motion: { kind: 'left'  count: n } }
-        j: (n) -> { operator: 'move',   motion: { kind: 'down'  count: n } }
-        k: (n) -> { operator: 'move',   motion: { kind: 'up'    count: n } }
-        l: (n) -> { operator: 'move',   motion: { kind: 'right' count: n } }
-        w: (n) -> { operator: 'move',   motion: { kind: 'word'  count: n } }
-        b: (n) -> { operator: 'move',   motion: { kind: 'wordBack' count: n } }
-        e: (n) -> { operator: 'move',   motion: { kind: 'wordEnd'  count: n } }
-        W: (n) -> { operator: 'move',   motion: { kind: 'wordBig'     count: n } }
-        B: (n) -> { operator: 'move',   motion: { kind: 'wordBackBig' count: n } }
-        E: (n) -> { operator: 'move',   motion: { kind: 'wordEndBig'  count: n } }
-        '$': (n) -> { operator: 'move', motion: { kind: 'eol'   count: n } }
-        G:   (n) -> { operator: 'move', motion: { kind: 'eof'   count: n } }
-        p:   (n) -> { operator: 'put',  count: n, after: true  }
-        P:   (n) -> { operator: 'put',  count: n, after: false }
-        u: (n) -> { operator: 'undo',   count: n }
-        '.': (n) -> { operator: 'repeat', count: n }
+    @commands: {
+        D:        -> { operator: 'delete'                    motion: { kind: 'eol'           } }
+        x:      n -> { operator: 'delete'       count: n     motion: { kind: 'char'          } }
+        X:      n -> { operator: 'delete'       count: n     motion: { kind: 'charBack'      } }
+        h:      n -> { operator: 'move'         count: n     motion: { kind: 'left'          } }
+        j:      n -> { operator: 'move'         count: n     motion: { kind: 'down'          } }
+        k:      n -> { operator: 'move'         count: n     motion: { kind: 'up'            } }
+        l:      n -> { operator: 'move'         count: n     motion: { kind: 'right'         } }
+        w:      n -> { operator: 'move'         count: n     motion: { kind: 'word'          } }
+        b:      n -> { operator: 'move'         count: n     motion: { kind: 'wordBack'      } }
+        e:      n -> { operator: 'move'         count: n     motion: { kind: 'wordEnd'       } }
+        W:      n -> { operator: 'move'         count: n     motion: { kind: 'wordBig'       } }
+        B:      n -> { operator: 'move'         count: n     motion: { kind: 'wordBackBig'   } }
+        E:      n -> { operator: 'move'         count: n     motion: { kind: 'wordEndBig'    } }
+        '$':    n -> { operator: 'move'         count: n     motion: { kind: 'eol'           } }
+        G:      n -> { operator: 'move'         count: n     motion: { kind: 'eof'           } }
+        n:      n -> { operator: 'searchNext'   count: n }
+        N:      n -> { operator: 'searchPrev'   count: n }
+        p:      n -> { operator: 'put'          count: n     after: true  }
+        P:      n -> { operator: 'put'          count: n     after: false }
+        u:      n -> { operator: 'undo'         count: n }
+        '.':    n -> { operator: 'repeat'       count: n } 
+        }
 
-    # motions complete a pending operator
-    # each receives the count and returns a motion value
-    @motions:
-        d: (n) -> { kind: 'line'     count: n }
-        y: (n) -> { kind: 'line'     count: n }
-        w: (n) -> { kind: 'word'     count: n }
-        e: (n) -> { kind: 'wordEnd'  count: n }
-        b: (n) -> { kind: 'wordBack' count: n }
-        W: (n) -> { kind: 'wordBig'     count: n }
-        E: (n) -> { kind: 'wordEndBig'  count: n }
-        B: (n) -> { kind: 'wordBackBig' count: n }
-        '0': -> { kind: 'bol' }
-        '$': -> { kind: 'eol' }
-        h: (n) -> { kind: 'charBack' count: n }
-        l: (n) -> { kind: 'char'     count: n }
-        j: (n) -> { kind: 'lineDown' count: n }
-        k: (n) -> { kind: 'lineUp'   count: n }
+    @motions: {
+        '0':      -> { kind: 'bol' }
+        '$':      -> { kind: 'eol' }
+        d:      n -> { kind: 'line'             count: n }
+        y:      n -> { kind: 'line'             count: n }
+        w:      n -> { kind: 'word'             count: n }
+        e:      n -> { kind: 'wordEnd'          count: n }
+        b:      n -> { kind: 'wordBack'         count: n }
+        W:      n -> { kind: 'wordBig'          count: n }
+        E:      n -> { kind: 'wordEndBig'       count: n }
+        B:      n -> { kind: 'wordBackBig'      count: n }
+        h:      n -> { kind: 'charBack'         count: n }
+        l:      n -> { kind: 'char'             count: n }
+        j:      n -> { kind: 'lineDown'         count: n }
+        k:      n -> { kind: 'lineUp'           count: n }
+        }
 
     @: @state ->
 
         @name     = 'novim'
         @lastFind = null
-        @reset false
+        @reset()
 
-    # the clipboard toggle, null means the default:
-    # on in ked, off in a headless editor
-    @clipboardSync: null
+    @clipboardSync: null # on in ked, off in a headless editor
 
     @isHeadless: ->
 
@@ -121,7 +116,7 @@ function novim
 
         enabled
 
-    reset: announce=true ->
+    reset: ->
 
         @count           = ''
         @operator        = null
@@ -130,7 +125,6 @@ function novim
         @register        = null
         @registerPending = false
         @find            = null
-        log 'novim reset' if announce
 
     resetOrExit: ->
 
@@ -144,14 +138,14 @@ function novim
 
     logPending: ->
 
-        log 'novim pending ▸' @operator @area @prefix @count @register @find
+        # log 'novim pending ▸' @operator @area @prefix @count @register @find
 
     complete: build ->
 
         operator = novim.operators[@operator]
 
         @execute { operator: operator, motion: build(@countNumber()) }
-        @reset false
+        @reset()
 
     completeTextObject: target ->
 
@@ -159,7 +153,7 @@ function novim
         operator = novim.operators[@operator]
 
         @execute { operator: operator, motion: { kind: 'textObject', area: area, target: target, count: @countNumber() } }
-        @reset false
+        @reset()
 
     completeFind: target ->
 
@@ -175,7 +169,7 @@ function novim
         else
             @execute { operator: 'move', motion: motion }
 
-        @reset false
+        @reset()
 
     repeatFind: reverse=false ->
 
@@ -190,7 +184,7 @@ function novim
         else
             @execute { operator: 'move', motion: motion }
 
-        @reset false
+        @reset()
 
     execute: cmd ->
 
@@ -219,9 +213,11 @@ function novim
             @resetOrExit()
             ⮐  true
 
-        # any key other than repeating or completing a find
-        # clears the highlights of the last one
-        @state.setHighlights [] if not @find and char not in [',' ';']
+        # any key other than repeating or completing a find clears the
+        # highlights of the last one; n and N jump through them,
+        # digits start a count that goes with the next command and
+        # reset after it, so they keep them too
+        @state.setHighlights [] if not @find and char not in [',' ';' 'n' 'N'] and not (char.length == 1 and +char >= 0 and +char <= 9)
 
         # f, t, F and T wait for the character they should find
         if @find
@@ -233,15 +229,13 @@ function novim
 
             ⮐  true
 
-        # arrows mean the same as h j k l
         if arrow = novim.arrows[char]
             char = arrow
 
-        # " selects the next register, + and * mean the system clipboard
         if @registerPending
-
             @registerPending = false
 
+            # " selects the next register, + and * mean the system clipboard
             if char in ['+' '*']
                 @register = 'clipboard'
             else if char in ['"' '0']
@@ -256,15 +250,18 @@ function novim
         # swallow every other non text key
         ⮐  true if char.length != 1
 
-        # gg is two keys, the first one only remembers itself
-        if @prefix
-
+        
+        if @prefix # gg and // 
             prefix  = @prefix
             @prefix = null
 
             if prefix == 'g' and char == 'g'
                 @execute { operator: 'move', motion: { kind: 'bof', count: @countNumber() } }
-                @reset false
+                @reset()
+            else if prefix == '/' and char == '/'
+                log "VINDER.SHOW"
+                post.emit 'vinder.show'
+                @reset()
             else
                 @reset()
 
@@ -325,17 +322,22 @@ function novim
             @prefix = 'g'
             @logPending()
 
+        else if char == '/'
+            log 'vinder.show'
+            post.emit 'vinder.show'
+            @reset()
+
         else if command = novim.commands[char]
 
             @execute command(@countNumber())
-            @reset false
+            @reset()
 
         else if char in '0123456789'
 
             # a lone 0 is a motion, after a count it is a digit
             if char == '0' and empty @count
                 @execute { operator: 'move', motion: { kind: 'bol' } }
-                @reset false
+                @reset()
             else
                 @count += char
 

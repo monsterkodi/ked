@@ -163,10 +163,17 @@
     iw  aw  iW  aW                      inner and around word or WORD text objects
     alt+cmd+c   alt+ctrl+c              toggle clipboard sync for yank, delete, put
     "+y  "+p  "*y  "*p                  use the system clipboard register
+    /{pattern}                          open the search strip and highlight matches
+    n  N                                jump to the next or previous highlight
 
     f and t search the whole buffer and underline every target while the
     find is active. ; repeats in the same direction, , in the other one.
     a count finds the count-th target.
+
+    / opens the search strip at the bottom of the editor; while typing,
+    every match in the current file is highlighted live. enter finalizes
+    the search and leaves the highlights in place; n and N then walk
+    them back and forth.
 
     clipboard sync writes yanks and deletes to the clipboard and reads puts
     from it. it is on by default, off in a headless editor. the explicit +

@@ -43,9 +43,9 @@ function mapscr extends mapview
         post.on 'greet.show' @hide
         post.on 'greet.hide' @show
         post.on 'popup.hide' @show
-        post.on 'popup.show' (name) => 
-            @hide() if name in ['differ' 'searcher']  
-            @show() if name in ['finder']
+        post.on 'popup.show' (name) =>
+            @hide() if name in ['differ' 'searcher']
+            @show() if name in ['finder' 'vinder']
         
         @editor.state.on 'lines.changed' @onLinesChanged
         
