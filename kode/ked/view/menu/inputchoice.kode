@@ -22,8 +22,6 @@ function inputchoice extends view
         
         @autoHideInput ?= true
         
-        log "#{@name}.autoHideInput: #{@autoHideInput}" 
-        
         @isVisible = false
         @isPopup   = true
         

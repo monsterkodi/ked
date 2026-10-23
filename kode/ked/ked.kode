@@ -41,6 +41,9 @@ function KED
         process.on 'uncaughtException' @quit
         @session = new session @args
         @logfile = new logfile @session.name
+        
+        log w2("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #{b8 @session.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
+        
         global.ked_session = @session
         
         @session.on 'loaded' @onSessionLoaded
@@ -71,8 +74,6 @@ function KED
 
         @input.on 'action' @onInputAction
         
-        log w2("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #{b8 @session.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
-
         @editor.state.hasFocus = true
         @editor.funtree = @funcol.funtree
         
@@ -146,33 +147,26 @@ function KED
         
         ked
         
-    #  ███████   ███████  █████████  ███   ███████   ███   ███  
-    # ███   ███  ███   ███ ███    ███ ███   ███  ████  ███ ███   
-    # ███████   ███████  ███████  ███ ███   ███  ███ █ ███  █████    
-    # ███   ███  ███   ███ ███   ███ ███   ███  ███  ███ ███   ███   
-    # ███████   ███████  ███████  ███  ██████   ███   ███   ███ ███   
+    # ███   ███  ████████   ███████   ███████    ███      ████████   ███████   ███████
+    # ███   ███  ███       ███   ███  ███   ███  ███      ███       ███       ███     
+    # █████████  ███████   █████████  ███   ███  ███      ███████   ███████   ███████ 
+    # ███   ███  ███       ███   ███  ███   ███  ███      ███            ███       ███
+    # ███   ███  ████████  ███   ███  ███████    ███████  ████████  ███████   ███████ 
     
-    #  the headless mode (-H or -C): the editor runs without a terminal, the
-    #  keys come from the standard input, and the screen is written out as
-    #  text after every key of the script
+    #  the headless mode: the editor runs without a terminal
+    #  input keys come from the standard input, and the screen is dumped for each key
     
     runHeadless: ○=>
         
         ended = new Promise (resolve) =>
             @t.on 'end' resolve
         
-        #  the file is loaded before the keys are played, so a key is never
-        #  played on an editor that is not ready for it
-        
         ○ @currentLoad if valid @currentLoad
         
         if @t.input
             ○ ended
         
-        #  the modes are loaded in the background, so the screen is given a
-        #  moment to settle before it is written out
-        
-        ○ sleep 100
+        ○ sleep 100 #  wait a little for modes to be loaded
         
         @dump 'start'
         
@@ -180,18 +174,12 @@ function KED
             
             @t.play step[1]
             
-            #  a key may have started something that is still running
-            
             ○ @currentLoad if valid @currentLoad
             ○ sleep 50
             
             @dump step[0]
         
         @quit()
-    
-    #  the screen, as text
-    #  
-    #  with -C the text carries the colors of the screen
     
     dump: label =>
         
@@ -487,8 +475,6 @@ function KED
                 
         @session.set 'files▸recent' frecent.store('file')
             
-    #  the dialog to save the buffer under another name
-    
     saveAs: =>
         
         dir = process.cwd()
@@ -499,9 +485,6 @@ function KED
             file = slash.file @currentFile
         
         @saveas.showDialog dir file
-    
-    #  the file is written here, not in the dialog: the editor keeps the
-    #  name of the file it shows
     
     onSaveAs: path ○=>
         
@@ -518,10 +501,6 @@ function KED
         
         ked_session.set 'editor▸file' path
         @editor.setCurrentFile path
-        
-        #  the buffer is highlighted for the extension it had before, so it
-        #  is highlighted again for the one it has now.  the state is not
-        #  loaded: that would take the cursor and the history away
         
         @editor.state.syntax.setExt slash.ext(path)
         @editor.state.syntax.clear()

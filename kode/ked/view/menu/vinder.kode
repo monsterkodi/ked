@@ -10,60 +10,59 @@
 
 use ../../../kxk    ▪ post
 use ../../theme     ◆ theme
-use ../base        ◆ view input
+use ../base         ◆ view input
 
 function vinder extends view
 
-    @: @screen @editor name='vinder' ->
-
+    @: @screen @editor @name='vinder' ->
+    
+        @state        = @editor.state
+        
         super @screen @name
 
-        @state        = @editor.state
+        @isVisible    = false
         @isPopup      = true
         @isInputPopup = true
 
-        @input   = new input @screen "#{@name}_input"
-        @input.show()
+        @input = new input @screen "#{@name}_input"
+        @input.show() # ???
 
         @input.on 'action' @onInputAction
+        
+        post.on 'vinder.show' @show
 
-        @setColor 'bg'    theme.vinder.bg ? theme.finder.bg
+        @setColor 'bg'    theme.vinder.bg    ? theme.finder.bg
         @setColor 'frame' theme.vinder.frame ? theme.finder.frame
-
-        post.on 'vinder.show' @show if @name == 'vinder'
 
     arrange: =>
 
         x = @editor.cells.x
         w = @editor.cells.cols
-        y = @editor.cells.y + @editor.cells.rows - 1
-        @input.layout  x+1  y  w-2  1
-        @cells.layout  x    y  w    1
+        y = @editor.cells.y
+        @input.layout  x+2  y+1  w-4  1
+        @cells.layout  x    y    w    3
 
-    show: text =>
+    show: =>
+        
+        text = @state.textOfSelectionOrWordAtCursor()
+        log "Vinder.show '#{text}'"
 
-        log "vinder.show #{@name} #{text}"
-
-        if empty text
-            text = @state.textOfSelectionOrWordAtCursor()
-
-        text ?= ''
-
+        @input.show()
+        
         if text != @input.current()
             @input.set text
             @input.selectAll()
             @input.state.moveCursors 'eol'
-            @input.grabFocus()
-
+        # @input.grabFocus()
         @state.highlightText text
-
         super()
+        @input.grabFocus()
 
     hide: => super()
 
     draw: ->
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
 
         @arrange()
 
@@ -72,7 +71,7 @@ function vinder extends view
         @input.draw()
 
     onInputAction: action text =>
-
+        log "vinder.onInputAction" action text
         switch action
 
             'submit'

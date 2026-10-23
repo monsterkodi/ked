@@ -18,8 +18,9 @@ vinder = (function ()
     {
         this.screen = screen
         this.editor = editor
+        this.name = name
     
-        var _30_42_, _31_45_
+        var _34_45_, _35_45_
 
         this["onKey"] = this["onKey"].bind(this)
         this["onMouse"] = this["onMouse"].bind(this)
@@ -27,19 +28,17 @@ vinder = (function ()
         this["hide"] = this["hide"].bind(this)
         this["show"] = this["show"].bind(this)
         this["arrange"] = this["arrange"].bind(this)
-        vinder.__super__.constructor.call(this,this.screen,this.name)
         this.state = this.editor.state
+        vinder.__super__.constructor.call(this,this.screen,this.name)
+        this.isVisible = false
         this.isPopup = true
         this.isInputPopup = true
         this.input = new input(this.screen,`${this.name}_input`)
         this.input.show()
         this.input.on('action',this.onInputAction)
-        this.setColor('bg',((_30_42_=theme.vinder.bg) != null ? _30_42_ : theme.finder.bg))
-        this.setColor('frame',((_31_45_=theme.vinder.frame) != null ? _31_45_ : theme.finder.frame))
-        if (this.name === 'vinder')
-        {
-            post.on('vinder.show',this.show)
-        }
+        post.on('vinder.show',this.show)
+        this.setColor('bg',((_34_45_=theme.vinder.bg) != null ? _34_45_ : theme.finder.bg))
+        this.setColor('frame',((_35_45_=theme.vinder.frame) != null ? _35_45_ : theme.finder.frame))
     }
 
     vinder.prototype["arrange"] = function ()
@@ -48,28 +47,27 @@ vinder = (function ()
 
         x = this.editor.cells.x
         w = this.editor.cells.cols
-        y = this.editor.cells.y + this.editor.cells.rows - 1
-        this.input.layout(x + 1,y,w - 2,1)
-        return this.cells.layout(x,y,w,1)
+        y = this.editor.cells.y
+        this.input.layout(x + 2,y + 1,w - 4,1)
+        return this.cells.layout(x,y,w,3)
     }
 
-    vinder.prototype["show"] = function (text)
+    vinder.prototype["show"] = function ()
     {
-        console.log(`vinder.show ${this.name} ${text}`)
-        if (_k_.empty(text))
-        {
-            text = this.state.textOfSelectionOrWordAtCursor()
-        }
-        text = (text != null ? text : '')
+        var text
+
+        text = this.state.textOfSelectionOrWordAtCursor()
+        console.log(`Vinder.show '${text}'`)
+        this.input.show()
         if (text !== this.input.current())
         {
             this.input.set(text)
             this.input.selectAll()
             this.input.state.moveCursors('eol')
-            this.input.grabFocus()
         }
         this.state.highlightText(text)
-        return vinder.__super__.show.call(this)
+        vinder.__super__.show.call(this)
+        return this.input.grabFocus()
     }
 
     vinder.prototype["hide"] = function ()
@@ -90,6 +88,7 @@ vinder = (function ()
 
     vinder.prototype["onInputAction"] = function (action, text)
     {
+        console.log("vinder.onInputAction",action,text)
         switch (action)
         {
             case 'submit':
@@ -169,5 +168,5 @@ vinder = (function ()
 
 export default vinder;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidmluZGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L21lbnUvdmluZGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FVYSxVQUFBO0lBQVM7O09BQ0EsWUFBWjs7T0FDVyxXQUFkO09BQW1CLFlBQW5COzs7QUFFRSxVQUFUOzt1QkFBd0I7YUFFcEIsUUFBSSxRQUFRLFFBQU8sT0FBSzs7UUFBckI7UUFBUTs7Ozs7Ozs7OzsrQ0FFRCxLQUFDLE9BQU8sS0FBQztRQUVmLEtBQUMsUUFBZSxLQUFDLE9BQU87UUFDeEIsS0FBQyxVQUFlO1FBQ2hCLEtBQUMsZUFBZTtRQUVoQixLQUFDLFlBQWMsTUFBTSxLQUFDLFVBQVUsS0FBQztRQUNqQyxLQUFDLE1BQU07UUFFUCxLQUFDLE1BQU0sR0FBRyxTQUFTLEtBQUM7UUFFcEIsS0FBQyxTQUFTLGVBQVEsTUFBTSxPQUFPLHdCQUFLLE1BQU0sT0FBTztRQUNqRCxLQUFDLFNBQVMsa0JBQVEsTUFBTSxPQUFPLDJCQUFRLE1BQU0sT0FBTztZQUVyQixLQUFDLFNBQVE7O1lBQXhDLEtBQUssR0FBRyxjQUFjLEtBQUM7Ozs7c0JBRTNCOzs7O1FBRUksSUFBSSxLQUFDLE9BQU8sTUFBTTtRQUNsQixJQUFJLEtBQUMsT0FBTyxNQUFNO1FBQ2xCLElBQUksS0FBQyxPQUFPLE1BQU0sSUFBSSxLQUFDLE9BQU8sTUFBTSxPQUFPO1FBQzNDLEtBQUMsTUFBTSxPQUFRLElBQUUsRUFBRyxFQUFHLElBQUUsRUFBRztlQUM1QixLQUFDLE1BQU0sT0FBUSxFQUFLLEVBQUcsRUFBSzs7O3NCQUVoQyxtQkFBTTs7UUFFRiwyQkFBbUIsS0FBQyxRQUFRO3NCQUVuQjs7WUFDTCxPQUFPLEtBQUMsTUFBTTs7UUFFbEIsUUFBQSxlQUFBLE9BQVE7WUFFTCxTQUFRLEtBQUMsTUFBTTs7WUFDZCxLQUFDLE1BQU0sSUFBSTtZQUNYLEtBQUMsTUFBTTtZQUNQLEtBQUMsTUFBTSxNQUFNLFlBQVk7WUFDekIsS0FBQyxNQUFNOztRQUVYLEtBQUMsTUFBTSxjQUFjOzs7O3NCQUl6Qjs7Ozs7c0JBRUE7O1lBRVUsS0FBQzs7OztRQUVQLEtBQUM7UUFFRCxLQUFDLE1BQU0sb0JBQW9CLEVBQUUsRUFBRSxHQUFHLElBQUcsR0FBRyxLQUFDLE1BQU07ZUFFL0MsS0FBQyxNQUFNOzs7c0JBRVgsNEJBQWUsUUFBTzs7Z0JBRVg7O2lCQUVIO2dCQUNJLEtBQUssS0FBSyxRQUFRO2dCQUNsQixLQUFDOztpQkFFTDsrQkFDYTs7b0JBQ0wsS0FBQyxNQUFNLGNBQWM7Ozs7b0JBRXJCLEtBQUMsTUFBTTs7O2lCQUVmO2lCQUNBO2lCQUNBO2dCQUNJLEtBQUssS0FBSyxRQUFRO2dCQUNsQixLQUFDLE1BQU07Z0JBQ1AsS0FBQzs7OztlQUVUOzs7c0JBRUosc0JBQVM7Ozs7WUFFQyxLQUFDOzs7O1FBRVAsTUFBTSxLQUFDLE1BQU0sUUFBUTthQUFpQixjQUFBLElBQUs7O21CQUFaOztZQUU1QixNQUFNLFNBQVEsWUFBZ0IsS0FBQyxNQUFNLGNBQWM7O1lBQ2xELEtBQUMsY0FBYztvQkFDWixPQUFPOztnQkFFZCxPQUFPOzs7c0JBRVgsb0JBQU8sS0FBSTs7OztZQUVELEtBQUM7Ozs7bUJBRUosTUFBTSxPQUFVLE1BQU0sY0FBYSxNQUFNLE1BQU0sV0FBVyxXQUFXLE1BQU0sTUFBTSxXQUFXLFlBQVksTUFBTSxNQUFNLFdBQVc7O3VCQUV4SCxNQUFNLE9BQVUsTUFBTTs7OztZQUN4QixLQUFDLGNBQWM7bUJBQ1o7O2VBRUo7WUFFSixTQUFTLEtBQUMsTUFBTSxNQUFNLElBQUk7O21CQUN0Qjs7ZUFFUDs7O1dBN0dDOzs7ZUErR0YifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidmluZGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L21lbnUvdmluZGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FVYSxVQUFBO0lBQVM7O09BQ0EsWUFBWjs7T0FDWSxXQUFmO09BQW9CLFlBQXBCOzs7QUFFRSxVQUFUOzt1QkFBd0I7YUFFcEIsUUFBSSxRQUFRLFFBQVE7O1FBQWpCO1FBQVE7UUFBUTs7Ozs7Ozs7OztRQUVmLEtBQUMsUUFBZSxLQUFDLE9BQU87K0NBRWxCLEtBQUMsT0FBTyxLQUFDO1FBRWYsS0FBQyxZQUFlO1FBQ2hCLEtBQUMsVUFBZTtRQUNoQixLQUFDLGVBQWU7UUFFaEIsS0FBQyxZQUFZLE1BQU0sS0FBQyxVQUFVLEtBQUM7UUFDL0IsS0FBQyxNQUFNO1FBRVAsS0FBQyxNQUFNLEdBQUcsU0FBUyxLQUFDO1FBRXBCLEtBQUssR0FBRyxjQUFjLEtBQUM7UUFFdkIsS0FBQyxTQUFTLGVBQVEsTUFBTSxPQUFPLHdCQUFRLE1BQU0sT0FBTztRQUNwRCxLQUFDLFNBQVMsa0JBQVEsTUFBTSxPQUFPLDJCQUFRLE1BQU0sT0FBTzs7O3NCQUV4RDs7OztRQUVJLElBQUksS0FBQyxPQUFPLE1BQU07UUFDbEIsSUFBSSxLQUFDLE9BQU8sTUFBTTtRQUNsQixJQUFJLEtBQUMsT0FBTyxNQUFNO1FBQ2xCLEtBQUMsTUFBTSxPQUFRLElBQUUsRUFBRyxJQUFFLEVBQUcsSUFBRSxFQUFHO2VBQzlCLEtBQUMsTUFBTSxPQUFRLEVBQUssRUFBSyxFQUFLOzs7c0JBRWxDOzs7O1FBRUksT0FBTyxLQUFDLE1BQU07UUFDZCw0QkFBb0I7UUFFcEIsS0FBQyxNQUFNO1lBRUosU0FBUSxLQUFDLE1BQU07O1lBQ2QsS0FBQyxNQUFNLElBQUk7WUFDWCxLQUFDLE1BQU07WUFDUCxLQUFDLE1BQU0sTUFBTSxZQUFZOztRQUU3QixLQUFDLE1BQU0sY0FBYzs7ZUFFckIsS0FBQyxNQUFNOzs7c0JBRVg7Ozs7O3NCQUVBOztZQUVTLEtBQUM7Ozs7UUFFTixLQUFDO1FBRUQsS0FBQyxNQUFNLG9CQUFvQixFQUFFLEVBQUUsR0FBRyxJQUFHLEdBQUcsS0FBQyxNQUFNO2VBRS9DLEtBQUMsTUFBTTs7O3NCQUVYLDRCQUFlLFFBQU87O1FBQ2xCLFlBQUksdUJBQXVCLE9BQU87Z0JBQzNCOztpQkFFSDtnQkFDSSxLQUFLLEtBQUssUUFBUTtnQkFDbEIsS0FBQzs7aUJBRUw7K0JBQ2E7O29CQUNMLEtBQUMsTUFBTSxjQUFjOzs7O29CQUVyQixLQUFDLE1BQU07OztpQkFFZjtpQkFDQTtpQkFDQTtnQkFDSSxLQUFLLEtBQUssUUFBUTtnQkFDbEIsS0FBQyxNQUFNO2dCQUNQLEtBQUM7Ozs7ZUFFVDs7O3NCQUVKLHNCQUFTOzs7O1lBRUMsS0FBQzs7OztRQUVQLE1BQU0sS0FBQyxNQUFNLFFBQVE7YUFBaUIsY0FBQSxJQUFLOzttQkFBWjs7WUFFNUIsTUFBTSxTQUFRLFlBQWdCLEtBQUMsTUFBTSxjQUFjOztZQUNsRCxLQUFDLGNBQWM7b0JBQ1osT0FBTzs7Z0JBRWQsT0FBTzs7O3NCQUVYLG9CQUFPLEtBQUk7Ozs7WUFFRCxLQUFDOzs7O21CQUVKLE1BQU0sT0FBVSxNQUFNLGNBQWEsTUFBTSxNQUFNLFdBQVcsV0FBVyxNQUFNLE1BQU0sV0FBVyxZQUFZLE1BQU0sTUFBTSxXQUFXOzt1QkFFeEgsTUFBTSxPQUFVLE1BQU07Ozs7WUFDeEIsS0FBQyxjQUFjO21CQUNaOztlQUVKO1lBRUosU0FBUyxLQUFDLE1BQU0sTUFBTSxJQUFJOzttQkFDdEI7O2VBRVA7OztXQTVHQzs7O2VBOEdGIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/menu/vinder.kode

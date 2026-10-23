@@ -267,79 +267,79 @@ function novim
 
             ⮐  true
 
-        if @area
-
-            if target = novim.textObjects[char]
-                @completeTextObject target
-            else
-                @reset()
-
-        else if @operator
-
-            if build = novim.motions[char]
-                @complete build
-            else if char in ['f' 't' 'F' 'T']
+        if 
+            @area
+    
+                if target = novim.textObjects[char]
+                    @completeTextObject target
+                else
+                    @reset()
+    
+            @operator
+    
+                if 
+                    build = novim.motions[char]
+                        @complete build
+                    char in ['f' 't' 'F' 'T']
+                        @find = char
+                        @logPending()
+                    char == ';'
+                        @repeatFind()
+                    char == ','
+                        @repeatFind true
+                    area = novim.areas[char]
+                        @area = area
+                        @logPending()
+                    char in '0123456789'
+                        @count += char
+                        @logPending()
+                    ➜ 
+                        @reset()
+                    
+            char in ['f' 't' 'F' 'T']
+    
                 @find = char
                 @logPending()
-            else if char == ';'
+    
+            char == ';'
+    
                 @repeatFind()
-            else if char == ','
+    
+            char == ','
+    
                 @repeatFind true
-            else if area = novim.areas[char]
-                @area = area
+    
+            novim.operators[char]
+    
+                @operator = char
                 @logPending()
-            else if char in '0123456789'
-                @count += char
+    
+            char == '"'
+    
+                @registerPending = true
                 @logPending()
-            else
+    
+            char == 'g'
+    
+                @prefix = 'g'
+                @logPending()
+    
+            char == '/'
+                post.emit 'vinder.show'
                 @reset()
-
-        else if char in ['f' 't' 'F' 'T']
-
-            @find = char
-            @logPending()
-
-        else if char == ';'
-
-            @repeatFind()
-
-        else if char == ','
-
-            @repeatFind true
-
-        else if novim.operators[char]
-
-            @operator = char
-            @logPending()
-
-        else if char == '"'
-
-            @registerPending = true
-            @logPending()
-
-        else if char == 'g'
-
-            @prefix = 'g'
-            @logPending()
-
-        else if char == '/'
-            log 'vinder.show'
-            post.emit 'vinder.show'
-            @reset()
-
-        else if command = novim.commands[char]
-
-            @execute command(@countNumber())
-            @reset()
-
-        else if char in '0123456789'
-
-            # a lone 0 is a motion, after a count it is a digit
-            if char == '0' and empty @count
-                @execute { operator: 'move', motion: { kind: 'bol' } }
+    
+            command = novim.commands[char]
+    
+                @execute command(@countNumber())
                 @reset()
-            else
-                @count += char
+    
+            char in '0123456789'
+    
+                if char == '0' and empty @count
+                    @execute { operator: 'move', motion: { kind: 'bol' } }
+                    @reset()
+                else
+                    @count += char
 
         # swallow all other input until more commands are implemented
         true
