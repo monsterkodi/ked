@@ -12,6 +12,8 @@
         word            to the start of the count-th word after
         wordEnd         to the end of the count-th word after
         wordBack        to the start of the count-th word before
+        wordBig wordEndBig wordBackBig    the same, but a WORD skips punctuation
+        charFind        to the count-th occurrence of a character, or just before it
         bol eol         to the start or end of the line
         line            count lines, starting with the current one
         lineDown        current line and count lines below
@@ -73,6 +75,10 @@ function motion
             'word'     ➜ @rangeForWord     lines x y count
             'wordEnd'  ➜ @rangeForWordEnd  lines x y count
             'wordBack' ➜ @rangeForWordBack lines x y count
+            'wordBig'     ➜ @rangeForWord     lines x y count true
+            'wordEndBig'  ➜ @rangeForWordEnd  lines x y count true
+            'wordBackBig' ➜ @rangeForWordBack lines x y count true
+            'charFind' ➜ @rangeForCharFind lines x y spec
             'bol'      ➜ @rangeForBol      lines x y
             'eol'      ➜ @rangeForEol      lines x y
             'line'     ➜ @rangeForLines    lines y y+count-1
@@ -105,7 +111,7 @@ function motion
 
     # ranges for word motions
 
-    @rangeForWord: lines x y count ->
+    @rangeForWord: lines x y count big=false ->
 
         pos = [x y]
 
@@ -113,7 +119,7 @@ function motion
 
             # as in vim, the last step of a word motion with an operator
             # stops at the end of the line instead of crossing it
-            pos = @wordStartAfter lines pos (n == count-1)
+            pos = @wordStartAfter lines pos (n == count-1) big
 
         # an exclusive motion that ends in column 0 of a later line
         # ends at the end of the line before it, so no line is joined
@@ -122,23 +128,64 @@ function motion
 
         [x y pos[0] pos[1]]
 
-    @rangeForWordEnd: lines x y count ->
+    @rangeForWordEnd: lines x y count big=false ->
 
         pos = [x y]
 
         for n in 0...count
-            pos = @wordEndAfter lines pos
+            pos = @wordEndAfter lines pos big
 
         [x y pos[0] pos[1]]
 
-    @rangeForWordBack: lines x y count ->
+    @rangeForWordBack: lines x y count big=false ->
 
         pos = [x y]
 
         for n in 0...count
-            pos = @wordStartBefore lines pos
+            pos = @wordStartBefore lines pos big
 
         [pos[0] pos[1] x y]
+
+    # the first count-th occurrence of target after the cursor on this line
+    @indexOfCharAfter: segs x target count ->
+
+        i = kseg.indexAtWidth segs x
+
+        found = 0
+
+        for j in i+1...segs.length
+            if segs[j] == target
+                found += 1
+                ⮐  j if found == count
+
+        null
+
+    @charFindPosition: lines pos target count till ->
+
+        [x y] = pos
+        segs   = lines[y]
+        j      = @indexOfCharAfter segs x target count
+
+        ⮐  null if j == null
+
+        if till
+            j = max 0 j-1
+
+        [kseg.widthAtSegi(segs, j) y]
+
+    @rangeForCharFind: lines x y spec ->
+
+        segs   = lines[y]
+        target = spec.target
+        count  = max 1 (spec.count ? 1)
+        j      = @indexOfCharAfter segs x target count
+
+        ⮐  null if j == null
+
+        if spec.till
+            [x y kseg.widthAtSegi(segs, j) y]
+        else
+            [x y kseg.widthAtSegi(segs, j+1) y]
 
     # scanning graphemes
 
@@ -152,12 +199,21 @@ function motion
             ⮐  'word'
         'punct'
 
+    # a WORD is anything without whitespace, punctuation included
+    @wordCategory: seg big ->
+
+        ⮐  'empty' if empty seg
+        ⮐  'ws'    if /\s+/.test seg
+        ⮐  'word'  if big
+        ⮐  'word'  if /\w+/.test seg
+        'punct'
+
     @widthAt: segs i -> kseg.widthAtSegi segs i
 
     # start of the next word, crossing lines and skipping empty ones
     # with eol the motion stops at the end of the current line,
     # which is what an operator wants for its last word step
-    @wordStartAfter: lines pos eol=false ->
+    @wordStartAfter: lines pos eol=false big=false ->
 
         [x y] = pos
 
@@ -166,13 +222,13 @@ function motion
 
         if i < segs.length
 
-            cat = @category segs[i]
+            cat = @wordCategory segs[i] big
 
             if cat != 'ws'
-                while i < segs.length and @category(segs[i]) == cat
+                while i < segs.length and @wordCategory(segs[i], big) == cat
                     i += 1
 
-            while i < segs.length and @category(segs[i]) == 'ws'
+            while i < segs.length and @wordCategory(segs[i], big) == 'ws'
                 i += 1
 
             ⮐  [@widthAt(segs i) y] if i < segs.length
@@ -184,7 +240,7 @@ function motion
             line = lines[yy]
             j    = 0
 
-            while j < line.length and @category(line[j]) == 'ws'
+            while j < line.length and @wordCategory(line[j], big) == 'ws'
                 j += 1
 
             ⮐  [@widthAt(line j) yy] if j < line.length
@@ -192,7 +248,7 @@ function motion
         [kseg.width(segs) y]
 
     # position just after the last character of the next word
-    @wordEndAfter: lines pos ->
+    @wordEndAfter: lines pos big=false ->
 
         [x y] = pos
 
@@ -209,7 +265,7 @@ function motion
                 i    = 0
                 continue
 
-            cat = @category segs[i]
+            cat = @wordCategory segs[i] big
 
             if cat == 'ws'
                 i += 1
@@ -217,7 +273,7 @@ function motion
 
             j = i
 
-            while j+1 < segs.length and @category(segs[j+1]) == cat
+            while j+1 < segs.length and @wordCategory(segs[j+1], big) == cat
                 j += 1
 
             ⮐  [@widthAt(segs j+1) y] if j > i
@@ -226,7 +282,7 @@ function motion
             i = j+1
 
     # start of the previous word, crossing lines and skipping empty ones
-    @wordStartBefore: lines pos ->
+    @wordStartBefore: lines pos big=false ->
 
         [x y] = pos
 
@@ -244,11 +300,11 @@ function motion
 
             i -= 1
 
-            cat = @category segs[i]
+            cat = @wordCategory segs[i] big
 
             continue if cat == 'ws'
 
-            while i > 0 and @category(segs[i-1]) == cat
+            while i > 0 and @wordCategory(segs[i-1], big) == cat
                 i -= 1
 
             ⮐  [@widthAt(segs i) y]

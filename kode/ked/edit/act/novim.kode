@@ -247,8 +247,10 @@ export
                 @moveCursors 'down' count:n-1
 
             @moveCursors 'eol'
-        else if spec.kind in ['word' 'wordBack' 'wordEnd']
+        else if spec.kind in ['word' 'wordBack' 'wordEnd' 'wordBig' 'wordBackBig' 'wordEndBig']
             @moveByWordMotion spec.kind n
+        else if spec.kind == 'charFind'
+            @moveByCharFind spec n
         else if spec.kind in ['bof' 'eof']
             @moveCursorsToLine spec.kind n
         else
@@ -263,6 +265,7 @@ export
         n       = max 1 (count ? 1)
         lines   = @s.lines
         cursors = @allCursors()
+        big     = kind in ['wordBig' 'wordBackBig' 'wordEndBig']
 
         for cursor, idx in cursors
 
@@ -270,24 +273,43 @@ export
 
             for i in 0...n
 
-                if kind == 'word'
-                    pos = motion.wordStartAfter lines pos
-                else if kind == 'wordBack'
-                    pos = motion.wordStartBefore lines pos
+                if kind in ['word' 'wordBig']
+                    pos = motion.wordStartAfter lines pos false big
+                else if kind in ['wordBack' 'wordBackBig']
+                    pos = motion.wordStartBefore lines pos big
                 else
-                    pos = motion.wordEndAfter lines pos
+                    pos = motion.wordEndAfter lines pos big
 
             # wordStartAfter already stops behind the last character when
             # there is no next word, so w lands there: the position after
             # the last word is not reserved for $
 
-            if kind == 'wordEnd'
+            if kind in ['wordEnd' 'wordEndBig']
 
                 # wordEndAfter returns the position after the last character,
                 # e lands on the character itself
                 pos = @widthBefore lines pos
 
             cursors[idx] = pos
+
+        @setCursors cursors main:@s.main
+
+    moveByCharFind: spec n ->
+
+        lines   = @s.lines
+        cursors = @allCursors()
+
+        for cursor, idx in cursors
+
+            pos = motion.charFindPosition lines cursor spec.target n spec.till
+
+            # a repeated t that would not move searches past that target,
+            # so ; keeps advancing instead of getting stuck
+            if pos and spec.repeat and spec.till and pos[0] == cursor[0] and pos[1] == cursor[1]
+                pos = motion.charFindPosition lines cursor spec.target n+1 spec.till
+
+            if pos
+                cursors[idx] = pos
 
         @setCursors cursors main:@s.main
 

@@ -57,6 +57,9 @@ function novim
         w: (n) -> { operator: 'move',   motion: { kind: 'word'  count: n } }
         b: (n) -> { operator: 'move',   motion: { kind: 'wordBack' count: n } }
         e: (n) -> { operator: 'move',   motion: { kind: 'wordEnd'  count: n } }
+        W: (n) -> { operator: 'move',   motion: { kind: 'wordBig'     count: n } }
+        B: (n) -> { operator: 'move',   motion: { kind: 'wordBackBig' count: n } }
+        E: (n) -> { operator: 'move',   motion: { kind: 'wordEndBig'  count: n } }
         '$': (n) -> { operator: 'move', motion: { kind: 'eol'   count: n } }
         G:   (n) -> { operator: 'move', motion: { kind: 'eof'   count: n } }
         p:   (n) -> { operator: 'put',  count: n, after: true  }
@@ -72,6 +75,9 @@ function novim
         w: (n) -> { kind: 'word'     count: n }
         e: (n) -> { kind: 'wordEnd'  count: n }
         b: (n) -> { kind: 'wordBack' count: n }
+        W: (n) -> { kind: 'wordBig'     count: n }
+        E: (n) -> { kind: 'wordEndBig'  count: n }
+        B: (n) -> { kind: 'wordBackBig' count: n }
         '0': -> { kind: 'bol' }
         '$': -> { kind: 'eol' }
         h: (n) -> { kind: 'charBack' count: n }
@@ -81,7 +87,8 @@ function novim
 
     @: @state ->
 
-        @name = 'novim'
+        @name     = 'novim'
+        @lastFind = null
         @reset false
 
     # the clipboard toggle, null means the default:
@@ -121,11 +128,12 @@ function novim
         @prefix          = null
         @register        = null
         @registerPending = false
+        @find            = null
         log 'novim reset' if announce
 
     resetOrExit: ->
 
-        if @operator or @count or @prefix or @registerPending or @register
+        if @operator or @count or @prefix or @registerPending or @register or @find
             @reset()
         else
             log 'novim exit'
@@ -135,7 +143,7 @@ function novim
 
     logPending: ->
 
-        log 'novim pending ▸' @operator @area @prefix @count @register
+        log 'novim pending ▸' @operator @area @prefix @count @register @find
 
     complete: build ->
 
@@ -150,6 +158,34 @@ function novim
         operator = novim.operators[@operator]
 
         @execute { operator: operator, motion: { kind: 'textObject', area: area, target: target, count: @countNumber() } }
+        @reset false
+
+    completeFind: target ->
+
+        till = @find == 't'
+
+        @lastFind = { target: target, till: till }
+
+        motion = { kind: 'charFind', target: target, till: till, count: @countNumber() }
+
+        if @operator
+            @execute { operator: novim.operators[@operator], motion: motion }
+        else
+            @execute { operator: 'move', motion: motion }
+
+        @reset false
+
+    repeatFind: ->
+
+        ⮐  if not @lastFind
+
+        motion = { kind: 'charFind', target: @lastFind.target, till: @lastFind.till, count: @countNumber(), repeat: true }
+
+        if @operator
+            @execute { operator: novim.operators[@operator], motion: motion }
+        else
+            @execute { operator: 'move', motion: motion }
+
         @reset false
 
     execute: cmd ->
@@ -176,6 +212,16 @@ function novim
 
         if combo in ['esc' 'escape']
             @resetOrExit()
+            ⮐  true
+
+        # f and t wait for the character they should find
+        if @find
+
+            if char.length == 1
+                @completeFind char
+            else
+                @reset()
+
             ⮐  true
 
         # arrows mean the same as h j k l
@@ -226,6 +272,11 @@ function novim
 
             if build = novim.motions[char]
                 @complete build
+            else if char in ['f' 't']
+                @find = char
+                @logPending()
+            else if char == ';'
+                @repeatFind()
             else if area = novim.areas[char]
                 @area = area
                 @logPending()
@@ -234,6 +285,15 @@ function novim
                 @logPending()
             else
                 @reset()
+
+        else if char in ['f' 't']
+
+            @find = char
+            @logPending()
+
+        else if char == ';'
+
+            @repeatFind()
 
         else if novim.operators[char]
 

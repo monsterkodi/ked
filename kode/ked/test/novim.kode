@@ -1298,6 +1298,129 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'e'
     cur 2 0
 
+    # W, B and E treat punctuation as part of a WORD
+
+    s.loadLines belt.linesForText("foo.bar baz, qux")
+    s.setMainCursor 0 0
+
+    key 'W'
+    cur 8 0
+
+    key 'W'
+    cur 13 0
+
+    key 'W'
+    cur 16 0
+
+    key 'B'
+    cur 13 0
+
+    key 'B'
+    cur 8 0
+
+    key 'B'
+    cur 0 0
+
+    s.setMainCursor 0 0
+    key 'E'
+    cur 6 0
+
+    key 'E'
+    cur 11 0
+
+    key 'E'
+    cur 15 0
+
+    # counts apply
+    s.setMainCursor 0 0
+    key '2'
+    key 'W'
+    cur 13 0
+
+    s.setMainCursor 0 0
+    key '2'
+    key 'E'
+    cur 11 0
+
+    # W and E work as operator motions too
+    s.loadLines belt.linesForText("foo.bar baz")
+    s.setMainCursor 0 0
+    key 'd'
+    key 'W'
+    txt "baz"
+
+    s.loadLines belt.linesForText("foo.bar baz")
+    s.setMainCursor 0 0
+    key 'd'
+    key 'E'
+    txt " baz"
+
+    # f finds a character on the line
+
+    s.loadLines belt.linesForText("a-b-c-d")
+    s.setMainCursor 0 0
+
+    key 'f'
+    key '-'
+    cur 1 0
+
+    key ';'
+    cur 3 0
+
+    key ';'
+    cur 5 0
+
+    # a count finds the count-th occurrence
+    s.setMainCursor 0 0
+    key '2'
+    key 'f'
+    key '-'
+    cur 3 0
+
+    # t stops one character before the target
+    s.loadLines belt.linesForText("a-b-c")
+    s.setMainCursor 0 0
+    key 't'
+    key 'b'
+    cur 1 0
+
+    s.setMainCursor 0 0
+    key '2'
+    key 't'
+    key '-'
+    cur 2 0
+
+    # ; repeats t as well
+    s.setMainCursor 0 0
+    key 't'
+    key '-'
+    cur 0 0
+
+    key ';'
+    cur 2 0
+
+    # f does not cross the line
+    s.loadLines belt.linesForText("abc\ndef")
+    s.setMainCursor 0 0
+    key 'f'
+    key 'z'
+    cur 0 0
+
+    # f and t are operator motions
+    s.loadLines belt.linesForText("a-b-c")
+    s.setMainCursor 0 0
+    key 'd'
+    key 'f'
+    key '-'
+    txt "b-c"
+
+    s.loadLines belt.linesForText("a-b-c")
+    s.setMainCursor 0 0
+    key 'd'
+    key 't'
+    key '-'
+    txt "-b-c"
+
 ▸ brckts lets novim handle text keys
 
     # brckts is auto-started in every editor, it must not handle text input
