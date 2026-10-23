@@ -1241,9 +1241,9 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'w'
     cur 6 1
 
-    # at the last word w stays on its last character
+    # at the last word w goes behind the last character
     key 'w'
-    cur 9 1
+    cur 10 1
 
     key 'b'
     cur 6 1
@@ -1287,12 +1287,12 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'e'
     cur 6 0
 
-    # from behind the last character w and e go back onto it
+    # from behind the last character w stays there, e goes back onto it
     s.loadLines belt.linesForText("abc")
     s.setMainCursor 3 0
 
     key 'w'
-    cur 2 0
+    cur 3 0
 
     s.setMainCursor 3 0
     key 'e'

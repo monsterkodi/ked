@@ -277,16 +277,11 @@ export
                 else
                     pos = motion.wordEndAfter lines pos
 
-            if kind == 'word'
+            # wordStartAfter already stops behind the last character when
+            # there is no next word, so w lands there: the position after
+            # the last word is not reserved for $
 
-                # with no next word the scan ends behind the last character,
-                # the cursor goes back onto it, as at the end of a buffer
-                width = kseg.width lines[pos[1]]
-
-                if width > 0 and pos[0] >= width
-                    pos[0] = width-1
-
-            else if kind == 'wordEnd'
+            if kind == 'wordEnd'
 
                 # wordEndAfter returns the position after the last character,
                 # e lands on the character itself
