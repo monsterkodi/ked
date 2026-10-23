@@ -127,6 +127,9 @@ function brckts
                         @state.deleteSelection()
                         ⮐ 
         
+        # novim swallows text input, only the shortcuts above belong to brckts
+        ⮐  'unhandled' if mode.isActive @state 'novim'
+        
         ⮐  'unhandled' if empty brckts.surround[event.char]
             
         if event.char == '#' # handle string interpolation

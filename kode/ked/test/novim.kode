@@ -7,8 +7,8 @@
 
 use ../../kxk       ▪ kseg
 use ../edit/tool    ◆ belt motion
-use ../edit         ◆ state
-use ../edit/mode ◆ novim
+use ../edit         ◆ state mode
+use ../edit/mode    ◆ novim brckts
 
 cells = cols:55 rows:66
 s = new state cells 'test'
@@ -715,3 +715,79 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     key '.'
     txt "three"
+
+▸ brckts lets novim handle text keys
+
+    # brckts is auto-started in every editor, it must not handle text input
+    # while novim owns the keys
+
+    stack = new state cells 'stack'
+
+    mode.modes.novim  = novim
+    mode.modes.brckts = brckts
+    mode.start stack 'brckts'
+    mode.start stack 'novim'
+
+    press = c -> mode.handleKey stack c {combo:c, char:c}
+    stxt  = t -> kseg.str(stack.s.lines) ▸ t
+
+    onKeys = (text x y keys) ->
+        stack.loadLines belt.linesForText(text)
+        stack.setMainCursor x y
+        mode.stop  stack 'novim'
+        mode.start stack 'novim'
+        for c in keys
+            press c
+
+    # a quote on its border is still a text object
+    onKeys 'say "hello there" ok' 4 0 ['d' 'i' '"']
+    stxt 'say "" ok'
+
+    onKeys 'say "hello there" ok' 16 0 ['d' 'i' '"']
+    stxt 'say "" ok'
+
+    onKeys "a 'b c' d" 2 0 ['d' 'i' "'"]
+    stxt "a '' d"
+
+    onKeys "a 'b c' d" 6 0 ['d' 'i' "'"]
+    stxt "a '' d"
+
+    # closing brackets have the same border
+    onKeys 'call(x)' 6 0 ['d' 'i' ')']
+    stxt 'call()'
+
+    onKeys 'a [b] c' 4 0 ['d' 'a' ']']
+    stxt 'a  c'
+
+    onKeys 'a {b} c' 4 0 ['d' 'a' '}']
+    stxt 'a  c'
+
+    mode.stop stack 'novim'
+    mode.stop stack 'brckts'
+
+▸ brckts still types without novim
+
+    plain = new state cells 'plain'
+
+    mode.modes.brckts = brckts
+    mode.start plain 'brckts'
+
+    pkey = c -> mode.handleKey plain c {combo:c, char:c}
+
+    # on a quote it steps over the existing delimiter
+    plain.loadLines belt.linesForText('say "hi" ok')
+    plain.setMainCursor 4 0
+    pkey '"'
+
+    plain.mainCursor() ▸ [5 0]
+    kseg.str(plain.s.lines) ▸ 'say "hi" ok'
+
+    # on white space it inserts a pair and puts the cursor inside
+    plain.loadLines belt.linesForText('x = ')
+    plain.setMainCursor 4 0
+    pkey '"'
+
+    plain.mainCursor() ▸ [5 0]
+    kseg.str(plain.s.lines) ▸ 'x = ""'
+
+    mode.stop plain 'brckts'
