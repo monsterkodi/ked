@@ -62,34 +62,34 @@ function input extends editor
 
     onKey: key event ->
         
-        log "#{@name} focus #{@hasFocus()}"
+        # log "#{@name} focus #{@hasFocus()}"
         
         ⮐ false if not @hasFocus()
         
-        log "#{@name} onKey #{key}}"
+        # log "#{@name} onKey #{key}}"
         
         switch event.combo
             
             'return'    
                 
                 @emit 'action' 'submit' @current()
-                ⮐  true
+                ⮐ true
                 
             'up' 'down'
                 
                 @emit 'action' event.combo 
-                ⮐  false
+                ⮐ false
                 
             'right'
                 
                 if @state.mainCursor()[0] >= @current().length
                     @emit 'action' 'right'
-                    ⮐  true
+                    ⮐ true
                     
             'esc'
             
                 @emit 'action' 'cancel'
-                ⮐  true
+                ⮐ true
 
         before = @current()
 
@@ -97,7 +97,7 @@ function input extends editor
         
         if before != @current()
             @emit 'action' 'change' @current() 
-            ⮐  true
+            ⮐ true
         
         sr
         

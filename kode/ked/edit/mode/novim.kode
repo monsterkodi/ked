@@ -11,6 +11,7 @@ to actions which are executed by edit▸act▸novim
 
 use ../../theme ◆ color
 use ../../../kxk ◆ post
+use ../../theme  ◆ theme
 
 function novim
 
@@ -351,10 +352,10 @@ function novim
     #  ███████   ███████   ███████   ███████   ███   ███
 
     themeColor: colorName defaultColor ->
-
+        log "themeColor #{colorName}" theme
         switch colorName
-            'cursor.multi' ➜ ⮐  color.values '#c00000' # medium red
-            'cursor.main'  ➜ ⮐  color.values '#ff3030' # bright red
+            'cursor.multi' ➜ ⮐ theme.novim.cursor.multi
+            'cursor.main'  ➜ ⮐ theme.novim.cursor.main
 
         defaultColor
 

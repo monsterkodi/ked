@@ -1,6 +1,6 @@
 var _k_ = {isStr: function (o) {return typeof o === 'string' || o instanceof String}, clone: function (o,v) { v ??= new Map(); if (Array.isArray(o)) { if (!v.has(o)) {var r = []; v.set(o,r); for (var i=0; i < o.length; i++) {if (!v.has(o[i])) { v.set(o[i],_k_.clone(o[i],v)) }; r.push(v.get(o[i]))}}; return v.get(o) } else if (typeof o == 'string') { if (!v.has(o)) {v.set(o,''+o)}; return v.get(o) } else if (o != null && typeof o == 'object' && o.constructor.name == 'Object') { if (!v.has(o)) { var k, r = {}; v.set(o,r); for (k in o) { if (!v.has(o[k])) { v.set(o[k],_k_.clone(o[k],v)) }; r[k] = v.get(o[k]) }; }; return v.get(o) } else {return o} }, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, isArr: function (o) {return Array.isArray(o)}, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
 
-var ext, full_vibrant, k, key, setVibrant, v, val, value
+var convert, ext, full_vibrant, key, setVibrant, value
 
 import kxk from "../../kxk.js"
 let post = kxk.post
@@ -8,22 +8,25 @@ let post = kxk.post
 import color from "./color.js"
 
 import theme from './theme.json' with { type : "json" }
-for (key in theme)
+
+convert = function (dict)
 {
-    val = theme[key]
-    if (_k_.isStr(val))
+    var key, val
+
+    for (key in dict)
     {
-        theme[key] = color.values(val)
-    }
-    else
-    {
-        for (k in val)
+        val = dict[key]
+        if (_k_.isStr(val))
         {
-            v = val[k]
-            val[k] = color.values(v)
+            dict[key] = color.values(val)
+        }
+        else
+        {
+            convert(val)
         }
     }
 }
+convert(theme)
 for (key in theme.syntax)
 {
     value = theme.syntax[key]
@@ -39,7 +42,7 @@ full_vibrant = _k_.clone(theme)
 
 setVibrant = function (vf, lf = 1.0)
 {
-    var c
+    var c, k, v, val
 
     vf = _k_.clamp(0,1,vf)
     for (key in full_vibrant)
@@ -68,5 +71,5 @@ setVibrant = function (vf, lf = 1.0)
 post.on('theme.vibrant',setVibrant)
 export default theme;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGhlbWUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL3RoZW1lL3RoZW1lLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FRVSxVQUFBO0lBQU07O09BQ1YsWUFBQTs7T0FFQyxNQUFNLEtBQUssZUFBZSxLQUFLLEVBQUUsS0FBSSxFQUFFLE9BQU87S0FFakQsT0FBVzs7SUFBUCxNQUFPO1FBQ0QsVUFBUDs7UUFDQyxNQUFNLE9BQU8sTUFBTSxPQUFPOzs7O2FBRXRCLEtBQU87O1lBQUwsSUFBSztZQUNQLElBQUksS0FBSyxNQUFNLE9BQU87Ozs7S0FFOUIsT0FBYSxNQUFNOztJQUFmLFFBQVMsTUFBTTtRQUNoQixJQUFJLFdBQVc7O1FBQ2QsTUFBTSxVQUFJO1FBQ1YsTUFBTSxPQUFPLGNBQVksT0FBUyxNQUFNLE9BQU8sTUFBTTtRQUNyRCxNQUFNLE9BQU8sZUFBYSxPQUFRLE1BQU0sT0FBTyxNQUFNO1FBQ3JELE1BQU0sT0FBTyxnQkFBYyxPQUFPLE1BQU0sT0FBTyxNQUFNOzs7QUFRN0QseUJBQXFCOztBQUVyQix1QkFBYSxJQUFHLEtBQUc7Ozs7SUFFZixlQUFXLEVBQUUsRUFBRTtTQUNYLE9BQVc7O1FBQVAsTUFBTztZQUNELFVBQVA7O1lBQ0MsSUFBSSxNQUFNLFNBQVMsSUFBSSxHQUFHO1lBQzFCLE1BQU0sS0FBSyxLQUFLLEVBQUU7WUFDbEIsTUFBTSxLQUFLLEtBQUssRUFBRTtZQUNsQixNQUFNLEtBQUssS0FBSyxFQUFFOzs7O2lCQUVkLEtBQU87O2dCQUFMLElBQUs7Z0JBQ1AsSUFBSSxNQUFNLFNBQVMsRUFBRSxHQUFHO2dCQUN4QixNQUFNLEtBQUssR0FBRyxLQUFLLEVBQUU7Z0JBQ3JCLE1BQU0sS0FBSyxHQUFHLEtBQUssRUFBRTtnQkFDckIsTUFBTSxLQUFLLEdBQUcsS0FBSyxFQUFFOzs7OztBQUVyQyxLQUFLLEdBQUcsZ0JBQWdCO2VBRWpCIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGhlbWUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL3RoZW1lL3RoZW1lLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FRVSxVQUFBO0lBQU07O09BQ1YsWUFBQTs7T0FFQyxNQUFNLEtBQUssZUFBZSxLQUFLLEVBQUUsS0FBSSxFQUFFLE9BQU87O0FBRXJELG9CQUFVOzs7O1NBQ0YsT0FBVzs7UUFBUCxNQUFPO1lBQ0QsVUFBUDs7WUFDQyxLQUFLLE9BQU8sTUFBTSxPQUFPOzs7O1lBRXpCLFFBQVE7Ozs7QUFDcEIsUUFBUTtLQUVKLE9BQWEsTUFBTTs7SUFBZixRQUFTLE1BQU07UUFDaEIsSUFBSSxXQUFXOztRQUNkLE1BQU0sVUFBSTtRQUNWLE1BQU0sT0FBTyxjQUFZLE9BQVMsTUFBTSxPQUFPLE1BQU07UUFDckQsTUFBTSxPQUFPLGVBQWEsT0FBUSxNQUFNLE9BQU8sTUFBTTtRQUNyRCxNQUFNLE9BQU8sZ0JBQWMsT0FBTyxNQUFNLE9BQU8sTUFBTTs7O0FBUTdELHlCQUFxQjs7QUFFckIsdUJBQWEsSUFBRyxLQUFHOzs7O0lBRWYsZUFBVyxFQUFFLEVBQUU7U0FDWCxPQUFXOztRQUFQLE1BQU87WUFDRCxVQUFQOztZQUNDLElBQUksTUFBTSxTQUFTLElBQUksR0FBRztZQUMxQixNQUFNLEtBQUssS0FBSyxFQUFFO1lBQ2xCLE1BQU0sS0FBSyxLQUFLLEVBQUU7WUFDbEIsTUFBTSxLQUFLLEtBQUssRUFBRTs7OztpQkFFZCxLQUFPOztnQkFBTCxJQUFLO2dCQUNQLElBQUksTUFBTSxTQUFTLEVBQUUsR0FBRztnQkFDeEIsTUFBTSxLQUFLLEdBQUcsS0FBSyxFQUFFO2dCQUNyQixNQUFNLEtBQUssR0FBRyxLQUFLLEVBQUU7Z0JBQ3JCLE1BQU0sS0FBSyxHQUFHLEtBQUssRUFBRTs7Ozs7QUFFckMsS0FBSyxHQUFHLGdCQUFnQjtlQUVqQiJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/theme/theme.kode

@@ -53,8 +53,8 @@ function unype
     themeColor: colorName defaultColor ->
         
         switch colorName
-            'cursor.multi' ➜ ⮐  theme.scroll.hover
-            'cursor.main'  ➜ ⮐  theme.scroll.dot
+            'cursor.multi' ➜ ⮐ theme.unype.cursor.multi
+            'cursor.main'  ➜ ⮐ theme.unype.cursor.main
         
         defaultColor
 

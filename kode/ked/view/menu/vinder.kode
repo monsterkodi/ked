@@ -25,7 +25,6 @@ function vinder extends view
         @isInputPopup = true
 
         @input = new input @screen "#{@name}_input"
-        # @input.show() # ???
 
         @input.on 'action' @onInputAction
         
@@ -53,7 +52,7 @@ function vinder extends view
             @input.set text
             @input.selectAll()
             @input.state.moveCursors 'eol'
-        # @input.grabFocus()
+
         @state.highlightText text
         super()
         @input.grabFocus()
@@ -71,7 +70,7 @@ function vinder extends view
         @input.draw()
 
     onInputAction: action text =>
-        log "vinder.onInputAction" action text
+        # log "vinder.onInputAction" action text
         switch action
 
             'submit'

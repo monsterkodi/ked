@@ -81,6 +81,18 @@
     "bg": "#111",
     "frame": "#222"
   },
+  "unype": {
+    "cursor": {
+      "multi": "#800",
+      "main": "#f00"
+    }
+  },
+  "novim": {
+    "cursor": {
+      "multi": "#44a",
+      "main": "#88f"
+    }
+  },
   "vinder": {
     "bg": "#1a1a1a",
     "frame": "#44a"

@@ -11,12 +11,13 @@ use ◆ color
 
 import theme from './theme.json' with { type: "json" }
 
-for key,val of theme # convert all colors into rgb triplets
-    if val is str
-        theme[key] = color.values(val)
-    else
-        for k,v of val
-            val[k] = color.values(v)
+convert = dict ->
+    for key,val of dict # convert all colors into rgb triplets
+        if val is str
+            dict[key] = color.values(val)
+        else
+            convert val
+convert theme
 
 for key,value of theme.syntax # generate colors for file ext and punct
     if key.startsWith 'file_'
