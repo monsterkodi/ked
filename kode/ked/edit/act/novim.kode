@@ -247,12 +247,63 @@ export
                 @moveCursors 'down' count:n-1
 
             @moveCursors 'eol'
+        else if spec.kind in ['word' 'wordBack' 'wordEnd']
+            @moveByWordMotion spec.kind n
         else if spec.kind in ['bof' 'eof']
             @moveCursorsToLine spec.kind n
         else
             @moveCursors spec.kind count:n
 
         @clampCursorsToLines()
+
+    # standalone word movement, unlike an operator it may cross lines
+    # and does not stop at the end of the current line
+    moveByWordMotion: kind count ->
+
+        n       = max 1 (count ? 1)
+        lines   = @s.lines
+        cursors = @allCursors()
+
+        for cursor, idx in cursors
+
+            pos = [cursor[0] cursor[1]]
+
+            for i in 0...n
+
+                if kind == 'word'
+                    pos = motion.wordStartAfter lines pos
+                else if kind == 'wordBack'
+                    pos = motion.wordStartBefore lines pos
+                else
+                    pos = motion.wordEndAfter lines pos
+
+            if kind == 'word'
+
+                # with no next word the scan ends behind the last character,
+                # the cursor goes back onto it, as at the end of a buffer
+                width = kseg.width lines[pos[1]]
+
+                if width > 0 and pos[0] >= width
+                    pos[0] = width-1
+
+            else if kind == 'wordEnd'
+
+                # wordEndAfter returns the position after the last character,
+                # e lands on the character itself
+                pos = @widthBefore lines pos
+
+            cursors[idx] = pos
+
+        @setCursors cursors main:@s.main
+
+    widthBefore: lines pos ->
+
+        segs = lines[pos[1]]
+        i    = kseg.indexAtWidth segs pos[0]
+
+        i = max 0 i-1
+
+        [kseg.widthAtSegi(segs, i) pos[1]]
 
     # bof and eof take a count as the line number to go to,
     # a count of one means the first or the last line

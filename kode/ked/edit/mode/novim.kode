@@ -54,6 +54,9 @@ function novim
         j: (n) -> { operator: 'move',   motion: { kind: 'down'  count: n } }
         k: (n) -> { operator: 'move',   motion: { kind: 'up'    count: n } }
         l: (n) -> { operator: 'move',   motion: { kind: 'right' count: n } }
+        w: (n) -> { operator: 'move',   motion: { kind: 'word'  count: n } }
+        b: (n) -> { operator: 'move',   motion: { kind: 'wordBack' count: n } }
+        e: (n) -> { operator: 'move',   motion: { kind: 'wordEnd'  count: n } }
         '$': (n) -> { operator: 'move', motion: { kind: 'eol'   count: n } }
         G:   (n) -> { operator: 'move', motion: { kind: 'eof'   count: n } }
         p:   (n) -> { operator: 'put',  count: n, after: true  }

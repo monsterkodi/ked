@@ -156,6 +156,7 @@
 
 # mode: novim (alt+n)
 
+    w  b  e                             next word, previous word, end of word
     alt+cmd+c   alt+ctrl+c              toggle clipboard sync for yank, delete, put
     "+y  "+p  "*y  "*p                  use the system clipboard register
 
