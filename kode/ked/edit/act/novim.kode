@@ -85,10 +85,49 @@ export
         if spec.kind in ['left' 'right']
             for i in 0...n
                 @moveCursors spec.kind
+        else if spec.kind == 'eol'
+
+            # as in vim a count on $ goes down count-1 lines first
+            if n > 1
+                @moveCursors 'down' count:n-1
+
+            @moveCursorsToEndOfLine()
+        else if spec.kind in ['bof' 'eof']
+            @moveCursorsToLine spec.kind n
         else
             @moveCursors spec.kind count:n
 
         @clampCursorsToLines()
+
+    # in vim a cursor on a line sits on its last character,
+    # one past the end is a position only insert needs
+    moveCursorsToEndOfLine: ->
+
+        cursors = @allCursors()
+
+        for c in cursors
+            c[0] = max 0 kseg.width(@s.lines[c[1]]) - 1
+
+        @setCursors cursors main:@s.main
+
+    # bof and eof take a count as the line number to go to,
+    # a count of one means the first or the last line
+    moveCursorsToLine: kind n ->
+
+        lines  = @s.lines
+        target = n > 1 ? n-1 : 0
+        target = lines.length-1 if kind == 'eof' and n <= 1
+        target = clamp 0 lines.length-1 target
+
+        width = kseg.width lines[target]
+
+        cursors = @allCursors()
+
+        for c in cursors
+            c[1] = target
+            c[0] = min belt.numIndent(lines[target]) max(0 width-1)
+
+        @setCursors cursors main:@s.main
 
     clampCursorsToLines: ->
 

@@ -53,6 +53,8 @@ function novim
         j: (n) -> { operator: 'move',   motion: { kind: 'down'  count: n } }
         k: (n) -> { operator: 'move',   motion: { kind: 'up'    count: n } }
         l: (n) -> { operator: 'move',   motion: { kind: 'right' count: n } }
+        '$': (n) -> { operator: 'move', motion: { kind: 'eol'   count: n } }
+        G:   (n) -> { operator: 'move', motion: { kind: 'eof'   count: n } }
         u: (n) -> { operator: 'undo',   count: n }
         '.': (n) -> { operator: 'repeat', count: n }
 
@@ -80,11 +82,12 @@ function novim
         @count    = ''
         @operator = null
         @area     = null
+        @prefix   = null
         log 'novim reset' if announce
 
     resetOrExit: ->
 
-        if @operator or @count
+        if @operator or @count or @prefix
             @reset()
         else
             log 'novim exit'
@@ -94,7 +97,7 @@ function novim
 
     logPending: ->
 
-        log 'novim pending ▸' @operator @area @count
+        log 'novim pending ▸' @operator @area @prefix @count
 
     complete: build ->
 
@@ -139,6 +142,20 @@ function novim
         # swallow every other non text key
         ⮐  true if char.length != 1
 
+        # gg is two keys, the first one only remembers itself
+        if @prefix
+
+            prefix  = @prefix
+            @prefix = null
+
+            if prefix == 'g' and char == 'g'
+                @execute { operator: 'move', motion: { kind: 'bof', count: @countNumber() } }
+                @reset false
+            else
+                @reset()
+
+            ⮐  true
+
         if @area
 
             if target = novim.textObjects[char]
@@ -164,6 +181,11 @@ function novim
             @operator = char
             @logPending()
 
+        else if char == 'g'
+
+            @prefix = 'g'
+            @logPending()
+
         else if command = novim.commands[char]
 
             @execute command(@countNumber())
@@ -171,7 +193,12 @@ function novim
 
         else if char in '0123456789'
 
-            @count += char
+            # a lone 0 is a motion, after a count it is a digit
+            if char == '0' and empty @count
+                @execute { operator: 'move', motion: { kind: 'bol' } }
+                @reset false
+            else
+                @count += char
 
         # swallow all other input until more commands are implemented
         true

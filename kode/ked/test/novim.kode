@@ -261,6 +261,63 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     txt "abc\ndef"
 
+▸ cursor to start and end of line
+
+    s.loadLines belt.linesForText("one two\nfour")
+    s.setMainCursor 0 0
+
+    # $ lands on the last character, as in vim, not past it
+    s.executeNovim {operator:'move', motion:{kind:'eol'}}
+    cur 6 0
+
+    # a count on $ goes down count-1 lines first
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'move', motion:{kind:'eol', count:2}}
+    cur 3 1
+
+    # 0 goes to the first column
+    s.setMainCursor 6 0
+    s.executeNovim {operator:'move', motion:{kind:'bol'}}
+    cur 0 0
+
+    # an empty line has nowhere else to go
+    s.loadLines belt.linesForText("\nabc")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'move', motion:{kind:'eol'}}
+    cur 0 0
+
+▸ cursor to first and last line
+
+    text = "  one\n  two\n  three"
+
+    # gg goes to the first line, G to the last
+    s.loadLines belt.linesForText(text)
+    s.setMainCursor 3 1
+
+    s.executeNovim {operator:'move', motion:{kind:'bof'}}
+    cur 2 0
+
+    s.setMainCursor 3 1
+    s.executeNovim {operator:'move', motion:{kind:'eof'}}
+    cur 2 2
+
+    # a count is the line number to go to
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'move', motion:{kind:'eof', count:2}}
+    cur 2 1
+
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'move', motion:{kind:'bof', count:3}}
+    cur 2 2
+
+    # a count past the last line is clamped
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'move', motion:{kind:'eof', count:9}}
+    cur 2 2
+
+    # moving to a line edits nothing
+    txt text
+
 ▸ execute command
 
     text = """
@@ -763,6 +820,54 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     key '.'
     txt "three"
+
+    # 0 $ gg and G
+
+    s.loadLines belt.linesForText("one\n  two\n  three")
+    s.setMainCursor 0 0
+
+    key 'G'
+    cur 2 2
+
+    key 'g'
+    key 'g'
+    cur 0 0
+
+    # a count selects the line
+    key '2'
+    key 'G'
+    cur 2 1
+
+    key '3'
+    key 'g'
+    key 'g'
+    cur 2 2
+
+    # 0 goes to the start, unless a count is being typed
+    key '0'
+    cur 0 2
+
+    s.setMainCursor 0 0
+    key '1'
+    key '0'
+    key 'G'
+    cur 2 2
+
+    # $ goes to the last character
+    key '$'
+    cur 6 2
+
+    # a lone g is thrown away by the next key
+    key 'g'
+    key 'l'
+    cur 6 2
+
+    # escape leaves a pending g
+    s.setMainCursor 0 0
+    key 'g'
+    m.handleKey 'esc' {combo:'esc'}
+    key 'G'
+    cur 2 2
 
 ▸ brckts lets novim handle text keys
 
