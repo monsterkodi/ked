@@ -83,6 +83,29 @@ mrange = lines x y m -> motion.range lines [x y] m
         mrange(segls, 11, 0, {kind:'eol'}) ▸ [11 0 13 0]
         mrange(segls, 13, 0, {kind:'eol'}) ▸ [13 0 13 0]
 
+    ▸ character find
+
+        findlines = kseg.segls "a-b\nc-d"
+
+        # f searches the whole buffer, not only the current line
+        mrange(findlines, 0, 0, {kind:'charFind', target:'-', count:1}) ▸ [0 0 2 0]
+        mrange(findlines, 0, 0, {kind:'charFind', target:'-', count:2}) ▸ [0 0 2 1]
+
+        # t stops one character before the target
+        mrange(findlines, 0, 0, {kind:'charFind', target:'-', count:1, till:true}) ▸ [0 0 1 0]
+        mrange(findlines, 0, 0, {kind:'charFind', target:'-', count:2, till:true}) ▸ [0 0 1 1]
+
+        # capital F searches backwards
+        mrange(findlines, 3, 1, {kind:'charFind', target:'-', count:1, forward:false}) ▸ [1 1 3 1]
+        mrange(findlines, 3, 1, {kind:'charFind', target:'-', count:2, forward:false}) ▸ [1 0 3 1]
+
+        # a backward till stops one character after the target
+        mrange(findlines, 3, 1, {kind:'charFind', target:'-', count:1, forward:false, till:true}) ▸ [2 1 3 1]
+
+        # forward till skips a target at the very start of a line,
+        # there is no character before it to stop on
+        mrange(kseg.segls("x\n-a\nb-c"), 0, 0, {kind:'charFind', target:'-', count:1, till:true}) ▸ [0 0 1 2]
+
 ▸ merging ranges
 
     motion.mergeRanges [[0 0 1 0] [1 0 2 0]] ▸ [[0 0 2 0]]
@@ -1409,7 +1432,7 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 'p'
     txt "foo.bar bazfoo.bar"
 
-    # f finds a character on the line
+    # f finds a character in the whole buffer
 
     s.loadLines belt.linesForText("a-b-c-d")
     s.setMainCursor 0 0
@@ -1424,12 +1447,49 @@ mrange = lines x y m -> motion.range lines [x y] m
     key ';'
     cur 5 0
 
+    # every target is highlighted while the find is active
+    s.loadLines belt.linesForText("a-b\nc-d")
+    s.setMainCursor 0 0
+
+    key 'f'
+    key '-'
+    cur 1 0
+    s.s.highlights ▸ [[1 0 2 0] [1 1 2 1]]
+
+    key ';'
+    cur 1 1
+    s.s.highlights ▸ [[1 0 2 0] [1 1 2 1]]
+
+    # another command clears the find highlights
+    key 'l'
+    s.s.highlights ▸ []
+
     # a count finds the count-th occurrence
     s.setMainCursor 0 0
     key '2'
     key 'f'
     key '-'
-    cur 3 0
+    cur 1 1
+
+    # , repeats the find the other way
+    key ','
+    cur 1 0
+
+    # F searches backwards
+    s.setMainCursor 3 1
+    key 'F'
+    key '-'
+    cur 1 1
+
+    key ';'
+    cur 1 0
+
+    # counts work backwards too
+    s.setMainCursor 3 1
+    key '2'
+    key 'F'
+    key '-'
+    cur 1 0
 
     # t stops one character before the target
     s.loadLines belt.linesForText("a-b-c")
@@ -1453,14 +1513,24 @@ mrange = lines x y m -> motion.range lines [x y] m
     key ';'
     cur 2 0
 
-    # f does not cross the line
-    s.loadLines belt.linesForText("abc\ndef")
+    # t keeps crossing lines, a target at the start of a line is skipped
+    s.loadLines belt.linesForText("x\n-a\nb-c")
     s.setMainCursor 0 0
-    key 'f'
-    key 'z'
-    cur 0 0
+    key 't'
+    key '-'
+    cur 0 2
 
-    # f and t are operator motions
+    # T stops just after a target to the left
+    s.loadLines belt.linesForText("a-b\nc-d")
+    s.setMainCursor 3 1
+    key 'T'
+    key '-'
+    cur 2 1
+
+    key ';'
+    cur 2 0
+
+    # f and t are operator motions, and cross lines like the cursor
     s.loadLines belt.linesForText("a-b-c")
     s.setMainCursor 0 0
     key 'd'
@@ -1474,6 +1544,13 @@ mrange = lines x y m -> motion.range lines [x y] m
     key 't'
     key '-'
     txt "-b-c"
+
+    s.loadLines belt.linesForText("ab\ncd")
+    s.setMainCursor 1 0
+    key 'd'
+    key 't'
+    key 'd'
+    txt "ad"
 
 ▸ brckts lets novim handle text keys
 

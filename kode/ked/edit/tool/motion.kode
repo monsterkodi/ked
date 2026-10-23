@@ -13,7 +13,8 @@
         wordEnd         to the end of the count-th word after
         wordBack        to the start of the count-th word before
         wordBig wordEndBig wordBackBig    the same, but a WORD skips punctuation
-        charFind        to the count-th occurrence of a character, or just before it
+        charFind        to the count-th occurrence of a character in the buffer,
+                        or just before it, forwards or backwards
         bol eol         to the start or end of the line
         line            count lines, starting with the current one
         lineDown        current line and count lines below
@@ -146,46 +147,99 @@ function motion
 
         [pos[0] pos[1] x y]
 
-    # the first count-th occurrence of target after the cursor on this line
-    @indexOfCharAfter: segs x target count ->
+    # every occurrence of target in the buffer, in reading order
+    @charFindMatches: lines target ->
 
-        i = kseg.indexAtWidth segs x
+        matches = []
 
-        found = 0
+        for segs, y in lines
+            for seg, i in segs
+                if seg == target
+                    matches.push [@widthAt(segs i) y]
 
-        for j in i+1...segs.length
-            if segs[j] == target
-                found += 1
-                ⮐  j if found == count
+        matches
 
-        null
-
-    @charFindPosition: lines pos target count till ->
+    # where the cursor lands for a match: on it with f, before it with t,
+    # and for F and T mirrored to the other side
+    @charFindLanding: lines pos till forward ->
 
         [x y] = pos
-        segs   = lines[y]
-        j      = @indexOfCharAfter segs x target count
 
-        ⮐  null if j == null
+        ⮐  [x y] if not till
 
-        if till
-            j = max 0 j-1
+        segs = lines[y]
+        i    = kseg.indexAtWidth segs x
 
-        [kseg.widthAtSegi(segs, j) y]
+        if forward
+            ⮐  null if i <= 0
+            [kseg.widthAtSegi(segs, i-1) y]
+        else
+            [kseg.widthAtSegi(segs, i+1) y]
+
+    # all landing positions, used to highlight every target
+    @charFindLandings: lines target till forward ->
+
+        landings = []
+
+        for m in @charFindMatches lines target
+            p = @charFindLanding lines m till forward
+            landings.push p if p
+
+        landings
+
+    @charFindPosition: lines pos target count till forward=true ->
+
+        [x y] = pos
+
+        found = []
+
+        for m in @charFindMatches lines target
+
+            if forward
+                continue if m[1] < y or (m[1] == y and m[0] <= x)
+            else
+                continue if m[1] > y or (m[1] == y and m[0] >= x)
+
+            p = @charFindLanding lines m till forward
+
+            found.push(p) if p
+
+        ⮐  null if found.length < count
+
+        if forward
+            found[count-1]
+        else
+            found[found.length-count]
 
     @rangeForCharFind: lines x y spec ->
 
-        segs   = lines[y]
-        target = spec.target
-        count  = max 1 (spec.count ? 1)
-        j      = @indexOfCharAfter segs x target count
+        target  = spec.target
+        count   = max 1 (spec.count ? 1)
+        till    = spec.till
+        forward = spec.forward != false
 
-        ⮐  null if j == null
+        pos = @charFindPosition lines [x y] target count till forward
 
-        if spec.till
-            [x y kseg.widthAtSegi(segs, j) y]
+        ⮐  null if pos == null
+
+        # a till endpoint is the landing itself, otherwise the range
+        # reaches one character past the match
+        msegs = lines[pos[1]]
+        mi    = kseg.indexAtWidth msegs pos[0]
+
+        mi += 1 if forward and till
+        mi -= 1 if not forward and till
+
+        if forward
+            if till
+                [x y kseg.widthAtSegi(msegs, mi) pos[1]]
+            else
+                [x y kseg.widthAtSegi(msegs, mi+1) pos[1]]
         else
-            [x y kseg.widthAtSegi(segs, j+1) y]
+            if till
+                [kseg.widthAtSegi(msegs, mi+1) pos[1] x y]
+            else
+                [kseg.widthAtSegi(msegs, mi) pos[1] x y]
 
     # scanning graphemes
 

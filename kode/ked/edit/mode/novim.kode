@@ -163,11 +163,12 @@ function novim
 
     completeFind: target ->
 
-        till = @find == 't'
+        till    = @find in ['t' 'T']
+        forward = @find in ['f' 't']
 
-        @lastFind = { target: target, till: till }
+        @lastFind = { target: target, till: till, forward: forward }
 
-        motion = { kind: 'charFind', target: target, till: till, count: @countNumber() }
+        motion = { kind: 'charFind', target: target, till: till, forward: forward, count: @countNumber() }
 
         if @operator
             @execute { operator: novim.operators[@operator], motion: motion }
@@ -176,11 +177,13 @@ function novim
 
         @reset false
 
-    repeatFind: ->
+    repeatFind: reverse=false ->
 
         ⮐  if not @lastFind
 
-        motion = { kind: 'charFind', target: @lastFind.target, till: @lastFind.till, count: @countNumber(), repeat: true }
+        forward = reverse ? not @lastFind.forward : @lastFind.forward
+
+        motion = { kind: 'charFind', target: @lastFind.target, till: @lastFind.till, forward: forward, count: @countNumber(), repeat: true }
 
         if @operator
             @execute { operator: novim.operators[@operator], motion: motion }
@@ -212,10 +215,15 @@ function novim
             ⮐  'unhandled'
 
         if combo in ['esc' 'escape']
+            @state.setHighlights []
             @resetOrExit()
             ⮐  true
 
-        # f and t wait for the character they should find
+        # any key other than repeating or completing a find
+        # clears the highlights of the last one
+        @state.setHighlights [] if not @find and char not in [',' ';']
+
+        # f, t, F and T wait for the character they should find
         if @find
 
             if char.length == 1
@@ -273,11 +281,13 @@ function novim
 
             if build = novim.motions[char]
                 @complete build
-            else if char in ['f' 't']
+            else if char in ['f' 't' 'F' 'T']
                 @find = char
                 @logPending()
             else if char == ';'
                 @repeatFind()
+            else if char == ','
+                @repeatFind true
             else if area = novim.areas[char]
                 @area = area
                 @logPending()
@@ -287,7 +297,7 @@ function novim
             else
                 @reset()
 
-        else if char in ['f' 't']
+        else if char in ['f' 't' 'F' 'T']
 
             @find = char
             @logPending()
@@ -295,6 +305,10 @@ function novim
         else if char == ';'
 
             @repeatFind()
+
+        else if char == ','
+
+            @repeatFind true
 
         else if novim.operators[char]
 

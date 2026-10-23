@@ -298,20 +298,38 @@ export
 
         lines   = @s.lines
         cursors = @allCursors()
+        forward = spec.forward != false
 
         for cursor, idx in cursors
 
-            pos = motion.charFindPosition lines cursor spec.target n spec.till
+            pos = motion.charFindPosition lines cursor spec.target n spec.till forward
 
             # a repeated t that would not move searches past that target,
             # so ; keeps advancing instead of getting stuck
             if pos and spec.repeat and spec.till and pos[0] == cursor[0] and pos[1] == cursor[1]
-                pos = motion.charFindPosition lines cursor spec.target n+1 spec.till
+                pos = motion.charFindPosition lines cursor spec.target n+1 spec.till forward
 
             if pos
                 cursors[idx] = pos
 
         @setCursors cursors main:@s.main
+
+        @highlightCharFind spec
+
+    # underline every target of the find that just moved the cursor
+    highlightCharFind: spec ->
+
+        spans   = []
+        forward = spec.forward != false
+
+        for p in motion.charFindLandings @s.lines spec.target spec.till forward
+
+            width = kseg.width @s.lines[p[1]]
+
+            if p[0] < width
+                spans.push [p[0] p[1] p[0]+1 p[1]]
+
+        @setHighlights spans
 
     widthBefore: lines pos ->
 

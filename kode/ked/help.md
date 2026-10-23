@@ -159,9 +159,14 @@
     w  b  e                             next word, previous word, end of word
     W  B  E                             same, but a WORD skips punctuation
     f{char}  t{char}  ;                 find a character, till before it, repeat
+    F{char}  T{char}  ,                 the same, searching backwards
     iw  aw  iW  aW                      inner and around word or WORD text objects
     alt+cmd+c   alt+ctrl+c              toggle clipboard sync for yank, delete, put
     "+y  "+p  "*y  "*p                  use the system clipboard register
+
+    f and t search the whole buffer and underline every target while the
+    find is active. ; repeats in the same direction, , in the other one.
+    a count finds the count-th target.
 
     clipboard sync writes yanks and deletes to the clipboard and reads puts
     from it. it is on by default, off in a headless editor. the explicit +
