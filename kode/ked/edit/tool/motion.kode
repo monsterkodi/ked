@@ -112,16 +112,8 @@ function motion
 
         for n in 0...count
 
-            # as in vim, the last step of a word motion with an operator
-            # stops at the end of the line instead of crossing it
             eol = cursors > 1
             pos = @wordStartAfter lines pos eol big
-            log "motion.rangeForWord #{x} #{y} #{eol} #{cursors} #{pos[0]} #{pos[1]}"
-
-        # an exclusive motion that ends in column 0 of a later line
-        # ends at the end of the line before it, so no line is joined
-        # if pos[0] == 0 and pos[1] > y
-        #     pos = [kseg.width(lines[pos[1]-1]) pos[1]-1]
 
         [x y pos[0] pos[1]]
 
@@ -143,7 +135,6 @@ function motion
 
         [pos[0] pos[1] x y]
 
-    # every occurrence of target in the buffer, in reading order
     @charFindMatches: lines target ->
 
         matches = []
@@ -155,8 +146,6 @@ function motion
 
         matches
 
-    # where the cursor lands for a match: on it with f, before it with t,
-    # and for F and T mirrored to the other side
     @charFindLanding: lines pos till forward ->
 
         [x y] = pos
@@ -172,7 +161,6 @@ function motion
         else
             [kseg.widthAtSegi(segs, i+1) y]
 
-    # all landing positions, used to highlight every target
     @charFindLandings: lines target till forward ->
 
         landings = []
@@ -252,8 +240,6 @@ function motion
 
     @widthAt: segs i -> kseg.widthAtSegi segs i
 
-    # start of the next word, crossing lines and skipping empty ones
-    # with eol the motion stops at the end of the current line
     @wordStartAfter: lines pos eol=false big=false ->
 
         [x y] = pos
@@ -288,7 +274,6 @@ function motion
 
         [kseg.width(segs) y]
 
-    # position just after the last character of the next word
     @wordEndAfter: lines pos big=false ->
 
         [x y] = pos
@@ -319,10 +304,8 @@ function motion
 
             ⮐  [@widthAt(segs j+1) y] if j > i
 
-            # already on the last character of this word
             i = j+1
 
-    # start of the previous word, crossing lines and skipping empty ones
     @wordStartBefore: lines pos big=false ->
 
         [x y] = pos
@@ -381,8 +364,6 @@ function motion
             'WORD' ➜ @rangeForWordObject lines x y count (area == 'inner') true
             else   ➜ @rangeForPairObject lines x y spec.target (area == 'inner')
 
-    # words
-
     @wordBoundsAt: segs i big=false ->
 
         cat = @wordCategory segs[i] big
@@ -409,8 +390,6 @@ function motion
             s -= 1
         s
 
-    # the start of the next word after an exclusive index,
-    # crossing lines but never part of a word
     @nextWordAfterIndex: lines y i big=false ->
 
         while true
@@ -441,13 +420,11 @@ function motion
 
         if @wordCategory(segs[i], big) == 'ws'
 
-            # on white space the inner object is the white space run
             if inner
                 s = @leadingWsStart segs i
                 e = @trailingWsEnd segs i
                 ⮐  [@widthAt(segs s) y @widthAtOrEnd(segs e) y]
 
-            # around white space means the next word on this line
             next = @nextWordAfterIndex lines y i big
 
             if not next
@@ -479,8 +456,6 @@ function motion
         if not around
             ⮐  [@widthAt(lines[firstLine] firstStart) firstLine @widthAt(lines[lastLine] lastEnd) lastLine]
 
-        # around includes the white space after the word,
-        # or the white space before it when the word ends the line
         lastSegs = lines[lastLine]
         tEnd     = @trailingWsEnd lastSegs lastEnd
 
@@ -491,8 +466,6 @@ function motion
         lStart    = @leadingWsStart firstSegs firstStart
 
         [@widthAt(firstSegs lStart) firstLine @widthAtOrEnd(lastSegs lastEnd) lastLine]
-
-    # quoted strings and bracket pairs
 
     @rangeForPairObject: lines x y target inner ->
 
@@ -549,7 +522,6 @@ function motion
                 chosen = pair
                 break
 
-        # a cursor before a string takes the next pair
         if not chosen
             for pair in pairs
                 if pair[0] > xi
@@ -563,7 +535,6 @@ function motion
         if inner
             ⮐  [@widthAt(segs o+1) y @widthAt(segs c) y]
 
-        # around takes the trailing white space, or the leading one
         tEnd = @trailingWsEnd segs c+1
 
         if tEnd > c+1
@@ -585,17 +556,12 @@ function motion
 
         chars
 
-    # the opened and closed spans of the pair around or at a position,
-    # pairs on one line come from the same parser that highlights them,
-    # the bracket scan finds pairs across lines
-
     @pairSpansForPosition: lines x y open ->
 
         spans = belt.pairSpansAtPosition lines [x y] open
 
         ⮐  spans if spans
 
-        # a cursor before a pair takes the next one
         for ch in @flatChars lines
             [c li w] = ch
 

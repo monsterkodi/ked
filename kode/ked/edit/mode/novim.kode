@@ -113,8 +113,6 @@ function novim
 
         novim.clipboardSync = enabled
 
-        log 'novim clipboard ▸' (enabled ? 'on' : 'off')
-
         enabled
 
     reset: ->
@@ -257,7 +255,7 @@ function novim
 
         ⮐  true if char.length != 1 # swallow every other non text key
         
-        if @prefix # gg and // 
+        if @prefix # gg 
             prefix  = @prefix
             @prefix = null
 
