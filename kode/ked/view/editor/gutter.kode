@@ -40,6 +40,23 @@ function gutter extends view
         
         @gitChanges = {}
         
+        post.on 'mode.start' @onModeStart
+        post.on 'mode.stop'  @onModeStop
+        
+    onModeStart: state name =>
+    
+        ⮐ if state != @state
+        if name == 'novim'
+            @setColor 'cursor_main'     theme.novim.cursor.main
+            @setColor 'cursor_multi'    theme.novim.cursor.multi
+
+    onModeStop: state name =>
+    
+        ⮐ if state != @state
+        if name == 'novim'
+            @setColor 'cursor_main'     theme.cursor.main
+            @setColor 'cursor_multi'    theme.cursor.multi
+        
     # ██     ██   ███████   ███   ███   ███████  ████████
     # ███   ███  ███   ███  ███   ███  ███       ███     
     # █████████  ███   ███  ███   ███  ███████   ███████ 

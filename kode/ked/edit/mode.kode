@@ -84,6 +84,8 @@ function mode
         @active[state.name] ?= []
         @active[state.name].push new mode.modes[name] state
         
+        post.emit 'mode.start' state name
+        
     @stop: state name ->
         
         m = @get state name
@@ -91,6 +93,8 @@ function mode
         @active[state.name].splice @active[state.name].indexOf(m) 1
         
         m.stop() if m.stop is func
+        
+        post.emit 'mode.stop' state name
         
     @toggle: state name ->
         
