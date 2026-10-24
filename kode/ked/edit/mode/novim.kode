@@ -220,19 +220,20 @@ function novim
 
         if combo in ['esc' 'escape']
             @state.setHighlights []
-            @resetOrExit()
-            ⮐  true
+            @reset()
+            ⮐ true
 
-        @state.setHighlights [] if not @find and char not in [',' ';' 'n' 'N'] and not (char.length == 1 and +char >= 0 and +char <= 9)
+        if not @find and char not in ',;nN0123456789'
+            log "reset highlights #{char}" 
+            @state.setHighlights [] 
 
         if @find
-
+            # log "novim.find #{char} -- #{event.char} #{combo} #{key}" 
             if char.length == 1
                 @completeFind char
-            else
+            else if key != 'shift'
                 @reset()
-
-            ⮐  true
+            ⮐ true
 
         if arrow = novim.arrows[char]
             char = arrow
@@ -262,13 +263,7 @@ function novim
 
             if prefix == 'g' and char == 'g'
                 @execute { operator: 'move', motion: { kind: 'bof', count: @countNumber() } }
-                @reset()
-            else if prefix == '/' and char == '/'
-                log "VINDER.SHOW"
-                post.emit 'vinder.show'
-                @reset()
-            else
-                @reset()
+            @reset()
 
             ⮐  true
 
@@ -345,6 +340,7 @@ function novim
                     @reset()
                 else
                     @count += char
+                    @logPending()
 
         # swallow all other input until more commands are implemented
         true
