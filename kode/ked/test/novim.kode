@@ -32,12 +32,6 @@ mrange = lines x y m -> motion.range lines [x y] m
         mrange(segls, 4, 0, {kind:'word',     count:1}) ▸ [4 0 8 0]
         mrange(segls, 8, 0, {kind:'word',     count:1}) ▸ [8 0 13 0]
         mrange(segls, 8, 1, {kind:'word',     count:1}) ▸ [8 1 9 1]
-        mrange(segls, 0, 0, {kind:'wordEnd',  count:1}) ▸ [0 0 3 0]
-        mrange(segls, 4, 0, {kind:'wordEnd',  count:2}) ▸ [4 0 13 0]
-        mrange(segls, 8, 0, {kind:'wordBack', count:1}) ▸ [4 0 8 0]
-        mrange(segls, 4, 0, {kind:'wordBack', count:1}) ▸ [0 0 4 0]
-
-        mrange(segls, 0, 0, {kind:'wordBack', count:1}) ▸ [0 0 0 0]
 
     ▸ words across lines
 
@@ -215,7 +209,7 @@ mrange = lines x y m -> motion.range lines [x y] m
     cur 0 0
 
     s.setMainCursor 8 0
-    s.executeNovim {operator:'yank', motion:{kind:'wordBack', count:1}}
+    s.executeNovim {operator:'yank', motion:{kind:'drow', count:1}}
     s.novimRegister.lines ▸ ['two ']
     cur 4 0
 

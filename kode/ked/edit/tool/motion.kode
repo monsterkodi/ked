@@ -10,9 +10,9 @@
 
         char charBack   count characters after or before the cursor
         word            to the start of the count-th word after
-        wordEnd         to the end of the count-th word after
-        wordBack        to the start of the count-th word before
-        wordBig wordEndBig wordBackBig    the same, but a WORD skips punctuation
+        wend            to the end of the count-th word after
+        drow            to the start of the count-th word before
+        WORD WEND DROW  as above, but skips punctuation
         charFind        to the count-th occurrence of a character in the buffer,
                         or just before it, forwards or backwards
         bol eol         to the start or end of the line
@@ -61,31 +61,31 @@ function motion
         merged
 
     @range: lines pos spec ->
-
         ⮐  null if empty lines
 
         [x y] = pos
 
+        log "MOTION RAG #{lines.length} #{x} #{y} #{spec.kind}" spec
         y     = clamp 0 lines.length-1 y
         x     = clamp 0 kseg.width(lines[y]) x
         count = max 1 (spec.count ? 1)
 
         switch spec.kind
-            'char'     ➜ @rangeForChars    lines x y count
-            'charBack' ➜ @rangeForCharsBack lines x y count
-            'word'     ➜ @rangeForWord     lines x y count
-            'wordEnd'  ➜ @rangeForWordEnd  lines x y count
-            'wordBack' ➜ @rangeForWordBack lines x y count
-            'wordBig'     ➜ @rangeForWord     lines x y count true
-            'wordEndBig'  ➜ @rangeForWordEnd  lines x y count true
-            'wordBackBig' ➜ @rangeForWordBack lines x y count true
-            'charFind' ➜ @rangeForCharFind lines x y spec
-            'bol'      ➜ @rangeForBol      lines x y
-            'eol'      ➜ @rangeForEol      lines x y
-            'line'     ➜ @rangeForLines    lines y y+count-1
-            'lineDown' ➜ @rangeForLines    lines y y+count
-            'lineUp'   ➜ @rangeForLines    lines y-count y
-            'textObject' ➜ @rangeForTextObject lines x y spec
+            'char'          ➜ @rangeForChars        lines x y count
+            'charBack'      ➜ @rangeForCharsBack    lines x y count
+            'word'          ➜ @rangeForWord         lines x y count
+            'wend'          ➜ @rangeForWordEnd      lines x y count
+            'drow'          ➜ @rangeForWordBack     lines x y count
+            'WORD'          ➜ @rangeForWord         lines x y count true
+            'WEND'          ➜ @rangeForWordEnd      lines x y count true
+            'DROW'          ➜ @rangeForWordBack     lines x y count true
+            'charFind'      ➜ @rangeForCharFind     lines x y spec
+            'bol'           ➜ @rangeForBol          lines x y
+            'eol'           ➜ @rangeForEol          lines x y
+            'line'          ➜ @rangeForLines        lines y y+count-1
+            'lineDown'      ➜ @rangeForLines        lines y y+count
+            'lineUp'        ➜ @rangeForLines        lines y-count y
+            'textObject'    ➜ @rangeForTextObject   lines x y spec
 
     # ranges for a single line
 
