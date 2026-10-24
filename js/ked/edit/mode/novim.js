@@ -320,7 +320,7 @@ novim = (function ()
         }
         if (_k_.in(combo,['esc','escape']))
         {
-            this.state.setHighlights([])
+            this.state.clearCursorsHighlightsAndSelections()
             this.reset()
             return true
         }

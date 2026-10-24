@@ -105,7 +105,6 @@ handleKey = key event -> # will be bound to state
         'alt+n'         'alt+z'             ➜ ⮐  @toggleMode 'novim'
         'alt+r'                             ➜ ⮐  @toggleMode 'record'
         'alt+u'                             ➜ ⮐  @toggleMode 'uniko'
-        'alt+;'                             ➜ ⮐  @toggleMode 'vimple'
         'alt+3'                             ➜ ⮐  @toggleMode 'salter'
 
         'alt+cmd+c'     'alt+ctrl+c'        ➜ ⮐  mode.modes.novim?.toggleClipboard()

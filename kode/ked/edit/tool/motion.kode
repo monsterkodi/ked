@@ -59,6 +59,7 @@ function motion
         merged
 
     @range: lines pos spec ->
+    
         ⮐  null if empty lines
 
         [x y] = pos
@@ -70,10 +71,10 @@ function motion
         switch spec.kind
             'char'          ➜ @rangeForChars        lines x y count
             'charBack'      ➜ @rangeForCharsBack    lines x y count
-            'word'          ➜ @rangeForWord         lines x y count
+            'word'          ➜ @rangeForWord         lines x y count false spec.cursors
             'wend'          ➜ @rangeForWordEnd      lines x y count
             'drow'          ➜ @rangeForWordBack     lines x y count
-            'WORD'          ➜ @rangeForWord         lines x y count true
+            'WORD'          ➜ @rangeForWord         lines x y count true  spec.cursors
             'WEND'          ➜ @rangeForWordEnd      lines x y count true
             'DROW'          ➜ @rangeForWordBack     lines x y count true
             'charFind'      ➜ @rangeForCharFind     lines x y spec
@@ -83,8 +84,6 @@ function motion
             'lineDown'      ➜ @rangeForLines        lines y y+count
             'lineUp'        ➜ @rangeForLines        lines y-count y
             'textObject'    ➜ @rangeForTextObject   lines x y spec
-
-    # ranges for a single line
 
     @rangeForChars: lines x y count ->
         width = kseg.width lines[y]
@@ -107,9 +106,7 @@ function motion
         endLine   = clamp 0 lines.length-1 endLine
         [0 startLine kseg.width(lines[endLine]) endLine]
 
-    # ranges for word motions
-
-    @rangeForWord: lines x y count big=false ->
+    @rangeForWord: lines x y count big cursors ->
 
         pos = [x y]
 
@@ -117,12 +114,14 @@ function motion
 
             # as in vim, the last step of a word motion with an operator
             # stops at the end of the line instead of crossing it
-            pos = @wordStartAfter lines pos (n == count-1) big
+            eol = cursors > 1
+            pos = @wordStartAfter lines pos eol big
+            log "motion.rangeForWord #{x} #{y} #{eol} #{cursors} #{pos[0]} #{pos[1]}"
 
         # an exclusive motion that ends in column 0 of a later line
         # ends at the end of the line before it, so no line is joined
-        if pos[0] == 0 and pos[1] > y
-            pos = [kseg.width(lines[pos[1]-1]) pos[1]-1]
+        # if pos[0] == 0 and pos[1] > y
+        #     pos = [kseg.width(lines[pos[1]-1]) pos[1]-1]
 
         [x y pos[0] pos[1]]
 

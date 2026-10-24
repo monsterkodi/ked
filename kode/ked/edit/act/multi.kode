@@ -121,30 +121,15 @@ export
                 'ind'       ➜ c[0] = belt.numIndent(line)
                 'ind_eol'   ➜ ind  = belt.numIndent(line); c[0] = c[0] < ind ? ind : kseg.width(line)
                 'ind_bol'   ➜ ind  = belt.numIndent(line); c[0] = c[0] > ind ? ind : 0
-                'word'      
-                    r = motion.range(lines c {kind:'word' count:opt.count})
-                    c[0] = if r[3] != c[1] then kseg.width(lines[c[1]]) else r[2] 
-                    c[1] = if r[3] != c[1] then c[1] else r[3]
-                'wend'      
-                    r = motion.range(lines c {kind:'wend'  count:opt.count})
-                    c[0] = if r[3] != c[1] then kseg.width(lines[c[1]]) else r[2]
-                    c[1] = if r[3] != c[1] then c[1] else r[3]
-                'WORD'      
-                    r = motion.range(lines c {kind:'WORD'  count:opt.count})
-                    c[0] = if r[3] != c[1] then kseg.width(lines[c[1]]) else r[2] 
-                    c[1] = if r[3] != c[1] then c[1] else r[3]
-                'WEND'      
-                    r = motion.range(lines c {kind:'WEND' count:opt.count}) 
-                    c[0] = if r[3] != c[1] then kseg.width(lines[c[1]]) else r[2] 
-                    c[1] = if r[3] != c[1] then c[1] else r[3]
-                'drow'      
-                    r = motion.range(lines c {kind:'drow' count:opt.count}) 
-                    c[0] = if r[1] != c[1] then 0 else r[0] 
-                    c[1] = if r[1] != c[1] then c[1] else r[1]
-                'DROW'      
-                    r = motion.range(lines c {kind:'DROW' count:opt.count}) 
-                    c[0] = if r[1] != c[1] then 0 else r[0] 
-                    c[1] = if r[1] != c[1] then c[1] else r[1]
+                'word' 'wend'
+                'WORD' 'WEND'
+                    r = motion.range(lines c {kind:dir count:opt.count cursors:cursors.length})
+                    c[0] = r[2]
+                    c[1] = r[3]
+                'drow' 'DROW'    
+                    r = motion.range(lines c {kind:dir count:opt.count cursors:cursors.length})
+                    c[0] = r[0]
+                    c[1] = r[1]
 
         main   = @s.main
         adjust = opt.adjust ? 'topBotDelta'

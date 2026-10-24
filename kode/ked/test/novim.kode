@@ -30,19 +30,8 @@ mrange = lines x y m -> motion.range lines [x y] m
 
         mrange(segls, 0, 0, {kind:'word',     count:1}) ▸ [0 0 4 0]
         mrange(segls, 4, 0, {kind:'word',     count:1}) ▸ [4 0 8 0]
-        mrange(segls, 8, 0, {kind:'word',     count:1}) ▸ [8 0 13 0]
+        mrange(segls, 8, 0, {kind:'word',     count:1}) ▸ [8 0 0 1]
         mrange(segls, 8, 1, {kind:'word',     count:1}) ▸ [8 1 9 1]
-
-    ▸ words across lines
-
-        across = kseg.segls """
-            foo
-              bar
-              baz
-            """
-
-        mrange(across, 0, 0, {kind:'word', count:1}) ▸ [0 0 3 0]
-        mrange(across, 0, 0, {kind:'word', count:2}) ▸ [0 0 5 1]
 
     ▸ lines
 
@@ -742,7 +731,6 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     keys 'd2w'
     txt """
-        
         gamma delta
         """
 

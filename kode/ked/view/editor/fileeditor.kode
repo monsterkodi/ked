@@ -34,7 +34,6 @@ function fileeditor extends editor
             'unype'   # temporary modes
             'novim' 
             'salter' 
-            'vimple' 
             'uniko' 
             ]
         

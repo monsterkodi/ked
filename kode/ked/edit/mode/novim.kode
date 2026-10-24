@@ -222,7 +222,7 @@ function novim
             ⮐  'unhandled'
 
         if combo in ['esc' 'escape']
-            @state.setHighlights []
+            @state.clearCursorsHighlightsAndSelections()
             @reset()
             ⮐ true
 
