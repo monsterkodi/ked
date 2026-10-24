@@ -10,8 +10,8 @@
 
 kxk = {}
 
-use ./kxk ◆ post slash stash watch matchr immutable linediff karg krzl pretty profile keyinfo events kstr kseg kermit scooter pepe kpos util sds os nfs walkdir noon
-for exp in "post slash stash watch matchr immutable linediff karg krzl pretty profile keyinfo events kstr kseg kermit scooter pepe kpos util sds os nfs walkdir noon".split(' ') ➜ kxk[exp] = eval exp
+use ./kxk ◆ post slash stash watch matchr immutable linediff karg krzl pretty profile keyinfo clip events kstr kseg kermit scooter pepe kpos util sds os nfs walkdir noon
+for exp in "post slash stash watch matchr immutable linediff karg krzl pretty profile keyinfo clip events kstr kseg kermit scooter pepe kpos util sds os nfs walkdir noon".split(' ') ➜ kxk[exp] = eval exp
     
 for exp,utl of util ➜ kxk[exp] = utl # export all utility functions
     

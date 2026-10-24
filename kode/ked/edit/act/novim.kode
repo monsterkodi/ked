@@ -4,10 +4,9 @@
 # ███  ████  ███   ███     ███     ███  ███ █ ███  
 # ███   ███   ███████       █      ███  ███   ███  
 
-use ../../../kxk ▪ kseg
-use ../../../kxk ◆ clip
-use ../mode    ◆ novim
-use ../tool    ◆ belt motion
+use ../../../kxk ▪ kseg clip
+use ../mode      ◆ novim
+use ../tool      ◆ belt motion
 
 export
 
@@ -19,7 +18,7 @@ export
             'delete'      ➜ @applyChange cmd
             'yank'        ➜ @yankByMotion       cmd.motion  cmd.register
             'put'         ➜ @putRegister        cmd.count   cmd.after cmd.register
-            'move'        ➜ @moveByMotion       cmd.motion
+            'move'        ➜ @moveByMotion       cmd.motion  cmd.count
             'searchNext'  ➜ @jumpByHighlight    cmd.count true
             'searchPrev'  ➜ @jumpByHighlight    cmd.count false
             'undo'        ➜ @undoCommand        cmd.count
@@ -115,8 +114,6 @@ export
             continue if belt.isEmptyRange(rng) and not motion.isLinewise(spec)
 
             rngs.push rng
-
-        # log 'novim ranges ▸' rngs
 
         ⮐  if empty rngs
 
@@ -235,47 +232,16 @@ export
         @setLines newLines
         @setCursors newPosl
 
-    moveByMotion: spec ->
+    moveByMotion: spec count=1->
     
-        n = max 1 (spec.count ? 1)
-        log "novim.move #{n}" spec
+        n = spec.count ? count
 
-        if spec.kind in ['word' 'wordBack' 'wordEnd' 'wordBig' 'wordBackBig' 'wordEndBig']
-            @moveByWordMotion spec.kind n
-            @clampCursorsToLines() # needed???
-        else if spec.kind == 'charFind'
+        if spec.kind == 'charFind'
             @moveByCharFind spec n
-            @clampCursorsToLines() #needed???
         else
             for i in 1..n
+                # we need to implement ['word' 'drow' 'wend' 'WORD' 'DROW' 'WEND']
                 @moveCursors spec.kind
-
-    moveByWordMotion: kind count ->
-
-        n       = max 1 (count ? 1)
-        lines   = @s.lines
-        cursors = @allCursors()
-        big     = kind in ['wordBig' 'wordBackBig' 'wordEndBig']
-
-        for cursor, idx in cursors
-
-            pos = [cursor[0] cursor[1]]
-
-            for i in 0...n
-
-                if kind in ['word' 'wordBig']
-                    pos = motion.wordStartAfter lines pos false big
-                else if kind in ['wordBack' 'wordBackBig']
-                    pos = motion.wordStartBefore lines pos big
-                else
-                    pos = motion.wordEndAfter lines pos big
-
-            if kind in ['wordEnd' 'wordEndBig']
-                pos = @widthBefore lines pos
-
-            cursors[idx] = pos
-
-        @setCursors cursors main:@s.main
 
     moveByCharFind: spec n ->
 

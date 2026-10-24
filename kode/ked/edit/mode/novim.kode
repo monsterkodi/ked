@@ -9,7 +9,7 @@ swallows text input while active and maps keys
 to actions which are executed by edit▸act▸novim
 ###
 
-use ../../theme ◆ color
+use ../../theme  ◆ color
 use ../../../kxk ◆ post
 use ../../theme  ◆ theme
 
@@ -31,7 +31,7 @@ function novim
 
     @textObjects:
         w: 'word'
-        W: 'wordBig'
+        W: 'WORD'
         '"': '"'
         "'": "'"
         '(': '('
@@ -44,21 +44,21 @@ function novim
         B: '{'
 
     @commands: {
-        D:        -> { operator: 'delete'                    motion: { kind: 'eol'           } }
-        x:      n -> { operator: 'delete'       count: n     motion: { kind: 'char'          } }
-        X:      n -> { operator: 'delete'       count: n     motion: { kind: 'charBack'      } }
-        h:      n -> { operator: 'move'         count: n     motion: { kind: 'left'          } }
-        j:      n -> { operator: 'move'         count: n     motion: { kind: 'down'          } }
-        k:      n -> { operator: 'move'         count: n     motion: { kind: 'up'            } }
-        l:      n -> { operator: 'move'         count: n     motion: { kind: 'right'         } }
-        w:      n -> { operator: 'move'         count: n     motion: { kind: 'word'          } }
-        b:      n -> { operator: 'move'         count: n     motion: { kind: 'wordBack'      } }
-        e:      n -> { operator: 'move'         count: n     motion: { kind: 'wordEnd'       } }
-        W:      n -> { operator: 'move'         count: n     motion: { kind: 'wordBig'       } }
-        B:      n -> { operator: 'move'         count: n     motion: { kind: 'wordBackBig'   } }
-        E:      n -> { operator: 'move'         count: n     motion: { kind: 'wordEndBig'    } }
-        '$':    n -> { operator: 'move'         count: n     motion: { kind: 'eol'           } }
-        G:      n -> { operator: 'move'         count: n     motion: { kind: 'eof'           } }
+        D:        -> { operator: 'delete'                    motion: { kind: 'eol'      } }
+        x:      n -> { operator: 'delete'       count: n     motion: { kind: 'char'     } }
+        X:      n -> { operator: 'delete'       count: n     motion: { kind: 'charBack' } }
+        h:      n -> { operator: 'move'         count: n     motion: { kind: 'left'     } }
+        j:      n -> { operator: 'move'         count: n     motion: { kind: 'down'     } }
+        k:      n -> { operator: 'move'         count: n     motion: { kind: 'up'       } }
+        l:      n -> { operator: 'move'         count: n     motion: { kind: 'right'    } }
+        w:      n -> { operator: 'move'         count: n     motion: { kind: 'word'     } }
+        b:      n -> { operator: 'move'         count: n     motion: { kind: 'drow'     } }
+        e:      n -> { operator: 'move'         count: n     motion: { kind: 'wend'     } }
+        W:      n -> { operator: 'move'         count: n     motion: { kind: 'WORD'     } }
+        B:      n -> { operator: 'move'         count: n     motion: { kind: 'DROW'     } }
+        E:      n -> { operator: 'move'         count: n     motion: { kind: 'WEND'     } }
+        '$':    n -> { operator: 'move'         count: n     motion: { kind: 'eol'      } }
+        G:      n -> { operator: 'move'         count: n     motion: { kind: 'eof'      } }
         n:      n -> { operator: 'searchNext'   count: n }
         N:      n -> { operator: 'searchPrev'   count: n }
         p:      n -> { operator: 'put'          count: n     after: true  }
@@ -73,11 +73,11 @@ function novim
         d:      n -> { kind: 'line'             count: n }
         y:      n -> { kind: 'line'             count: n }
         w:      n -> { kind: 'word'             count: n }
-        e:      n -> { kind: 'wordEnd'          count: n }
-        b:      n -> { kind: 'wordBack'         count: n }
-        W:      n -> { kind: 'wordBig'          count: n }
-        E:      n -> { kind: 'wordEndBig'       count: n }
-        B:      n -> { kind: 'wordBackBig'      count: n }
+        e:      n -> { kind: 'wend'             count: n }
+        b:      n -> { kind: 'drow'             count: n }
+        W:      n -> { kind: 'WORD'             count: n }
+        E:      n -> { kind: 'WEND'             count: n }
+        B:      n -> { kind: 'DROW'             count: n }
         h:      n -> { kind: 'charBack'         count: n }
         l:      n -> { kind: 'char'             count: n }
         j:      n -> { kind: 'lineDown'         count: n }
@@ -214,13 +214,8 @@ function novim
             @resetOrExit()
             ⮐  true
 
-        # any key other than repeating or completing a find clears the
-        # highlights of the last one; n and N jump through them,
-        # digits start a count that goes with the next command and
-        # reset after it, so they keep them too
         @state.setHighlights [] if not @find and char not in [',' ';' 'n' 'N'] and not (char.length == 1 and +char >= 0 and +char <= 9)
 
-        # f, t, F and T wait for the character they should find
         if @find
 
             if char.length == 1
