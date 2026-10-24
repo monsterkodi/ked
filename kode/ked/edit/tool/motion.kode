@@ -236,19 +236,13 @@ function motion
             else
                 [kseg.widthAtSegi(msegs, mi) pos[1] x y]
 
-    # scanning graphemes
-
     @category: seg ->
 
-        if empty seg
-            ⮐  'empty'
-        if /\s+/.test seg
-            ⮐  'ws'
-        if /\w+/.test seg
-            ⮐  'word'
+        if empty seg       ➜ ⮐ 'empty'
+        if /\s+/.test seg  ➜ ⮐ 'ws'
+        if /\w+/.test seg  ➜ ⮐ 'word'
         'punct'
 
-    # a WORD is anything without whitespace, punctuation included
     @wordCategory: seg big ->
 
         ⮐  'empty' if empty seg
@@ -357,9 +351,6 @@ function motion
 
             ⮐  [@widthAt(segs i) y]
 
-    # text objects
-    # the cursor can sit one past the last character,
-    # text objects then act on the last character of the line
     @objectX: lines y x ->
         segs  = lines[y]
         width = kseg.width segs
@@ -387,9 +378,9 @@ function motion
         x     = @objectX lines y x
 
         switch spec.target
-            'word'    ➜ @rangeForWordObject lines x y count (area == 'inner') false
-            'wordBig' ➜ @rangeForWordObject lines x y count (area == 'inner') true
-            else      ➜ @rangeForPairObject lines x y spec.target (area == 'inner')
+            'word' ➜ @rangeForWordObject lines x y count (area == 'inner') false
+            'WORD' ➜ @rangeForWordObject lines x y count (area == 'inner') true
+            else   ➜ @rangeForPairObject lines x y spec.target (area == 'inner')
 
     # words
 
