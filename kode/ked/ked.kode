@@ -19,6 +19,7 @@ use ./view/editor ◆ fileeditor
 use ./view/screen ◆ screen ttio
 use ./view/menu   ◆ context menu macro finder searcher differ vinder
 use ./view/colmns ◆ browse dircol funcol quicky droop saveas
+use                 child_process
 
 function KED
 
@@ -146,6 +147,8 @@ function KED
         ○ ked.runHeadless() if ked.args.headless or ked.args.colors
         
         ked
+
+    @restart: => log "KED.restart"
         
     # ███   ███  ████████   ███████   ███████    ███      ████████   ███████   ███████
     # ███   ███  ███       ███   ███  ███   ███  ███      ███       ███       ███     
@@ -315,7 +318,27 @@ function KED
                 'delete' ➜ @newFile() # todo: load current text into new file
                 'change'
                 'rename' ➜ @reloadFile()
-        
+        ⮐ if KED.building
+        # log "change" event
+        if event.change == 'rename' and slash.ext(event.path) == 'kode'        
+            if event.path.startsWith slash.path(◆dir '../../kode/ked')
+                KED.building = true
+                log 'ked: REBUILD'
+                kk = slash.path ◆dir '../../kk'
+                child_process.exec "#{kk} -k" {shell:true} (err stdout stderr) -> 
+                    if empty err
+                        log 'ked TEST'
+                        child_process.exec "#{kk} -t ked" {shell:true} (err stdout stderr) -> 
+                            if empty err
+                                log 'ked RESTART'
+                                KED.restart()
+                            else
+                                log err stdout stderr
+                            KED.building = false
+                    else
+                        log err stdout stderr
+                        KED.building = false
+            
     onGitStatus: => git.diff @currentFile
         
     # ████████   ████████  ███       ███████    ███████   ███████  

@@ -19,15 +19,19 @@ export
             'yank'        ➜ @yankByMotion       cmd.motion  cmd.register
             'put'         ➜ @putRegister        cmd.count   cmd.after cmd.register
             'move'        ➜ @moveByMotion       cmd.motion  cmd.count
-            'searchNext'  ➜ @jumpByHighlight    cmd.count true
-            'searchPrev'  ➜ @jumpByHighlight    cmd.count false
+            'searchNext'  ➜ @jumpByHighlight    cmd.count cmd.text true
+            'searchPrev'  ➜ @jumpByHighlight    cmd.count cmd.text false
             'undo'        ➜ @undoCommand        cmd.count
             'repeat'      ➜ @repeatChange       cmd.count
             else          ➜ log 'novim unknown operator ▸' cmd.operator
 
-    jumpByHighlight: count=1 forward=true ->
+    jumpByHighlight: count text forward ->
 
-        ⮐ if empty @s.highlights
+        if empty @s.highlights
+            if valid text
+                @highlightText text
+            else
+                ⮐ 
 
         pos = @mainCursor()
 
@@ -55,6 +59,7 @@ export
             pos = [target[0] target[1]]
 
         @setMainCursor pos
+        @highlightText text
 
     applyChange: cmd ->
 

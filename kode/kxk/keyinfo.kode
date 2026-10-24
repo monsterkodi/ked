@@ -19,12 +19,11 @@ class Keyinfo
             short: @short(combo)
         info
     
-    @modifierNames: ['shift' 'ctrl' 'alt' 'command'] 
+    @modifierNames: ['shift' 'ctrl' 'alt' 'command' 'cmd'] 
     @modifierChars: ['⌂' '⌃' '⌥' '⌘']
     
     @iconKeyNames:  ['shift' 'ctrl' 'alt' 'command' 'backspace' 'delete' 'home' 'end' 'page up' 'page down' 'return' 'enter' 'up' 'down' 'left' 'right' 'tab'  'space' 'click']
     @iconKeyChars:  ['⌂'     '⌃'    '⌥'   '⌘'       '⌫'         '⌦'      '↖'    '↘'   '⇞'       '⇟'         '↩'      '↩'     '▴'  '▾'    '◂'    '▸'     '⤠'    '␣'     '⍝']
-    # @iconKeyChars:['⌂'     '⌃'    '⌥'   '⌘'       '⌫'         '⌦'      '↖'    '↘'   '⇞'       '⇟'         '↩'      '↩'     '↑'  '↓'    '←'    '→'     '⤠'    '␣'     '⍝']
 
     # ▶▲▼◀ ▸▴▾◂
     @forCombo: combo ->
@@ -42,7 +41,7 @@ class Keyinfo
         combo: combo 
         char:  char
     
-    @isModifier: keyname -> keyname in @modifierNames
+    @isModifier: key-> key in @modifierNames
 
     @modifiersForEvent: event -> 
 

@@ -10,7 +10,7 @@ to actions which are executed by edit▸act▸novim
 ###
 
 use ../../theme  ◆ color
-use ../../../kxk ◆ post
+use ../../../kxk ◆ post keyinfo
 use ../../theme  ◆ theme
 
 function novim
@@ -59,8 +59,8 @@ function novim
         'E':    n -> { operator: 'move'         count: n     motion: { kind: 'WEND'     } }
         '$':    n -> { operator: 'move'         count: n     motion: { kind: 'eol'      } }
         'G':    n -> { operator: 'move'         count: n     motion: { kind: 'eof'      } }
-        'n':    n -> { operator: 'searchNext'   count: n }
-        'N':    n -> { operator: 'searchPrev'   count: n }
+        'n':    n -> { operator: 'searchNext'   count: n     text:  novim.lastVind }
+        'N':    n -> { operator: 'searchPrev'   count: n     text:  novim.lastVind }
         'p':    n -> { operator: 'put'          count: n     after: true  }
         'P':    n -> { operator: 'put'          count: n     after: false }
         'u':    n -> { operator: 'undo'         count: n }
@@ -84,11 +84,15 @@ function novim
         'k':    n -> { kind: 'lineUp'           count: n }
         }
 
+    @lastVind: ''
+    
     @: @state ->
 
         @name     = 'novim'
         @lastFind = null
         @reset()
+        
+        post.on 'vinder.text' (text) => novim.lastVind = text
 
     @clipboardSync: null # on in ked, off in a headless editor
 
@@ -224,7 +228,7 @@ function novim
             @reset()
             ⮐ true
 
-        if not @find and char not in ',;nN0123456789'
+        if not @find and char not in ',;nN0123456789' and key not in keyinfo.modifierNames
             @state.setHighlights [] 
 
         if @find
@@ -327,7 +331,8 @@ function novim
                 @logPending()
     
             char == '/'
-                post.emit 'vinder.show'
+            
+                post.emit 'vinder.show' 
                 @reset()
     
             command = novim.commands[char]

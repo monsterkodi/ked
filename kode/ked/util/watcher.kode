@@ -107,7 +107,7 @@ function watcher
                 if @fileStats[path]?   # node reports a change because the atimeMs changes :(
                     if @fileStats[path].size == exists.size and @fileStats[path].mtimeMs == exists.mtimeMs
                         ⮐  # assume the file didn't change when the size and modification time is unchanged
-
+            ⮐ if slash.file(path) == 'ked.log'
             post.emit 'file.change' path:path change:change   watcher:@
         else
             post.emit 'file.change' path:path change:'remove' watcher:@

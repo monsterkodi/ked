@@ -44,7 +44,6 @@ function vinder extends view
     show: =>
         
         text = @state.textOfSelectionOrWordAtCursor()
-        log "Vinder.show '#{text}'"
 
         @input.show()
         
@@ -53,6 +52,7 @@ function vinder extends view
             @input.selectAll()
             @input.state.moveCursors 'eol'
 
+        post.emit 'vinder.text' text
         @state.highlightText text
         super()
         @input.grabFocus()
@@ -82,6 +82,7 @@ function vinder extends view
                     @state.highlightText text
                 else
                     @state.setHighlights []
+                post.emit 'vinder.text' text
 
             'cancel'
             'escape'

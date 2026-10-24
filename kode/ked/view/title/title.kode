@@ -45,6 +45,7 @@ function title extends view
         @fileoffs = []
         
         @novimText = ''
+        @vinderText = ''
         
         @pointerType = 'pointer'
         
@@ -65,10 +66,9 @@ function title extends view
         @filepos.on    'action' @onFileposAction
         
         post.on 'title.filepos' @onTitleFilepos
-        post.on 'title.novim'   @onTitleNovim
+        post.on 'title.novim'   @novimText =>
+        post.on 'vinder.text'   @vinderText => @redraw()
     
-    onTitleNovim: @novimText =>
-        
     onTitleFilepos: @fileposl @fileoffs => 
     
         if @fileposl.length > 1
@@ -270,8 +270,12 @@ function title extends view
             for ci in x...cols-13
                 add ' ' null 'dark'
             add '' 'novim' 'dark'
-            for c in @novimText
-                add c 'novimText' 'novim'
+            if valid @novimText
+                for c in @novimText
+                    add c 'novimText' 'novim'
+            else if valid @vinderText
+                for c in @vinderText[0..10]
+                    add c 'vinderText' 'novim'
             for ci in x...cols-1
                 add ' ' null 'novim'
             add '' 'novim' @color.gutter

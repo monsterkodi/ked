@@ -27,7 +27,9 @@ mrange = lines x y m -> motion.range lines [x y] m
         """
 
     ▸ words
-
+        
+        # false ▸ true
+        
         mrange(segls, 0, 0, {kind:'word',     count:1}) ▸ [0 0 4 0]
         mrange(segls, 4, 0, {kind:'word',     count:1}) ▸ [4 0 8 0]
         mrange(segls, 8, 0, {kind:'word',     count:1}) ▸ [8 0 0 1]
