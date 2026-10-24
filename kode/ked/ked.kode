@@ -150,13 +150,14 @@ function KED
 
     restart: =>
         
-        # process.stdin.setRawMode false
-        # process.stdin.pause()
-        cmd  = process.execPath
+        @t?.detach()
+        process.stdin.setRawMode false
+        process.stdin.pause()
+        cmd = process.execPath
         args = process.argv.slice(1)
-        proc = child_process.spawn cmd args {stdio:"inherit" detached:true shell:true}
-        # proc.on 'error' (err) -> error "ked: restart -- #{err}"
-        # proc.on 'exit' (code) => @quit()
+        proc = child_process.spawn cmd args {stdio:["inherit" "inherit" "inherit"]}
+        proc.on 'error' (err) -> error "ked: restart -- #{err}"
+        proc.on 'exit' (code) => @quit()
         
     # ███   ███  ████████   ███████   ███████    ███      ████████   ███████   ███████
     # ███   ███  ███       ███   ███  ███   ███  ███      ███       ███       ███     
@@ -270,16 +271,13 @@ function KED
             error msg.stack if msg.stack
             error "#{y5 msg}"
         
-        @t?.quit()
+        @t?.detach()
         
         @logfile.close =>
             
             process.stderr.write "#{r4 msg.stack}\n" if msg?.stack
             process.stderr.write "#{y5 msg}" if msg?
             
-            if @restartOnQuit
-                @restart()
-                
             process.exit msg? ? 1 : 0
             
     # ███   ███  ████████  ███   ███  
@@ -343,8 +341,7 @@ function KED
                         child_process.exec "#{kk} -t ked" {shell:true} (err stdout stderr) => 
                             if empty err
                                 log 'ked RESTART'
-                                @restartOnQuit = true
-                                @quit()
+                                @restart()
                             else
                                 log err stdout stderr
                             KED.building = false

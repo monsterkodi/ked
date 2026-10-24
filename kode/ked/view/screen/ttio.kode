@@ -115,7 +115,7 @@ function TTIO extends events
     
     written: => @out.join ''
     
-    quit: =>
+    detach: =>
         
         process.stdout.removeListener 'resize' @onResize
         process.stdin.removeListener  'data'   @onData

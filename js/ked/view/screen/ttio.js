@@ -52,7 +52,7 @@ TTIO = (function ()
         this["rows"] = this["rows"].bind(this)
         this["cols"] = this["cols"].bind(this)
         this["clear"] = this["clear"].bind(this)
-        this["quit"] = this["quit"].bind(this)
+        this["detach"] = this["detach"].bind(this)
         this["written"] = this["written"].bind(this)
         this["write"] = this["write"].bind(this)
         opt = (opt != null ? opt : {})
@@ -140,7 +140,7 @@ TTIO = (function ()
         return this.out.join('')
     }
 
-    TTIO.prototype["quit"] = function ()
+    TTIO.prototype["detach"] = function ()
     {
         process.stdout.removeListener('resize',this.onResize)
         process.stdin.removeListener('data',this.onData)
