@@ -236,28 +236,19 @@ export
         @setCursors newPosl
 
     moveByMotion: spec ->
-
+    
         n = max 1 (spec.count ? 1)
+        log "novim.move #{n}" spec
 
-        if spec.kind in ['left' 'right']
-            for i in 0...n
-                @moveCursors spec.kind
-        else if spec.kind == 'eol'
-
-            if n > 1
-                @moveCursors 'down' count:n-1
-
-            @moveCursors 'eol'
-        else if spec.kind in ['word' 'wordBack' 'wordEnd' 'wordBig' 'wordBackBig' 'wordEndBig']
+        if spec.kind in ['word' 'wordBack' 'wordEnd' 'wordBig' 'wordBackBig' 'wordEndBig']
             @moveByWordMotion spec.kind n
+            @clampCursorsToLines() # needed???
         else if spec.kind == 'charFind'
             @moveByCharFind spec n
-        else if spec.kind in ['bof' 'eof']
-            @moveCursorsToLine spec.kind n
+            @clampCursorsToLines() #needed???
         else
-            @moveCursors spec.kind count:n
-
-        @clampCursorsToLines()
+            for i in 1..n
+                @moveCursors spec.kind
 
     moveByWordMotion: kind count ->
 

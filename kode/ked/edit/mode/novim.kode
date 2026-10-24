@@ -352,7 +352,7 @@ function novim
     #  ███████   ███████   ███████   ███████   ███   ███
 
     themeColor: colorName defaultColor ->
-        log "themeColor #{colorName}" theme
+
         switch colorName
             'cursor.multi' ➜ ⮐ theme.novim.cursor.multi
             'cursor.main'  ➜ ⮐ theme.novim.cursor.main
