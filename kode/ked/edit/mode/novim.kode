@@ -126,6 +126,7 @@ function novim
         @register        = null
         @registerPending = false
         @find            = null
+        @logPending()
 
     resetOrExit: ->
 
@@ -138,8 +139,16 @@ function novim
     countNumber: -> if empty @count then 1 else parseInt @count
 
     logPending: ->
-
-        # log 'novim pending ▸' @operator @area @prefix @count @register @find
+    
+        t = ''
+        t += @operator if @operator 
+        t += @area[0] if @area 
+        t += @prefix if @prefix 
+        t += @count if @count 
+        t += @register if @register 
+        t += @find if @find 
+    
+        post.emit 'title.novim' t
 
     complete: build ->
 

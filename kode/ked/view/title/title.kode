@@ -12,6 +12,7 @@
 use ../../../kxk    ▪ post slash kstr kseg nfs
 use ../../edit/tool ◆ belt
 use ../../edit/mode ◆ filepos
+use ../../edit      ◆ mode
 use ../../theme     ◆ color theme
 use ../base         ◆ view crumbs bubble 
 use                 ◆ titlefile
@@ -43,6 +44,8 @@ function title extends view
         @fileposl = []
         @fileoffs = []
         
+        @novimText = ''
+        
         @pointerType = 'pointer'
         
         @setColor 'gutter' theme.gutter.bg
@@ -62,6 +65,9 @@ function title extends view
         @filepos.on    'action' @onFileposAction
         
         post.on 'title.filepos' @onTitleFilepos
+        post.on 'title.novim'   @onTitleNovim
+    
+    onTitleNovim: @novimText =>
         
     onTitleFilepos: @fileposl @fileoffs => 
     
@@ -259,14 +265,21 @@ function title extends view
              
             for i in 0...hil.length
                 add hil[i] (i<hil.length-1) ? 'hil' : color.darken(theme.title.hil) 'dark'
-                                
-        # fill to the right
         
-        for ci in x...cols-1
-            add ' ' null 'dark'
+        if mode.isActive @state 'novim'
+            for ci in x...cols-13
+                add ' ' null 'dark'
+            add '' 'novim' 'dark'
+            for c in @novimText
+                add c 'novimText' 'novim'
+            for ci in x...cols-1
+                add ' ' null 'novim'
+            add '' 'novim' @color.gutter
+        else                        
+            for ci in x...cols-1
+                add ' ' null 'dark'
+            add '' 'dark' @color.gutter 
             
-        add '' 'dark' @color.gutter 
-        
         if false   
             ci = clamp 0 3 int((@time/(1000*1000)-8)/8)
             ch = ' •'[ci] # 
