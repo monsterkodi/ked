@@ -33,18 +33,11 @@ function salterMode
         ⮐  if not state.allowedModes?.salter
         ⮐  if state.s.cursors.length != 1
         ⮐  if state.s.selections.length
-        
+        ⮐  if mode.isActive state 'novim'
         cursors = belt.findPositionsForSaltInsert state.s.lines state.mainCursor()
         if valid cursors                # start the salter mode if the main
             mode.start state 'salter'   # cursor moved inside a salted line 
 
-    ###
-     ███████   ███████   ███    █████████  ████████  ████████   
-    ███       ███   ███  ███       ███     ███       ███   ███  
-    ███████   █████████  ███       ███     ███████   ███████    
-         ███  ███   ███  ███       ███     ███       ███   ███  
-    ███████   ███   ███  ███████   ███     ████████  ███   ███  
-    ###
     # ███      ███  ███   ███  ████████
     # ███      ███  ████  ███  ███     
     # ███      ███  ███ █ ███  ███████ 

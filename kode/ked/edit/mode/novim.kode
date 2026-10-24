@@ -26,62 +26,62 @@ function novim
         down:  'j'
 
     @areas:
-        i: 'inner'
-        a: 'around'
+        i:      'inner'
+        a:      'around'
 
     @textObjects:
-        w: 'word'
-        W: 'WORD'
-        '"': '"'
-        "'": "'"
-        '(': '('
-        ')': '('
-        b: '('
-        '[': '['
-        ']': '['
-        '{': '{'
-        '}': '{'
-        B: '{'
+        'w':    'word'
+        'W':    'WORD'
+        '"':    '"'
+        "'":    "'"
+        '(':    '('
+        ')':    '('
+        'b':    '('
+        '[':    '['
+        ']':    '['
+        '{':    '{'
+        '}':    '{'
+        'B':    '{'
 
     @commands: {
-        D:        -> { operator: 'delete'                    motion: { kind: 'eol'      } }
-        x:      n -> { operator: 'delete'       count: n     motion: { kind: 'char'     } }
-        X:      n -> { operator: 'delete'       count: n     motion: { kind: 'charBack' } }
-        h:      n -> { operator: 'move'         count: n     motion: { kind: 'left'     } }
-        j:      n -> { operator: 'move'         count: n     motion: { kind: 'down'     } }
-        k:      n -> { operator: 'move'         count: n     motion: { kind: 'up'       } }
-        l:      n -> { operator: 'move'         count: n     motion: { kind: 'right'    } }
-        w:      n -> { operator: 'move'         count: n     motion: { kind: 'word'     } }
-        b:      n -> { operator: 'move'         count: n     motion: { kind: 'drow'     } }
-        e:      n -> { operator: 'move'         count: n     motion: { kind: 'wend'     } }
-        W:      n -> { operator: 'move'         count: n     motion: { kind: 'WORD'     } }
-        B:      n -> { operator: 'move'         count: n     motion: { kind: 'DROW'     } }
-        E:      n -> { operator: 'move'         count: n     motion: { kind: 'WEND'     } }
+        'D':      -> { operator: 'delete'                    motion: { kind: 'eol'      } }
+        'x':    n -> { operator: 'delete'       count: n     motion: { kind: 'char'     } }
+        'X':    n -> { operator: 'delete'       count: n     motion: { kind: 'charBack' } }
+        'h':    n -> { operator: 'move'         count: n     motion: { kind: 'left'     } }
+        'j':    n -> { operator: 'move'         count: n     motion: { kind: 'down'     } }
+        'k':    n -> { operator: 'move'         count: n     motion: { kind: 'up'       } }
+        'l':    n -> { operator: 'move'         count: n     motion: { kind: 'right'    } }
+        'w':    n -> { operator: 'move'         count: n     motion: { kind: 'word'     } }
+        'b':    n -> { operator: 'move'         count: n     motion: { kind: 'drow'     } }
+        'e':    n -> { operator: 'move'         count: n     motion: { kind: 'wend'     } }
+        'W':    n -> { operator: 'move'         count: n     motion: { kind: 'WORD'     } }
+        'B':    n -> { operator: 'move'         count: n     motion: { kind: 'DROW'     } }
+        'E':    n -> { operator: 'move'         count: n     motion: { kind: 'WEND'     } }
         '$':    n -> { operator: 'move'         count: n     motion: { kind: 'eol'      } }
-        G:      n -> { operator: 'move'         count: n     motion: { kind: 'eof'      } }
-        n:      n -> { operator: 'searchNext'   count: n }
-        N:      n -> { operator: 'searchPrev'   count: n }
-        p:      n -> { operator: 'put'          count: n     after: true  }
-        P:      n -> { operator: 'put'          count: n     after: false }
-        u:      n -> { operator: 'undo'         count: n }
+        'G':    n -> { operator: 'move'         count: n     motion: { kind: 'eof'      } }
+        'n':    n -> { operator: 'searchNext'   count: n }
+        'N':    n -> { operator: 'searchPrev'   count: n }
+        'p':    n -> { operator: 'put'          count: n     after: true  }
+        'P':    n -> { operator: 'put'          count: n     after: false }
+        'u':    n -> { operator: 'undo'         count: n }
         '.':    n -> { operator: 'repeat'       count: n } 
         }
 
     @motions: {
         '0':      -> { kind: 'bol' }
         '$':      -> { kind: 'eol' }
-        d:      n -> { kind: 'line'             count: n }
-        y:      n -> { kind: 'line'             count: n }
-        w:      n -> { kind: 'word'             count: n }
-        e:      n -> { kind: 'wend'             count: n }
-        b:      n -> { kind: 'drow'             count: n }
-        W:      n -> { kind: 'WORD'             count: n }
-        E:      n -> { kind: 'WEND'             count: n }
-        B:      n -> { kind: 'DROW'             count: n }
-        h:      n -> { kind: 'charBack'         count: n }
-        l:      n -> { kind: 'char'             count: n }
-        j:      n -> { kind: 'lineDown'         count: n }
-        k:      n -> { kind: 'lineUp'           count: n }
+        'd':    n -> { kind: 'line'             count: n }
+        'y':    n -> { kind: 'line'             count: n }
+        'w':    n -> { kind: 'word'             count: n }
+        'e':    n -> { kind: 'wend'             count: n }
+        'b':    n -> { kind: 'drow'             count: n }
+        'W':    n -> { kind: 'WORD'             count: n }
+        'E':    n -> { kind: 'WEND'             count: n }
+        'B':    n -> { kind: 'DROW'             count: n }
+        'h':    n -> { kind: 'charBack'         count: n }
+        'l':    n -> { kind: 'char'             count: n }
+        'j':    n -> { kind: 'lineDown'         count: n }
+        'k':    n -> { kind: 'lineUp'           count: n }
         }
 
     @: @state ->

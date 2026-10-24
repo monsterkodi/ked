@@ -29,8 +29,8 @@ handleKey = key event -> # will be bound to state
         'shift+ctrl+alt+up'                 ➜ ⮐  @moveCursors 'up'    count:16
         'shift+ctrl+alt+down'               ➜ ⮐  @moveCursors 'down'  count:16
             
-        'cmd+left'  'ctrl+left'             ➜ ⮐  @moveCursors ['bos' 'ind_bol']
-        'cmd+right' 'ctrl+right'            ➜ ⮐  @moveCursors ['eos' 'ind_eol']
+        'cmd+left'      'ctrl+left'         ➜ ⮐  @moveCursors ['bos' 'ind_bol']
+        'cmd+right'     'ctrl+right'        ➜ ⮐  @moveCursors ['eos' 'ind_eol']
                                                  
         'alt+left'                          ➜ ⮐  @moveCursors 'left'  jump:['ws' 'word' 'empty' 'punct']
         'alt+right'                         ➜ ⮐  @moveCursors 'right' jump:['ws' 'word' 'empty' 'punct']
@@ -56,8 +56,8 @@ handleKey = key event -> # will be bound to state
         'shift+alt+up'   'shift+cmd+up'     ➜ ⮐  @cloneSelectionAndCursorLines 'up'
         'shift+alt+down' 'shift+cmd+down'   ➜ ⮐  @cloneSelectionAndCursorLines 'down'
                                                  
-        'cmd+up'   'ctrl+up'                ➜ ⮐  @expandCursors   'up'
-        'cmd+down' 'ctrl+down'              ➜ ⮐  @expandCursors   'down'
+        'cmd+up'        'ctrl+up'           ➜ ⮐  @expandCursors   'up'
+        'cmd+down'      'ctrl+down'         ➜ ⮐  @expandCursors   'down'
         'shift+cmd+up'                      ➜ ⮐  @contractCursors 'up'
         'shift+cmd+down'                    ➜ ⮐  @contractCursors 'down'
                                                  
@@ -80,41 +80,41 @@ handleKey = key event -> # will be bound to state
         'shift+tab'                         ➜ ⮐  @deindentSelectedOrCursorLines()
         'tab'                               ➜ ⮐  @insert '\t'
                                                  
-        'cmd+x'        'ctrl+x'             ➜ ⮐  @cut()
-        'cmd+c'        'ctrl+c'             ➜ ⮐  @copy()
-        'cmd+v'        'ctrl+v'             ➜ ⮐  @paste()
+        'cmd+x'         'ctrl+x'            ➜ ⮐  @cut()
+        'cmd+c'         'ctrl+c'            ➜ ⮐  @copy()
+        'cmd+v'         'ctrl+v'            ➜ ⮐  @paste()
                                                  
-        'cmd+z' 'ctrl+z'                    ➜ ⮐  @undo()
+        'cmd+z'         'ctrl+z'            ➜ ⮐  @undo()
         'shift+cmd+z'                            
-        'cmd+y' 'ctrl+y'                    ➜ ⮐  @redo()
+        'cmd+y'         'ctrl+y'            ➜ ⮐  @redo()
                                                  
-        'cmd+a'       'ctrl+a'              ➜ ⮐  @selectAllLines()
-        'cmd+j'       'ctrl+j'              ➜ ⮐  @joinLines()
-        'cmd+l'       'ctrl+l'              ➜ ⮐  @selectMoreLines()
-        'shift+cmd+l' 'shift+ctrl+l'        ➜ ⮐  @selectLessLines()
+        'cmd+a'         'ctrl+a'            ➜ ⮐  @selectAllLines()
+        'cmd+j'         'ctrl+j'            ➜ ⮐  @joinLines()
+        'cmd+l'         'ctrl+l'            ➜ ⮐  @selectMoreLines()
+        'shift+cmd+l'   'shift+ctrl+l'      ➜ ⮐  @selectLessLines()
                                                  
         'cmd+e' 'ctrl+e'                    ➜ ⮐  @highlightWordAtCursor_deselectCursorHighlight_moveCursorToNextHighlight()
         'cmd+d' 'ctrl+d'                    ➜ ⮐  @selectWordAtCursor_highlightSelection_addNextHighlightToSelection()
         'cmd+g' 'ctrl+g'                    ➜ ⮐  @selectWordAtCursor_highlightSelection_selectNextHighlight()
                                                  
-        'shift+cmd+e' 'shift+ctrl+e'        ➜ ⮐  @highlightWordAtCursor_deselectCursorHighlight_moveCursorToPrevHighlight()
-        'shift+cmd+d' 'shift+ctrl+d'        ➜ ⮐  @selectWordAtCursor_highlightSelection_addPrevHighlightToSelection()
-        'shift+cmd+g' 'shift+ctrl+g'        ➜ ⮐  @selectWordAtCursor_highlightSelection_selectPrevHighlight()
+        'shift+cmd+e'   'shift+ctrl+e'      ➜ ⮐  @highlightWordAtCursor_deselectCursorHighlight_moveCursorToPrevHighlight()
+        'shift+cmd+d'   'shift+ctrl+d'      ➜ ⮐  @selectWordAtCursor_highlightSelection_addPrevHighlightToSelection()
+        'shift+cmd+g'   'shift+ctrl+g'      ➜ ⮐  @selectWordAtCursor_highlightSelection_selectPrevHighlight()
                                                  
         'alt+y'                             ➜ ⮐  @toggleMode 'unype'
-        'alt+n'                             ➜ ⮐  @toggleMode 'novim'
+        'alt+n'         'alt+z'             ➜ ⮐  @toggleMode 'novim'
         'alt+r'                             ➜ ⮐  @toggleMode 'record'
         'alt+u'                             ➜ ⮐  @toggleMode 'uniko'
         'alt+;'                             ➜ ⮐  @toggleMode 'vimple'
         'alt+3'                             ➜ ⮐  @toggleMode 'salter'
 
-        'alt+cmd+c' 'alt+ctrl+c'            ➜ ⮐  mode.modes.novim?.toggleClipboard()
+        'alt+cmd+c'     'alt+ctrl+c'        ➜ ⮐  mode.modes.novim?.toggleClipboard()
                                                  
-        'cmd+3' 'ctrl+3'                    ➜ ⮐  @insertAsciiHeaderForSelectionOrWordAtCursor()
-        'alt+cmd+d' 'alt+ctrl+d'            ➜ ⮐  @selectWordAtCursor_highlightSelection_selectAllHighlights()
+        'cmd+3'         'ctrl+3'            ➜ ⮐  @insertAsciiHeaderForSelectionOrWordAtCursor()
+        'alt+cmd+d'     'alt+ctrl+d'        ➜ ⮐  @selectWordAtCursor_highlightSelection_selectAllHighlights()
                                                  
-        'cmd+/' 'ctrl+/'                    ➜ ⮐  @toggleCommentAtSelectionOrCursorLines()
-        'alt+cmd+/' 'ctrl+alt+/'            ➜ ⮐  @toggleCommentTypeAtSelectionOrCursorLines()
+        'cmd+/'         'ctrl+/'            ➜ ⮐  @toggleCommentAtSelectionOrCursorLines()
+        'alt+cmd+/'     'ctrl+alt+/'        ➜ ⮐  @toggleCommentTypeAtSelectionOrCursorLines()
                                                  
         'esc'                               ➜ ⮐  @clearCursorsHighlightsAndSelections()
     

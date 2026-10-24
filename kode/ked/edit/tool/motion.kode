@@ -29,8 +29,6 @@ function motion
 
     @isLinewise: spec -> spec.kind in ['line' 'lineDown' 'lineUp']
 
-    # cursors can share a line, so their ranges can overlap or repeat.
-    # one merged range per region keeps deleteRanges from deleting twice.
     @mergeRanges: rngs ->
 
         ⮐  [] if empty rngs
@@ -65,7 +63,6 @@ function motion
 
         [x y] = pos
 
-        log "MOTION RAG #{lines.length} #{x} #{y} #{spec.kind}" spec
         y     = clamp 0 lines.length-1 y
         x     = clamp 0 kseg.width(lines[y]) x
         count = max 1 (spec.count ? 1)
@@ -222,8 +219,6 @@ function motion
 
         ⮐  null if pos == null
 
-        # a till endpoint is the landing itself, otherwise the range
-        # reaches one character past the match
         msegs = lines[pos[1]]
         mi    = kseg.indexAtWidth msegs pos[0]
 
@@ -265,8 +260,7 @@ function motion
     @widthAt: segs i -> kseg.widthAtSegi segs i
 
     # start of the next word, crossing lines and skipping empty ones
-    # with eol the motion stops at the end of the current line,
-    # which is what an operator wants for its last word step
+    # with eol the motion stops at the end of the current line
     @wordStartAfter: lines pos eol=false big=false ->
 
         [x y] = pos
