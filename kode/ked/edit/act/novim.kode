@@ -240,7 +240,6 @@ export
             @moveByCharFind spec n
         else
             for i in 1..n
-                # we need to implement ['word' 'drow' 'wend' 'WORD' 'DROW' 'WEND']
                 @moveCursors spec.kind
 
     moveByCharFind: spec n ->

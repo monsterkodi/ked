@@ -89,7 +89,6 @@ function vinder extends view
                 post.emit 'focus' 'editor'
                 @state.setHighlights []
                 @hide()
-
         true
 
     onMouse: event =>

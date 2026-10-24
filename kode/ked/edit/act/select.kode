@@ -70,7 +70,13 @@ export
     
     selectWordAtCursor_highlightSelection_addNextHighlightToSelection: ->
         # cmd+d ctrl+d
-        if valid @s.highlights ➜ ⮐  @addCurrentOrNextHighlightToSelection()
+        if valid @s.highlights
+            # filter bracket highlights 
+            text  = belt.textForSpans @s.lines @s.highlights
+            lines = belt.linesForText text
+            lines = lines.filter (s) -> s not in ['"' "'" "[" "]" "{" "}" "(" ")"]
+            if valid lines
+                ⮐ @addCurrentOrNextHighlightToSelection()                                   
             
         @selectWordAtCursor_highlightSelection()
         
