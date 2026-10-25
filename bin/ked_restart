@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+
+import { spawn } from 'child_process';
+
+const pid = parseInt(process.argv[2]);
+
+if (!pid) {
+  console.error('Usage: ked_restart <pid> [args...]');
+  process.exit(1);
+}
+
+function isProcessAlive(pid) 
+{
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    return err.code === 'EPERM';
+  }
+}
+
+function waitForExit(pid) 
+{
+    const interval = setInterval(() => {
+        if (!isProcessAlive(pid)) {
+            clearInterval(interval);
+            const opt = { stdio:"inherit", shell:true, detached:true }
+            spawn('hyprctl', ['dispatch', '"hl.dsp.exec_cmd(\'kitty --title=ked /home/kodi/s/ked/bin/ked\')"'], opt);
+            spawn('hyprctl', ['dispatch', '"hl.dsp.window.close()"'], opt);
+        }
+    }, 10); 
+}
+
+waitForExit(pid) 

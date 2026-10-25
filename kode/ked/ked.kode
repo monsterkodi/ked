@@ -19,7 +19,7 @@ use ./view/editor ◆ fileeditor
 use ./view/screen ◆ screen ttio
 use ./view/menu   ◆ context menu macro finder searcher differ vinder
 use ./view/colmns ◆ browse dircol funcol quicky droop saveas
-use                 child_process
+use child_process ▪ spawn
 
 function KED
 
@@ -150,14 +150,10 @@ function KED
 
     restart: =>
         
-        @t?.detach()
-        process.stdin.setRawMode false
-        process.stdin.pause()
-        cmd = process.execPath
-        args = process.argv.slice(1)
-        proc = child_process.spawn cmd args {stdio:["inherit" "inherit" "inherit"]}
-        proc.on 'error' (err) -> error "ked: restart -- #{err}"
-        proc.on 'exit' (code) => @quit()
+        cmd  = slash.path ◆dir '../../bin/ked_restart'
+        args = [process.pid process.execPath].concat process.argv.slice(1)
+        proc = spawn cmd args {stdio:"inherit" detached:true shell:true}
+        proc.unref()
         
     # ███   ███  ████████   ███████   ███████    ███      ████████   ███████   ███████
     # ███   ███  ███       ███   ███  ███   ███  ███      ███       ███       ███     
@@ -259,8 +255,8 @@ function KED
 
     quit: msg ○=>
         
+        watcher.close()
         clearImmediate @redrawId
-        
         @quitting = true
         
         ○ @session.save()
@@ -275,9 +271,8 @@ function KED
         
         @logfile.close =>
             
-            process.stderr.write "#{r4 msg.stack}\n" if msg?.stack
-            process.stderr.write "#{y5 msg}" if msg?
-            
+            # process.stderr.write "#{r4 msg.stack}\n" if msg?.stack
+            # process.stderr.write "#{y5 msg}" if msg?
             process.exit msg? ? 1 : 0
             
     # ███   ███  ████████  ███   ███  
@@ -333,15 +328,17 @@ function KED
         if event.change == 'rename' and slash.ext(event.path) == 'kode'        
             if event.path.startsWith slash.path(◆dir '../../kode/ked')
                 KED.building = true
-                log 'ked REBUILD'
+                # log 'ked REBUILD'
+                watcher.close()
                 kk = slash.path ◆dir '../../kk'
                 child_process.exec "#{kk} -k" {shell:true} (err stdout stderr) => 
                     if empty err
-                        log 'ked TEST'
+                        # log 'ked TEST'
                         child_process.exec "#{kk} -t ked" {shell:true} (err stdout stderr) => 
                             if empty err
-                                log 'ked RESTART'
+                                # log 'ked RESTART'                                
                                 @restart()
+                                @quit()
                             else
                                 log err stdout stderr
                             KED.building = false

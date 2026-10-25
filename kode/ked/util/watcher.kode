@@ -15,7 +15,6 @@ function watcher
 
     @watchers: {}
     @renameTimer: {}
-    
     @fileStats: {}
     
     #  ███████  ███   ███   ███████   ████████    ███████  ███   ███   ███████   █████████  
@@ -28,6 +27,12 @@ function watcher
     
         if stat =○ nfs.fileExists file
             @fileStats[file] = stat
+
+    @close: ->
+    
+        for path,wtch of watcher.watchers
+            wtch.close()
+        watcher.watchers = {}
 
     @watch: path opt ○->
     
