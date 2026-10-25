@@ -322,26 +322,23 @@ function KED
                 'delete' ➜ @newFile() # todo: load current text into new file
                 'change'
                 'rename' ➜ @reloadFile()
+                
         ⮐ if KED.building
         ⮐ if @args.headless
-        # log "change" event
+        
         if event.change == 'rename' and slash.ext(event.path) == 'kode'        
             if event.path.startsWith slash.path(◆dir '../../kode/ked')
                 KED.building = true
-                # log 'ked REBUILD'
-                watcher.close()
                 kk = slash.path ◆dir '../../kk'
                 child_process.exec "#{kk} -k" {shell:true} (err stdout stderr) => 
                     if empty err
-                        # log 'ked TEST'
                         child_process.exec "#{kk} -t ked" {shell:true} (err stdout stderr) => 
                             if empty err
-                                # log 'ked RESTART'                                
                                 @restart()
                                 @quit()
                             else
                                 log err stdout stderr
-                            KED.building = false
+                                KED.building = false
                     else
                         log err stdout stderr
                         KED.building = false
