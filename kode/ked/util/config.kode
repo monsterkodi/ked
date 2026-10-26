@@ -12,11 +12,11 @@ function config
 
     @data = null
     
-    @load: -> 
+    @load: ○-> 
     
         configFile = slash.path ◆dir '../../../config'
-        log 'load config file' configFile
-        @data = noon.read configFile
+        # log 'load config file' configFile
+        @data =○ noon.load configFile
         log 'config loaded' @data
 
 export config

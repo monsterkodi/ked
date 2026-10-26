@@ -1,3 +1,4 @@
 filetypes
-    .kkache   noon
     config    noon
+    .kkache   noon
+    .todo     noon

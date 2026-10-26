@@ -454,7 +454,9 @@ function KED
         if valid colors
             @editor.state.syntax.setColors colors
         else
-            @editor.state.syntax.setExt slash.ext(@currentFile)
+            ext = config.data.filetypes[slash.file(@currentFile)]
+            ext ?= slash.ext(@currentFile)
+            @editor.state.syntax.setExt ext
         
         @editor.state.loadSegls segls
         @editor.setCurrentFile @currentFile     

@@ -584,8 +584,10 @@ load = p ext ○->
     str =○ nfs.readText p
          
     if valid str
+        # log "noon load" str
         parseStr str p ext
     else
+        log 'noon load null'
         null
                     
 ###
