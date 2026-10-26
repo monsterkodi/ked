@@ -16,6 +16,7 @@ use ../../theme  ◆ theme
 function novim
 
     @operators:
+        c: 'change'
         d: 'delete'
         y: 'yank'
 
@@ -44,7 +45,10 @@ function novim
         'B':    '{'
 
     @commands: {
+        'C':      -> { operator: 'change'                    motion: { kind: 'eol'      } }
         'D':      -> { operator: 'delete'                    motion: { kind: 'eol'      } }
+        's':    n -> { operator: 'change'       count: n     motion: { kind: 'char'     } }
+        'S':    n -> { operator: 'change'       count: n     motion: { kind: 'line'     } }
         'x':    n -> { operator: 'delete'       count: n     motion: { kind: 'char'     } }
         'X':    n -> { operator: 'delete'       count: n     motion: { kind: 'charBack' } }
         'h':    n -> { operator: 'move'         count: n     motion: { kind: 'left'     } }
@@ -70,6 +74,7 @@ function novim
     @motions: {
         '0':      -> { kind: 'bol' }
         '$':      -> { kind: 'eol' }
+        'c':    n -> { kind: 'line'             count: n }
         'd':    n -> { kind: 'line'             count: n }
         'y':    n -> { kind: 'line'             count: n }
         'w':    n -> { kind: 'word'             count: n }

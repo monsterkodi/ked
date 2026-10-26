@@ -14,7 +14,11 @@ export
 
         # log 'novim command ▸' cmd
 
+        if cmd.motion
+            cmd.motion.count ?= cmd.count
+
         switch cmd.operator
+            'change'      ➜ @changeByMotion     cmd.motion  cmd.register
             'delete'      ➜ @applyChange cmd
             'yank'        ➜ @yankByMotion       cmd.motion  cmd.register
             'put'         ➜ @putRegister        cmd.count   cmd.after cmd.register
@@ -106,7 +110,7 @@ export
 
         { lines: lines, linewise: linewise }
 
-    deleteByMotion: spec register ->
+    selectByMotion: spec ->
 
         lines = @s.lines
         rngs  = []
@@ -124,21 +128,58 @@ export
 
         rngs = motion.mergeRanges rngs
 
-        linewise = motion.isLinewise spec
-        texts    = []
+        @setSelections rngs
+
+        rngs
+
+    setNovimRegister: rngs linewise register ->
+
+        texts = []
 
         for rng in rngs
-            texts.push belt.textForLineRange(lines, rng)
+            texts.push belt.textForLineRange(@s.lines, rng)
 
         @novimRegister = { lines: texts.join('\n').split('\n'), linewise: linewise }
 
         @copyRegisterToClipboard @novimRegister if @usesClipboard(register)
+
+    deleteByMotion: spec register ->
+
+        rngs = @selectByMotion spec
+
+        ⮐  if empty rngs
+
+        linewise = motion.isLinewise spec
+
+        @setNovimRegister rngs linewise register
 
         @begin()
 
         @deleteRanges rngs @allCursors() linewise
 
         @end()
+
+    changeByMotion: spec register ->
+
+        rngs = @selectByMotion spec
+
+        ⮐  if empty rngs
+
+        linewise = motion.isLinewise spec
+
+        @setNovimRegister rngs linewise register
+
+        @begin()
+
+        # @deleteRanges rngs @allCursors() linewise
+        # alternative version: only select ranges, with cursors at end of selections 
+        @deleteRanges rngs @allCursors() linewise
+
+        @end()
+
+        @lastChange = null
+
+        @stopMode 'novim'
 
     yankByMotion: spec register ->
 

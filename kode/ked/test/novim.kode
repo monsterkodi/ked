@@ -657,6 +657,161 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'delete', motion:{kind:'charBack', count:1}}
     txt "alpha"
 
+▸ change selects before it deletes
+
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 5 0
+
+    s.selectByMotion {kind:'textObject', area:'inner', target:'word', count:1}
+
+    txt "one two three"
+    s.s.selections ▸ [[4 0 7 0]]
+    cur 5 0
+
+    s.loadLines belt.linesForText("one two\nthree four")
+    s.setCursors [[0 0] [0 1]]
+
+    s.selectByMotion {kind:'word', count:1}
+
+    txt "one two\nthree four"
+    s.s.selections ▸ [[0 0 4 0] [0 1 6 1]]
+
+▸ change deletes the selection
+
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 5 0
+
+    s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+
+    txt "one  three"
+    cur 4 0
+    s.s.selections ▸ []
+    s.novimRegister.lines ▸ ['two']
+    s.novimRegister.linewise ▸ false
+
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 5 0
+
+    s.executeNovim {operator:'change', motion:{kind:'textObject', area:'around', target:'word', count:1}}
+
+    txt "one three"
+
+    s.loadLines belt.linesForText("one two\nthree four")
+    s.setCursors [[0 0] [0 1]]
+
+    s.executeNovim {operator:'change', motion:{kind:'word', count:1}}
+
+    txt "two\nfour"
+    s.allCursors() ▸ [[0 0] [0 1]]
+
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 4 0
+
+    s.executeNovim {operator:'change', motion:{kind:'eol'}}
+
+    txt "one "
+    cur 4 0
+
+    s.loadLines belt.linesForText("one\ntwo")
+    s.setMainCursor 1 0
+
+    s.executeNovim {operator:'change', motion:{kind:'line', count:1}}
+
+    txt "two"
+    cur 0 0
+
+▸ change is undoable
+
+    s.loadLines belt.linesForText("alpha beta")
+    s.setMainCursor 0 0
+    before = s.h.length
+
+    s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+
+    txt " beta"
+    (s.h.length - before) ▸ 1
+
+    s.executeNovim {operator:'undo', count:1}
+
+    txt "alpha beta"
+    cur 0 0
+
+▸ change commands and keys
+
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 5 0
+    keys 'ciw'
+    txt "one  three"
+    cur 4 0
+    m.operator ▸ null
+
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 5 0
+    keys 'caw'
+    txt "one three"
+
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 4 0
+    keys 'C'
+    txt "one "
+    cur 4 0
+
+    s.loadLines belt.linesForText("one\ntwo")
+    s.setMainCursor 0 0
+    keys 'S'
+    txt "two"
+    cur 0 0
+
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 0 0
+    keys 's'
+    txt "bcdef"
+    cur 0 0
+
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 0 0
+    keys '2s'
+    txt "cdef"
+    cur 0 0
+
+    s.loadLines belt.linesForText("one\ntwo")
+    s.setMainCursor 0 0
+    keys 'cc'
+    txt "two"
+    cur 0 0
+
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 0 0
+    keys 'dw'
+    txt "two three"
+
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 0 0
+    keys 'ciw'
+    txt " two three"
+
+    keys '.'
+    txt " two three"
+
+▸ change exits novim
+
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 5 0
+
+    s.allowedModes.novim = true
+    mode.modes.novim = novim
+    mode.start s 'novim'
+
+    mode.isActive s 'novim' ▸ true
+
+    s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+
+    mode.isActive s 'novim' ▸ false
+    txt "one  three"
+    cur 4 0
+
+    delete s.allowedModes.novim
+
 ▸ repeat command
 
     s.loadLines belt.linesForText("abcdef")
