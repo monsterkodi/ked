@@ -8,7 +8,7 @@
 
 use ../kxk        ▪ karg kstr kseg slash post nfs sleep
 use ./index       ◆ prjcts indexer
-use ./util        ◆ logfile session help frecent watcher git 
+use ./util        ◆ logfile session help frecent watcher git config
 use ./util/img    ◆ rounded squares sircels
 use ./edit/tool   ◆ belt
 use ./edit        ◆ mode
@@ -19,7 +19,7 @@ use ./view/editor ◆ fileeditor
 use ./view/screen ◆ screen ttio
 use ./view/menu   ◆ context menu macro finder searcher differ vinder
 use ./view/colmns ◆ browse dircol funcol quicky droop saveas
-use child_process ▪ spawn
+use child_process ▪ spawn exec
 
 function KED
 
@@ -45,6 +45,7 @@ function KED
         
         log w2("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #{b8 @session.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
         
+        config.load()
         global.ked_session = @session
         
         @session.on 'loaded' @onSessionLoaded
@@ -327,12 +328,15 @@ function KED
         ⮐ if @args.headless
         
         if event.change == 'rename' and slash.ext(event.path) == 'kode'        
+            # log "src change?" event
             if event.path.startsWith slash.path(◆dir '../../kode/ked')
                 KED.building = true
+                # log "building"
                 kk = slash.path ◆dir '../../kk'
-                child_process.exec "#{kk} -k" {shell:true} (err stdout stderr) => 
+                # child_process.exec "#{kk} -k" {shell:true} (err stdout stderr) => 
+                exec "#{kk} -k" {} (err stdout stderr) => 
                     if empty err
-                        child_process.exec "#{kk} -t ked" {shell:true} (err stdout stderr) => 
+                        exec "#{kk} -t ked" {} (err stdout stderr) => 
                             if empty err
                                 @restart()
                                 @quit()

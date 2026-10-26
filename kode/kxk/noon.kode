@@ -581,16 +581,6 @@ parseStr = str p ext ->
 
 load = p ext ○->
     
-    # if globalThis.global
-    #     
-    #     fs  =○ import('fs/promises')
-    #     str =○ fs.readFile p 'utf8'
-    #          
-    #     if valid str
-    #         parseStr str p ext
-    #     else
-    #         null
-                    
     str =○ nfs.readText p
          
     if valid str

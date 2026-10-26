@@ -1,0 +1,22 @@
+###
+     ███████   ███████   ███   ███  ████████  ███   ███████   
+    ███       ███   ███  ████  ███  ███       ███  ███        
+    ███       ███   ███  ███ █ ███  ██████    ███  ███  ████  
+    ███       ███   ███  ███  ████  ███       ███  ███   ███  
+     ███████   ███████   ███   ███  ███       ███   ███████   
+###
+
+use ../../kxk ▪ noon slash
+
+function config
+
+    @data = null
+    
+    @load: -> 
+    
+        configFile = slash.path ◆dir '../../../config'
+        log 'load config file' configFile
+        @data = noon.read configFile
+        log 'config loaded' @data
+
+export config
