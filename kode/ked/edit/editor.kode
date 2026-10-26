@@ -204,7 +204,7 @@ function editor extends draw
             @complete?.complete()
             ⮐  true
         else
-            if key.split('+')[-1] not in ['shift' 'ctrl' 'alt' 'cmd'] 
+            if key.split('+')[-1] not in ['shift' 'ctrl' 'alt' 'cmd' 'esc'] 
                 log "editor.onKey? |#{key}|" event 
 
 export editor
