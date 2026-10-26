@@ -309,6 +309,16 @@ function novim
             char == 'i'
             
                 @exitNovim()
+
+            char == 'a'
+            
+                @state.moveCursors 'right'
+                @exitNovim()
+                
+            char == 'A'
+            
+                @state.moveCursors 'eol'
+                @exitNovim()
     
             char == ';'
     
