@@ -442,6 +442,10 @@ export
         if @s.cursors.length > 1
             @setCursors [@mainCursor()]
             
+    hasCursorsHighlightsOrSelections: ->
+    
+        valid @s.selections or valid @s.highlights or @s.cursors.length > 1
+            
     clearCursorsHighlightsAndSelections: ->
         
         @pushState() if @s.cursors.length>1 or valid @s.selections

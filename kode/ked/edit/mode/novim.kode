@@ -224,8 +224,11 @@ function novim
             ⮐  'unhandled'
 
         if combo in ['esc' 'escape']
-            @state.clearCursorsHighlightsAndSelections()
             @reset()
+            if @state.hasCursorsHighlightsOrSelections()
+                @state.clearCursorsHighlightsAndSelections()
+            else
+                @exitNovim()
             ⮐ true
 
         if not @find and char not in ',;nN0123456789' and key not in keyinfo.modifierNames

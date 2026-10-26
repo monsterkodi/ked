@@ -51,11 +51,11 @@ handleKey = key event -> # will be bound to state
         'shift+alt+cmd+left'                ➜ ⮐  @moveMainCursorInDirection 'left'  keep:true # 'paint' cursors
         'shift+alt+cmd+right'               ➜ ⮐  @moveMainCursorInDirection 'right' keep:true # 'paint' cursors
                                                  
-        'alt+up'         'shift+ctrl+up'    ➜ ⮐  @moveSelectionOrCursorLines 'up'
-        'alt+down'       'shift+ctrl+down'  ➜ ⮐  @moveSelectionOrCursorLines 'down'
-        'shift+alt+up'   'shift+cmd+up'     ➜ ⮐  @cloneSelectionAndCursorLines 'up'
-        'shift+alt+down' 'shift+cmd+down'   ➜ ⮐  @cloneSelectionAndCursorLines 'down'
-                                                 
+        'alt+up'         'shift+ctrl+up'    ➜ ⮐  @moveSelectionOrCursorLines   'up'
+        'alt+down'       'shift+ctrl+down'  ➜ ⮐  @moveSelectionOrCursorLines   'down'
+        'shift+alt+up'                      ➜ ⮐  @cloneSelectionAndCursorLines 'up'
+        'shift+alt+down'                    ➜ ⮐  @cloneSelectionAndCursorLines 'down'
+
         'cmd+up'        'ctrl+up'           ➜ ⮐  @expandCursors   'up'
         'cmd+down'      'ctrl+down'         ➜ ⮐  @expandCursors   'down'
         'shift+cmd+up'                      ➜ ⮐  @contractCursors 'up'
@@ -115,7 +115,11 @@ handleKey = key event -> # will be bound to state
         'cmd+/'         'ctrl+/'            ➜ ⮐  @toggleCommentAtSelectionOrCursorLines()
         'alt+cmd+/'     'ctrl+alt+/'        ➜ ⮐  @toggleCommentTypeAtSelectionOrCursorLines()
                                                  
-        'esc'                               ➜ ⮐  @clearCursorsHighlightsAndSelections()
+        'esc' 
+            if @hasCursorsHighlightsOrSelections()                              
+                ⮐ @clearCursorsHighlightsAndSelections()
+            else
+                @toggleMode 'novim' # this switch should be configurable
     
     'unhandled'
 
