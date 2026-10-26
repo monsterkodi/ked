@@ -233,7 +233,7 @@ function inputchoice extends view
                     @autoHide()
                     ⮐  result
             else
-                @choices.grabFocus() if key in 'down'
+                @choices.grabFocus() if key == 'down'
                 @autoHide()
                 ⮐  result
         true
