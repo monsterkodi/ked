@@ -7,7 +7,7 @@
 ###
 
 use ../../kxk ▪ post slash nfs
-use ../util   ◆ walker
+use ../util   ◆ walker config
 
 class prjcts
         
@@ -78,9 +78,11 @@ class prjcts
         @indexing = prjPath
         
         walk = new walker
-            root:     prjPath
-            maxDepth: 12
-            maxFiles: 10000
+            root:       prjPath
+            maxDepth:   config.data.project.maxDepth
+            ignore:     config.data.project.ignore
+            includeExt: config.data.sourceFileExtensions
+            maxFiles:   10000
             # file:     (f) => post.emit 'prjcts.file.indexed' f
                   
         # log 'start walker'

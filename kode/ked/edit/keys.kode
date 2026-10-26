@@ -9,6 +9,7 @@
     functions of edit▸state
 ###
 
+use ../util ◆ config
 use ◆ mode
 
 handleKey = key event -> # will be bound to state
@@ -119,7 +120,8 @@ handleKey = key event -> # will be bound to state
             if @hasCursorsHighlightsOrSelections()                              
                 ⮐ @clearCursorsHighlightsAndSelections()
             else
-                @toggleMode 'novim' # this switch should be configurable
+                if config.data.novim.autoEnableOnEscape
+                    @toggleMode 'novim'
     
     'unhandled'
 

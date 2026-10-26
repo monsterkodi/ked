@@ -7,7 +7,7 @@
 ###
 
 use ../../kxk ▪ slash nfs
-use           ◆ fileutil
+use           ◆ fileutil config
 
 class walker
     
@@ -17,10 +17,10 @@ class walker
         @cfg.maxDepth    ?= 3
         @cfg.dotFiles    ?= false
         @cfg.maxFiles    ?= 15000
-        @cfg.ignore      ?= ['node_modules' 'build' 'Build' 'Library' 'Applications' '.kkache' 'ked.log'] #, 'resources' 'ThirdParty' 'Binaries' 'Intermediate' 'Saved' 'Programs' 'Shaders' 'DerivedDataCache' 'Content' 'Samples']
-        @cfg.include     ?= ['.konrad.noon' '.gitignore' '.npmignore']
+        @cfg.ignore      ?= ['node_modules']
+        @cfg.include     ?= ['.gitignore' '.npmignore']
         @cfg.ignoreExt   ?= ['asar']
-        @cfg.includeExt  ?= fileutil.sourceFileExtensions # this should be set by prjcts instead
+        @cfg.includeExt  ?= []
         
     #  ███████  █████████   ███████   ████████   █████████
     # ███          ███     ███   ███  ███   ███     ███   

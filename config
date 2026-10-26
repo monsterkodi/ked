@@ -1,5 +1,67 @@
 filetypes
-    config    noon
-    .kkache   noon
-    .todo     noon
-    kk        js
+    config      noon
+    .kkache     noon
+    .todo       noon
+    .gitignore  noon
+    kk          js
+    
+project
+    maxDepth    12
+    ignore      
+        node_modules
+        .kkache
+        ked.log
+        
+mouse
+    wheelSteps    1
+    wheelSpeedup  2
+    
+novim
+    autoEnableOnEscape  true
+
+sourceFileExtensions
+    kode 
+    mm 
+    zig 
+    cc 
+    c 
+    h 
+    hpp 
+    cpp 
+    nim 
+    lua 
+    bashrc
+    bash_history
+    gitconfig
+    gitignore_global
+    lesshst
+    npmrc
+    nvimrc
+    profile
+    zprofile
+    zsh_history
+    zshrc
+    ts 
+    js 
+    mjs 
+    swift 
+    styl 
+    css 
+    pug 
+    html 
+    md 
+    noon 
+    json 
+    txt 
+    log 
+    sh 
+    fish 
+    py 
+    frag 
+    vert 
+    config 
+    toml 
+    conf 
+    gitignore 
+    plist
+    
