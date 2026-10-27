@@ -165,17 +165,7 @@ export
 
         ⮐  if empty rngs
 
-        linewise = motion.isLinewise spec
-
-        @setNovimRegister rngs linewise register
-
-        @begin()
-
-        # @deleteRanges rngs @allCursors() linewise
-        # alternative version: only select ranges, with cursors at end of selections 
-        @deleteRanges rngs @allCursors() linewise
-
-        @end()
+        @setCursors belt.endPositionsOfRanges(rngs)
 
         @lastChange = null
 
