@@ -17,21 +17,29 @@ export
         if cmd.motion
             cmd.motion.count ?= cmd.count
 
+        if @visual and cmd.operator not in ['move' 'matchBracket' 'visualDelete' 'visualYank' 'visualChange' 'visualSwap' 'visualTextObject']
+            @stopVisual()
+
         switch cmd.operator
             'change'      ➜ @changeByMotion     cmd.motion  cmd.register
             'delete'      ➜ @applyChange cmd
             'yank'        ➜ @yankByMotion       cmd.motion  cmd.register
             'put'         ➜ @putRegister        cmd.count   cmd.after cmd.register
-            'move'        ➜ @moveByMotion       cmd.motion  cmd.count
+            'move'        ➜ @moveByMotionWithVisual cmd.motion cmd.count
             'searchNext'  ➜ @jumpByHighlight    cmd.count cmd.text true
             'searchPrev'  ➜ @jumpByHighlight    cmd.count cmd.text false
             'searchWord'  ➜ @searchWord         cmd.count cmd.forward
-            'matchBracket' ➜ @matchBracket()
+            'matchBracket' ➜ @matchBracket(); @updateVisual() if @visual
             'openLine'    ➜ @openLine           cmd.count cmd.after
             'insertAtIndent' ➜ @insertAtIndent()
             'replace'     ➜ @replaceChars       cmd.char cmd.count
             'toggleCase'  ➜ @toggleCase         cmd.count
             'joinLinesVim' ➜ @joinLinesVim      cmd.count
+            'visualDelete' ➜ @visualDelete      cmd.register
+            'visualYank'  ➜ @visualYank         cmd.register
+            'visualChange' ➜ @visualChange()
+            'visualSwap'  ➜ @visualSwap()
+            'visualTextObject' ➜ @visualTextObject cmd.motion
             'undo'        ➜ @undoCommand        cmd.count
             'repeat'      ➜ @repeatChange       cmd.count
             else          ➜ log 'novim unknown operator ▸' cmd.operator
@@ -181,6 +189,195 @@ export
 
         if moved
             @setCursors newCursors main:@s.main
+
+    # ███   ███  ██  ███████  ██   ██  ███████  ██
+    # ███   ███  ██  ██       ██   ██    ███    ██
+    # ███   ███  ██  ███████  ██   ██    ███    ██
+    #  ███ ███   ██       ██  ██   ██    ███    ██
+    #   █████    ██  ███████   ██████  ███████  ███████
+
+    startVisual: kind ->
+
+        if @visual == kind
+            ⮐  @stopVisual()
+
+        if not @visual
+            @visualAnchors = @allCursors().map (c) -> [c[0] c[1]]
+
+        @visual = kind
+
+        @updateVisual()
+
+    stopVisual: keepSelections=false ->
+
+        @visual        = null
+        @visualAnchors = []
+
+        if not keepSelections
+            @setSelections []
+
+    visualPairs: ->
+
+        cursors = @allCursors()
+        anchors = @visualAnchors
+        pairs   = []
+
+        for cursor, i in cursors
+
+            anchor = anchors[i] ? [cursor[0] cursor[1]]
+
+            pairs.push [[anchor[0] anchor[1]] [cursor[0] cursor[1]]]
+
+        pairs.sort (a b) ->
+            if a[1][1] == b[1][1]
+                a[1][0] - b[1][0]
+            else
+                a[1][1] - b[1][1]
+
+        unique = []
+
+        for pair in pairs
+            continue if unique.length and belt.samePos unique[-1][1] pair[1]
+            unique.push pair
+
+        unique
+
+    visualRangeForPair: anchor cursor ->
+
+        if @visual == 'line'
+
+            y1 = min anchor[1] cursor[1]
+            y2 = max anchor[1] cursor[1]
+
+            ⮐  [0 y1 kseg.width(@s.lines[y2]) y2]
+
+        a = [anchor[0] anchor[1]]
+        b = [cursor[0] cursor[1]]
+
+        if b[1] < a[1] or b[1] == a[1] and b[0] < a[0]
+            [a b] = [b a]
+
+        [a[0] a[1] b[0] b[1]]
+
+    updateVisual: ->
+
+        ⮐  if not @visual
+
+        pairs   = @visualPairs()
+        cursors = pairs.map (p) -> [p[1][0] p[1][1]]
+        anchors = pairs.map (p) -> [p[0][0] p[0][1]]
+
+        @visualAnchors = anchors
+
+        same = cursors.length == @s.cursors.length
+
+        if same
+            for cursor, i in cursors
+                same = false if not belt.samePos cursor @s.cursors[i]
+
+        if not same
+            @setCursors cursors main:@mainCursor()
+
+        rngs = []
+        for pair in pairs
+            rngs.push @visualRangeForPair(pair[0] pair[1])
+
+        @setSelections rngs
+
+    visualDelete: register ->
+
+        rngs = @s.selections.asMutable()
+
+        ⮐  if empty rngs
+
+        linewise = @visual == 'line'
+
+        @setNovimRegister rngs linewise register
+
+        @begin()
+
+        @deleteRanges rngs @allCursors() linewise
+
+        @end()
+
+        @stopVisual()
+
+    visualYank: register ->
+
+        rngs = @s.selections.asMutable()
+
+        ⮐  if empty rngs
+
+        linewise = @visual == 'line'
+
+        @setNovimRegister rngs linewise register
+
+        starts = rngs.map (r) -> [r[0] r[1]]
+
+        @setCursors starts main:@mainCursor()
+
+        @stopVisual()
+
+    visualChange: ->
+
+        rngs = @s.selections.asMutable()
+
+        ⮐  if empty rngs
+
+        @setCursors belt.endPositionsOfRanges(rngs) main:@mainCursor()
+
+        @lastChange = null
+
+        @visual        = null
+        @visualAnchors = []
+
+        @stopMode 'novim'
+
+    visualSwap: ->
+
+        ⮐  if not @visual
+
+        cursors = @allCursors()
+        anchors = @visualAnchors
+
+        for cursor, i in cursors
+
+            continue if not anchors[i]
+
+            anchor     = anchors[i]
+            anchors[i] = [cursor[0] cursor[1]]
+            cursors[i] = [anchor[0] anchor[1]]
+
+        @visualAnchors = anchors
+
+        @setCursors cursors main:@mainCursor()
+
+        @updateVisual()
+
+    visualTextObject: spec ->
+
+        ⮐  if not @visual
+
+        rngs = []
+
+        for cursor in @allCursors()
+
+            rng = motion.range @s.lines cursor spec
+
+            continue if not rng
+            continue if belt.isEmptyRange rng
+
+            rngs.push rng
+
+        ⮐  if empty rngs
+
+        @visualAnchors = rngs.map (r) -> [r[0] r[1]]
+
+        cursors = rngs.map (r) -> [max(r[0] r[2]-1) r[3]]
+
+        @setCursors cursors main:@mainCursor()
+
+        @updateVisual()
 
     applyChange: cmd ->
 
@@ -560,6 +757,12 @@ export
         else
             for i in 1..n
                 @moveCursors spec.kind
+
+    moveByMotionWithVisual: spec count=1 ->
+
+        @moveByMotion spec count
+
+        @updateVisual() if @visual
 
     moveByCharFind: spec n ->
 

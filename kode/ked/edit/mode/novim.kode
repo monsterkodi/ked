@@ -246,7 +246,9 @@ function novim
 
         if combo in ['esc' 'escape']
             @reset()
-            if @state.hasCursorsHighlightsOrSelections()
+            if @state.visual
+                @state.stopVisual()
+            else if @state.hasCursorsHighlightsOrSelections()
                 @state.clearCursorsHighlightsAndSelections()
             else
                 @exitNovim()
@@ -289,7 +291,56 @@ function novim
             ⮐  true
 
         ⮐  true if char.length != 1 # swallow every other non text key
-        
+
+        if @state.visual and not @operator and not @area
+
+            if char == 'v'
+                @state.startVisual 'char'
+                @reset()
+                ⮐  true
+
+            if char == 'V'
+                @state.startVisual 'line'
+                @reset()
+                ⮐  true
+
+            if char in ['d' 'x']
+                @execute { operator: 'visualDelete' }
+                @reset()
+                ⮐  true
+
+            if char == 'y'
+                @execute { operator: 'visualYank' }
+                @reset()
+                ⮐  true
+
+            if char in ['c' 's']
+                @execute { operator: 'visualChange' }
+                @reset()
+                ⮐  true
+
+            if char == 'o'
+                @execute { operator: 'visualSwap' }
+                @reset()
+                ⮐  true
+
+            if area = novim.areas[char]
+                @area = area
+                @logPending()
+                ⮐  true
+
+        if not @operator and not @area
+
+            if char == 'v'
+                @state.startVisual 'char'
+                @reset()
+                ⮐  true
+
+            if char == 'V'
+                @state.startVisual 'line'
+                @reset()
+                ⮐  true
+
         if @prefix # gg 
             prefix  = @prefix
             @prefix = null
@@ -304,7 +355,11 @@ function novim
             @area
     
                 if target = novim.textObjects[char]
-                    @completeTextObject target
+                    if @state.visual
+                        @execute { operator: 'visualTextObject', motion: { kind: 'textObject', area: @area, target: target, count: @countNumber() } }
+                        @reset()
+                    else
+                        @completeTextObject target
                 else
                     @reset()
     

@@ -1262,6 +1262,213 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     novim.lastVind = ''
 
+▸ visual mode
+
+    s.loadLines belt.linesForText("one two\nthree four")
+    s.setMainCursor 0 0
+
+    key 'v'
+    s.visual ▸ 'char'
+    s.s.selections ▸ []
+    cur 0 0
+
+    keys 'l'
+    s.s.selections ▸ [[0 0 1 0]]
+    cur 1 0
+
+    keys 'l'
+    s.s.selections ▸ [[0 0 2 0]]
+    cur 2 0
+
+    keys 'h'
+    s.s.selections ▸ [[0 0 1 0]]
+    cur 1 0
+
+    keys 'h'
+    s.s.selections ▸ []
+    cur 0 0
+
+    key 'V'
+    s.visual ▸ 'line'
+    s.s.selections ▸ [[0 0 7 0]]
+    cur 0 0
+
+    keys 'j'
+    s.s.selections ▸ [[0 0 10 1]]
+    cur 0 1
+
+    key 'esc'
+    s.visual ▸ null
+    s.s.selections ▸ []
+    txt "one two\nthree four"
+
+▸ visual multicursor
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setCursors [[0 0] [0 2]]
+
+    key 'v'
+    s.s.selections ▸ []
+
+    keys 'l'
+    s.s.selections ▸ [[0 0 1 0] [0 2 1 2]]
+    s.allCursors() ▸ [[1 0] [1 2]]
+
+    key 'esc'
+
+▸ visual vertical
+
+    s.loadLines belt.linesForText("abcd\nefgh")
+    s.setMainCursor 1 0
+
+    key 'v'
+    key 'j'
+    s.s.selections ▸ [[1 0 1 1]]
+    cur 1 1
+
+    key '$'
+    s.s.selections ▸ [[1 0 4 1]]
+    cur 4 1
+
+    key 'esc'
+
+▸ visual line mode
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 1 1
+
+    keys 'Vj'
+    s.visual ▸ 'line'
+    s.s.selections ▸ [[0 1 5 2]]
+    cur 1 2
+
+    key 'V'
+    s.visual ▸ null
+    s.s.selections ▸ []
+
+▸ visual yank
+
+    s.novimRegister = null
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 0 0
+
+    keys 'vlly'
+    s.novimRegister.lines ▸ ['on']
+    s.novimRegister.linewise ▸ false
+    s.visual ▸ null
+    s.s.selections ▸ []
+    cur 0 0
+    txt "one two"
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 1 1
+
+    keys 'Vy'
+    s.novimRegister.lines ▸ ['two']
+    s.novimRegister.linewise ▸ true
+
+▸ visual delete
+
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 0 0
+
+    keys 'vlld'
+    txt "e two"
+    s.novimRegister.lines ▸ ['on']
+    s.visual ▸ null
+    cur 0 0
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 0 1
+
+    keys 'Vd'
+    txt "one\nthree"
+    s.novimRegister.lines ▸ ['two']
+    s.novimRegister.linewise ▸ true
+    cur 0 1
+
+▸ visual change
+
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 0 0
+
+    keys 'vllc'
+    txt "one two"
+    s.s.selections ▸ [[0 0 2 0]]
+    cur 2 0
+    s.visual ▸ null
+
+    s.insert 'X'
+    txt "Xe two"
+
+▸ visual swap ends
+
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 1 0
+
+    keys 'vll'
+    s.s.selections ▸ [[1 0 3 0]]
+    cur 3 0
+
+    key 'o'
+    s.s.selections ▸ [[1 0 3 0]]
+    cur 1 0
+
+    key 'o'
+    cur 3 0
+
+    key 'esc'
+
+▸ visual counts and find
+
+    s.loadLines belt.linesForText("a b c d")
+    s.setMainCursor 0 0
+
+    keys 'v2l'
+    s.s.selections ▸ [[0 0 2 0]]
+    cur 2 0
+
+    key 'esc'
+
+    s.loadLines belt.linesForText("a b c d")
+    s.setMainCursor 0 0
+
+    keys 'vf '
+    s.s.selections ▸ [[0 0 1 0]]
+    cur 1 0
+
+    key 'esc'
+
+▸ visual bracket
+
+    s.loadLines belt.linesForText("if (a[b]) c")
+    s.setMainCursor 3 0
+
+    keys 'v%'
+    s.s.selections ▸ [[3 0 8 0]]
+    cur 8 0
+
+    key 'esc'
+
+▸ visual escape stays in novim
+
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 0 0
+
+    s.allowedModes.novim = true
+    mode.modes.novim = novim
+    mode.start s 'novim'
+
+    key 'v'
+    key 'esc'
+
+    s.visual ▸ null
+    s.s.selections ▸ []
+    mode.isActive s 'novim' ▸ true
+
+    mode.stop s 'novim'
+    delete s.allowedModes.novim
+
 ▸ search highlights
 
     s.loadLines belt.linesForText("foo\nbar\nfoo\nbar\nfoo")

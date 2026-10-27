@@ -165,6 +165,9 @@ function state extends events
     clearEmpty:  => @clearSegls [  ]
     clearSegls: @segls =>
     
+        @visual        = null
+        @visualAnchors = []
+    
         @s = immutable
             lines:       @segls
             selections:  []
