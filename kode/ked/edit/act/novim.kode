@@ -17,7 +17,7 @@ export
         if cmd.motion
             cmd.motion.count ?= cmd.count
 
-        if @visual and cmd.operator not in ['move' 'matchBracket' 'visualDelete' 'visualYank' 'visualChange' 'visualSwap' 'visualTextObject']
+        if @visual and cmd.operator not in ['move' 'matchBracket' 'visualDelete' 'visualYank' 'visualChange' 'visualSwap' 'visualTextObject' 'visualIndent' 'visualDeindent']
             @stopVisual()
 
         switch cmd.operator
@@ -40,6 +40,10 @@ export
             'visualChange' ➜ @visualChange()
             'visualSwap'  ➜ @visualSwap()
             'visualTextObject' ➜ @visualTextObject cmd.motion
+            'indent'      ➜ @indentByMotion    cmd.motion false
+            'deindent'    ➜ @indentByMotion    cmd.motion true
+            'visualIndent' ➜ @indentVisual     cmd.count false
+            'visualDeindent' ➜ @indentVisual   cmd.count true
             'undo'        ➜ @undoCommand        cmd.count
             'repeat'      ➜ @repeatChange       cmd.count
             else          ➜ log 'novim unknown operator ▸' cmd.operator
@@ -379,6 +383,63 @@ export
 
         @updateVisual()
 
+    indentByMotion: spec deindent=false ->
+
+        indices = []
+
+        for cursor in @allCursors()
+
+            rng = motion.range @s.lines cursor spec
+
+            continue if not rng
+
+            indices = indices.concat belt.lineIndicesForRange(rng)
+
+        ⮐  if empty indices
+
+        @indentAtIndices indices deindent
+
+        @lastChange = { operator: deindent ? 'deindent' : 'indent', motion: copy(spec) }
+
+    indentVisual: count deindent=false ->
+
+        indices = belt.lineIndicesForRanges @s.selections
+
+        ⮐  if empty indices
+
+        indices = Array.from new Set(indices)
+
+        @indentAtIndices indices deindent (count ? 1)
+
+        @lastChange = { operator: deindent ? 'deindent' : 'indent', motion: { kind: 'line', count: indices.length } }
+
+        @stopVisual()
+
+    indentAtIndices: indices deindent=false times=1 ->
+
+        indices = Array.from new Set(indices)
+
+        indices.sort (a b) -> a - b
+
+        ⮐  if empty indices
+
+        n = max 1 (times ? 1)
+
+        @begin()
+
+        for i in 0...n
+
+            if deindent
+                [lines selections cursors] = belt.deindentLineRangesAndPositionsAtIndices @s.lines @s.selections @s.cursors indices
+            else
+                [lines selections cursors] = belt.indentLineRangesAndPositionsAtIndices @s.lines @s.selections @s.cursors indices
+
+            @setLines lines
+            @setSelections selections
+            @setCursors cursors main:@mainCursor()
+
+        @end()
+
     applyChange: cmd ->
 
         @lastChange = cmd
@@ -392,12 +453,22 @@ export
             'replace'     ➜ @replaceChars     @lastChange.char     (count > 1 ? count : @lastChange.count)
             'toggleCase'  ➜ @toggleCase       (count > 1 ? count : @lastChange.count)
             'joinLinesVim'➜ @joinLinesVim     (count > 1 ? count : @lastChange.count)
+            'indent'      ➜ @repeatIndent     count false
+            'deindent'    ➜ @repeatIndent     count true
             else
                 spec = copy @lastChange.motion
 
                 spec.count = count if count > 1
 
                 @deleteByMotion spec @lastChange.register
+
+    repeatIndent: count deindent ->
+
+        spec = copy (@lastChange.motion ? { kind: 'line', count: 1 })
+
+        spec.count = count if count > 1
+
+        @indentByMotion spec deindent
 
     usesClipboard: register ->
 

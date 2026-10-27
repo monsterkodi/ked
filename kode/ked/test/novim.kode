@@ -1469,6 +1469,82 @@ mrange = lines x y m -> motion.range lines [x y] m
     mode.stop s 'novim'
     delete s.allowedModes.novim
 
+▸ indent lines
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 0 0
+
+    keys '>>'
+    txt "    one\ntwo\nthree"
+    cur 4 0
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 0 0
+
+    keys '2>>'
+    txt "    one\n    two\nthree"
+    cur 4 0
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 0 0
+
+    keys '>j'
+    txt "    one\n    two\nthree"
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 0 0
+
+    keys '>>j.'
+    txt "    one\n    two\nthree"
+
+▸ deindent lines
+
+    s.loadLines belt.linesForText("    one\n        two\n            three")
+    s.setMainCursor 0 0
+
+    keys '<<'
+    txt "one\n        two\n            three"
+    cur 0 0
+
+    s.loadLines belt.linesForText("    one\n        two\n            three")
+    s.setMainCursor 0 0
+
+    keys '2<<'
+    txt "one\n    two\n            three"
+    cur 0 0
+
+    s.loadLines belt.linesForText("    one\n        two\n            three")
+    s.setMainCursor 0 0
+
+    keys '<j'
+    txt "one\n    two\n            three"
+
+▸ visual indent
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 1 1
+
+    keys 'Vj>'
+    txt "one\n    two\n    three"
+    s.visual ▸ null
+    s.s.selections ▸ []
+
+    s.loadLines belt.linesForText("    one\n        two\n            three")
+    s.setMainCursor 1 1
+
+    keys 'Vj<'
+    txt "    one\n    two\n        three"
+    s.visual ▸ null
+    s.s.selections ▸ []
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 0 1
+
+    keys 'vj>'
+    txt "one\n    two\nthree"
+    s.visual ▸ null
+    s.s.selections ▸ []
+
 ▸ search highlights
 
     s.loadLines belt.linesForText("foo\nbar\nfoo\nbar\nfoo")

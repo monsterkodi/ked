@@ -19,6 +19,8 @@ function novim
         c: 'change'
         d: 'delete'
         y: 'yank'
+        '>': 'indent'
+        '<': 'deindent'
 
     @arrows:
         left:  'h'
@@ -83,6 +85,8 @@ function novim
     @motions: {
         '0':      -> { kind: 'bol' }
         '$':      -> { kind: 'eol' }
+        '>':    n -> { kind: 'line'             count: n }
+        '<':    n -> { kind: 'line'             count: n }
         'c':    n -> { kind: 'line'             count: n }
         'd':    n -> { kind: 'line'             count: n }
         'y':    n -> { kind: 'line'             count: n }
@@ -321,6 +325,12 @@ function novim
 
             if char == 'o'
                 @execute { operator: 'visualSwap' }
+                @reset()
+                ⮐  true
+
+            if char in ['>' '<']
+                operator = char == '>' ? 'visualIndent' : 'visualDeindent'
+                @execute { operator: operator, count: @countNumber() }
                 @reset()
                 ⮐  true
 
