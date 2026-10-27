@@ -494,7 +494,7 @@ function edit
 
         newRngs
     
-    @extendLineRangesByMovingPositionsInDirection: lines rngs posl dir opt ->
+    @extendLineRangesByMovingPositionsInDirection: lines rngs posl dir opt anchors ->
         
         newRngs = rngs.asMutable()
         newPosl = posl.asMutable()
@@ -534,6 +534,7 @@ function edit
             rng[0] = clamp 0 lines[rng[1]].length rng[0] if rng[1] < lines.length
             rng[2] = clamp 0 lines[rng[3]].length rng[2] if rng[3] < lines.length
         
+        log 'extendLineRangesByMovingPositionsInDirection' anchors newRngs newPosl        
         [newRngs newPosl]
         
 export edit

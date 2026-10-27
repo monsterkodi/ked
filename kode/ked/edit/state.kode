@@ -82,6 +82,9 @@ function state extends events
         
         main = opt.main
 
+        if not opt.keepAnchors
+            delete @anchors
+
         if main is arr ➜ main = belt.indexOfPosInPositions main cursors
         if main is num and main < 0 ➜ main = cursors.length+main
 
