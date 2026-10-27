@@ -1045,6 +1045,223 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.setMainCursor 0 0
     keys 'gg'   0 0
 
+▸ yank line command
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 1 1
+
+    key 'Y'
+    s.novimRegister.lines ▸ ['two']
+    s.novimRegister.linewise ▸ true
+    cur 1 1
+    txt "one\ntwo\nthree"
+
+    s.setMainCursor 0 0
+    keys '2Y'
+    s.novimRegister.lines ▸ ['one' 'two']
+
+▸ open lines
+
+    s.loadLines belt.linesForText("abc\ndef")
+    s.setMainCursor 0 1
+
+    key 'o'
+    txt "abc\ndef\n"
+    cur 0 2
+
+    s.loadLines belt.linesForText("abc\ndef")
+    s.setMainCursor 0 1
+
+    key 'O'
+    txt "abc\n\ndef"
+    cur 0 1
+
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 0 0
+
+    keys '2o'
+    txt "abc\n\n"
+    cur 0 2
+
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 0 0
+
+    keys '2O'
+    txt "\n\nabc"
+    cur 0 0
+
+▸ insert at first non blank
+
+    s.loadLines belt.linesForText("    abc")
+    s.setMainCursor 6 0
+
+    s.allowedModes.novim = true
+    mode.modes.novim = novim
+    mode.start s 'novim'
+
+    key 'I'
+    cur 4 0
+    mode.isActive s 'novim' ▸ false
+
+    delete s.allowedModes.novim
+
+▸ replace chars
+
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 1 0
+
+    key 'r'
+    m.replace ▸ true
+    key 'X'
+    txt "aXcdef"
+    cur 2 0
+    m.replace ▸ null
+
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 0 0
+
+    keys '3rx'
+    txt "xxxdef"
+    cur 3 0
+
+    s.loadLines belt.linesForText("ab")
+    s.setMainCursor 1 0
+
+    keys '3rx'
+    txt "ab"
+    cur 1 0
+
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 0 0
+
+    keys 'rX.'
+    txt "XXc"
+    cur 2 0
+
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 0 0
+
+    key 'r'
+    m.handleKey 'esc' {combo:'esc'}
+    txt "abcdef"
+    m.replace ▸ null
+
+▸ toggle case
+
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 0 0
+
+    key '~'
+    txt "Abc"
+    cur 1 0
+
+    s.loadLines belt.linesForText("aBc")
+    s.setMainCursor 0 0
+
+    keys '3~'
+    txt "AbC"
+    cur 2 0
+
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 2 0
+
+    key '~'
+    txt "abC"
+    cur 2 0
+
+    s.loadLines belt.linesForText("abcd")
+    s.setMainCursor 0 0
+
+    keys '~l.'
+    txt "AbCd"
+    cur 3 0
+
+▸ join lines
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 0 0
+
+    key 'J'
+    txt "one two\nthree"
+    cur 3 0
+
+    s.loadLines belt.linesForText("one  \n   two\nthree")
+    s.setMainCursor 0 0
+
+    key 'J'
+    txt "one two\nthree"
+    cur 3 0
+
+    s.loadLines belt.linesForText("  one\n    two")
+    s.setMainCursor 0 0
+
+    key 'J'
+    txt "  one two"
+    cur 5 0
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 0 0
+
+    keys '3J'
+    txt "one two three"
+    cur 3 0
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 0 1
+
+    key 'J'
+    txt "one\ntwo three"
+    cur 3 1
+
+▸ match bracket
+
+    s.loadLines belt.linesForText("if (a[b]) { c }")
+    s.setMainCursor 3 0
+
+    key '%'
+    cur 8 0
+
+    key '%'
+    cur 3 0
+
+    s.setMainCursor 5 0
+    key '%'
+    cur 7 0
+
+    s.setMainCursor 0 0
+    key '%'
+    cur 8 0
+
+    s.loadLines belt.linesForText("call(\n  x\n)")
+    s.setMainCursor 4 0
+    key '%'
+    cur 0 2
+
+▸ search word under cursor
+
+    s.loadLines belt.linesForText("foo bar foo\nfoobar foo")
+    s.setMainCursor 0 0
+
+    key '*'
+    cur 8 0
+    novim.lastVind ▸ 'foo'
+    s.s.highlights ▸ [[0 0 3] [8 0 11] [7 1 10]]
+
+    key '*'
+    cur 7 1
+    s.s.highlights ▸ [[0 0 3] [8 0 11] [7 1 10]]
+
+    key '#'
+    cur 8 0
+
+    s.loadLines belt.linesForText("foo bar foo\nfoobar foo")
+    s.setMainCursor 0 0
+
+    key '#'
+    cur 0 0
+
+    novim.lastVind = ''
+
 ▸ search highlights
 
     s.loadLines belt.linesForText("foo\nbar\nfoo\nbar\nfoo")

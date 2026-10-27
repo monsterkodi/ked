@@ -25,6 +25,13 @@ export
             'move'        ➜ @moveByMotion       cmd.motion  cmd.count
             'searchNext'  ➜ @jumpByHighlight    cmd.count cmd.text true
             'searchPrev'  ➜ @jumpByHighlight    cmd.count cmd.text false
+            'searchWord'  ➜ @searchWord         cmd.count cmd.forward
+            'matchBracket' ➜ @matchBracket()
+            'openLine'    ➜ @openLine           cmd.count cmd.after
+            'insertAtIndent' ➜ @insertAtIndent()
+            'replace'     ➜ @replaceChars       cmd.char cmd.count
+            'toggleCase'  ➜ @toggleCase         cmd.count
+            'joinLinesVim' ➜ @joinLinesVim      cmd.count
             'undo'        ➜ @undoCommand        cmd.count
             'repeat'      ➜ @repeatChange       cmd.count
             else          ➜ log 'novim unknown operator ▸' cmd.operator
@@ -63,7 +70,117 @@ export
             pos = [target[0] target[1]]
 
         @setMainCursor pos
-        @highlightText text
+
+    wordSpansForText: text ->
+
+        spans = []
+
+        for span in belt.lineSpansForText(@s.lines, text)
+
+            [x1 y x2] = span
+            line      = kseg.str @s.lines[y]
+            before    = x1 > 0 ? line[x1-1] : ''
+            after     = x2 < line.length ? line[x2] : ''
+
+            continue if /\w/.test(text[0]) and /\w/.test(before)
+            continue if /\w/.test(text[text.length-1]) and /\w/.test(after)
+
+            spans.push span
+
+        spans
+
+    searchWord: count forward ->
+
+        text = @wordAtCursor()
+
+        ⮐  if empty text
+
+        novim.lastVind = text
+
+        spans = @wordSpansForText text
+
+        @setHighlights spans
+
+        rng = belt.rangeOfClosestWordToPos @s.lines @mainCursor()
+
+        ⮐  if not rng
+
+        start = [rng[0] rng[1]]
+        end   = [rng[2] rng[3]]
+        pos   = @mainCursor()
+        moved = false
+
+        for i in 0...max(1, count ? 1)
+
+            target = null
+
+            for span in spans
+
+                after  = span[1] > end[1] or (span[1] == end[1] and span[0] > end[0])
+                before = span[1] < start[1] or (span[1] == start[1] and span[0] < start[0])
+
+                if forward and after
+                    target = span
+                    break
+                if not forward and before
+                    target = span
+
+            break if not target
+
+            start = [target[0] target[1]]
+            end   = [target[0]+text.length target[1]]
+            pos   = [target[0] target[1]]
+            moved = true
+
+        @setMainCursor pos[0] pos[1] if moved
+
+    matchBracket: ->
+
+        lines      = @s.lines
+        cursors    = @allCursors()
+        newCursors = []
+        moved      = false
+
+        for c in cursors
+
+            line = lines[c[1]]
+            segi = kseg.indexAtWidth line c[0]
+            found = null
+
+            while segi < line.length
+
+                ch = line[segi]
+
+                if ch in ['(' ')' '[' ']' '{' '}']
+                    found = [kseg.widthAtSegi(line, segi), c[1], ch]
+                    break
+
+                segi += 1
+
+            if not found
+                newCursors.push c
+                continue
+
+            ch = found[2]
+            open = switch ch
+                '(' '[' '{' ➜ ch
+                ')' ➜ '('
+                ']' ➜ '['
+                '}' ➜ '{'
+
+            spans = motion.pairSpansForPosition lines found[0] found[1] open
+
+            if not spans
+                newCursors.push c
+                continue
+
+            target = open == ch ? [spans[1][0] spans[1][1]] : [spans[0][0] spans[0][1]]
+
+            newCursors.push target
+            moved = true
+
+        if moved
+            @setCursors newCursors main:@s.main
 
     applyChange: cmd ->
 
@@ -74,11 +191,16 @@ export
 
         ⮐  if not @lastChange
 
-        spec = copy @lastChange.motion
+        switch @lastChange.operator
+            'replace'     ➜ @replaceChars     @lastChange.char     (count > 1 ? count : @lastChange.count)
+            'toggleCase'  ➜ @toggleCase       (count > 1 ? count : @lastChange.count)
+            'joinLinesVim'➜ @joinLinesVim     (count > 1 ? count : @lastChange.count)
+            else
+                spec = copy @lastChange.motion
 
-        spec.count = count if count > 1
+                spec.count = count if count > 1
 
-        @deleteByMotion spec @lastChange.register
+                @deleteByMotion spec @lastChange.register
 
     usesClipboard: register ->
 
@@ -267,6 +389,167 @@ export
 
         @setLines newLines
         @setCursors newPosl
+
+    openLine: count after ->
+
+        n = max 1 (count ? 1)
+
+        @begin()
+
+        for i in 0...n
+            @putLines [''] after
+
+        @end()
+
+        @stopMode 'novim'
+
+    insertAtIndent: ->
+
+        @moveCursors 'ind'
+
+        @stopMode 'novim'
+
+    replaceChars: text count ->
+
+        n       = max 1 (count ? 1)
+        lines   = @s.lines.map (l) -> l
+        cursors = @allCursors()
+        changed = false
+
+        for c in cursors
+
+            line = lines[c[1]].asMutable()
+            segi = kseg.indexAtWidth line c[0]
+
+            continue if segi+n > line.length
+
+            repl = []
+            for i in 0...n
+                repl.push text
+
+            newLine = line[0...segi].concat(repl).concat(line[segi+n..])
+
+            lines[c[1]] = newLine
+            c[0]        = kseg.width newLine[0...segi+n]
+            changed     = true
+
+        ⮐  if not changed
+
+        @begin()
+
+        @setLines lines
+        @setCursors cursors main:@s.main
+
+        @end()
+
+        @lastChange = { operator: 'replace', char: text, count: n }
+
+    toggleCase: count ->
+
+        n       = max 1 (count ? 1)
+        lines   = @s.lines.map (l) -> l
+        cursors = @allCursors()
+        changed = false
+
+        for c in cursors
+
+            line = lines[c[1]].asMutable()
+            segi = kseg.indexAtWidth line c[0]
+
+            continue if segi >= line.length
+
+            lasti = min line.length-1 segi+n-1
+
+            for i in segi..lasti
+
+                seg  = line[i]
+                upper = seg.toUpperCase()
+
+                line[i] = upper != seg ? upper : seg.toLowerCase()
+
+            lines[c[1]] = line
+            c[0]        = kseg.width line[0...min(lasti+1, line.length-1)]
+            changed     = true
+
+        ⮐  if not changed
+
+        @begin()
+
+        @setLines lines
+        @setCursors cursors main:@s.main
+
+        @end()
+
+        @lastChange = { operator: 'toggleCase', count: n }
+
+    joinLinesVim: count ->
+
+        n       = max 2 (count ? 1)
+        lines   = @s.lines.map (l) -> l
+        cursors = @allCursors()
+
+        starts = []
+        for c in cursors
+            starts.push c[1] if c[1] < lines.length-1 and c[1] not in starts
+
+        ⮐  if empty starts
+
+        starts.sort (a b) -> a - b
+
+        blocks = []
+        for y in starts
+            continue if blocks.length and y < blocks[-1][0] + blocks[-1][1]
+            blocks.push [y min(n, lines.length-y) 0]
+
+        for block in blocks
+
+            [y take] = block
+            first    = kseg.str(lines[y]).replace(/\s+$/ '')
+            parts    = [first]
+
+            for j in 1...take
+                text = kseg.str(lines[y+j]).replace(/^\s+/ '').replace(/\s+$/ '')
+                parts.push text
+
+            joined = ''
+            for part in parts
+                continue if empty part
+                joined = empty(joined) ? part : joined + ' ' + part
+
+            block[2] = kseg.width first
+
+            lines.splice y take (kseg joined)
+
+        newCursors = []
+
+        for c in cursors
+
+            [x y] = c
+            ny    = y
+            nx    = x
+
+            for block in blocks
+
+                [by take seam] = block
+
+                if by <= y < by+take
+                    ny = by
+                    nx = seam
+                    break
+
+                if by+take <= y
+                    ny -= take-1
+
+            newCursors.push [nx ny]
+
+        @begin()
+
+        @setLines lines
+        @setCursors newCursors main:@s.main
+
+        @end()
+
+        @lastChange = { operator: 'joinLinesVim', count: n }
 
     moveByMotion: spec count=1->
     

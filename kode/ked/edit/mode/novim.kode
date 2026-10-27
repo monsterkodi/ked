@@ -69,6 +69,15 @@ function novim
         'P':    n -> { operator: 'put'          count: n     after: false }
         'u':    n -> { operator: 'undo'         count: n }
         '.':    n -> { operator: 'repeat'       count: n } 
+        'Y':    n -> { operator: 'yank'         motion: { kind: 'line', count: n } }
+        'o':    n -> { operator: 'openLine'     count: n  after: true  }
+        'O':    n -> { operator: 'openLine'     count: n  after: false }
+        'I':      -> { operator: 'insertAtIndent' }
+        '~':    n -> { operator: 'toggleCase'   count: n }
+        'J':    n -> { operator: 'joinLinesVim' count: n }
+        '%':      -> { operator: 'matchBracket' }
+        '*':    n -> { operator: 'searchWord'   count: n  forward: true  }
+        '#':    n -> { operator: 'searchWord'   count: n  forward: false }
         }
 
     @motions: {
@@ -133,11 +142,12 @@ function novim
         @register        = null
         @registerPending = false
         @find            = null
+        @replace         = null
         @logPending()
 
     resetOrExit: ->
 
-        if @operator or @count or @prefix or @registerPending or @register or @find
+        if @operator or @count or @prefix or @registerPending or @register or @find or @replace
             @reset()
         else
             @exitNovim()
@@ -157,6 +167,7 @@ function novim
         t += @count if @count 
         t += @register if @register 
         t += @find if @find 
+        t += 'r' if @replace
     
         post.emit 'title.novim' t
 
@@ -189,6 +200,11 @@ function novim
         else
             @execute { operator: 'move', motion: motion }
 
+        @reset()
+
+    completeReplace: char ->
+
+        @execute { operator: 'replace', char: char, count: @countNumber() }
         @reset()
 
     repeatFind: reverse=false ->
@@ -243,6 +259,13 @@ function novim
             # log "novim.find #{char} -- #{event.char} #{combo} #{key}" 
             if char.length == 1
                 @completeFind char
+            else if key != 'shift'
+                @reset()
+            ⮐ true
+
+        if @replace
+            if char.length == 1
+                @completeReplace char
             else if key != 'shift'
                 @reset()
             ⮐ true
@@ -332,6 +355,11 @@ function novim
             char == ','
     
                 @repeatFind true
+    
+            char == 'r'
+    
+                @replace = true
+                @logPending()
     
             novim.operators[char]
     
