@@ -22,6 +22,8 @@ export
                 
         ⮐  @deleteSelection() if type in ['back' 'next'] and valid @s.selections
 
+        @recordNovimBackspace() if type == 'back' and not jump
+
         lines = @s.lines.map (l) -> l
         
         cursors = @allCursors()

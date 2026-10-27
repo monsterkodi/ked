@@ -117,6 +117,7 @@ handleKey = key event -> # will be bound to state
         'alt+cmd+/'     'ctrl+alt+/'        ➜ ⮐  @toggleCommentTypeAtSelectionOrCursorLines()
                                                  
         'esc' 
+            @finishNovimInsert()
             if @hasCursorsHighlightsOrSelections()                              
                 ⮐ @clearCursorsHighlightsAndSelections()
             else

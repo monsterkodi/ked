@@ -298,6 +298,8 @@ export
 
         @setNovimRegister rngs linewise register
 
+        @lastChange = { operator: 'visualDelete', linewise: linewise, register: register, shapes: @visualRepeatShapes() }
+
         @begin()
 
         @deleteRanges rngs @allCursors() linewise
@@ -328,14 +330,36 @@ export
 
         ⮐  if empty rngs
 
-        @setCursors belt.endPositionsOfRanges(rngs) main:@mainCursor()
+        @startNovimInsert { kind: 'visual', linewise: @visual == 'line', shapes: @visualRepeatShapes() }
 
-        @lastChange = null
+        @setCursors belt.endPositionsOfRanges(rngs) main:@mainCursor()
 
         @visual        = null
         @visualAnchors = []
 
         @stopMode 'novim'
+
+    visualRepeatShapes: ->
+
+        shapes = []
+
+        if @visual == 'line'
+
+            y1 = Infinity
+            y2 = -1
+
+            for rng in @s.selections
+                y1 = min y1 rng[1]
+                y2 = max y2 rng[3]
+
+            shapes.push { linewise: true, count: y2-y1+1 }
+
+        else
+
+            for rng in @s.selections
+                shapes.push { linewise: false, x1: 0, y1: 0, x2: rng[2]-rng[0], y2: rng[3]-rng[1] }
+
+        shapes
 
     visualSwap: ->
 
@@ -463,6 +487,38 @@ export
         @lastChange = cmd
         @deleteByMotion cmd.motion cmd.register
 
+    startNovimInsert: spec ->
+
+        @novimInsert = copy(spec)
+
+        @novimInsert.text ?= ''
+
+        @novimInsert
+
+    recordNovimInsert: text ->
+
+        ⮐  if not @novimInsert or @novimReplaying
+
+        @novimInsert.text += text
+
+    recordNovimBackspace: ->
+
+        ⮐  if not @novimInsert or @novimReplaying
+
+        text = @novimInsert.text
+
+        @novimInsert.text = text[0...-1] if text.length
+
+    finishNovimInsert: ->
+
+        ⮐  if not @novimInsert
+
+        insert = @novimInsert
+
+        @novimInsert = null
+
+        @lastChange = { operator: 'insert', insert: insert }
+
     repeatChange: count ->
 
         ⮐  if not @lastChange
@@ -473,6 +529,9 @@ export
             'joinLinesVim'➜ @joinLinesVim     (count > 1 ? count : @lastChange.count)
             'indent'      ➜ @repeatIndent     count false
             'deindent'    ➜ @repeatIndent     count true
+            'insert'      ➜ @repeatInsert     count
+            'put'         ➜ @repeatPut        count
+            'visualDelete'➜ @repeatVisual     count 'delete'
             else
                 spec = copy @lastChange.motion
 
@@ -487,6 +546,132 @@ export
         spec.count = count if count > 1
 
         @indentByMotion spec deindent
+
+    repeatPut: count ->
+
+        n = max 1 (count > 1 ? count : @lastChange.count)
+
+        @putRegLines @lastChange.reg n @lastChange.after
+
+    repeatInsert: count ->
+
+        insert = @lastChange.insert
+
+        n = max 1 (count ? 1)
+
+        for i in 0...n
+            @replayInsert insert
+
+    replayInsert: insert ->
+
+        switch insert.kind
+            'insert'         ➜ @insertForRepeat insert.text
+            'append'         ➜ @moveCursors('right'); @insertForRepeat insert.text
+            'appendEol'      ➜ @moveCursors('eol');   @insertForRepeat insert.text
+            'insertAtIndent' ➜ @moveCursors('ind');   @insertForRepeat insert.text
+            'openLineAfter'  ➜ @putOpenLines(insert, true);  @insertForRepeat insert.text
+            'openLineBefore' ➜ @putOpenLines(insert, false); @insertForRepeat insert.text
+            'change'         ➜ @replayChange insert
+            'visual'         ➜ @replayVisual insert 'change'
+            else             ➜ log 'novim unknown insert ▸' insert.kind
+
+    replayChange: insert ->
+
+        spec = copy insert.motion
+
+        rngs = @selectByMotion spec
+
+        ⮐  if empty rngs
+
+        @setCursors belt.endPositionsOfRanges(rngs) main:@s.main
+
+        @insertForRepeat insert.text
+
+    putOpenLines: insert after ->
+
+        n = max 1 (insert.count ? 1)
+
+        @begin()
+
+        for i in 0...n
+            @putLines [''] after
+
+        @end()
+
+    insertForRepeat: text ->
+
+        @novimReplaying = true
+
+        @insert text
+
+        @novimReplaying = false
+
+    repeatVisual: count action ->
+
+        n = max 1 (count ? 1)
+
+        for i in 0...n
+            @replayVisual @lastChange action
+
+    replayVisual: change action ->
+
+        rngs = []
+
+        cursors = @allCursors()
+
+        for cursor, i in cursors
+
+            shape = change.shapes[min(i, change.shapes.length-1)] ? change.shapes[0]
+
+            continue if not shape
+
+            rng = @rangeForVisualShape shape cursor
+
+            continue if not rng
+            continue if belt.isEmptyRange rng
+
+            rngs.push rng
+
+        ⮐  if empty rngs
+
+        if action == 'delete'
+
+            @setNovimRegister rngs change.linewise change.register
+
+            @begin()
+
+            @deleteRanges rngs @allCursors() change.linewise
+
+            @end()
+
+        else
+
+            @setSelections rngs
+
+            @setCursors belt.endPositionsOfRanges(rngs) main:@s.main
+
+            @insertForRepeat change.text
+
+    rangeForVisualShape: shape cursor ->
+
+        lines = @s.lines
+
+        ⮐  if empty lines
+
+        if shape.linewise
+
+            y1 = min cursor[1] lines.length-1
+            y2 = min cursor[1]+shape.count-1 lines.length-1
+
+            ⮐  [0 y1 kseg.width(lines[y2]) y2]
+
+        y1 = min cursor[1] lines.length-1
+        y2 = min cursor[1]+shape.y2 lines.length-1
+
+        x1 = min cursor[0] kseg.width(lines[y1])
+        x2 = min cursor[0]+shape.x2 kseg.width(lines[y2])
+
+        [x1 y1 x2 y2]
 
     usesClipboard: register ->
 
@@ -575,7 +760,7 @@ export
 
         @setCursors belt.endPositionsOfRanges(rngs)
 
-        @lastChange = null
+        @startNovimInsert { kind: 'change', motion: copy(spec) }
 
         @stopMode 'novim'
 
@@ -615,9 +800,15 @@ export
 
         n = max 1 (count ? 1)
 
+        @putRegLines reg n after
+
+        @lastChange = { operator: 'put', after: after, count: n, register: register, reg: { lines: copy(reg.lines), linewise: reg.linewise } }
+
+    putRegLines: reg count after ->
+
         @begin()
 
-        for i in 0...n
+        for i in 0...count
             if reg.linewise
                 @putLines reg.lines after
             else
@@ -687,11 +878,15 @@ export
 
         @end()
 
+        @startNovimInsert { kind: after ? 'openLineAfter' : 'openLineBefore', count: n }
+
         @stopMode 'novim'
 
     insertAtIndent: ->
 
         @moveCursors 'ind'
+
+        @startNovimInsert { kind: 'insertAtIndent' }
 
         @stopMode 'novim'
 

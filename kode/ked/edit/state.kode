@@ -167,6 +167,7 @@ function state extends events
     
         @visual        = null
         @visualAnchors = []
+        @novimInsert   = null
     
         @s = immutable
             lines:       @segls

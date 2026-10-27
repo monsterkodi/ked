@@ -28,7 +28,9 @@ export
             @deleteSelection()
             
         [lines cursors] = belt.insertTextAtPositions @s.lines text @s.cursors
-        
+
+        @recordNovimInsert text
+
         @clearHighlights()
         @setLines   lines
         @setCursors cursors

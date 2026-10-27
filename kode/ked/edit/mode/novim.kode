@@ -401,15 +401,18 @@ function novim
     
             char == 'i'
             
+                @state.startNovimInsert { kind: 'insert' }
                 @exitNovim()
 
             char == 'a'
             
+                @state.startNovimInsert { kind: 'append' }
                 @state.moveCursors 'right'
                 @exitNovim()
                 
             char == 'A'
             
+                @state.startNovimInsert { kind: 'appendEol' }
                 @state.moveCursors 'eol'
                 @exitNovim()
     

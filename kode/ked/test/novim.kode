@@ -811,6 +811,9 @@ mrange = lines x y m -> motion.range lines [x y] m
     txt "one two three"
     s.s.selections ▸ [[0 0 3 0]]
 
+    s.lastChange = null
+    s.novimInsert = null
+
     keys '.'
     txt "one two three"
     s.s.selections ▸ [[0 0 3 0]]
@@ -891,6 +894,189 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     s.executeNovim {operator:'repeat', count:1}
     txt "abc"
+
+▸ repeat insert
+
+    s.loadLines belt.linesForText("abc\ndef")
+    s.setMainCursor 0 0
+
+    keys 'i'
+    s.novimInsert.kind ▸ 'insert'
+    s.insert 'X'
+    s.finishNovimInsert()
+    txt "Xabc\ndef"
+
+    s.setMainCursor 0 1
+    s.executeNovim {operator:'repeat', count:1}
+    txt "Xabc\nXdef"
+
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 0 0
+
+    keys 'i'
+    s.insert 'new '
+    s.finishNovimInsert()
+    txt "new one two"
+
+    s.setMainCursor 0 4
+    s.executeNovim {operator:'repeat', count:2}
+    txt "new new new one two"
+
+▸ repeat insert with backspace
+
+    s.loadLines belt.linesForText("abc\ndef")
+    s.setMainCursor 0 0
+
+    keys 'i'
+    s.insert 'XY'
+    s.delete 'back' false
+    s.insert 'Z'
+    s.finishNovimInsert()
+    txt "XZabc\ndef"
+
+    s.setMainCursor 0 1
+    s.executeNovim {operator:'repeat', count:1}
+    txt "XZabc\nXZdef"
+
+▸ repeat append
+
+    s.loadLines belt.linesForText("abc\ndef")
+    s.setMainCursor 0 1
+
+    keys 'A'
+    s.insert 'Z'
+    s.finishNovimInsert()
+    txt "abc\ndefZ"
+
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'repeat', count:1}
+    txt "abcZ\ndefZ"
+
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 0 0
+
+    keys 'a'
+    s.insert 'X'
+    s.finishNovimInsert()
+    txt "aXbc"
+
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'repeat', count:1}
+    txt "aXXbc"
+
+▸ repeat open line
+
+    s.loadLines belt.linesForText("abc\ndef")
+    s.setMainCursor 0 0
+
+    keys 'o'
+    s.insert 'new'
+    s.finishNovimInsert()
+    txt "abc\nnew\ndef"
+
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'repeat', count:1}
+    txt "abc\nnew\nnew\ndef"
+
+▸ repeat change with text
+
+    s.loadLines belt.linesForText("one two three")
+    s.setMainCursor 4 0
+
+    keys 'ciw'
+    s.insert 'X'
+    s.finishNovimInsert()
+    txt "one X three"
+
+    s.setMainCursor 8 0
+    s.executeNovim {operator:'repeat', count:1}
+    txt "one X X"
+
+▸ repeat change without text
+
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 0 0
+
+    keys 'ciw'
+    s.finishNovimInsert()
+    txt "one two"
+
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'repeat', count:1}
+    txt " two"
+
+▸ repeat put
+
+    s.loadLines belt.linesForText("one\ntwo")
+    s.setMainCursor 0 0
+    s.novimRegister = { lines: ['new'], linewise: true }
+
+    keys 'p'
+    txt "one\nnew\ntwo"
+
+    s.setMainCursor 0 2
+    s.executeNovim {operator:'repeat', count:1}
+    txt "one\nnew\ntwo\nnew"
+
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 0 0
+    s.novimRegister = { lines: ['X'], linewise: false }
+
+    keys 'p'
+    txt "oXne two"
+
+    s.setMainCursor 4 0
+    s.executeNovim {operator:'repeat', count:1}
+    txt "oXne Xtwo"
+
+▸ repeat visual delete
+
+    s.loadLines belt.linesForText("abcdefg")
+    s.setMainCursor 0 0
+
+    keys 'vlld'
+    txt "cdefg"
+
+    s.executeNovim {operator:'repeat', count:1}
+    txt "efg"
+
+    s.executeNovim {operator:'repeat', count:1}
+    txt "g"
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 0 0
+
+    keys 'Vd'
+    txt "two\nthree"
+
+    s.executeNovim {operator:'repeat', count:1}
+    txt "three"
+
+▸ repeat visual change
+
+    s.loadLines belt.linesForText("abcdef")
+    s.setMainCursor 0 0
+
+    keys 'vllc'
+    s.insert 'XY'
+    s.finishNovimInsert()
+    txt "XYcdef"
+
+    s.setMainCursor 2 0
+    s.executeNovim {operator:'repeat', count:1}
+    txt "XYXYef"
+
+    s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
+    s.setMainCursor 0 0
+
+    keys 'Vc'
+    s.insert 'X'
+    s.finishNovimInsert()
+    txt "Xtwo\nthree\nfour"
+
+    s.setMainCursor 0 1
+    s.executeNovim {operator:'repeat', count:1}
+    txt "Xtwo\nXfour"
 
 ▸ keys
 
