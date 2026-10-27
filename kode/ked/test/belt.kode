@@ -45,6 +45,14 @@ use ../edit/tool   ◆ belt
         belt.extendLineRangesFromPositionToPosition lines immutable([]) [0 0] [0 2] ▸ [[0 0 0 2]]
         belt.extendLineRangesFromPositionToPosition lines immutable([[0 0 1 0] [2 0 3 0]]) [1 1] [0 2] ▸ [[0 0 1 0] [2 0 3 0] [1 1 0 2]]
 
+    ▸ removeFromLineRangesBetweenPositions
+
+        belt.removeFromLineRangesBetweenPositions [[2 0 4 0]] [4 0] [3 0] ▸ [[2 0 3 0]]
+        belt.removeFromLineRangesBetweenPositions [[3 0 5 0]] [3 0] [4 0] ▸ [[4 0 5 0]]
+        belt.removeFromLineRangesBetweenPositions [[0 0 0 2]] [0 2] [0 1] ▸ [[0 0 0 1]]
+        belt.removeFromLineRangesBetweenPositions [[3 0 4 0]] [4 0] [3 0] ▸ []
+        belt.removeFromLineRangesBetweenPositions [[2 0 3 0] [5 0 6 0]] [4 0] [3 0] ▸ [[2 0 3 0] [5 0 6 0]]
+
     #       ███  ███   ███  ██     ██  ████████   
     #       ███  ███   ███  ███   ███  ███   ███  
     #       ███  ███   ███  █████████  ████████   

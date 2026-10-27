@@ -528,7 +528,11 @@ function edit
             if backtrack
                 log "backtrack #{dir}"
                 newRngs = @removeFromLineRangesBetweenPositions newRngs backtrack pos
-                newRngs.push [anch[0] anch[1] pos[0] pos[1]]
+                rng[0] = anch[0]
+                rng[1] = anch[1]
+                rng[2] = pos[0]
+                rng[3] = pos[1]
+                @normalizeRanges [rng]
             else
                 switch dir
                     'left'      ➜ rng[0] = rng[0]+nc
@@ -543,15 +547,34 @@ function edit
                     'ind_bol'   ➜ ind = @numIndent(line); rng[0] = rng[0] > ind ? ind : 0
                     'ind_eol'   ➜ ind = @numIndent(line); rng[2] = rng[2] < ind ? ind : line.length
                 
-                rng[0] = clamp 0 lines[rng[1]].length rng[0] if rng[1] < lines.length
-                rng[2] = clamp 0 lines[rng[3]].length rng[2] if rng[3] < lines.length
+            rng[0] = clamp 0 lines[rng[1]].length rng[0] if rng[1] < lines.length
+            rng[2] = clamp 0 lines[rng[3]].length rng[2] if rng[3] < lines.length
         
-        # log 'extendLineRangesByMovingPositionsInDirection' anchors newRngs newPosl        
         [newRngs newPosl]
     
     @removeFromLineRangesBetweenPositions: rngs pos1 pos2 ->
     
-        newRanges = rngs
+        ⮐  rngs if empty rngs or @samePos pos1 pos2
         
-        ⮐ newRanges
+        if pos1[1] > pos2[1] or pos1[1] == pos2[1] and pos1[0] > pos2[0]
+            [pos1 pos2] = [pos2 pos1]
+        
+        newRanges = []
+        
+        for rng in rngs
+            
+            start = @startOfRange rng
+            end   = @endOfRange rng
+            
+            if end[1] < pos1[1] or end[1] == pos1[1] and end[0] <= pos1[0]
+                newRanges.push rng
+            else if start[1] > pos2[1] or start[1] == pos2[1] and start[0] >= pos2[0]
+                newRanges.push rng
+            else
+                if start[1] < pos1[1] or start[1] == pos1[1] and start[0] < pos1[0]
+                    newRanges.push [start[0] start[1] pos1[0] pos1[1]]
+                if end[1] > pos2[1] or end[1] == pos2[1] and end[0] > pos2[0]
+                    newRanges.push [pos2[0] pos2[1] end[0] end[1]]
+        
+        newRanges
 export edit
