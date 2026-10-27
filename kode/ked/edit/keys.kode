@@ -83,7 +83,7 @@ handleKey = key event -> # will be bound to state
                                                  
         'cmd+x'         'ctrl+x'            ➜ ⮐  @cut()
         'cmd+c'         'ctrl+c'            ➜ ⮐  @copy()
-        'cmd+v'         'ctrl+v'            ➜ ⮐  @paste()
+        'cmd+v'         'ctrl+v'            ➜ ⮐  @paste() if not mode.isActive @ 'novim' 
                                                  
         'cmd+z'         'ctrl+z'            ➜ ⮐  @undo()
         'shift+cmd+z'                            
