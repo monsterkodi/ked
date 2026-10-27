@@ -1532,6 +1532,130 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.visual ▸ null
     s.s.selections ▸ []
 
+▸ visual block starts empty
+
+    s.loadLines belt.linesForText("abcd\nefgh")
+    s.setMainCursor 0 0
+
+    key 'ctrl+v'
+    s.visual ▸ 'block'
+    s.s.selections ▸ []
+    cur 0 0
+
+    key 'j'
+    s.visual ▸ 'block'
+    s.s.selections ▸ []
+    cur 0 1
+
+    key 'l'
+    s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
+    cur 1 1
+
+    key 'l'
+    s.s.selections ▸ [[0 0 2 0] [0 1 2 1]]
+    cur 2 1
+
+    key 'h'
+    s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
+    cur 1 1
+
+    key 'h'
+    s.s.selections ▸ []
+    cur 0 1
+
+    key 'k'
+    s.s.selections ▸ []
+    cur 0 0
+
+    key 'l'
+    s.s.selections ▸ [[0 0 1 0]]
+    cur 1 0
+
+    key 'j'
+    s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
+    cur 1 1
+
+    key 'esc'
+    s.visual ▸ null
+    s.s.selections ▸ []
+
+▸ visual block toggles and switches
+
+    s.loadLines belt.linesForText("abcd\nefgh")
+    s.setMainCursor 0 0
+
+    key 'ctrl+v'
+    key 'ctrl+v'
+    s.visual ▸ null
+    s.s.selections ▸ []
+
+    key 'ctrl+v'
+    key 'v'
+    s.visual ▸ 'char'
+    s.s.selections ▸ []
+
+    key 'V'
+    s.visual ▸ 'line'
+    s.s.selections ▸ [[0 0 4 0]]
+
+    key 'esc'
+
+▸ visual block delete
+
+    s.loadLines belt.linesForText("abcd\nefgh")
+    s.setMainCursor 0 0
+
+    key 'ctrl+v'
+    keys 'lj'
+    s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
+
+    key 'd'
+    txt "bcd\nfgh"
+    s.visual ▸ null
+    s.novimRegister.lines ▸ ['a' 'e']
+    s.novimRegister.linewise ▸ false
+
+    s.executeNovim {operator:'repeat', count:1}
+    txt "cd\ngh"
+
+▸ visual block yank
+
+    s.loadLines belt.linesForText("abcd\nefgh")
+    s.setMainCursor 0 0
+
+    key 'ctrl+v'
+    keys 'lj'
+    key 'y'
+
+    s.novimRegister.lines ▸ ['a' 'e']
+    s.novimRegister.linewise ▸ false
+    s.visual ▸ null
+    s.s.selections ▸ []
+    cur 0 0
+    txt "abcd\nefgh"
+
+▸ visual block change
+
+    s.loadLines belt.linesForText("abcd\nefgh")
+    s.setMainCursor 0 0
+
+    key 'ctrl+v'
+    keys 'lj'
+    key 'c'
+
+    txt "abcd\nefgh"
+    s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
+
+    s.insert 'XY'
+    txt "XYbcd\nXYfgh"
+    s.allCursors() ▸ [[2 0] [2 1]]
+
+    s.finishNovimInsert()
+
+    s.setMainCursor 2 0
+    s.executeNovim {operator:'repeat', count:1}
+    txt "XYXYcd\nXYXYgh"
+
 ▸ visual yank
 
     s.novimRegister = null

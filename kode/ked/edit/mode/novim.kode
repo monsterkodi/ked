@@ -244,6 +244,12 @@ function novim
         combo = event.combo ? key
         char  = valid(event.char) ? event.char : combo
 
+        if combo == 'ctrl+v'
+            if not @operator and not @area
+                @state.startVisual 'block'
+            @reset()
+            ⮐  true
+
         # let global shortcuts through, at least the one that leaves this mode
         if combo.includes('alt+') or combo.includes('ctrl+') or combo.includes('cmd+')
             ⮐  'unhandled'

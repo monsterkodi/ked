@@ -263,6 +263,33 @@ export
 
         [a[0] a[1] b[0] b[1]]
 
+    visualBlockRanges: anchor cursor ->
+
+        y1 = min anchor[1] cursor[1]
+        y2 = max anchor[1] cursor[1]
+        x1 = min anchor[0] cursor[0]
+        x2 = max anchor[0] cursor[0]
+
+        rngs = []
+
+        ⮐  rngs if x1 == x2
+
+        for y in y1..y2
+
+            continue if y >= @s.lines.length
+
+            width = kseg.width @s.lines[y]
+
+            continue if x1 >= width
+
+            ex = min x2 width
+
+            continue if ex <= x1
+
+            rngs.push [x1 y ex y]
+
+        rngs
+
     updateVisual: ->
 
         ⮐  if not @visual
@@ -284,7 +311,10 @@ export
 
         rngs = []
         for pair in pairs
-            rngs.push @visualRangeForPair(pair[0] pair[1])
+            if @visual == 'block'
+                rngs = rngs.concat @visualBlockRanges(pair[0] pair[1])
+            else
+                rngs.push @visualRangeForPair(pair[0] pair[1])
 
         @setSelections rngs
 
@@ -296,6 +326,11 @@ export
 
         linewise = @visual == 'line'
 
+        blockStarts = null
+
+        if @visual == 'block'
+            blockStarts = @visualPairs().map (p) -> [min(p[0][0] p[1][0]) min(p[0][1] p[1][1])]
+
         @setNovimRegister rngs linewise register
 
         @lastChange = { operator: 'visualDelete', linewise: linewise, register: register, shapes: @visualRepeatShapes() }
@@ -305,6 +340,8 @@ export
         @deleteRanges rngs @allCursors() linewise
 
         @end()
+
+        @setCursors(blockStarts main:@s.main) if blockStarts
 
         @stopVisual()
 
@@ -318,7 +355,11 @@ export
 
         @setNovimRegister rngs linewise register
 
-        starts = rngs.map (r) -> [r[0] r[1]]
+        if @visual == 'block'
+            pairs  = @visualPairs()
+            starts = pairs.map (p) -> [min(p[0][0] p[1][0]) min(p[0][1] p[1][1])]
+        else
+            starts = rngs.map (r) -> [r[0] r[1]]
 
         @setCursors starts main:@mainCursor()
 
@@ -353,6 +394,23 @@ export
                 y2 = max y2 rng[3]
 
             shapes.push { linewise: true, count: y2-y1+1 }
+
+        else if @visual == 'block'
+
+            if not empty @s.selections
+
+                x1 = Infinity
+                x2 = -1
+                y1 = Infinity
+                y2 = -1
+
+                for rng in @s.selections
+                    x1 = min x1 rng[0]
+                    x2 = max x2 rng[2]
+                    y1 = min y1 rng[1]
+                    y2 = max y2 rng[3]
+
+                shapes.push { block: true, x1: 0, y1: 0, x2: x2-x1, y2: y2-y1 }
 
         else
 
@@ -619,11 +677,18 @@ export
 
         cursors = @allCursors()
 
+        cursors = [@mainCursor()] if change.shapes.length and change.shapes[0].block
+
         for cursor, i in cursors
 
             shape = change.shapes[min(i, change.shapes.length-1)] ? change.shapes[0]
 
             continue if not shape
+
+            if shape.block
+                for rng in @blockRangesForShape(shape, cursor)
+                    rngs.push rng
+                continue
 
             rng = @rangeForVisualShape shape cursor
 
@@ -672,6 +737,32 @@ export
         x2 = min cursor[0]+shape.x2 kseg.width(lines[y2])
 
         [x1 y1 x2 y2]
+
+    blockRangesForShape: shape cursor ->
+
+        lines = @s.lines
+
+        rngs = []
+
+        ⮐  rngs if empty lines
+
+        y1 = min cursor[1] lines.length-1
+        y2 = min cursor[1]+shape.y2 lines.length-1
+        x1 = cursor[0]
+
+        for y in y1..y2
+
+            width = kseg.width lines[y]
+
+            continue if x1 >= width
+
+            x2 = min x1+shape.x2 width
+
+            continue if x2 <= x1
+
+            rngs.push [x1 y x2 y]
+
+        rngs
 
     usesClipboard: register ->
 
