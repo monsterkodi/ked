@@ -17,7 +17,7 @@ export
         if cmd.motion
             cmd.motion.count ?= cmd.count
 
-        if @visual and cmd.operator not in ['move' 'matchBracket' 'visualDelete' 'visualYank' 'visualChange' 'visualSwap' 'visualTextObject' 'visualIndent' 'visualDeindent']
+        if @visual and cmd.operator not in ['move' 'matchBracket' 'visualDelete' 'visualYank' 'visualChange' 'visualSwap' 'visualTextObject' 'visualIndent' 'visualDeindent' 'visualBlockPrepend' 'visualBlockAppend']
             @stopVisual()
 
         switch cmd.operator
@@ -44,6 +44,8 @@ export
             'deindent'    ➜ @indentByMotion    cmd.motion true
             'visualIndent' ➜ @indentVisual     cmd.count false
             'visualDeindent' ➜ @indentVisual   cmd.count true
+            'visualBlockPrepend' ➜ @visualBlockInsert false
+            'visualBlockAppend'  ➜ @visualBlockInsert true
             'undo'        ➜ @undoCommand        cmd.count
             'repeat'      ➜ @repeatChange       cmd.count
             else          ➜ log 'novim unknown operator ▸' cmd.operator
@@ -380,6 +382,22 @@ export
 
         @stopMode 'novim'
 
+    visualBlockInsert: after ->
+
+        rngs = @s.selections
+
+        ⮐  if empty rngs
+
+        cursors = rngs.map (r) -> [after ? r[2] : r[0] r[1]]
+
+        @startNovimInsert { kind: after ? 'blockAppend' : 'blockPrepend', shapes: @visualRepeatShapes() }
+
+        @stopVisual()
+
+        @setCursors cursors main:@s.main
+
+        @stopMode 'novim'
+
     visualRepeatShapes: ->
 
         shapes = []
@@ -629,6 +647,8 @@ export
             'insertAtIndent' ➜ @moveCursors('ind');   @insertForRepeat insert.text
             'openLineAfter'  ➜ @putOpenLines(insert, true);  @insertForRepeat insert.text
             'openLineBefore' ➜ @putOpenLines(insert, false); @insertForRepeat insert.text
+            'blockPrepend'   ➜ @replayBlockInsert insert false
+            'blockAppend'    ➜ @replayBlockInsert insert true
             'change'         ➜ @replayChange insert
             'visual'         ➜ @replayVisual insert 'change'
             else             ➜ log 'novim unknown insert ▸' insert.kind
@@ -655,6 +675,22 @@ export
             @putLines [''] after
 
         @end()
+
+    replayBlockInsert: insert after ->
+
+        shape = insert.shapes[0]
+
+        ⮐  if not shape
+
+        rngs = @blockRangesForShape shape @mainCursor()
+
+        ⮐  if empty rngs
+
+        cursors = rngs.map (r) -> [after ? r[2] : r[0] r[1]]
+
+        @setCursors cursors main:@s.main
+
+        @insertForRepeat insert.text
 
     insertForRepeat: text ->
 
@@ -950,7 +986,8 @@ export
 
         for c in cursors
             width = kseg.width lines[c[1]]
-            x     = after ? min(c[0]+1 width) : min(c[0] width)
+            x     = min(c[0] width)
+            x     = max(0 x-1) if not after
             posl.push [x c[1]]
 
         [newLines newPosl] = belt.insertTextAtPositions lines text posl

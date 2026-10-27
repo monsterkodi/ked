@@ -264,21 +264,49 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'yank', motion:{kind:'eol'}}
     s.setMainCursor 1 1
     s.executeNovim {operator:'put', after:false}
-    txt "abc\ndabcef"
-    cur 4 1
+    txt "abc\nabcdef"
+    cur 3 1
 
     s.novimRegister = { lines: ['one' 'two'], linewise: false }
     s.loadLines belt.linesForText("ab")
     s.setMainCursor 0 0
     s.executeNovim {operator:'put', after:true}
-    txt "aone\ntwob"
-    cur 3 1
+    txt "one\ntwo\nab"
+    cur 0 2
 
     s.novimRegister = null
     s.loadLines belt.linesForText("abc")
     s.setMainCursor 0 0
     s.executeNovim {operator:'put', after:true}
     txt "abc"
+
+▸ put text at the cursor
+
+    s.novimRegister = { lines: ['X'], linewise: false }
+
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 0 0
+    s.executeNovim {operator:'put', after:true}
+    txt "Xabc"
+    cur 1 0
+
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 1 0
+    s.executeNovim {operator:'put', after:true}
+    txt "aXbc"
+    cur 2 0
+
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 1 0
+    s.executeNovim {operator:'put', after:false}
+    txt "Xabc"
+    cur 1 0
+
+    s.loadLines belt.linesForText("abc")
+    s.setMainCursor 3 0
+    s.executeNovim {operator:'put', after:true}
+    txt "abcX"
+    cur 4 0
 
     s.loadLines belt.linesForText("abc\ndef")
     s.setMainCursor 0 0
@@ -372,7 +400,7 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.loadLines belt.linesForText("abc")
     s.setMainCursor 1 0
     s.executeNovim {operator:'put', after:true}
-    txt "abXYZc"
+    txt "aXYZbc"
 
     s.loadLines belt.linesForText("gone\nkept")
     s.setMainCursor 0 0
@@ -397,7 +425,7 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.loadLines belt.linesForText("ab")
     s.setMainCursor 0 0
     s.executeNovim {operator:'put', after:true, register:'clipboard'}
-    txt "astarb"
+    txt "starab"
 
     s.loadLines belt.linesForText("abc")
     s.setMainCursor 0 0
@@ -1023,11 +1051,11 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.novimRegister = { lines: ['X'], linewise: false }
 
     keys 'p'
-    txt "oXne two"
+    txt "Xone two"
 
     s.setMainCursor 4 0
     s.executeNovim {operator:'repeat', count:1}
-    txt "oXne Xtwo"
+    txt "XoneX two"
 
 ▸ repeat visual delete
 
@@ -1655,6 +1683,59 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.setMainCursor 2 0
     s.executeNovim {operator:'repeat', count:1}
     txt "XYXYcd\nXYXYgh"
+
+▸ visual block prepend and append
+
+    s.loadLines belt.linesForText("abcd\nefgh")
+    s.setMainCursor 0 0
+
+    key 'ctrl+v'
+    keys 'lj'
+    key 'I'
+
+    s.visual ▸ null
+    s.s.selections ▸ []
+    s.allCursors() ▸ [[0 0] [0 1]]
+
+    s.insert 'XY'
+    s.finishNovimInsert()
+    txt "XYabcd\nXYefgh"
+
+    s.loadLines belt.linesForText("abcd\nefgh")
+    s.setMainCursor 0 0
+
+    key 'ctrl+v'
+    keys 'lj'
+    key 'A'
+
+    s.visual ▸ null
+    s.s.selections ▸ []
+    s.allCursors() ▸ [[1 0] [1 1]]
+
+    s.insert 'XY'
+    txt "aXYbcd\neXYfgh"
+
+    s.loadLines belt.linesForText("abcd\nefgh\nijkl")
+    s.setMainCursor 0 0
+
+    key 'ctrl+v'
+    keys 'lj'
+    key 'I'
+    s.insert 'X'
+    s.finishNovimInsert()
+    txt "Xabcd\nXefgh\nijkl"
+
+    s.setMainCursor 0 2
+    s.executeNovim {operator:'repeat', count:1}
+    txt "Xabcd\nXefgh\nXijkl"
+
+    key 'ctrl+v'
+    key 'j'
+    key 'I'
+    s.visual ▸ 'block'
+    s.s.selections ▸ []
+
+    key 'esc'
 
 ▸ visual yank
 

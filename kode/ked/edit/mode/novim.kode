@@ -340,6 +340,12 @@ function novim
                 @reset()
                 ⮐  true
 
+            if @state.visual == 'block' and char in ['I' 'A']
+                operator = char == 'I' ? 'visualBlockPrepend' : 'visualBlockAppend'
+                @execute { operator: operator }
+                @reset()
+                ⮐  true
+
             if area = novim.areas[char]
                 @area = area
                 @logPending()
