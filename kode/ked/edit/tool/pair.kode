@@ -6,7 +6,7 @@
    ███     ████████  ███   ███     ███   
 ###
 
-use ../../../kxk ▪ kstr kutil kseg pepe
+use ../../../kxk ▪ kseg pepe
 use              ◆ belt
 
 brckts = new Set(['(' ')' '[' ']' '{' '}'])

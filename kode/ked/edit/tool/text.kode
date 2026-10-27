@@ -6,9 +6,8 @@
    ███     ████████  ███   ███     ███   
 ###
 
-use ../../../kxk ▪ kstr kutil kseg 
+use ../../../kxk ▪ kstr kseg 
 use ../../theme  ◆ color
-use              ◆ belt
 
 function text
 

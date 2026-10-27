@@ -9,7 +9,6 @@ swallows text input while active and maps keys
 to actions which are executed by edit▸act▸novim
 ###
 
-use ../../theme  ◆ color
 use ../../../kxk ◆ post keyinfo
 use ../../theme  ◆ theme
 
@@ -149,13 +148,6 @@ function novim
         @replace         = null
         @logPending()
 
-    resetOrExit: ->
-
-        if @operator or @count or @prefix or @registerPending or @register or @find or @replace
-            @reset()
-        else
-            @exitNovim()
-            
     exitNovim: ->
         
         @state.stopMode 'novim'

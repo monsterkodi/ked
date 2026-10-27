@@ -6,7 +6,7 @@
     ███████    ████████  ███████     ███     
 ###
 
-use ../../../kxk ▪ kstr kseg
+use ../../../kxk ▪ kseg
 use ◆ text cell edit misc pair salt
 
 function belt

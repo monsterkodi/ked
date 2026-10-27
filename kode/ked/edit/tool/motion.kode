@@ -223,13 +223,6 @@ function motion
             else
                 [kseg.widthAtSegi(msegs, mi) pos[1] x y]
 
-    @category: seg ->
-
-        if empty seg       ➜ ⮐ 'empty'
-        if /\s+/.test seg  ➜ ⮐ 'ws'
-        if /\w+/.test seg  ➜ ⮐ 'word'
-        'punct'
-
     @wordCategory: seg big ->
 
         ⮐  'empty' if empty seg
@@ -380,13 +373,13 @@ function motion
 
     @trailingWsEnd: segs i ->
         e = i
-        while e < segs.length and @category(segs[e]) == 'ws'
+        while e < segs.length and belt.categoryForChar(segs[e]) == 'ws'
             e += 1
         e
 
     @leadingWsStart: segs i ->
         s = i
-        while s > 0 and @category(segs[s-1]) == 'ws'
+        while s > 0 and belt.categoryForChar(segs[s-1]) == 'ws'
             s -= 1
         s
 

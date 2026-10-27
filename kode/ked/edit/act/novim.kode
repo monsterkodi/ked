@@ -997,16 +997,9 @@ export
 
     openLine: count after ->
 
-        n = max 1 (count ? 1)
+        @putOpenLines { count:count } after
 
-        @begin()
-
-        for i in 0...n
-            @putLines [''] after
-
-        @end()
-
-        @startNovimInsert { kind: after ? 'openLineAfter' : 'openLineBefore', count: n }
+        @startNovimInsert { kind: after ? 'openLineAfter' : 'openLineBefore', count:count }
 
         @stopMode 'novim'
 
@@ -1209,32 +1202,6 @@ export
                 spans.push [p[0] p[1] p[0]+1 p[1]]
 
         @setHighlights spans
-
-    widthBefore: lines pos ->
-
-        segs = lines[pos[1]]
-        i    = kseg.indexAtWidth segs pos[0]
-
-        i = max 0 i-1
-
-        [kseg.widthAtSegi(segs, i) pos[1]]
-
-    moveCursorsToLine: kind n ->
-
-        lines  = @s.lines
-        target = n > 1 ? n-1 : 0
-        target = lines.length-1 if kind == 'eof' and n <= 1
-        target = clamp 0 lines.length-1 target
-
-        width = kseg.width lines[target]
-
-        cursors = @allCursors()
-
-        for c in cursors
-            c[1] = target
-            c[0] = min belt.numIndent(lines[target]) max(0 width-1)
-
-        @setCursors cursors main:@s.main
 
     clampCursorsToLines: ->
 
