@@ -499,9 +499,16 @@ function edit
         newRngs = rngs.asMutable()
         newPosl = posl.asMutable()
         
-        for pos in newPosl
+        for pos,idx in newPosl
             
-            line = lines[pos[1]]
+            anch = anchors[idx]
+            if
+                dir in ['left' 'ind_bol' 'bol' 'bof']   and (pos[0] > anch[0] or pos[1] > anch[1]) ➜ backtrack = copy pos 
+                dir in ['right' 'ind_eol' 'eol' 'eof']  and (pos[0] < anch[0] or pos[1] < anch[1]) ➜ backtrack = copy pos 
+                dir in ['up' 'bof']                     and pos[1] > anch[1] ➜ backtrack = copy pos 
+                dir in ['down' 'eof']                   and pos[1] < anch[1] ➜ backtrack = copy pos 
+                            
+            line = lines[pos[1]]            
             rng = [pos[0] pos[1] pos[0] pos[1]]
             newRngs.push rng
             
@@ -517,24 +524,34 @@ function edit
 
                 'ind_bol'   ➜ ind = @numIndent(line); pos[0] = pos[0] > ind ? ind : 0
                 'ind_eol'   ➜ ind = @numIndent(line); pos[0] = pos[0] < ind ? ind : line.length
-                
-            switch dir
-                'left'      ➜ rng[0] = rng[0]+nc
-                'right'     ➜ rng[2] = rng[2]+nc
-                'up'        ➜ rng[1] = max 0 rng[1]-1
-                'down'      ➜ rng[3] = min lines.length-1 rng[3]+1
-                'eol'       ➜ rng[2] = Infinity
-                'bol'       ➜ rng[0] = 0
-                'bof'       ➜ rng[1] = rng[0] = 0
-                'eof'       ➜ rng[3] = lines.length-1; rng[2] = lines[lines.length-1].length
 
-                'ind_bol'   ➜ ind = @numIndent(line); rng[0] = rng[0] > ind ? ind : 0
-                'ind_eol'   ➜ ind = @numIndent(line); rng[2] = rng[2] < ind ? ind : line.length
+            if backtrack
+                log "backtrack #{dir}"
+                newRngs = @removeFromLineRangesBetweenPositions newRngs backtrack pos
+                newRngs.push [anch[0] anch[1] pos[0] pos[1]]
+            else
+                switch dir
+                    'left'      ➜ rng[0] = rng[0]+nc
+                    'right'     ➜ rng[2] = rng[2]+nc
+                    'up'        ➜ rng[1] = max 0 rng[1]-1
+                    'down'      ➜ rng[3] = min lines.length-1 rng[3]+1
+                    'eol'       ➜ rng[2] = Infinity
+                    'bol'       ➜ rng[0] = 0
+                    'bof'       ➜ rng[1] = rng[0] = 0
+                    'eof'       ➜ rng[3] = lines.length-1; rng[2] = lines[lines.length-1].length
+    
+                    'ind_bol'   ➜ ind = @numIndent(line); rng[0] = rng[0] > ind ? ind : 0
+                    'ind_eol'   ➜ ind = @numIndent(line); rng[2] = rng[2] < ind ? ind : line.length
                 
-            rng[0] = clamp 0 lines[rng[1]].length rng[0] if rng[1] < lines.length
-            rng[2] = clamp 0 lines[rng[3]].length rng[2] if rng[3] < lines.length
+                rng[0] = clamp 0 lines[rng[1]].length rng[0] if rng[1] < lines.length
+                rng[2] = clamp 0 lines[rng[3]].length rng[2] if rng[3] < lines.length
         
-        log 'extendLineRangesByMovingPositionsInDirection' anchors newRngs newPosl        
+        # log 'extendLineRangesByMovingPositionsInDirection' anchors newRngs newPosl        
         [newRngs newPosl]
+    
+    @removeFromLineRangesBetweenPositions: rngs pos1 pos2 ->
+    
+        newRanges = rngs
         
+        ⮐ newRanges
 export edit
