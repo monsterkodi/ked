@@ -408,12 +408,30 @@ export
         ⮐  if empty indices
 
         indices = Array.from new Set(indices)
+        indents = {}
+
+        for index in indices
+            indents[index] = belt.numIndent @s.lines[index]
 
         @indentAtIndices indices deindent (count ? 1)
 
+        anchors = []
+
+        for anchor in @visualAnchors
+
+            oldIndent = indents[anchor[1]]
+
+            if oldIndent?
+                shift = belt.numIndent(@s.lines[anchor[1]]) - oldIndent
+                anchors.push [max(0 anchor[0]+shift) anchor[1]]
+            else
+                anchors.push [anchor[0] anchor[1]]
+
+        @visualAnchors = anchors
+
         @lastChange = { operator: deindent ? 'deindent' : 'indent', motion: { kind: 'line', count: indices.length } }
 
-        @stopVisual()
+        @updateVisual()
 
     indentAtIndices: indices deindent=false times=1 ->
 
