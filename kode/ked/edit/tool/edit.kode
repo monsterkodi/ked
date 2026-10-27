@@ -526,7 +526,6 @@ function edit
                 'ind_eol'   ➜ ind = @numIndent(line); pos[0] = pos[0] < ind ? ind : line.length
 
             if backtrack
-                log "backtrack #{dir}"
                 newRngs = @removeFromLineRangesBetweenPositions newRngs backtrack pos
                 rng[0] = anch[0]
                 rng[1] = anch[1]
@@ -547,10 +546,19 @@ function edit
                     'ind_bol'   ➜ ind = @numIndent(line); rng[0] = rng[0] > ind ? ind : 0
                     'ind_eol'   ➜ ind = @numIndent(line); rng[2] = rng[2] < ind ? ind : line.length
                 
-            rng[0] = clamp 0 lines[rng[1]].length rng[0] if rng[1] < lines.length
-            rng[2] = clamp 0 lines[rng[3]].length rng[2] if rng[3] < lines.length
+        newRngs = @clampLineRanges lines newRngs
         
         [newRngs newPosl]
+        
+    @clampLineRanges: lines rngs ->
+        
+        for rng in rngs
+            rng[1] = clamp 0 lines.length-1 rng[1]
+            rng[3] = clamp 0 lines.length-1 rng[3]
+            rng[0] = clamp 0 lines[rng[1]].length rng[0]
+            rng[2] = clamp 0 lines[rng[3]].length rng[2]
+        
+        rngs
     
     @removeFromLineRangesBetweenPositions: rngs pos1 pos2 ->
     

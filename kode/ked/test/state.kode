@@ -200,6 +200,19 @@ sel = r... -> s.allSelections() ▸ r
         s.moveCursorsAndSelect 'up'
         mul [0 0] [0 1]
         sel()
+        
+    ▸ backtrack selection past end of line
+    
+        s.loadLines belt.linesForText("abc\ndefgh")
+        s.setMainCursor 5 0
+        
+        s.moveCursorsAndSelect 'down'
+        cur 5 1
+        sel [3 0 5 1]
+        
+        s.moveCursorsAndSelect 'up'
+        cur 5 0
+        sel()
             
     # ███   ███  ███   ███  ███   ███████   ███████   ███████    ████████  
     # ███   ███  ████  ███  ███  ███       ███   ███  ███   ███  ███       
