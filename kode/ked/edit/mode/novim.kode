@@ -300,7 +300,7 @@ function novim
             @logPending()
             ⮐  true
 
-        ⮐  true if char.length != 1 # swallow every other non text key
+        ⮐  'unhandled' if char.length != 1 # ignore every other non text key
 
         if @state.visual and not @operator and not @area
 
@@ -363,17 +363,15 @@ function novim
                 @reset()
                 ⮐  true
 
-        if @prefix # gg 
-            prefix  = @prefix
-            @prefix = null
-
-            if prefix == 'g' and char == 'g'
-                @execute { operator: 'move', motion: { kind: 'bof', count: @countNumber() } }
-            @reset()
-
-            ⮐  true
-
         if 
+            @prefix # gg 
+            
+                prefix  = @prefix
+                @prefix = null
+                if prefix == 'g' and char == 'g'
+                    @execute { operator: 'move', motion: { kind: 'bof', count: @countNumber() } }
+                @reset()
+ 
             @area
     
                 if target = novim.textObjects[char]
@@ -474,8 +472,9 @@ function novim
                 else
                     @count += char
                     @logPending()
-
-        # swallow all other input until more commands are implemented
+            ➜ 
+                ⮐ 'unhandled'
+                
         true
 
     #  ███████   ███████   ███       ███████   ████████
