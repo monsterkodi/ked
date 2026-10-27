@@ -67,7 +67,7 @@ function title extends view
         
         post.on 'title.filepos' @onTitleFilepos
         post.on 'title.novim'   (@novimText) =>
-        post.on 'vinder.text'   (@vinderText) => @redraw()
+        post.on 'vinder.text'   (@vinderText) => post.emit 'redraw'
     
     onTitleFilepos: @fileposl @fileoffs => 
     
