@@ -139,6 +139,68 @@ sel = r... -> s.allSelections() ▸ r
             3
             """    
             
+    ▸ backtrack selection
+    
+        s.loadLines belt.linesForText('abcdef')
+        s.setMainCursor 2 0
+        
+        s.moveCursorsAndSelect 'right'
+        cur 3 0
+        sel [2 0 3 0]
+        
+        s.moveCursorsAndSelect 'right'
+        cur 4 0
+        sel [2 0 4 0]
+        
+        s.moveCursorsAndSelect 'left'
+        cur 3 0
+        sel [2 0 3 0]
+        
+        s.moveCursorsAndSelect 'left'
+        cur 2 0
+        sel()
+        
+        s.moveCursorsAndSelect 'left'
+        cur 1 0
+        sel [1 0 2 0]
+        
+    ▸ backtrack selection stays sticky after moving
+    
+        s.loadLines belt.linesForText('abcdef')
+        s.setMainCursor 2 0
+        
+        s.moveCursorsAndSelect 'right'
+        s.moveCursorsAndSelect 'right'
+        s.moveCursors 'right'
+        
+        cur 5 0
+        sel [2 0 4 0]
+        
+        s.moveCursorsAndSelect 'right'
+        cur 6 0
+        sel [2 0 4 0] [5 0 6 0]
+        
+    ▸ backtrack selection with multiple cursors
+    
+        s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
+        s.setCursors [[0 0] [0 1]]
+        
+        s.moveCursorsAndSelect 'down'
+        mul [0 1] [0 2]
+        sel [0 0 0 2]
+        
+        s.moveCursorsAndSelect 'down'
+        mul [0 2] [0 3]
+        sel [0 0 0 3]
+        
+        s.moveCursorsAndSelect 'up'
+        mul [0 1] [0 2]
+        sel [0 0 0 2]
+        
+        s.moveCursorsAndSelect 'up'
+        mul [0 0] [0 1]
+        sel()
+            
     # ███   ███  ███   ███  ███   ███████   ███████   ███████    ████████  
     # ███   ███  ████  ███  ███  ███       ███   ███  ███   ███  ███       
     # ███   ███  ███ █ ███  ███  ███       ███   ███  ███   ███  ███████   
