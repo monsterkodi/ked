@@ -422,7 +422,14 @@ function KED
             absFile = slash.absolute p
         else
             absFile = slash.path process.cwd() p
-            
+
+        #  a reload keeps what is on screen instead of what was last stored in the session
+        reload = valid @currentFile and not row? and slash.samePath absFile @currentFile
+
+        if reload
+            reloadCursor = @editor.state.mainCursor()
+            reloadView   = @editor.state.s.view.asMutable()
+
         ⮐  if slash.samePath absFile @loadingFile
         
         # log "ked.loadFile absFile #{absFile}"
@@ -478,7 +485,11 @@ function KED
         
         @title.time = process.hrtime(start)[1]
         
-        mode.fileLoaded @editor.state @currentFile row col view
+        if reload
+            @editor.state.setView reloadView
+            @editor.state.setCursors [reloadCursor] adjust:false
+        else
+            mode.fileLoaded @editor.state @currentFile row col view
         
         post.emit 'file.loaded' @currentFile
         

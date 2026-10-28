@@ -23,6 +23,7 @@ function filepos
     @: @state ->
         
         @name = 'filepos'
+        @restoring = false
         
         # since this is a mode, it gets loaded late.
         # but the editor loads recent files immediately.
@@ -44,6 +45,9 @@ function filepos
     #  ███████   ███████   ███   ███  ███████    ███████   ███   ███  ███████ 
 
     cursorsSet: ->
+        
+        #  restoring a position must not overwrite the position that is the source of it
+        ⮐  if @restoring
         
         if file = ked_session.get "editor▸file"
         
@@ -78,8 +82,10 @@ function filepos
             post.emit 'goto.line' row col view
         else
             if posview = ked_session.get "editor▸filepos▸#{file}"
-                @state.setCursors [posview[0..1]]
+                @restoring = true
+                @state.setCursors [posview[0..1]] adjust:false
                 @state.setView posview[2..]
+                @restoring = false
 
     #  ███████  ███   ███   ███████   ████████ 
     # ███       ███ █ ███  ███   ███  ███   ███

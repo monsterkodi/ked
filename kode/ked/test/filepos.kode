@@ -1,0 +1,59 @@
+###
+
+    filepos
+
+    stores and restores the main cursor and the view offset per file
+
+###
+
+use ../edit/tool ◆ belt
+use ../edit      ◆ state
+use ../edit/mode ◆ filepos
+
+▸ filepos
+
+    ▸ a reload keeps the saved view
+
+        store = {}
+
+        fakeGet = (key def) -> clone(store[key] ? def)
+        fakeSet = (key value) -> store[key] = clone value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        cells = cols:40 rows:20
+
+        s = new state cells 'test_filepos'
+
+        lines = []
+        for i in 0...100
+            lines.push "line #{i}"
+
+        text = lines.join '\n'
+
+        s.loadSegls belt.seglsForText(text)
+
+        file = '/tmp/ked-test-filepos'
+
+        fp = new filepos s
+
+        s.on 'cursorsSet' (-> fp.cursorsSet())
+
+        ked_session.set 'editor▸file' file
+
+        #  the main cursor is the 11th visible line of a view showing 20 lines
+        ked_session.set "editor▸filepos▸#{file}" [5 60 0 50]
+
+        reload = ->
+            s.loadSegls belt.seglsForText(text)
+            fp.fileLoaded file
+
+        reload()
+        s.s.view ▸ [0 50]
+        s.mainCursor() ▸ [5 60]
+
+        reload()
+        s.s.view ▸ [0 50]
+
+        ked_session.get("editor▸filepos▸#{file}") ▸ [5 60 0 50]
+
+        delete global.ked_session
