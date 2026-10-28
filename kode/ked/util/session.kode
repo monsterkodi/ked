@@ -34,9 +34,13 @@ function session extends events
         @dir  = slash.absolute "~/.config/ked/sessions/"
         @file = slash.path @dir "#{@name}.noon"
         
+        @loaded = new Promise (resolve) => @resolveLoaded = resolve
+        
         if not opt.fresh
             @loadAndMerge()
             @cleanSessions()
+        else
+            @resolveLoaded()
         
     keypath: key => key.split @sep
     
@@ -149,6 +153,7 @@ function session extends events
             @set 'editor' recent.editor
         
         @emit 'loaded'
+        @resolveLoaded()
     
     # ████████  ███  ███      ████████   ███████  
     # ███       ███  ███      ███       ███       

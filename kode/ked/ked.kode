@@ -45,12 +45,10 @@ function KED
         
         log w2("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #{b8 @session.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
         
-        post.on 'config.loaded' @onConfigLoaded
         config.load()
 
         global.ked_session = @session
         
-        @session.on 'loaded' @onSessionLoaded
         @t = new ttio headless:(@args.headless or @args.colors)
         
         @screen   = new screen @t
@@ -124,6 +122,8 @@ function KED
             @menu.show true
         else if @args.new
             @newFile()
+            
+        @startup()
             
     showEditor: -> 
     
@@ -215,20 +215,11 @@ function KED
     #      ███  ███            ███       ███  ███  ███   ███  ███  ████
     # ███████   ████████  ███████   ███████   ███   ███████   ███   ███
 
-    onSessionLoaded: =>
-
-        @sessionLoaded = true
-        if @configLoaded
-            @configAndSessionLoaded()
-    
-    onConfigLoaded: =>
-    
-        @configLoaded = true
-        if @sessionLoaded
-            @configAndSessionLoaded()
-
-    configAndSessionLoaded: =>
-    
+    startup: ○=>
+        
+        ○ config.loaded if config.loaded
+        ○ @session.loaded
+        
         ⮐  if @args.fresh
         ⮐  if @args.new
         

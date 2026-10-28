@@ -1,9 +1,10 @@
 var toExport = {}
-var loading
+var loading, s
 
 import mode from "../edit/mode.js"
 
 import config from "../util/config.js"
+import session from "../util/session.js"
 
 toExport["startup"] = async function ()
 {
@@ -22,11 +23,17 @@ toExport["startup"] = async function ()
         await config.loaded
         compare((config.data !== null),true)
     })
+    await section("the session announces when it is loaded", async function ()
+    {
+        s = new session({fresh:true})
+        compare((s.loaded instanceof Promise),true)
+        await s.loaded
+    })
 }
 toExport["startup"]._section_ = true
 toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RhcnR1cC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC9zdGFydHVwLmtvZGUiXSwibWFwcGluZ3MiOiI7OztPQVFjLFdBQVA7O09BQ08sYUFBUDs7Ozs7O2lCQU1FLEtBQUssa0JBQWtCLFNBQVc7Y0FFakMsS0FBSztnQkFFUCxLQUFLLFFBQVEsU0FBUyxTQUFXO2dCQUNqQyxLQUFLLFFBQVEsT0FBUzs7OztRQUl0QixVQUFVLE9BQU87aUJBRWhCLE9BQU8sa0JBQWtCLFNBQVc7Y0FFbkM7Y0FDQSxPQUFPO2lCQUVSLE9BQU8sU0FBUSxNQUFRIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RhcnR1cC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC9zdGFydHVwLmtvZGUiXSwibWFwcGluZ3MiOiI7OztPQVFjLFdBQVA7O09BQ08sYUFBUDtPQUFjLGNBQWQ7Ozs7OztpQkFNRSxLQUFLLGtCQUFrQixTQUFXO2NBRWpDLEtBQUs7Z0JBRVAsS0FBSyxRQUFRLFNBQVMsU0FBVztnQkFDakMsS0FBSyxRQUFRLE9BQVM7Ozs7UUFJdEIsVUFBVSxPQUFPO2lCQUVoQixPQUFPLGtCQUFrQixTQUFXO2NBRW5DO2NBQ0EsT0FBTztpQkFFUixPQUFPLFNBQVEsTUFBUTs7OztRQUl4QixRQUFRLFNBQVEsTUFBTTtpQkFFckIsRUFBRSxrQkFBa0IsU0FBVztjQUU5QixFQUFFIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/test/startup.kode
