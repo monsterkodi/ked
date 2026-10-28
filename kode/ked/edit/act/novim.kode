@@ -7,6 +7,7 @@
 use ../../../kxk ▪ kseg clip post
 use ../mode      ◆ novim
 use ../tool      ◆ belt motion
+use ../../util   ◆ config
 
 export
 
@@ -293,12 +294,12 @@ export
             width = kseg.width lines[y]
 
             continue if x1 >= width
+                       
+            xe = min x2 width
 
-            x2 = min x2 width
+            continue if xe <= x1
 
-            continue if x2 <= x1
-
-            rngs.push [x1 y x2 y]
+            rngs.push [x1 y xe y]
 
         rngs
 
@@ -904,8 +905,9 @@ export
 
         clearTimeout @yankFlashTimer if @yankFlashTimer
 
+        flashMs = config.data?.novim?.yankFlashMs ? 500
         @yankFlash      = rngs
-        @yankFlashTimer = setTimeout (=> @clearYankFlash()) 200
+        @yankFlashTimer = setTimeout (=> @clearYankFlash()) flashMs
 
     clearYankFlash: ->
 

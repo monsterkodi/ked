@@ -222,6 +222,9 @@ function KED
             @configAndSessionLoaded()
 
     configAndSessionLoaded: =>
+    
+        if config.data?.novim?.autoStart
+            @editor.state.toggleMode 'novim'
 
         ⮐  if @args.fresh
         ⮐  if @args.new
@@ -347,7 +350,7 @@ function KED
                 KED.building = true
                 # log "building"
                 kk = slash.path ◆dir '../../kk'
-                # child_process.exec "#{kk} -k" {shell:true} (err stdout stderr) => 
+                # exec "#{kk} -k" {shell:true} (err stdout stderr) => 
                 exec "#{kk} -k" {} (err stdout stderr) => 
                     if empty err
                         exec "#{kk} -t ked" {} (err stdout stderr) => 

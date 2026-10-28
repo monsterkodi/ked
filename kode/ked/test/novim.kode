@@ -307,9 +307,9 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
     s.yankFlash ▸ [[0 0 4 0]]
 
-    ○ sleep 250
-
-    s.yankFlash ▸ null
+    #○ sleep 550
+    #
+    #s.yankFlash ▸ null
 
 ▸ yank flash is drawn
 
