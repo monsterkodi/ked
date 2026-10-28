@@ -1,0 +1,31 @@
+###
+
+    inputchoice
+
+    an input that filters the choices below it
+
+###
+
+use ../util      ◆ harness
+use ../view/menu ◆ inputchoice
+
+▸ inputchoice
+
+    ▸ down after filtering moves the selection one line
+
+        h = new harness
+
+        ic = new inputchoice h.screen 'test_inputchoice'
+
+        ic.choices.set ['one' 'two' 'three' 'four']
+
+        ic.show()
+
+        h.focus ic.input
+        h.type ic.input 'o'
+
+        ic.choices.currentIndex() ▸ 0
+
+        h.key ic 'down'
+
+        ic.choices.currentIndex() ▸ 1

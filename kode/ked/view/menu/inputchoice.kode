@@ -223,6 +223,11 @@ function inputchoice extends view
             if result = @input.onKey key event
                 @autoHide()
                 ⮐  result
+            #  up and down became input actions that already moved the choices
+            if event.combo in ['up' 'down']
+                @choices.grabFocus() if event.combo == 'down'
+                @autoHide()
+                ⮐  true
             # log "focused input didn't handle key #{key}?"
 
         if result = @choices.onKey key event

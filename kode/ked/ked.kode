@@ -223,9 +223,6 @@ function KED
 
     configAndSessionLoaded: =>
     
-        if config.data?.novim?.autoStart
-            @editor.state.toggleMode 'novim'
-
         ⮐  if @args.fresh
         ⮐  if @args.new
         
@@ -484,6 +481,10 @@ function KED
         mode.fileLoaded @editor.state @currentFile row col view
         
         post.emit 'file.loaded' @currentFile
+        
+        if config.data?.novim?.autoStart
+            if not mode.isActive @editor.state 'novim'
+                @editor.state.toggleMode 'novim'
         
         @showEditor()
         @redraw()
