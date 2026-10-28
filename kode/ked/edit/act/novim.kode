@@ -21,34 +21,34 @@ export
             @stopVisual()
 
         switch cmd.operator
-            'change'      ➜ @changeByMotion     cmd.motion  cmd.register
-            'delete'      ➜ @applyChange cmd
-            'yank'        ➜ @yankByMotion       cmd.motion  cmd.register
-            'put'         ➜ @putRegister        cmd.count   cmd.after cmd.register
-            'move'        ➜ @moveByMotionWithVisual cmd.motion cmd.count
-            'searchNext'  ➜ @jumpByHighlight    cmd.count cmd.text true
-            'searchPrev'  ➜ @jumpByHighlight    cmd.count cmd.text false
-            'searchWord'  ➜ @searchWord         cmd.count cmd.forward
-            'matchBracket' ➜ @matchBracket(); @updateVisual() if @visual
-            'openLine'    ➜ @openLine           cmd.count cmd.after
-            'insertAtIndent' ➜ @insertAtIndent()
-            'replace'     ➜ @replaceChars       cmd.char cmd.count
-            'toggleCase'  ➜ @toggleCase         cmd.count
-            'joinLinesVim' ➜ @joinLinesVim      cmd.count
-            'visualDelete' ➜ @visualDelete      cmd.register
-            'visualYank'  ➜ @visualYank         cmd.register
-            'visualChange' ➜ @visualChange()
-            'visualSwap'  ➜ @visualSwap()
-            'visualTextObject' ➜ @visualTextObject cmd.motion
-            'indent'      ➜ @indentByMotion    cmd.motion false
-            'deindent'    ➜ @indentByMotion    cmd.motion true
-            'visualIndent' ➜ @indentVisual     cmd.count false
-            'visualDeindent' ➜ @indentVisual   cmd.count true
-            'visualBlockPrepend' ➜ @visualBlockInsert false
-            'visualBlockAppend'  ➜ @visualBlockInsert true
-            'undo'        ➜ @undoCommand        cmd.count
-            'repeat'      ➜ @repeatChange       cmd.count
-            else          ➜ log 'novim unknown operator ▸' cmd.operator
+            'change'                ➜ @changeByMotion       cmd.motion  cmd.register
+            'delete'                ➜ @applyChange          cmd
+            'yank'                  ➜ @yankByMotion         cmd.motion  cmd.register
+            'put'                   ➜ @putRegister          cmd.count   cmd.after cmd.register
+            'move'                  ➜ @moveByMotion         cmd.motion  cmd.count
+            'searchNext'            ➜ @jumpByHighlight      cmd.count   cmd.text true
+            'searchPrev'            ➜ @jumpByHighlight      cmd.count   cmd.text false
+            'searchWord'            ➜ @searchWord           cmd.count   cmd.forward
+            'matchBracket'          ➜ @matchBracket()
+            'openLine'              ➜ @openLine             cmd.count   cmd.after
+            'insertAtIndent'        ➜ @insertAtIndent()
+            'replace'               ➜ @replaceChars         cmd.char    cmd.count
+            'toggleCase'            ➜ @toggleCase           cmd.count
+            'joinLinesVim'          ➜ @joinLinesVim         cmd.count
+            'visualDelete'          ➜ @visualDelete         cmd.register
+            'visualYank'            ➜ @visualYank           cmd.register
+            'visualChange'          ➜ @visualChange()
+            'visualSwap'            ➜ @visualSwap()
+            'visualTextObject'      ➜ @visualTextObject     cmd.motion
+            'indent'                ➜ @indentByMotion       cmd.motion  false
+            'deindent'              ➜ @indentByMotion       cmd.motion  true
+            'visualIndent'          ➜ @indentVisual         cmd.count   false
+            'visualDeindent'        ➜ @indentVisual         cmd.count   true
+            'visualBlockPrepend'    ➜ @visualBlockInsert    false
+            'visualBlockAppend'     ➜ @visualBlockInsert    true
+            'undo'                  ➜ @undoCommand          cmd.count
+            'repeat'                ➜ @repeatChange         cmd.count
+                                    ➜ log 'novim unknown operator ▸' cmd.operator
 
     jumpByHighlight: count text forward ->
 
@@ -195,12 +195,8 @@ export
 
         if moved
             @setCursors newCursors main:@s.main
-
-    # ███   ███  ██  ███████  ██   ██  ███████  ██
-    # ███   ███  ██  ██       ██   ██    ███    ██
-    # ███   ███  ██  ███████  ██   ██    ███    ██
-    #  ███ ███   ██       ██  ██   ██    ███    ██
-    #   █████    ██  ███████   ██████  ███████  ███████
+            
+        @updateVisual() if @visual
 
     startVisual: kind ->
 
@@ -1145,11 +1141,7 @@ export
         else
             for i in 1..n
                 @moveCursors spec.kind
-
-    moveByMotionWithVisual: spec count=1 ->
-
-        @moveByMotion spec count
-
+                
         @updateVisual() if @visual
 
     moveByCharFind: spec n ->
