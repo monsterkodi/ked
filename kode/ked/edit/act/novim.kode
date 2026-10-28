@@ -272,23 +272,37 @@ export
         x1 = min anchor[0] cursor[0]
         x2 = max anchor[0] cursor[0]
 
+        ⮐ [] if x1 == x2
+        
+        @blockRangesForRect @s.lines x1 y1 x2 y2
+        
+    blockRangesForShape: shape cursor ->
+
+        ⮐ [] if empty @s.lines
+
+        y1 = min cursor[1] @s.lines.length-1
+        y2 = min cursor[1]+shape.y2 @s.lines.length-1
+        x1 = cursor[0]
+        x2 = x1+shape.x2
+        
+        @blockRangesForRect @s.lines x1 y1 x2 y2
+
+    blockRangesForRect: lines x1 y1 x2 y2 ->
+    
         rngs = []
-
-        ⮐  rngs if x1 == x2
-
         for y in y1..y2
+        
+            continue if y >= lines.length
 
-            continue if y >= @s.lines.length
-
-            width = kseg.width @s.lines[y]
+            width = kseg.width lines[y]
 
             continue if x1 >= width
 
-            ex = min x2 width
+            x2 = min x2 width
 
-            continue if ex <= x1
+            continue if x2 <= x1
 
-            rngs.push [x1 y ex y]
+            rngs.push [x1 y x2 y]
 
         rngs
 
@@ -773,32 +787,6 @@ export
         x2 = min cursor[0]+shape.x2 kseg.width(lines[y2])
 
         [x1 y1 x2 y2]
-
-    blockRangesForShape: shape cursor ->
-
-        lines = @s.lines
-
-        rngs = []
-
-        ⮐  rngs if empty lines
-
-        y1 = min cursor[1] lines.length-1
-        y2 = min cursor[1]+shape.y2 lines.length-1
-        x1 = cursor[0]
-
-        for y in y1..y2
-
-            width = kseg.width lines[y]
-
-            continue if x1 >= width
-
-            x2 = min x1+shape.x2 width
-
-            continue if x2 <= x1
-
-            rngs.push [x1 y x2 y]
-
-        rngs
 
     usesClipboard: register ->
 
