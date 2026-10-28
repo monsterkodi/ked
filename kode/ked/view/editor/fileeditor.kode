@@ -48,6 +48,7 @@ function fileeditor extends editor
         post.on 'goto.func'        @onGotoFunc
         post.on 'git.diff'         @onGitDiff
         post.on 'git.commit'       @onGitCommit
+        post.on 'jumpToWord'       @jumpToWord
         
         post.on 'funtree.loaded'   @onFuntreeLoaded
         
@@ -171,12 +172,10 @@ function fileeditor extends editor
             if valid func.file
                 if slash.ext(func.file) == 'js'
                     log "JS func.file file://#{func.file}:#{func.line}"
-                    log "FUNC" func 
                     map = new srcmap()
-                    src =○ map.sourcePosition func.file func.line
+                    src =○ map.sourcePosition func.file func.line 30
                     if valid src
-                        log "JS MAP" src
-                        post.emit 'file.open' src.file src.line 'ind'
+                        post.emit 'file.open' src.file src.line-1 'ind'
                         ⮐ true
                 post.emit 'file.open' func.file func.line-1 'ind'
                 ⮐ true
@@ -289,9 +288,7 @@ function fileeditor extends editor
                     
                     if event.cmd or event.ctrl
                         if word = belt.wordAtPos @state.s.lines [x y]
-                            log "jumpToWord #{word}" event
-                            if @jumpToWord word
-                                ⮐ 
+                            ⮐ if @jumpToWord word
 
                     @dragStart = [x y x]
                                         

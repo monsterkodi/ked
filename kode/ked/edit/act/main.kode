@@ -6,7 +6,7 @@
 ███   ███  ███   ███  ███  ███   ███  
 ###
 
-use ../../../kxk ▪ kseg
+use ../../../kxk ▪ kseg post
 use ../tool      ◆ belt
 
 export
@@ -122,6 +122,11 @@ export
 
         @deselect()
         @setCursors [mc]
+                   
+    jumpToWordAtCursor: ->
+    
+        if word = @wordAtCursor()
+            post.emit 'jumpToWord' word
                                     
     wordAtCursor:      -> belt.wordAtPos      @s.lines @mainCursor()
     chunkBeforeCursor: -> belt.chunkBeforePos @s.lines @mainCursor()
