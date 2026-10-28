@@ -86,6 +86,7 @@ function novim
         '%':      -> { operator: 'matchBracket' }
         '*':    n -> { operator: 'searchWord'   count: n  forward: true  }
         '#':    n -> { operator: 'searchWord'   count: n  forward: false }
+        'r': n c='' -> { operator: 'replace'    count: n  char: c }
         }
 
     @exCommands: {
@@ -174,10 +175,12 @@ function novim
         @replace         = null
         @ex              = null
         @logPending()
+        true
 
     exitNovim: ->
         
         @state.stopMode 'novim'
+        true
 
     countNumber: -> if empty @count then 1 else parseInt @count
 
@@ -194,13 +197,13 @@ function novim
         t += ':' + @ex if @ex?
     
         post.emit 'title.novim' t
+        true
 
     complete: build ->
 
         operator = novim.operators[@operator]
 
         @execute { operator: operator, motion: build(@countNumber()) }
-        @reset()
 
     completeTextObject: target ->
 
@@ -208,7 +211,6 @@ function novim
         operator = novim.operators[@operator]
 
         @execute { operator: operator, motion: { kind: 'textObject', area: area, target: target, count: @countNumber() } }
-        @reset()
 
     completeFind: target ->
 
@@ -224,12 +226,9 @@ function novim
         else
             @execute { operator: 'move', motion: motion }
 
-        @reset()
-
     completeReplace: char ->
 
-        @execute { operator: 'replace', char: char, count: @countNumber() }
-        @reset()
+        @execute novim.commands['r'](@countNumber() char)
 
     repeatFind: reverse=false ->
 
@@ -244,14 +243,13 @@ function novim
         else
             @execute { operator: 'move', motion: motion }
 
-        @reset()
-
     execute: cmd ->
 
         if @register
             cmd.register = @register
 
         @state.executeNovim cmd
+        @reset()
 
     runEx: ->
 
@@ -342,17 +340,15 @@ function novim
     handleExKey: combo char ->
 
         if combo in ['esc' 'escape']
-            @reset()
-            ⮐  true
+            ⮐ @reset()
 
         if combo in ['return' 'enter']
             @runEx()
-            ⮐  true
+            ⮐ true
 
         if combo in ['backspace' 'delete' 'ctrl+h']
             @ex = @ex[0...-1] if @ex.length
-            @logPending()
-            ⮐  true
+            ⮐ @logPending()
 
         if char.length == 1 and char not in ['\n' '\r' '\t']
             @ex += char
@@ -374,16 +370,15 @@ function novim
         if combo == 'ctrl+v'
             if not @operator and not @area
                 @state.startVisual 'block'
-            @reset()
-            ⮐  true
+            ⮐ @reset()
 
         # let global shortcuts through, at least the one that leaves this mode
         if combo.includes('alt+') or combo.includes('ctrl+') or combo.includes('cmd+')
-            ⮐  'unhandled'
+            ⮐ 'unhandled'
 
         if @ex?
             @handleExKey combo char
-            ⮐  true
+            ⮐ true
 
         if combo in ['esc' 'escape']
             @reset()
@@ -408,9 +403,9 @@ function novim
 
         if @replace
             if char.length == 1
-                @completeReplace char
+                ⮐ @completeReplace char
             else if key != 'shift'
-                @reset()
+                ⮐ @reset()
             ⮐ true
 
         if arrow = novim.arrows[char]
@@ -425,80 +420,60 @@ function novim
             else if char in ['"' '0']
                 @register = null
             else
-                @reset()
-                ⮐  true
+                ⮐ @reset()
 
-            @logPending()
-            ⮐  true
+            ⮐ @logPending()
 
-        ⮐  'unhandled' if char.length != 1 # ignore every other non text key
+        ⮐ 'unhandled' if char.length != 1 # ignore every other non text key
 
         if @state.visual and not @operator and not @area
 
             if char == 'v'
                 @state.startVisual 'char'
-                @reset()
-                ⮐  true
+                ⮐ @reset()
 
             if char == 'V'
                 @state.startVisual 'line'
-                @reset()
-                ⮐  true
+                ⮐ @reset()
 
             if char in ['d' 'x']
-                @execute { operator: 'visualDelete' }
-                @reset()
-                ⮐  true
+                ⮐ @execute { operator: 'visualDelete' }
 
             if char == 'y'
-                @execute { operator: 'visualYank' }
-                @reset()
-                ⮐  true
+                ⮐ @execute { operator: 'visualYank' }
 
             if char in ['c' 's']
-                @execute { operator: 'visualChange' }
-                @reset()
-                ⮐  true
+                ⮐ @execute { operator: 'visualChange' }
 
             if char == 'o'
-                @execute { operator: 'visualSwap' }
-                @reset()
-                ⮐  true
+                ⮐ @execute { operator: 'visualSwap' }
 
             if char in ['>' '<']
                 operator = char == '>' ? 'visualIndent' : 'visualDeindent'
-                @execute { operator: operator, count: @countNumber() }
-                @reset()
-                ⮐  true
+                ⮐ @execute { operator: operator, count: @countNumber() }
 
             if @state.visual == 'block' and char in ['I' 'A']
                 operator = char == 'I' ? 'visualBlockPrepend' : 'visualBlockAppend'
-                @execute { operator: operator }
-                @reset()
-                ⮐  true
+                ⮐ @execute { operator: operator }
 
             if area = novim.areas[char]
                 @area = area
-                @logPending()
-                ⮐  true
+                ⮐ @logPending()
 
         if not @operator and not @area
 
             if char == 'v'
                 @state.startVisual 'char'
-                @reset()
-                ⮐  true
+                ⮐ @reset()
 
             if char == 'V'
                 @state.startVisual 'line'
-                @reset()
-                ⮐  true
+                ⮐ @reset()
 
             if char == ':' and not @state.visual
                 @reset()
                 @ex = ''
-                @logPending()
-                ⮐  true
+                ⮐ @logPending()
 
         if 
             @prefix # gg 
@@ -506,19 +481,18 @@ function novim
                 prefix  = @prefix
                 @prefix = null
                 if prefix == 'g' and char == 'g'
-                    @execute { operator: 'move', motion: { kind: 'bof', count: @countNumber() } }
-                @reset()
+                    ⮐ @execute { operator: 'move', motion: { kind: 'bof', count: @countNumber() } }
+                # @reset()
  
             @area
     
                 if target = novim.textObjects[char]
                     if @state.visual
-                        @execute { operator: 'visualTextObject', motion: { kind: 'textObject', area: @area, target: target, count: @countNumber() } }
-                        @reset()
+                        ⮐ @execute { operator: 'visualTextObject', motion: { kind: 'textObject', area: @area, target: target, count: @countNumber() } }
                     else
                         @completeTextObject target
                 else
-                    @reset()
+                    @reset() # needed?
     
             @operator
     
@@ -527,88 +501,86 @@ function novim
                         @complete build
                     char in ['f' 't' 'F' 'T']
                         @find = char
-                        @logPending()
+                        ⮐ @logPending()
                     char == ';'
-                        @repeatFind()
+                        ⮐ @repeatFind()
                     char == ','
-                        @repeatFind true
+                        ⮐ @repeatFind true
                     area = novim.areas[char]
                         @area = area
-                        @logPending()
+                        ⮐ @logPending()
                     char in '0123456789'
                         @count += char
-                        @logPending()
+                        ⮐ @logPending()
                     ➜ 
-                        @reset()
+                        ⮐ @reset()
                     
             char in ['f' 't' 'F' 'T']
     
                 @find = char
-                @logPending()
+                ⮐ @logPending()
     
             char == 'i'
             
                 @state.startNovimInsert { kind: 'insert' }
-                @exitNovim()
+                ⮐ @exitNovim()
 
             char == 'a'
             
                 @state.startNovimInsert { kind: 'append' }
                 @state.moveCursors 'right'
-                @exitNovim()
+                ⮐ @exitNovim()
                 
             char == 'A'
             
                 @state.startNovimInsert { kind: 'appendEol' }
                 @state.moveCursors 'eol'
-                @exitNovim()
+                ⮐ @exitNovim()
     
             char == ';'
     
-                @repeatFind()
+                ⮐ @repeatFind()
     
             char == ','
     
-                @repeatFind true
+                ⮐ @repeatFind true
     
             char == 'r'
     
                 @replace = true
-                @logPending()
+                ⮐ @logPending()
     
             novim.operators[char]
     
                 @operator = char
-                @logPending()
+                ⮐ @logPending()
     
             char == '"'
     
                 @registerPending = true
-                @logPending()
+                ⮐ @logPending()
     
             char == 'g'
     
                 @prefix = 'g'
-                @logPending()
+                ⮐ @logPending()
     
             char == '/'
             
                 post.emit 'vinder.show' 
-                @reset()
+                ⮐ @reset()
     
             command = novim.commands[char]
     
-                @execute command(@countNumber())
-                @reset()
+                ⮐ @execute command(@countNumber())
     
             char in '0123456789'
     
                 if char == '0' and empty @count
-                    @execute { operator: 'move', motion: { kind: 'bol' } }
-                    @reset()
+                    ⮐ @execute { operator: 'move', motion: { kind: 'bol' } }
                 else
                     @count += char
-                    @logPending()
+                    ⮐ @logPending()
             ➜ 
                 ⮐ 'unhandled'
                 
