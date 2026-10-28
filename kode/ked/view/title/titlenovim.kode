@@ -1,0 +1,55 @@
+###
+    █████████  ███  █████████  ███      ████████  ███   ███   ███████   ███   ███  ███  ██     ██  
+       ███     ███     ███     ███      ███       ████  ███  ███   ███  ███   ███  ███  ███   ███  
+       ███     ███     ███     ███      ███████   ███ █ ███  ███   ███   ███ ███   ███  █████████  
+       ███     ███     ███     ███      ███       ███  ████  ███   ███     ███     ███  ███ █ ███  
+       ███     ███     ███     ███████  ████████  ███   ███   ███████       █      ███  ███   ███  
+
+    used by title to display the novim status
+###
+
+use ../../../kxk ▪ slash post
+use ../../theme  ◆ color theme 
+use ../../edit   ◆ mode
+use ../base      ◆ view
+
+function titlenovim extends view
+
+    @: screen name ->
+
+        super screen name
+        
+        @setColor 'bg'     theme.title.novim
+        @setColor 'fg'     theme.title.novimText
+        @setColor 'empty'  theme.title.empty
+        
+        @pointerType = 'default'
+        @novimText   = "novim"
+
+        post.on 'title.novim' (@novimText) =>
+        
+    # ███████    ████████    ███████   ███   ███  
+    # ███   ███  ███   ███  ███   ███  ███ █ ███  
+    # ███   ███  ███████    █████████  █████████  
+    # ███   ███  ███   ███  ███   ███  ███   ███  
+    # ███████    ███   ███  ███   ███  ██     ██  
+    
+    draw: x w -> 
+        
+        ⮐ if @hidden()
+        
+        super()
+        @layout x 0 w 1
+        @rounded = "#{rpad(w-2 @novimText)}"
+        
+        # log "#{@cells.x} #{@cells.cols} #{x} #{w}"
+            
+        bg = @color.bg
+        fg = @color.fg 
+        for ch,xo in @rounded
+            if ch in ''
+                @cells.set xo 0 ch bg @color.empty
+            else
+                @cells.set xo 0 ch fg bg 
+                
+export titlenovim

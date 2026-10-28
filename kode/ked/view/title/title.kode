@@ -15,7 +15,7 @@ use ../../edit/mode ◆ filepos
 use ../../edit      ◆ mode
 use ../../theme     ◆ color theme
 use ../base         ◆ view crumbs bubble 
-use                 ◆ titlefile
+use                 ◆ titlefile titlenovim
 
 function fileposSyntax
 
@@ -51,9 +51,10 @@ function title extends view
         
         @setColor 'gutter' theme.gutter.bg
            
-        @crumbs    = new crumbs     @screen 'title_crumbs'
-        @titlefile = new titlefile  @screen 'title_file'
-        @filepos   = new bubble     @screen "title_bubble"
+        @crumbs     = new crumbs      @screen 'title_crumbs'
+        @titlefile  = new titlefile   @screen 'title_file'
+        @titlenovim = new titlenovim  @screen 'title_novim'
+        @filepos    = new bubble      @screen "title_bubble"
         
         @crumbs.setColor 'empty_left'  @color.gutter
         @crumbs.setColor 'empty_right' theme.title.empty
@@ -66,7 +67,7 @@ function title extends view
         @filepos.on    'action' @onFileposAction
         
         post.on 'title.filepos' @onTitleFilepos
-        post.on 'title.novim'   (@novimText) =>
+        
         post.on 'vinder.text'   (@vinderText) => post.emit 'redraw'
     
     onTitleFilepos: @fileposl @fileoffs => 
@@ -135,10 +136,11 @@ function title extends view
     onMouse: event =>
 
         cret = @crumbs    .onMouse event
-        sret = @titlefile.onMouse event
+        sret = @titlefile .onMouse event
         fret = @filepos   .onMouse event
-        
-        ⮐  sret or cret or fret if sret or cret or fret
+        nret = @titlenovim.onMouse event
+
+        ⮐  sret or cret or fret or nret if sret or cret or fret or nret
 
         super event
         
@@ -196,6 +198,10 @@ function title extends view
         x += @titlefile.rounded.length
         
         @filepos.layout x y @filepos.rounded.length 1
+        
+        x += @filepos.rounded.length
+        x += 12
+        @titlenovim.layout x y w-x 1
                 
     # ███████    ████████    ███████   ███   ███  
     # ███   ███  ███   ███  ███   ███  ███ █ ███  
@@ -231,7 +237,7 @@ function title extends view
         add '' 'col' @color.gutter # column number end
               
         @crumbs.draw() # dir path
-        @titlefile.draw() # file
+        @titlefile.draw() # file        
         @filepos.draw()
         
         x += @crumbs.rounded.length
@@ -266,24 +272,15 @@ function title extends view
             for i in 0...hil.length
                 add hil[i] (i<hil.length-1) ? 'hil' : color.darken(theme.title.hil) 'dark'
         
+        novimX = x + 1
+        
+        for ci in x...cols-1
+            add ' ' null 'dark'
+        add '' 'dark' @color.gutter
+         
         if mode.isActive @state 'novim'
-            for ci in x...cols-13
-                add ' ' null 'dark'
-            add '' 'novim' 'dark'
-            if valid @novimText
-                for c in @novimText
-                    add c 'novimText' 'novim'
-            else if valid @vinderText
-                for c in @vinderText[0..10]
-                    add c 'vinderText' 'novim'
-            for ci in x...cols-1
-                add ' ' null 'novim'
-            add '' 'novim' @color.gutter
-        else                        
-            for ci in x...cols-1
-                add ' ' null 'dark'
-            add '' 'dark' @color.gutter 
-            
+            @titlenovim.draw @cells.x+novimX @cells.cols-novimX
+             
         if false   
             ci = clamp 0 3 int((@time/(1000*1000)-8)/8)
             ch = ' •'[ci] # 

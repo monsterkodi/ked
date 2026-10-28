@@ -259,7 +259,7 @@ function KED
         
         @dircol.layout  0     0  dcw        h    if @dircol.visible() and @dircol.active
         @funcol.layout  w-fcw 1  fcw        h-1  if @funcol.visible() and @funcol.active
-        @title.layout  dcw   0  w-dcw      1
+        @title.layout   dcw   0  w-dcw      1
         @editor.layout  dcw   1  w-dcw-fcw  h-1
     
     #  ███████   ███   ███  ███  █████████
@@ -340,7 +340,7 @@ function KED
                 
         ⮐ if KED.building
         ⮐ if @args.headless
-        
+        ⮐ if true
         if event.change == 'rename' and slash.ext(event.path) == 'kode'        
             # log "src change?" event
             if event.path.startsWith slash.path(◆dir '../../kode/ked')
