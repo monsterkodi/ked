@@ -123,6 +123,13 @@ class indexer
                 
             fileInfo.funcs.push funcInfo
             
+        if valid parsed.words
+            fileInfo.words = parsed.words
+            # log "#{file} #{fileInfo.words.length} words"
+            for word in parsed.words
+                @words[word] ?= new Set()
+                @words[word].add file    
+        
         @files[file] = fileInfo
         post.emit 'file.indexed' file fileInfo        
         

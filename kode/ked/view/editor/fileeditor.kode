@@ -151,8 +151,15 @@ function fileeditor extends editor
     jumpToWord: word ○=>
     
         log "fileeditor.jumpToWord '#{word}'"
-        # log 'fileeditor.jumpToWord classes' Object.keys(indexer.singleton.classes)
-        # log 'fileeditor.jumpToWord funcs'   Object.keys(indexer.singleton.funcs)
+        
+        currentFile = ked_session.get('editor▸file')
+        
+        canJumpTo = fileLine => 
+            ⮐ false if empty fileLine
+            if fileLine.file != currentFile or fileLine.line != @state.mainCursor()[1]+1
+                post.emit 'file.open' fileLine.file fileLine.line-1 'ind'
+                ⮐ true
+            false
         
         if clss = indexer.singleton.classes[word]
             log "clss.file" clss.file
@@ -160,27 +167,32 @@ function fileeditor extends editor
             ⮐ true
             
         else if func = indexer.singleton.funcs[word]
-
+            
             if func is arr
-                currentFile = ked_session.get 'editor▸file'
+            
+                func = func.filter (f) -> slash.ext(f.file) == slash.ext(currentFile)
+            
                 for fun,idx in func
                     if fun.file == currentFile
                         func = func[(idx+1) % func.length]
                         break
                 if func is arr
                     func = func[0]
+
             if valid func.file
                 if slash.ext(func.file) == 'js'
-                    # log "JS func.file file://#{func.file}:#{func.line}"
                     map = new srcmap()
                     src =○ map.sourcePosition func.file func.line Infinity
-                    if valid src
-                        post.emit 'file.open' src.file src.line-1 'ind'
+                    if canJumpTo src 
                         ⮐ true
-                post.emit 'file.open' func.file func.line-1 'ind'
-                ⮐ true
-        else 
-            log "fileeditor.jumpToWord(#{word}) nothing found to jump to"
+                if canJumpTo func
+                    ⮐ true
+                    
+        if indexer.singleton.words[word]
+            log "fileeditor.jumpToWord('#{word}') KNOWN WORD" Array.from(indexer.singleton.words[word])
+            ⮐ true
+
+        log "fileeditor.jumpToWord('#{word}') nothing to jump to"
         false
             
     singleCursorAtLine: li =>
