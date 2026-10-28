@@ -182,7 +182,7 @@ function novim
         @state.stopMode 'novim'
         true
 
-    countNumber: -> if empty @count then 1 else parseInt @count
+    countNumber: -> empty @count ? 1 : parseInt(@count)
 
     logPending: ->
     
@@ -428,34 +428,18 @@ function novim
 
         if @state.visual and not @operator and not @area
 
-            if char == 'v'
-                @state.startVisual 'char'
-                ⮐ @reset()
-
-            if char == 'V'
-                @state.startVisual 'line'
-                ⮐ @reset()
-
-            if char in ['d' 'x']
-                ⮐ @execute { operator: 'visualDelete' }
-
-            if char == 'y'
-                ⮐ @execute { operator: 'visualYank' }
-
-            if char in ['c' 's']
-                ⮐ @execute { operator: 'visualChange' }
-
-            if char == 'o'
-                ⮐ @execute { operator: 'visualSwap' }
-
-            if char in ['>' '<']
-                operator = char == '>' ? 'visualIndent' : 'visualDeindent'
-                ⮐ @execute { operator: operator, count: @countNumber() }
-
-            if @state.visual == 'block' and char in ['I' 'A']
-                operator = char == 'I' ? 'visualBlockPrepend' : 'visualBlockAppend'
-                ⮐ @execute { operator: operator }
-
+            switch char
+                'v'     ➜ @state.startVisual 'char' ; ⮐ @reset()
+                'V'     ➜ @state.startVisual 'line' ; ⮐ @reset()
+                'd' 'x' ➜ ⮐ @execute { operator: 'visualDelete' }
+                'y'     ➜ ⮐ @execute { operator: 'visualYank' }
+                'c' 's' ➜ ⮐ @execute { operator: 'visualChange' }
+                'o'     ➜ ⮐ @execute { operator: 'visualSwap' }
+                '>'     ➜ ⮐ @execute { operator: 'visualIndent',   count: @countNumber() }
+                '<'     ➜ ⮐ @execute { operator: 'visualDeindent', count: @countNumber() }
+                'I'     ➜ ⮐ @execute { operator: 'visualBlockPrepend' } if @state.visual == 'block'
+                'A'     ➜ ⮐ @execute { operator: 'visualBlockAppend' }  if @state.visual == 'block'
+                    
             if area = novim.areas[char]
                 @area = area
                 ⮐ @logPending()
@@ -503,7 +487,7 @@ function novim
                         @find = char
                         ⮐ @logPending()
                     char == ';'
-                        ⮐ @repeatFind()
+                        ⮐ @repeatFind false
                     char == ','
                         ⮐ @repeatFind true
                     area = novim.areas[char]
@@ -539,7 +523,7 @@ function novim
     
             char == ';'
     
-                ⮐ @repeatFind()
+                ⮐ @repeatFind false
     
             char == ','
     
@@ -581,10 +565,8 @@ function novim
                 else
                     @count += char
                     ⮐ @logPending()
-            ➜ 
-                ⮐ 'unhandled'
                 
-        true
+        'unhandled'
 
     #  ███████   ███████   ███       ███████   ████████
     # ███       ███   ███  ███      ███   ███  ███   ███
