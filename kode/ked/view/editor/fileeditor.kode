@@ -171,9 +171,9 @@ function fileeditor extends editor
                     func = func[0]
             if valid func.file
                 if slash.ext(func.file) == 'js'
-                    log "JS func.file file://#{func.file}:#{func.line}"
+                    # log "JS func.file file://#{func.file}:#{func.line}"
                     map = new srcmap()
-                    src =○ map.sourcePosition func.file func.line 30
+                    src =○ map.sourcePosition func.file func.line Infinity
                     if valid src
                         post.emit 'file.open' src.file src.line-1 'ind'
                         ⮐ true
