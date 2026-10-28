@@ -881,25 +881,20 @@ export
 
     yankByMotion: spec register ->
 
-        lines    = @s.lines
         linewise = motion.isLinewise spec
         cursors  = @allCursors()
-        texts    = []
+        rngs = []
+        for cursor,idx in cursors
 
-        for cursor, idx in cursors
-
-            rng = motion.range lines cursor spec
+            rng = motion.range @s.lines cursor spec
             continue if not rng
             continue if belt.isEmptyRange(rng) and not linewise
-
-            texts.push belt.textForLineRange(lines, rng)
+            rngs.push rng
             cursors[idx] = [rng[0] rng[1]] if not linewise
 
-        ⮐  if empty texts
-
-        @novimRegister = { lines: texts.join('\n').split('\n'), linewise: linewise }
-
-        @copyRegisterToClipboard @novimRegister if @usesClipboard(register)
+        ⮐ if empty rngs
+        
+        @setNovimRegister rngs linewise register
 
         if not linewise
             @setCursors cursors main:@s.main
