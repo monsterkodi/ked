@@ -66,6 +66,9 @@ function vinder extends view
         @arrange()
 
         @cells.draw_rounded_border 0 0 -1 -1 fg:@color.frame
+        # add left and right half-width padding to input
+        @cells.draw_vertical_padding 1 1 @color.frame theme.vinder.bg
+        @cells.draw_vertical_padding @cells.cols-2 1 theme.vinder.bg @color.frame
 
         @input.draw()
 

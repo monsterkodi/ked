@@ -23,7 +23,7 @@
     alt+o                               jump to counterpart
     alt+1                               filepos: previous entry
     alt+2                               filepos: next entry
-    cmd+1                               filepos: swap previous
+    cmd+1           ctrl+1              filepos: swap previous
     alt+h                               show filepos history
                                             
     ███   ███  ███  ████████  ███   ███   ███████

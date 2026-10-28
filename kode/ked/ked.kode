@@ -659,7 +659,7 @@ function KED
             
             'alt+1'                      ➜ ⮐  post.emit 'filepos.goBackward'  
             'alt+2'                      ➜ ⮐  post.emit 'filepos.goForward'   
-            'cmd+1'                      ➜ ⮐  post.emit 'filepos.swapPrevious'
+            'cmd+1' 'ctrl+1'             ➜ ⮐  post.emit 'filepos.swapPrevious'
             'alt+h'                      ➜ ⮐  @showFileposHistory()
             'alt+q' 'ctrl+q' 'cmd+q'     ➜ ⮐  @quit()
             'ctrl+r' 'cmd+r'             ➜ ⮐  @reloadFile()
