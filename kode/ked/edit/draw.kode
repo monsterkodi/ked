@@ -259,7 +259,7 @@ function draw extends view
 
         ⮐  if empty @state.yankFlash
 
-        bg = @color.yank.bg
+        bg = @color.yank
 
         [vx vy] = @state.s.view
 

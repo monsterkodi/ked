@@ -76,9 +76,6 @@ title
     cur                                     #f00   
     sel                                     #88f   
     hil                                     #0a0   
-    novim                                   #44a   
-    novimText                               #88f   
-    vinderText                              #008   
                                               
 scroll                                      
     knob                                    #1a1a1a
@@ -95,8 +92,9 @@ unype
         main                                #f00   
 
 novim
-    yank
-        bg                                  #060   
+    bg                                      #44a   
+    text                                    #88f   
+    yank                                    #060   
     cursor
         multi                               #44a   
         main                                #88f   

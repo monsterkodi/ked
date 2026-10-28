@@ -19,12 +19,12 @@ function titlenovim extends view
 
         super screen name
         
-        @setColor 'bg'     theme.title.novim
-        @setColor 'fg'     theme.title.novimText
+        @setColor 'bg'     theme.novim.bg
+        @setColor 'fg'     theme.novim.text
         @setColor 'empty'  theme.title.empty
         
         @pointerType = 'default'
-        @novimText   = "novim"
+        @novimText   = 'novim'
 
         post.on 'title.novim' (@novimText) =>
         
@@ -39,11 +39,10 @@ function titlenovim extends view
         ⮐ if @hidden()
         
         super()
+        
         @layout x 0 w 1
         @rounded = "#{rpad(w-2 @novimText)}"
         
-        # log "#{@cells.x} #{@cells.cols} #{x} #{w}"
-            
         bg = @color.bg
         fg = @color.fg 
         for ch,xo in @rounded
