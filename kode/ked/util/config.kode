@@ -20,7 +20,7 @@ function config
         configFile = slash.path ◆dir '../../../config'
         # log 'load config file' configFile
         @data =○ noon.load configFile
-        log 'config loaded' #@data
+        # log 'config loaded' #@data
         post.emit 'config.loaded'
         
         @resolveLoaded()
