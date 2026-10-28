@@ -10,7 +10,14 @@ use fs
 
 function logfile
 
-    @: @name ->
+    @: @name headless=false ->
+        
+        @headless = headless
+        
+        #  a headless run has no terminal to take over: the console stays
+        #  as it is and there is no log file
+        
+        ⮐ if @headless
         
         logfile = ◆dir + '/../../../ked.log'
 
@@ -37,11 +44,15 @@ function logfile
         
     write: txt ->
         
-        ⮐  if @stream.closed or not @stream.writable
+        ⮐  if @headless or @stream.closed or not @stream.writable
 
         @stream.write txt + '\n'
         
     close: cb ->
+        
+        if @headless
+            cb()
+            ⮐
         
         @stream.end r4('▪\n')
         @stream.close cb

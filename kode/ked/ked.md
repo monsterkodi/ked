@@ -30,6 +30,9 @@ terminal escape codes instead of plain text.
 the terminal: the ttio keeps what would have been written, and the screen is
 a buffer of cells that can be read as text.
 
+The console is not taken over: `console.log` keeps writing to stdout and no
+`ked.log` is written, so a script can print while it drives the editor.
+
 The screen is written out after every key of the script, so a script can be
 followed step by step:
 

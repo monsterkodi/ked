@@ -1,0 +1,35 @@
+###
+    logfile
+
+    in a headless run there is no terminal to hijack: the console keeps
+    its own writers and the log file is never opened.
+###
+
+use ../util ◆ logfile
+
+▸ logfile
+
+    ▸ a headless logfile leaves the console alone
+
+        before = [console.log console.warn console.error]
+        log = new logfile 'test' true
+
+        log.stream ▸ undefined
+        (console.log == before[0]) ▸ true
+        (console.warn == before[1]) ▸ true
+        (console.error == before[2]) ▸ true
+
+    ▸ a headless logfile writes nowhere
+
+        log = new logfile 'test' true
+
+        log.write 'nothing happens'
+
+    ▸ a headless logfile still closes
+
+        log = new logfile 'test' true
+        closed = false
+
+        log.close -> closed = true
+
+        closed ▸ true

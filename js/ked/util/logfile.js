@@ -13,12 +13,17 @@ import fs from "fs"
 
 logfile = (function ()
 {
-    function logfile (name)
+    function logfile (name, headless = false)
     {
         this.name = name
     
         var logfile
 
+        this.headless = headless
+        if (this.headless)
+        {
+            return
+        }
         logfile = _k_.dir() + '/../../../ked.log'
         this.stream = fs.createWriteStream(logfile,{flags:'w',autoClose:false})
         console.log = (function (...args)
@@ -64,7 +69,7 @@ logfile = (function ()
 
     logfile.prototype["write"] = function (txt)
     {
-        if (this.stream.closed || !this.stream.writable)
+        if (this.headless || this.stream.closed || !this.stream.writable)
         {
             return
         }
@@ -73,6 +78,11 @@ logfile = (function ()
 
     logfile.prototype["close"] = function (cb)
     {
+        if (this.headless)
+        {
+            cb()
+            return
+        }
         this.stream.end(_k_.r4('▪\n'))
         return this.stream.close(cb)
     }
@@ -82,5 +92,5 @@ logfile = (function ()
 
 export default logfile;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibG9nZmlsZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdXRpbC9sb2dmaWxlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7T0FRSSxTQUFBOzs7QUFFSyxXQUFUOzthQUVJLFNBQUk7O1FBQUQ7Ozs7UUFFQyxVQUFXLFlBQU07UUFFakIsS0FBQyxTQUFTLEdBQUcsa0JBQWtCLFNBQVEsTUFBTSxJQUFJLFVBQVU7UUFDM0QsUUFBUSxpQkFBTTs7OztnQkFFUCxLQUFLLFVBQXNCLFVBQVgsS0FBSzs7b0JBQ2pCLEtBQUssU0FBUzs7b0JBQ2IsTUFBTSxXQUFLOzt5QkFDUCxLQUFLLFdBQVU7O29CQUNuQixNQUFNLEtBQUs7O2dCQUNmLEtBQUMsTUFBTSxPQUFHLFFBQVEsT0FBRyxLQUFLO29CQUNOLEtBQUssU0FBUzs7MkJBQWxDLEtBQUMsZ0JBQVc7Ozs7O3VCQUVaLEtBQUMsTUFBTSxrQkFBVzs7O1FBRTFCLFFBQVEsa0JBQU87O21CQUVYLEtBQUMsTUFBTSxPQUFHLEtBQUssY0FBSzs7dUJBQU0sT0FBRyxrQkFBVztlQUFJLEtBQUs7O1FBRXJELFFBQVEsbUJBQVE7O21CQUVaLEtBQUMsTUFBTSxPQUFHLEtBQUssY0FBSzs7dUJBQU0sT0FBRyxrQkFBVztlQUFJLEtBQUs7Ozs7dUJBRXpELG9CQUFPOztZQUVHLEtBQUMsT0FBTyxXQUFjLEtBQUMsT0FBTzs7OztlQUVwQyxLQUFDLE9BQU8sTUFBTSxNQUFNOzs7dUJBRXhCLG9CQUFPOztRQUVILEtBQUMsT0FBTyxJQUFJLE9BQUc7ZUFDZixLQUFDLE9BQU8sTUFBTTs7O1dBcENiOzs7ZUFzQ0YifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibG9nZmlsZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdXRpbC9sb2dmaWxlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7T0FRSSxTQUFBOzs7QUFFSyxXQUFUOzthQUVJLFNBQUksTUFBSyxXQUFTOztRQUFmOzs7O1FBRUMsS0FBQyxXQUFXO1lBS1AsS0FBQzs7OztRQUVOLFVBQVcsWUFBTTtRQUVqQixLQUFDLFNBQVMsR0FBRyxrQkFBa0IsU0FBUSxNQUFNLElBQUksVUFBVTtRQUMzRCxRQUFRLGlCQUFNOzs7O2dCQUVQLEtBQUssVUFBc0IsVUFBWCxLQUFLOztvQkFDakIsS0FBSyxTQUFTOztvQkFDYixNQUFNLFdBQUs7O3lCQUNQLEtBQUssV0FBVTs7b0JBQ25CLE1BQU0sS0FBSzs7Z0JBQ2YsS0FBQyxNQUFNLE9BQUcsUUFBUSxPQUFHLEtBQUs7b0JBQ04sS0FBSyxTQUFTOzsyQkFBbEMsS0FBQyxnQkFBVzs7Ozs7dUJBRVosS0FBQyxNQUFNLGtCQUFXOzs7UUFFMUIsUUFBUSxrQkFBTzs7bUJBRVgsS0FBQyxNQUFNLE9BQUcsS0FBSyxjQUFLOzt1QkFBTSxPQUFHLGtCQUFXO2VBQUksS0FBSzs7UUFFckQsUUFBUSxtQkFBUTs7bUJBRVosS0FBQyxNQUFNLE9BQUcsS0FBSyxjQUFLOzt1QkFBTSxPQUFHLGtCQUFXO2VBQUksS0FBSzs7Ozt1QkFFekQsb0JBQU87O1lBRUcsS0FBQyxZQUFZLEtBQUMsT0FBTyxXQUFjLEtBQUMsT0FBTzs7OztlQUVqRCxLQUFDLE9BQU8sTUFBTSxNQUFNOzs7dUJBRXhCLG9CQUFPOztZQUVBLEtBQUM7O1lBQ0E7OztRQUdKLEtBQUMsT0FBTyxJQUFJLE9BQUc7ZUFDZixLQUFDLE9BQU8sTUFBTTs7O1dBL0NiOzs7ZUFpREYifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/util/logfile.kode
