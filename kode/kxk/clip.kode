@@ -73,7 +73,7 @@ function Clip
             error 'clip.copy -- no clipboard tool found (tried wl-copy, xsel, xclip)'
             ⮐
         
-        log "clip.write" cmd args
+        # log "clip.write" cmd args
         proc = child_process.spawn cmd args
 
         # without this a missing tool raises an unhandled 'error' event
@@ -107,7 +107,7 @@ function Clip
             error 'clip.paste -- no clipboard tool found (tried wl-copy, xsel, xclip)'
             ⮐ ''
 
-        log "clip.read" cmd args
+        # log "clip.read" cmd args
 
         try
             child_process.execSync([cmd].concat(args).join(' ')).toString 'utf8'
@@ -134,11 +134,11 @@ function Clip
 
     @paste: ->
         
-        log "PASTE"
+        # log "PASTE"
         
         text = Clip.read()
         
-        log "PASTE" text
+        # log "PASTE" text
         
         ⮐ text if valid text
 
