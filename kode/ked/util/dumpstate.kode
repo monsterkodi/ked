@@ -1,0 +1,30 @@
+###
+    ████████    ███   ███  ███   ███  ████████
+    ███   ███  ███   ███  ████  ███  ███
+    ███   ███  ███   ███  ███ █ ███  ███████
+    ███   ███  ███   ███  ███  ████       ███
+    ████████    ███████   ███   ███  ████████
+
+    one line of state for a headless dump
+###
+
+use ../edit ◆ mode
+
+function dumpstate
+
+    @tags: (state file) ->
+        
+        tags = []
+        
+        names = (mode.active[state.name] ? []).map((m) -> m.name).sort()
+        tags.push "modes: #{names.join ' '}" if valid names
+        
+        novim = mode.get state 'novim'
+        tags.push "pending: :#{novim.ex}" if novim?.ex?
+        
+        tags.push 'dirty' if state.isDirty()
+        tags.push "file: #{file}" if valid file
+        
+        tags.map((tag) -> "[#{tag}]").join ' '
+
+export dumpstate

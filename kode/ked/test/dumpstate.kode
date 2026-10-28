@@ -1,0 +1,39 @@
+###
+    dumpstate
+
+    the one-line state that follows each headless dump
+###
+
+use ../edit ◆ state mode
+use ../util ◆ dumpstate
+
+cells = cols:55 rows:66
+
+▸ dumpstate
+
+    ▸ a plain state carries its file
+
+        s = new state cells 'plain'
+
+        dumpstate.tags(s, '/tmp/x') ▸ '[file: /tmp/x]'
+
+    ▸ the active modes and a pending ex command are shown
+
+        ○ mode.loaded
+
+        s = new state cells 'modes'
+        s.allowedModes.unype = true
+        s.allowedModes.novim = true
+        s.startMode 'unype'
+        s.startMode 'novim'
+        mode.get(s, 'novim').ex = 'q'
+
+        dumpstate.tags(s, '/tmp/x') ▸ '[modes: novim unype] [pending: :q] [file: /tmp/x]'
+
+    ▸ a changed buffer is dirty
+
+        s = new state cells 'dirty'
+        s.clearHistory()
+        s.pushState()
+
+        dumpstate.tags(s, '/tmp/x') ▸ '[dirty] [file: /tmp/x]'

@@ -8,7 +8,7 @@
 
 use ../kxk        ▪ karg kstr kseg slash post nfs sleep
 use ./index       ◆ prjcts indexer
-use ./util        ◆ logfile session help frecent watcher git config
+use ./util        ◆ logfile session help frecent watcher git config dumpstate
 use ./util/img    ◆ rounded squares sircels
 use ./edit/tool   ◆ belt
 use ./edit        ◆ mode
@@ -202,7 +202,10 @@ function KED
         
         @draw()
         
-        process.stdout.write "\n=== #{label}\n"
+        state = dumpstate.tags @editor.state @currentFile
+        line  = valid state ? "#{label} #{state}" : label
+        
+        process.stdout.write "\n=== #{line}\n"
         
         if @args.colors
             process.stdout.write @screen.textColored().join('\n') + '\n'

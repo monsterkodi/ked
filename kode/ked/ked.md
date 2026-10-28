@@ -37,11 +37,17 @@ The screen is written out after every key of the script, so a script can be
 followed step by step:
 
 ```
-=== start
+=== start [modes: brckts filepos novim replex] [file: /tmp/x]
 <the screen>
-=== down
+=== down [modes: brckts filepos novim replex] [dirty] [file: /tmp/x]
+<the screen>
+=== q [pending: :q] [dirty] [file: /tmp/x]
 <the screen>
 ```
+
+The label carries the state of the editor: the active modes, a pending `:`
+command, whether the buffer is dirty, and the current file. Empty parts are
+left out.
 
 The cursor is drawn with kitty graphics, which a headless screen has none of,
 so it is marked with escape sequences there: the character under the cursor is
