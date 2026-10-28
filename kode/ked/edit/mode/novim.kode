@@ -88,6 +88,11 @@ function novim
         '#':    n -> { operator: 'searchWord'   count: n  forward: false }
         }
 
+    @exCommands: {
+        'q':  { desc: 'save pending changes and quit'   run: (-> post.emit 'file.saveAndQuit') }
+        'q!': { desc: 'quit discarding pending changes' run: (-> post.emit 'quit') }
+        }
+
     @motions: {
         '0':      -> { kind: 'bol' }
         '$':      -> { kind: 'eol' }
@@ -160,6 +165,7 @@ function novim
         @registerPending = false
         @find            = null
         @replace         = null
+        @ex              = null
         @logPending()
 
     exitNovim: ->
@@ -178,6 +184,7 @@ function novim
         t += @register if @register 
         t += @find if @find 
         t += 'r' if @replace
+        t += ':' + @ex if @ex?
     
         post.emit 'title.novim' t
 
@@ -239,6 +246,45 @@ function novim
 
         @state.executeNovim cmd
 
+    runEx: ->
+
+        name = @ex
+
+        @reset()
+
+        ⮐  true if empty name
+
+        cmd = novim.exCommands[name]
+
+        if not cmd
+            post.emit 'title.novim' "E492: #{name}"
+            ⮐  false
+
+        cmd.run()
+
+        true
+
+    handleExKey: combo char ->
+
+        if combo in ['esc' 'escape']
+            @reset()
+            ⮐  true
+
+        if combo in ['return' 'enter']
+            @runEx()
+            ⮐  true
+
+        if combo in ['backspace' 'delete' 'ctrl+h']
+            @ex = @ex[0...-1] if @ex.length
+            @logPending()
+            ⮐  true
+
+        if char.length == 1 and char not in ['\n' '\r' '\t']
+            @ex += char
+            @logPending()
+
+        true
+
     # ███   ███  ████████  ███   ███
     # ███  ███   ███        ███ ███
     # ███████    ███████     █████
@@ -259,6 +305,10 @@ function novim
         # let global shortcuts through, at least the one that leaves this mode
         if combo.includes('alt+') or combo.includes('ctrl+') or combo.includes('cmd+')
             ⮐  'unhandled'
+
+        if @ex?
+            @handleExKey combo char
+            ⮐  true
 
         if combo in ['esc' 'escape']
             @reset()
@@ -367,6 +417,12 @@ function novim
             if char == 'V'
                 @state.startVisual 'line'
                 @reset()
+                ⮐  true
+
+            if char == ':' and not @state.visual
+                @reset()
+                @ex = ''
+                @logPending()
                 ⮐  true
 
         if 

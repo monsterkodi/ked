@@ -164,6 +164,7 @@
     "+y  "+p  "*y  "*p                  use the system clipboard register
     /{pattern}                          open the search strip and highlight matches
     n  N                                jump to the next or previous highlight
+    :q  :q!                             save and quit, quit discarding changes
 
     f and t search the whole buffer and underline every target while the
     find is active. ; repeats in the same direction, , in the other one.

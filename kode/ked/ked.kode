@@ -90,6 +90,8 @@ function KED
         post.on 'file.new'      @newFile
         post.on 'file.reload'   @reloadFile
         post.on 'file.open'     @openFile
+        post.on 'file.save'     @saveFile
+        post.on 'file.saveAndQuit' @saveAndQuit
         post.on 'file.saveas'   @onSaveAs
         post.on 'quit'          @quit
         post.on 'file.change'   @onFileChange
@@ -530,6 +532,12 @@ function KED
             @editor.state.clearHistory() # lazy way to 'undirty' :> no undo after save :(
             @redraw()
             @saveSessionFile @currentFile 'saved'
+            
+    saveAndQuit: ○=>
+
+        ○ @saveFile()
+
+        @quit()
             
     saveSessionFile: file type =>
         

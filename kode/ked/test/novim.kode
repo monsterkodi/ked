@@ -5,7 +5,7 @@
     the motions are pure: lines and a position in, a range out.
 ###
 
-use ../../kxk       ▪ kseg sleep
+use ../../kxk       ▪ kseg sleep post
 use ../../kxk       ◆ clip
 use ../edit/tool    ◆ belt motion
 use ../edit         ◆ state mode editor
@@ -2239,6 +2239,115 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     key '/'
     txt "foo\nbar"
+
+▸ ex commands
+
+    m = new novim s
+
+    key   = c -> m.handleKey c {combo:c, char:c}
+    keys  = t ->
+        for c in t
+            key c
+    enter = -> m.handleKey 'return'    {combo:'return', char:'\n'}
+    back  = -> m.handleKey 'backspace' {combo:'backspace'}
+    esc   = -> m.handleKey 'esc'       {combo:'esc', char:''}
+
+    quits  = 0
+    saves  = 0
+    titles = []
+    capture = true
+
+    post.on 'quit'            -> quits += 1
+    post.on 'file.saveAndQuit' -> saves += 1
+    post.on 'title.novim' (t) -> titles.push t if capture
+
+    keys ':q'
+
+    m.ex        ▸ 'q'
+    titles[-1]  ▸ ':q'
+
+    enter()
+
+    saves    ▸ 1
+    quits    ▸ 0
+    m.ex     ▸ null
+
+    keys ':q'
+
+    m.ex ▸ 'q'
+
+    enter()
+
+    saves ▸ 2
+    quits ▸ 0
+
+    keys ':q!'
+
+    m.ex        ▸ 'q!'
+    titles[-1]  ▸ ':q!'
+
+    enter()
+
+    saves ▸ 2
+    quits ▸ 1
+    m.ex  ▸ null
+
+    keys ':q!!'
+    back()
+
+    m.ex        ▸ 'q!'
+    titles[-1]  ▸ ':q!'
+
+    enter()
+
+    saves ▸ 2
+    quits ▸ 2
+
+    keys ':q'
+    esc()
+
+    m.ex ▸ null
+
+    enter()
+
+    saves ▸ 2
+    quits ▸ 2
+
+    keys ':'
+    enter()
+
+    saves ▸ 2
+    quits ▸ 2
+    m.ex  ▸ null
+
+    # a pending count does not leak into the ex command
+
+    keys '3:q'
+
+    m.ex       ▸ 'q'
+    titles[-1] ▸ ':q'
+
+    esc()
+
+    m.ex ▸ null
+
+    keys ':nope'
+    enter()
+
+    titles[-1] ▸ 'E492: nope'
+    saves     ▸ 2
+    quits     ▸ 2
+    m.ex      ▸ null
+
+    # a pending operator keeps ':' from starting an ex command
+
+    key 'd'
+    key ':'
+
+    m.operator ▸ null
+    m.ex       ▸ null
+
+    capture = false
 
 ▸ brckts lets novim handle text keys
 
