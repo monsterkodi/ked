@@ -2253,15 +2253,24 @@ mrange = lines x y m -> motion.range lines [x y] m
     esc   = -> m.handleKey 'esc'       {combo:'esc', char:''}
 
     quits  = 0
-    saves  = 0
-    writes = 0
+    saves  = []
+    writes = []
     titles = []
     capture = true
 
-    post.on 'quit'            -> quits += 1
-    post.on 'file.saveAndQuit' -> saves += 1
-    post.on 'file.save'        -> writes += 1
-    post.on 'title.novim' (t) -> titles.push t if capture
+    clean = -> s.clearHistory()
+    dirty = ->
+        s.clearHistory()
+        s.pushState()
+
+    post.on 'quit'                    -> quits += 1
+    post.on 'file.saveAndQuit' (file) -> saves.push file ? null
+    post.on 'file.save'        (file) -> writes.push file ? null
+    post.on 'title.novim'      (t)    -> titles.push t if capture
+
+    clean()
+
+    # :q quits when there is nothing to lose
 
     keys ':q'
 
@@ -2270,18 +2279,22 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     enter()
 
-    saves    ▸ 1
-    quits    ▸ 0
-    m.ex     ▸ null
+    quits  ▸ 1
+    writes ▸ []
+    saves  ▸ []
+    m.ex   ▸ null
+
+    # :q refuses to throw away a changed buffer
+
+    dirty()
 
     keys ':q'
-
-    m.ex ▸ 'q'
-
     enter()
 
-    saves ▸ 2
-    quits ▸ 0
+    quits      ▸ 1
+    titles[-1] ▸ 'E37: No write since last change (add ! to override)'
+
+    # :q! quits anyway
 
     keys ':q!'
 
@@ -2290,37 +2303,24 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     enter()
 
-    saves ▸ 2
-    quits ▸ 1
-    m.ex  ▸ null
+    quits  ▸ 2
+    writes ▸ []
+    saves  ▸ []
 
-    keys ':q!!'
-    back()
+    # commands that take no argument reject one
 
-    m.ex        ▸ 'q!'
-    titles[-1]  ▸ ':q!'
+    before = quits
 
+    keys ':q now'
     enter()
 
-    saves ▸ 2
-    quits ▸ 2
+    quits      ▸ before
+    titles[-1] ▸ 'E488: Trailing characters: now'
 
-    keys ':q'
-    esc()
-
-    m.ex ▸ null
-
+    keys ':wa now'
     enter()
 
-    saves ▸ 2
-    quits ▸ 2
-
-    keys ':'
-    enter()
-
-    saves ▸ 2
-    quits ▸ 2
-    m.ex  ▸ null
+    titles[-1] ▸ 'E488: Trailing characters: now'
 
     # a pending count does not leak into the ex command
 
@@ -2333,12 +2333,157 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     m.ex ▸ null
 
+    # backspace edits the ex line
+
+    keys ':wqq'
+    back()
+
+    m.ex ▸ 'wq'
+
+    esc()
+
+    m.ex ▸ null
+
+    # :w writes without quitting
+
+    clean()
+
+    keys ':w'
+    enter()
+
+    writes ▸ [null]
+    saves  ▸ []
+    quits  ▸ 2
+    m.ex   ▸ null
+
+    # :w file writes to the given file
+
+    keys ':w /tmp/ked-w.txt'
+    enter()
+
+    writes ▸ [null '/tmp/ked-w.txt']
+
+    # :w! writes the same way
+
+    keys ':w! /tmp/ked-w.txt'
+    enter()
+
+    writes ▸ [null '/tmp/ked-w.txt' '/tmp/ked-w.txt']
+
+    # spaces around the argument are dropped
+
+    keys ':w   /tmp/ked-space.txt   '
+    enter()
+
+    writes[-1] ▸ '/tmp/ked-space.txt'
+
+    # a leading ! would be a shell command, which is not supported
+
+    before = writes.length
+
+    keys ':w !ls'
+    enter()
+
+    writes.length ▸ before
+    titles[-1]    ▸ 'E492: shell commands are not supported'
+
+    before = saves.length
+
+    keys ':wq !ls'
+    enter()
+
+    saves.length ▸ before
+    titles[-1]   ▸ 'E492: shell commands are not supported'
+
+    # :wq writes and quits
+
+    keys ':wq'
+    enter()
+
+    saves ▸ [null]
+
+    keys ':wq /tmp/ked-wq.txt'
+    enter()
+
+    saves ▸ [null '/tmp/ked-wq.txt']
+
+    keys ':wq! /tmp/ked-wq.txt'
+    enter()
+
+    saves ▸ [null '/tmp/ked-wq.txt' '/tmp/ked-wq.txt']
+
+    # :x quits a clean buffer without writing
+
+    clean()
+    before = writes.length
+
+    keys ':x'
+    enter()
+
+    quits         ▸ 3
+    writes.length ▸ before
+
+    # :x writes a changed buffer and quits
+
+    dirty()
+
+    keys ':x'
+    enter()
+
+    saves[-1] ▸ null
+
+    # :x file writes the changed buffer to the file
+
+    dirty()
+
+    keys ':x /tmp/ked-x.txt'
+    enter()
+
+    saves[-1] ▸ '/tmp/ked-x.txt'
+
+    # :x! writes the same way
+
+    dirty()
+
+    keys ':x! /tmp/ked-x.txt'
+    enter()
+
+    saves[-1] ▸ '/tmp/ked-x.txt'
+
+    # :wa writes nothing when nothing changed
+
+    clean()
+    before = writes.length
+
+    keys ':wa'
+    enter()
+
+    writes.length ▸ before
+
+    # :wa writes the changed buffer
+
+    dirty()
+
+    keys ':wa'
+    enter()
+
+    writes[-1] ▸ null
+
+    clean()
+
+    # an empty ex line does nothing
+
+    keys ':'
+    enter()
+
+    m.ex ▸ null
+
+    # unknown commands are reported
+
     keys ':nope'
     enter()
 
     titles[-1] ▸ 'E492: nope'
-    saves     ▸ 2
-    quits     ▸ 2
     m.ex      ▸ null
 
     # a pending operator keeps ':' from starting an ex command
@@ -2348,32 +2493,6 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     m.operator ▸ null
     m.ex       ▸ null
-
-    # :w saves without quitting, :wq saves and quits
-
-    keys ':w'
-
-    m.ex       ▸ 'w'
-    titles[-1] ▸ ':w'
-
-    enter()
-
-    writes  ▸ 1
-    saves   ▸ 2
-    quits   ▸ 2
-    m.ex    ▸ null
-
-    keys ':wq'
-
-    m.ex       ▸ 'wq'
-    titles[-1] ▸ ':wq'
-
-    enter()
-
-    writes  ▸ 1
-    saves   ▸ 3
-    quits   ▸ 2
-    m.ex    ▸ null
 
     capture = false
 

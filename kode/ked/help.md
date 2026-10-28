@@ -164,9 +164,13 @@
     "+y  "+p  "*y  "*p                  use the system clipboard register
     /{pattern}                          open the search strip and highlight matches
     n  N                                jump to the next or previous highlight
-    :q  :wq                             save and quit
-    :w                                  save pending changes
+    :w  :w {file}                       write the buffer to the file
+    :w!  :w! {file}                     the same, overriding a refusal
+    :wa                                 write every buffer that changed
+    :q                                  quit, fail if there are pending changes
     :q!                                 quit discarding pending changes
+    :wq  :wq {file}  :wq!               write then quit
+    :x  :x {file}  :x!                  write only if changed, then quit
 
     f and t search the whole buffer and underline every target while the
     find is active. ; repeats in the same direction, , in the other one.

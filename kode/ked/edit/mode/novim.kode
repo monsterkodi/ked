@@ -89,10 +89,15 @@ function novim
         }
 
     @exCommands: {
-        'q':  { desc: 'save pending changes and quit'   run: (-> post.emit 'file.saveAndQuit') }
-        'q!': { desc: 'quit discarding pending changes' run: (-> post.emit 'quit') }
-        'w':  { desc: 'save pending changes'            run: (-> post.emit 'file.save') }
-        'wq': { desc: 'save pending changes and quit'   run: (-> post.emit 'file.saveAndQuit') }
+        'q':   { desc: 'quit, fail if there are pending changes'       run: 'exQuit'      arg: false }
+        'q!':  { desc: 'quit discarding pending changes'               run: 'exQuitForce' arg: false }
+        'w':   { desc: 'write the buffer'                              run: 'exWrite' }
+        'w!':  { desc: 'write the buffer, overriding a refusal'        run: 'exWrite' }
+        'wa':  { desc: 'write all buffers with pending changes'        run: 'exWriteAll'  arg: false }
+        'wq':  { desc: 'write the buffer and quit'                     run: 'exWriteAndQuit' }
+        'wq!': { desc: 'write the buffer and quit, overriding a refusal' run: 'exWriteAndQuit' }
+        'x':   { desc: 'write if changed, then quit'                   run: 'exWriteIfChangedAndQuit' }
+        'x!':  { desc: 'write if changed, then quit, overriding a refusal' run: 'exWriteIfChangedAndQuit' }
         }
 
     @motions: {
@@ -250,11 +255,13 @@ function novim
 
     runEx: ->
 
-        name = @ex
+        line = @ex
 
         @reset()
 
-        ⮐  true if empty name
+        ⮐  true if empty line
+
+        [name file] = novim.splitEx line
 
         cmd = novim.exCommands[name]
 
@@ -262,9 +269,75 @@ function novim
             post.emit 'title.novim' "E492: #{name}"
             ⮐  false
 
-        cmd.run()
+        if cmd.arg == false and file?
+            post.emit 'title.novim' "E488: Trailing characters: #{file}"
+            ⮐  false
+
+        @[cmd.run] file
 
         true
+
+    @splitEx: (line) ->
+
+        line = line.trim()
+        idx  = line.search /\s/
+
+        ⮐ [line null] if idx < 0
+
+        [line[0...idx] line[idx..].trim()]
+
+    exQuit: ->
+
+        if @state.isDirty()
+            post.emit 'title.novim' 'E37: No write since last change (add ! to override)'
+            ⮐  false
+
+        post.emit 'quit'
+        true
+
+    exQuitForce: ->
+
+        post.emit 'quit'
+        true
+
+    exWrite: file ->
+
+        ⮐  false if not @exFileIsPath file
+
+        post.emit 'file.save', file
+        true
+
+    exWriteAll: ->
+
+        post.emit 'file.save' if @state.isDirty()
+        true
+
+    exWriteAndQuit: file ->
+
+        ⮐  false if not @exFileIsPath file
+
+        post.emit 'file.saveAndQuit', file
+        true
+
+    exWriteIfChangedAndQuit: file ->
+
+        ⮐  false if not @exFileIsPath file
+
+        if @state.isDirty()
+            post.emit 'file.saveAndQuit', file
+        else
+            post.emit 'quit'
+        true
+
+    #  a leading ! means 'pipe to a shell command', which is not supported
+    #  yet. refuse instead of writing a file whose name starts with !
+    
+    exFileIsPath: file ->
+
+        ⮐  true if not file?.startsWith '!'
+
+        post.emit 'title.novim' 'E492: shell commands are not supported'
+        false
 
     handleExKey: combo char ->
 

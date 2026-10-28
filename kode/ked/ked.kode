@@ -527,20 +527,34 @@ function KED
     #      ███  ███   ███     ███     ███       
     # ███████   ███   ███      █      ████████  
     
-    saveFile: ○=>
+    saveFile: file ○=>
         
         text = kseg.str @editor.state.s.lines
+        path = file ? @currentFile
         
-        if valid @currentFile
-            ○ nfs.write @currentFile text
+        if empty path
+            post.emit 'title.novim' 'E32: No file name'
+            ⮐  false
+        
+        result = ○ nfs.write path text
+        
+        if result?.error
+            post.emit 'title.novim' "E212: Can't open file for writing: #{path}"
+            ⮐  false
+        
+        if path == @currentFile
             @editor.state.clearHistory() # lazy way to 'undirty' :> no undo after save :(
             @redraw()
             @saveSessionFile @currentFile 'saved'
             
-    saveAndQuit: ○=>
-
-        ○ @saveFile()
-
+        true
+    
+    saveAndQuit: file ○=>
+        
+        saved = ○ @saveFile file
+        
+        ⮐  if not saved
+        
         @quit()
             
     saveSessionFile: file type =>
