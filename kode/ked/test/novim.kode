@@ -323,7 +323,7 @@ mrange = lines x y m -> motion.range lines [x y] m
     e.state.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
     e.draw()
 
-    h.screen.get_bg 1 0 ▸ theme.yank.bg
+    h.screen.get_bg 1 0 ▸ theme.novim.yank.bg
     h.screen.get_bg 4 0 ▸ theme.editor.bg
 
     e.state.clearYankFlash()

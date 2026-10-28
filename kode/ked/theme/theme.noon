@@ -25,9 +25,6 @@ selection
     map                                     #66a   
     mapfully                                #444   
     
-yank
-    bg                                      #060   
-
 highlight                                   
     bg                                      #030   
     map                                     #060   
@@ -98,6 +95,8 @@ unype
         main                                #f00   
 
 novim
+    yank
+        bg                                  #060   
     cursor
         multi                               #44a   
         main                                #88f   
