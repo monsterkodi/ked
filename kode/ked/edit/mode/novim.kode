@@ -56,6 +56,13 @@ function novim
         'j':    n -> { operator: 'move'         count: n     motion: { kind: 'down'     } }
         'k':    n -> { operator: 'move'         count: n     motion: { kind: 'up'       } }
         'l':    n -> { operator: 'move'         count: n     motion: { kind: 'right'    } }
+        '(':    n -> { operator: 'move'         count: n     motion: { kind: 'sentenceBack' } }
+        ')':    n -> { operator: 'move'         count: n     motion: { kind: 'sentence' } }
+        '{':    n -> { operator: 'move'         count: n     motion: { kind: 'paragraphBack' } }
+        '}':    n -> { operator: 'move'         count: n     motion: { kind: 'paragraph' } }
+        '+':    n -> { operator: 'move'         count: n     motion: { kind: 'lineFirstDown' } }
+        '-':    n -> { operator: 'move'         count: n     motion: { kind: 'lineFirstUp' } }
+        '_':    n -> { operator: 'move'         count: n     motion: { kind: 'lineFirst' } }
         'w':    n -> { operator: 'move'         count: n     motion: { kind: 'word'     } }
         'b':    n -> { operator: 'move'         count: n     motion: { kind: 'drow'     } }
         'e':    n -> { operator: 'move'         count: n     motion: { kind: 'wend'     } }
@@ -99,6 +106,13 @@ function novim
         'l':    n -> { kind: 'char'             count: n }
         'j':    n -> { kind: 'lineDown'         count: n }
         'k':    n -> { kind: 'lineUp'           count: n }
+        '(':    n -> { kind: 'sentenceBack'     count: n }
+        ')':    n -> { kind: 'sentence'         count: n }
+        '{':    n -> { kind: 'paragraphBack'    count: n }
+        '}':    n -> { kind: 'paragraph'        count: n }
+        '+':    n -> { kind: 'lineFirstDown'    count: n }
+        '-':    n -> { kind: 'lineFirstUp'      count: n }
+        '_':    n -> { kind: 'lineFirst'        count: n }
         }
 
     @lastVind: ''

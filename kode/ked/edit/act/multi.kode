@@ -121,6 +121,16 @@ export
                 'ind'       ➜ c[0] = belt.numIndent(line)
                 'ind_eol'   ➜ ind  = belt.numIndent(line); c[0] = c[0] < ind ? ind : kseg.width(line)
                 'ind_bol'   ➜ ind  = belt.numIndent(line); c[0] = c[0] > ind ? ind : 0
+                'lineFirstDown' ➜ c[1] = min(c[1]+opt.count, lines.length-1); c[0] = belt.numIndent(lines[c[1]])
+                'lineFirstUp'   ➜ c[1] = max(c[1]-opt.count, 0); c[0] = belt.numIndent(lines[c[1]])
+                'paragraph'     ➜ pos = motion.paragraphPositionAfter  lines c 1; c[0] = pos[0]; c[1] = pos[1]
+                'paragraphBack' ➜ pos = motion.paragraphPositionBefore lines c 1; c[0] = pos[0]; c[1] = pos[1]
+                'sentence' 'sentenceBack'
+                    r = motion.range(lines c {kind:dir count:opt.count})
+                    if r
+                        back = dir == 'sentenceBack'
+                        c[0] = back ? r[0] : r[2]
+                        c[1] = back ? r[1] : r[3]
                 'word' 'wend'
                 'WORD' 'WEND'
                     r = motion.range(lines c {kind:dir count:opt.count cursors:cursors.length})

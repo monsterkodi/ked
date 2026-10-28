@@ -68,6 +68,59 @@ mrange = lines x y m -> motion.range lines [x y] m
         mrange(findlines, 3, 1, {kind:'charFind', target:'-', count:1, forward:false, till:true}) ▸ [2 1 3 1]
         mrange(kseg.segls("x\n-a\nb-c"), 0, 0, {kind:'charFind', target:'-', count:1, till:true}) ▸ [0 0 1 2]
 
+    ▸ sentences
+
+        sents = kseg.segls "one two. three four. five six."
+
+        mrange(sents, 0, 0,  {kind:'sentence',     count:1}) ▸ [0 0 9 0]
+        mrange(sents, 0, 0,  {kind:'sentence',     count:2}) ▸ [0 0 21 0]
+        mrange(sents, 9, 0,  {kind:'sentence',     count:1}) ▸ [9 0 21 0]
+        mrange(sents, 21, 0, {kind:'sentence',     count:1}) ▸ [21 0 30 0]
+        mrange(sents, 14, 0, {kind:'sentenceBack', count:1}) ▸ [9 0 14 0]
+        mrange(sents, 9, 0,  {kind:'sentenceBack', count:1}) ▸ [0 0 9 0]
+        mrange(sents, 0, 0,  {kind:'sentenceBack', count:1}) ▸ [0 0 0 0]
+        mrange(sents, 25, 0, {kind:'sentenceBack', count:2}) ▸ [9 0 25 0]
+
+        msents = kseg.segls "one two\nthree. four\n\nfive six"
+
+        mrange(msents, 0, 0, {kind:'sentence',     count:1}) ▸ [0 0 7 1]
+        mrange(msents, 0, 1, {kind:'sentence',     count:1}) ▸ [0 1 7 1]
+        mrange(msents, 0, 1, {kind:'sentence',     count:2}) ▸ [0 1 0 2]
+        mrange(msents, 0, 2, {kind:'sentence',     count:1}) ▸ [0 2 0 3]
+        mrange(msents, 0, 3, {kind:'sentenceBack', count:1}) ▸ [0 2 0 3]
+        mrange(msents, 0, 3, {kind:'sentenceBack', count:2}) ▸ [7 1 0 3]
+
+        mrange(kseg.segls('nothing here'), 0, 0, {kind:'sentence', count:1}) ▸ [0 0 12 0]
+
+    ▸ paragraphs
+
+        paras = kseg.segls "a\n\nb\nc\n\nd"
+
+        mrange(paras, 0, 0, {kind:'paragraph',     count:1}) ▸ [0 0 0 1]
+        mrange(paras, 0, 1, {kind:'paragraph',     count:1}) ▸ [0 1 0 4]
+        mrange(paras, 0, 2, {kind:'paragraph',     count:1}) ▸ [0 2 0 4]
+        mrange(paras, 1, 2, {kind:'paragraph',     count:1}) ▸ [1 2 1 3]
+        mrange(paras, 0, 4, {kind:'paragraph',     count:1}) ▸ [0 4 1 5]
+        mrange(paras, 0, 0, {kind:'paragraph',     count:2}) ▸ [0 0 0 4]
+        mrange(paras, 0, 5, {kind:'paragraphBack', count:1}) ▸ [0 4 0 5]
+        mrange(paras, 0, 2, {kind:'paragraphBack', count:1}) ▸ [0 1 0 2]
+        mrange(paras, 0, 1, {kind:'paragraphBack', count:1}) ▸ [0 0 0 1]
+        mrange(paras, 2, 3, {kind:'paragraphBack', count:1}) ▸ [0 1 1 3]
+        mrange(paras, 0, 0, {kind:'paragraphBack', count:1}) ▸ [0 0 0 0]
+        mrange(paras, 0, 5, {kind:'paragraphBack', count:2}) ▸ [0 2 0 5]
+
+    ▸ line first
+
+        flines = kseg.segls "  one\n    two\n three"
+
+        mrange(flines, 0, 0, {kind:'lineFirstDown', count:1}) ▸ [0 0 7 1]
+        mrange(flines, 0, 0, {kind:'lineFirstDown', count:2}) ▸ [0 0 6 2]
+        mrange(flines, 0, 2, {kind:'lineFirstUp',   count:1}) ▸ [0 1 6 2]
+        mrange(flines, 0, 2, {kind:'lineFirstUp',   count:5}) ▸ [0 0 6 2]
+        mrange(flines, 0, 1, {kind:'lineFirst',     count:1}) ▸ [0 1 7 1]
+        mrange(flines, 0, 1, {kind:'lineFirst',     count:2}) ▸ [0 1 6 2]
+        mrange(flines, 0, 0, {kind:'lineFirst',     count:5}) ▸ [0 0 6 2]
+
 ▸ merging ranges
 
     motion.mergeRanges [[0 0 1 0] [1 0 2 0]] ▸ [[0 0 2 0]]
@@ -1450,6 +1503,131 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.setMainCursor 4 0
     key '%'
     cur 0 2
+
+▸ sentence motions by keys
+
+    s.loadLines belt.linesForText("one two. three four. five six.")
+    s.setMainCursor 0 0
+
+    key ')'
+    cur 9 0
+
+    key ')'
+    cur 21 0
+
+    key '('
+    cur 9 0
+
+    key '('
+    cur 0 0
+
+    keys '2)'
+    cur 21 0
+
+    s.setMainCursor 20 0
+    key '('
+    cur 9 0
+
+    s.loadLines belt.linesForText("one two. three four.")
+    s.setMainCursor 0 0
+    keys 'd)'
+    txt "three four."
+
+    s.loadLines belt.linesForText("one two. three four.")
+    s.setMainCursor 9 0
+    keys 'd('
+    txt "three four."
+
+    s.loadLines belt.linesForText("one two. three four.")
+    s.setMainCursor 0 0
+    keys 'v)'
+    s.s.selections ▸ [[0 0 9 0]]
+    cur 9 0
+    key 'esc'
+
+▸ paragraph motions by keys
+
+    s.loadLines belt.linesForText("a\n\nb\nc\n\nd")
+    s.setMainCursor 0 0
+
+    key '}'
+    cur 0 1
+
+    key '}'
+    cur 0 4
+
+    key '{'
+    cur 0 2
+
+    key '{'
+    cur 0 1
+
+    key '{'
+    cur 0 0
+
+    keys '2}'
+    cur 0 4
+
+    s.setMainCursor 0 2
+    keys 'd}'
+    txt "a\n\nd"
+
+    s.loadLines belt.linesForText("hello world\nfoo bar\n\nbaz")
+    s.setMainCursor 6 0
+    keys 'd}'
+    txt "hello \n\nbaz"
+    cur 6 0
+
+    s.loadLines belt.linesForText("a\n\nb")
+    s.setMainCursor 0 0
+    keys 'v}'
+    s.s.selections ▸ [[0 0 0 1]]
+    cur 0 1
+    key 'esc'
+
+▸ line first motions by keys
+
+    s.loadLines belt.linesForText("  one\n    two\n three")
+    s.setMainCursor 0 0
+
+    key '+'
+    cur 4 1
+
+    key '+'
+    cur 1 2
+
+    key '-'
+    cur 4 1
+
+    key '_'
+    cur 4 1
+
+    keys '2_'
+    cur 1 2
+
+    s.setMainCursor 0 0
+    keys '5_'
+    cur 1 2
+
+    s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
+    s.setMainCursor 0 1
+    keys 'd+'
+    txt "one\nfour"
+
+    s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
+    s.setMainCursor 0 2
+    keys 'd-'
+    txt "one\nfour"
+
+    s.loadLines belt.linesForText("one\ntwo\nthree")
+    s.setMainCursor 3 1
+    keys 'd_'
+    txt "one\nthree"
+
+    s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
+    s.setMainCursor 3 0
+    keys '2d_'
+    txt "three\nfour"
 
 ▸ search word under cursor
 
