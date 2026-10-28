@@ -23,6 +23,7 @@ function mode
     @active:  {} # maps editor state names to active mode instances
     @modes:   {} # maps mode names to mode classes
     @pending: [] # list of editors that requested autostart before modes were loaded
+    @loaded:  null # resolves when the mode modules are in @modes
     
     @names: -> Object.keys mode.modes
     
@@ -199,6 +200,6 @@ function record
 
     @: @state -> @name = 'record'
     
-mode.loadModules()
+mode.loaded = mode.loadModules()
     
 export mode

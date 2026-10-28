@@ -174,12 +174,16 @@ function KED
         ended = new Promise (resolve) =>
             @t.on 'end' resolve
         
-        ○ @currentLoad if valid @currentLoad
+        ○ @currentLoad if @currentLoad
         
         if @t.input
             ○ ended
         
-        ○ sleep 100 #  wait a little for modes to be loaded
+        #  wait for the startup work the editor needs, instead of guessing
+        #  how long it takes
+        
+        ○ config.loaded if config.loaded
+        ○ mode.loaded
         
         @dump 'start'
         
@@ -187,7 +191,7 @@ function KED
             
             @t.play step[1]
             
-            ○ @currentLoad if valid @currentLoad
+            ○ @currentLoad if @currentLoad
             ○ sleep 50
             
             @dump step[0]
@@ -437,6 +441,12 @@ function KED
         # log "ked.loadFile absFile #{absFile}"
         
         @loadingFile = absFile
+        
+        #  the file is opened once the config and the modes are there:
+        #  both decide what happens to it, and neither is loaded yet
+        
+        ○ config.loaded if config.loaded
+        ○ mode.loaded
         
         exists =○ nfs.fileExists @loadingFile
         

@@ -11,13 +11,18 @@ use ../../kxk ▪ noon slash post
 function config
 
     @data = null
+    @loaded = null # resolves when the config file is read and merged
     
     @load: ○-> 
     
+        @loaded = new Promise (resolve) => @resolveLoaded = resolve
+        
         configFile = slash.path ◆dir '../../../config'
         # log 'load config file' configFile
         @data =○ noon.load configFile
         log 'config loaded' #@data
         post.emit 'config.loaded'
+        
+        @resolveLoaded()
 
 export config

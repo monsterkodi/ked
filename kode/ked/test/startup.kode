@@ -1,0 +1,32 @@
+###
+    startup
+
+    the config and the modes are loaded before a file is opened, so a file
+    load does not have to guess whether the things it needs are there yet.
+    both announce the end of their load with a promise.
+###
+
+use ../edit ◆ mode
+use ../util ◆ config
+
+▸ startup
+
+    ▸ the modes announce when they are loaded
+
+        (mode.loaded instanceof Promise) ▸ true
+
+        ○ mode.loaded
+
+        mode.names().includes('novim') ▸ true
+        mode.pending.length ▸ 0
+
+    ▸ the config announces when it is loaded
+
+        loading = config.load()
+
+        (config.loaded instanceof Promise) ▸ true
+
+        ○ loading
+        ○ config.loaded
+
+        (config.data != null) ▸ true
