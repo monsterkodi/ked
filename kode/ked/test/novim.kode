@@ -5,11 +5,13 @@
     the motions are pure: lines and a position in, a range out.
 ###
 
-use ../../kxk       ▪ kseg
+use ../../kxk       ▪ kseg sleep
 use ../../kxk       ◆ clip
 use ../edit/tool    ◆ belt motion
-use ../edit         ◆ state mode
+use ../edit         ◆ state mode editor
 use ../edit/mode    ◆ novim brckts
+use ../theme        ◆ theme
+use ../util         ◆ harness
 
 cells = cols:55 rows:66
 s = new state cells 'test'
@@ -272,6 +274,62 @@ mrange = lines x y m -> motion.range lines [x y] m
     s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
     s.h.length ▸ history
     txt "alpha\nbeta\ngamma"
+
+▸ yank flash
+
+    s.loadLines belt.linesForText("one two three\nfour five")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
+    s.yankFlash ▸ [[0 0 4 0]]
+
+    s.clearYankFlash()
+    s.yankFlash ▸ null
+
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 0 0
+    s.startVisual 'char'
+    s.setMainCursor 2 0
+    s.updateVisual()
+
+    s.executeNovim {operator:'visualYank'}
+    s.yankFlash ▸ [[0 0 2 0]]
+    s.visual ▸ null
+
+    s.clearYankFlash()
+    s.yankFlash ▸ null
+
+▸ yank flash fades
+
+    s.loadLines belt.linesForText("one two")
+    s.setMainCursor 0 0
+
+    s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
+    s.yankFlash ▸ [[0 0 4 0]]
+
+    ○ sleep 250
+
+    s.yankFlash ▸ null
+
+▸ yank flash is drawn
+
+    h = new harness rows:4 cols:24
+    e = new editor h.screen 'test_yank' []
+
+    e.layout 0 0 24 4
+    e.state.loadLines belt.linesForText("one two three")
+    e.state.setMainCursor 0 0
+
+    e.state.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
+    e.draw()
+
+    h.screen.get_bg 1 0 ▸ theme.yank.bg
+    h.screen.get_bg 4 0 ▸ theme.editor.bg
+
+    e.state.clearYankFlash()
+    e.draw()
+
+    h.screen.get_bg 1 0 ▸ theme.editor.bg
 
 ▸ put
 

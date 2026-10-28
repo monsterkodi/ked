@@ -20,6 +20,9 @@
     "map": "#66a",
     "mapfully": "#444"
   },
+  "yank": {
+    "bg": "#2a2"
+  },
   "highlight": {
     "bg": "#030",
     "map": "#060",

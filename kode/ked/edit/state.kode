@@ -36,6 +36,9 @@ function state extends events
         @syntax   = new syntax @name + '.syntax'
         @hasFocus = false
 
+        @yankFlash      = null
+        @yankFlashTimer = null
+
         @clearSingle()
 
     toggleMode: name => mode.toggle @ name if @allowedModes[name]
@@ -171,6 +174,11 @@ function state extends events
         @visual        = null
         @visualAnchors = []
         @novimInsert   = null
+
+        clearTimeout @yankFlashTimer if @yankFlashTimer
+
+        @yankFlash      = null
+        @yankFlashTimer = null
     
         @s = immutable
             lines:       @segls

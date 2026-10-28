@@ -4,7 +4,7 @@
 # ███  ████  ███   ███     ███     ███  ███ █ ███  
 # ███   ███   ███████       █      ███  ███   ███  
 
-use ../../../kxk ▪ kseg clip
+use ../../../kxk ▪ kseg clip post
 use ../mode      ◆ novim
 use ../tool      ◆ belt motion
 
@@ -366,6 +366,7 @@ export
         linewise = @visual == 'line'
 
         @setNovimRegister rngs linewise register
+        @flashYank rngs
 
         if @visual == 'block'
             pairs  = @visualPairs()
@@ -891,10 +892,32 @@ export
         ⮐ if empty rngs
         
         @setNovimRegister rngs linewise register
+        @flashYank rngs
 
         if not linewise
             @setCursors cursors main:@s.main
             @clampCursorsToLines()
+
+    flashYank: rngs ->
+
+        ⮐  if empty rngs
+
+        clearTimeout @yankFlashTimer if @yankFlashTimer
+
+        @yankFlash      = rngs
+        @yankFlashTimer = setTimeout (=> @clearYankFlash()) 200
+
+    clearYankFlash: ->
+
+        clearTimeout @yankFlashTimer if @yankFlashTimer
+
+        @yankFlashTimer = null
+
+        ⮐  if not @yankFlash
+
+        @yankFlash = null
+
+        post.emit 'redraw'
 
     putRegister: count after register ->
 
