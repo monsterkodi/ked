@@ -2254,11 +2254,13 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     quits  = 0
     saves  = 0
+    writes = 0
     titles = []
     capture = true
 
     post.on 'quit'            -> quits += 1
     post.on 'file.saveAndQuit' -> saves += 1
+    post.on 'file.save'        -> writes += 1
     post.on 'title.novim' (t) -> titles.push t if capture
 
     keys ':q'
@@ -2346,6 +2348,32 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     m.operator ▸ null
     m.ex       ▸ null
+
+    # :w saves without quitting, :wq saves and quits
+
+    keys ':w'
+
+    m.ex       ▸ 'w'
+    titles[-1] ▸ ':w'
+
+    enter()
+
+    writes  ▸ 1
+    saves   ▸ 2
+    quits   ▸ 2
+    m.ex    ▸ null
+
+    keys ':wq'
+
+    m.ex       ▸ 'wq'
+    titles[-1] ▸ ':wq'
+
+    enter()
+
+    writes  ▸ 1
+    saves   ▸ 3
+    quits   ▸ 2
+    m.ex    ▸ null
 
     capture = false
 

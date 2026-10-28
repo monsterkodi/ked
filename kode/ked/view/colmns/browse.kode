@@ -246,7 +246,7 @@ function browse extends quicky
                 
     onChoicesAction: action choice =>
     
-        log '--- onChoicesAction' action choice @currentDir
+        # log '--- onChoicesAction' action choice @currentDir
         
         switch action
             

@@ -91,6 +91,8 @@ function novim
     @exCommands: {
         'q':  { desc: 'save pending changes and quit'   run: (-> post.emit 'file.saveAndQuit') }
         'q!': { desc: 'quit discarding pending changes' run: (-> post.emit 'quit') }
+        'w':  { desc: 'save pending changes'            run: (-> post.emit 'file.save') }
+        'wq': { desc: 'save pending changes and quit'   run: (-> post.emit 'file.saveAndQuit') }
         }
 
     @motions: {
