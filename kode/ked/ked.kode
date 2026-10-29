@@ -533,13 +533,13 @@ function KED
         path = file ? @currentFile
         
         if empty path
-            post.emit 'title.novim' 'E32: No file name'
+            post.emit 'novim.error' 'no file name'
             ⮐  false
         
         result = ○ nfs.write path text
         
         if result?.error
-            post.emit 'title.novim' "E212: Can't open file for writing: #{path}"
+            post.emit 'novim.error' "can't open file for writing: #{path}"
             ⮐  false
         
         if path == @currentFile

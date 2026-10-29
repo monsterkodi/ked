@@ -151,7 +151,6 @@ function novim
         @find            = null
         @replace         = null
         @ex              = null
-        post.emit 'title.novim'
         true
 
     exitNovim: ->
