@@ -202,8 +202,21 @@ function funtree extends choices
         
         switch action
         
+            'space'
+                post.emit 'goto.line' choice.line-1 'ind' 'topDelta'
+                ⮐  
+        
             'right'
             
+                @selectNext()
+                choice = @choiceAtRow @currentIndex()
+                post.emit 'goto.line' choice.line-1 'ind' 'topDelta'
+                ⮐  
+                
+            'left'
+            
+                @selectPrev()
+                choice = @choiceAtRow @currentIndex()
                 post.emit 'goto.line' choice.line-1 'ind' 'topDelta'
                 ⮐  
                 
