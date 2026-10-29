@@ -21,16 +21,6 @@ function novim
         '>': 'indent'
         '<': 'deindent'
 
-    @arrows:
-        left:  'h'
-        right: 'l'
-        up:    'k'
-        down:  'j'
-
-    @areas:
-        i:      'inner'
-        a:      'around'
-
     @textObjects:
         'w':    'word'
         'W':    'WORD'
@@ -102,8 +92,8 @@ function novim
         }
 
     @motions: {
-        '0':      -> { kind: 'bol' }
-        '$':      -> { kind: 'eol' }
+        '0':      -> { kind: 'bol'                       }
+        '$':      -> { kind: 'eol'                       }
         '>':    n -> { kind: 'line'             count: n }
         '<':    n -> { kind: 'line'             count: n }
         'c':    n -> { kind: 'line'             count: n }
@@ -197,13 +187,7 @@ function novim
         t += ':' + @ex if @ex?
     
         post.emit 'title.novim' t
-        true
-
-    complete: build ->
-
-        operator = novim.operators[@operator]
-
-        @execute { operator: operator, motion: build(@countNumber()) }
+        true        
 
     completeTextObject: target ->
 
@@ -219,12 +203,9 @@ function novim
 
         @lastFind = { target: target, till: till, forward: forward }
 
-        motion = { kind: 'charFind', target: target, till: till, forward: forward, count: @countNumber() }
-
-        if @operator
-            @execute { operator: novim.operators[@operator], motion: motion }
-        else
-            @execute { operator: 'move', motion: motion }
+        motion = kind:'charFind' target:target till:till forward:forward count:@countNumber()
+        operator = novim.operators[@operator] ? 'move'
+        @execute operator:operator motion:motion
 
     completeReplace: char ->
 
@@ -236,12 +217,9 @@ function novim
 
         forward = reverse ? not @lastFind.forward : @lastFind.forward
 
-        motion = { kind: 'charFind', target: @lastFind.target, till: @lastFind.till, forward: forward, count: @countNumber(), repeat: true }
-
-        if @operator
-            @execute { operator: novim.operators[@operator], motion: motion }
-        else
-            @execute { operator: 'move', motion: motion }
+        motion = kind:'charFind' target:@lastFind.target till:@lastFind.till forward:forward count:@countNumber() repeat:true
+        operator = novim.operators[@operator] ? 'move'
+        @execute operator:operator motion:motion
 
     execute: cmd ->
 
@@ -302,7 +280,7 @@ function novim
 
         ⮐  false if not @exFileIsPath file
 
-        post.emit 'file.save', file
+        post.emit 'file.save' file
         true
 
     exWriteAll: ->
@@ -314,7 +292,7 @@ function novim
 
         ⮐  false if not @exFileIsPath file
 
-        post.emit 'file.saveAndQuit', file
+        post.emit 'file.saveAndQuit' file
         true
 
     exWriteIfChangedAndQuit: file ->
@@ -322,7 +300,7 @@ function novim
         ⮐  false if not @exFileIsPath file
 
         if @state.isDirty()
-            post.emit 'file.saveAndQuit', file
+            post.emit 'file.saveAndQuit' file
         else
             post.emit 'quit'
         true
@@ -404,8 +382,11 @@ function novim
             @replace = true
             ⮐ @logPending()
 
-        if arrow = novim.arrows[char]
-            char = arrow
+        switch char
+            'left'  ➜ char = 'h'
+            'right' ➜ char = 'l'
+            'up'    ➜ char = 'k'
+            'down'  ➜ char = 'j'
 
         if @registerPending
             @registerPending = false
@@ -432,10 +413,10 @@ function novim
                 '<'     ➜ ⮐ @execute { operator: 'visualDeindent', count: @countNumber() }
                 'I'     ➜ ⮐ @execute { operator: 'visualBlockPrepend' } if @state.visual == 'block'
                 'A'     ➜ ⮐ @execute { operator: 'visualBlockAppend' }  if @state.visual == 'block'
-                    
-            if area = novim.areas[char]
-                @area = area
-                ⮐ @logPending()
+             
+        if (@state.visual or @operator) and not @area and char in 'ia'
+            @area = char == 'i' ? 'inner' : 'around'
+            ⮐ @logPending()
 
         if not @operator and not @area
             switch char
@@ -473,12 +454,8 @@ function novim
     
             @operator
     
-                if  
-                    build = novim.motions[char]
-                        ⮐ @complete build
-                    area = novim.areas[char]
-                        @area = area
-                        ⮐ @logPending()
+                if build = novim.motions[char]
+                    ⮐ @execute operator:novim.operators[@operator] motion:build(@countNumber())
                 
                 switch char 
                     ';' ➜ ⮐ @repeatFind false
