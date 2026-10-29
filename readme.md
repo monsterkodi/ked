@@ -9,4 +9,4 @@
   </a>
 </p>
 
-requires a kitty terminal and node
+requires kitty or ghostty terminal and node
