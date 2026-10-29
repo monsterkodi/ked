@@ -20,8 +20,8 @@ titlenovim = (function ()
     function titlenovim (screen, name)
     {
         this["onError"] = this["onError"].bind(this)
-        this["onPending"] = this["onPending"].bind(this)
         this["onExecute"] = this["onExecute"].bind(this)
+        this["onPending"] = this["onPending"].bind(this)
         titlenovim.__super__.constructor.call(this,screen,name)
         this.setColor('bg',theme.novim.bg)
         this.setColor('fg',theme.novim.text)
@@ -33,43 +33,58 @@ titlenovim = (function ()
         post.on('novim.error',this.onError)
     }
 
+    titlenovim.prototype["onPending"] = function (pending)
+    {
+        var t, _38_24_, _40_27_, _41_26_, _42_28_, _43_30_
+
+        console.log('PENDING',pending)
+        this.setColor('bg',theme.novim.pending.bg)
+        this.setColor('fg',theme.novim.pending.fg)
+        t = ((_38_24_=pending.op) != null ? _38_24_ : '')
+        t += ' '
+        t += ((_40_27_=pending.count) != null ? _40_27_ : '')
+        t += ((_41_26_=pending.area) != null ? _41_26_ : '')
+        t += ((_42_28_=pending.prefix) != null ? _42_28_ : '')
+        t += ((_43_30_=pending.register) != null ? _43_30_ : '')
+        return this.novimText = t
+    }
+
     titlenovim.prototype["onExecute"] = function (execute)
     {
         var t
 
-        console.log("EXECUTE",execute)
+        console.log('EXECUTE',execute)
         this.setColor('bg',theme.novim.execute.bg)
         this.setColor('fg',theme.novim.execute.fg)
         t = execute.operator
         if (execute.count)
         {
-            t += " " + execute.count
+            t += ' ' + execute.count
         }
         if (execute.motion)
         {
-            t += " " + execute.motion.kind
+            if (execute.motion.kind === 'textObject')
+            {
+                if (execute.motion.area)
+                {
+                    t += ' ' + execute.motion.area
+                }
+                if (execute.motion.target)
+                {
+                    t += ' ' + execute.motion.target
+                }
+            }
+            else
+            {
+                t += ' ' + execute.motion.kind
+            }
         }
-        return this.novimText = t
-    }
-
-    titlenovim.prototype["onPending"] = function (pending)
-    {
-        var t, _47_24_, _48_27_, _49_26_, _50_28_, _51_30_
-
-        console.log("PENDING",pending)
-        this.setColor('bg',theme.novim.pending.bg)
-        this.setColor('fg',theme.novim.pending.fg)
-        t = ((_47_24_=pending.op) != null ? _47_24_ : '')
-        t += ((_48_27_=pending.count) != null ? _48_27_ : '')
-        t += ((_49_26_=pending.area) != null ? _49_26_ : '')
-        t += ((_50_28_=pending.prefix) != null ? _50_28_ : '')
-        t += ((_51_30_=pending.register) != null ? _51_30_ : '')
         return this.novimText = t
     }
 
     titlenovim.prototype["onError"] = function (err)
     {
-        console.log("ERROR",err)
+        console.log('ERROR',err)
         this.setColor('bg',theme.novim.error.bg)
         this.setColor('fg',theme.novim.error.fg)
         return this.novimText = err
@@ -108,5 +123,5 @@ titlenovim = (function ()
 
 export default titlenovim;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGl0bGVub3ZpbS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy90aXRsZS90aXRsZW5vdmltLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FVYSxVQUFBO0lBQU07SUFBTTs7T0FDTixZQUFUO09BQWUsWUFBZjs7T0FDUyxXQUFUOztPQUNTLFdBQVo7OztBQUVFLGNBQVQ7OzJCQUE0QjthQUV4QixZQUFHLFFBQU87Ozs7O21EQUVBLE9BQU87UUFFYixLQUFDLFNBQVMsS0FBUyxNQUFNLE1BQU07UUFDL0IsS0FBQyxTQUFTLEtBQVMsTUFBTSxNQUFNO1FBQy9CLEtBQUMsU0FBUyxRQUFTLE1BQU0sTUFBTTtRQUUvQixLQUFDLGNBQWM7UUFDZixLQUFDLFlBQWM7UUFHZixLQUFLLEdBQUcsZ0JBQWdCLEtBQUM7UUFDekIsS0FBSyxHQUFHLGdCQUFnQixLQUFDO1FBQ3pCLEtBQUssR0FBRyxjQUFnQixLQUFDOzs7MEJBRTdCLHdCQUFXOzs7O1FBQ1AsWUFBSSxVQUFVO1FBQ2QsS0FBQyxTQUFTLEtBQU0sTUFBTSxNQUFNLFFBQVE7UUFDcEMsS0FBQyxTQUFTLEtBQU0sTUFBTSxNQUFNLFFBQVE7UUFDcEMsSUFBSSxRQUFRO1lBQ3VCLFFBQVE7O1lBQTNDLEtBQUssTUFBTSxRQUFROztZQUNnQixRQUFROztZQUEzQyxLQUFLLE1BQU0sUUFBUSxPQUFPOztlQUMxQixLQUFDLFlBQVk7OzswQkFFakIsd0JBQVc7Ozs7UUFDUCxZQUFJLFVBQVU7UUFDZCxLQUFDLFNBQVMsS0FBTSxNQUFNLE1BQU0sUUFBUTtRQUNwQyxLQUFDLFNBQVMsS0FBTSxNQUFNLE1BQU0sUUFBUTtRQUNwQyxjQUFLLFFBQVEsd0JBQUs7UUFDbEIsZUFBSyxRQUFRLDJCQUFRO1FBQ3JCLGVBQUssUUFBUSwwQkFBTztRQUNwQixlQUFLLFFBQVEsNEJBQVM7UUFDdEIsZUFBSyxRQUFRLDhCQUFXO2VBQ3hCLEtBQUMsWUFBWTs7OzBCQUVqQixzQkFBUzs7UUFDTCxZQUFJLFFBQVE7UUFDWixLQUFDLFNBQVMsS0FBTSxNQUFNLE1BQU0sTUFBTTtRQUNsQyxLQUFDLFNBQVMsS0FBTSxNQUFNLE1BQU0sTUFBTTtlQUNsQyxLQUFDLFlBQVk7OzswQkFRakIsbUJBQU0sR0FBRTs7OztZQUVDLEtBQUM7Ozs7O1FBSU4sS0FBQyxPQUFPLEVBQUUsRUFBRSxFQUFFO1FBQ2QsS0FBQyx1QkFBbUIsSUFBRSxFQUFFLEtBQUM7UUFFekIsS0FBSyxLQUFDLE1BQU07UUFDWixLQUFLLEtBQUMsTUFBTTs0QkFDQyxLQUFDO2FBQVA7O1lBQUg7dUJBQ0csR0FBTTs7Z0JBQ0wsS0FBQyxNQUFNLElBQUksR0FBRyxFQUFFLEdBQUcsR0FBRyxLQUFDLE1BQU07Ozs7Z0JBRTdCLEtBQUMsTUFBTSxJQUFJLEdBQUcsRUFBRSxHQUFHLEdBQUc7Ozs7O1dBakU3Qjs7O2VBbUVGIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGl0bGVub3ZpbS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy90aXRsZS90aXRsZW5vdmltLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FVYSxVQUFBO0lBQU07SUFBTTs7T0FDTixZQUFUO09BQWUsWUFBZjs7T0FDUyxXQUFUOztPQUNTLFdBQVo7OztBQUVFLGNBQVQ7OzJCQUE0QjthQUV4QixZQUFHLFFBQU87Ozs7O21EQUVBLE9BQU87UUFFYixLQUFDLFNBQVMsS0FBUyxNQUFNLE1BQU07UUFDL0IsS0FBQyxTQUFTLEtBQVMsTUFBTSxNQUFNO1FBQy9CLEtBQUMsU0FBUyxRQUFTLE1BQU0sTUFBTTtRQUUvQixLQUFDLGNBQWM7UUFDZixLQUFDLFlBQWM7UUFHZixLQUFLLEdBQUcsZ0JBQWdCLEtBQUM7UUFDekIsS0FBSyxHQUFHLGdCQUFnQixLQUFDO1FBQ3pCLEtBQUssR0FBRyxjQUFnQixLQUFDOzs7MEJBRTdCLHdCQUFXOzs7O1FBQ1AsWUFBSSxVQUFVO1FBQ2QsS0FBQyxTQUFTLEtBQU0sTUFBTSxNQUFNLFFBQVE7UUFDcEMsS0FBQyxTQUFTLEtBQU0sTUFBTSxNQUFNLFFBQVE7UUFDcEMsY0FBSyxRQUFRLHdCQUFLO1FBQ2xCLEtBQUs7UUFDTCxlQUFLLFFBQVEsMkJBQVE7UUFDckIsZUFBSyxRQUFRLDBCQUFPO1FBQ3BCLGVBQUssUUFBUSw0QkFBUztRQUN0QixlQUFLLFFBQVEsOEJBQVc7ZUFDeEIsS0FBQyxZQUFZOzs7MEJBRWpCLHdCQUFXOzs7O1FBQ1AsWUFBSSxVQUFVO1FBQ2QsS0FBQyxTQUFTLEtBQU0sTUFBTSxNQUFNLFFBQVE7UUFDcEMsS0FBQyxTQUFTLEtBQU0sTUFBTSxNQUFNLFFBQVE7UUFDcEMsSUFBSSxRQUFRO1lBQ2dCLFFBQVE7O1lBQXBDLEtBQUssTUFBTSxRQUFROztZQUNoQixRQUFROztnQkFDSixRQUFRLE9BQU8sU0FBUTs7b0JBQ2MsUUFBUSxPQUFPOztvQkFBbkQsS0FBSyxNQUFNLFFBQVEsT0FBTzs7b0JBQ1UsUUFBUSxPQUFPOztvQkFBbkQsS0FBSyxNQUFNLFFBQVEsT0FBTzs7Ozs7Z0JBRTFCLEtBQUssTUFBTSxRQUFRLE9BQU87OztlQUNsQyxLQUFDLFlBQVk7OzswQkFFakIsc0JBQVM7O1FBQ0wsWUFBSSxRQUFRO1FBQ1osS0FBQyxTQUFTLEtBQUssTUFBTSxNQUFNLE1BQU07UUFDakMsS0FBQyxTQUFTLEtBQUssTUFBTSxNQUFNLE1BQU07ZUFDakMsS0FBQyxZQUFZOzs7MEJBUWpCLG1CQUFNLEdBQUU7Ozs7WUFFQyxLQUFDOzs7OztRQUlOLEtBQUMsT0FBTyxFQUFFLEVBQUUsRUFBRTtRQUNkLEtBQUMsdUJBQW1CLElBQUUsRUFBRSxLQUFDO1FBRXpCLEtBQUssS0FBQyxNQUFNO1FBQ1osS0FBSyxLQUFDLE1BQU07NEJBQ0MsS0FBQzthQUFQOztZQUFIO3VCQUNHLEdBQU07O2dCQUNMLEtBQUMsTUFBTSxJQUFJLEdBQUcsRUFBRSxHQUFHLEdBQUcsS0FBQyxNQUFNOzs7O2dCQUU3QixLQUFDLE1BQU0sSUFBSSxHQUFHLEVBQUUsR0FBRyxHQUFHOzs7OztXQXZFN0I7OztlQXlFRiJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/title/titlenovim.kode

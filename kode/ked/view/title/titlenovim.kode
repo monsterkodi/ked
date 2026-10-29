@@ -26,35 +26,40 @@ function titlenovim extends view
         @pointerType = 'default'
         @novimText   = 'novim'
         
-        # post.on 'title.novim' (@novimText) =>
         post.on 'novim.execute' @onExecute
         post.on 'novim.pending' @onPending
         post.on 'novim.error'   @onError
 
-    onExecute: execute => 
-        log "EXECUTE" execute
-        @setColor 'bg'  theme.novim.execute.bg
-        @setColor 'fg'  theme.novim.execute.fg
-        t = execute.operator
-        t += " " + execute.count        if execute.count
-        t += " " + execute.motion.kind  if execute.motion
-        @novimText = t
-
     onPending: pending => 
-        log "PENDING" pending
+        # log 'PENDING' pending
         @setColor 'bg'  theme.novim.pending.bg
         @setColor 'fg'  theme.novim.pending.fg
         t  = pending.op ? ''
+        t += ' '
         t += pending.count ? ''
         t += pending.area ? ''
         t += pending.prefix ? ''
         t += pending.register ? '' 
         @novimText = t
-
+        
+    onExecute: execute =>
+        # log 'EXECUTE' execute
+        @setColor 'bg'  theme.novim.execute.bg
+        @setColor 'fg'  theme.novim.execute.fg
+        t = execute.operator
+        t += ' ' + execute.count if execute.count
+        if execute.motion
+            if execute.motion.kind == 'textObject'
+                t += ' ' + execute.motion.area   if execute.motion.area
+                t += ' ' + execute.motion.target if execute.motion.target
+            else 
+                t += ' ' + execute.motion.kind        
+        @novimText = t
+ 
     onError: err => 
-        log "ERROR" err
-        @setColor 'bg'  theme.novim.error.bg
-        @setColor 'fg'  theme.novim.error.fg
+        # log "ERROR" err
+        @setColor 'bg' theme.novim.error.bg
+        @setColor 'fg' theme.novim.error.fg
         @novimText = err
 
     # ███████    ████████    ███████   ███   ███  

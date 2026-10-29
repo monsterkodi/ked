@@ -163,25 +163,13 @@ function novim
 
     logPending: ->
         
-        # t = ''
-        # t += @operator if @operator 
-        # t += @area[0] if @area 
-        # t += @prefix if @prefix 
-        # t += @count if @count 
-        # t += @register if @register 
-        # t += @find if @find 
-        # t += 'r' if @replace
-        # t += ':' + @ex if @ex?
-        
         op = @operator
         op ?= @find
         op ?= @replace
         op ?= ':' + @ex if @ex?
         
         pending = op:op area:@area prefix:@prefix count:@count register:@register
-        log 'pending' pending
         post.emit 'novim.pending' pending
-        # post.emit 'title.novim' t
         true        
 
     completeTextObject: target ->
@@ -223,7 +211,6 @@ function novim
 
         @state.executeNovim cmd
         @reset()
-        log 'title.novim.execute' cmd
         post.emit 'novim.execute' cmd
         true
 
@@ -373,17 +360,14 @@ function novim
                 'v'
                     @state.startVisual 'char'
                     ⮐ @reset()
-    
                 'V'
                     @state.startVisual 'line'
                     ⮐ @reset()
-    
                 ':' 
                     if not @state.visual
                         @reset()
                         @ex = ''
                         ⮐ @logPending()
-
         if 
             @prefix # gg 
             
