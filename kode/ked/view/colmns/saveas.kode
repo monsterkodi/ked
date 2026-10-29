@@ -76,7 +76,7 @@ function saveas extends browse
         super action choice
         
     onKey: key event =>
-
+    
         ⮐ if @hidden()
 
         switch event.combo
@@ -86,15 +86,15 @@ function saveas extends browse
         if @input.hasFocus()
             if 
                 key == 'down'   ➜ ⮐ @choices.grabFocus()
-                key in 'return' ➜ ⮐ @doSaveAs()
-                event.char not in '\t\n' 
+                key == 'return' ➜ ⮐ @doSaveAs()
+                event.char not in ['\t''\n'] 
                     if result = @input.onKey key event
                         ⮐ result
             ⮐ 
-        if event.char and event.char not in ' \n\t'
+        if event.char and event.char not in [' ''\n''\t']
             log "event with char swallowed '#{event.char}'"
             ⮐ 
-            
+        
         super key event
         
 export saveas

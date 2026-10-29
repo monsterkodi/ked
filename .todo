@@ -1,6 +1,4 @@
 check bla.blub and other runtime errors at compile time  .
-kode sourcemap for classes      ▪
-shortcuts for focus in dir/func column  ✔
 check kode dbg                  ▪
 kode fix n = [] with array on the next line?  ▪
 pretty path rendering           ▪

@@ -17,7 +17,7 @@ mouse
     wheelSpeedup  2
     
 novim
-    autoStart           true
+    autoStart           false
     autoEnableOnEscape  true
     yankFlashMs         700
 
