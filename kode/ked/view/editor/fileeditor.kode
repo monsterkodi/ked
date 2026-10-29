@@ -188,7 +188,7 @@ function fileeditor extends editor
                     ⮐ true
                     
         if indexer.singleton.words[word]
-            log "fileeditor.jumpToWord('#{word}') KNOWN WORD" Array.from(indexer.singleton.words[word])
+            post.emit 'searcher.show' word Array.from(indexer.singleton.words[word])
             ⮐ true
 
         log "fileeditor.jumpToWord('#{word}') nothing to jump to"

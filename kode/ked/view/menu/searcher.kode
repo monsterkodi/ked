@@ -149,7 +149,7 @@ function searcher extends finder
     #      ███  ███   ███  ███   ███  ███   ███  
     # ███████   ███   ███   ███████   ██     ██  
     
-    show: text ○=>
+    show: text files ○=>
     
         # log "searcher show |#{text}|"
         
@@ -163,12 +163,12 @@ function searcher extends finder
         
         editorFile = ked_session.get 'editor▸file'
         
-        dir   = prjcts.dir   editorFile
-        files = prjcts.files editorFile
+        dir    = prjcts.dir   editorFile
+        files ?= prjcts.files editorFile
 
         files = @sortFiles files
 
-        # log "searcher - search #{files.length} files in #{dir} for |#{text}|" #files
+        log "searcher - search #{files.length} files in #{dir} for |#{text}|" #files
         
         view.prototype.show.call @ # bypass finder to avoid reading selection or cursor word again
         
