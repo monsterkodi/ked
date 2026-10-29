@@ -413,15 +413,12 @@ function novim
 
         if @registerPending
             @registerPending = false
-
-            # " selects the next register, + and * mean the system clipboard
-            if char in ['+' '*']
-                @register = 'clipboard'
-            else if char in ['"' '0']
-                @register = null
-            else
-                ⮐ @reset()
-
+            switch char
+                '+' '*'
+                    @register = 'clipboard'
+                '"' '0'
+                    @register = null
+                ➜ ⮐ @reset()
             ⮐ @logPending()
 
         ⮐ 'unhandled' if char.length != 1 # ignore every other non text key
@@ -445,19 +442,20 @@ function novim
                 ⮐ @logPending()
 
         if not @operator and not @area
-
-            if char == 'v'
-                @state.startVisual 'char'
-                ⮐ @reset()
-
-            if char == 'V'
-                @state.startVisual 'line'
-                ⮐ @reset()
-
-            if char == ':' and not @state.visual
-                @reset()
-                @ex = ''
-                ⮐ @logPending()
+            switch char
+                'v'
+                    @state.startVisual 'char'
+                    ⮐ @reset()
+    
+                'V'
+                    @state.startVisual 'line'
+                    ⮐ @reset()
+    
+                ':' 
+                    if not @state.visual
+                        @reset()
+                        @ex = ''
+                        ⮐ @logPending()
 
         if 
             @prefix # gg 
@@ -482,17 +480,17 @@ function novim
                 if  
                     build = novim.motions[char]
                         ⮐ @complete build
-                    char in ['f' 't' 'F' 'T']
-                        @find = char
-                        ⮐ @logPending()
-                    char == ';'
-                        ⮐ @repeatFind false
-                    char == ','
-                        ⮐ @repeatFind true
                     area = novim.areas[char]
                         @area = area
                         ⮐ @logPending()
-                    char in '0123456789'
+                
+                switch char 
+                    ';' ➜ ⮐ @repeatFind false
+                    ',' ➜ ⮐ @repeatFind true
+                    'f' 't' 'F' 'T'
+                        @find = char
+                        ⮐ @logPending()
+                    '0''1''2''3''4''5''6''7''8''9'
                         @count += char
                         ⮐ @logPending()
                 ⮐ @reset()
@@ -507,25 +505,13 @@ function novim
                 ⮐ @execute command(@countNumber())
             
         switch char       
-            'f' 't' 'F' 'T'
     
-                @find = char
-                ⮐ @logPending()
+            'i' ➜ ⮐ @state.startNovimInsert kind:'insert'
+            'a' ➜ ⮐ @state.startNovimInsert kind:'append'
+            'A' ➜ ⮐ @state.startNovimInsert kind:'appendEol'
     
-            'i'
-                ⮐ @state.startNovimInsert kind:'insert'
-
-            'a'
-                ⮐ @state.startNovimInsert kind:'append'
-                
-            'A'
-                ⮐ @state.startNovimInsert kind:'appendEol'
-    
-            ';'
-                ⮐ @repeatFind false
-    
-            ','
-                ⮐ @repeatFind true
+            ';' ➜ ⮐ @repeatFind false
+            ',' ➜ ⮐ @repeatFind true
     
             '"'
                 @registerPending = true
@@ -538,6 +524,11 @@ function novim
             '/'
                 post.emit 'vinder.show' 
                 ⮐ @reset()
+
+            'f' 't' 'F' 'T'
+    
+                @find = char
+                ⮐ @logPending()
     
             '0''1''2''3''4''5''6''7''8''9'
     
