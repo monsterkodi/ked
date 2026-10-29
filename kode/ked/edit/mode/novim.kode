@@ -257,7 +257,7 @@ function novim
 
         @reset()
 
-        ⮐  true if empty line
+        ⮐ true if empty line
 
         [name file] = novim.splitEx line
 
@@ -265,11 +265,11 @@ function novim
 
         if not cmd
             post.emit 'title.novim' "E492: #{name}"
-            ⮐  false
+            ⮐ false
 
         if cmd.arg == false and file?
             post.emit 'title.novim' "E488: Trailing characters: #{file}"
-            ⮐  false
+            ⮐ false
 
         @[cmd.run] file
 
@@ -336,18 +336,14 @@ function novim
 
     handleExKey: combo char ->
 
-        if combo in ['esc' 'escape']
-            ⮐ @reset()
+        switch combo
+            'esc''escape'   ➜ ⮐ @reset()
+            'return''enter' ➜ ⮐ @runEx()
+            'backspace' 'delete' 'ctrl+h'
+                @ex = @ex[0...-1] if @ex.length
+                ⮐ @logPending()
 
-        if combo in ['return' 'enter']
-            @runEx()
-            ⮐ true
-
-        if combo in ['backspace' 'delete' 'ctrl+h']
-            @ex = @ex[0...-1] if @ex.length
-            ⮐ @logPending()
-
-        if char.length == 1 and char not in ['\n' '\r' '\t']
+        if char.length == 1 and char not in '\n\r\t'
             @ex += char
             @logPending()
 
