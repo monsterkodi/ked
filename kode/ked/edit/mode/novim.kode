@@ -79,18 +79,6 @@ function novim
         'r':  n c -> { operator: 'replace'      count: n  char: c ? '' }
         }
 
-    @exCommands: {
-        'q':   { desc: 'quit, fail if there are pending changes'       run: 'exQuit'      arg: false }
-        'q!':  { desc: 'quit discarding pending changes'               run: 'exQuitForce' arg: false }
-        'w':   { desc: 'write the buffer'                              run: 'exWrite' }
-        'w!':  { desc: 'write the buffer, overriding a refusal'        run: 'exWrite' }
-        'wa':  { desc: 'write all buffers with pending changes'        run: 'exWriteAll'  arg: false }
-        'wq':  { desc: 'write the buffer and quit'                     run: 'exWriteAndQuit' }
-        'wq!': { desc: 'write the buffer and quit, overriding a refusal' run: 'exWriteAndQuit' }
-        'x':   { desc: 'write if changed, then quit'                   run: 'exWriteIfChangedAndQuit' }
-        'x!':  { desc: 'write if changed, then quit, overriding a refusal' run: 'exWriteIfChangedAndQuit' }
-        }
-
     @motions: {
         '0':      -> { kind: 'bol'                       }
         '$':      -> { kind: 'eol'                       }
@@ -239,18 +227,15 @@ function novim
 
         [name file] = novim.splitEx line
 
-        cmd = novim.exCommands[name]
-
-        if not cmd
-            post.emit 'title.novim' "E492: #{name}"
-            ⮐ false
-
-        if cmd.arg == false and file?
-            post.emit 'title.novim' "E488: Trailing characters: #{file}"
-            ⮐ false
-
-        @[cmd.run] file
-
+        switch name 
+            'q'   ➜ @exQuit()
+            'q!'  ➜ @exQuitForce()
+            'w'
+            'w!'  ➜ @exWrite file
+            'wq'
+            'wq!' ➜ @exWriteAndQuit file
+            'x' 
+            'x!'  ➜ @exWriteIfChangedAndQuit file
         true
 
     @splitEx: (line) ->
@@ -265,7 +250,7 @@ function novim
     exQuit: ->
 
         if @state.isDirty()
-            post.emit 'title.novim' 'E37: No write since last change (add ! to override)'
+            post.emit 'novim.error' 'unsaved changes'
             ⮐  false
 
         post.emit 'quit'
@@ -278,39 +263,21 @@ function novim
 
     exWrite: file ->
 
-        ⮐  false if not @exFileIsPath file
-
         post.emit 'file.save' file
         true
 
-    exWriteAll: ->
-
-        post.emit 'file.save' if @state.isDirty()
-        true
-
     exWriteAndQuit: file ->
-
-        ⮐  false if not @exFileIsPath file
 
         post.emit 'file.saveAndQuit' file
         true
 
     exWriteIfChangedAndQuit: file ->
 
-        ⮐  false if not @exFileIsPath file
-
         if @state.isDirty()
             post.emit 'file.saveAndQuit' file
         else
             post.emit 'quit'
         true
-
-    exFileIsPath: file ->
-
-        ⮐  true if not file?.startsWith '!'
-
-        post.emit 'title.novim' 'E492: shell commands are not supported'
-        false
 
     handleExKey: combo char ->
 
