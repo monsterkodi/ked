@@ -86,7 +86,7 @@ function novim
         '%':      -> { operator: 'matchBracket' }
         '*':    n -> { operator: 'searchWord'   count: n  forward: true  }
         '#':    n -> { operator: 'searchWord'   count: n  forward: false }
-        'r': n c='' -> { operator: 'replace'    count: n  char: c }
+        'r':  n c -> { operator: 'replace'      count: n  char: c ? '' }
         }
 
     @exCommands: {
