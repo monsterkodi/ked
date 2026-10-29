@@ -327,9 +327,6 @@ function novim
             post.emit 'quit'
         true
 
-    #  a leading ! means 'pipe to a shell command', which is not supported
-    #  yet. refuse instead of writing a file whose name starts with !
-    
     exFileIsPath: file ->
 
         ⮐  true if not file?.startsWith '!'
@@ -407,6 +404,9 @@ function novim
             else if key != 'shift'
                 ⮐ @reset()
             ⮐ true
+        else if char == 'r'
+            @replace = true
+            ⮐ @logPending()
 
         if arrow = novim.arrows[char]
             char = arrow
@@ -466,7 +466,7 @@ function novim
                 @prefix = null
                 if prefix == 'g' and char == 'g'
                     ⮐ @execute { operator: 'move', motion: { kind: 'bof', count: @countNumber() } }
-                # @reset()
+                ⮐ @reset()
  
             @area
     
@@ -474,15 +474,14 @@ function novim
                     if @state.visual
                         ⮐ @execute { operator: 'visualTextObject', motion: { kind: 'textObject', area: @area, target: target, count: @countNumber() } }
                     else
-                        @completeTextObject target
-                else
-                    @reset() # needed?
+                        ⮐ @completeTextObject target
+                ⮐ @reset()
     
             @operator
     
                 if  
                     build = novim.motions[char]
-                        @complete build
+                        ⮐ @complete build
                     char in ['f' 't' 'F' 'T']
                         @find = char
                         ⮐ @logPending()
@@ -496,69 +495,56 @@ function novim
                     char in '0123456789'
                         @count += char
                         ⮐ @logPending()
-                    ➜ 
-                        ⮐ @reset()
-                    
-            char in ['f' 't' 'F' 'T']
+                ⮐ @reset()
+
+            novim.operators[char]
+            
+                @operator = char
+                ⮐ @logPending()
+
+            command = novim.commands[char]
+    
+                ⮐ @execute command(@countNumber())
+            
+        switch char       
+            'f' 't' 'F' 'T'
     
                 @find = char
                 ⮐ @logPending()
     
-            char == 'i'
-            
+            'i'
                 @state.startNovimInsert { kind: 'insert' }
                 ⮐ @exitNovim()
 
-            char == 'a'
-            
+            'a'
                 @state.startNovimInsert { kind: 'append' }
                 @state.moveCursors 'right'
                 ⮐ @exitNovim()
                 
-            char == 'A'
-            
+            'A'
                 @state.startNovimInsert { kind: 'appendEol' }
                 @state.moveCursors 'eol'
                 ⮐ @exitNovim()
     
-            char == ';'
-    
+            ';'
                 ⮐ @repeatFind false
     
-            char == ','
-    
+            ','
                 ⮐ @repeatFind true
     
-            char == 'r'
-    
-                @replace = true
-                ⮐ @logPending()
-    
-            novim.operators[char]
-    
-                @operator = char
-                ⮐ @logPending()
-    
-            char == '"'
-    
+            '"'
                 @registerPending = true
                 ⮐ @logPending()
     
-            char == 'g'
-    
+            'g'
                 @prefix = 'g'
                 ⮐ @logPending()
     
-            char == '/'
-            
+            '/'
                 post.emit 'vinder.show' 
                 ⮐ @reset()
     
-            command = novim.commands[char]
-    
-                ⮐ @execute command(@countNumber())
-    
-            char in '0123456789'
+            '0''1''2''3''4''5''6''7''8''9'
     
                 if char == '0' and empty @count
                     ⮐ @execute { operator: 'move', motion: { kind: 'bol' } }
