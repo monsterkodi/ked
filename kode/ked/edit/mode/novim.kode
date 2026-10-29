@@ -5,8 +5,7 @@
 ███  ████  ███   ███     ███     ███  ███ █ ███
 ███   ███   ███████       █      ███  ███   ███
 
-swallows text input while active and maps keys 
-to actions which are executed by edit▸act▸novim
+maps keys to actions which are executed by edit▸act▸novim
 ###
 
 use ../../../kxk ◆ post keyinfo
@@ -20,20 +19,6 @@ function novim
         y: 'yank'
         '>': 'indent'
         '<': 'deindent'
-
-    @textObjects:
-        'w':    'word'
-        'W':    'WORD'
-        '"':    '"'
-        "'":    "'"
-        '(':    '('
-        ')':    '('
-        'b':    '('
-        '[':    '['
-        ']':    '['
-        '{':    '{'
-        '}':    '{'
-        'B':    '{'
 
     @commands: {
         'C':      -> { operator: 'change'                    motion: { kind: 'eol'      } }
@@ -106,6 +91,20 @@ function novim
         '_':    n -> { kind: 'lineFirst'        count: n }
         }
 
+    @textObjects:
+        'w':    'word'
+        'W':    'WORD'
+        '"':    '"'
+        "'":    "'"
+        '(':    '('
+        ')':    '('
+        'b':    '('
+        '[':    '['
+        ']':    '['
+        '{':    '{'
+        '}':    '{'
+        'B':    '{'
+
     @lastVind: ''
     
     @: @state ->
@@ -152,7 +151,7 @@ function novim
         @find            = null
         @replace         = null
         @ex              = null
-        @logPending()
+        post.emit 'title.novim'
         true
 
     exitNovim: ->
@@ -163,7 +162,7 @@ function novim
     countNumber: -> empty @count ? 1 : parseInt(@count)
 
     logPending: ->
-    
+        
         t = ''
         t += @operator if @operator 
         t += @area[0] if @area 
@@ -173,7 +172,14 @@ function novim
         t += @find if @find 
         t += 'r' if @replace
         t += ':' + @ex if @ex?
-    
+        
+        op = @operator
+        op ?= @find
+        op ?= @replace
+        op ?= ':' + @ex if @ex?
+        
+        pending = op:op area:@area prefix:@prefix count:@count register:@register
+        log 'pending' pending
         post.emit 'title.novim' t
         true        
 
@@ -216,67 +222,44 @@ function novim
 
         @state.executeNovim cmd
         @reset()
+        log 'title.novim.execute' cmd
+        post.emit 'title.novim.execute' cmd
+        true
 
     runEx: ->
 
         line = @ex
 
         @reset()
-
+        
         ⮐ true if empty line
-
-        [name file] = novim.splitEx line
-
-        switch name 
-            'q'   ➜ @exQuit()
-            'q!'  ➜ @exQuitForce()
-            'w'
-            'w!'  ➜ @exWrite file
-            'wq'
-            'wq!' ➜ @exWriteAndQuit file
-            'x' 
-            'x!'  ➜ @exWriteIfChangedAndQuit file
-        true
-
-    @splitEx: (line) ->
-
+        
         line = line.trim()
         idx  = line.search /\s/
-
-        ⮐ [line null] if idx < 0
-
-        [line[0...idx] line[idx..].trim()]
-
-    exQuit: ->
-
-        if @state.isDirty()
-            post.emit 'novim.error' 'unsaved changes'
-            ⮐  false
-
-        post.emit 'quit'
-        true
-
-    exQuitForce: ->
-
-        post.emit 'quit'
-        true
-
-    exWrite: file ->
-
-        post.emit 'file.save' file
-        true
-
-    exWriteAndQuit: file ->
-
-        post.emit 'file.saveAndQuit' file
-        true
-
-    exWriteIfChangedAndQuit: file ->
-
-        if @state.isDirty()
-            post.emit 'file.saveAndQuit' file
+        
+        if idx < 0
+            name = line
         else
-            post.emit 'quit'
+            name = line[0...idx] 
+            file = line[idx..].trim()
+
+        switch name 
+            'q'   
+                    if @state.isDirty()
+                        post.emit 'novim.error' 'unsaved changes'
+                        ⮐  false
+                    post.emit 'quit'
+            'q!'  ➜ post.emit 'quit'
+            'w'
+            'w!'  ➜ post.emit 'file.save' file
+            'wq'
+            'wq!' ➜ post.emit 'file.saveAndQuit' file
+            'x' 
+            'x!'  
+                    if @state.isDirty()
+                        post.emit 'file.saveAndQuit' file
+                    else
+                        post.emit 'quit'
         true
 
     handleExKey: combo char ->
@@ -310,7 +293,6 @@ function novim
                 @state.startVisual 'block'
             ⮐ @reset()
 
-        # let global shortcuts through, at least the one that leaves this mode
         if combo.includes('alt+') or combo.includes('ctrl+') or combo.includes('cmd+')
             ⮐ 'unhandled'
 

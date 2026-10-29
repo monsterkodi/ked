@@ -20,9 +20,6 @@ function TTIO extends events
         
         opt ?= {}
         
-        #  a headless ttio has no terminal to talk to: it keeps what would
-        #  have been written, and it takes its size from the options
-        
         @headless = opt.headless ? false
         @input    = opt.input ? true
         
@@ -55,13 +52,7 @@ function TTIO extends events
         
         if @headless
         
-            #  a terminal is not a script: the input is read only when it
-            #  comes from a pipe or a file
-            
             @input = @input and not process.stdin.isTTY
-            
-            #  there are no cells in a headless screen, so there is no cell
-            #  size either: the views that draw pictures skip themselves
             
             @cellsz = []
             
@@ -144,24 +135,13 @@ function TTIO extends events
     cols: => @headless ? @size[0] : process.stdout.columns
     rows: => @headless ? @size[1] : process.stdout.rows  
     
-    #  the size of a headless screen is known, so it is not asked for
-    #  the way it is asked for in a terminal
-    #  
-    #  there are no cells, so there is no cell size to report either
-    
     onHeadlessResize: =>
         
         @emit 'resize' @cols() @rows() null ([])
     
-    #  the input of a headless editor is a script, and it is read as a
-    #  whole: a key that a read splits in two is still a key
-    
     onInputData: data =>
         
         @inputChunks.push data
-    
-    #  the input of a headless editor is a script, and it is played when
-    #  the editor is ready for it
     
     steps: =>
         
@@ -172,13 +152,9 @@ function TTIO extends events
         
         keyscript.steps text
         
-    #  play a key of the script
-    
     play: bytes =>
         
         @onData Buffer.from(bytes)
-    
-    #  the input is over
     
     onEnd: =>
         
@@ -683,16 +659,12 @@ function TTIO extends events
             e = s+1
             
             if type == 'csi'
-                #  a csi sequence ends with its final byte, and the byte
-                #  after it is a key of its own
-                
+
                 e = s+2
                 
                 while e < data.length
                     break if 0x40 <= data[e] <= 0x7e
                     e += 1
-                
-                #  the final byte is the last of the sequence
                 
                 e = min(e+1, data.length)
                     
@@ -730,12 +702,12 @@ function TTIO extends events
             
             if dataStr.endsWith '\x1b[201~'
                 @pasteBuffer += data[0...-6].toString 'utf8'
-                log 'tty paste end' noon(@pasteBuffer)
+                # log 'tty paste end' noon(@pasteBuffer)
                 @emit 'paste' kstr.clean(@pasteBuffer)
                 delete @pasteBuffer
             else
                 @pasteBuffer += dataStr
-                log 'tty paste cont' noon(@pasteBuffer)
+                # log 'tty paste cont' noon(@pasteBuffer)
             ⮐ 
         
         for seq in @parseData data
@@ -765,13 +737,13 @@ function TTIO extends events
                     
                     @pasteBuffer = data[6..].toString('utf8')
                     
-                    log 'tty paste start' noon(@pasteBuffer)
+                    # log 'tty paste start' noon(@pasteBuffer)
                     
                     continue
                     
                 if csi.startsWith '201~' # paste end
                     
-                    log 'tty paste end' noon(@pasteBuffer)
+                    # log 'tty paste end' noon(@pasteBuffer)
                     
                     @emit 'paste' kstr.clean(@pasteBuffer)
                     delete @pasteBuffer
