@@ -1,8 +1,9 @@
 ###
-    logfile
-
-    in a headless run there is no terminal to hijack: the console keeps
-    its own writers and the log file is never opened.
+    ███       ███████    ███████   ████████  ███  ███      ████████
+    ███      ███   ███  ███        ███       ███  ███      ███     
+    ███      ███   ███  ███  ████  ██████    ███  ███      ███████ 
+    ███      ███   ███  ███   ███  ███       ███  ███      ███     
+    ███████   ███████    ███████   ███       ███  ███████  ████████
 ###
 
 use ../util ◆ logfile
