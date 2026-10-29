@@ -513,18 +513,13 @@ function novim
                 ⮐ @logPending()
     
             'i'
-                @state.startNovimInsert { kind: 'insert' }
-                ⮐ @exitNovim()
+                ⮐ @state.startNovimInsert kind:'insert'
 
             'a'
-                @state.startNovimInsert { kind: 'append' }
-                @state.moveCursors 'right'
-                ⮐ @exitNovim()
+                ⮐ @state.startNovimInsert kind:'append'
                 
             'A'
-                @state.startNovimInsert { kind: 'appendEol' }
-                @state.moveCursors 'eol'
-                ⮐ @exitNovim()
+                ⮐ @state.startNovimInsert kind:'appendEol'
     
             ';'
                 ⮐ @repeatFind false

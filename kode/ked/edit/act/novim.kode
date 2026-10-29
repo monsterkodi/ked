@@ -252,7 +252,7 @@ export
             y1 = min anchor[1] cursor[1]
             y2 = max anchor[1] cursor[1]
 
-            ⮐  [0 y1 kseg.width(@s.lines[y2]) y2]
+            ⮐ [0 y1 kseg.width(@s.lines[y2]) y2]
 
         a = [anchor[0] anchor[1]]
         b = [cursor[0] cursor[1]]
@@ -362,7 +362,7 @@ export
 
         rngs = @s.selections.asMutable()
 
-        ⮐  if empty rngs
+        ⮐ if empty rngs
 
         linewise = @visual == 'line'
 
@@ -392,8 +392,6 @@ export
         @visual        = null
         @visualAnchors = []
 
-        @stopMode 'novim'
-
     visualBlockInsert: after ->
 
         rngs = @s.selections
@@ -407,8 +405,6 @@ export
         @stopVisual()
 
         @setCursors cursors main:@s.main
-
-        @stopMode 'novim'
 
     visualRepeatShapes: ->
 
@@ -577,10 +573,16 @@ export
 
     startNovimInsert: spec ->
 
-        @novimInsert = copy(spec)
+        @novimInsert = copy spec
 
         @novimInsert.text ?= ''
-
+        
+        switch spec.kind
+            'append'         ➜ @moveCursors 'right'
+            'appendEol'      ➜ @moveCursors 'eol'
+            'insertAtIndent' ➜ @moveCursors 'ind'
+        
+        @stopMode 'novim'
         @novimInsert
 
     recordNovimInsert: text ->
@@ -875,8 +877,6 @@ export
 
         @startNovimInsert { kind: 'change', motion: copy(spec) }
 
-        @stopMode 'novim'
-
     yankByMotion: spec register ->
 
         linewise = motion.isLinewise spec
@@ -1005,15 +1005,9 @@ export
 
         @startNovimInsert { kind: after ? 'openLineAfter' : 'openLineBefore', count:count }
 
-        @stopMode 'novim'
-
     insertAtIndent: ->
 
-        @moveCursors 'ind'
-
-        @startNovimInsert { kind: 'insertAtIndent' }
-
-        @stopMode 'novim'
+        @startNovimInsert kind: 'insertAtIndent'
 
     replaceChars: text count ->
 
