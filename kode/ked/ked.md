@@ -1,10 +1,10 @@
 # KED - terminal editor
 
-      crumbs  file      tabs          status
+      crumbs  crumbs file infos novim status
     ┏━━━━━━━━┳━━━━┳━━━━┳━━━━┳━━━━┳━━━━┳━━━━━┓
     ┣━━━━━━━━╋━━━━┻━━━━┻━━━━┻━━━━┻━━┳━┻━━━━━┫
     ┃        ┃                      ┃       ┃
-    ┃ dirtee ┃    editor            ┃ funcs ┃
+    ┃ dirtee ┃      fileeditor      ┃ funcs ┃
     ┃        ┃                      ┃       ┃
     ┃        ┃                      ┃       ┃
     ┃        ┃                      ┃       ┃
@@ -50,9 +50,8 @@ command, whether the buffer is dirty, and the current file. Empty parts are
 left out.
 
 The cursor is drawn with kitty graphics, which a headless screen has none of,
-so it is marked with escape sequences there: the character under the cursor is
-in the colors of the other way round, and the main cursor is underlined as
-well.
+so it is marked with escape sequences there: the character under a cursor is
+displayed with inverted colors, and the main cursor is underlined.
 
 The keys are a script of key names: a word that names a key is that key, and
 a word that names nothing is the characters it is made of. A word can have

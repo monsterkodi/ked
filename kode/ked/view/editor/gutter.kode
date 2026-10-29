@@ -14,6 +14,7 @@ use ../../../kxk   ▪ post kseg
 use ../../../kolor ◆ kulur
 use ../../util/img ◆ squares
 use ../../util     ◆ prof syntax
+use ../../edit     ◆ mode 
 use ../../theme    ◆ color theme 
 use ../base        ◆ view
 
@@ -100,7 +101,10 @@ function gutter extends view
             syntax.diss[idx] = oldDiss
         
     lineno: y ->
-                
+    
+        mcy = @state.mainCursor()[1] 
+        if mode.isActive(@state 'novim') and y != mcy
+            y -= mcy + 1
         lineno = lpad @cells.cols-1 y+1
         lineno += ' '
         lineno

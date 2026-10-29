@@ -19,11 +19,11 @@ use ../menu         ◆ choices
 ###
 
 SYMBOL = 
-    clss:          '■'  # '■' 
-    unbound:       '->' # '▸'
-    bound:         '=>' # '▸'
-    async_unbound: '○→' # '○'
-    async_bound:   '●→' # '●' 
+    clss:          '■'  
+    unbound:       '->'
+    bound:         '=>'
+    async_unbound: '○→'
+    async_bound:   '●→' 
         
 function funSyntax
 
@@ -135,6 +135,7 @@ function funtree extends choices
         if func.name == "   -> #{func.class}" and func.line
             ⮐  @lineIndexForFunc class:func.class name:'   -> @'
             
+    
         if func.name == "   -> @" and func.line
             ⮐  @lineIndexForFunc class:func.class name: "   -> #{func.class}"
                 
