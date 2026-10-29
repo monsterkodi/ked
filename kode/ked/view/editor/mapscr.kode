@@ -199,7 +199,7 @@ function mapscr extends mapview
            @mapY + @lineOffset(pos[1])
        ]
     
-    maxLinesToLoad: => 2000
+    maxLinesToLoad: => 10000
     
     ###
     ███████    ████████    ███████   ███   ███

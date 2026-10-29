@@ -5,10 +5,9 @@
     the motions are pure: lines and a position in, a range out.
 ###
 
-use ../../kxk       ▪ kseg sleep post
-use ../../kxk       ◆ clip
-use ../edit/tool    ◆ belt motion
+use ../../kxk       ▪ kseg sleep post clip
 use ../edit         ◆ state mode editor
+use ../edit/tool    ◆ belt motion
 use ../edit/mode    ◆ novim brckts
 use ../theme        ◆ theme
 use ../util         ◆ harness

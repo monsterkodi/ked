@@ -241,7 +241,7 @@ mapscr = (function ()
 
     mapscr.prototype["maxLinesToLoad"] = function ()
     {
-        return 2000
+        return 10000
     }
 
     mapscr.prototype["draw"] = function ()
