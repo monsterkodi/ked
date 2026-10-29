@@ -180,6 +180,7 @@ function novim
         
         pending = op:op area:@area prefix:@prefix count:@count register:@register
         log 'pending' pending
+        post.emit 'novim.pending' pending
         post.emit 'title.novim' t
         true        
 
@@ -223,7 +224,7 @@ function novim
         @state.executeNovim cmd
         @reset()
         log 'title.novim.execute' cmd
-        post.emit 'title.novim.execute' cmd
+        post.emit 'novim.execute' cmd
         true
 
     runEx: ->

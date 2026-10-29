@@ -16,7 +16,7 @@ use ../base      ◆ view
 function titlenovim extends view
 
     @: screen name ->
-
+        
         super screen name
         
         @setColor 'bg'     theme.novim.bg
@@ -25,9 +25,34 @@ function titlenovim extends view
         
         @pointerType = 'default'
         @novimText   = 'novim'
-
-        post.on 'title.novim' (@novimText) =>
         
+        # post.on 'title.novim' (@novimText) =>
+        post.on 'novim.execute' @onExecute
+        post.on 'novim.pending' @onPending
+        post.on 'novim.error'   @onError
+
+    onExecute: execute => 
+        log "EXECUTE" execute
+        @setColor 'bg'  theme.novim.execute.bg
+        t = execute.operator
+        t += " " + execute.count        if execute.count
+        t += " " + execute.motion.kind  if execute.motion
+        @novimText = t
+
+    onPending: pending => 
+        log "PENDING" pending
+        @setColor 'bg'  theme.novim.pending.bg
+        t  = pending.op ? ''
+        t += pending.count ? ''
+        t += pending.area ? ''
+        t += pending.prefix ? ''
+        t += pending.register ? '' 
+        @novimText = t
+
+    onError: err => 
+        log "ERROR"   err
+        @setColor 'bg'  theme.novim.error.bg
+
     # ███████    ████████    ███████   ███   ███  
     # ███   ███  ███   ███  ███   ███  ███ █ ███  
     # ███   ███  ███████    █████████  █████████  
@@ -50,5 +75,5 @@ function titlenovim extends view
                 @cells.set xo 0 ch bg @color.empty
             else
                 @cells.set xo 0 ch fg bg 
-                
+
 export titlenovim

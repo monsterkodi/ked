@@ -88,8 +88,17 @@
     }
   },
   "novim": {
-    "bg": "#44a",
+    "bg": "#444",
     "text": "#88f",
+    "execute": {
+      "bg": "#228"
+    },
+    "pending": {
+      "bg": "#44a"
+    },
+    "error": {
+      "bg": "#f00"
+    },
     "yank": "#060",
     "cursor": {
       "multi": "#44a",

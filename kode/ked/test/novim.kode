@@ -2252,8 +2252,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     quits  = 0
     saves  = []
     writes = []
-    titles = []
-    capture = true
 
     clean = -> s.clearHistory()
     dirty = ->
@@ -2263,16 +2261,12 @@ mrange = lines x y m -> motion.range lines [x y] m
     post.on 'quit'                    -> quits += 1
     post.on 'file.saveAndQuit' (file) -> saves.push file ? null
     post.on 'file.save'        (file) -> writes.push file ? null
-    post.on 'title.novim'      (t)    -> titles.push t if capture
 
     clean()
-
-    # :q quits when there is nothing to lose
 
     keys ':q'
 
     m.ex        ▸ 'q'
-    titles[-1]  ▸ ':q'
 
     enter()
 
@@ -2281,8 +2275,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     saves  ▸ []
     m.ex   ▸ null
 
-    # :q refuses to throw away a changed buffer
-
     dirty()
 
     keys ':q'
@@ -2290,12 +2282,9 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     quits      ▸ 1
 
-    # :q! quits anyway
-
     keys ':q!'
 
     m.ex        ▸ 'q!'
-    titles[-1]  ▸ ':q!'
 
     enter()
 
@@ -2303,18 +2292,13 @@ mrange = lines x y m -> motion.range lines [x y] m
     writes ▸ []
     saves  ▸ []
 
-    # a pending count does not leak into the ex command
-
     keys '3:q'
 
     m.ex       ▸ 'q'
-    titles[-1] ▸ ':q'
 
     esc()
 
     m.ex ▸ null
-
-    # backspace edits the ex line
 
     keys ':wqq'
     back()
@@ -2325,8 +2309,6 @@ mrange = lines x y m -> motion.range lines [x y] m
 
     m.ex ▸ null
 
-    # :w writes without quitting
-
     clean()
 
     keys ':w'
@@ -2336,8 +2318,6 @@ mrange = lines x y m -> motion.range lines [x y] m
     saves  ▸ []
     quits  ▸ 2
     m.ex   ▸ null
-
-    capture = false
 
 ▸ brckts lets novim handle text keys
 
