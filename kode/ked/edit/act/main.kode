@@ -106,12 +106,6 @@ export
         @deselect()
         @setCursors [mc]
 
-    # ████████    ███████    ███████   ████████
-    # ███   ███  ███   ███  ███        ███     
-    # ████████   █████████  ███  ████  ███████ 
-    # ███        ███   ███  ███   ███  ███     
-    # ███        ███   ███   ███████   ████████
-
     singleCursorPage: dir ->
 
         mc = @mainCursor()
@@ -132,12 +126,6 @@ export
     chunkBeforeCursor: -> belt.chunkBeforePos @s.lines @mainCursor()
     chunkAfterCursor:  -> belt.chunkAfterPos  @s.lines @mainCursor()
         
-    #  ███████  ████████  ███      ████████   ███████  █████████  
-    # ███       ███       ███      ███       ███          ███     
-    # ███████   ███████   ███      ███████   ███          ███     
-    #      ███  ███       ███      ███       ███          ███     
-    # ███████   ████████  ███████  ████████   ███████     ███     
-    
     setMainCursorAndSelect: x y ->
         
         @setSelections belt.extendLineRangesFromPositionToPosition @s.lines @allSelections() @mainCursor() [x y]

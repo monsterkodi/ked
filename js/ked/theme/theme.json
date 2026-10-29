@@ -91,13 +91,16 @@
     "bg": "#444",
     "text": "#88f",
     "execute": {
+      "fg": "#44b",
       "bg": "#228"
     },
     "pending": {
+      "fg": "#ddf",
       "bg": "#44a"
     },
     "error": {
-      "bg": "#f00"
+      "bg": "#f00",
+      "fg": "#ff0"
     },
     "yank": "#060",
     "cursor": {

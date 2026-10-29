@@ -34,6 +34,7 @@ function titlenovim extends view
     onExecute: execute => 
         log "EXECUTE" execute
         @setColor 'bg'  theme.novim.execute.bg
+        @setColor 'fg'  theme.novim.execute.fg
         t = execute.operator
         t += " " + execute.count        if execute.count
         t += " " + execute.motion.kind  if execute.motion
@@ -42,6 +43,7 @@ function titlenovim extends view
     onPending: pending => 
         log "PENDING" pending
         @setColor 'bg'  theme.novim.pending.bg
+        @setColor 'fg'  theme.novim.pending.fg
         t  = pending.op ? ''
         t += pending.count ? ''
         t += pending.area ? ''
@@ -50,8 +52,10 @@ function titlenovim extends view
         @novimText = t
 
     onError: err => 
-        log "ERROR"   err
+        log "ERROR" err
         @setColor 'bg'  theme.novim.error.bg
+        @setColor 'fg'  theme.novim.error.fg
+        @novimText = err
 
     # ███████    ████████    ███████   ███   ███  
     # ███   ███  ███   ███  ███   ███  ███ █ ███  

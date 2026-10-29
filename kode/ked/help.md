@@ -5,7 +5,6 @@
     ███   ███  ███       ███      ███
     ███   ███  ████████  ███████  ███
 ```
-
 # keyboard shortcuts
 
 ```
@@ -153,47 +152,27 @@
     alt+u                               uniko mode
     alt+r                               record mode (shadowed, see below)
 
-# mode: novim (alt+n)
+# mode: novim (alt+n alt+z)
 
     w  b  e                             next word, previous word, end of word
     W  B  E                             same, but a WORD skips punctuation
     f{char}  t{char}  ;                 find a character, till before it, repeat
     F{char}  T{char}  ,                 the same, searching backwards
     iw  aw  iW  aW                      inner and around word or WORD text objects
-    alt+cmd+c   alt+ctrl+c              toggle clipboard sync for yank, delete, put
-    "+y  "+p  "*y  "*p                  use the system clipboard register
     /{pattern}                          open the search strip and highlight matches
     n  N                                jump to the next or previous highlight
     :w  :w {file}                       write the buffer to the file
-    :w!  :w! {file}                     the same, overriding a refusal
-    :wa                                 write every buffer that changed
     :q                                  quit, fail if there are pending changes
     :q!                                 quit discarding pending changes
-    :wq  :wq {file}  :wq!               write then quit
-    :x  :x {file}  :x!                  write only if changed, then quit
+    :wq                                 write then quit
+    :x                                  write only if changed, then quit
 
-    f and t search the whole buffer and underline every target while the
-    find is active. ; repeats in the same direction, , in the other one.
-    a count finds the count-th target.
-
-    / opens the search strip at the bottom of the editor; while typing,
-    every match in the current file is highlighted live. enter finalizes
-    the search and leaves the highlights in place; n and N then walk
-    them back and forth.
-
-    clipboard sync writes yanks and deletes to the clipboard and reads puts
-    from it. it is on by default, off in a headless editor. the explicit +
-    and * registers always use the clipboard.
-
-# mode: brckts (auto, on selection)
+# mode: brckts
 
     alt+cmd+'                           swap ' and " around cursor
     alt+cmd+b                           select delimiters or brackets
 
 # notes
-
-    ctrl+j is bound twice in keys.kode: the first match wins, so
-    it moves to end of file and never joins lines. Use cmd+j.
 
     alt+r is bound in both ked.kode and keys.kode. ked.kode wins,
     so it reveals the file in the dir column and never toggles

@@ -90,7 +90,7 @@ handleKey = key event -> # will be bound to state
         'cmd+y'         'ctrl+y'            ➜ ⮐  @redo()
                                                  
         'cmd+a'         'ctrl+a'            ➜ ⮐  @selectAllLines()
-        'cmd+j'         'ctrl+j'            ➜ ⮐  @joinLines()
+        'cmd+j'                             ➜ ⮐  @joinLines()
         'cmd+l'         'ctrl+l'            ➜ ⮐  @selectMoreLines()
         'shift+cmd+l'   'shift+ctrl+l'      ➜ ⮐  @selectLessLines()
                                                  
@@ -104,11 +104,11 @@ handleKey = key event -> # will be bound to state
                                                  
         'alt+y'                             ➜ ⮐  @toggleMode 'unype'
         'alt+n'         'alt+z'             ➜ ⮐  @toggleMode 'novim'
-        'alt+r'                             ➜ ⮐  @toggleMode 'record'
+        # 'alt+r'                             ➜ ⮐  @toggleMode 'record'
         'alt+u'                             ➜ ⮐  @toggleMode 'uniko'
         'alt+3'                             ➜ ⮐  @toggleMode 'salter'
 
-        'alt+cmd+c'     'alt+ctrl+c'        ➜ ⮐  mode.modes.novim?.toggleClipboard()
+        # 'alt+cmd+c'     'alt+ctrl+c'      ➜ ⮐  mode.modes.novim?.toggleClipboard()
                                                  
         'cmd+3'         'ctrl+3'            ➜ ⮐  @insertAsciiHeaderForSelectionOrWordAtCursor()
         'alt+cmd+d'     'alt+ctrl+d'        ➜ ⮐  @selectWordAtCursor_highlightSelection_selectAllHighlights()
