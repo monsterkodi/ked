@@ -7,9 +7,6 @@
 
     a unicode character picker
     lives below the funtree and above the colorpicker
-
-    posts
-        uniko.show
 ###
 
 use ../../../kxk ▪ kseg post
@@ -209,12 +206,12 @@ function uniko extends view
         ⮐  false if @hidden()
 
         switch event.combo
-            'esc'    ➜ ⮐  @hide()
-            'return' ➜ ⮐  @submit()
-            'cmd+c'  ➜ ⮐  @copy()
-            'ctrl+c' ➜ ⮐  @copy()
-            'cmd+down' ➜ ⮐ @incScale 1
-            'cmd+up'   ➜ ⮐ @incScale -1
+            'esc'      ➜ ⮐ @hide()
+            'return'   ➜ ⮐ @submit()
+            'cmd+c'    ➜ ⮐ @copy()
+            'ctrl+c'   ➜ ⮐ @copy()
+            'cmd+up'   ➜ ⮐ @incScale  1
+            'cmd+down' ➜ ⮐ @incScale -1
 
         if event.combo == 'space'
             ⮐  @submit()
