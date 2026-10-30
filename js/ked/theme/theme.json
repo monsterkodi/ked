@@ -47,7 +47,9 @@
   "colorpicker": {
     "bg": "#161616",
     "fg": "#888",
-    "separator": "#222"
+    "red": "#f55",
+    "green": "#5f5",
+    "blue": "#55f"
   },
   "knob": {
     "fg": "#222",

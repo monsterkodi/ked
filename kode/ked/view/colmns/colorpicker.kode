@@ -42,6 +42,10 @@ function colorpicker extends view
         @sliders = [@hue @bright @sat]
         @inputs  = [@red @green @blue]
 
+        @red.textColor   = theme.colorpicker.red
+        @green.textColor = theme.colorpicker.green
+        @blue.textColor  = theme.colorpicker.blue
+
         @childNames = [@name @red.name @green.name @blue.name]
 
         @hue.min = 0
@@ -57,9 +61,8 @@ function colorpicker extends view
         @bright.gradient = (v) => color.hsvToRgb [@h @s v]
         @sat.gradient    = (v) => color.hsvToRgb [@h v @v]
 
-        @setColor 'bg'        theme.colorpicker.bg
-        @setColor 'fg'        theme.colorpicker.fg
-        @setColor 'separator' theme.colorpicker.separator
+        @setColor 'bg' theme.colorpicker.bg
+        @setColor 'fg' theme.colorpicker.fg
 
         @isVisible = false
 
@@ -170,13 +173,6 @@ function colorpicker extends view
 
     focusNext: dir => @focusTo (@focusIndex + dir + 6) % 6
 
-    focusDown: =>
-
-        switch @focusIndex
-            0 ➜ @focusTo 1
-            1 ➜ @focusTo 2
-            2 ➜ @focusTo 3
-
     focusUp: =>
 
         switch @focusIndex
@@ -225,6 +221,7 @@ function colorpicker extends view
         switch event.combo
             'tab'       ➜ @focusNext  1; ⮐  true
             'shift+tab' ➜ @focusNext -1; ⮐  true
+            'down'      ➜ @focusNext  1; ⮐  true
             'esc'       ➜ @cancel();      ⮐  true
             'return'    ➜ @submit();      ⮐  true
 
@@ -241,7 +238,6 @@ function colorpicker extends view
                 'shift+right' ➜ slider.setValue slider.value + 10
                 'cmd+left'  'ctrl+left'  ➜ slider.setValue slider.min
                 'cmd+right' 'ctrl+right' ➜ slider.setValue slider.max
-                'down'        ➜ @focusDown(); ⮐  true
                 'up'          ➜ @focusUp();   ⮐  true
                 else          ➜ ⮐  false
 
@@ -253,8 +249,7 @@ function colorpicker extends view
         input = @inputs[@focusIndex-3]
 
         switch event.combo
-            'up'   ➜ @focusTo 2; ⮐  true
-            'down' ➜ ⮐  true
+            'up' ➜ @focusTo 2; ⮐  true
 
         handled = input.onKey key event
 
@@ -268,24 +263,24 @@ function colorpicker extends view
 
         super x y w h
 
-        @hue.layout    x y+1 w 1
-        @bright.layout x y+2 w 1
-        @sat.layout    x y+3 w 1
+        @hue.layout    x+1 y+1 w-2 1
+        @bright.layout x+1 y+2 w-2 1
+        @sat.layout    x+1 y+3 w-2 1
 
-        iw = max(3, min(5, int(w/3)))
-        gap = max 0 int((w - 3*iw)/2)
-        start = max 0 int((w - (3*iw + 2*gap))/2)
+        aw = max 1 w-2
+        iw = max(3, min(5, int(aw/3)))
+        gap = max 0 int((aw - 3*iw)/2)
+        start = max 0 int((aw - (3*iw + 2*gap))/2)
 
-        @red.layout   x+start            y+6 iw 1
-        @green.layout x+start+iw+gap     y+6 iw 1
-        @blue.layout  x+start+2*(iw+gap) y+6 iw 1
+        @red.layout   x+1+start            y+5 iw 1
+        @green.layout x+1+start+iw+gap     y+5 iw 1
+        @blue.layout  x+1+start+2*(iw+gap) y+5 iw 1
 
     draw: =>
 
         ⮐  if @hidden() or @collapsed()
 
         @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
-        @cells.fill_rect 0 5 -1  5 '─' @color.separator @color.bg
 
         @hue.draw()
         @bright.draw()
@@ -297,14 +292,14 @@ function colorpicker extends view
 
         rgb = @rgb()
 
-        @cells.fill_rect 0 8 -1 8 ' ' null rgb
+        @cells.fill_rect 1 7 -2 7 ' ' null rgb
 
         hex = @hex()
         fg  = color.adjustForBackground @color.fg rgb
-        x   = max 0 int((@cells.cols - hex.length)/2)
+        x   = max 1 int((@cells.cols - hex.length)/2)
 
         for ch,i in hex
-            @cells.set x+i 8 ch fg rgb
+            @cells.set x+i 7 ch fg rgb
 
         super()
 

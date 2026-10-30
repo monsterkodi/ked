@@ -19,8 +19,11 @@ function rgbinput extends input
         @setColor 'bg_focus' theme.selection.line
         @setColor 'empty'    theme.colorpicker.bg
 
-        @value = 0
+        @textColor = theme.colorpicker.fg
+        @value     = 0
         @set '0'
+
+        @state.skipAdjustViewForMainCursor = true
 
     getValue: -> @value
 
@@ -50,6 +53,15 @@ function rgbinput extends input
 
         @value = v
         v
+
+    draw: ->
+
+        super()
+
+        ⮐  if @hidden() or @collapsed()
+
+        for ch, x in @current()
+            @cells.set_fg x 0 @textColor
 
     drawCursors: =>
 
