@@ -9,6 +9,7 @@
     one blank cell between the characters
     a selected cell with half circles on its left and right
     a scroll bar on the right when the grid overflows
+    a double sized mode that uses the kitty text sizing protocol
 ###
 
 use ../../../kxk    ▪ post
@@ -32,6 +33,7 @@ function matrix extends view
         @selectedIndex = 0
         @offset        = 0
         @focused       = false
+        @double        = false
 
         post.on 'focus' @onFocus
 
@@ -45,12 +47,24 @@ function matrix extends view
         @selectedIndex = 0
         @offset        = 0
 
+    setDouble: on =>
+
+        @double = on
+        @ensureVisible()
+
+        true
+
     numItems: -> @items.length
 
     #  a character is drawn at 2*col+1, so the selection has a cell for
     #  its left half circle even in the first column
 
-    baseColumns: -> max 1 int((@cells.cols - 1) / 2)
+    baseColumns: ->
+
+        if @double
+            ⮐  max 1 int((@cells.cols - 3) / 4)
+
+        max 1 int((@cells.cols - 1) / 2)
 
     scrollBarVisible: ->
 
@@ -59,14 +73,20 @@ function matrix extends view
 
         cols = @baseColumns()
 
-        int((@items.length + cols - 1) / cols) > @cells.rows
+        int((@items.length + cols - 1) / cols) > @viewportRows()
 
     columns: ->
 
         bar = @scrollBarVisible() ? 1 : 0
 
+        if @double
+            ⮐  max 1 int((@cells.cols - 3 - bar) / 4)
+
         max 1 int((@cells.cols - 1 - bar) / 2)
 
+    rowHeight: -> @double ? 2 : 1
+
+    viewportRows: -> max 0 int(@cells.rows / @rowHeight())
 
     numRows: ->
 
@@ -105,6 +125,13 @@ function matrix extends view
         @selectedIndex = 0
         @offset        = 0
 
+    cellAtPos: x y =>
+
+        if @double
+            ⮐  [int((x-3)/4) int(y/2)]
+
+        [int((x-1)/2) y]
+
     selectAt: col row =>
 
         cols = @columns()
@@ -119,7 +146,7 @@ function matrix extends view
     ensureVisible: ->
 
         cols = @columns()
-        rows = max 1 @cells.rows
+        rows = max 1 @viewportRows()
         row  = int(@selectedIndex / cols)
 
         @offset = row if row < @offset
@@ -134,7 +161,7 @@ function matrix extends view
         ⮐  false if empty @items
 
         cols   = @columns()
-        rows   = max 1 @cells.rows
+        rows   = max 1 @viewportRows()
         before = @selectedIndex
         lastIndex = @items.length - 1
 
@@ -167,11 +194,19 @@ function matrix extends view
 
         @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
 
-        ⮐  if empty @items
+        if not empty @items
+            if @double
+                @drawDouble()
+            else
+                @drawSingle()
+
+        @drawScrollBar()
+
+    drawSingle: ->
 
         cols = @columns()
 
-        for row in 0...@cells.rows
+        for row in 0...@viewportRows()
 
             for col in 0...cols
 
@@ -199,20 +234,78 @@ function matrix extends view
         @cells.set_ch_fg x-1 y '' fg
         @cells.set_ch_fg x+1 y '' fg
 
-        @drawScrollBar()
+    #  each character is a 2 by 2 block in kitty's text sizing protocol
+    #  the cells in the second row are jumped over so the blocks do not
+    #  shift the rest of the line
+
+    drawDouble: ->
+
+        cols = @columns()
+
+        for row in 0...@viewportRows()
+
+            for col in 0...cols
+
+                idx = (@offset + row) * cols + col
+
+                break if idx >= @items.length
+
+                @doubleCell 3+col*4 row*2 @itemText(@items[idx]) @color.fg @color.bg
+
+        ⮐  if @selectedIndex < 0 or @selectedIndex >= @items.length
+
+        [col row] = @selectedPos()
+
+        y = (row - @offset) * 2
+
+        ⮐  if y < 0 or y >= @cells.rows
+
+        x  = 3 + col*4
+        fg = @focused ? @color.selection : @color.selection_blur
+
+        @cells.set_bg x y fg
+
+        @cells.adjustContrastForHighlight x y fg
+
+        @doubleCell x-2 y '' fg @color.bg
+        @doubleCell x+2 y '' fg @color.bg
+
+    doubleCell: x y char fg bg ->
+
+        if @cells.screen.t.headless
+            @cells.set x   y   char fg bg
+            @cells.set x+1 y   null null null
+            @cells.set x   y+1 null null null
+            @cells.set x+1 y+1 null null null
+            ⮐
+
+        @cells.set x   y   @doubleText(char) fg bg
+        @cells.set x+1 y   null null null
+        @cells.set x   y+1 @skipText() null null
+        @cells.set x+1 y+1 null null
+
+    doubleText: char -> '\x1b]66;s=2:w=1;' + char + '\x07'
+
+    skipText: -> '\x1b[2C'
 
     drawScrollBar: ->
 
         ⮐  if not @scrollBarVisible()
         ⮐  if empty (csz = @screen.t.cellsz)
 
-        rows = @cells.rows
-        num  = @numRows()
+        rows = @viewportRows()
+
+        ⮐  if rows < 1
+
+        num = @numRows()
 
         ⮐  if num <= rows
 
-        kh = ((rows*rows) / num) * csz[1]
-        ky = ((rows*csz[1]-kh) * @offset / (num-rows))
+        regionH = @cells.rows * csz[1]
+        rowH    = csz[1] * @rowHeight()
+
+        kh = ((rows*rows) / num) * rowH
+        ky = ((regionH-kh) * @offset / (num-rows))
 
         fg = @color.scroll
 
@@ -224,6 +317,6 @@ function matrix extends view
         squares.place x int(y+w/2) w h-w fg
 
         sircels.place x y     w (ky ? fg : @color.scroll_dot) 1111
-        sircels.place x y+h-w w ((y+h < (@cells.y+rows)*csz[1]-1) ? fg : @color.scroll_dot) 1111
+        sircels.place x y+h-w w ((y+h < (@cells.y+@cells.rows)*csz[1]-1) ? fg : @color.scroll_dot) 1111
 
 export matrix

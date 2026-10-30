@@ -226,3 +226,23 @@ use ../view/colmns  ◆ uniko
         kseg.str(e.state.s.lines[0]) ▸ 'abc'
         u.hidden() ▸ true
         e.hasFocus() ▸ true
+
+    ▸ cmd+down doubles the matrix and cmd+up brings it back
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 14
+        u.show()
+
+        u.height ▸ 14
+
+        h.key u 'cmd+down' ''
+
+        u.height ▸ 24
+        u.matrix.rowHeight() ▸ 2
+
+        h.key u 'cmd+up' ''
+
+        u.height ▸ 14
+        u.matrix.rowHeight() ▸ 1

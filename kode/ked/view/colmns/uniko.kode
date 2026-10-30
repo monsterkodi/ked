@@ -28,6 +28,7 @@ function uniko extends view
 
         @height = 14
         @focus  = 'matrix'
+        @double = false
 
         @setColor 'bg' theme.uniko.bg
 
@@ -143,6 +144,17 @@ function uniko extends view
         @matrix.grabFocus()
         true
 
+    setDouble: on =>
+
+        @double = on
+        @height = on ? 24 : 14
+
+        @matrix.setDouble on
+
+        post.emit 'redraw'
+
+        true
+
     show: =>
 
         @input.set ''
@@ -205,6 +217,8 @@ function uniko extends view
             'return' ➜ ⮐  @submit()
             'cmd+c'  ➜ ⮐  @copy()
             'ctrl+c' ➜ ⮐  @copy()
+            'cmd+down' ➜ ⮐ @setDouble true
+            'cmd+up'   ➜ ⮐ @setDouble false
 
         if event.combo == 'space'
             ⮐  @submit()
@@ -256,8 +270,9 @@ function uniko extends view
 
             if event.type == 'press'
                 [x y] = @matrix.cells.posForEvent event
+                [col row] = @matrix.cellAtPos x y
                 @focus = 'matrix'
-                @matrix.selectAt int((x-1)/2) y
+                @matrix.selectAt col row
                 @matrix.grabFocus()
                 @submit()
 
@@ -288,7 +303,10 @@ function uniko extends view
         super x y w h
 
         @input.layout  x+1 y+1   w-2 1
-        @matrix.layout x+1 y+3   w-2 10
+
+        mh = max 0 (h-4)
+
+        @matrix.layout x+1 y+3   w-2 mh
 
     draw: =>
 
