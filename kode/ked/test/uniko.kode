@@ -143,6 +143,28 @@ use ../view/colmns  ◆ uniko
         u.focus ▸ 'matrix'
         e.hasFocus() ▸ false
 
+    ▸ space inserts while the input is focused too
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['abc']
+        e.state.setMainCursor 1 0
+
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 14
+        u.show()
+
+        h.type u 'sqrt'
+
+        u.focus ▸ 'input'
+
+        h.key u 'space' ' '
+
+        kseg.str(e.state.s.lines[0]) ▸ 'a√bc'
+        u.hidden() ▸ false
+        u.focus ▸ 'input'
+        e.hasFocus() ▸ false
+
     ▸ a mouse click inserts the clicked character and keeps the matrix focused
 
         h = new harness cols:60 rows:30

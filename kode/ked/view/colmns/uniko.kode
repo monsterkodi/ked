@@ -206,6 +206,9 @@ function uniko extends view
             'cmd+c'  ➜ ⮐  @copy()
             'ctrl+c' ➜ ⮐  @copy()
 
+        if event.combo == 'space'
+            ⮐  @submit()
+
         if @focus == 'input'
 
             if event.combo == 'down'
@@ -213,9 +216,6 @@ function uniko extends view
                 ⮐  true
 
             ⮐  @input.onKey key event
-
-        if event.combo == 'space'
-            ⮐  @submit()
 
         if valid event.char and event.char.length == 1 and event.char in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
             @focusInput()
