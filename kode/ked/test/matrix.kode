@@ -6,6 +6,7 @@
 
 use ../util      ◆ harness
 use ../view/base ◆ matrix
+use ../../kxk    ▪ post
 
 ▸ matrix
 
@@ -62,3 +63,32 @@ use ../view/base ◆ matrix
 
         m.selectedIndex ▸ m.columns()
         m.offset ▸ 1
+
+    ▸ a scroll bar appears when the grid overflows
+
+        h = new harness cols:10 rows:2
+        m = new matrix h.screen 'test_matrix'
+        m.layout 0 0 10 2
+        m.setItems ['a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l']
+
+        m.scrollBarVisible() ▸ true
+
+        m.setItems ['a' 'b' 'c']
+
+        m.scrollBarVisible() ▸ false
+
+    ▸ the matrix knows whether it has the focus
+
+        h = new harness cols:10 rows:5
+        m = new matrix h.screen 'test_matrix'
+        m.layout 0 0 10 5
+
+        m.hasFocus() ▸ false
+
+        h.focus m
+
+        m.hasFocus() ▸ true
+
+        post.emit 'focus' 'somewhere_else'
+
+        m.hasFocus() ▸ false

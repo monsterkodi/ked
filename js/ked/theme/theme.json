@@ -54,7 +54,8 @@
   "uniko": {
     "bg": "#0c0c0c",
     "fg": "#888",
-    "selection": "#44a"
+    "selection": "#44a",
+    "selection_blur": "#333"
   },
   "knob": {
     "fg": "#222",

@@ -89,7 +89,7 @@ use ../view/colmns  ◆ uniko
 
         u.matrix.numItems() ▸ all
 
-    ▸ down moves the focus from the input to the matrix
+    ▸ the matrix starts focused and typing moves the focus to the input
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []
@@ -97,14 +97,15 @@ use ../view/colmns  ◆ uniko
         u.layout 0 0 60 16
         u.show()
 
-        u.focus ▸ 'input'
-
-        h.key u 'down' ''
-
         u.focus ▸ 'matrix'
         u.matrix.selectedIndex ▸ 0
 
-    ▸ return inserts the selected character at the cursors and closes
+        h.key u 's' 's'
+
+        u.focus ▸ 'input'
+        u.input.current() ▸ 's'
+
+    ▸ return inserts the selected character at the cursors but keeps the picker open
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []
@@ -119,7 +120,52 @@ use ../view/colmns  ◆ uniko
         h.key u 'return' ''
 
         kseg.str(e.state.s.lines[0]) ▸ 'a√bc'
-        u.hidden() ▸ true
+        u.hidden() ▸ false
+        u.focus ▸ 'matrix'
+        e.hasFocus() ▸ false
+
+    ▸ space inserts the selected character and keeps the matrix focused
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['abc']
+        e.state.setMainCursor 1 0
+
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 16
+        u.show()
+
+        u.filter 'sqrt'
+        h.key u 'space' ' '
+
+        kseg.str(e.state.s.lines[0]) ▸ 'a√bc'
+        u.hidden() ▸ false
+        u.focus ▸ 'matrix'
+        e.hasFocus() ▸ false
+
+    ▸ a mouse click inserts the clicked character and keeps the matrix focused
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['abc']
+        e.state.setMainCursor 1 0
+
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 14
+        u.show()
+
+        u.filter 'sqrt'
+
+        u.onMouse
+            type: 'press'
+            cell: [2 3]
+            button: 'left'
+            count: 1
+
+        kseg.str(e.state.s.lines[0]) ▸ 'a√bc'
+        u.hidden() ▸ false
+        u.focus ▸ 'matrix'
+        e.hasFocus() ▸ false
 
     ▸ copy writes the selected character to the clipboard
 

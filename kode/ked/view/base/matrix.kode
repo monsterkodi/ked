@@ -8,10 +8,12 @@
     a grid of characters
     one blank cell between the characters
     a selected cell with half circles on its left and right
+    a scroll bar on the right when the grid overflows
 ###
 
-use ../../../kxk ▪ post
-use              ◆ view
+use ../../../kxk    ▪ post
+use ../../util/img  ◆ squares sircels
+use                 ◆ view
 
 function matrix extends view
 
@@ -19,13 +21,23 @@ function matrix extends view
 
         super screen name
 
-        @setColor 'bg'        [0 0 0]
-        @setColor 'fg'        [200 200 200]
-        @setColor 'selection' [68 68 170]
+        @setColor 'bg'             [0 0 0]
+        @setColor 'fg'             [200 200 200]
+        @setColor 'selection'      [68 68 170]
+        @setColor 'selection_blur' [60 60 60]
+        @setColor 'scroll'         [26 26 26]
+        @setColor 'scroll_dot'     [136 136 255]
 
         @items         = []
         @selectedIndex = 0
         @offset        = 0
+        @focused       = false
+
+        post.on 'focus' @onFocus
+
+    onFocus: name => @focused = (name == @name)
+
+    hasFocus: -> @focused
 
     setItems: items =>
 
@@ -38,7 +50,23 @@ function matrix extends view
     #  a character is drawn at 2*col+1, so the selection has a cell for
     #  its left half circle even in the first column
 
-    columns: -> max 1 int((@cells.cols - 1) / 2)
+    baseColumns: -> max 1 int((@cells.cols - 1) / 2)
+
+    scrollBarVisible: ->
+
+        ⮐  false if empty @items
+        ⮐  false if @cells.rows < 1
+
+        cols = @baseColumns()
+
+        int((@items.length + cols - 1) / cols) > @cells.rows
+
+    columns: ->
+
+        bar = @scrollBarVisible() ? 1 : 0
+
+        max 1 int((@cells.cols - 1 - bar) / 2)
+
 
     numRows: ->
 
@@ -162,14 +190,40 @@ function matrix extends view
         ⮐  if y < 0 or y >= @cells.rows
 
         x  = col*2 + 1
-        fg = @color.selection
+        fg = @focused ? @color.selection : @color.selection_blur
 
         @cells.set_bg x y fg
-        @cells.set_bg x+1 y fg
 
         @cells.adjustContrastForHighlight x y fg
 
         @cells.set_ch_fg x-1 y '' fg
         @cells.set_ch_fg x+1 y '' fg
+
+        @drawScrollBar()
+
+    drawScrollBar: ->
+
+        ⮐  if not @scrollBarVisible()
+        ⮐  if empty (csz = @screen.t.cellsz)
+
+        rows = @cells.rows
+        num  = @numRows()
+
+        ⮐  if num <= rows
+
+        kh = ((rows*rows) / num) * csz[1]
+        ky = ((rows*csz[1]-kh) * @offset / (num-rows))
+
+        fg = @color.scroll
+
+        x = (@cells.x + @cells.cols - 1) * csz[0]
+        y = int @cells.y*csz[1]+ky
+        w = int csz[0]/2
+        h = int kh
+
+        squares.place x int(y+w/2) w h-w fg
+
+        sircels.place x y     w (ky ? fg : @color.scroll_dot) 1111
+        sircels.place x y+h-w w ((y+h < (@cells.y+rows)*csz[1]-1) ? fg : @color.scroll_dot) 1111
 
 export matrix

@@ -26,17 +26,20 @@ function uniko extends view
 
         super @screen name
 
-        @height = 16
-        @focus  = 'input'
+        @height = 14
+        @focus  = 'matrix'
 
         @setColor 'bg' theme.uniko.bg
 
         @input  = new input  @screen "#{@name}_input"
         @matrix = new matrix @screen "#{@name}_matrix"
 
-        @matrix.setColor 'bg'        theme.uniko.bg
-        @matrix.setColor 'fg'        theme.uniko.fg
-        @matrix.setColor 'selection' theme.uniko.selection
+        @matrix.setColor 'bg'             theme.uniko.bg
+        @matrix.setColor 'fg'             theme.uniko.fg
+        @matrix.setColor 'selection'      theme.uniko.selection
+        @matrix.setColor 'selection_blur' theme.uniko.selection_blur
+        @matrix.setColor 'scroll'         theme.scroll.knob
+        @matrix.setColor 'scroll_dot'     theme.scroll.dot
 
         @input.on 'action' @onInputAction
 
@@ -144,11 +147,12 @@ function uniko extends view
 
         @input.set ''
         @filter ''
-        @focus = 'input'
+        @focus = 'matrix'
 
         super()
 
-        @input.grabFocus()
+        @matrix.selectFirst()
+        @matrix.grabFocus()
 
         post.emit 'redraw'
 
@@ -158,7 +162,7 @@ function uniko extends view
 
         super()
 
-        @focus = 'input'
+        @focus = 'matrix'
         @input.state.deselect()
 
         post.emit 'focus' @editor.name
@@ -171,7 +175,8 @@ function uniko extends view
         ⮐  false if empty char
 
         @editor.state.insert char
-        @hide()
+
+        post.emit 'redraw'
 
         true
 
@@ -209,6 +214,13 @@ function uniko extends view
 
             ⮐  @input.onKey key event
 
+        if event.combo == 'space'
+            ⮐  @submit()
+
+        if valid event.char and event.char.length == 1 and event.char in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            @focusInput()
+            ⮐  @input.onKey key event
+
         switch event.combo
 
             'up'
@@ -242,11 +254,12 @@ function uniko extends view
 
         if @matrix.cells.isInsideEvent event
 
-            @focusMatrix()
-
             if event.type == 'press'
                 [x y] = @matrix.cells.posForEvent event
+                @focus = 'matrix'
                 @matrix.selectAt int((x-1)/2) y
+                @matrix.grabFocus()
+                @submit()
 
             ⮐  redraw:true
 
