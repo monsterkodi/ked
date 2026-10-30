@@ -4,8 +4,7 @@
 #    ███       ███   ███  ███  ████     ███     ███   ███  ███       ███       
 #    ███        ███████   ███   ███     ███     ███   ███  ████████  ████████  
 
-use ../../../kxk    ▪ post slash
-use ../../../kxk    ◆ nfs
+use ../../../kxk    ▪ post slash nfs
 use ../../theme     ◆ color theme icons
 use ../../edit/tool ◆ belt
 use ../menu         ◆ choices 

@@ -56,7 +56,6 @@
 []     . file_icon_cljs
 []     . file_icon_coffee
 []     . file_icon_cpp
-[]     . file_icon_cs
 []     . file_icon_d
 []     . file_icon_dart
 []     . file_icon_db
@@ -84,7 +83,6 @@
 []     . file_icon_plist
 []     . file_icon_pp
 []     . file_icon_py
-[ﳒ]     . file_icon_r
 []     . file_icon_rb
 []     . file_icon_rs
 []     . file_icon_rss
@@ -92,13 +90,10 @@
 []     . file_icon_scala
 []     . file_icon_sh
 []     . file_icon_sln
-[ﲹ]     . file_icon_sol
 []     . file_icon_sql
 []     . file_icon_suo
 []     . file_icon_swift
-[ﭨ]     . file_icon_tex
 []     . file_icon_ts
 []     . file_icon_tsx
 []     . file_icon_vim
-[﵂]     . file_icon_vue
 []     . file_icon_xul
