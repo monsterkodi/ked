@@ -154,3 +154,24 @@ use ../view/editor ◆ mapview
         data[6]  ▸ 0
         data[7]  ▸ 0
         data[8]  ▸ 255
+
+    ▸ the map can use colors passed in for a preview
+
+        h = new harness cols:20 rows:5
+        e = new editor h.screen 'test_color_map' []
+
+        e.layout 0 0 20 5
+        e.state.loadLines ['abcdef']
+
+        m = new mapview h.screen e.state
+        m.setSyntaxSegls 'txt' e.state.s.lines
+        m.setColors
+            fg: [[1 0 2 '#00ff00']]
+            bg: []
+
+        data = Buffer.alloc 120
+        m.imageForLine data e.state.s.lines[0] 0
+
+        data[6]  ▸ 0
+        data[7]  ▸ 255
+        data[8]  ▸ 0

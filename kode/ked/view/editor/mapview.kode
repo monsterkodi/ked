@@ -28,6 +28,7 @@ function mapview extends view
         @rowOffset  = 0
         @images     = []
         @cells.cols = 12
+        @colors     = null
         
         @csz          = []
         @pixelsPerRow = 4
@@ -82,6 +83,13 @@ function mapview extends view
                 
     getSegls:  => @segls
     getSyntax: => @syntax
+    getColors: => @colors ? @state.s.colors
+
+    setColors: colors =>
+
+        @colors = colors
+        @redraw = true
+
     setSyntaxSegls: ext @segls => 
         
         @syntax = new syntax 
@@ -186,7 +194,7 @@ function mapview extends view
 
         fgSpans = []
         bgSpans = []
-        colors  = @state.s.colors
+        colors  = @getColors()
 
         if colors?
             fgSpans = colorspans.spansForLine (colors.fg ? []) y

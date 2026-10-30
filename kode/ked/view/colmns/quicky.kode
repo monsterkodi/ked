@@ -8,7 +8,7 @@
 
 use ../../../kxk    ▪ kstr slash post kutil nfs
 use ../../index     ◆ prjcts
-use ../../util      ◆ fileutil frecent
+use ../../util      ◆ fileutil frecent filecolors
 use ../../edit/tool ◆ belt
 use ../../theme     ◆ icons
 use ../base         ◆ crumbs 
@@ -251,9 +251,12 @@ function quicky extends inputchoice
         
         if item.type == 'file' and slash.ext(item.path) in fileutil.sourceFileExtensions
             text =○ nfs.read item.path
+            fileColorData = filecolors.split item.path text
+            text = fileColorData.text
             segls = belt.seglsForText text
             @choices.mapscr.show()
             @choices.mapscr.setSyntaxSegls slash.ext(item.path) segls
+            @choices.mapscr.setColors fileColorData.colors
         else
             @hideMap()
             

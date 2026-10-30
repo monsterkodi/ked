@@ -7,7 +7,7 @@
 ###
 
 use ../../../kxk    ▪ kstr slash post nfs
-use ../../util      ◆ config
+use ../../util      ◆ config filecolors
 use ../../edit/tool ◆ belt
 use ../../theme     ◆ color theme icons
 use                 ◆ quicky brocol diritem dirlist
@@ -165,8 +165,11 @@ function browse extends quicky
             if slash.ext(item.path) in config.data.sourceFileExtensions
                 text =○ nfs.read item.path
                 ⮐  if @brocol.visible()
+                fileColorData = filecolors.split item.path text
+                text = fileColorData.text
                 segls = belt.seglsForText text
                 @choices.mapscr.setSyntaxSegls slash.ext(item.path) segls
+                @choices.mapscr.setColors fileColorData.colors
                 @choices.mapscr.show()
             else
                 @hideMap()
