@@ -5,9 +5,13 @@ var funcol
 import kxk from "../../../kxk.js"
 let post = kxk.post
 let slash = kxk.slash
+let kseg = kxk.kseg
+let kutil = kxk.kutil
 
 import color from "../../theme/color.js"
 import theme from "../../theme/theme.js"
+
+import belt from "../../edit/tool/belt.js"
 
 import view from "../base/view.js"
 import knob from "../base/knob.js"
@@ -29,11 +33,15 @@ funcol = (function ()
         this["onFuncolToggle"] = this["onFuncolToggle"].bind(this)
         this["onFuncolResize"] = this["onFuncolResize"].bind(this)
         this["onContext"] = this["onContext"].bind(this)
+        this["replaceColor"] = this["replaceColor"].bind(this)
+        this["colorAtCursor"] = this["colorAtCursor"].bind(this)
+        this["onColorPickerSubmit"] = this["onColorPickerSubmit"].bind(this)
         this["onColorPickerShow"] = this["onColorPickerShow"].bind(this)
         this["onSessionMerge"] = this["onSessionMerge"].bind(this)
         funcol.__super__.constructor.call(this,screen,'funcol',features)
         this.isVisible = false
         this.active = false
+        this.colorReplace = null
         this.pointerType = 'pointer'
         this.knob = new knob(screen,`${this.name}_knob`)
         this.funtree = new funtree(this.editor,`${this.name}_funtree`,['scrllr'])
@@ -53,6 +61,7 @@ funcol = (function ()
             return this.funtree.grabFocus()
         }).bind(this))
         post.on('colorpicker.show',this.onColorPickerShow)
+        post.on('colorpicker.submit',this.onColorPickerSubmit)
     }
 
     funcol.prototype["onSessionMerge"] = function (recent)
@@ -71,14 +80,110 @@ funcol = (function ()
 
     funcol.prototype["onColorPickerShow"] = function (hex)
     {
+        var found
+
         this.active = true
         if (this.hidden())
         {
             this.show()
         }
+        this.colorReplace = null
+        if (_k_.empty(hex))
+        {
+            if (found = this.colorAtCursor())
+            {
+                hex = found.text
+                this.colorReplace = found
+            }
+        }
         this.colorpicker.show(hex)
         ked_session.set('funcol▸active',this.active)
         return post.emit('redraw')
+    }
+
+    funcol.prototype["onColorPickerSubmit"] = function (hex)
+    {
+        var _77_42_
+
+        if ((this.colorReplace != null))
+        {
+            return this.replaceColor(hex)
+        }
+    }
+
+    funcol.prototype["colorAtCursor"] = function ()
+    {
+        var line, lines, mc, rng, state, text, word, x, y
+
+        state = this.editor.state
+        mc = state.mainCursor()
+        lines = state.s.lines
+        var _a_ = mc; x = _a_[0]; y = _a_[1]
+
+        if (y < 0 || y >= lines.length)
+        {
+            return
+        }
+        line = lines[y]
+        if (_k_.empty(line))
+        {
+            return
+        }
+        word = state.wordAtCursor()
+        rng = belt.rangeOfClosestWordToPos(lines,mc)
+        if (_k_.empty(word) || _k_.empty(rng))
+        {
+            if (x < line.length && kseg.str(line.slice(x, x + 1)) === '#')
+            {
+                word = belt.wordAtPos(lines,[x + 1,y])
+                rng = belt.rangeOfClosestWordToPos(lines,[x + 1,y])
+            }
+        }
+        if (_k_.empty(word) || _k_.empty(rng))
+        {
+            return
+        }
+        if (_k_.empty(color.values(word)))
+        {
+            return
+        }
+        text = word
+        if (rng[0] > 0 && kseg.str(line.slice(rng[0] - 1, typeof rng[0] === 'number' ? rng[0] : -1)) === '#')
+        {
+            text = '#' + text
+            rng = [rng[0] - 1,rng[1],rng[2],rng[3]]
+        }
+        return {text:text,range:rng}
+    }
+
+    funcol.prototype["replaceColor"] = function (hex)
+    {
+        var lines, state, text, x1, x2, y
+
+        if (_k_.empty(hex))
+        {
+            return
+        }
+        if (_k_.empty(this.colorReplace))
+        {
+            return
+        }
+        var _a_ = this.colorReplace.range; x1 = _a_[0]; y = _a_[1]; x2 = _a_[2]
+
+        state = this.editor.state
+        lines = state.s.lines.asMutable()
+        if (y < 0 || y >= lines.length)
+        {
+            return
+        }
+        text = hex
+        if (this.colorReplace.text[0] !== '#' && text[0] === '#')
+        {
+            text = text.slice(1)
+        }
+        kutil.replace(lines[y],x1,(x2 - x1),kseg(text))
+        state.setLines(lines)
+        return this.colorReplace = null
     }
 
     funcol.prototype["layout"] = function (x, y, w, h)
@@ -217,5 +322,5 @@ funcol = (function ()
 
 export default funcol;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZnVuY29sLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2NvbG1ucy9mdW5jb2wua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQVFhLFVBQUE7SUFBTTtJQUFLOztPQUNMLFlBQVQ7T0FBZSxZQUFmOztPQUNTLFdBQVo7T0FBaUIsV0FBakI7O09BQ1ksY0FBQTtPQUFRLGtCQUFBOzs7QUFFbEIsVUFBVDs7dUJBQXdCO2FBRXBCLFFBQUcsUUFBUSxRQUFPOztRQUFSOzs7Ozs7Ozs7OytDQUVBLE9BQU8sU0FBUztRQUV0QixLQUFDLFlBQVk7UUFDYixLQUFDLFNBQVk7UUFFYixLQUFDLGNBQWM7UUFFZixLQUFDLFdBQWMsS0FBUSxVQUFXLEtBQUM7UUFDbkMsS0FBQyxjQUFjLFFBQVEsS0FBQyxVQUFVLEtBQUMsZ0JBQWdCO1FBQ25ELEtBQUMsa0JBQWtCLFlBQVksVUFBVSxLQUFDO1FBRTFDLEtBQUMsS0FBSyxZQUFZO1FBRWxCLEtBQUMsUUFBUSxTQUFTLEtBQWdCLE1BQU0sUUFBUTtRQUNoRCxLQUFDLFFBQVEsU0FBUyxRQUFnQixLQUFDLFFBQVEsTUFBTTtRQUNqRCxLQUFDLFFBQVEsU0FBUyxjQUFnQixLQUFDLFFBQVEsTUFBTTtRQUNqRCxLQUFDLFFBQVEsU0FBUyxlQUFnQixLQUFDLFFBQVEsTUFBTTtRQUNqRCxLQUFDLFFBQVEsT0FBTyxTQUFTLEtBQVMsS0FBQyxRQUFRLE1BQU07UUFFakQsS0FBQyxLQUFRLFNBQVMsS0FBZ0IsS0FBQyxRQUFRLE1BQU07UUFFakQsS0FBSyxHQUFHLGdCQUFnQixLQUFDO1FBQ3pCLEtBQUssR0FBRyxnQkFBZ0IsS0FBQztRQUN6QixLQUFLLEdBQUcsZ0JBQWdCLEtBQUM7UUFDekIsS0FBSyxHQUFHOzttQkFBbUIsS0FBQyxRQUFROztRQUNwQyxLQUFLLEdBQUcsbUJBQW1CLEtBQUM7OztzQkFFaEMsNkJBQWdCOztzQkFFQSxPQUFPOzs7O1lBRWhCLE9BQU8sT0FBTzs7WUFDYixLQUFDLFNBQVM7WUFDVixLQUFDOztlQUVMLFlBQVksSUFBSSxTQUFTLE9BQU87OztzQkFFcEMsZ0NBQW1COztRQUVmLEtBQUMsU0FBUztZQUNDLEtBQUM7O1lBQVosS0FBQzs7UUFFRCxLQUFDLFlBQVksS0FBSztRQUVsQixZQUFZLElBQUksZ0JBQWdCLEtBQUM7ZUFDakMsS0FBSyxLQUFLOzs7c0JBUWQscUJBQVEsR0FBRSxHQUFFLEdBQUU7Ozs7UUFFVixNQUFLLEtBQUMsWUFBWSxvQkFBZ0IsS0FBQyxZQUFZLE9BQU8sSUFBRSxLQUFLO1lBQ25ELEtBQUs7O1lBQWYsS0FBSzs7UUFFTCxLQUFDLFFBQVEsT0FBTyxFQUFFLEVBQUUsRUFBRSxJQUFFO1lBQ2E7O1lBQXJDLEtBQUMsWUFBWSxPQUFPLEVBQUUsSUFBRSxJQUFFLEdBQUcsRUFBRTs7UUFDL0IsS0FBQyxLQUFLLE9BQVUsRUFBRSxFQUFFLEVBQUU7aURBRWhCLEVBQUUsRUFBRSxFQUFFOzs7c0JBUWhCOztZQUVVLEtBQUMsWUFBWSxLQUFDLGdCQUFtQixLQUFDOzs7O1FBRXhDLEtBQUMsTUFBTSxVQUFVLEVBQUUsRUFBRSxHQUFHLEdBQUcsSUFBSSxLQUFLLE1BQU0sUUFBUTtRQUNsRCxLQUFDLE1BQU0sVUFBVSxFQUFFLEVBQUUsR0FBSSxFQUFFLElBQUksS0FBSyxNQUFNLE9BQU87UUFFakQsS0FBQyxRQUFRO1lBQ2MsS0FBQyxZQUFZOztZQUFwQyxLQUFDLFlBQVk7O1FBQ2IsS0FBQyxLQUFLOzs7O3NCQVVWLHdCQUFXOzthQUVHLEtBQUM7Ozs7UUFFWCxpQ0FBeUIsS0FBQyxRQUFROzs7c0JBUXRDOztlQUFtQixLQUFDLEtBQUssU0FBUzs7O3NCQUNsQzs7OztjQUVzQixLQUFDLGFBQWMsS0FBQzs7WUFBbEMsS0FBQzs7UUFDRCxLQUFDLFNBQVMsS0FBQztRQUNYLFlBQVksSUFBSSxnQkFBZ0IsS0FBQztRQUNqQyxlQUFXLFlBQU8sS0FBQyxNQUFNLE9BQU8sT0FBTztlQUN2QyxLQUFLLEtBQUssWUFBWSxLQUFDLEtBQUssU0FBUSxLQUFDLFlBQVksS0FBQyxNQUFNLE9BQU8sT0FBSyxLQUFDLE1BQU07OztzQkFRL0Usc0JBQVM7Ozs7WUFFQyxLQUFDLFlBQVksS0FBQyxnQkFBbUIsS0FBQzs7OztRQUV4Qyx5Q0FBWTthQUE2QixjQUFBLElBQUs7O21CQUFaOztRQUNsQyxNQUFNLEtBQUMsS0FBSyxRQUFRO2FBQXFCLGNBQUEsSUFBSzs7bUJBQVo7O1lBQy9CLEtBQUMsWUFBWTs7WUFDWixNQUFNLEtBQUMsWUFBWSxRQUFRO2lCQUNqQixjQUFBLElBQUs7O3VCQUFaOzs7UUFDUCxNQUFNLEtBQUMsUUFBUSxRQUFRO2FBQWtCLGNBQUEsSUFBSzs7bUJBQVo7Ozs7c0JBUXRDLHNCQUFTOzs7O1lBRUMsS0FBQyxZQUFZLEtBQUMsZ0JBQW1CLEtBQUM7Ozs7WUFFckMsS0FBQyxZQUFZOztnQkFDVCxNQUFNLEtBQUMsWUFBWSxRQUFROzt1QkFDdkI7OztlQUVYLEtBQUMsUUFBUSxRQUFROzs7c0JBUXJCLG9CQUFPLEtBQUk7O1lBRUQsS0FBQyxZQUFZLEtBQUMsZ0JBQW1CLEtBQUM7Ozs7WUFFckMsS0FBQyxZQUFZLGFBQWMsS0FBQyxZQUFZOzttQkFDcEMsS0FBQyxZQUFZLE1BQU0sSUFBSTs7YUFFcEIsS0FBQyxRQUFROzs7O2VBRW5CLEtBQUMsUUFBUSxNQUFNLElBQUk7OztXQWxLbEI7OztlQW9LRiJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZnVuY29sLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2NvbG1ucy9mdW5jb2wua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQVFhLFVBQUE7SUFBTTtJQUFLO0lBQU07SUFBSzs7T0FDaEIsWUFBVDtPQUFlLFlBQWY7O09BQ1ksV0FBUDs7T0FDSSxXQUFaO09BQWlCLFdBQWpCOztPQUNZLGNBQUE7T0FBUSxrQkFBQTs7O0FBRWxCLFVBQVQ7O3VCQUF3QjthQUVwQixRQUFHLFFBQVEsUUFBTzs7UUFBUjs7Ozs7Ozs7Ozs7OzsrQ0FFQSxPQUFPLFNBQVM7UUFFdEIsS0FBQyxZQUFZO1FBQ2IsS0FBQyxTQUFZO1FBQ2IsS0FBQyxlQUFlO1FBRWhCLEtBQUMsY0FBYztRQUVmLEtBQUMsV0FBYyxLQUFRLFVBQVcsS0FBQztRQUNuQyxLQUFDLGNBQWMsUUFBUSxLQUFDLFVBQVUsS0FBQyxnQkFBZ0I7UUFDbkQsS0FBQyxrQkFBa0IsWUFBWSxVQUFVLEtBQUM7UUFFMUMsS0FBQyxLQUFLLFlBQVk7UUFFbEIsS0FBQyxRQUFRLFNBQVMsS0FBZ0IsTUFBTSxRQUFRO1FBQ2hELEtBQUMsUUFBUSxTQUFTLFFBQWdCLEtBQUMsUUFBUSxNQUFNO1FBQ2pELEtBQUMsUUFBUSxTQUFTLGNBQWdCLEtBQUMsUUFBUSxNQUFNO1FBQ2pELEtBQUMsUUFBUSxTQUFTLGVBQWdCLEtBQUMsUUFBUSxNQUFNO1FBQ2pELEtBQUMsUUFBUSxPQUFPLFNBQVMsS0FBUyxLQUFDLFFBQVEsTUFBTTtRQUVqRCxLQUFDLEtBQVEsU0FBUyxLQUFnQixLQUFDLFFBQVEsTUFBTTtRQUVqRCxLQUFLLEdBQUcsZ0JBQWdCLEtBQUM7UUFDekIsS0FBSyxHQUFHLGdCQUFnQixLQUFDO1FBQ3pCLEtBQUssR0FBRyxnQkFBZ0IsS0FBQztRQUN6QixLQUFLLEdBQUc7O21CQUFtQixLQUFDLFFBQVE7O1FBQ3BDLEtBQUssR0FBRyxtQkFBbUIsS0FBQztRQUM1QixLQUFLLEdBQUcscUJBQXFC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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/funcol.kode

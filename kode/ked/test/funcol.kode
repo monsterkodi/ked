@@ -1,0 +1,146 @@
+###
+    funcol
+
+    the color picker reads a color from the editor and
+    replaces it when the picker is submitted
+###
+
+use ../../kxk       ▪ kseg
+use ../edit         ◆ editor
+use ../util         ◆ harness
+use ../view/colmns  ◆ funcol
+
+▸ funcol color picker
+
+    ▸ an empty show picks the color under the cursor
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['x = #ff8000;']
+        e.state.setMainCursor 6 0
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow ''
+
+        f.colorpicker.hex() ▸ '#ff8000'
+        f.colorReplace.text ▸ '#ff8000'
+        f.colorReplace.range ▸ [4 0 11 0]
+
+        delete global.ked_session
+
+    ▸ a cursor on the hash picks the color
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['x = #ff8000;']
+        e.state.setMainCursor 4 0
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow ''
+
+        f.colorpicker.hex() ▸ '#ff8000'
+
+        delete global.ked_session
+
+    ▸ a word that is not a color keeps the default and no replace mode
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['x = hello;']
+        e.state.setMainCursor 6 0
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow ''
+
+        f.colorpicker.hex() ▸ '#ff0000'
+        f.colorReplace ▸ null
+
+        delete global.ked_session
+
+    ▸ submitting replaces the original color
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['x = #ff8000;']
+        e.state.setMainCursor 6 0
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow ''
+        f.onColorPickerSubmit '#00ff00'
+
+        kseg.str(e.state.s.lines[0]) ▸ 'x = #00ff00;'
+        f.colorReplace ▸ null
+
+        delete global.ked_session
+
+    ▸ a short color is replaced with the full hex
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['c = #abc;']
+        e.state.setMainCursor 6 0
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow ''
+
+        f.colorReplace.text ▸ '#abc'
+
+        f.onColorPickerSubmit '#ff0000'
+
+        kseg.str(e.state.s.lines[0]) ▸ 'c = #ff0000;'
+
+        delete global.ked_session
+
+    ▸ an explicit show does not replace anything
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['x = #ff8000;']
+        e.state.setMainCursor 6 0
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow '#123456'
+
+        f.colorReplace ▸ null
+
+        f.onColorPickerSubmit '#abcdef'
+
+        kseg.str(e.state.s.lines[0]) ▸ 'x = #ff8000;'
+
+        delete global.ked_session

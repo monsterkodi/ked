@@ -6,8 +6,9 @@
 ███        ███████   ███   ███   ███████   ███████   ███████
 ###
 
-use ../../../kxk ▪ post slash
+use ../../../kxk ▪ post slash kseg kutil
 use ../../theme  ◆ color theme
+use ../../edit/tool ◆ belt
 use ../base      ◆ view knob
 use              ◆ funtree colorpicker
 
@@ -19,6 +20,7 @@ function funcol extends view
         
         @isVisible = false
         @active    = false
+        @colorReplace = null
         
         @pointerType = 'pointer'
         
@@ -41,6 +43,7 @@ function funcol extends view
         post.on 'session.merge' @onSessionMerge
         post.on 'funcol.focus'  => @funtree.grabFocus()
         post.on 'colorpicker.show' @onColorPickerShow
+        post.on 'colorpicker.submit' @onColorPickerSubmit
         
     onSessionMerge: recent =>
     
@@ -57,10 +60,73 @@ function funcol extends view
         @active = true
         @show() if @hidden()
 
+        @colorReplace = null
+
+        if empty hex
+            if found = @colorAtCursor()
+                hex = found.text
+                @colorReplace = found
+
         @colorpicker.show hex
 
         ked_session.set 'funcol▸active' @active
         post.emit 'redraw'
+
+    onColorPickerSubmit: hex =>
+
+        @replaceColor hex if @colorReplace?
+
+    colorAtCursor: =>
+
+        state = @editor.state
+        mc    = state.mainCursor()
+        lines = state.s.lines
+        [x y] = mc
+
+        ⮐  if y < 0 or y >= lines.length
+
+        line = lines[y]
+        ⮐  if empty line
+
+        word = state.wordAtCursor()
+        rng  = belt.rangeOfClosestWordToPos lines mc
+
+        if empty word or empty rng
+            if x < line.length and kseg.str(line[x...x+1]) == '#'
+                word = belt.wordAtPos lines [x+1 y]
+                rng  = belt.rangeOfClosestWordToPos lines [x+1 y]
+
+        ⮐  if empty word or empty rng
+        ⮐  if empty color.values(word)
+
+        text = word
+
+        if rng[0] > 0 and kseg.str(line[rng[0]-1...rng[0]]) == '#'
+            text = '#' + text
+            rng  = [rng[0]-1 rng[1] rng[2] rng[3]]
+
+        text: text
+        range: rng
+
+    replaceColor: hex =>
+
+        ⮐  if empty hex
+        ⮐  if empty @colorReplace
+
+        [x1 y x2] = @colorReplace.range
+
+        state = @editor.state
+        lines = state.s.lines.asMutable()
+
+        ⮐  if y < 0 or y >= lines.length
+
+        text = hex
+        text = text[1..] if @colorReplace.text[0] != '#' and text[0] == '#'
+
+        kutil.replace lines[y] x1 (x2-x1) kseg(text)
+        state.setLines lines
+
+        @colorReplace = null
         
     # ███       ███████   ███   ███   ███████   ███   ███  █████████
     # ███      ███   ███   ███ ███   ███   ███  ███   ███     ███   
