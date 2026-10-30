@@ -246,15 +246,15 @@ use ../view/colmns  ◆ uniko
         h.key u 'cmd+up' ''
         h.key u 'cmd+up' ''
 
-        u.matrix.scale ▸ 4
+        u.matrix.scale ▸ 3
 
         h.key u 'cmd+up' ''
 
-        u.matrix.scale ▸ 4
+        u.matrix.scale ▸ 3
 
         h.key u 'cmd+down' ''
 
-        u.matrix.scale ▸ 3
+        u.matrix.scale ▸ 2
 
         h.key u 'cmd+down' ''
         h.key u 'cmd+down' ''

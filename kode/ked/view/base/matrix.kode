@@ -48,11 +48,7 @@ function matrix extends view
         before = @scale
 
         @scale += delta
-        @scale = clamp 1 4 @scale
-
-        #  the terminal keeps the multicell characters of the old scale
-        #  around when the layout changes, so erase the matrix area
-        #  whenever the scale really changes
+        @scale = clamp 1 3 @scale
 
         if @scale != before
             @clearArea()
@@ -73,31 +69,18 @@ function matrix extends view
 
     numItems: -> @items.length
 
-    #  the first character starts at @scale, leaving room for its left
-    #  half circle. the half circles and the space between the characters
-    #  are each @scale cells wide.
-
-    baseColumns: ->
-
-        s = @scale
-
-        max 1 int((@cells.cols - s) / (s * 2))
-
     scrollBarVisible: ->
 
         ⮐  false if empty @items
         ⮐  false if @cells.rows < 1
 
-        cols = @baseColumns()
+        cols = @columns()
 
         int((@items.length + cols - 1) / cols) > @viewportRows()
 
     columns: ->
 
-        s   = @scale
-        bar = @scrollBarVisible() ? 1 : 0
-
-        max 1 int((@cells.cols - bar - s) / (s * 2))
+        max 1 int((@cells.cols - @scale) / (@scale * 2))
 
     viewportRows: -> max 0 int(@cells.rows / @scale)
 
@@ -263,7 +246,6 @@ function matrix extends view
             for i in 0...@scale
                 if i or j
                     @cells.set x+i y+j (i==0 ? @skipText() : null) null null
-                    # @cells.set x+i y+j null null null
 
     scaleText: char -> "\x1b]66;s=#{@scale}:w=1;" + char + '\x07'
 
@@ -290,7 +272,7 @@ function matrix extends view
 
         fg = @color.scroll
 
-        x = (@cells.x + @cells.cols - 1) * csz[0]
+        x = (@cells.x + @cells.cols) * csz[0]
         y = int @cells.y*csz[1]+ky
         w = int csz[0]/2
         h = int kh

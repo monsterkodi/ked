@@ -122,7 +122,7 @@ use ../../kxk    ▪ post
 
     ▸ scaled cells and the selection line up at every scale
 
-        for s in [2 3 4]
+        for s in [2 3]
 
             h = new harness cols:24 rows:20
             m = new matrix h.screen 'test_matrix'
