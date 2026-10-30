@@ -72,7 +72,7 @@ function state extends events
     setSelections: selections => @set 'selections' belt.mergeLineRanges(@s.lines selections)
     setHighlights: highlights => @set 'highlights' belt.normalizeSpans(highlights)
 
-    setColorsForRanges: (ranges fg bg) =>
+    setColorsForRanges: (ranges fg bg voided=[]) =>
 
         colors = @s.colors
         colors ?= {fg: [], bg: []}
@@ -80,8 +80,15 @@ function state extends events
         fgSpans = colors.fg ? []
         bgSpans = colors.bg ? []
 
-        fgSpans = colorspans.overlay fgSpans ranges fg @s.lines if valid fg and not empty fg
-        bgSpans = colorspans.overlay bgSpans ranges bg @s.lines if valid bg and not empty bg
+        if 'fg' in voided
+            fgSpans = colorspans.clear fgSpans ranges
+        else if valid fg and not empty fg
+            fgSpans = colorspans.overlay fgSpans ranges fg @s.lines
+
+        if 'bg' in voided
+            bgSpans = colorspans.clear bgSpans ranges
+        else if valid bg and not empty bg
+            bgSpans = colorspans.overlay bgSpans ranges bg @s.lines
 
         next =
             fg: fgSpans

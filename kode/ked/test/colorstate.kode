@@ -193,3 +193,16 @@ use ../view/editor ◆ mapview
         h.screen.get_char(0 0) ▸ '█'
         h.screen.get_fg(0 0) ▸ [255 0 0]
         h.screen.get_char(3 0) ▸ '▋'
+
+    ▸ setting colors can void a layer
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        s.setColorsForRanges [[0 0 6 0]] '#ff0000' '#0000ff'
+
+        s.setColorsForRanges [[1 0 4 0]] '#00ff00' null ['bg']
+
+        s.s.colors.fg ▸ [[0 0 1 '#ff0000'] [1 0 4 '#00ff00'] [4 0 6 '#ff0000']]
+        s.s.colors.bg ▸ [[0 0 1 '#0000ff'] [4 0 6 '#0000ff']]

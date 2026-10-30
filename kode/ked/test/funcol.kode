@@ -191,6 +191,7 @@ use ../view/colmns  ◆ funcol
         f.onColorPickerSubmit '#ff0000'
 
         e.state.s.colors.fg ▸ [[0 0 5 '#ff0000']]
+        e.state.s.colors.bg ▸ []
         f.colorDecorate ▸ null
 
         delete global.ked_session
@@ -299,5 +300,61 @@ use ../view/colmns  ◆ funcol
 
         e.state.s.colors.fg ▸ [[0 0 5 '#ff0000']]
         e.state.s.colors.bg ▸ [[0 0 5 '#0000ff']]
+
+        delete global.ked_session
+
+    ▸ a voided foreground is cleared on submit
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['hello world']
+        e.state.setSelections [[0 0 5 0]]
+        e.state.setMainCursor 2 0
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow ''
+
+        f.colorpicker.focusTo 0
+        h.key f.colorpicker 'delete' ''
+
+        f.onColorPickerSubmit f.colorpicker.foregroundHex()
+
+        e.state.s.colors.fg ▸ []
+        e.state.s.colors.bg ▸ []
+
+        delete global.ked_session
+
+    ▸ a voided background is cleared on submit
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['hello world']
+        e.state.setSelections [[0 0 5 0]]
+        e.state.setMainCursor 2 0
+        e.state.setColorsForRanges [[0 0 5 0]] '#00ff00' '#0000ff'
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow ''
+
+        f.colorpicker.setActiveColor 1
+        f.colorpicker.focusTo 1
+        h.key f.colorpicker 'delete' ''
+
+        f.onColorPickerSubmit f.colorpicker.foregroundHex()
+
+        e.state.s.colors.fg ▸ [[0 0 5 '#00ff00']]
+        e.state.s.colors.bg ▸ []
 
         delete global.ked_session

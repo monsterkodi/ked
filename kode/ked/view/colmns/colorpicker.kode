@@ -35,6 +35,7 @@ function colorpicker extends view
         @twoColors   = false
         @activeColor = 0
         @bgChanged   = false
+        @voided      = [false false]
         @colorStates = [{h: 0 s: 100 v: 100} {h: 0 s: 100 v: 100}]
 
         @hue    = new colorslider screen "#{@name}_hue"
@@ -120,6 +121,18 @@ function colorpicker extends view
 
     backgroundChanged: => @bgChanged
 
+    colorVoided: idx => @voided[idx] ? false
+
+    voidActiveColor: =>
+
+        ⮐  if not @twoColors
+
+        @voided[@activeColor] = true
+
+        @syncRadio()
+
+        post.emit 'redraw'
+
     maxFocus: => @twoColors ? RADIO_FOCUS : 5
 
     rgb: => color.hsvToRgb [@h @s @v]
@@ -157,11 +170,11 @@ function colorpicker extends view
         opts = []
 
         fg = @colorHex 0
-        opts.push {color: color.values(fg), label: fg} if fg?
+        opts.push {color: color.values(fg), label: (@voided[0] ? 'none' : fg)} if fg?
 
         if @twoColors
             bg = @colorHex 1
-            opts.push {color: color.values(bg), label: bg} if bg?
+            opts.push {color: color.values(bg), label: (@voided[1] ? 'none' : bg)} if bg?
 
         @radio.setOptions opts
         @radio.setActive @activeColor
@@ -195,6 +208,8 @@ function colorpicker extends view
 
         ⮐  if empty hex
         ⮐  if not @setColorStateFromHex @activeColor hex
+
+        @voided[@activeColor] = false
 
         @bgChanged = true if @activeColor == 1
 
@@ -232,6 +247,7 @@ function colorpicker extends view
         @syncInputs()
         @syncRadio()
 
+        @voided[@activeColor] = false
         @bgChanged = true if @activeColor == 1
 
     syncFromRgb: =>
@@ -251,6 +267,7 @@ function colorpicker extends view
         @syncSliders()
         @syncRadio()
 
+        @voided[@activeColor] = false
         @bgChanged = true if @activeColor == 1
 
     sliderChanged: =>
@@ -301,6 +318,10 @@ function colorpicker extends view
 
     focusUp: =>
 
+        if @focusIndex == 0
+            @focusTo RADIO_FOCUS if @twoColors
+            ⮐
+
         switch @focusIndex
             1 ➜ @focusTo 0
             2 ➜ @focusTo 1
@@ -314,6 +335,7 @@ function colorpicker extends view
         @twoColors   = false
         @bgChanged   = false
         @activeColor = 0
+        @voided      = [false false]
 
         if hex?
             @setHex hex
@@ -331,10 +353,11 @@ function colorpicker extends view
         @twoColors   = true
         @bgChanged   = false
         @activeColor = 0
+        @voided      = [false false]
         @colorStates = [{h: 0 s: 100 v: 100} {h: 0 s: 100 v: 100}]
 
         fg ?= '#ff0000'
-        bg ?= fg
+        bg ?= '#000000'
 
         @setColorStateFromHex 0 fg
         @setColorStateFromHex 1 bg
@@ -425,6 +448,12 @@ function colorpicker extends view
                 'up'    ➜ @focusUp();     ⮐  true
                 else    ➜ ⮐  false
 
+        if @focusIndex < 3 and @twoColors and event.combo in ['delete' 'backspace']
+
+            @voidActiveColor()
+
+            ⮐  true
+
         before = @hex()
 
         if @focusIndex < 3
@@ -463,20 +492,20 @@ function colorpicker extends view
 
         super x y w h
 
-        @radio.layout  x+1 y   w-2 1
+        @radio.layout  x+1 y+1 w-2 1
 
-        @hue.layout    x+1 y+2 w-2 1
-        @bright.layout x+1 y+3 w-2 1
-        @sat.layout    x+1 y+4 w-2 1
+        @hue.layout    x+1 y+3 w-2 1
+        @bright.layout x+1 y+4 w-2 1
+        @sat.layout    x+1 y+5 w-2 1
 
         aw = max 1 w-2
         iw = max(3, min(5, int(aw/3)))
         gap = max 0 int((aw - 3*iw)/2)
         start = max 0 int((aw - (3*iw + 2*gap))/2)
 
-        @red.layout   x+1+start            y+6 iw 1
-        @green.layout x+1+start+iw+gap     y+6 iw 1
-        @blue.layout  x+1+start+2*(iw+gap) y+6 iw 1
+        @red.layout   x+1+start            y+7 iw 1
+        @green.layout x+1+start+iw+gap     y+7 iw 1
+        @blue.layout  x+1+start+2*(iw+gap) y+7 iw 1
 
     draw: =>
 

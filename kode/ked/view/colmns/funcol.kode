@@ -106,7 +106,11 @@ function funcol extends view
 
             bg = @colorpicker.backgroundHex() if @colorpicker.backgroundChanged()
 
-            @editor.state.setColorsForRanges ranges fg bg
+            voided = []
+            voided.push 'fg' if @colorpicker.colorVoided 0
+            voided.push 'bg' if @colorpicker.colorVoided 1
+
+            @editor.state.setColorsForRanges ranges fg bg voided
 
             post.emit 'redraw'
 
