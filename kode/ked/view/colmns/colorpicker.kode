@@ -440,6 +440,10 @@ function colorpicker extends view
             'esc'       ➜ @cancel();      ⮐  true
             'return'    ➜ @submit();      ⮐  true
 
+        if (@focusIndex < 3 or @focusIndex == RADIO_FOCUS) and @twoColors and event.combo in ['delete' 'backspace']
+            @voidActiveColor()
+            ⮐  true
+
         if @focusIndex == RADIO_FOCUS and @twoColors
 
             switch event.combo
@@ -447,12 +451,6 @@ function colorpicker extends view
                 'right' ➜ @cycleColor  1; ⮐  true
                 'up'    ➜ @focusUp();     ⮐  true
                 else    ➜ ⮐  false
-
-        if @focusIndex < 3 and @twoColors and event.combo in ['delete' 'backspace']
-
-            @voidActiveColor()
-
-            ⮐  true
 
         before = @hex()
 
