@@ -175,3 +175,21 @@ use ../view/editor ◆ mapview
         data[6]  ▸ 0
         data[7]  ▸ 255
         data[8]  ▸ 0
+
+    ▸ custom colors keep ascii header edges plain
+
+        h = new harness cols:20 rows:5
+        e = new editor h.screen 'test_color_ascii' []
+
+        e.layout 0 0 20 5
+        e.state.loadLines ['████']
+        e.state.setMainCursor 10 0
+
+        e.state.setColorsForRanges [[0 0 1 0]] '#ff0000' null
+
+        e.draw()
+        e.drawAsciiHeader e.state.s.lines[0] 0 'comment triple header'
+
+        h.screen.get_char(0 0) ▸ '█'
+        h.screen.get_fg(0 0) ▸ [255 0 0]
+        h.screen.get_char(3 0) ▸ '▋'

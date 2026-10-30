@@ -385,20 +385,38 @@ function draw extends view
         
         # log "▸ #{kseg.str line}"
         
+        fgSpans = []
+        bgSpans = []
+
+        if @state.s.colors?
+            y = row + @state.s.view[1]
+            fgSpans = colorspans.spansForLine (@state.s.colors.fg ? []) y
+            bgSpans = colorspans.spansForLine (@state.s.colors.bg ? []) y
+
+        custom = (x) ->
+            for span in fgSpans
+                ⮐  true if span[0] <= x < span[1]
+            for span in bgSpans
+                ⮐  true if span[0] <= x < span[1]
+            false
+
         chunks = kseg.chunks line
         for chunk in chunks
+
             continue if chunk.segl[0] not in '0█'
-            x = chunk.index-@state.s.view[0]
-            ch = '▎'
-            fg = theme.syntax[clss+' highlight']
-            bg = theme.syntax[clss]
-            @cells.set x row ch fg bg
+
+            ix0 = chunk.index
+
+            if not custom ix0
+                x = ix0-@state.s.view[0]
+                @cells.set x row '▎' theme.syntax[clss+' highlight'] theme.syntax[clss]
             
             continue if chunk.segl.length <= 1
-            x += chunk.segl.length - 1 
-            ch = '▋' # '▊'
-            fg = theme.syntax[clss]
-            bg = theme.syntax[clss+' shadow']
-            @cells.set x row ch fg bg
+
+            ix1 = chunk.index + chunk.segl.length - 1
+
+            if not custom ix1
+                x = ix1-@state.s.view[0]
+                @cells.set x row '▋' theme.syntax[clss] theme.syntax[clss+' shadow']
 
 export draw
