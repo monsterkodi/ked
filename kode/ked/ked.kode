@@ -718,6 +718,7 @@ function KED
             "alt+\\"                     ➜ ⮐  post.emit 'dircol.focus'
             "alt+'"                      ➜ ⮐  post.emit 'funcol.focus'
             'alt+c'                      ➜ ⮐  post.emit 'colorpicker.show'
+            'alt+u'                      ➜ ⮐  post.emit 'uniko.show'
             'alt+shift+c' 'shift+alt+c'  ➜ ⮐  @editor.state.clearColorsAtCursorOrSelection()
             
         for handler in @keyHandlers

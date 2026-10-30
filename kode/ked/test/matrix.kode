@@ -1,0 +1,64 @@
+###
+    matrix
+
+    a grid of characters
+###
+
+use ../util      ◆ harness
+use ../view/base ◆ matrix
+
+▸ matrix
+
+    ▸ selection moves through the items in reading order
+
+        h = new harness cols:10 rows:5
+        m = new matrix h.screen 'test_matrix'
+        m.layout 0 0 10 5
+        m.setItems ['a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l']
+
+        m.selectedText() ▸ 'a'
+
+        m.moveSelection 'right' ▸ true
+        m.selectedText() ▸ 'b'
+
+        cols = m.columns()
+
+        m.setItems ['a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l']
+        m.selectedIndex ▸ 0
+
+        m.moveSelection 'down' ▸ true
+        m.selectedIndex ▸ cols
+
+    ▸ left at the first item stays put
+
+        h = new harness cols:10 rows:5
+        m = new matrix h.screen 'test_matrix'
+        m.layout 0 0 10 5
+        m.setItems ['a' 'b' 'c']
+
+        m.moveSelection 'left' ▸ false
+        m.selectedIndex ▸ 0
+
+    ▸ up in the first row stays put
+
+        h = new harness cols:10 rows:5
+        m = new matrix h.screen 'test_matrix'
+        m.layout 0 0 10 5
+        m.setItems ['a' 'b' 'c']
+
+        m.moveSelection 'up' ▸ false
+        m.selectedIndex ▸ 0
+
+    ▸ the selection scrolls into a one row view
+
+        h = new harness cols:10 rows:1
+        m = new matrix h.screen 'test_matrix'
+        m.layout 0 0 10 1
+        m.setItems ['a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l']
+
+        m.offset ▸ 0
+
+        m.moveSelection 'down'
+
+        m.selectedIndex ▸ m.columns()
+        m.offset ▸ 1

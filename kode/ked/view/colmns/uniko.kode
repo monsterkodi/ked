@@ -1,0 +1,291 @@
+###
+    ███   ███  ███   ███  ███  ███  ███   ███████
+    ███   ███  ████  ███  ███  ███ ███   ███   ███
+    ███   ███  ███ █ ███  ███  █████     ███   ███
+    ███   ███  ███  ████  ███  ███ ███   ███   ███
+     ███████   ███   ███  ███  ███  ███   ███████
+
+    a unicode character picker
+    lives below the funtree and above the colorpicker
+
+    posts
+        uniko.show
+###
+
+use ../../../kxk ▪ kseg post
+use ../../../kxk ◆ clip
+use ../../theme  ◆ theme
+use ../../edit   ◆ specs
+use ../base      ◆ view input matrix
+
+import julia from '../../util/julia.json' with { type: "json" }
+
+function uniko extends view
+
+    @: @screen @editor name ->
+
+        super @screen name
+
+        @height = 16
+        @focus  = 'input'
+
+        @setColor 'bg' theme.uniko.bg
+
+        @input  = new input  @screen "#{@name}_input"
+        @matrix = new matrix @screen "#{@name}_matrix"
+
+        @matrix.setColor 'bg'        theme.uniko.bg
+        @matrix.setColor 'fg'        theme.uniko.fg
+        @matrix.setColor 'selection' theme.uniko.selection
+
+        @input.on 'action' @onInputAction
+
+        @allItems = @buildItems()
+        @matrix.setItems @allItems
+
+        @isVisible = false
+
+    #  the characters of the ~ completion come first, then the rest of
+    #  julia. a character appears once, its aliases are merged so that
+    #  any key still finds it.
+
+    buildItems: ->
+
+        items  = []
+        byChar = {}
+
+        for ch in specs.trigger['~']
+            char = trim ch
+            continue if empty char
+            @addItem items byChar char ch [] []
+
+        for key,val of julia
+            [char comment] = @splitValue val
+            continue if empty char
+            continue if kseg.segWidth(char) >= 2
+            comments = []
+            comments.push comment if not empty comment
+            @addItem items byChar char char [key] comments
+
+        items
+
+    splitValue: value =>
+
+        idx = value.indexOf '#'
+
+        ⮐  [trim(value) ''] if idx < 0
+
+        [trim(value[0...idx]) trim(value[idx+1..])]
+
+    showFor: char ->
+
+        ⮐  '◌' + char if kseg.segWidth(char) == 0
+
+        char
+
+    addItem: items byChar char insert keys comments ->
+
+        item = byChar[char]
+
+        if not item?
+
+            item =
+                char:     insert
+                show:     @showFor(char)
+                keys:     []
+                comments: []
+                search:   ''
+
+            byChar[char] = item
+            items.push item
+
+        for key in keys
+            item.keys.push key if not (key in item.keys)
+
+        for comment in comments
+            item.comments.push comment if not (comment in item.comments)
+
+        item.search = item.keys.concat(item.comments).join(' ').toLowerCase()
+
+    filter: text =>
+
+        text = trim text
+
+        if empty text
+            @matrix.setItems @allItems
+            ⮐
+
+        needle = text.toLowerCase()
+
+        matches = @allItems.filter (item) -> item.search.includes needle
+
+        @matrix.setItems matches
+
+    # ███████  ████████  ███      ████████   ███████  █████████  
+    # ███      ███       ███      ███       ███          ███     
+    # ███████  ███████   ███      ███████   ███          ███     
+    #      ███ ███       ███      ███       ███          ███     
+    # ███████  ████████  ███████  ████████   ███████     ███     
+
+    focusInput: =>
+
+        @focus = 'input'
+        @input.grabFocus()
+        true
+
+    focusMatrix: =>
+
+        @focus = 'matrix'
+        @matrix.selectFirst()
+        @matrix.grabFocus()
+        true
+
+    show: =>
+
+        @input.set ''
+        @filter ''
+        @focus = 'input'
+
+        super()
+
+        @input.grabFocus()
+
+        post.emit 'redraw'
+
+    hide: =>
+
+        ⮐  if @hidden()
+
+        super()
+
+        @focus = 'input'
+        @input.state.deselect()
+
+        post.emit 'focus' @editor.name
+        post.emit 'redraw'
+
+    submit: =>
+
+        char = @matrix.selectedText()
+
+        ⮐  false if empty char
+
+        @editor.state.insert char
+        @hide()
+
+        true
+
+    copy: =>
+
+        char = @matrix.selectedText()
+
+        ⮐  false if empty char
+
+        clip.copy char
+
+        true
+
+    # ███   ███  ████████  ███   ███  
+    # ███  ███   ███        ███ ███   
+    # ███████    ███████     █████    
+    # ███  ███   ███          ███     
+    # ███   ███  ████████     ███     
+
+    onKey: key event =>
+
+        ⮐  false if @hidden()
+
+        switch event.combo
+            'esc'    ➜ ⮐  @hide()
+            'return' ➜ ⮐  @submit()
+            'cmd+c'  ➜ ⮐  @copy()
+            'ctrl+c' ➜ ⮐  @copy()
+
+        if @focus == 'input'
+
+            if event.combo == 'down'
+                @focusMatrix()
+                ⮐  true
+
+            ⮐  @input.onKey key event
+
+        switch event.combo
+
+            'up'
+                if @matrix.moveSelection 'up'
+                    ⮐  true
+                @focusInput()
+                ⮐  true
+
+            'left'
+            'right'
+            'down'
+            'pageup'
+            'pagedown'
+                @matrix.moveSelection event.combo
+                ⮐  true
+
+        false
+
+    onInputAction: action text =>
+
+        switch action
+            'change' ➜ @filter text
+
+    onMouse: event =>
+
+        ⮐  false if @hidden()
+
+        if @input.cells.isInsideEvent event
+            @focusInput()
+            ⮐  @input.onMouse event
+
+        if @matrix.cells.isInsideEvent event
+
+            @focusMatrix()
+
+            if event.type == 'press'
+                [x y] = @matrix.cells.posForEvent event
+                @matrix.selectAt int((x-1)/2) y
+
+            ⮐  redraw:true
+
+        false
+
+    onWheel: event =>
+
+        ⮐  false if @hidden()
+
+        if @matrix.cells.isInsideEvent event
+            switch event.dir
+                'up'   ➜ @matrix.moveSelection 'up'
+                'down' ➜ @matrix.moveSelection 'down'
+            ⮐  redraw:true
+
+        false
+
+    # ███████    ████████    ███████   ███   ███  
+    # ███   ███  ███   ███  ███   ███  ███ █ ███  
+    # ███   ███  ███████    █████████  █████████  
+    # ███   ███  ███   ███  ███   ███  ███   ███  
+    # ███████    ███   ███  ███   ███  ██     ██  
+
+    layout: x y w h =>
+
+        super x y w h
+
+        @input.layout  x+1 y+1   w-2 1
+        @matrix.layout x+1 y+3   w-2 10
+
+    draw: =>
+
+        ⮐  if @hidden() or @collapsed()
+
+        @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
+
+        @input.draw()
+        @matrix.draw()
+
+        super()
+
+export uniko

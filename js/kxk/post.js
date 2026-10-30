@@ -5,7 +5,7 @@ var POST, poster
 POST = "__POST__"
 import events from "events"
 
-events.setMaxListeners(200)
+events.setMaxListeners(1000)
 class Poster extends EventTarget
 {
     constructor ()

@@ -33,7 +33,6 @@ function fileeditor extends editor
             'unype'   # temporary modes
             'novim' 
             'salter' 
-            'uniko' 
             ]
         
         super screen name features

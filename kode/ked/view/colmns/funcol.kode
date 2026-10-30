@@ -10,7 +10,7 @@ use ../../../kxk ▪ post slash kseg kutil
 use ../../theme  ◆ color theme
 use ../../edit/tool ◆ belt
 use ../base      ◆ view knob
-use              ◆ funtree colorpicker
+use              ◆ funtree colorpicker uniko
 
 function funcol extends view
 
@@ -28,6 +28,7 @@ function funcol extends view
         @knob    = new knob    screen  "#{@name}_knob"
         @funtree = new funtree @editor "#{@name}_funtree" ['scrllr']       
         @colorpicker = new colorpicker screen "#{@name}_colorpicker"
+        @uniko       = new uniko       screen @editor "#{@name}_uniko"
         
         @knob.frameSide = 'left'
         
@@ -45,6 +46,7 @@ function funcol extends view
         post.on 'funcol.focus'  => @funtree.grabFocus()
         post.on 'colorpicker.show' @onColorPickerShow
         post.on 'colorpicker.submit' @onColorPickerSubmit
+        post.on 'uniko.show' @onUnikoShow
         
     onSessionMerge: recent =>
     
@@ -83,6 +85,16 @@ function funcol extends view
         @colorpicker.show hex
 
         @colorReplace.from = @colorpicker.hex() if @colorReplace?
+
+        ked_session.set 'funcol▸active' @active
+        post.emit 'redraw'
+
+    onUnikoShow: =>
+
+        @active = true
+        @show() if @hidden()
+
+        @uniko.show()
 
         ked_session.set 'funcol▸active' @active
         post.emit 'redraw'
@@ -189,7 +201,11 @@ function funcol extends view
         ph = @colorpicker.visible() ? min(@colorpicker.height h-1) : 0
         ph = 0 if ph < 1
 
-        @funtree.layout x y w h-ph
+        uh = @uniko.visible() ? min(@uniko.height h-ph-1) : 0
+        uh = 0 if uh < 1
+
+        @funtree.layout x y w h-ph-uh
+        @uniko.layout   x y+h-ph-uh w uh if uh
         @colorpicker.layout x y+h-ph w ph if ph
         @knob.layout    x y 1 h
                 
@@ -209,6 +225,7 @@ function funcol extends view
         @cells.fill_rect 0 0 -1  0 ' ' null theme.gutter.bg
         
         @funtree.draw()
+        @uniko.draw() if @uniko.visible()
         @colorpicker.draw() if @colorpicker.visible()
         @knob.draw()
     
@@ -253,6 +270,9 @@ function funcol extends view
         
         ret = super event            ; ⮐  ret if ret?.redraw
         ret = @knob.onMouse event    ; ⮐  ret if ret?.redraw
+        if @uniko.visible()
+            ret = @uniko.onMouse event
+            ⮐  ret if ret?.redraw
         if @colorpicker.visible()
             ret = @colorpicker.onMouse event
             ⮐  ret if ret?.redraw
@@ -267,6 +287,10 @@ function funcol extends view
     onWheel: event =>
         
         ⮐  if @hidden() or @collapsed() or not @active
+
+        if @uniko.visible()
+            if ret = @uniko.onWheel event
+                ⮐  ret
 
         if @colorpicker.visible()
             if ret = @colorpicker.onWheel event
@@ -283,6 +307,10 @@ function funcol extends view
     onKey: key event =>
         
         ⮐  if @hidden() or @collapsed() or not @active
+
+        if @uniko.visible()
+            if ret = @uniko.onKey key event
+                ⮐  ret
 
         if @colorpicker.visible() and @colorpicker.hasFocus()
             ⮐  @colorpicker.onKey key event

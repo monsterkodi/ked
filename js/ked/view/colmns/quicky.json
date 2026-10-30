@@ -199,9 +199,6 @@
   "[]": [
     "file_icon_coffee"
   ],
-  "[]": [
-    "file_icon_cs"
-  ],
   "[]": [
     "file_icon_d"
   ],
@@ -283,9 +280,6 @@
   "[]": [
     "file_icon_py"
   ],
-  "[ﳒ]": [
-    "file_icon_r"
-  ],
   "[]": [
     "file_icon_rb"
   ],
@@ -304,23 +298,14 @@
   "[]": [
     "file_icon_suo"
   ],
-  "[ﲹ]": [
-    "file_icon_sol"
-  ],
   "[]": [
     "file_icon_swift"
-  ],
-  "[ﭨ]": [
-    "file_icon_tex"
   ],
   "[]": [
     "file_icon_ts"
   ],
   "[]": [
     "file_icon_vim"
-  ],
-  "[﵂]": [
-    "file_icon_vue"
   ],
   "[]": [
     "file_icon_xul"

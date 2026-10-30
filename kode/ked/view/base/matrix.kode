@@ -1,0 +1,175 @@
+###
+    ███   ███   ███████   █████████  ████████  ███  ██     ██
+    ████ ████  ███   ███     ███     ███   ███  ███   ███   ███
+    ███ █ ███  █████████     ███     ███████    ███    █████
+    ███   ███  ███   ███     ███     ███   ███  ███     ███
+    ███   ███  ███   ███     ███     ███   ███  ███     ███
+
+    a grid of characters
+    one blank cell between the characters
+    a selected cell with half circles on its left and right
+###
+
+use ../../../kxk ▪ post
+use              ◆ view
+
+function matrix extends view
+
+    @: screen name ->
+
+        super screen name
+
+        @setColor 'bg'        [0 0 0]
+        @setColor 'fg'        [200 200 200]
+        @setColor 'selection' [68 68 170]
+
+        @items         = []
+        @selectedIndex = 0
+        @offset        = 0
+
+    setItems: items =>
+
+        @items         = items ? []
+        @selectedIndex = 0
+        @offset        = 0
+
+    numItems: -> @items.length
+
+    #  a character is drawn at 2*col+1, so the selection has a cell for
+    #  its left half circle even in the first column
+
+    columns: -> max 1 int((@cells.cols - 1) / 2)
+
+    numRows: ->
+
+        ⮐  0 if empty @items
+
+        cols = @columns()
+
+        int((@items.length + cols - 1) / cols)
+
+    itemText: item =>
+
+        if item is obj
+            if valid item.show
+                ⮐  item.show
+            ⮐  item.char ? ''
+        item
+
+    selected: -> @items[@selectedIndex]
+
+    selectedText: => @itemText @selected()
+
+    selectedPos: ->
+
+        cols = @columns()
+
+        [@selectedIndex % cols int(@selectedIndex / cols)]
+
+    # ███████  ████████  ███      ████████   ███████  █████████  
+    # ███      ███       ███      ███       ███          ███     
+    # ███████  ███████   ███      ███████   ███          ███     
+    #      ███ ███       ███      ███       ███          ███     
+    # ███████  ████████  ███████  ████████   ███████     ███     
+
+    selectFirst: =>
+
+        @selectedIndex = 0
+        @offset        = 0
+
+    selectAt: col row =>
+
+        cols = @columns()
+        idx  = (@offset + row) * cols + col
+
+        ⮐  false if idx < 0 or idx >= @items.length
+
+        @selectedIndex = idx
+
+        true
+
+    ensureVisible: ->
+
+        cols = @columns()
+        rows = max 1 @cells.rows
+        row  = int(@selectedIndex / cols)
+
+        @offset = row if row < @offset
+        @offset = row - rows + 1 if row >= @offset + rows
+
+        maxOffset = max 0 (@numRows() - rows)
+
+        @offset = clamp 0 maxOffset @offset
+
+    moveSelection: dir =>
+
+        ⮐  false if empty @items
+
+        cols   = @columns()
+        rows   = max 1 @cells.rows
+        before = @selectedIndex
+        lastIndex = @items.length - 1
+
+        switch dir
+            'left'     ➜ @selectedIndex = max 0 (@selectedIndex - 1)
+            'right'    ➜ @selectedIndex = min lastIndex (@selectedIndex + 1)
+            'up'       ➜ @selectedIndex = max 0 (@selectedIndex - cols)
+            'down'     ➜ @selectedIndex = min lastIndex (@selectedIndex + cols)
+            'pageup'   ➜ @selectedIndex = max 0 (@selectedIndex - cols * rows)
+            'pagedown' ➜ @selectedIndex = min lastIndex (@selectedIndex + cols * rows)
+
+        @ensureVisible()
+
+        @selectedIndex != before
+
+    grabFocus: =>
+
+        post.emit 'focus' @name
+        post.emit 'redraw'
+
+    # ████████   ████████    ███████   ███   ███  
+    # ███   ███  ███   ███  ███   ███  ███ █ ███  
+    # ███   ███  ███████    █████████  █████████  
+    # ███   ███  ███   ███  ███   ███  ███   ███  
+    # ███████    ███   ███  ███   ███  ██     ██  
+
+    draw: =>
+
+        ⮐  if @hidden() or @collapsed()
+
+        @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
+
+        ⮐  if empty @items
+
+        cols = @columns()
+
+        for row in 0...@cells.rows
+
+            for col in 0...cols
+
+                idx = (@offset + row) * cols + col
+
+                break if idx >= @items.length
+
+                @cells.set col*2+1 row @itemText(@items[idx]) @color.fg @color.bg
+
+        ⮐  if @selectedIndex < 0 or @selectedIndex >= @items.length
+
+        [col row] = @selectedPos()
+
+        y = row - @offset
+
+        ⮐  if y < 0 or y >= @cells.rows
+
+        x  = col*2 + 1
+        fg = @color.selection
+
+        @cells.set_bg x y fg
+        @cells.set_bg x+1 y fg
+
+        @cells.adjustContrastForHighlight x y fg
+
+        @cells.set_ch_fg x-1 y '' fg
+        @cells.set_ch_fg x+1 y '' fg
+
+export matrix

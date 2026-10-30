@@ -679,18 +679,6 @@ saturn                      ♄
 uranus                      ♅
 neptune                     ♆
 pluto                       ♇
-aries                       ♈
-taurus                      ♉
-gemini                      ♊
-cancer                      ♋
-leo                         ♌
-virgo                       ♍
-libra                       ♎
-scorpio                     ♏
-sagittarius                 ♐
-capricornus                 ♑
-aquarius                    ♒
-pisces                      ♓
 spadesuit                   ♠
 heartsuit                   ♡
 diamondsuit                 ♢
@@ -1122,8 +1110,6 @@ urtriangle                  ◹  # upper right triangle
 lltriangle                  ◺  # lower left triangle
 mdwhtsquare                 ◻  # white medium square
 mdblksquare                 ◼  # black medium square
-mdsmwhtsquare               ◽  # white medium small square
-mdsmblksquare               ◾  # black medium small square
 lrtriangle                  ◿  # lower right triangle
 bigwhitestar                ☆  # star, open
 astrosun                    ☉  # sun
@@ -1148,8 +1134,6 @@ circledtwodots              ⚇  # white circle with two dots
 blackcircledrightdot        ⚈  # black circle with white dot right
 blackcircledtwodots         ⚉  # black circle with two white dots
 hermaphrodite               ⚥  # male and female sign
-mdwhtcircle                 ⚪ # medium white circle
-mdblkcircle                 ⚫ # medium black circle
 mdsmwhtcircle               ⚬  # medium small white circle
 neuter                      ⚲  # neuter
 circledstar                 ✪  # circled white star
@@ -1402,8 +1386,6 @@ diamondrightblack           ⬗  # diamond with right half black
 diamondtopblack             ⬘  # diamond with top half black
 diamondbotblack             ⬙  # diamond with bottom half black
 dottedsquare                ⬚  # dotted square
-lgblksquare                 ⬛ # black large square
-lgwhtsquare                 ⬜ # white large square
 vysmblksquare               ⬝  # black very small square
 vysmwhtsquare               ⬞  # white very small square
 pentagonblack               ⬟  # black pentagon
@@ -1454,12 +1436,10 @@ similarleftarrow            ⭉  # tilde operator above leftwards arrow
 leftarrowapprox             ⭊  # leftwards arrow above almost equal to
 leftarrowbsimilar           ⭋  # leftwards arrow above reverse tilde operator
 rightarrowbsimilar          ⭌  # righttwards arrow above reverse tilde operator
-medwhitestar                ⭐ # white medium star
 medblackstar                ⭑  # black medium star
 smwhitestar                 ⭒  # white small star
 rightpentagonblack          ⭓  # black right-pointing pentagon
 rightpentagon               ⭔  # white right-pointing pentagon
-postalmark                  〒 # postal mark
 italic_imath                𝚤  # mathematical italic small dotless i
 italic_jmath                𝚥  # mathematical italic small dotless j
 bold_Alpha                  𝚨  # mathematical bold capital alpha

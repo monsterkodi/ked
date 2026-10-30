@@ -9,7 +9,7 @@
 POST = "__POST__"
 
 use events
-events.setMaxListeners 200
+events.setMaxListeners 1000
 
 class Poster extends EventTarget
 

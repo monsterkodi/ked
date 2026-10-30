@@ -1,0 +1,160 @@
+###
+    uniko
+
+    a unicode character picker
+###
+
+use ../../kxk       ▪ kseg
+use ../../kxk       ◆ clip
+use ../util         ◆ harness
+use ../edit         ◆ editor specs
+use ../view/colmns  ◆ uniko
+
+▸ uniko
+
+    ▸ the default list starts with the characters of the trigger list
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 16
+        u.show()
+
+        triggers = specs.trigger['~']
+
+        u.matrix.numItems() > triggers.length ▸ true
+
+        for i in 0...triggers.length
+            u.matrix.items[i].char.trim() ▸ triggers[i].trim()
+
+    ▸ the default list has no double width characters
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 16
+        u.show()
+
+        u.allItems.every((item) -> kseg.segWidth(item.char) < 2) ▸ true
+
+    ▸ a key filters the characters
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 16
+        u.show()
+
+        u.filter 'sqrt'
+
+        u.matrix.numItems() > 0 ▸ true
+        u.matrix.selectedText() ▸ '√'
+
+    ▸ an alias finds the same character
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 16
+        u.show()
+
+        u.filter 'surd'
+
+        u.matrix.selectedText() ▸ '√'
+
+    ▸ comments are searchable and the match is case insensitive
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 16
+        u.show()
+
+        u.filter 'GREEK'
+
+        u.matrix.numItems() > 0 ▸ true
+
+    ▸ an empty search shows the whole list again
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 16
+        u.show()
+
+        all = u.matrix.numItems()
+
+        u.filter 'sqrt'
+        u.filter ''
+
+        u.matrix.numItems() ▸ all
+
+    ▸ down moves the focus from the input to the matrix
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 16
+        u.show()
+
+        u.focus ▸ 'input'
+
+        h.key u 'down' ''
+
+        u.focus ▸ 'matrix'
+        u.matrix.selectedIndex ▸ 0
+
+    ▸ return inserts the selected character at the cursors and closes
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['abc']
+        e.state.setMainCursor 1 0
+
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 16
+        u.show()
+
+        u.filter 'sqrt'
+        h.key u 'return' ''
+
+        kseg.str(e.state.s.lines[0]) ▸ 'a√bc'
+        u.hidden() ▸ true
+
+    ▸ copy writes the selected character to the clipboard
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 16
+        u.show()
+
+        copied = []
+        before = clip.copy
+        clip.copy = (text) -> copied.push text
+
+        u.filter 'sqrt'
+        h.key u 'cmd+c' ''
+
+        copied ▸ ['√']
+        u.hidden() ▸ false
+
+        clip.copy = before
+
+    ▸ escape closes without a change and gives the focus back
+
+        h = new harness cols:60 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['abc']
+        e.state.setMainCursor 1 0
+
+        u = new uniko h.screen e 'test_uniko'
+        u.layout 0 0 60 16
+        u.show()
+
+        h.key u 'esc' ''
+
+        kseg.str(e.state.s.lines[0]) ▸ 'abc'
+        u.hidden() ▸ true
+        e.hasFocus() ▸ true
