@@ -45,12 +45,31 @@ function matrix extends view
 
     incScale: delta =>
 
+        before = @scale
+
         @scale += delta
         @scale = clamp 1 4 @scale
+
+        #  the terminal keeps the multicell characters of the old scale
+        #  around when the layout changes, so erase the matrix area
+        #  whenever the scale really changes
+
+        if @scale != before
+            @clearArea()
 
         @ensureVisible()
 
         true
+
+    clearArea: ->
+
+        ⮐  if @cells.screen.t.headless
+
+        t = @cells.screen.t
+
+        for row in 0...@cells.rows
+            t.setCursor @cells.x (@cells.y+row)
+            t.write "\x1b[#{@cells.cols}X"
 
     numItems: -> @items.length
 
