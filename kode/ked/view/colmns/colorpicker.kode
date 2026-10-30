@@ -1,0 +1,311 @@
+###
+    colorpicker
+
+    a keyboard first color picker
+    lives at the bottom of the funcol
+
+    posts
+        colorpicker.show    hex
+        colorpicker.change  hex
+        colorpicker.submit  hex
+        colorpicker.hide
+###
+
+use ../../../kxk ▪ post
+use ../../theme  ◆ color theme
+use ../base      ◆ view colorslider rgbinput
+
+PICKER_HEIGHT = 9
+
+function colorpicker extends view
+
+    @: screen name ->
+
+        super screen name
+
+        @height     = PICKER_HEIGHT
+        @focused    = false
+        @focusIndex = 0
+
+        @h = 0
+        @s = 100
+        @v = 100
+
+        @hue    = new colorslider screen "#{@name}_hue"
+        @bright = new colorslider screen "#{@name}_bright"
+        @sat    = new colorslider screen "#{@name}_sat"
+
+        @red   = new rgbinput screen "#{@name}_red"
+        @green = new rgbinput screen "#{@name}_green"
+        @blue  = new rgbinput screen "#{@name}_blue"
+
+        @sliders = [@hue @bright @sat]
+        @inputs  = [@red @green @blue]
+
+        @childNames = [@name @red.name @green.name @blue.name]
+
+        @hue.min = 0
+        @hue.max = 360
+
+        @bright.min = 0
+        @bright.max = 100
+
+        @sat.min = 0
+        @sat.max = 100
+
+        @hue.gradient    = (v) -> color.hsvToRgb [v 100 100]
+        @bright.gradient = (v) => color.hsvToRgb [@h @s v]
+        @sat.gradient    = (v) => color.hsvToRgb [@h v @v]
+
+        @setColor 'bg'        theme.colorpicker.bg
+        @setColor 'fg'        theme.colorpicker.fg
+        @setColor 'separator' theme.colorpicker.separator
+
+        @isVisible = false
+
+        post.on 'focus' @onFocus
+
+        @syncAll()
+
+    hasFocus: => @focused
+
+    onFocus: name =>
+
+        @focused = name in @childNames
+
+        for input, i in @inputs
+            if name == input.name
+                @focusIndex = i+3
+
+        for slider, j in @sliders
+            slider.focused = @focused and j == @focusIndex
+
+        post.emit 'redraw' if @focused
+
+    rgb: => color.hsvToRgb [@h @s @v]
+
+    hex: => color.hex @rgb()
+
+    syncSliders: =>
+
+        @hue.setValue    @h
+        @bright.setValue @v
+        @sat.setValue    @s
+
+    syncInputs: =>
+
+        rgb = @rgb()
+
+        for i in 0...3
+            @inputs[i].setValue rgb[i]
+
+    syncAll: =>
+
+        @syncSliders()
+        @syncInputs()
+
+    setHex: hex =>
+
+        ⮐  if empty hex
+
+        rgb = color.values hex
+        ⮐  if empty rgb
+
+        [h s v] = color.rgbToHsv rgb
+
+        @h = h
+        @s = s
+        @v = v
+
+        @syncAll()
+
+    syncFromSliders: =>
+
+        @h = @hue.getValue()
+        @v = @bright.getValue()
+        @s = @sat.getValue()
+
+        @syncInputs()
+
+    syncFromRgb: =>
+
+        rgb = [@red.getValue() @green.getValue() @blue.getValue()]
+        [h s v] = color.rgbToHsv rgb
+
+        h = @h if s == 0
+        h = @h if v == 0
+        s = @s if v == 0
+
+        @h = h
+        @s = s
+        @v = v
+
+        @syncSliders()
+
+    emitChanged: before =>
+
+        after = @hex()
+
+        ⮐  if after == before
+
+        post.emit 'colorpicker.change' after
+        post.emit 'redraw'
+
+    focusTo: i =>
+
+        @focusIndex = clamp 0 5 int(i)
+
+        for input, j in @inputs
+            if j+3 != @focusIndex
+                input.state.deselect()
+
+        if @focusIndex < 3
+            post.emit 'focus' @name
+        else
+            input = @inputs[@focusIndex-3]
+            input.grabFocus()
+            input.selectAll()
+
+        post.emit 'redraw'
+
+    focusNext: dir => @focusTo (@focusIndex + dir + 6) % 6
+
+    focusDown: =>
+
+        switch @focusIndex
+            0 ➜ @focusTo 1
+            1 ➜ @focusTo 2
+            2 ➜ @focusTo 3
+
+    focusUp: =>
+
+        switch @focusIndex
+            1 ➜ @focusTo 0
+            2 ➜ @focusTo 1
+            3 ➜ @focusTo 2
+            4 ➜ @focusTo 2
+            5 ➜ @focusTo 2
+
+    show: hex =>
+
+        @setHex hex if hex?
+        super()
+
+        @focusTo 0
+
+    hide: =>
+
+        ⮐  if @hidden()
+
+        super()
+
+        @focused    = false
+        @focusIndex = 0
+
+        for input in @inputs
+            input.state.deselect()
+
+        post.emit 'focus' 'editor'
+        post.emit 'redraw'
+
+    submit: =>
+
+        post.emit 'colorpicker.submit' @hex()
+        @hide()
+
+    cancel: =>
+
+        post.emit 'colorpicker.hide'
+        @hide()
+
+    onKey: key event =>
+
+        ⮐  false if @hidden() or not @focused
+
+        switch event.combo
+            'tab'       ➜ @focusNext  1; ⮐  true
+            'shift+tab' ➜ @focusNext -1; ⮐  true
+            'esc'       ➜ @cancel();      ⮐  true
+            'return'    ➜ @submit();      ⮐  true
+
+        before = @hex()
+
+        if @focusIndex < 3
+
+            slider = @sliders[@focusIndex]
+
+            switch event.combo
+                'left'        ➜ slider.setValue slider.value - 1
+                'right'       ➜ slider.setValue slider.value + 1
+                'shift+left'  ➜ slider.setValue slider.value - 10
+                'shift+right' ➜ slider.setValue slider.value + 10
+                'cmd+left'  'ctrl+left'  ➜ slider.setValue slider.min
+                'cmd+right' 'ctrl+right' ➜ slider.setValue slider.max
+                'down'        ➜ @focusDown(); ⮐  true
+                'up'          ➜ @focusUp();   ⮐  true
+                else          ➜ ⮐  false
+
+            @syncFromSliders()
+            @emitChanged before
+
+            ⮐  true
+
+        input = @inputs[@focusIndex-3]
+
+        switch event.combo
+            'up'   ➜ @focusTo 2; ⮐  true
+            'down' ➜ ⮐  true
+
+        handled = input.onKey key event
+
+        if handled
+            @syncFromRgb()
+            @emitChanged before
+
+        handled
+
+    layout: x y w h =>
+
+        super x y w h
+
+        @hue.layout    x y+1 w 1
+        @bright.layout x y+2 w 1
+        @sat.layout    x y+3 w 1
+
+        iw = max(3, min(5, int(w/3)))
+        gap = max 0 int((w - 3*iw)/2)
+        start = max 0 int((w - (3*iw + 2*gap))/2)
+
+        @red.layout   x+start            y+6 iw 1
+        @green.layout x+start+iw+gap     y+6 iw 1
+        @blue.layout  x+start+2*(iw+gap) y+6 iw 1
+
+    draw: =>
+
+        ⮐  if @hidden() or @collapsed()
+
+        @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
+        @cells.fill_rect 0 5 -1  5 '─' @color.separator @color.bg
+
+        @hue.draw()
+        @bright.draw()
+        @sat.draw()
+
+        @red.draw()
+        @green.draw()
+        @blue.draw()
+
+        rgb = @rgb()
+
+        @cells.fill_rect 0 8 -1 8 ' ' null rgb
+
+        hex = @hex()
+        fg  = color.adjustForBackground @color.fg rgb
+        x   = max 0 int((@cells.cols - hex.length)/2)
+
+        for ch,i in hex
+            @cells.set x+i 8 ch fg rgb
+
+        super()
+
+export colorpicker

@@ -1,0 +1,75 @@
+###
+    rgbinput
+
+    a three digit rgb input for the colorpicker
+    built on the regular input field
+###
+
+use ../../theme ◆ theme
+use              ◆ input
+
+function rgbinput extends input
+
+    @: screen name ->
+
+        super screen name
+
+        @setColor 'bg'       theme.colorpicker.bg
+        @setColor 'bg_blur'  theme.colorpicker.bg
+        @setColor 'bg_focus' theme.selection.line
+        @setColor 'empty'    theme.colorpicker.bg
+
+        @value = 0
+        @set '0'
+
+    getValue: -> @value
+
+    setValue: v =>
+
+        v = clamp 0 255 int(v)
+        @value = v
+
+        text = "#{v}"
+        if @current() != text
+            @set text
+
+    clampText: =>
+
+        text   = @current()
+        digits = ''
+
+        for ch in text
+            digits += ch if ch in '0123456789'
+
+        v = clamp 0 255 (digits.length ? parseInt(digits) : 0)
+        text = "#{v}"
+
+        if @current() != text
+            @set text
+            @state.moveCursors 'eol'
+
+        @value = v
+        v
+
+    drawCursors: =>
+
+        ⮐  if not @hasFocus()
+        super()
+
+    onKey: key event =>
+
+        ⮐  false if not @hasFocus()
+
+        switch event.combo
+            'up' 'down' 'tab' 'shift+tab' 'return' 'esc' ➜ ⮐  false
+
+        if valid event.char and not (event.char in '0123456789')
+            ⮐  true
+
+        handled = super key event
+
+        @clampText() if handled
+
+        handled
+
+export rgbinput

@@ -1,0 +1,66 @@
+###
+    colorslider
+
+    a horizontal slider for the colorpicker
+    draws a gradient and the value on the right
+###
+
+use ../../../kxk ▪ post
+use ../../theme  ◆ color theme
+use              ◆ view
+
+function colorslider extends view
+
+    @: screen name ->
+
+        super screen name
+
+        @setColor 'bg'       theme.colorpicker.bg
+        @setColor 'fg'       theme.colorpicker.fg
+        @setColor 'focus'    theme.hover.bg
+        @setColor 'focus_fg' '#fff'
+
+        @min      = 0
+        @max      = 100
+        @value    = 0
+        @suffix   = 4
+        @focused  = false
+        @gradient = (v) -> [0 0 0]
+
+    setValue: v => @value = clamp @min @max int(v)
+
+    getValue: -> @value
+
+    draw: =>
+
+        ⮐  if @hidden() or @collapsed()
+
+        w = @cells.cols - @suffix
+        ⮐  if w < 1
+
+        span = max 1 w-1
+
+        for x in 0...w
+            v = @min + (x/span)*(@max-@min)
+            @cells.set_bg x 0 @gradient(v)
+
+        fg = @focused ? @color.focus_fg : @color.fg
+        bg = @focused ? @color.focus    : @color.bg
+
+        @cells.fill_rect w 0 -1 0 ' ' null bg
+
+        text = "#{@value}"
+        tx   = @cells.cols - text.length
+
+        for ch,i in text
+            @cells.set tx+i 0 ch fg bg
+
+        mx  = round((@value-@min)/(@max-@min)*span)
+        mbg = @cells.get_bg mx 0
+        mfg = color.adjustForBackground [255 255 255] mbg
+
+        @cells.set_ch_fg mx 0 '│' mfg
+
+        super()
+
+export colorslider

@@ -709,6 +709,7 @@ function KED
             "cmd+'" "ctrl+'"             ➜ ⮐  post.emit 'funcol.toggle'
             "alt+\\"                     ➜ ⮐  post.emit 'dircol.focus'
             "alt+'"                      ➜ ⮐  post.emit 'funcol.focus'
+            'alt+c'                      ➜ ⮐  post.emit 'colorpicker.show'
             
         for handler in @keyHandlers
             # ●▸ on key

@@ -9,7 +9,7 @@
 use ../../../kxk ▪ post slash
 use ../../theme  ◆ color theme
 use ../base      ◆ view knob
-use              ◆ funtree
+use              ◆ funtree colorpicker
 
 function funcol extends view
 
@@ -24,6 +24,7 @@ function funcol extends view
         
         @knob    = new knob    screen  "#{@name}_knob"
         @funtree = new funtree @editor "#{@name}_funtree" ['scrllr']       
+        @colorpicker = new colorpicker screen "#{@name}_colorpicker"
         
         @knob.frameSide = 'left'
         
@@ -39,6 +40,7 @@ function funcol extends view
         post.on 'funcol.toggle' @onFuncolToggle
         post.on 'session.merge' @onSessionMerge
         post.on 'funcol.focus'  => @funtree.grabFocus()
+        post.on 'colorpicker.show' @onColorPickerShow
         
     onSessionMerge: recent =>
     
@@ -49,6 +51,16 @@ function funcol extends view
             @show()
             
         ked_session.set 'funcol' recent.funcol
+
+    onColorPickerShow: hex =>
+
+        @active = true
+        @show() if @hidden()
+
+        @colorpicker.show hex
+
+        ked_session.set 'funcol▸active' @active
+        post.emit 'redraw'
         
     # ███       ███████   ███   ███   ███████   ███   ███  █████████
     # ███      ███   ███   ███ ███   ███   ███  ███   ███     ███   
@@ -58,7 +70,11 @@ function funcol extends view
 
     layout: x y w h ->
         
-        @funtree.layout x y w h
+        ph = @colorpicker.visible() ? min(@colorpicker.height h-1) : 0
+        ph = 0 if ph < 1
+
+        @funtree.layout x y w h-ph
+        @colorpicker.layout x y+h-ph w ph if ph
         @knob.layout    x y 1 h
                 
         super x y w h
@@ -77,6 +93,7 @@ function funcol extends view
         @cells.fill_rect 0 0 -1  0 ' ' null theme.gutter.bg
         
         @funtree.draw()
+        @colorpicker.draw() if @colorpicker.visible()
         @knob.draw()
     
         super()
@@ -141,6 +158,11 @@ function funcol extends view
     
     onKey: key event =>
         
+        ⮐  if @hidden() or @collapsed() or not @active
+
+        if @colorpicker.visible() and @colorpicker.hasFocus()
+            ⮐  @colorpicker.onKey key event
+
         ⮐  if not @funtree.hasFocus()
         
         @funtree.onKey key event

@@ -48,6 +48,11 @@ funtree
     test1                                   #0a0   
     test2                                   #080   
     test3                                   #060   
+
+colorpicker
+    bg                                      #161616
+    fg                                      #888   
+    separator                               #222   
                                             
 knob                            
     fg                                      #222   
