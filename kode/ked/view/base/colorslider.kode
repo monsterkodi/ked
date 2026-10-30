@@ -139,8 +139,10 @@ function colorslider extends view
             fg = color.adjustForBackground [255 255 255] mbg
             @cells.set_ch_fg mx 0 '●' fg
         else
-            fg = color.adjustForBackground @color.fg mbg
-            @cells.set_ch_fg mx 0 '┃' fg
+            fg = color.adjustForBackground [255 255 255] mbg
+            # fg = color.adjustForBackground @color.fg mbg
+            # @cells.set_ch_fg mx 0 '┃' fg
+            @cells.set_ch_fg mx 0 '▪' fg
 
         super()
 

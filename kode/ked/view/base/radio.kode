@@ -68,11 +68,11 @@ function radio extends view
 
         if event.type == 'press' and @hover and @focusable
 
-            @setActive @optionAt @eventPos(event)[0]
+            @setActive @optionAt(@eventPos(event)[0])
             @grabFocus()
             @onSelect @active if @onSelect is func
 
-            ⮐  redraw:true
+            ⮐ redraw:true
 
         @hover
 

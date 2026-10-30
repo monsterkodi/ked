@@ -15,8 +15,7 @@ use ../../../kxk ▪ post
 use ../../theme  ◆ color theme
 use ../base      ◆ view colorslider rgbinput radio
 
-PICKER_HEIGHT = 9
-RADIO_FOCUS   = 6
+RADIO_FOCUS = 6
 
 function colorpicker extends view
 
@@ -24,7 +23,7 @@ function colorpicker extends view
 
         super screen name
 
-        @height     = PICKER_HEIGHT
+        @height     = 9
         @focused    = false
         @focusIndex = 0
 
@@ -190,7 +189,7 @@ function colorpicker extends view
     setColorStateFromHex: (idx hex) =>
 
         rgb = color.values hex
-        ⮐  false if empty rgb
+        ⮐ false if empty rgb
 
         [h s v] = color.rgbToHsv rgb
 
@@ -206,8 +205,8 @@ function colorpicker extends view
 
     setHex: hex =>
 
-        ⮐  if empty hex
-        ⮐  if not @setColorStateFromHex @activeColor hex
+        ⮐ if empty hex
+        ⮐ if not @setColorStateFromHex @activeColor hex
 
         @voided[@activeColor] = false
 
@@ -234,6 +233,7 @@ function colorpicker extends view
         @loadActiveColor()
 
         post.emit 'redraw'
+        true
 
     cycleColor: dir => @setActiveColor (@activeColor + dir + 2) % 2
 
@@ -309,6 +309,7 @@ function colorpicker extends view
             post.emit 'focus' @name
 
         post.emit 'redraw'
+        true
 
     focusNext: dir =>
 
@@ -329,6 +330,8 @@ function colorpicker extends view
             4 ➜ @focusTo 2
             5 ➜ @focusTo 2
             6 ➜ @focusTo 5
+            
+        true
 
     show: hex =>
 
@@ -434,11 +437,11 @@ function colorpicker extends view
         ⮐  false if @hidden() or not @focused
 
         switch event.combo
-            'tab'       ➜ @focusNext  1; ⮐  true
-            'shift+tab' ➜ @focusNext -1; ⮐  true
-            'down'      ➜ @focusNext  1; ⮐  true
-            'esc'       ➜ @cancel();      ⮐  true
-            'return'    ➜ @submit();      ⮐  true
+            'tab'       ➜ ⮐ @focusNext  1
+            'shift+tab' ➜ ⮐ @focusNext -1
+            'down'      ➜ ⮐ @focusNext  1
+            'esc'       ➜ ⮐ @cancel()
+            'return'    ➜ ⮐ @submit()
 
         if (@focusIndex < 3 or @focusIndex == RADIO_FOCUS) and @twoColors and event.combo in ['delete' 'backspace']
             @voidActiveColor()
@@ -447,10 +450,10 @@ function colorpicker extends view
         if @focusIndex == RADIO_FOCUS and @twoColors
 
             switch event.combo
-                'left'  ➜ @cycleColor -1; ⮐  true
-                'right' ➜ @cycleColor  1; ⮐  true
-                'up'    ➜ @focusUp();     ⮐  true
-                else    ➜ ⮐  false
+                'left'  ➜ ⮐ @cycleColor -1
+                'right' ➜ ⮐ @cycleColor  1
+                'up'    ➜ ⮐ @focusUp()
+                        ➜ ⮐ false
 
         before = @hex()
 
@@ -459,24 +462,24 @@ function colorpicker extends view
             slider = @sliders[@focusIndex]
 
             switch event.combo
-                'left'        ➜ slider.setValue slider.value - 1
-                'right'       ➜ slider.setValue slider.value + 1
-                'shift+left'  ➜ slider.setValue slider.value - 10
-                'shift+right' ➜ slider.setValue slider.value + 10
+                'left'                   ➜ slider.setValue slider.value - 1
+                'right'                  ➜ slider.setValue slider.value + 1
+                'shift+left'             ➜ slider.setValue slider.value - 10
+                'shift+right'            ➜ slider.setValue slider.value + 10
                 'cmd+left'  'ctrl+left'  ➜ slider.setValue slider.min
                 'cmd+right' 'ctrl+right' ➜ slider.setValue slider.max
-                'up'          ➜ @focusUp();   ⮐  true
-                else          ➜ ⮐  false
+                'up'                     ➜ ⮐ @focusUp()
+                                         ➜ ⮐ false
 
             @syncFromSliders()
             @emitChanged before
 
-            ⮐  true
+            ⮐ true
 
         input = @inputs[@focusIndex-3]
 
         switch event.combo
-            'up' ➜ @focusTo 2; ⮐  true
+            'up' ➜ ⮐ @focusTo 2
 
         handled = input.onKey key event
 
@@ -497,17 +500,15 @@ function colorpicker extends view
         @sat.layout    x+1 y+5 w-2 1
 
         aw = max 1 w-2
-        iw = max(3, min(5, int(aw/3)))
-        gap = max 0 int((aw - 3*iw)/2)
-        start = max 0 int((aw - (3*iw + 2*gap))/2)
+        iw = 4
 
-        @red.layout   x+1+start            y+7 iw 1
-        @green.layout x+1+start+iw+gap     y+7 iw 1
-        @blue.layout  x+1+start+2*(iw+gap) y+7 iw 1
+        @red.layout   x+1                y+7 iw 1
+        @green.layout x+1+int((aw-iw)/2) y+7 iw 1
+        @blue.layout  x+1+aw-iw          y+7 iw 1
 
     draw: =>
 
-        ⮐  if @hidden() or @collapsed()
+        ⮐ if @hidden() or @collapsed()
 
         @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
 
