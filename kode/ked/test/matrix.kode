@@ -93,7 +93,7 @@ use ../../kxk    ▪ post
 
         m.hasFocus() ▸ false
 
-    ▸ double mode uses two cell rows per logical row
+    ▸ a larger scale uses more cell rows per logical row
 
         h = new harness cols:20 rows:20
         m = new matrix h.screen 'test_matrix'
@@ -108,7 +108,36 @@ use ../../kxk    ▪ post
         m.viewportRows() ▸ 10
         m.cellAtPos(3 4) ▸ [0 2]
 
+        m.incScale 1
+
+        m.scale ▸ 3
+        m.viewportRows() ▸ 6
+        m.cellAtPos(3 3) ▸ [0 1]
+
+        m.incScale -1
         m.incScale -1
 
         m.scale ▸ 1
         m.viewportRows() ▸ 20
+
+    ▸ scaled cells and the selection line up at every scale
+
+        for s in [2 3 4]
+
+            h = new harness cols:24 rows:20
+            m = new matrix h.screen 'test_matrix'
+            m.layout 0 0 24 20
+
+            while m.scale < s
+                m.incScale 1
+
+            m.setItems ['a']
+            m.draw()
+
+            x = s
+
+            h.screen.get_char(x-s 0) ▸ ''
+            h.screen.get_char(x   0) ▸ 'a'
+            h.screen.get_char(x+s 0) ▸ ''
+
+            m.skipText() ▸ "\x1b[#{s}C"

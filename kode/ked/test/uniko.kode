@@ -227,22 +227,36 @@ use ../view/colmns  ◆ uniko
         u.hidden() ▸ true
         e.hasFocus() ▸ true
 
-    ▸ cmd+down doubles the matrix and cmd+up brings it back
+    ▸ cmd+down increases the scale and cmd+up decreases it
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []
         u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 14
+        u.layout 0 0 60 16
         u.show()
 
-        u.height ▸ 14
+        u.height ▸ 16
+        u.matrix.scale ▸ 1
 
         h.key u 'cmd+down' ''
 
-        u.height ▸ 24
-        u.matrix.rowHeight() ▸ 2
+        u.height ▸ 16
+        u.matrix.scale ▸ 2
+
+        h.key u 'cmd+down' ''
+        h.key u 'cmd+down' ''
+
+        u.matrix.scale ▸ 4
+
+        h.key u 'cmd+down' ''
+
+        u.matrix.scale ▸ 4
 
         h.key u 'cmd+up' ''
 
-        u.height ▸ 14
-        u.matrix.rowHeight() ▸ 1
+        u.matrix.scale ▸ 3
+
+        h.key u 'cmd+up' ''
+        h.key u 'cmd+up' ''
+
+        u.matrix.scale ▸ 1

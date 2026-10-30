@@ -54,18 +54,31 @@ function matrix extends view
 
     numItems: -> @items.length
 
+    #  the first character starts at @scale, leaving room for its left
+    #  half circle. the half circles and the space between the characters
+    #  are each @scale cells wide.
+
+    baseColumns: ->
+
+        s = @scale
+
+        max 1 int((@cells.cols - s) / (s * 2))
+
     scrollBarVisible: ->
 
         ⮐  false if empty @items
         ⮐  false if @cells.rows < 1
 
-        cols = @columns()
+        cols = @baseColumns()
 
         int((@items.length + cols - 1) / cols) > @viewportRows()
 
     columns: ->
 
-        max 1 int((@cells.cols-@scale) / (@scale*2))
+        s   = @scale
+        bar = @scrollBarVisible() ? 1 : 0
+
+        max 1 int((@cells.cols - bar - s) / (s * 2))
 
     viewportRows: -> max 0 int(@cells.rows / @scale)
 
@@ -108,7 +121,9 @@ function matrix extends view
 
     cellAtPos: x y =>
 
-        [int((x-1)/(@scale*2)) (y/@scale)]
+        s = @scale
+
+        [int((x-s)/(s*2)) int(y/s)]
 
     selectAt: col row =>
 
@@ -197,7 +212,7 @@ function matrix extends view
 
             ⮐  if y < 0 or y >= @cells.rows
     
-            x  = 1 + col*(@scale*2)
+            x  = @scale + col*(@scale*2)
             fg = @focused ? @color.selection : @color.selection_blur
     
             @cells.set_bg x y fg
@@ -233,7 +248,7 @@ function matrix extends view
 
     scaleText: char -> "\x1b]66;s=#{@scale}:w=1;" + char + '\x07'
 
-    skipText: -> '\x1b[2C'
+    skipText: -> "\x1b[#{@scale}C"
 
     drawScrollBar: ->
 
@@ -256,7 +271,7 @@ function matrix extends view
 
         fg = @color.scroll
 
-        x = (@cells.x + @cells.cols) * csz[0]
+        x = (@cells.x + @cells.cols - 1) * csz[0]
         y = int @cells.y*csz[1]+ky
         w = int csz[0]/2
         h = int kh
