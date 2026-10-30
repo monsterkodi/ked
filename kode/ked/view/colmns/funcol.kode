@@ -137,6 +137,9 @@ function funcol extends view
         
         ret = super event            ; ⮐  ret if ret?.redraw
         ret = @knob.onMouse event    ; ⮐  ret if ret?.redraw
+        if @colorpicker.visible()
+            ret = @colorpicker.onMouse event
+            ⮐  ret if ret?.redraw
         ret = @funtree.onMouse event ; ⮐  ret if ret?.redraw
         
     # ███   ███  ███   ███  ████████  ████████  ███      
@@ -148,6 +151,11 @@ function funcol extends view
     onWheel: event =>
         
         ⮐  if @hidden() or @collapsed() or not @active
+
+        if @colorpicker.visible()
+            if ret = @colorpicker.onWheel event
+                ⮐  ret
+
         @funtree.onWheel event
         
     # ███   ███  ████████  ███   ███  

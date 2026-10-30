@@ -1,0 +1,167 @@
+###
+    colorpicker
+
+    mouse handling for the color picker
+###
+
+use ../util        ◆ harness
+use ../view/colmns ◆ colorpicker
+
+▸ colorpicker
+
+    ▸ hovering a slider focuses it
+
+        h = new harness cols:16 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 16 9
+        p.show()
+
+        p.focusIndex ▸ 0
+
+        e =
+            type: 'move'
+            cell: [8 2]
+        p.onMouse e
+
+        p.focusIndex ▸ 1
+
+    ▸ hovering an rgb input focuses it
+
+        h = new harness cols:16 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 16 9
+        p.show()
+
+        e =
+            type: 'move'
+            cell: [6 5]
+        p.onMouse e
+
+        p.focusIndex ▸ 4
+        p.green.hasFocus() ▸ true
+
+    ▸ pressing a slider sets the value from the column
+
+        h = new harness cols:16 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 16 9
+        p.show()
+
+        e =
+            type: 'press'
+            cell: [11 1]
+            button: 'left'
+            count: 1
+        p.onMouse e
+
+        p.hue.getValue() ▸ 277
+        p.focusIndex ▸ 0
+
+    ▸ dragging a slider keeps tracking outside of it
+
+        h = new harness cols:16 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 16 9
+        p.show()
+
+        e =
+            type: 'press'
+            cell: [5 1]
+            button: 'left'
+            count: 1
+        p.onMouse e
+
+        p.hue.getValue() ▸ 111
+
+        e =
+            type: 'drag'
+            cell: [15 3]
+            button: 'left'
+            count: 1
+        p.onMouse e
+
+        p.hue.getValue() ▸ 360
+
+        e =
+            type: 'release'
+            cell: [15 3]
+            button: 'left'
+            count: 1
+        p.onMouse e
+
+    ▸ dragging over another slider does not focus it
+
+        h = new harness cols:16 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 16 9
+        p.show()
+
+        e =
+            type: 'press'
+            cell: [5 3]
+            button: 'left'
+            count: 1
+        p.onMouse e
+
+        p.focusIndex ▸ 2
+
+        e =
+            type: 'drag'
+            cell: [5 2]
+            button: 'left'
+            count: 1
+        p.onMouse e
+
+        p.focusIndex ▸ 2
+
+        e =
+            type: 'drag'
+            cell: [5 1]
+            button: 'left'
+            count: 1
+        p.onMouse e
+
+        p.focusIndex ▸ 2
+
+        e =
+            type: 'release'
+            cell: [5 1]
+            button: 'left'
+            count: 1
+        p.onMouse e
+
+    ▸ the wheel steps a slider and focuses it
+
+        h = new harness cols:16 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 16 9
+        p.show()
+
+        p.sat.setValue 50
+
+        e =
+            type: 'wheel'
+            cell: [8 3]
+            dir: 'up'
+        p.onWheel e
+
+        p.sat.getValue() ▸ 51
+        p.focusIndex ▸ 2
+
+    ▸ the wheel steps an rgb input and focuses it
+
+        h = new harness cols:16 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 16 9
+        p.show()
+
+        p.red.setValue 100
+
+        e =
+            type: 'wheel'
+            cell: [2 5]
+            dir: 'down'
+        p.onWheel e
+
+        p.red.getValue() ▸ 99
+        p.focusIndex ▸ 3

@@ -5,6 +5,7 @@
     built on the regular input field
 ###
 
+use ../../../kxk ▪ post
 use ../../theme ◆ theme
 use              ◆ input
 
@@ -25,7 +26,49 @@ function rgbinput extends input
 
         @state.skipAdjustViewForMainCursor = true
 
+        @onFocusRequest = null
+        @onInput        = null
+        @pointerType    = 'text'
+
     getValue: -> @value
+
+    onMouseEnter: event =>
+
+        if @onFocusRequest is func
+            @onFocusRequest()
+            if @pointerType
+                post.emit 'pointer' @pointerType
+                post.emit 'redraw'
+        else
+            super event
+
+    onMouseLeave: event =>
+
+        post.emit 'pointer' 'default' if @pointerType
+        super event
+
+    onWheel: event =>
+
+        ⮐  if @hidden() or @collapsed()
+        ⮐  if not @cells.isInsideEvent event
+
+        dir = switch event.dir
+            'up'    ➜  1
+            'right' ➜  1
+            'down'  ➜ -1
+            'left'  ➜ -1
+            else    ➜  0
+
+        ⮐  if not dir
+
+        step = 1
+        step = 10 if event.shift
+
+        @onFocusRequest() if @onFocusRequest is func
+        @setValue @value + dir*step
+        @onInput() if @onInput is func
+
+        redraw:true
 
     setValue: v =>
 

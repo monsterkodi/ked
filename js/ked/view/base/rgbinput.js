@@ -1,6 +1,9 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, isFunc: function (o) {return typeof o === 'function'}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
 
 var rgbinput
+
+import kxk from "../../../kxk.js"
+let post = kxk.post
 
 import theme from "../../theme/theme.js"
 
@@ -16,6 +19,9 @@ rgbinput = (function ()
         this["drawCursors"] = this["drawCursors"].bind(this)
         this["clampText"] = this["clampText"].bind(this)
         this["setValue"] = this["setValue"].bind(this)
+        this["onWheel"] = this["onWheel"].bind(this)
+        this["onMouseLeave"] = this["onMouseLeave"].bind(this)
+        this["onMouseEnter"] = this["onMouseEnter"].bind(this)
         rgbinput.__super__.constructor.call(this,screen,name)
         this.setColor('bg',theme.colorpicker.bg)
         this.setColor('bg_blur',theme.colorpicker.bg)
@@ -25,11 +31,94 @@ rgbinput = (function ()
         this.value = 0
         this.set('0')
         this.state.skipAdjustViewForMainCursor = true
+        this.onFocusRequest = null
+        this.onInput = null
+        this.pointerType = 'text'
     }
 
     rgbinput.prototype["getValue"] = function ()
     {
         return this.value
+    }
+
+    rgbinput.prototype["onMouseEnter"] = function (event)
+    {
+        if (_k_.isFunc(this.onFocusRequest))
+        {
+            this.onFocusRequest()
+            if (this.pointerType)
+            {
+                post.emit('pointer',this.pointerType)
+                return post.emit('redraw')
+            }
+        }
+        else
+        {
+            return rgbinput.__super__.onMouseEnter.call(this,event)
+        }
+    }
+
+    rgbinput.prototype["onMouseLeave"] = function (event)
+    {
+        if (this.pointerType)
+        {
+            post.emit('pointer','default')
+        }
+        return rgbinput.__super__.onMouseLeave.call(this,event)
+    }
+
+    rgbinput.prototype["onWheel"] = function (event)
+    {
+        var dir, step
+
+        if (this.hidden() || this.collapsed())
+        {
+            return
+        }
+        if (!this.cells.isInsideEvent(event))
+        {
+            return
+        }
+        dir = ((function ()
+        {
+            switch (event.dir)
+            {
+                case 'up':
+                    return 1
+
+                case 'right':
+                    return 1
+
+                case 'down':
+                    return -1
+
+                case 'left':
+                    return -1
+
+                default:
+                    return 0
+            }
+
+        }).bind(this))()
+        if (!dir)
+        {
+            return
+        }
+        step = 1
+        if (event.shift)
+        {
+            step = 10
+        }
+        if (_k_.isFunc(this.onFocusRequest))
+        {
+            this.onFocusRequest()
+        }
+        this.setValue(this.value + dir * step)
+        if (_k_.isFunc(this.onInput))
+        {
+            this.onInput()
+        }
+        return {redraw:true}
     }
 
     rgbinput.prototype["setValue"] = function (v)
@@ -135,5 +224,5 @@ rgbinput = (function ()
 
 export default rgbinput;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmdiaW5wdXQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS9yZ2JpbnB1dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BT2tCLFlBQVI7O09BQ1MsWUFBQTs7O0FBRVYsWUFBVDs7eUJBQTBCO2FBRXRCLFVBQUcsUUFBTzs7Ozs7O2lEQUVBLE9BQU87UUFFYixLQUFDLFNBQVMsS0FBVyxNQUFNLFlBQVk7UUFDdkMsS0FBQyxTQUFTLFVBQVcsTUFBTSxZQUFZO1FBQ3ZDLEtBQUMsU0FBUyxXQUFXLE1BQU0sVUFBVTtRQUNyQyxLQUFDLFNBQVMsUUFBVyxNQUFNLFlBQVk7UUFFdkMsS0FBQyxZQUFZLE1BQU0sWUFBWTtRQUMvQixLQUFDLFFBQVk7UUFDYixLQUFDLElBQUk7UUFFTCxLQUFDLE1BQU0sOEJBQThCOzs7d0JBRXpDOztlQUFhLEtBQUM7Ozt3QkFFZCx1QkFBVTs7OztRQUVOLGNBQVUsRUFBRSxhQUFRO1FBQ3BCLEtBQUMsUUFBUTtRQUVULFVBQVU7WUFDUCxLQUFDLGNBQWE7O21CQUNiLEtBQUMsSUFBSTs7Ozt3QkFFYjs7OztRQUVJLE9BQVMsS0FBQztRQUNWLFNBQVM7NEJBRUM7OztZQUFOO3VCQUNnQixHQUFNOztnQkFBdEIsVUFBVTs7O1FBRWQsY0FBVSxFQUFFLE1BQUssT0FBTyxTQUFTLFNBQVMsVUFBVTtRQUNwRCxVQUFVO1lBRVAsS0FBQyxjQUFhOztZQUNiLEtBQUMsSUFBSTtZQUNMLEtBQUMsTUFBTSxZQUFZOztRQUV2QixLQUFDLFFBQVE7ZUFDVDs7O3dCQUVKOzs7Ozs7WUFJVSxLQUFDLFlBQVksS0FBQzs7Ozs0QkFFUCxLQUFDO2FBQU47O1lBQUo7WUFDQSxLQUFDLE1BQU0sT0FBTyxFQUFFLEVBQUUsS0FBQzs7Ozt3QkFFM0I7O2FBRWMsS0FBQzs7Ozs7Ozt3QkFHZixvQkFBTyxLQUFJOzs7O2FBRVMsS0FBQzs7bUJBQWQ7O2dCQUVJLE1BQU07O2lCQUNUO2lCQUFLO2lCQUFPO2lCQUFNO2lCQUFZO2lCQUFTO3VCQUFXOzs7O3VCQUU3QyxNQUFNLGtCQUFjLE1BQU0sS0FBUTs7bUJBQ3BDOztRQUVQLDZDQUFnQixJQUFJO1lBRUo7O1lBQWhCLEtBQUM7O2VBRUQ7OztXQTFFQzs7O2VBNEVGIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmdiaW5wdXQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS9yZ2JpbnB1dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BT2EsVUFBQTtJQUFNOztPQUNELFlBQVI7O09BQ1MsWUFBQTs7O0FBRVYsWUFBVDs7eUJBQTBCO2FBRXRCLFVBQUcsUUFBTzs7Ozs7Ozs7O2lEQUVBLE9BQU87UUFFYixLQUFDLFNBQVMsS0FBVyxNQUFNLFlBQVk7UUFDdkMsS0FBQyxTQUFTLFVBQVcsTUFBTSxZQUFZO1FBQ3ZDLEtBQUMsU0FBUyxXQUFXLE1BQU0sVUFBVTtRQUNyQyxLQUFDLFNBQVMsUUFBVyxNQUFNLFlBQVk7UUFFdkMsS0FBQyxZQUFZLE1BQU0sWUFBWTtRQUMvQixLQUFDLFFBQVk7UUFDYixLQUFDLElBQUk7UUFFTCxLQUFDLE1BQU0sOEJBQThCO1FBRXJDLEtBQUMsaUJBQWlCO1FBQ2xCLEtBQUMsVUFBaUI7UUFDbEIsS0FBQyxjQUFpQjs7O3dCQUV0Qjs7ZUFBYSxLQUFDOzs7d0JBRWQsMkJBQWM7O1lBRVksV0FBbkIsS0FBQzs7WUFDQSxLQUFDO2dCQUNFLEtBQUM7O2dCQUNBLEtBQUssS0FBSyxVQUFVLEtBQUM7dUJBQ3JCLEtBQUssS0FBSzs7Ozs7NkRBRVI7Ozs7d0JBRWQsMkJBQWM7O1lBRXVCLEtBQUM7O1lBQWxDLEtBQUssS0FBSyxVQUFVOzt5REFDZDs7O3dCQUVWLHNCQUFTOzs7O1lBRUMsS0FBQyxZQUFZLEtBQUM7Ozs7YUFDVixLQUFDLE1BQU0sY0FBYzs7OztRQUUvQjs7b0JBQWEsTUFBTTs7cUJBQ2Y7MkJBQVc7O3FCQUNYOzJCQUFXOztxQkFDWDsyQkFBVTs7cUJBQ1Y7MkJBQVU7OzsyQkFDQzs7OzthQUVMOzs7O1FBRVYsT0FBTztZQUNNLE1BQU07O1lBQW5CLE9BQU87O1lBRWlDLFdBQW5CLEtBQUM7O1lBQXRCLEtBQUM7O1FBQ0QsS0FBQyxTQUFTLEtBQUMsUUFBUSxNQUFJO1lBQ0csV0FBWixLQUFDOztZQUFmLEtBQUM7O2dCQUVELE9BQU87Ozt3QkFFWCx1QkFBVTs7OztRQUVOLGNBQVUsRUFBRSxhQUFRO1FBQ3BCLEtBQUMsUUFBUTtRQUVULFVBQVU7WUFDUCxLQUFDLGNBQWE7O21CQUNiLEtBQUMsSUFBSTs7Ozt3QkFFYjs7OztRQUVJLE9BQVMsS0FBQztRQUNWLFNBQVM7NEJBRUM7OztZQUFOO3VCQUNnQixHQUFNOztnQkFBdEIsVUFBVTs7O1FBRWQsY0FBVSxFQUFFLE1BQUssT0FBTyxTQUFTLFNBQVMsVUFBVTtRQUNwRCxVQUFVO1lBRVAsS0FBQyxjQUFhOztZQUNiLEtBQUMsSUFBSTtZQUNMLEtBQUMsTUFBTSxZQUFZOztRQUV2QixLQUFDLFFBQVE7ZUFDVDs7O3dCQUVKOzs7Ozs7WUFJVSxLQUFDLFlBQVksS0FBQzs7Ozs0QkFFUCxLQUFDO2FBQU47O1lBQUo7WUFDQSxLQUFDLE1BQU0sT0FBTyxFQUFFLEVBQUUsS0FBQzs7Ozt3QkFFM0I7O2FBRWMsS0FBQzs7Ozs7Ozt3QkFHZixvQkFBTyxLQUFJOzs7O2FBRVMsS0FBQzs7bUJBQWQ7O2dCQUVJLE1BQU07O2lCQUNUO2lCQUFLO2lCQUFPO2lCQUFNO2lCQUFZO2lCQUFTO3VCQUFXOzs7O3VCQUU3QyxNQUFNLGtCQUFjLE1BQU0sS0FBUTs7bUJBQ3BDOztRQUVQLDZDQUFnQixJQUFJO1lBRUo7O1lBQWhCLEtBQUM7O2VBRUQ7OztXQXBIQzs7O2VBc0hGIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/base/rgbinput.kode

@@ -5,6 +5,7 @@
     draws a gradient and marks the value
 ###
 
+use ../../../kxk ▪ post
 use ../../theme ◆ color theme
 use             ◆ view
 
@@ -23,9 +24,100 @@ function colorslider extends view
         @focused  = false
         @gradient = (v) -> [0 0 0]
 
+        @focusable      = true
+        @pointerType    = 'ew-resize'
+        @onFocusRequest = null
+        @onInput        = null
+
     setValue: v => @value = clamp @min @max int(v)
 
     getValue: -> @value
+
+    grabFocus: => @onFocusRequest() if @onFocusRequest is func
+
+    onMouseEnter: event =>
+
+        if event.button?
+            post.emit 'pointer' @pointerType if @pointerType
+            post.emit 'redraw'
+            ⮐
+
+        super event
+
+    setFromEvent: event =>
+
+        [col row] = @eventPos event
+
+        col  = clamp 0 (@cells.cols-1) col
+        span = max 1 @cells.cols-1
+
+        @setValue round(@min + (col/span)*(@max-@min))
+
+    onMouse: event =>
+
+        ⮐  if @hidden() or @collapsed()
+
+        super event
+
+        switch event.type
+
+            'press'
+
+                if @hover
+                    @grabFocus()
+                    @doDrag = true
+                    @setFromEvent event
+                    @onInput() if @onInput is func
+                    post.emit 'pointer' 'grabbing'
+                    ⮐  redraw:true
+
+            'drag'
+
+                if @doDrag
+                    @hover = true
+                    @setFromEvent event
+                    @onInput() if @onInput is func
+                    post.emit 'pointer' 'grabbing'
+                    ⮐  redraw:true
+
+                @hover = false
+
+            'release'
+
+                if @doDrag
+                    post.emit 'pointer' @pointerType if @hover
+                    delete @doDrag
+                    ⮐  redraw:true
+
+        @hover
+
+    onMouseLeave: event =>
+
+        post.emit 'pointer' 'default' if @pointerType
+        super event
+
+    onWheel: event =>
+
+        ⮐  if @hidden() or @collapsed()
+        ⮐  if not @cells.isInsideEvent event
+
+        dir = switch event.dir
+            'up'    ➜  1
+            'right' ➜  1
+            'down'  ➜ -1
+            'left'  ➜ -1
+            else    ➜  0
+
+        ⮐  if not dir
+
+        step = 1
+        step = 10 if event.shift
+
+        @grabFocus()
+        @setValue @value + dir*step
+        @onInput() if @onInput is func
+
+        redraw:true
 
     draw: =>
 

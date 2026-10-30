@@ -61,6 +61,22 @@ function colorpicker extends view
         @bright.gradient = (v) => color.hsvToRgb [@h @s v]
         @sat.gradient    = (v) => color.hsvToRgb [@h v @v]
 
+        @hue.onFocusRequest    = => @focusTo 0
+        @bright.onFocusRequest = => @focusTo 1
+        @sat.onFocusRequest    = => @focusTo 2
+
+        @red.onFocusRequest   = => @focusTo 3
+        @green.onFocusRequest = => @focusTo 4
+        @blue.onFocusRequest  = => @focusTo 5
+
+        @hue.onInput    = => @sliderChanged()
+        @bright.onInput = => @sliderChanged()
+        @sat.onInput    = => @sliderChanged()
+
+        @red.onInput   = => @rgbChanged()
+        @green.onInput = => @rgbChanged()
+        @blue.onInput  = => @rgbChanged()
+
         @setColor 'bg' theme.colorpicker.bg
         @setColor 'fg' theme.colorpicker.fg
 
@@ -145,6 +161,18 @@ function colorpicker extends view
 
         @syncSliders()
 
+    sliderChanged: =>
+
+        before = @hex()
+        @syncFromSliders()
+        @emitChanged before
+
+    rgbChanged: =>
+
+        before = @hex()
+        @syncFromRgb()
+        @emitChanged before
+
     emitChanged: before =>
 
         after = @hex()
@@ -213,6 +241,35 @@ function colorpicker extends view
 
         post.emit 'colorpicker.hide'
         @hide()
+
+    onMouse: event =>
+
+        ⮐  if @hidden() or @collapsed()
+
+        for slider in @sliders
+            ret = slider.onMouse event
+            ⮐  ret if ret?.redraw
+
+        for input in @inputs
+            ret = input.onMouse event
+            ⮐  ret if ret?.redraw
+
+        super event
+
+    onWheel: event =>
+
+        ⮐  if @hidden() or @collapsed()
+
+        for slider in @sliders
+            ret = slider.onWheel event
+            ⮐  ret if ret?.redraw
+
+        for input in @inputs
+            ret = input.onWheel event
+            ⮐  ret if ret?.redraw
+
+        if @cells.isInsideEvent event
+            ⮐  redraw:false
 
     onKey: key event =>
 
