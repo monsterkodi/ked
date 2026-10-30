@@ -9,6 +9,9 @@
     
     is coupled to the process: doesn't care about other instances
     
+    headless runs save to a separate directory so their state
+    never mixes with the sessions of terminal runs
+    
     stores 
     
         - main cursor position and view offset per file
@@ -30,8 +33,12 @@ function session extends events
         @timeout = opt.timeout ? 1000
         
         @sep  = opt.separator ? '▸'
+
+        @headless = false
+        @headless = true if opt.headless or opt.colors
         
         @dir  = slash.absolute "~/.config/ked/sessions/"
+        @dir  = slash.absolute "~/.config/ked/headless-sessions/" if @headless
         @file = slash.path @dir "#{@name}.noon"
         
         @loaded = new Promise (resolve) => @resolveLoaded = resolve

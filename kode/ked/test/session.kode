@@ -1,0 +1,33 @@
+###
+    session
+
+    headless runs keep their session state apart from terminal runs
+###
+
+use ../../kxk ◆ slash
+use ../util  ◆ session
+
+▸ session
+
+    ▸ a terminal session uses the terminal session directory
+
+        s = new session fresh:true
+
+        s.headless ▸ false
+        s.dir ▸ slash.absolute("~/.config/ked/sessions/")
+        s.file ▸ slash.path(s.dir "#{s.name}.noon")
+
+    ▸ a headless session uses its own directory
+
+        s = new session fresh:true headless:true
+
+        s.headless ▸ true
+        s.dir ▸ slash.absolute("~/.config/ked/headless-sessions/")
+        s.file ▸ slash.path(s.dir "#{s.name}.noon")
+
+    ▸ a colored headless session uses the headless directory
+
+        s = new session fresh:true colors:true
+
+        s.headless ▸ true
+        s.dir ▸ slash.absolute("~/.config/ked/headless-sessions/")

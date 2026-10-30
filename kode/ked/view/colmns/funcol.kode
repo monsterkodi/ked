@@ -69,12 +69,18 @@ function funcol extends view
 
         @colorpicker.show hex
 
+        @colorReplace.from = @colorpicker.hex() if @colorReplace?
+
         ked_session.set 'funcol▸active' @active
         post.emit 'redraw'
 
     onColorPickerSubmit: hex =>
 
-        @replaceColor hex if @colorReplace?
+        if @colorReplace?
+            if hex == @colorReplace.from
+                @colorReplace = null
+                ⮐
+            @replaceColor hex
 
     colorAtCursor: =>
 

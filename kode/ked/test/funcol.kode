@@ -121,6 +121,29 @@ use ../view/colmns  ◆ funcol
 
         delete global.ked_session
 
+    ▸ submitting without changes keeps the original color string
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['c = #abc;']
+        e.state.setMainCursor 6 0
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow ''
+
+        f.onColorPickerSubmit f.colorpicker.hex()
+
+        kseg.str(e.state.s.lines[0]) ▸ 'c = #abc;'
+        f.colorReplace ▸ null
+
+        delete global.ked_session
+
     ▸ an explicit show does not replace anything
 
         store = {}
