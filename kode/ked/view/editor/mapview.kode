@@ -13,6 +13,7 @@
 use ../../../kxk ▪ kstr post
 use ../../util   ◆ prof syntax 
 use ../../theme  ◆ color theme
+use ../../edit/tool ◆ colorspans
 use ../base      ◆ view
 
 function mapview extends view
@@ -182,7 +183,21 @@ function mapview extends view
         maxX   = w/@pixelsPerCol
         syntax = @getSyntax()
         classes = syntax.getClasses y
-        
+
+        fgSpans = []
+        bgSpans = []
+        colors  = @state.s.colors
+
+        if colors?
+            fgSpans = colorspans.spansForLine (colors.fg ? []) y
+            bgSpans = colorspans.spansForLine (colors.bg ? []) y
+
+        customColor = (spans x fallback) ->
+            for span in spans
+                if span[0] <= x < span[1]
+                    ⮐  color.values span[2]
+            fallback
+
         for x in 0...line.length
             
             break if x > maxX
@@ -199,13 +214,16 @@ function mapview extends view
                         f = 2.0
                 rgb = syntax.getColor x y clss
                 rgb = rgb.map (v) -> clamp(0 255 int(f*v))
+                rgb = customColor fgSpans x rgb
                  
                 charPixels x rgb
             else
-                charPixels x @color.bg
+                bg = customColor bgSpans x @color.bg
+                charPixels x bg
                     
         for x in line.length...maxX
-            charPixels x @color.bg        
+            bg = customColor bgSpans x @color.bg
+            charPixels x bg
             
     # ███████    ████████    ███████   ███   ███  
     # ███   ███  ███   ███  ███   ███  ███ █ ███  

@@ -6,6 +6,7 @@
 
 use ../edit  ◆ state editor
 use ../util  ◆ harness filecolors
+use ../view/editor ◆ mapview
 
 ▸ color state
 
@@ -113,3 +114,43 @@ use ../util  ◆ harness filecolors
         e.draw()
 
         h.screen.get_bg(2 0) ▸ [0 0 255]
+
+    ▸ the map uses custom colors
+
+        h = new harness cols:20 rows:5
+        e = new editor h.screen 'test_color_map' []
+
+        e.layout 0 0 20 5
+        e.state.loadLines ['abcdef']
+
+        e.state.setColorsForRanges [[1 0 2 0]] '#ff0000' null
+
+        m = new mapview h.screen e.state
+        m.setSyntaxSegls 'txt' e.state.s.lines
+
+        data = Buffer.alloc 120
+        m.imageForLine data e.state.s.lines[0] 0
+
+        data[6]  ▸ 255
+        data[7]  ▸ 0
+        data[8]  ▸ 0
+
+    ▸ the map uses custom backgrounds for spaces
+
+        h = new harness cols:20 rows:5
+        e = new editor h.screen 'test_color_map' []
+
+        e.layout 0 0 20 5
+        e.state.loadLines ['a b']
+
+        e.state.setColorsForRanges [[1 0 2 0]] null '#0000ff'
+
+        m = new mapview h.screen e.state
+        m.setSyntaxSegls 'txt' e.state.s.lines
+
+        data = Buffer.alloc 120
+        m.imageForLine data e.state.s.lines[0] 0
+
+        data[6]  ▸ 0
+        data[7]  ▸ 0
+        data[8]  ▸ 255

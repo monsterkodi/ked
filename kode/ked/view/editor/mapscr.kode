@@ -48,6 +48,7 @@ function mapscr extends mapview
             @show() if name in ['finder' 'vinder']
         
         @editor.state.on 'lines.changed' @onLinesChanged
+        @editor.state.on 'colors.changed' (=> @reload())
         
         @calcView()
         

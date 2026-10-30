@@ -92,6 +92,7 @@ function state extends events
         @s = @s.set 'colors' next
         @r = []
         @pushState()
+        @emit 'colors.changed'
 
     clearColorsForRanges: ranges =>
 
@@ -110,6 +111,7 @@ function state extends events
         @s = @s.set 'colors' next
         @r = []
         @pushState()
+        @emit 'colors.changed'
 
     clearColorsAtCursorOrSelection: =>
 
@@ -143,6 +145,7 @@ function state extends events
 
         @s = @s.set 'colors' next
         @clearHistory()
+        @emit 'colors.changed'
 
     #  ███████  ███   ███  ████████    ███████   ███████   ████████    ███████
     # ███       ███   ███  ███   ███  ███       ███   ███  ███   ███  ███
@@ -336,6 +339,7 @@ function state extends events
         @r.push @h.pop()
         @s = @h[-1]
         @syntax.setSegls @s.lines
+        @emit 'colors.changed'
 
     redo: =>
 
@@ -343,6 +347,7 @@ function state extends events
         @h.push @r.pop()
         @s = @h[-1]
         @syntax.setSegls @s.lines
+        @emit 'colors.changed'
 
     begin: => @beginIndex = @h.length
 
