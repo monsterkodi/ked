@@ -11,7 +11,7 @@ use ../util      ◆ prof
 use ../util/img  ◆ rounded
 use ../theme     ◆ color theme 
 use ../view/base ◆ view
-use ./tool       ◆ belt
+use ./tool       ◆ belt colorspans
 use              ◆ mode
 
 function draw extends view
@@ -89,6 +89,15 @@ function draw extends view
         
         syntax = @state.syntax
         view   = @state.s.view
+
+        fgSpans = []
+        bgSpans = []
+
+        if @state.s.colors?
+            for span in colorspans.spansForLine (@state.s.colors.fg ? []) y
+                fgSpans.push [span[0] span[1] color.values(span[2])]
+            for span in colorspans.spansForLine (@state.s.colors.bg ? []) y
+                bgSpans.push [span[0] span[1] color.values(span[2])]
     
         classes = syntax.getClasses y # one scan per line, not per column
     
@@ -122,6 +131,11 @@ function draw extends view
             clss ?= 'text'
             
             fg = syntax.getColor ci y clss
+
+            for span in fgSpans
+                if span[0] <= ci < span[1]
+                    fg = span[2]
+                    break
                 
             ch = syntax.getChar ci y line[si] clss
             if ch == "#" ➜ checkColor = true
@@ -143,6 +157,20 @@ function draw extends view
                 
         @drawColorPills  line row linel       if checkColor
         @drawAsciiHeader line row headerClass if headerClass
+        @drawColorBackgrounds row bgSpans
+
+    drawColorBackgrounds: row spans ->
+
+        view = @state.s.view
+
+        for span in spans
+
+            x1 = max 0 span[0]-view[0]
+            x2 = min @cells.cols span[1]-view[0]
+
+            continue if x1 >= x2
+
+            @cells.bg_rect x1 row (x2-1) row span[2]
         
     # ████████    ███████   ███   ███       ███████     ███████    ███████  ███   ███   ███████   ████████   ███████    
     # ███   ███  ███   ███  ███ █ ███       ███   ███  ███   ███  ███       ███  ███   ███        ███   ███  ███   ███  

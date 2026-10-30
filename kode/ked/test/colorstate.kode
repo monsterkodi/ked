@@ -1,0 +1,115 @@
+###
+    color state
+
+    color spans in the editor state and their drawing
+###
+
+use ../edit  ◆ state editor
+use ../util  ◆ harness filecolors
+
+▸ color state
+
+    ▸ foreground and background are independent layers
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        s.setColorsForRanges [[0 0 3 0]] '#ff0000' null
+
+        s.s.colors.fg ▸ [[0 0 3 '#ff0000']]
+        s.s.colors.bg ▸ []
+
+        s.setColorsForRanges [[1 0 5 0]] null '#0000ff'
+
+        s.s.colors.fg ▸ [[0 0 3 '#ff0000']]
+        s.s.colors.bg ▸ [[1 0 5 '#0000ff']]
+
+    ▸ clearing splits both layers
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        s.setColorsForRanges [[0 0 3 0]] '#ff0000' null
+        s.setColorsForRanges [[1 0 5 0]] null '#0000ff'
+
+        s.clearColorsForRanges [[1 0 4 0]]
+
+        s.s.colors.fg ▸ [[0 0 1 '#ff0000']]
+        s.s.colors.bg ▸ [[4 0 5 '#0000ff']]
+
+    ▸ editing adjusts the spans
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        s.setColorsForRanges [[0 0 6 0]] '#ff0000' null
+
+        s.setLines ['abXcdef']
+
+        s.s.colors.fg ▸ [[0 0 7 '#ff0000']]
+
+    ▸ clearing at the selection clears both layers
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        s.setColorsForRanges [[0 0 6 0]] '#ff0000' '#0000ff'
+        s.setSelections [[0 0 6 0]]
+
+        s.clearColorsAtCursorOrSelection()
+
+        s.s.colors.fg ▸ []
+        s.s.colors.bg ▸ []
+
+    ▸ colors can be undone
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        s.setColorsForRanges [[0 0 3 0]] '#ff0000' null
+
+        s.s.colors.fg ▸ [[0 0 3 '#ff0000']]
+
+        s.undo()
+
+        s.s.colors.fg ▸ []
+
+    ▸ colors are drawn over syntax
+
+        h = new harness cols:20 rows:5
+        e = new editor h.screen 'test_color_draw' []
+
+        e.layout 0 0 20 5
+        e.state.loadLines ['abcdef']
+
+        e.state.setColorsForRanges [[1 0 4 0]] '#ff0000' '#0000ff'
+
+        e.draw()
+
+        h.screen.get_fg(2 0) ▸ [255 0 0]
+        h.screen.get_bg(2 0) ▸ [0 0 255]
+
+    ▸ a saved background survives a load
+
+        colors =
+            fg: []
+            bg: [[1 0 4 '#0000ff']]
+
+        text = filecolors.join 'test.js' 'abcdef' colors
+        data = filecolors.split 'test.js' text
+
+        h = new harness cols:20 rows:5
+        e = new editor h.screen 'test_color_load' []
+
+        e.layout 0 0 20 5
+        e.state.loadLines data.text.split('\n')
+        e.state.loadColors data.colors
+
+        e.draw()
+
+        h.screen.get_bg(2 0) ▸ [0 0 255]

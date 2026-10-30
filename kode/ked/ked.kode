@@ -8,7 +8,7 @@
 
 use ../kxk        ▪ karg kstr kseg slash post nfs sleep
 use ./index       ◆ prjcts indexer
-use ./util        ◆ logfile session help frecent watcher git config dumpstate
+use ./util        ◆ logfile session help frecent watcher git config dumpstate filecolors
 use ./util/img    ◆ rounded squares sircels
 use ./edit/tool   ◆ belt
 use ./edit        ◆ mode
@@ -475,7 +475,11 @@ function KED
                 
         if text == undefined
             text = '○ binary ○'
-        
+
+        fileColorData = filecolors.split @currentFile text
+        text          = fileColorData.text
+        fileColors    = fileColorData.colors
+
         [colors segls] = belt.colorSeglsForText text
         
         if valid colors
@@ -486,6 +490,7 @@ function KED
             @editor.state.syntax.setExt ext
         
         @editor.state.loadSegls segls
+        @editor.state.loadColors fileColors
         @editor.setCurrentFile @currentFile     
         ked_session.set "editor▸file" @currentFile
         
@@ -535,7 +540,9 @@ function KED
         if empty path
             post.emit 'novim.error' 'no file name'
             ⮐  false
-        
+
+        text = filecolors.join path text @editor.state.s.colors
+
         result = ○ nfs.write path text
         
         if result?.error
@@ -577,6 +584,7 @@ function KED
     onSaveAs: path ○=>
         
         text = kseg.str @editor.state.s.lines
+        text = filecolors.join path text @editor.state.s.colors
         
         ○ nfs.write path text
         
@@ -710,6 +718,7 @@ function KED
             "alt+\\"                     ➜ ⮐  post.emit 'dircol.focus'
             "alt+'"                      ➜ ⮐  post.emit 'funcol.focus'
             'alt+c'                      ➜ ⮐  post.emit 'colorpicker.show'
+            'alt+shift+c' 'shift+alt+c'  ➜ ⮐  @editor.state.clearColorsAtCursorOrSelection()
             
         for handler in @keyHandlers
             # ●▸ on key

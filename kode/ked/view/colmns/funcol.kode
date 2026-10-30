@@ -20,7 +20,8 @@ function funcol extends view
         
         @isVisible = false
         @active    = false
-        @colorReplace = null
+        @colorReplace  = null
+        @colorDecorate = null
         
         @pointerType = 'pointer'
         
@@ -60,12 +61,28 @@ function funcol extends view
         @active = true
         @show() if @hidden()
 
-        @colorReplace = null
+        @colorReplace  = null
+        @colorDecorate = null
 
         if empty hex
+
             if found = @colorAtCursor()
                 hex = found.text
                 @colorReplace = found
+            else if not empty @editor.state.s.selections
+
+                @colorDecorate =
+                    ranges: clone @editor.state.s.selections
+
+                foundColor = @editor.state.colorAtPos @editor.state.mainCursor() 'fg'
+
+                if not foundColor
+                    for rng in @colorDecorate.ranges
+                        if clr = @editor.state.colorAtPos [rng[0] rng[1]] 'fg'
+                            foundColor = clr
+                            break
+
+                hex = foundColor if foundColor
 
         @colorpicker.show hex
 
@@ -81,6 +98,16 @@ function funcol extends view
                 @colorReplace = null
                 ⮐
             @replaceColor hex
+
+        else if @colorDecorate?
+
+            ranges = @colorDecorate.ranges
+
+            @colorDecorate = null
+
+            @editor.state.setColorsForRanges ranges hex null
+
+            post.emit 'redraw'
 
     colorAtCursor: =>
 

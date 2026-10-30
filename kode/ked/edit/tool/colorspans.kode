@@ -1,0 +1,274 @@
+###
+    colorspans
+
+    per line color spans for the editor
+    a span is [x1 y x2 color]
+    x2 is exclusive
+###
+
+use ../../../kxk ▪ kseg
+
+function colorspans
+
+    @normalize: spans ->
+
+        result = []
+
+        for span in spans
+
+            continue if not (span is arr) or span.length != 4
+
+            [x1 y x2 color] = span
+
+            continue if not (x1 is num) or not (y is num) or not (x2 is num)
+            continue if not (color is str) or empty color
+            continue if x1 >= x2 or y < 0
+
+            result.push [x1 y x2 color]
+
+        result.sort (a b) -> a[1] == b[1] ? a[0]-b[0] : a[1]-b[1]
+
+        merged = []
+
+        for span in result
+
+            lastSpan = merged[-1]
+
+            if lastSpan? and lastSpan[1] == span[1] and lastSpan[3] == span[3] and span[0] <= lastSpan[2]
+                lastSpan[2] = max lastSpan[2] span[2]
+            else
+                merged.push span
+
+        merged
+
+    @spansForLine: spans y ->
+
+        result = []
+
+        for span in spans
+            if span[1] == y
+                result.push [span[0] span[2] span[3]]
+
+        result
+
+    @colorAtPos: spans pos ->
+
+        [x y] = pos
+
+        for span in spans
+            if span[1] == y and span[0] <= x < span[2]
+                ⮐  span[3]
+
+        null
+
+    @segmentsForRange: lines rng ->
+
+        [x1 y1 x2 y2] = rng
+
+        segs = []
+
+        y1 = max 0 y1
+        y2 = min lines.length-1 y2
+
+        ⮐  segs if y1 > y2
+
+        for y in y1..y2
+
+            line  = lines[y] ? []
+            width = kseg.width line
+
+            a = y == y1 ? x1 : 0
+            b = y == y2 ? x2 : width
+
+            a = clamp 0 width a
+            b = clamp 0 width b
+
+            segs.push [a y b] if a < b
+
+        segs
+
+    @removeSegment: spans x1 y x2 ->
+
+        result = []
+
+        for span in spans
+
+            if span[1] != y or span[2] <= x1 or span[0] >= x2
+                result.push span
+            else
+                result.push [span[0] y x1 span[3]] if span[0] < x1
+                result.push [x2 y span[2] span[3]] if x2 < span[2]
+
+        result
+
+    @overlay: spans ranges color lines ->
+
+        out = @normalize spans
+
+        ⮐  out if empty color
+
+        for rng in ranges
+
+            for seg in @segmentsForRange(lines rng)
+
+                [x1 y x2] = seg
+
+                out = @removeSegment out x1 y x2
+                out.push [x1 y x2 color]
+                out = @normalize out
+
+        out
+
+    @clear: spans ranges ->
+
+        out = @normalize spans
+
+        for rng in ranges
+
+            [x1 y1 x2 y2] = rng
+
+            for y in y1..y2
+
+                a = y == y1 ? x1 : 0
+                b = y == y2 ? x2 : 1000000000
+
+                out = @removeSegment out a y b
+
+        @normalize out
+
+    @lineMap: oldLines newLines ->
+
+        oldLen = oldLines.length
+        newLen = newLines.length
+
+        map = []
+
+        pre = 0
+        while pre < oldLen and pre < newLen and oldLines[pre] eql newLines[pre]
+            map[pre] = pre
+            pre += 1
+
+        suf = 0
+        while suf < oldLen-pre and suf < newLen-pre and oldLines[oldLen-1-suf] eql newLines[newLen-1-suf]
+            map[oldLen-1-suf] = newLen-1-suf
+            suf += 1
+
+        oldMidLen = oldLen-pre-suf
+        newMidLen = newLen-pre-suf
+
+        if oldMidLen == newMidLen
+
+            for y in pre...oldLen-suf
+                map[y] = y
+
+        else
+
+            positions = Object.create null
+
+            for y in pre...newLen-suf
+                key = kseg.str newLines[y]
+                positions[key] ?= []
+                positions[key].push y
+
+            cursor = pre
+
+            for y in pre...oldLen-suf
+
+                key  = kseg.str oldLines[y]
+                idxs = positions[key] ? []
+
+                while idxs.length and idxs[0] < cursor
+                    idxs.shift()
+
+                if idxs.length
+                    ni = idxs.shift()
+                    map[y]  = ni
+                    cursor  = ni+1
+                else
+                    map[y] = -1
+
+        map
+
+    @adjustSegment: span oldLine newLine ->
+
+        [x1 y x2 color] = span
+
+        oldLen = oldLine.length
+        newLen = newLine.length
+
+        p = 0
+        while p < oldLen and p < newLen and oldLine[p] == newLine[p]
+            p += 1
+
+        s = 0
+        while s < oldLen-p and s < newLen-p and oldLine[oldLen-1-s] == newLine[newLen-1-s]
+            s += 1
+
+        oldWidth = kseg.width oldLine
+        newWidth = kseg.width newLine
+
+        preWidth = kseg.width oldLine[0...p]
+
+        oldChangeStart = preWidth
+        oldChangeEnd   = oldWidth - kseg.width(oldLine[oldLen-s...oldLen])
+        newChangeEnd   = newWidth - kseg.width(newLine[newLen-s...newLen])
+
+        delta = newWidth-oldWidth
+
+        if oldChangeStart == oldChangeEnd
+
+            if x1 < preWidth and preWidth <= x2
+                ⮐  [x1 y x2+delta color]
+
+            if x1 >= preWidth
+                ⮐  [x1+delta y x2+delta color]
+
+            ⮐  [x1 y x2 color]
+
+        if x2 <= oldChangeStart
+            ⮐  [x1 y x2 color]
+
+        if x1 >= oldChangeEnd
+            ⮐  [x1+delta y x2+delta color]
+
+        if x1 <= oldChangeStart and x2 >= oldChangeEnd
+            ⮐  [x1 y x2+delta color]
+
+        if x1 <= oldChangeStart
+            ⮐  [x1 y oldChangeStart color]
+
+        if x2 >= oldChangeEnd
+            ⮐  [newChangeEnd y x2+delta color]
+
+        null
+
+    @adjust: spans oldLines newLines ->
+
+        ⮐  [] if empty spans
+
+        map = @lineMap oldLines newLines
+
+        result = []
+
+        for span in spans
+
+            [x1 y x2 color] = span
+
+            ny = map[y]
+
+            continue if not ny? or ny < 0
+
+            oldLine = oldLines[y] ? []
+            newLine = newLines[ny] ? []
+
+            if oldLine eql newLine
+                result.push [x1 ny x2 color]
+            else
+                adj = @adjustSegment span oldLine newLine
+                if adj?
+                    adj[1] = ny
+                    result.push adj
+
+        @normalize result
+
+export colorspans

@@ -1,0 +1,87 @@
+###
+    filecolors
+
+    serialize color spans into a single trailing comment line
+    and read them back
+###
+
+use ../util ◆ filecolors
+
+▸ filecolors
+
+    ▸ js uses a block comment
+
+        filecolors.commentStyle('x.js').start ▸ '/*'
+        filecolors.commentStyle('x.js').end ▸ '*/'
+
+    ▸ python uses a hash comment
+
+        filecolors.commentStyle('x.py').start ▸ '#'
+        filecolors.commentStyle('x.py').end ▸ ''
+
+    ▸ json has no comment style
+
+        filecolors.commentStyle('x.json') ▸ null
+
+    ▸ other file types use their kolor comment style
+
+        filecolors.commentStyle('x.css').start ▸ '/*'
+        filecolors.commentStyle('x.lua').start ▸ '--'
+        filecolors.commentStyle('x.html').start ▸ '<!--'
+        filecolors.commentStyle('x.kode').start ▸ '#'
+
+    ▸ join and split roundtrip
+
+        colors =
+            fg: [[0 0 3 '#f00']]
+            bg: [[4 0 5 '#00f']]
+
+        text = 'abc def'
+
+        joined = filecolors.join 'x.js' text colors
+
+        lines = joined.split '\n'
+        lines.length ▸ 3
+        lines[1].startsWith('/* ked-colors ') ▸ true
+        lines[1].endsWith(' */') ▸ true
+
+        back = filecolors.split 'x.js' joined
+
+        back.text ▸ text
+        back.colors ▸ colors
+
+    ▸ a trailing newline is kept
+
+        colors = fg: [[0 0 3 '#f00']] bg: []
+
+        text = 'abc\n'
+
+        joined = filecolors.join 'x.js' text colors
+
+        back = filecolors.split 'x.js' joined
+
+        back.text ▸ text
+        back.colors ▸ colors
+
+    ▸ no colors means no comment
+
+        filecolors.join 'x.js' 'abc' {fg:[] bg:[]} ▸ 'abc'
+
+    ▸ unsupported file types are left alone
+
+        colors = fg: [[0 0 3 '#f00']] bg: []
+
+        filecolors.join 'x.json' '{"a":1}' colors ▸ '{"a":1}'
+
+    ▸ a changed file discards the colors but strips the comment
+
+        colors = fg: [[0 0 3 '#f00']] bg: []
+
+        joined = filecolors.join 'x.js' 'abc' colors
+        changed = joined.replace 'abc' 'abd'
+
+        back = filecolors.split 'x.js' changed
+
+        back.text ▸ 'abd'
+        back.colors.fg ▸ []
+        back.colors.bg ▸ []

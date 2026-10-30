@@ -1,0 +1,116 @@
+###
+    filecolors
+
+    serialize editor color spans into one trailing comment line
+    and read them back when the whole file hash still matches
+###
+
+use ../../kxk    ▪ kstr slash
+use ../../kolor  ◆ kulur
+use ../edit/tool ◆ colorspans
+
+function filecolors
+
+    @commentStyle: path -> kulur.commentStyle slash.ext(path)
+
+    @empty: -> fg: [] bg: []
+
+    @validSpans: spans count ->
+
+        result = []
+
+        ⮐  result if not (spans is arr)
+
+        for span in spans
+
+            continue if not (span is arr) or span.length != 4
+
+            [x1 y x2 color] = span
+
+            continue if not (x1 is num) or not (y is num) or not (x2 is num)
+            continue if not (color is str)
+            continue if x1 >= x2 or y < 0 or y >= count
+            continue if not color.match /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
+
+            result.push [x1 y x2 color]
+
+        colorspans.normalize result
+
+    @split: path text ->
+
+        style = @commentStyle path
+
+        ⮐  {text: text colors: @empty()} if not style?
+
+        end = text.endsWith('\n') ? text.length-1 : text.length
+        ⮐  {text: text colors: @empty()} if end <= 0
+
+        start = text.lastIndexOf '\n' end-1
+        start += 1
+
+        trailer = text[start...end]
+        trailer = trailer[0...trailer.length-1] if trailer.endsWith '\r'
+
+        ⮐  {text: text colors: @empty()} if empty trailer
+        ⮐  {text: text colors: @empty()} if not trailer.startsWith(style.start)
+
+        innerEnd = trailer.length
+        innerEnd -= style.end.length if not empty style.end
+
+        ⮐  {text: text colors: @empty()} if not empty style.end and not trailer.endsWith(style.end)
+
+        body = trailer[style.start.length...innerEnd].trim()
+
+        ⮐  {text: text colors: @empty()} if not body.startsWith 'ked-colors'
+
+        payload = body['ked-colors'.length..].trim()
+
+        clean = start > 0 ? text[0...start-1] : ''
+
+        data = null
+        try
+            data = JSON.parse payload
+        catch err
+            data = null
+
+        expected = "#{kstr.hash clean}:#{clean.length}"
+        count    = clean.split('\n').length
+
+        if data? and data.v == 1 and data.hash == expected
+            validFg = @validSpans data.fg count
+            validBg = @validSpans data.bg count
+            colors =
+                fg: validFg
+                bg: validBg
+        else
+            colors = @empty()
+
+        text: clean
+        colors: colors
+
+    @join: path text colors ->
+
+        style = @commentStyle path
+
+        ⮐  text if not style?
+
+        colors ?= @empty()
+
+        fg = colors.fg ? []
+        bg = colors.bg ? []
+
+        ⮐  text if empty fg and empty bg
+
+        data =
+            v:    1
+            hash: "#{kstr.hash text}:#{text.length}"
+            fg:   fg
+            bg:   bg
+
+        trailer = style.start + ' ked-colors ' + JSON.stringify(data)
+
+        trailer += ' ' + style.end if not empty style.end
+
+        text + '\n' + trailer + '\n'
+
+export filecolors

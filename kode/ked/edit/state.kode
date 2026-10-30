@@ -16,7 +16,7 @@ use ../../kxk ▪ immutable kstr kseg events absMin
 use ../../kxk ◆ clip
 use ../util   ◆ syntax
 use ./act     ◆ del insert select join indent multi main novim
-use ./tool    ◆ belt
+use ./tool    ◆ belt colorspans
 use           ◆ keys mode
 
 function state extends events
@@ -71,6 +71,78 @@ function state extends events
 
     setSelections: selections => @set 'selections' belt.mergeLineRanges(@s.lines selections)
     setHighlights: highlights => @set 'highlights' belt.normalizeSpans(highlights)
+
+    setColorsForRanges: (ranges fg bg) =>
+
+        colors = @s.colors
+        colors ?= {fg: [], bg: []}
+
+        fgSpans = colors.fg ? []
+        bgSpans = colors.bg ? []
+
+        fgSpans = colorspans.overlay fgSpans ranges fg @s.lines if valid fg and not empty fg
+        bgSpans = colorspans.overlay bgSpans ranges bg @s.lines if valid bg and not empty bg
+
+        next =
+            fg: fgSpans
+            bg: bgSpans
+
+        ⮐  if @s.colors? and @s.colors eql next
+
+        @s = @s.set 'colors' next
+        @r = []
+        @pushState()
+
+    clearColorsForRanges: ranges =>
+
+        colors = @s.colors
+        ⮐  if not colors?
+
+        fgSpans = colorspans.clear (colors.fg ? []) ranges
+        bgSpans = colorspans.clear (colors.bg ? []) ranges
+
+        next =
+            fg: fgSpans
+            bg: bgSpans
+
+        ⮐  if colors eql next
+
+        @s = @s.set 'colors' next
+        @r = []
+        @pushState()
+
+    clearColorsAtCursorOrSelection: =>
+
+        ranges = @s.selections
+
+        if empty ranges
+            if rng = belt.rangeOfClosestWordToPos @s.lines @mainCursor()
+                ranges = [rng]
+
+        @clearColorsForRanges ranges if not empty ranges
+
+    colorAtPos: (pos layer) =>
+
+        colors = @s.colors
+        ⮐  null if not colors?
+
+        colorspans.colorAtPos (colors[layer] ? []) pos
+
+    loadColors: colors =>
+
+        fgSpans = []
+        bgSpans = []
+
+        if colors?
+            fgSpans = colors.fg ? []
+            bgSpans = colors.bg ? []
+
+        next =
+            fg: fgSpans
+            bg: bgSpans
+
+        @s = @s.set 'colors' next
+        @clearHistory()
 
     #  ███████  ███   ███  ████████    ███████   ███████   ████████    ███████
     # ███       ███   ███  ███   ███  ███       ███   ███  ███   ███  ███
@@ -187,6 +259,7 @@ function state extends events
             cursors:     [[0 0]]
             main:        0
             view:        [0 0]
+            colors:      {fg: [], bg: []}
             
         @syntax.clear()
         
@@ -224,6 +297,20 @@ function state extends events
         @s = @s.set 'lines' @segls
         
         if oldLines != @s.lines
+
+            colors = @s.colors
+
+            if colors? and (not empty colors.fg or not empty colors.bg)
+
+                fgSpans = colorspans.adjust (colors.fg ? []) oldLines @s.lines
+                bgSpans = colorspans.adjust (colors.bg ? []) oldLines @s.lines
+
+                next =
+                    fg: fgSpans
+                    bg: bgSpans
+
+                @s = @s.set 'colors' next
+
             diff = belt.diffLines oldLines @s.lines            
             @emit 'lines.changed' diff
 

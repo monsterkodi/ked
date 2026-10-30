@@ -1450,6 +1450,29 @@ for ext,obj of handlers
     handlers[ext].punct.push stacked
     handlers[ext].word.push stacked
 
+commentStyles = {}
+
+for ext,handler of handlers
+
+    punct = handler.punct
+
+    if hashComment in punct or noonComment in punct or nimComment in punct
+        commentStyles[ext] = start:'#' end:''
+    else if luaComment in punct
+        commentStyles[ext] = start:'--' end:''
+    else if starComment in punct
+        commentStyles[ext] = start:'/*' end:'*/'
+    else if slashComment in punct
+        commentStyles[ext] = start:'//' end:''
+
+for ext in ['html' 'htm' 'xml' 'svg' 'md']
+    commentStyles[ext] = start:'<!--' end:'-->'
+
+commentStyle = (ext) ->
+    ⮐  null if not ext is str
+    ext = ext[1..] if ext[0] == '.'
+    commentStyles[ext] ? null
+
 ###
 ███████    ███       ███████    ███████  ███   ███  ████████  ███████
 ███   ███  ███      ███   ███  ███       ███  ███   ███       ███   ███
@@ -1674,3 +1697,5 @@ export
     kolorize:       kolorize
     kolorizeChunks: kolorizeChunks
     syntax:         syntax
+    commentStyle:   commentStyle
+    commentStyles:  commentStyles
