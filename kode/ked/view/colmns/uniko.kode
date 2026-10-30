@@ -26,7 +26,7 @@ function uniko extends view
 
         super @screen name
 
-        @height = 14
+        @height = 16
         @focus  = 'matrix'
         @double = false
 
@@ -144,12 +144,9 @@ function uniko extends view
         @matrix.grabFocus()
         true
 
-    setDouble: on =>
+    incScale: delta =>
 
-        @double = on
-        @height = on ? 24 : 14
-
-        @matrix.setDouble on
+        @matrix.incScale delta
 
         post.emit 'redraw'
 
@@ -217,8 +214,8 @@ function uniko extends view
             'return' ➜ ⮐  @submit()
             'cmd+c'  ➜ ⮐  @copy()
             'ctrl+c' ➜ ⮐  @copy()
-            'cmd+down' ➜ ⮐ @setDouble true
-            'cmd+up'   ➜ ⮐ @setDouble false
+            'cmd+down' ➜ ⮐ @incScale -1
+            'cmd+up'   ➜ ⮐ @incScale 1
 
         if event.combo == 'space'
             ⮐  @submit()

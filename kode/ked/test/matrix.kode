@@ -99,16 +99,16 @@ use ../../kxk    ▪ post
         m = new matrix h.screen 'test_matrix'
         m.layout 0 0 20 20
 
-        m.rowHeight() ▸ 1
+        m.scale ▸ 1
         m.viewportRows() ▸ 20
 
-        m.setDouble true
+        m.incScale 1
 
-        m.rowHeight() ▸ 2
+        m.scale ▸ 2
         m.viewportRows() ▸ 10
         m.cellAtPos(3 4) ▸ [0 2]
 
-        m.setDouble false
+        m.incScale -1
 
-        m.rowHeight() ▸ 1
+        m.scale ▸ 1
         m.viewportRows() ▸ 20
