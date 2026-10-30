@@ -74,15 +74,11 @@ function funcol extends view
                 @colorDecorate =
                     ranges: clone @editor.state.s.selections
 
-                foundColor = @editor.state.colorAtPos @editor.state.mainCursor() 'fg'
+                @colorpicker.showSelection @colorForSelection('fg') @colorForSelection('bg')
 
-                if not foundColor
-                    for rng in @colorDecorate.ranges
-                        if clr = @editor.state.colorAtPos [rng[0] rng[1]] 'fg'
-                            foundColor = clr
-                            break
-
-                hex = foundColor if foundColor
+                ked_session.set 'funcol▸active' @active
+                post.emit 'redraw'
+                ⮐
 
         @colorpicker.show hex
 
@@ -105,9 +101,26 @@ function funcol extends view
 
             @colorDecorate = null
 
-            @editor.state.setColorsForRanges ranges hex null
+            fg = @colorpicker.foregroundHex()
+            bg = null
+
+            bg = @colorpicker.backgroundHex() if @colorpicker.backgroundChanged()
+
+            @editor.state.setColorsForRanges ranges fg bg
 
             post.emit 'redraw'
+
+    colorForSelection: layer =>
+
+        color = @editor.state.colorAtPos @editor.state.mainCursor() layer
+
+        ⮐  color if color?
+
+        for rng in @editor.state.s.selections
+            if c = @editor.state.colorAtPos [rng[0] rng[1]] layer
+                ⮐  c
+
+        null
 
     colorAtCursor: =>
 

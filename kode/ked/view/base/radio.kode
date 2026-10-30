@@ -1,0 +1,131 @@
+###
+    radio
+
+    a horizontal segmented color radio
+    each option has a color and a label
+    only the active option shows its label
+###
+
+use ../../theme ◆ color theme
+use             ◆ view
+
+function radio extends view
+
+    @: screen name ->
+
+        super screen name
+
+        @setColor 'bg' theme.colorpicker.bg
+        @setColor 'fg' theme.colorpicker.fg
+
+        @options      = []
+        @active       = 0
+        @focused      = false
+        @focusable    = false
+        @pointerType  = null
+        @onFocusRequest = null
+        @onSelect       = null
+
+    setOptions: options =>
+
+        @options = options ? []
+
+        if empty @options
+            @active = 0
+        else
+            @active = clamp 0 (@options.length-1) @active
+
+    setActive: idx =>
+
+        ⮐  if empty @options
+        @active = clamp 0 (@options.length-1) int(idx)
+
+    getActive: -> @active
+
+    setFocused: focused => @focused = focused
+
+    setFocusable: focusable =>
+
+        @focusable   = focusable
+        @pointerType = focusable ? 'pointer' : null
+
+    grabFocus: => @onFocusRequest() if @onFocusRequest is func
+
+    optionAt: x =>
+
+        ⮐  0 if empty @options
+
+        w = max 1 @cells.cols
+        idx = int(x * @options.length / w)
+
+        clamp 0 @options.length-1 idx
+
+    onMouse: event =>
+
+        ⮐  if @hidden() or @collapsed()
+
+        super event
+
+        if event.type == 'press' and @hover and @focusable
+
+            @setActive @optionAt @eventPos(event)[0]
+            @grabFocus()
+            @onSelect @active if @onSelect is func
+
+            ⮐  redraw:true
+
+        @hover
+
+    draw: =>
+
+        ⮐  if @hidden() or @collapsed()
+
+        w = @cells.cols
+        ⮐  if w < 1
+
+        @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
+
+        n = @options.length
+        ⮐  if n < 1
+
+        starts = []
+        ends   = []
+
+        for idx in 0...n
+            starts.push int(idx*w/n)
+            ends.push   int((idx+1)*w/n)
+            for x in starts[idx]...ends[idx]
+                @cells.set_bg x 0 @options[idx].color
+
+        used = []
+        hex  = @options[@active].label ? ''
+        segw = ends[@active]-starts[@active]
+
+        label = hex
+
+        if @focused
+            for candidate in ['● ' + hex + ' ●' '●' + hex + '●']
+                if candidate.length <= segw
+                    label = candidate
+                    break
+
+        label = label[0...min(segw label.length)]
+
+        pad = max 0 int((segw - label.length)/2)
+        x = starts[@active] + pad
+        fg = color.adjustForBackground @color.fg @options[@active].color
+
+        for ch, i in label
+            @cells.set x+i 0 ch fg @options[@active].color
+            used[x+i] = true
+
+        if w > 1
+
+            capLeft  = not used[0]
+            capRight = not used[w-1]
+
+            if capLeft and capRight
+                @cells.set 0 0 '◖' @options[0].color @color.bg
+                @cells.set w-1 0 '◗' @options[-1].color @color.bg
+
+export radio

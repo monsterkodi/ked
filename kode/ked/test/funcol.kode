@@ -243,3 +243,61 @@ use ../view/colmns  ◆ funcol
         f.colorpicker.hex() ▸ '#00ff00'
 
         delete global.ked_session
+
+    ▸ a selection keeps its existing background when only the foreground changes
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['hello world']
+        e.state.setSelections [[0 0 5 0]]
+        e.state.setMainCursor 2 0
+        e.state.setColorsForRanges [[0 0 5 0]] '#00ff00' '#0000ff'
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow ''
+
+        f.colorpicker.foregroundHex() ▸ '#00ff00'
+        f.colorpicker.backgroundHex() ▸ '#0000ff'
+        f.colorpicker.backgroundChanged() ▸ false
+
+        f.onColorPickerSubmit '#00ff00'
+
+        e.state.s.colors.fg ▸ [[0 0 5 '#00ff00']]
+        e.state.s.colors.bg ▸ [[0 0 5 '#0000ff']]
+
+        delete global.ked_session
+
+    ▸ a changed background is applied on submit
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['hello world']
+        e.state.setSelections [[0 0 5 0]]
+        e.state.setMainCursor 2 0
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow ''
+
+        f.colorpicker.setActiveColor 1
+        f.colorpicker.setHex '#0000ff'
+
+        f.colorpicker.backgroundChanged() ▸ true
+
+        f.onColorPickerSubmit f.colorpicker.foregroundHex()
+
+        e.state.s.colors.fg ▸ [[0 0 5 '#ff0000']]
+        e.state.s.colors.bg ▸ [[0 0 5 '#0000ff']]
+
+        delete global.ked_session

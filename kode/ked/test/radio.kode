@@ -1,0 +1,70 @@
+###
+    radio
+
+    a segmented color radio for the color picker
+###
+
+use ../util      ◆ harness
+use ../view/base ◆ radio
+
+▸ radio
+
+    ▸ a single option fills the row and shows its label
+
+        h = new harness cols:20 rows:2
+        r = new radio h.screen 'test_radio'
+
+        r.layout 0 0 20 1
+        r.setOptions [{color: [255 255 255] label: '#ffffff'}]
+        r.draw()
+
+        h.row(0).includes('#ffffff') ▸ true
+        h.screen.get_char(0 0) ▸ '◖'
+        h.screen.get_char(19 0) ▸ '◗'
+        h.screen.get_bg(10 0) ▸ [255 255 255]
+
+    ▸ only the active option shows a label
+
+        h = new harness cols:20 rows:2
+        r = new radio h.screen 'test_radio'
+
+        r.layout 0 0 20 1
+        r.setOptions [{color: [255 255 255] label: '#ffffff'} {color: [0 0 255] label: '#0000ff'}]
+
+        r.draw()
+
+        h.row(0).includes('#ffffff') ▸ true
+        h.row(0).includes('#0000ff') ▸ false
+        h.screen.get_bg(2 0) ▸ [255 255 255]
+        h.screen.get_bg(17 0) ▸ [0 0 255]
+
+        r.setActive 1
+        r.draw()
+
+        h.row(0).includes('#ffffff') ▸ false
+        h.row(0).includes('#0000ff') ▸ true
+
+    ▸ the active label gets focus markers when they fit
+
+        h = new harness cols:20 rows:2
+        r = new radio h.screen 'test_radio'
+
+        r.layout 0 0 20 1
+        r.setOptions [{color: [255 255 255] label: '#ffffff'} {color: [0 0 255] label: '#0000ff'}]
+        r.setActive 1
+        r.setFocused true
+        r.draw()
+
+        h.row(0).includes('●#0000ff●') ▸ true
+
+    ▸ focusability is controlled by the caller
+
+        h = new harness cols:20 rows:2
+        r = new radio h.screen 'test_radio'
+
+        r.focusable ▸ false
+        r.setFocusable true
+        r.focusable ▸ true
+        r.pointerType ▸ 'pointer'
+        r.setFocusable false
+        r.pointerType ▸ null

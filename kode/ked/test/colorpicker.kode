@@ -20,7 +20,7 @@ use ../view/colmns ◆ colorpicker
 
         e =
             type: 'move'
-            cell: [8 2]
+            cell: [8 3]
         p.onMouse e
 
         p.focusIndex ▸ 1
@@ -34,7 +34,7 @@ use ../view/colmns ◆ colorpicker
 
         e =
             type: 'move'
-            cell: [6 5]
+            cell: [6 6]
         p.onMouse e
 
         p.focusIndex ▸ 4
@@ -49,7 +49,7 @@ use ../view/colmns ◆ colorpicker
 
         e =
             type: 'press'
-            cell: [11 1]
+            cell: [11 2]
             button: 'left'
             count: 1
         p.onMouse e
@@ -66,7 +66,7 @@ use ../view/colmns ◆ colorpicker
 
         e =
             type: 'press'
-            cell: [5 1]
+            cell: [5 2]
             button: 'left'
             count: 1
         p.onMouse e
@@ -75,7 +75,7 @@ use ../view/colmns ◆ colorpicker
 
         e =
             type: 'drag'
-            cell: [15 3]
+            cell: [15 4]
             button: 'left'
             count: 1
         p.onMouse e
@@ -84,7 +84,7 @@ use ../view/colmns ◆ colorpicker
 
         e =
             type: 'release'
-            cell: [15 3]
+            cell: [15 4]
             button: 'left'
             count: 1
         p.onMouse e
@@ -98,6 +98,15 @@ use ../view/colmns ◆ colorpicker
 
         e =
             type: 'press'
+            cell: [5 4]
+            button: 'left'
+            count: 1
+        p.onMouse e
+
+        p.focusIndex ▸ 2
+
+        e =
+            type: 'drag'
             cell: [5 3]
             button: 'left'
             count: 1
@@ -115,17 +124,8 @@ use ../view/colmns ◆ colorpicker
         p.focusIndex ▸ 2
 
         e =
-            type: 'drag'
-            cell: [5 1]
-            button: 'left'
-            count: 1
-        p.onMouse e
-
-        p.focusIndex ▸ 2
-
-        e =
             type: 'release'
-            cell: [5 1]
+            cell: [5 2]
             button: 'left'
             count: 1
         p.onMouse e
@@ -141,7 +141,7 @@ use ../view/colmns ◆ colorpicker
 
         e =
             type: 'wheel'
-            cell: [8 3]
+            cell: [8 4]
             dir: 'up'
         p.onWheel e
 
@@ -159,9 +159,146 @@ use ../view/colmns ◆ colorpicker
 
         e =
             type: 'wheel'
-            cell: [2 5]
+            cell: [2 6]
             dir: 'down'
         p.onWheel e
 
         p.red.getValue() ▸ 99
         p.focusIndex ▸ 3
+
+    ▸ a selection keeps two colors and adds the radio to the ring
+
+        h = new harness cols:30 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 30 9
+
+        p.showSelection '#ff0000' '#00ff00'
+
+        p.selectionMode() ▸ true
+        p.radio.options.length ▸ 2
+        p.radio.focusable ▸ true
+
+        p.focusTo 5
+        h.key p 'tab' ''
+        p.focusIndex ▸ 6
+
+        h.key p 'tab' ''
+        p.focusIndex ▸ 0
+
+    ▸ left and right switch the active color
+
+        h = new harness cols:30 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 30 9
+
+        p.showSelection '#ff0000' '#00ff00'
+        p.focusTo 6
+
+        p.activeColor ▸ 0
+        p.hex() ▸ '#ff0000'
+
+        h.key p 'right' ''
+        p.activeColor ▸ 1
+        p.hex() ▸ '#00ff00'
+
+        h.key p 'left' ''
+        p.activeColor ▸ 0
+        p.hex() ▸ '#ff0000'
+
+    ▸ the radio is out of the ring in single color mode
+
+        h = new harness cols:30 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 30 9
+
+        p.show '#ff0000'
+
+        p.selectionMode() ▸ false
+        p.radio.options.length ▸ 1
+        p.radio.focusable ▸ false
+
+        p.focusTo 5
+        h.key p 'tab' ''
+        p.focusIndex ▸ 0
+
+        p.onMouse
+            type: 'move'
+            cell: [5 0]
+
+        p.focusIndex ▸ 0
+
+    ▸ the radio shows the active color at the top
+
+        h = new harness cols:30 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 30 9
+
+        p.showSelection '#ff0000' '#00ff00'
+        p.draw()
+
+        h.row(0).includes('#ff0000') ▸ true
+        h.row(0).includes('#00ff00') ▸ false
+
+        p.setActiveColor 1
+        p.draw()
+
+        h.row(0).includes('#ff0000') ▸ false
+        h.row(0).includes('#00ff00') ▸ true
+
+    ▸ a focused radio shows markers around the active color
+
+        h = new harness cols:30 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 30 9
+
+        p.showSelection '#ff0000' '#00ff00'
+        p.focusTo 6
+        p.draw()
+
+        h.row(0).includes('● #ff0000 ●') ▸ true
+
+    ▸ changing the background marks it as changed
+
+        h = new harness cols:30 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 30 9
+
+        p.showSelection '#ff0000' '#0000ff'
+
+        p.backgroundChanged() ▸ false
+        p.setActiveColor 1
+        p.setHex '#00ff00'
+
+        p.backgroundChanged() ▸ true
+        p.foregroundHex() ▸ '#ff0000'
+        p.backgroundHex() ▸ '#00ff00'
+
+    ▸ hovering the radio focuses it
+
+        h = new harness cols:30 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 30 9
+
+        p.showSelection '#ff0000' '#00ff00'
+
+        p.onMouse
+            type: 'move'
+            cell: [5 0]
+
+        p.focusIndex ▸ 6
+
+    ▸ typing rgb while the background is active marks it changed
+
+        h = new harness cols:30 rows:9
+        p = new colorpicker h.screen 'test_cp'
+        p.layout 0 0 30 9
+
+        p.showSelection '#ff0000' '#00ff00'
+        p.setActiveColor 1
+        p.focusTo 4
+
+        p.backgroundChanged() ▸ false
+
+        h.type p '12'
+
+        p.backgroundChanged() ▸ true
