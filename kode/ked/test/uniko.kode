@@ -227,7 +227,7 @@ use ../view/colmns  ◆ uniko
         u.hidden() ▸ true
         e.hasFocus() ▸ true
 
-    ▸ cmd+down increases the scale and cmd+up decreases it
+    ▸ scale change
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []
@@ -238,25 +238,25 @@ use ../view/colmns  ◆ uniko
         u.height ▸ 16
         u.matrix.scale ▸ 1
 
-        h.key u 'cmd+down' ''
+        h.key u 'cmd+up' ''
 
         u.height ▸ 16
         u.matrix.scale ▸ 2
 
-        h.key u 'cmd+down' ''
-        h.key u 'cmd+down' ''
-
-        u.matrix.scale ▸ 4
-
-        h.key u 'cmd+down' ''
+        h.key u 'cmd+up' ''
+        h.key u 'cmd+up' ''
 
         u.matrix.scale ▸ 4
 
         h.key u 'cmd+up' ''
+
+        u.matrix.scale ▸ 4
+
+        h.key u 'cmd+down' ''
 
         u.matrix.scale ▸ 3
 
-        h.key u 'cmd+up' ''
-        h.key u 'cmd+up' ''
+        h.key u 'cmd+down' ''
+        h.key u 'cmd+down' ''
 
         u.matrix.scale ▸ 1
