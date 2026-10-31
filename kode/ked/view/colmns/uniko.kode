@@ -40,78 +40,20 @@ function uniko extends view
 
         @input.on 'action' @onInputAction
 
-        @allItems = @buildItems()
+        @allItems = []
+        for char,comment of julia
+            @allItems.push char:char search:trim(comment)
         @matrix.setItems @allItems
 
         @isVisible = false
 
-    #  the characters of the ~ completion come first, then the rest of
-    #  julia. a character appears once, its aliases are merged so that
-    #  any key still finds it.
-
-    buildItems: ->
-
-        items  = []
-        byChar = {}
-
-        for ch in specs.trigger['~']
-            char = trim ch
-            continue if empty char
-            @addItem items byChar char ch [] []
-
-        for key,val of julia
-            [char comment] = @splitValue val
-            continue if empty char
-            comments = []
-            comments.push comment if not empty comment
-            @addItem items byChar char char [key] comments
-
-        # log items
-        log "julia #{Object.keys(julia).length} #{items.length} #{specs.trigger['~'].length}"
-        items
-
-    splitValue: value =>
-
-        idx = value.indexOf '#'
-
-        ⮐  [trim(value) ''] if idx < 0
-
-        [trim(value[0...idx]) trim(value[idx+1..])]
-
-    addItem: items byChar char insert keys comments ->
-
-        item = byChar[char]
-
-        if not item?
-
-            item =
-                char:     insert
-                keys:     []
-                comments: []
-                search:   ''
-
-            byChar[char] = item
-            items.push item
-
-        for key in keys
-            item.keys.push key if not (key in item.keys)
-
-        for comment in comments
-            item.comments.push comment if not (comment in item.comments)
-
-        item.search = item.keys.concat(item.comments).join(' ').toLowerCase()
-
     filter: text =>
 
-        text = trim text
+        text = trim(text).toLowerCase()
 
-        if empty text
-            @matrix.setItems @allItems
-            ⮐
+        if empty text ➜ ⮐ @matrix.setItems @allItems
 
-        needle = text.toLowerCase()
-
-        matches = @allItems.filter (item) -> item.search.includes needle
+        matches = @allItems.filter (item) -> item.search.includes text
 
         @matrix.setItems matches
 
@@ -137,9 +79,7 @@ function uniko extends view
     incScale: delta =>
 
         @matrix.incScale delta
-
         post.emit 'redraw'
-
         true
 
     show: =>
@@ -157,7 +97,7 @@ function uniko extends view
 
     hide: =>
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
 
         super()
 
@@ -171,7 +111,7 @@ function uniko extends view
 
         char = @matrix.selectedText()
 
-        ⮐  false if empty char
+        ⮐ false if empty char
 
         @editor.state.insert char
 
@@ -183,7 +123,7 @@ function uniko extends view
 
         char = @matrix.selectedText()
 
-        ⮐  false if empty char
+        ⮐ false if empty char
 
         clip.copy char
 
@@ -197,7 +137,7 @@ function uniko extends view
 
     onKey: key event =>
 
-        ⮐  false if @hidden()
+        ⮐ false if @hidden()
 
         switch event.combo
             'esc'      ➜ ⮐ @hide()
@@ -208,19 +148,19 @@ function uniko extends view
             'cmd+down' ➜ ⮐ @incScale -1
 
         if event.combo == 'space'
-            ⮐  @submit()
+            ⮐ @submit()
 
         if @focus == 'input'
 
             if event.combo == 'down'
                 @focusMatrix()
-                ⮐  true
+                ⮐ true
 
-            ⮐  @input.onKey key event
+            ⮐ @input.onKey key event
 
         if valid event.char and event.char.length == 1 and event.char in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
             @focusInput()
-            ⮐  @input.onKey key event
+            ⮐ @input.onKey key event
 
         if event.combo in ['up''left''right''down']            
             @matrix.moveSelection event.combo
@@ -234,11 +174,11 @@ function uniko extends view
 
     onMouse: event =>
 
-        ⮐  false if @hidden()
+        ⮐ false if @hidden()
 
         if @input.cells.isInsideEvent event
             @focusInput()
-            ⮐  @input.onMouse event
+            ⮐ @input.onMouse event
 
         if @matrix.cells.isInsideEvent event
 
@@ -250,19 +190,19 @@ function uniko extends view
                 @matrix.grabFocus()
                 @submit()
 
-            ⮐  redraw:true
+            ⮐ redraw:true
 
         false
 
     onWheel: event =>
 
-        ⮐  false if @hidden()
+        ⮐ false if @hidden()
 
         if @matrix.cells.isInsideEvent event
             switch event.dir
                 'up'   ➜ @matrix.moveSelection 'up'
                 'down' ➜ @matrix.moveSelection 'down'
-            ⮐  redraw:true
+            ⮐ redraw:true
 
         false
 
@@ -276,15 +216,15 @@ function uniko extends view
 
         super x y w h
 
-        @input.layout  x+1 y+1   w-2 1
+        @input.layout x+1 y+1 w-2 1
 
         mh = max 0 (h-4)
 
-        @matrix.layout x+1 y+3   w-2 mh
+        @matrix.layout x+1 y+3 w-2 mh
 
     draw: =>
 
-        ⮐  if @hidden() or @collapsed()
+        ⮐ if @hidden() or @collapsed()
 
         @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
 

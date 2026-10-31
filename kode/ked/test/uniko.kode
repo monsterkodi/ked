@@ -7,56 +7,6 @@ use ../view/colmns  ◆ uniko
 
 ▸ uniko
 
-    ▸ the default list starts with the characters of the trigger list
-
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 16
-        u.show()
-
-        triggers = specs.trigger['~']
-
-        u.matrix.numItems() > triggers.length ▸ true
-
-        for i in 0...triggers.length
-            u.matrix.items[i].char.trim() ▸ triggers[i].trim()
-
-    ▸ the default list has no double width characters
-
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 16
-        u.show()
-
-        u.allItems.every((item) -> kseg.segWidth(item.char) < 2) ▸ true
-
-    ▸ a key filters the characters
-
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 16
-        u.show()
-
-        u.filter 'sqrt'
-
-        u.matrix.numItems() > 0 ▸ true
-        u.matrix.selectedText() ▸ '√'
-
-    ▸ an alias finds the same character
-
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 16
-        u.show()
-
-        u.filter 'surd'
-
-        u.matrix.selectedText() ▸ '√'
-
     ▸ comments are searchable and the match is case insensitive
 
         h = new harness cols:60 rows:30

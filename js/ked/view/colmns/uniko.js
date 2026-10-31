@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, trim: function (s,c=' ') {return _k_.ltrim(_k_.rtrim(s,c),c)}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, ltrim: function (s,c=' ') { while (_k_.in(s[0],c)) { s = s.slice(1) } return s}, rtrim: function (s,c=' ') {while (_k_.in(s.slice(-1)[0],c)) { s = s.slice(0, s.length - 1) } return s}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, trim: function (s,c=' ') {return _k_.ltrim(_k_.rtrim(s,c),c)}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, ltrim: function (s,c=' ') { while (_k_.in(s[0],c)) { s = s.slice(1) } return s}, rtrim: function (s,c=' ') {while (_k_.in(s.slice(-1)[0],c)) { s = s.slice(0, s.length - 1) } return s}}
 
 var uniko
 
@@ -26,6 +26,8 @@ uniko = (function ()
         this.screen = screen
         this.editor = editor
     
+        var char, comment
+
         this["draw"] = this["draw"].bind(this)
         this["layout"] = this["layout"].bind(this)
         this["onWheel"] = this["onWheel"].bind(this)
@@ -40,7 +42,6 @@ uniko = (function ()
         this["focusMatrix"] = this["focusMatrix"].bind(this)
         this["focusInput"] = this["focusInput"].bind(this)
         this["filter"] = this["filter"].bind(this)
-        this["splitValue"] = this["splitValue"].bind(this)
         uniko.__super__.constructor.call(this,this.screen,name)
         this.height = 16
         this.focus = 'matrix'
@@ -54,106 +55,28 @@ uniko = (function ()
         this.matrix.setColor('scroll',theme.scroll.knob)
         this.matrix.setColor('scroll_dot',theme.scroll.dot)
         this.input.on('action',this.onInputAction)
-        this.allItems = this.buildItems()
+        this.allItems = []
+        for (char in julia)
+        {
+            comment = julia[char]
+            this.allItems.push({char:char,search:_k_.trim(comment)})
+        }
         this.matrix.setItems(this.allItems)
         this.isVisible = false
     }
 
-    uniko.prototype["buildItems"] = function ()
-    {
-        var byChar, ch, char, comment, comments, items, key, val
-
-        items = []
-        byChar = {}
-        var list = _k_.list(specs.trigger['~'])
-        for (var _a_ = 0; _a_ < list.length; _a_++)
-        {
-            ch = list[_a_]
-            char = _k_.trim(ch)
-            if (_k_.empty(char))
-            {
-                continue
-            }
-            this.addItem(items,byChar,char,ch,[],[])
-        }
-        for (key in julia)
-        {
-            val = julia[key]
-            var _b_ = this.splitValue(val); char = _b_[0]; comment = _b_[1]
-
-            if (_k_.empty(char))
-            {
-                continue
-            }
-            comments = []
-            if (!_k_.empty(comment))
-            {
-                comments.push(comment)
-            }
-            this.addItem(items,byChar,char,char,[key],comments)
-        }
-        console.log(`julia ${Object.keys(julia).length} ${items.length} ${specs.trigger['~'].length}`)
-        return items
-    }
-
-    uniko.prototype["splitValue"] = function (value)
-    {
-        var idx
-
-        idx = value.indexOf('#')
-        if (idx < 0)
-        {
-            return [_k_.trim(value),'']
-        }
-        return [_k_.trim(value.slice(0, typeof idx === 'number' ? idx : -1)),_k_.trim(value.slice(idx + 1))]
-    }
-
-    uniko.prototype["addItem"] = function (items, byChar, char, insert, keys, comments)
-    {
-        var comment, item, key
-
-        item = byChar[char]
-        if (!(item != null))
-        {
-            item = {char:insert,keys:[],comments:[],search:''}
-            byChar[char] = item
-            items.push(item)
-        }
-        var list = _k_.list(keys)
-        for (var _a_ = 0; _a_ < list.length; _a_++)
-        {
-            key = list[_a_]
-            if (!(_k_.in(key,item.keys)))
-            {
-                item.keys.push(key)
-            }
-        }
-        var list1 = _k_.list(comments)
-        for (var _b_ = 0; _b_ < list1.length; _b_++)
-        {
-            comment = list1[_b_]
-            if (!(_k_.in(comment,item.comments)))
-            {
-                item.comments.push(comment)
-            }
-        }
-        return item.search = item.keys.concat(item.comments).join(' ').toLowerCase()
-    }
-
     uniko.prototype["filter"] = function (text)
     {
-        var matches, needle
+        var matches
 
-        text = _k_.trim(text)
+        text = _k_.trim(text).toLowerCase()
         if (_k_.empty(text))
         {
-            this.matrix.setItems(this.allItems)
-            return
+            return this.matrix.setItems(this.allItems)
         }
-        needle = text.toLowerCase()
         matches = this.allItems.filter(function (item)
         {
-            return item.search.includes(needle)
+            return item.search.includes(text)
         })
         return this.matrix.setItems(matches)
     }
@@ -377,5 +300,5 @@ uniko = (function ()
 
 export default uniko;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidW5pa28uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3VuaWtvLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FXYSxVQUFBO0lBQU07SUFBSzs7T0FDTCxXQUFOOztPQUNNLFlBQVQ7O09BQ1MsWUFBVDs7T0FDUyxXQUFaO09BQWlCLFlBQWpCO09BQXVCLGFBQXZCOztPQUVBLE1BQU0sS0FBSyx3QkFBd0IsS0FBSyxFQUFFLEtBQUksRUFBRSxPQUFPOztBQUVyRCxTQUFUOztzQkFBdUI7YUFFbkIsT0FBSSxRQUFRLFFBQU87O1FBQWhCO1FBQVE7Ozs7Ozs7Ozs7Ozs7Ozs7OzhDQUVELEtBQUMsT0FBTztRQUVkLEtBQUMsU0FBUztRQUNWLEtBQUMsUUFBUztRQUVWLEtBQUMsU0FBUyxLQUFLLE1BQU0sTUFBTTtRQUUzQixLQUFDLFlBQWEsTUFBTyxLQUFDLFVBQVUsS0FBQztRQUNqQyxLQUFDLGFBQWEsT0FBTyxLQUFDLFVBQVUsS0FBQztRQUVqQyxLQUFDLE9BQU8sU0FBUyxLQUFpQixNQUFNLE1BQU07UUFDOUMsS0FBQyxPQUFPLFNBQVMsS0FBaUIsTUFBTSxNQUFNO1FBQzlDLEtBQUMsT0FBTyxTQUFTLFlBQWlCLE1BQU0sTUFBTTtRQUM5QyxLQUFDLE9BQU8sU0FBUyxpQkFBaUIsTUFBTSxNQUFNO1FBQzlDLEtBQUMsT0FBTyxTQUFTLFNBQWlCLE1BQU0sT0FBTztRQUMvQyxLQUFDLE9BQU8sU0FBUyxhQUFpQixNQUFNLE9BQU87UUFFL0MsS0FBQyxNQUFNLEdBQUcsU0FBUyxLQUFDO1FBRXBCLEtBQUMsV0FBVyxLQUFDO1FBQ2IsS0FBQyxPQUFPLFNBQVMsS0FBQztRQUVsQixLQUFDLFlBQVk7OztxQkFNakI7Ozs7UUFFSTtRQUNBOzRCQUVVLE1BQU0sUUFBUTs7O1lBQXBCO1lBQ0EsZ0JBQVk7MEJBQ007O2dCQUFsQjs7WUFDQSxLQUFDLFFBQVEsTUFBTSxPQUFPLEtBQUs7O2FBRTNCLE9BQVc7O1lBQVAsTUFBTztz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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidW5pa28uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3VuaWtvLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FXYSxVQUFBO0lBQU07SUFBSzs7T0FDTCxXQUFOOztPQUNNLFlBQVQ7O09BQ1MsWUFBVDs7T0FDUyxXQUFaO09BQWlCLFlBQWpCO09BQXVCLGFBQXZCOztPQUVBLE1BQU0sS0FBSyx3QkFBd0IsS0FBSyxFQUFFLEtBQUksRUFBRSxPQUFPOztBQUVyRCxTQUFUOztzQkFBdUI7YUFFbkIsT0FBSSxRQUFRLFFBQU87O1FBQWhCO1FBQVE7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs4Q0FFRCxLQUFDLE9BQU87UUFFZCxLQUFDLFNBQVM7UUFDVixLQUFDLFFBQVM7UUFFVixLQUFDLFNBQVMsS0FBSyxNQUFNLE1BQU07UUFFM0IsS0FBQyxZQUFhLE1BQU8sS0FBQyxVQUFVLEtBQUM7UUFDakMsS0FBQyxhQUFhLE9BQU8sS0FBQyxVQUFVLEtBQUM7UUFFakMsS0FBQyxPQUFPLFNBQVMsS0FBaUIsTUFBTSxNQUFNO1FBQzlDLEtBQUMsT0FBTyxTQUFTLEtBQWlCLE1BQU0sTUFBTTtRQUM5QyxLQUFDLE9BQU8sU0FBUyxZQUFpQixNQUFNLE1BQU07UUFDOUMsS0FBQyxPQUFPLFNBQVMsaUJBQWlCLE1BQU0sTUFBTTtRQUM5QyxLQUFDLE9BQU8sU0FBUyxTQUFpQixNQUFNLE9BQU87UUFDL0MsS0FBQyxPQUFPLFNBQVMsYUFBaUIsTUFBTSxPQUFPO1FBRS9DLEtBQUMsTUFBTSxHQUFHLFNBQVMsS0FBQztRQUVwQixLQUFDO2FBQ0csUUFBZ0I7O1lBQVgsVUFBVztZQUNoQixLQUFDLFNBQVMsTUFBSyxLQUFLLEtBQUssZ0JBQVk7O1FBQ3pDLEtBQUMsT0FBTyxTQUFTLEtBQUM7UUFFbEIsS0FBQyxZQUFZOzs7cUJBRWpCLHFCQUFROzs7O1FBRUosZ0JBQVksTUFBTTtzQkFFVDs7bUJBQVMsS0FBQyxPQUFPLFNBQVMsS0FBQzs7UUFFcEMs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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/uniko.kode
