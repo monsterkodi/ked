@@ -13,7 +13,7 @@ project
         ked.log
         
 mouse
-    wheelSteps    1
+    wheelSteps    2
     wheelSpeedup  2
     
 novim

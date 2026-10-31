@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, isFunc: function (o) {return typeof o === 'function'}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
 
 var rgbinput
 
@@ -17,11 +17,9 @@ rgbinput = (function ()
     {
         this["onKey"] = this["onKey"].bind(this)
         this["drawCursors"] = this["drawCursors"].bind(this)
-        this["clampText"] = this["clampText"].bind(this)
         this["setValue"] = this["setValue"].bind(this)
+        this["changeValue"] = this["changeValue"].bind(this)
         this["onWheel"] = this["onWheel"].bind(this)
-        this["onMouseLeave"] = this["onMouseLeave"].bind(this)
-        this["onMouseEnter"] = this["onMouseEnter"].bind(this)
         rgbinput.__super__.constructor.call(this,screen,name)
         this.setColor('bg',theme.colorpicker.bg)
         this.setColor('bg_blur',theme.colorpicker.bg)
@@ -31,40 +29,12 @@ rgbinput = (function ()
         this.value = 0
         this.set('0')
         this.state.skipAdjustViewForMainCursor = true
-        this.onFocusRequest = null
-        this.onInput = null
         this.pointerType = 'text'
     }
 
     rgbinput.prototype["getValue"] = function ()
     {
         return this.value
-    }
-
-    rgbinput.prototype["onMouseEnter"] = function (event)
-    {
-        if (_k_.isFunc(this.onFocusRequest))
-        {
-            this.onFocusRequest()
-            if (this.pointerType)
-            {
-                post.emit('pointer',this.pointerType)
-                return post.emit('redraw')
-            }
-        }
-        else
-        {
-            return rgbinput.__super__.onMouseEnter.call(this,event)
-        }
-    }
-
-    rgbinput.prototype["onMouseLeave"] = function (event)
-    {
-        if (this.pointerType)
-        {
-            post.emit('pointer','default')
-        }
-        return rgbinput.__super__.onMouseLeave.call(this,event)
     }
 
     rgbinput.prototype["onWheel"] = function (event)
@@ -96,68 +66,38 @@ rgbinput = (function ()
                     return -1
 
                 default:
-                    return 0
+                    return
             }
 
         }).bind(this))()
-        if (!dir)
-        {
-            return
-        }
         step = 1
         if (event.shift)
         {
             step = 10
         }
-        if (_k_.isFunc(this.onFocusRequest))
-        {
-            this.onFocusRequest()
-        }
-        this.setValue(this.value + dir * step)
-        if (_k_.isFunc(this.onInput))
-        {
-            this.onInput()
-        }
+        this.changeValue(this.value + dir * step)
+        this.state.moveCursors(((dir > 0 ? 'eol' : 'bol')))
         return {redraw:true}
+    }
+
+    rgbinput.prototype["changeValue"] = function (v)
+    {
+        v = _k_.clamp(0,255,parseInt(v))
+        if (v !== this.value)
+        {
+            this.setValue(v)
+            return this.emit('valueChange',this.value)
+        }
     }
 
     rgbinput.prototype["setValue"] = function (v)
     {
-        var text
-
-        v = _k_.clamp(0,255,parseInt(v))
-        this.value = v
-        text = `${v}`
-        if (this.current() !== text)
+        this.value = _k_.clamp(0,255,parseInt(v))
+        if (`${this.value}` !== this.current())
         {
-            return this.set(text)
+            this.set(`${this.value}`)
+            return this.state.moveCursors('eol')
         }
-    }
-
-    rgbinput.prototype["clampText"] = function ()
-    {
-        var ch, digits, text, v
-
-        text = this.current()
-        digits = ''
-        var list = _k_.list(text)
-        for (var _a_ = 0; _a_ < list.length; _a_++)
-        {
-            ch = list[_a_]
-            if (_k_.in(ch,'0123456789'))
-            {
-                digits += ch
-            }
-        }
-        v = _k_.clamp(0,255,((digits.length ? parseInt(digits) : 0)))
-        text = `${v}`
-        if (this.current() !== text)
-        {
-            this.set(text)
-            this.state.moveCursors('eol')
-        }
-        this.value = v
-        return v
     }
 
     rgbinput.prototype["draw"] = function ()
@@ -189,34 +129,42 @@ rgbinput = (function ()
 
     rgbinput.prototype["onKey"] = function (key, event)
     {
-        var handled
-
         if (!this.hasFocus())
+        {
+            return false
+        }
+        if (this.hidden() || this.collapsed())
         {
             return false
         }
         switch (event.combo)
         {
-            case 'up':
-            case 'down':
-            case 'tab':
-            case 'shift+tab':
-            case 'return':
-            case 'esc':
-                return false
+            case 'cmd+a':
+            case 'cmd+left':
+            case 'cmd+right':
+            case 'shift+left':
+            case 'shift+right':
+            case 'left':
+            case 'right':
+            case 'delete':
+            case 'backspace':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case '0':
+                rgbinput.__super__.onKey.call(this,key,event)
+                this.changeValue(parseInt(this.current()))
+                return true
 
         }
 
-        if (!_k_.empty(event.char) && !(_k_.in(event.char,'0123456789')))
-        {
-            return true
-        }
-        handled = rgbinput.__super__.onKey.call(this,key,event)
-        if (handled)
-        {
-            this.clampText()
-        }
-        return handled
+        return false
     }
 
     return rgbinput
@@ -224,5 +172,5 @@ rgbinput = (function ()
 
 export default rgbinput;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmdiaW5wdXQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS9yZ2JpbnB1dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BT2EsVUFBQTtJQUFNOztPQUNELFlBQVI7O09BQ1MsWUFBQTs7O0FBRVYsWUFBVDs7eUJBQTBCO2FBRXRCLFVBQUcsUUFBTzs7Ozs7Ozs7O2lEQUVBLE9BQU87UUFFYixLQUFDLFNBQVMsS0FBVyxNQUFNLFlBQVk7UUFDdkMsS0FBQyxTQUFTLFVBQVcsTUFBTSxZQUFZO1FBQ3ZDLEtBQUMsU0FBUyxXQUFXLE1BQU0sVUFBVTtRQUNyQyxLQUFDLFNBQVMsUUFBVyxNQUFNLFlBQVk7UUFFdkMsS0FBQyxZQUFZLE1BQU0sWUFBWTtRQUMvQixLQUFDLFFBQVk7UUFDYixLQUFDLElBQUk7UUFFTCxLQUFDLE1BQU0sOEJBQThCO1FBRXJDLEtBQUMsaUJBQWlCO1FBQ2xCLEtBQUMsVUFBaUI7UUFDbEIsS0FBQyxjQUFpQjs7O3dCQUV0Qjs7ZUFBYSxLQUFDOzs7d0JBRWQsMkJBQWM7O1lBRVksV0FBbkIsS0FBQzs7WUFDQSxLQUFDO2dCQUNFLEtBQUM7O2dCQUNBLEtBQUssS0FBSyxVQUFVLEtBQUM7dUJBQ3JCLEtBQUssS0FBSzs7Ozs7NkRBRVI7Ozs7d0JBRWQsMkJBQWM7O1lBRXVCLEtBQUM7O1lBQWxDLEtBQUssS0FBSyxVQUFVOzt5REFDZDs7O3dCQUVWLHNCQUFTOzs7O1lBRUMsS0FBQyxZQUFZLEtBQUM7Ozs7YUFDVixLQUFDLE1BQU0sY0FBYzs7OztRQUUvQjs7b0JBQWEsTUFBTTs7cUJBQ2Y7MkJBQVc7O3FCQUNYOzJCQUFXOztxQkFDWDsyQkFBVTs7cUJBQ1Y7MkJBQVU7OzsyQkFDQzs7OzthQUVMOzs7O1FBRVYsT0FBTztZQUNNLE1BQU07O1lBQW5CLE9BQU87O1lBRWlDLFdBQW5CLEtBQUM7O1lBQXRCLEtBQUM7O1FBQ0QsS0FBQyxTQUFTLEtBQUMsUUFBUSxNQUFJO1lBQ0csV0FBWixLQUFDOztZQUFmLEtBQUM7O2dCQUVELE9BQU87Ozt3QkFFWCx1QkFBVTs7OztRQUVOLGNBQVUsRUFBRSxhQUFRO1FBQ3BCLEtBQUMsUUFBUTtRQUVULFVBQVU7WUFDUCxLQUFDLGNBQWE7O21CQUNiLEtBQUMsSUFBSTs7Ozt3QkFFYjs7OztRQUVJLE9BQVMsS0FBQztRQUNWLFNBQVM7NEJBRUM7OztZQUFOO3VCQUNnQixHQUFNOztnQkFBdEIsVUFBVTs7O1FBRWQsY0FBVSxFQUFFLE1BQUssT0FBTyxTQUFTLFNBQVMsVUFBVTtRQUNwRCxVQUFVO1lBRVAsS0FBQyxjQUFhOztZQUNiLEtBQUMsSUFBSTtZQUNMLEtBQUMsTUFBTSxZQUFZOztRQUV2QixLQUFDLFFBQVE7ZUFDVDs7O3dCQUVKOzs7Ozs7WUFJVSxLQUFDLFlBQVksS0FBQzs7Ozs0QkFFUCxLQUFDO2FBQU47O1lBQUo7WUFDQSxLQUFDLE1BQU0sT0FBTyxFQUFFLEVBQUUsS0FBQzs7Ozt3QkFFM0I7O2FBRWMsS0FBQzs7Ozs7Ozt3QkFHZixvQkFBTyxLQUFJOzs7O2FBRVMsS0FBQzs7bUJBQWQ7O2dCQUVJLE1BQU07O2lCQUNUO2lCQUFLO2lCQUFPO2lCQUFNO2lCQUFZO2lCQUFTO3VCQUFXOzs7O3VCQUU3QyxNQUFNLGtCQUFjLE1BQU0sS0FBUTs7bUJBQ3BDOztRQUVQLDZDQUFnQixJQUFJO1lBRUo7O1lBQWhCLEtBQUM7O2VBRUQ7OztXQXBIQzs7O2VBc0hGIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmdiaW5wdXQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS9yZ2JpbnB1dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BVWEsVUFBQTtJQUFNOztPQUNBLFlBQVQ7O09BQ1MsWUFBQTs7O0FBRVYsWUFBVDs7eUJBQTBCO2FBRXRCLFVBQUcsUUFBTzs7Ozs7OztpREFFQSxPQUFPO1FBRWIsS0FBQyxTQUFTLEtBQVcsTUFBTSxZQUFZO1FBQ3ZDLEtBQUMsU0FBUyxVQUFXLE1BQU0sWUFBWTtRQUN2QyxLQUFDLFNBQVMsV0FBVyxNQUFNLFVBQVU7UUFDckMsS0FBQyxTQUFTLFFBQVcsTUFBTSxZQUFZO1FBRXZDLEtBQUMsWUFBWSxNQUFNLFlBQVk7UUFDL0IsS0FBQyxRQUFZO1FBQ2IsS0FBQyxJQUFJO1FBRUwsS0FBQyxNQUFNLDhCQUE4QjtRQUVyQyxLQUFDLGNBQWlCOzs7d0JBRXRCOztlQUFhLEtBQUM7Ozt3QkFFZCxzQkFBUzs7OztZQUVBLEtBQUMsWUFBWSxLQUFDOzs7O2FBQ1YsS0FBQyxNQUFNLGNBQWM7Ozs7UUFFOUI7O29CQUFhLE1BQU07O3FCQUNmOzJCQUFXOztxQkFDWDsyQkFBVzs7cUJBQ1g7MkJBQVU7O3FCQUNWOzJCQUFVOzs7Ozs7O1FBR2QsT0FBTztZQUNNLE1BQU07O1lBQW5CLE9BQU87O1FBRVAsS0FBQyxZQUFZLEtBQUMsUUFBUSxNQUFJO1FBRTFCLEtBQUMsTUFBTSxjQUFhLE1BQU0sSUFBSSxRQUFRO2dCQUV0QyxPQUFPOzs7d0JBRVgsMEJBQWE7O1FBRVQsY0FBVSxFQUFFLGFBQVE7WUFDakIsTUFBSyxLQUFDOztZQUNMLEtBQUMsU0FBUzttQkFDVixLQUFDLEtBQUssY0FBYyxLQUFDOzs7O3dCQUU3Qix1QkFBVTs7UUFFTixLQUFDLGtCQUFjLEVBQUUsYUFBUTtlQUNuQixLQUFDLFlBQVcsS0FBQzs7WUFDZixLQUFDLE9BQU8sS0FBQzttQkFDVCxLQUFDLE1BQU0sWUFBWTs7Ozt3QkFFM0I7Ozs7OztZQUlTLEtBQUMsWUFBWSxLQUFDOzs7OzRCQUVOLEtBQUM7YUFBTjs7WUFBSjtZQUNBLEtBQUMsTUFBTSxPQUFPLEVBQUUsRUFBRSxLQUFDOzs7O3dCQUUzQjs7YUFFYSxLQUFDOzs7Ozs7O3dCQUdkLG9CQUFPLEtBQUk7O2FBRVEsS0FBQzs7bUJBQWQ7O1lBQ1MsS0FBQyxZQUFZLEtBQUM7O21CQUF2Qjs7Z0JBRUssTUFBTTs7aUJBQ1Q7aUJBQVE7aUJBQVc7aUJBQVk7aUJBQWE7aUJBQzVDO2lCQUFPO2lCQUFRO2lCQUFTO2lCQUN4QjtpQkFBRztpQkFBRztpQkFBRztpQkFBRztpQkFBRztpQkFBRztpQkFBRztpQkFBRztpQkFBRzttREFDakIsSUFBSTtnQkFDVixLQUFDLFlBQVksU0FBUyxLQUFDO3VCQUNyQjs7OztlQUNWOzs7V0FsRkM7OztlQW9GRiJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/base/rgbinput.kode

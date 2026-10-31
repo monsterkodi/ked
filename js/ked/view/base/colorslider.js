@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, isFunc: function (o) {return typeof o === 'function'}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
 
 var colorslider
 
@@ -18,12 +18,10 @@ colorslider = (function ()
     {
         this["draw"] = this["draw"].bind(this)
         this["onWheel"] = this["onWheel"].bind(this)
-        this["onMouseLeave"] = this["onMouseLeave"].bind(this)
         this["onMouse"] = this["onMouse"].bind(this)
         this["setFromEvent"] = this["setFromEvent"].bind(this)
-        this["onMouseEnter"] = this["onMouseEnter"].bind(this)
-        this["grabFocus"] = this["grabFocus"].bind(this)
         this["setValue"] = this["setValue"].bind(this)
+        this["changeValue"] = this["changeValue"].bind(this)
         colorslider.__super__.constructor.call(this,screen,name)
         this.setColor('bg',theme.colorpicker.bg)
         this.setColor('fg',theme.colorpicker.fg)
@@ -34,10 +32,20 @@ colorslider = (function ()
         {
             return [0,0,0]
         }
-        this.pointerType = 'ew-resize'
-        this.onFocusRequest = null
-        this.onInput = null
+        this.pointerType = 'pointer'
         this.setFocusable()
+    }
+
+    colorslider.prototype["changeValue"] = function (v)
+    {
+        var newValue
+
+        newValue = _k_.clamp(this.min,this.max,parseInt(v))
+        if (newValue !== this.value)
+        {
+            this.setValue(newValue)
+            return this.emit('valueChange',this.value)
+        }
     }
 
     colorslider.prototype["setValue"] = function (v)
@@ -50,30 +58,6 @@ colorslider = (function ()
         return this.value
     }
 
-    colorslider.prototype["grabFocus"] = function ()
-    {
-        if (_k_.isFunc(this.onFocusRequest))
-        {
-            return this.onFocusRequest()
-        }
-    }
-
-    colorslider.prototype["onMouseEnter"] = function (event)
-    {
-        var _41_23_
-
-        if ((event.button != null))
-        {
-            if (this.pointerType)
-            {
-                post.emit('pointer',this.pointerType)
-            }
-            post.emit('redraw')
-            return
-        }
-        return colorslider.__super__.onMouseEnter.call(this,event)
-    }
-
     colorslider.prototype["setFromEvent"] = function (event)
     {
         var col, row, span
@@ -82,7 +66,7 @@ colorslider = (function ()
 
         col = _k_.clamp(0,(this.cells.cols - 1),col)
         span = _k_.max(1,this.cells.cols - 1)
-        return this.setValue(Math.round(this.min + (col / span) * (this.max - this.min)))
+        return this.changeValue(Math.round(this.min + (col / span) * (this.max - this.min)))
     }
 
     colorslider.prototype["onMouse"] = function (event)
@@ -100,10 +84,6 @@ colorslider = (function ()
                     this.grabFocus()
                     this.doDrag = true
                     this.setFromEvent(event)
-                    if (_k_.isFunc(this.onInput))
-                    {
-                        this.onInput()
-                    }
                     post.emit('pointer','grabbing')
                     return {redraw:true}
                 }
@@ -113,10 +93,6 @@ colorslider = (function ()
                 {
                     this.hover = true
                     this.setFromEvent(event)
-                    if (_k_.isFunc(this.onInput))
-                    {
-                        this.onInput()
-                    }
                     post.emit('pointer','grabbing')
                     return {redraw:true}
                 }
@@ -136,15 +112,6 @@ colorslider = (function ()
         }
 
         return this.hover
-    }
-
-    colorslider.prototype["onMouseLeave"] = function (event)
-    {
-        if (this.pointerType)
-        {
-            post.emit('pointer','default')
-        }
-        return colorslider.__super__.onMouseLeave.call(this,event)
     }
 
     colorslider.prototype["onWheel"] = function (event)
@@ -189,12 +156,7 @@ colorslider = (function ()
         {
             step = 10
         }
-        this.grabFocus()
-        this.setValue(this.value + dir * step)
-        if (_k_.isFunc(this.onInput))
-        {
-            this.onInput()
-        }
+        this.changeValue(this.value + dir * step)
         return {redraw:true}
     }
 
@@ -237,5 +199,5 @@ colorslider = (function ()
 
 export default colorslider;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29sb3JzbGlkZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS9jb2xvcnNsaWRlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BUWEsVUFBQTtJQUFNOztPQUNELFlBQVI7T0FBYyxZQUFkOztPQUNRLFdBQUE7OztBQUVULGVBQVQ7OzRCQUE2QjthQUV6QixhQUFHLFFBQU87Ozs7Ozs7Ozs7b0RBRUEsT0FBTztRQUViLEtBQUMsU0FBUyxLQUFLLE1BQU0sWUFBWTtRQUNqQyxLQUFDLFNBQVMsS0FBSyxNQUFNLFlBQVk7UUFFakMsS0FBQyxNQUFXO1FBQ1osS0FBQyxNQUFXO1FBQ1osS0FBQyxRQUFXO1FBQ1osS0FBQyxxQkFBWTs7b0JBQU8sRUFBRSxFQUFFOztRQUV4QixLQUFDLGNBQWlCO1FBQ2xCLEtBQUMsaUJBQWlCO1FBQ2xCLEtBQUMsVUFBaUI7UUFFbEIsS0FBQzs7OzJCQUVMLHVCQUFVOztlQUFLLEtBQUMsa0JBQWMsS0FBQyxJQUFJLEtBQUMsYUFBUTs7OzJCQUU1Qzs7ZUFBYSxLQUFDOzs7MkJBRWQ7O1lBQXNELFdBQW5CLEtBQUM7O21CQUF0QixLQUFDOzs7OzJCQUVmLDJCQUFjOzs7O2FBRVAsTUFBTTs7Z0JBQytCLEtBQUM7O2dCQUFyQyxLQUFLLEtBQUssVUFBVSxLQUFDOztZQUNyQixLQUFLLEtBQUs7Ozs0REFHUjs7OzJCQUVWLDJCQUFjOzs7O2tCQUVFLEtBQUMsU0FBUyxRQUFyQixjQUFJOztRQUVMLGdCQUFhLEdBQUcsS0FBQyxNQUFNLE9BQUssR0FBRztRQUMvQixlQUFXLEVBQUUsS0FBQyxNQUFNLE9BQUs7ZUFFekIsS0FBQyxvQkFBZSxLQUFDLE9BQU8sTUFBSSxTQUFPLEtBQUMsTUFBSSxLQUFDOzs7MkJBRTdDLHNCQUFTOztZQUVBLEtBQUMsWUFBWSxLQUFDOzs7O2dEQUViO2dCQUVDLE1BQU07O2lCQUVUO29CQUVPLEtBQUM7O29CQUNBLEtBQUM7b0JBQ0QsS0FBQyxTQUFTO29CQUNWLEtBQUMsYUFBYTt3QkFDWSxXQUFaLEtBQUM7O3dCQUFmLEtBQUM7O29CQUNELEtBQUssS0FBSyxVQUFVOzRCQUNsQixPQUFPOzs7aUJBRWpCO29CQUVPLEtBQUM7O29CQUNBLEtBQUMsUUFBUTtvQkFDVCxLQUFDLGFBQWE7d0JBQ1ksV0FBWixLQUFDOzt3QkFBZixLQUFDOztvQkFDRCxLQUFLLEtBQUssVUFBVTs0QkFDbEIsT0FBTzs7Z0JBRWIsS0FBQyxRQUFROztpQkFFYjtvQkFFTyxLQUFDOzt3QkFDb0MsS0FBQzs7d0JBQXJDLEtBQUssS0FBSyxVQUFVLEtBQUM7OzJCQUNkLEtBQUM7NEJBQ04sT0FBTzs7Ozs7ZUFFckIsS0FBQzs7OzJCQUVMLDJCQUFjOztZQUV1QixLQUFDOztZQUFsQyxLQUFLLEtBQUssVUFBVTs7NERBQ2Q7OzsyQkFFVixzQkFBUzs7OztZQUVBLEtBQUMsWUFBWSxLQUFDOzs7O2FBQ1YsS0FBQyxNQUFNLGNBQWM7Ozs7UUFFOUI7O29CQUFhLE1BQU07O3FCQUNmOzJCQUFXOztxQkFDWDsyQkFBVzs7cUJBQ1g7MkJBQVU7O3FCQUNWOzJCQUFVOzs7MkJBQ0M7Ozs7YUFFTjs7OztRQUVULE9BQU87WUFDTSxNQUFNOztZQUFuQixPQUFPOztRQUVQLEtBQUM7UUFDRCxLQUFDLFNBQVMsS0FBQyxRQUFRLE1BQUk7WUFDRyxXQUFaLEtBQUM7O1lBQWYsS0FBQzs7Z0JBRUQsT0FBTzs7OzJCQUVYOzs7O1lBRVMsS0FBQyxZQUFZLEtBQUM7Ozs7UUFFbkIsSUFBSSxLQUFDLE1BQU07WUFDTixJQUFJOzs7O1FBRVQsZUFBVyxFQUFFLElBQUU7dUJBRVgsSUFBSyxTQUFJLHFCQUFBLFFBQUE7O1lBQ1QsSUFBSSxLQUFDLE9BQU8sSUFBRSxTQUFPLEtBQUMsTUFBSSxLQUFDO1lBQzNCLEtBQUMsTUFBTSxPQUFPLEVBQUUsRUFBRSxLQUFDLFNBQVM7O1FBRWhDLGlCQUFhLEtBQUMsUUFBTSxLQUFDLFFBQU0sS0FBQyxNQUFJLEtBQUMsT0FBSztRQUN0QyxNQUFNLEtBQUMsTUFBTSxPQUFPLEdBQUc7WUFFcEIsS0FBQzs7WUFDQSxLQUFLLE1BQU0scUJBQXFCLElBQUksSUFBSSxLQUFLO1lBQzdDLEtBQUMsTUFBTSxVQUFVLEdBQUcsRUFBRSxJQUFJOzs7O1lBRTFCLEtBQUssTUFBTSxvQkFBb0IsS0FBQyxNQUFNLEdBQUc7WUFDekMsS0FBQyxNQUFNLFVBQVUsR0FBRyxFQUFFLElBQUk7Ozs7O1dBbkk3Qjs7O2VBdUlGIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29sb3JzbGlkZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS9jb2xvcnNsaWRlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BUWEsVUFBQTtJQUFNOztPQUNELFlBQVI7T0FBYyxZQUFkOztPQUNRLFdBQUE7OztBQUVULGVBQVQ7OzRCQUE2QjthQUV6QixhQUFHLFFBQU87Ozs7Ozs7O29EQUVBLE9BQU87UUFFYixLQUFDLFNBQVMsS0FBSyxNQUFNLFlBQVk7UUFDakMsS0FBQyxTQUFTLEtBQUssTUFBTSxZQUFZO1FBRWpDLEtBQUMsTUFBVztRQUNaLEtBQUMsTUFBVztRQUNaLEtBQUMsUUFBVztRQUNaLEtBQUMscUJBQVk7O29CQUFPLEVBQUUsRUFBRTs7UUFFeEIsS0FBQyxjQUFjO1FBQ2YsS0FBQzs7OzJCQUVMLDBCQUFhOzs7O1FBRVQscUJBQWlCLEtBQUMsSUFBSSxLQUFDLGFBQVE7WUFDNUIsYUFBWSxLQUFDOztZQUNaLEtBQUMsU0FBUzttQkFDVixLQUFDLEtBQUssY0FBYyxLQUFDOzs7OzJCQUU3Qix1QkFBVTs7ZUFFTixLQUFDLGtCQUFjLEtBQUMsSUFBSSxLQUFDLGFBQVE7OzsyQkFFakM7O2VBQWEsS0FBQzs7OzJCQUVkLDJCQUFjOzs7O2tCQUVFLEtBQUMsU0FBUyxRQUFyQixjQUFJOztRQUVMLGdCQUFhLEdBQUcsS0FBQyxNQUFNLE9BQUssR0FBRztRQUMvQixlQUFXLEVBQUUsS0FBQyxNQUFNLE9BQUs7ZUFFekIsS0FBQyx1QkFBa0IsS0FBQyxPQUFPLE1BQUksU0FBTyxLQUFDLE1BQUksS0FBQzs7OzJCQUVoRCxzQkFBUzs7WUFFQSxLQUFDLFlBQVksS0FBQzs7OztnREFFYjtnQkFFQyxNQUFNOztpQkFFVDtvQkFFTyxLQUFDOztvQkFDQSxLQUFDO29CQUNELEtBQUMsU0FBUztvQkFDVixLQUFDLGFBQWE7b0JBQ2QsS0FBSyxLQUFLLFVBQVU7NEJBQ2xCLE9BQU87OztpQkFFakI7b0JBRU8sS0FBQzs7b0JBQ0EsS0FBQyxRQUFRO29CQUNULEtBQUMsYUFBYTtvQkFDZCxLQUFLLEtBQUssVUFBVTs0QkFDbEIsT0FBTzs7Z0JBRWIsS0FBQyxRQUFROztpQkFFYjtvQkFFTyxLQUFDOzt3QkFDb0MsS0FBQzs7d0JBQXJDLEtBQUssS0FBSyxVQUFVLEtBQUM7OzJCQUNkLEtBQUM7NEJBQ04sT0FBTzs7Ozs7ZUFFckIsS0FBQzs7OzJCQUVMLHNCQUFTOzs7O1lBRUEsS0FBQyxZQUFZLEtBQUM7Ozs7YUFDVixLQUFDLE1BQU0sY0FBYzs7OztRQUU5Qjs7b0JBQWEsTUFBTTs7cUJBQ2Y7MkJBQVc7O3FCQUNYOzJCQUFXOztxQkFDWDsyQkFBVTs7cUJBQ1Y7MkJBQVU7OzsyQkFDQzs7OzthQUVOOzs7O1FBRVQsT0FBTztZQUNNLE1BQU07O1lBQW5CLE9BQU87O1FBRVAsS0FBQyxZQUFZLEtBQUMsUUFBUSxNQUFJO2dCQUMxQixPQUFPOzs7MkJBRVg7Ozs7WUFFUyxLQUFDLFlBQVksS0FBQzs7OztRQUVuQixJQUFJLEtBQUMsTUFBTTtZQUNOLElBQUk7Ozs7UUFFVCxlQUFXLEVBQUUsSUFBRTt1QkFFWCxJQUFLLFNBQUkscUJBQUEsUUFBQTs7WUFDVCxJQUFJLEtBQUMsT0FBTyxJQUFFLFNBQU8sS0FBQyxNQUFJLEtBQUM7WUFDM0IsS0FBQyxNQUFNLE9BQU8sRUFBRSxFQUFFLEtBQUMsU0FBUzs7UUFFaEMsaUJBQWEsS0FBQyxRQUFNLEtBQUMsUUFBTSxLQUFDLE1BQUksS0FBQyxPQUFLO1FBQ3RDLE1BQU0sS0FBQyxNQUFNLE9BQU8sR0FBRztZQUVwQixLQUFDOztZQUNBLEtBQUssTUFBTSxxQkFBcUIsSUFBSSxJQUFJLEtBQUs7WUFDN0MsS0FBQyxNQUFNLFVBQVUsR0FBRyxFQUFFLElBQUk7Ozs7WUFFMUIsS0FBSyxNQUFNLG9CQUFvQixLQUFDLE1BQU0sR0FBRztZQUN6QyxLQUFDLE1BQU0sVUFBVSxHQUFHLEVBQUUsSUFBSTs7Ozs7V0FwSDdCOzs7ZUF3SEYifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/base/colorslider.kode

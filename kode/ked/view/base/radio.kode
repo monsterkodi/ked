@@ -1,9 +1,9 @@
 ###
-    radio
-
-    a horizontal segmented color radio
-    each option has a color and a label
-    only the active option shows its label
+    ████████    ███████   ███████    ███   ███████ 
+    ███   ███  ███   ███  ███   ███  ███  ███   ███
+    ███████    █████████  ███   ███  ███  ███   ███
+    ███   ███  ███   ███  ███   ███  ███  ███   ███
+    ███   ███  ███   ███  ███████    ███   ███████ 
 ###
 
 use ../../theme ◆ color theme
@@ -18,13 +18,12 @@ function radio extends view
         @setColor 'bg' theme.colorpicker.bg
         @setColor 'fg' theme.colorpicker.fg
 
-        @options      = []
-        @active       = 0
-        @focused      = false
-        @focusable    = false
-        @pointerType  = null
-        @onFocusRequest = null
-        @onSelect       = null
+        @options     = []
+        @active      = 0
+        @pointerType = null
+        @onSelect    = null
+        
+        @setFocusable()
 
     setOptions: options =>
 
@@ -41,15 +40,6 @@ function radio extends view
         @active = clamp 0 (@options.length-1) int(idx)
 
     getActive: -> @active
-
-    setFocused: focused => @focused = focused
-
-    setFocusable: focusable =>
-
-        @focusable   = focusable
-        @pointerType = focusable ? 'pointer' : null
-
-    grabFocus: => @onFocusRequest() if @onFocusRequest is func
 
     optionAt: x =>
 
@@ -71,7 +61,6 @@ function radio extends view
             @setActive @optionAt(@eventPos(event)[0])
             @grabFocus()
             @onSelect @active if @onSelect is func
-
             ⮐ redraw:true
 
         @hover

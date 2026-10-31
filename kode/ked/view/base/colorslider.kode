@@ -24,26 +24,21 @@ function colorslider extends view
         @value    = 0
         @gradient = (v) -> [0 0 0]
 
-        @pointerType    = 'ew-resize'
-        @onFocusRequest = null
-        @onInput        = null
-        
+        @pointerType = 'pointer'
         @setFocusable()
 
-    setValue: v => @value = clamp @min @max int(v)
+    changeValue: v =>
+    
+        newValue = clamp @min @max int(v)
+        if newValue != @value
+            @setValue newValue
+            @emit 'valueChange' @value
+
+    setValue: v => 
+    
+        @value = clamp @min @max int(v)
 
     getValue: -> @value
-
-    grabFocus: => @onFocusRequest() if @onFocusRequest is func
-
-    onMouseEnter: event =>
-
-        if event.button?
-            post.emit 'pointer' @pointerType if @pointerType
-            post.emit 'redraw'
-            ⮐
-
-        super event
 
     setFromEvent: event =>
 
@@ -52,7 +47,7 @@ function colorslider extends view
         col  = clamp 0 (@cells.cols-1) col
         span = max 1 @cells.cols-1
 
-        @setValue round(@min + (col/span)*(@max-@min))
+        @changeValue round(@min + (col/span)*(@max-@min))
 
     onMouse: event =>
 
@@ -68,7 +63,6 @@ function colorslider extends view
                     @grabFocus()
                     @doDrag = true
                     @setFromEvent event
-                    @onInput() if @onInput is func
                     post.emit 'pointer' 'grabbing'
                     ⮐ redraw:true
 
@@ -77,7 +71,6 @@ function colorslider extends view
                 if @doDrag
                     @hover = true
                     @setFromEvent event
-                    @onInput() if @onInput is func
                     post.emit 'pointer' 'grabbing'
                     ⮐ redraw:true
 
@@ -91,11 +84,6 @@ function colorslider extends view
                     ⮐ redraw:true
 
         @hover
-
-    onMouseLeave: event =>
-
-        post.emit 'pointer' 'default' if @pointerType
-        super event
 
     onWheel: event =>
 
@@ -114,10 +102,7 @@ function colorslider extends view
         step = 1
         step = 10 if event.shift
 
-        @grabFocus()
-        @setValue @value + dir*step
-        @onInput() if @onInput is func
-
+        @changeValue @value + dir*step
         redraw:true
 
     draw: =>
