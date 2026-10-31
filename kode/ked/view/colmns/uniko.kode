@@ -62,11 +62,12 @@ function uniko extends view
         for key,val of julia
             [char comment] = @splitValue val
             continue if empty char
-            continue if kseg.segWidth(char) >= 2
             comments = []
             comments.push comment if not empty comment
             @addItem items byChar char char [key] comments
 
+        # log items
+        log "julia #{Object.keys(julia).length} #{items.length} #{specs.trigger['~'].length}"
         items
 
     splitValue: value =>
@@ -77,12 +78,6 @@ function uniko extends view
 
         [trim(value[0...idx]) trim(value[idx+1..])]
 
-    showFor: char ->
-
-        ⮐  '◌' + char if kseg.segWidth(char) == 0
-
-        char
-
     addItem: items byChar char insert keys comments ->
 
         item = byChar[char]
@@ -91,7 +86,6 @@ function uniko extends view
 
             item =
                 char:     insert
-                show:     @showFor(char)
                 keys:     []
                 comments: []
                 search:   ''

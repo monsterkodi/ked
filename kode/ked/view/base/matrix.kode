@@ -29,7 +29,7 @@ function matrix extends view
         @items         = []
         @selectedIndex = 0
         @offset        = 0
-        @scale         = 1
+        @scale         = 2
 
         post.on 'focus' @onFocus
 
@@ -85,9 +85,7 @@ function matrix extends view
     itemText: item =>
 
         if item is obj
-            if valid item.show
-                ⮐  item.show
-            ⮐  item.char ? ''
+            ⮐ item.char ? ''
         item
 
     selectedText: => @itemText @items[@selectedIndex]
@@ -240,6 +238,7 @@ function matrix extends view
         ⮐ if empty (csz = @screen.t.cellsz)
 
         rows = @viewportRows()
+        cols = @columns()
 
         ⮐ if rows < 1
         ⮐ if int((@items.length + cols - 1) / cols) <= rows
