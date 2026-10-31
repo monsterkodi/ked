@@ -91,9 +91,9 @@ function funSyntax
 
 function funtree extends choices
 
-    @: @editor name features ->
+    @: @editor @name features ->
         
-        super @editor.screen name features
+        super @editor.screen @name features
         
         @state.syntax = new funSyntax @
         

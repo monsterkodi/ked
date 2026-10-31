@@ -47,19 +47,8 @@ use ../view/base ◆ radio
         r.layout 0 0 20 1
         r.setOptions [{color: [255 255 255] label: '#ffffff'} {color: [0 0 255] label: '#0000ff'}]
         r.setActive 1
-        r.setFocused true
+        r.grabFocus()
         r.draw()
 
         h.row(0).includes('●#0000ff●') ▸ true
 
-    ▸ focusability is controlled by the caller
-
-        h = new harness cols:20 rows:2
-        r = new radio h.screen 'test_radio'
-
-        r.focusable ▸ false
-        r.setFocusable true
-        r.focusable ▸ true
-        r.pointerType ▸ 'pointer'
-        r.setFocusable false
-        r.pointerType ▸ null

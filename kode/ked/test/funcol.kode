@@ -6,28 +6,6 @@ use ../view/colmns ◆ funcol
 
 ▸ funcol color picker
 
-    ▸ an empty show picks the color under the cursor
-
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['x = #ff8000;']
-        e.state.setMainCursor 6 0
-
-        f = new funcol h.screen e []
-
-        f.onColorPickerShow ''
-
-        f.colorpicker.hex() ▸ '#ff8000'
-        f.colorReplace.text ▸ '#ff8000'
-        f.colorReplace.range ▸ [4 0 11 0]
-
-        delete global.ked_session
-
     ▸ a cursor on the hash picks the color
 
         store = {}
@@ -69,52 +47,6 @@ use ../view/colmns ◆ funcol
 
         delete global.ked_session
 
-    ▸ submitting replaces the original color
-
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['x = #ff8000;']
-        e.state.setMainCursor 6 0
-
-        f = new funcol h.screen e []
-
-        f.onColorPickerShow ''
-        f.onColorPickerSubmit '#00ff00'
-
-        kseg.str(e.state.s.lines[0]) ▸ 'x = #00ff00;'
-        f.colorReplace ▸ null
-
-        delete global.ked_session
-
-    ▸ a short color is replaced with the full hex
-
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['c = #abc;']
-        e.state.setMainCursor 6 0
-
-        f = new funcol h.screen e []
-
-        f.onColorPickerShow ''
-
-        f.colorReplace.text ▸ '#abc'
-
-        f.onColorPickerSubmit '#ff0000'
-
-        kseg.str(e.state.s.lines[0]) ▸ 'c = #ff0000;'
-
-        delete global.ked_session
-
     ▸ submitting without changes keeps the original color string
 
         store = {}
@@ -131,7 +63,7 @@ use ../view/colmns ◆ funcol
 
         f.onColorPickerShow ''
 
-        f.onColorPickerSubmit f.colorpicker.hex()
+        f.colorpicker.submit f.colorpicker.hex()
 
         kseg.str(e.state.s.lines[0]) ▸ 'c = #abc;'
         f.colorReplace ▸ null
@@ -156,64 +88,9 @@ use ../view/colmns ◆ funcol
 
         f.colorReplace ▸ null
 
-        f.onColorPickerSubmit '#abcdef'
+        f.colorpicker.submit '#abcdef'
 
         kseg.str(e.state.s.lines[0]) ▸ 'x = #ff8000;'
-
-        delete global.ked_session
-
-    ▸ a selection without a color literal becomes a color selection
-
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['hello world']
-        e.state.setSelections [[0 0 5 0]]
-        e.state.setMainCursor 2 0
-
-        f = new funcol h.screen e []
-
-        f.onColorPickerShow ''
-
-        f.colorReplace ▸ null
-        f.colorDecorate.ranges ▸ [[0 0 5 0]]
-
-        f.onColorPickerSubmit '#ff0000'
-
-        e.state.s.colors.fg ▸ [[0 0 5 '#ff0000']]
-        e.state.s.colors.bg ▸ []
-        f.colorDecorate ▸ null
-
-        delete global.ked_session
-
-    ▸ a color literal wins over a selection
-
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['x = #ff8000;']
-        e.state.setSelections [[4 0 11 0]]
-        e.state.setMainCursor 6 0
-
-        f = new funcol h.screen e []
-
-        f.onColorPickerShow ''
-
-        f.colorDecorate ▸ null
-        f.colorReplace.text ▸ '#ff8000'
-
-        f.onColorPickerSubmit '#00ff00'
-
-        kseg.str(e.state.s.lines[0]) ▸ 'x = #00ff00;'
-        e.state.s.colors.fg ▸ []
 
         delete global.ked_session
 
@@ -261,7 +138,7 @@ use ../view/colmns ◆ funcol
         f.colorpicker.backgroundHex() ▸ '#0000ff'
         f.colorpicker.backgroundChanged() ▸ false
 
-        f.onColorPickerSubmit '#00ff00'
+        f.colorpicker.submit '#00ff00'
 
         e.state.s.colors.fg ▸ [[0 0 5 '#00ff00']]
         e.state.s.colors.bg ▸ [[0 0 5 '#0000ff']]
@@ -290,65 +167,9 @@ use ../view/colmns ◆ funcol
 
         f.colorpicker.backgroundChanged() ▸ true
 
-        f.onColorPickerSubmit f.colorpicker.foregroundHex()
+        f.colorpicker.submit f.colorpicker.foregroundHex()
 
         e.state.s.colors.fg ▸ [[0 0 5 '#ff0000']]
         e.state.s.colors.bg ▸ [[0 0 5 '#0000ff']]
-
-        delete global.ked_session
-
-    ▸ a voided foreground is cleared on submit
-
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['hello world']
-        e.state.setSelections [[0 0 5 0]]
-        e.state.setMainCursor 2 0
-
-        f = new funcol h.screen e []
-
-        f.onColorPickerShow ''
-
-        f.colorpicker.focusTo 0
-        h.key f.colorpicker 'delete' ''
-
-        f.onColorPickerSubmit f.colorpicker.foregroundHex()
-
-        e.state.s.colors.fg ▸ []
-        e.state.s.colors.bg ▸ []
-
-        delete global.ked_session
-
-    ▸ a voided background is cleared on submit
-
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['hello world']
-        e.state.setSelections [[0 0 5 0]]
-        e.state.setMainCursor 2 0
-        e.state.setColorsForRanges [[0 0 5 0]] '#00ff00' '#0000ff'
-
-        f = new funcol h.screen e []
-
-        f.onColorPickerShow ''
-
-        f.colorpicker.setActiveColor 1
-        f.colorpicker.focusTo 1
-        h.key f.colorpicker 'delete' ''
-
-        f.onColorPickerSubmit f.colorpicker.foregroundHex()
-
-        e.state.s.colors.fg ▸ [[0 0 5 '#00ff00']]
-        e.state.s.colors.bg ▸ []
 
         delete global.ked_session

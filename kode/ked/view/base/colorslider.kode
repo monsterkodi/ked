@@ -33,6 +33,7 @@ function colorslider extends view
         if newValue != @value
             @setValue newValue
             @emit 'valueChange' @value
+        true
 
     setValue: v => 
     
@@ -104,6 +105,21 @@ function colorslider extends view
 
         @changeValue @value + dir*step
         redraw:true
+        
+    onKey: key event =>
+    
+        ⮐ false if not @hasFocus()
+        ⮐ false if @hidden() or @collapsed()
+    
+        switch event.combo
+            'left'                   ➜ ⮐ @changeValue @value - 1
+            'right'                  ➜ ⮐ @changeValue @value + 1
+            'shift+left'             ➜ ⮐ @changeValue @value - 10
+            'shift+right'            ➜ ⮐ @changeValue @value + 10
+            'cmd+left'  'ctrl+left'  ➜ ⮐ @changeValue @min
+            'cmd+right' 'ctrl+right' ➜ ⮐ @changeValue @max
+            
+        false
 
     draw: =>
 

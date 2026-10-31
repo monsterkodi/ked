@@ -18,9 +18,9 @@ import julia from '../../util/julia.json' with { type: "json" }
 
 function uniko extends view
 
-    @: @screen @editor name ->
+    @: @screen @editor @name ->
 
-        super @screen name
+        super @screen @name
 
         @height = 28
         @focus  = 'matrix'

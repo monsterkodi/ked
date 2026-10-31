@@ -6,13 +6,16 @@
      ███████   ███████   ███████   ███████   ███   ███  ███        ███   ███████  ███   ███  ████████  ███   ███
 ###
 
-use ../../../kxk ▪ post
-use ../../theme  ◆ color theme
-use ../base      ◆ view colorslider rgbinput radio
+use ../../../kxk    ▪ post kseg kutil
+use ../../theme     ◆ color theme
+use ../../edit/tool ◆ belt
+use ../base         ◆ view colorslider rgbinput radio
+
+# #3c3cf0 #ABC #8c5900
 
 function colorpicker extends view
 
-    @: @screen @name @editor ->
+    @: @screen @editor @name ->
 
         super @screen @name
 
@@ -40,8 +43,9 @@ function colorpicker extends view
                 
         @radio  = new radio screen "#{@name}_radio"
 
-        @sliders = [@hue @bright @sat]
-        @inputs  = [@red @green @blue]
+        @sliders   = [@hue @bright @sat]
+        @inputs    = [@red @green @blue]
+        @focusRing = [@radio @hue @bright @sat @red @green @blue]
 
         @red.textColor   = theme.colorpicker.red
         @green.textColor = theme.colorpicker.green
@@ -79,6 +83,21 @@ function colorpicker extends view
 
         @syncAll()
 
+    focusDelta: delta =>
+    
+        for item,index in @focusRing
+            if item.hasFocus()
+                num = @focusRing.length
+                if 0 <= index+delta < num
+                    if @focusRing[index+delta].focusable
+                        @focusRing[index+delta].grabFocus()
+                        ⮐ true
+                ⮐ false
+        false
+            
+    focusNext: => @focusDelta 1
+    focusPrev: => @focusDelta -1
+
     selectionMode: => @twoColors
 
     backgroundChanged: => @bgChanged
@@ -96,7 +115,6 @@ function colorpicker extends view
         post.emit 'redraw'
 
     rgb: => color.hsvToRgb [@h @s @v]
-
     hex: => color.hex @rgb()
 
     colorHex: idx =>
@@ -107,7 +125,6 @@ function colorpicker extends view
         color.hex color.hsvToRgb([st.h st.s st.v])
 
     foregroundHex: => @colorHex 0
-
     backgroundHex: => if @twoColors then @colorHex 1 else null
 
     saveColorState: => @colorStates[@activeColor] = {h: @h, s: @s, v: @v}
@@ -258,67 +275,85 @@ function colorpicker extends view
         @activeColor = 0
         @voided      = [false false]
 
+        @radio.setFocusable false
+
         if hex?
             @setHex hex
         else
-            @loadActiveColor()
-            
-    #         @colorReplace  = null
-    #         @colorDecorate = null
-    # 
-    #         if empty hex
-    # 
-    #             if found = @colorAtCursor()
-    #                 hex = found.text
-    #                 @colorReplace = found
-    #             else if not empty @editor.state.s.selections
-    # 
-    #                 @colorDecorate =
-    #                     ranges: clone @editor.state.s.selections
-    # 
-    #                 @colorpicker.showSelection @colorForSelection('fg') @colorForSelection('bg')
-    # 
-    #                 ked_session.set 'funcol▸active' @active
-    #                 post.emit 'redraw'
-    #                 ⮐
-    # 
-    #         @colorpicker.show hex
-    # 
-    #         @colorReplace.from = @colorpicker.hex() if @colorReplace?
-                # 
-        @radio.setFocusable false
+            if found = @colorAtCursor()
+                hex = found.text
+                @colorReplace = found
+                @setHex hex
+                @colorReplace.from = @hex()
+                
+            else if not empty @editor.state.s.selections
+                
+                @twoColors = true
+                @colorDecorate = ranges:clone(@editor.state.s.selections)
+                @colorStates = [{h: 0 s: 100 v: 100} {h: 0 s: 100 v: 100}]
+                
+                fg = @colorAtSelection('fg') ? '#ff0000'
+                bg = @colorAtSelection('bg') ? '#000000'
+
+                @setColorStateFromHex 0 fg
+                @setColorStateFromHex 1 bg
+                
+                @loadActiveColor()
+                    
+                @radio.setFocusable true
 
         super()
 
         @hue.grabFocus()
+        
+    colorAtSelection: layer =>
 
-    showSelection: (fg bg) =>
+        color = @editor.state.colorAtPos @editor.state.mainCursor() layer
 
-        @twoColors   = true
-        @bgChanged   = false
-        @activeColor = 0
-        @voided      = [false false]
-        @colorStates = [{h: 0 s: 100 v: 100} {h: 0 s: 100 v: 100}]
+        ⮐ color if color?
 
-        fg ?= '#ff0000'
-        bg ?= '#000000'
+        for rng in @editor.state.s.selections
+            if c = @editor.state.colorAtPos [rng[0] rng[1]] layer
+                ⮐ c
+        null
+        
+    colorAtCursor: =>
 
-        @setColorStateFromHex 0 fg
-        @setColorStateFromHex 1 bg
-        @loadActiveColor()
+        state = @editor.state
+        mc    = state.mainCursor()
+        lines = state.s.lines
+        [x y] = mc
 
-        @radio.setFocusable true
+        ⮐ if y < 0 or y >= lines.length
 
-        @isVisible = true
+        line = lines[y]
+        ⮐ if empty line
+
+        word = state.wordAtCursor()
+        rng  = belt.rangeOfClosestWordToPos lines mc
+
+        if empty word or empty rng
+            if x < line.length and kseg.str(line[x...x+1]) == '#'
+                word = belt.wordAtPos lines [x+1 y]
+                rng  = belt.rangeOfClosestWordToPos lines [x+1 y]
+
+        ⮐ if empty word or empty rng
+        ⮐ if empty color.values(word)
+
+        text = word
+
+        if rng[0] > 0 and kseg.str(line[rng[0]-1...rng[0]]) == '#'
+            text = '#' + text
+            rng  = [rng[0]-1 rng[1] rng[2] rng[3]]
+
+        text: text
+        range: rng
 
     hide: =>
 
         ⮐ if @hidden()
 
         super()
-
-        # @radio.setFocused false
-        # @radio.setFocusable false
 
         for input in @inputs
             input.state.deselect()
@@ -328,8 +363,53 @@ function colorpicker extends view
 
     submit: =>
 
-        post.emit 'colorpicker.submit' @hex()
+        hex = @hex()
+        if @colorReplace?
+            if hex == @colorReplace.from
+                @colorReplace = null
+                ⮐
+            @replaceColor hex
+
+        else if @colorDecorate?
+
+            ranges = @colorDecorate.ranges
+
+            @colorDecorate = null
+
+            fg = @foregroundHex()
+            bg = null
+
+            bg = @backgroundHex() if @backgroundChanged()
+
+            voided = []
+            voided.push 'fg' if @colorVoided 0
+            voided.push 'bg' if @colorVoided 1
+
+            @editor.state.setColorsForRanges ranges fg bg voided
+
+        # post.emit 'redraw'
+        
         @hide()
+
+    replaceColor: hex =>
+
+        ⮐ if empty hex
+        ⮐ if empty @colorReplace
+
+        [x1 y x2] = @colorReplace.range
+
+        state = @editor.state
+        lines = state.s.lines.asMutable()
+
+        ⮐ if y < 0 or y >= lines.length
+
+        text = hex
+        text = text[1..] if @colorReplace.text[0] != '#' and text[0] == '#'
+
+        kutil.replace lines[y] x1 (x2-x1) kseg(text)
+        state.setLines lines
+
+        @colorReplace = null
 
     cancel: =>
 
@@ -365,63 +445,32 @@ function colorpicker extends view
 
     onKey: key event =>
 
-        ⮐ false if @hidden() #or not @focused
+        ⮐ false if @hidden()
 
         switch event.combo
-            # 'down'
-            # 'tab'       ➜ ⮐ @focusNext  1
-            # 'shift+tab' ➜ ⮐ @focusNext -1
-            'esc'       ➜ ⮐ @cancel()
-            'return'    ➜ ⮐ @submit()
+            'down''tab'     ➜ ⮐ @focusNext() 
+            'up''shift+tab' ➜ ⮐ @focusPrev()
+            'esc'           ➜ ⮐ @cancel()
+            'return'        ➜ ⮐ @submit()
+            
         # log "colorpicker.onKey #{key}"
         ⮐ true if @red  .onKey key event
         ⮐ true if @green.onKey key event
         ⮐ true if @blue .onKey key event
 
-        # if (@focusIndex < 3 or @focusIndex == RADIO_FOCUS) and @twoColors and event.combo in ['delete' 'backspace']
-        #     @voidActiveColor()
-        #     ⮐ true
+        ⮐ true if @hue   .onKey key event
+        ⮐ true if @bright.onKey key event
+        ⮐ true if @sat   .onKey key event
 
-        # if @focusIndex == RADIO_FOCUS and @twoColors
         if @radio.hasFocus() and @twoColors
 
             switch event.combo
-                'left'  ➜ ⮐ @cycleColor -1
-                'right' ➜ ⮐ @cycleColor  1
-                'down'  ➜ ⮐ @hue.grabFocus()
-                        ➜ ⮐ false
-
-        before = @hex()
-
-#         if @focusIndex < 3
-# 
-#             slider = @sliders[@focusIndex]
-# 
-#             switch event.combo
-#                 'left'                   ➜ slider.setValue slider.value - 1
-#                 'right'                  ➜ slider.setValue slider.value + 1
-#                 'shift+left'             ➜ slider.setValue slider.value - 10
-#                 'shift+right'            ➜ slider.setValue slider.value + 10
-#                 'cmd+left'  'ctrl+left'  ➜ slider.setValue slider.min
-#                 'cmd+right' 'ctrl+right' ➜ slider.setValue slider.max
-#                 # 'up'                     ➜ ⮐ @focusUp()
-#                                          ➜ ⮐ false
-# 
-#             @syncFromSliders()
-#             @emitChanged before
-# 
-#             ⮐ true
-
-        # input = @inputs[@focusIndex-3]
-
-        # switch event.combo
-        #     'up' ➜ ⮐ @focusTo 2
-
-#         handled = input.onKey key event
-# 
-#         if handled
-#             @syncFromRgb()
-#             @emitChanged before
+                'delete' 
+                'backspace' ➜ ⮐ @voidActiveColor()
+                'left'      ➜ ⮐ @cycleColor -1
+                'right'     ➜ ⮐ @cycleColor  1
+                'down'      ➜ ⮐ @hue.grabFocus()
+                            ➜ ⮐ false
 
         false
 

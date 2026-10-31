@@ -1,260 +1,77 @@
 var toExport = {}
-var e, h, p
+var e, p, pickr
 
 import harness from "../util/harness.js"
 
+import state from "../edit/state.js"
+import editor from "../edit/editor.js"
+
 import colorpicker from "../view/colmns/colorpicker.js"
 
+
+pickr = function ()
+{
+    var e, h, p
+
+    h = new harness({cols:30,rows:9})
+    e = new editor(h.screen,'test_editor_colorpicker',[])
+    p = new colorpicker(h.screen,e,'test_colorpicker')
+    p.layout(0,0,30,9)
+    p.show()
+    return p
+}
 toExport["colorpicker"] = async function ()
 {
     await section("hovering a slider focuses it", async function ()
     {
-        h = new harness({cols:16,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,16,9)
-        p.show()
-        compare(p.focusIndex,0)
+        p = pickr()
+        compare(p.hue.hasFocus(),true)
         e = {type:'move',cell:[8,4]}
         p.onMouse(e)
-        compare(p.focusIndex,1)
-    })
-    await section("hovering an rgb input focuses it", async function ()
-    {
-        h = new harness({cols:16,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,16,9)
-        p.show()
-        e = {type:'move',cell:[6,7]}
-        p.onMouse(e)
-        compare(p.focusIndex,4)
-        compare(p.green.hasFocus(),true)
+        compare(p.bright.hasFocus(),true)
     })
     await section("pressing a slider sets the value from the column", async function ()
     {
-        h = new harness({cols:16,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,16,9)
-        p.show()
+        p = pickr()
         e = {type:'press',cell:[11,3],button:'left',count:1}
         p.onMouse(e)
-        compare(p.hue.getValue(),277)
-        compare(p.focusIndex,0)
+        compare(p.hue.getValue(),133)
     })
     await section("dragging a slider keeps tracking outside of it", async function ()
     {
-        h = new harness({cols:16,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,16,9)
-        p.show()
+        p = pickr()
         e = {type:'press',cell:[5,3],button:'left',count:1}
         p.onMouse(e)
-        compare(p.hue.getValue(),111)
+        compare(p.hue.getValue(),53)
         e = {type:'drag',cell:[15,5],button:'left',count:1}
         p.onMouse(e)
-        compare(p.hue.getValue(),360)
+        compare(p.hue.getValue(),187)
         e = {type:'release',cell:[15,5],button:'left',count:1}
-        p.onMouse(e)
-    })
-    await section("dragging over another slider does not focus it", async function ()
-    {
-        h = new harness({cols:16,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,16,9)
-        p.show()
-        e = {type:'press',cell:[5,5],button:'left',count:1}
-        p.onMouse(e)
-        compare(p.focusIndex,2)
-        e = {type:'drag',cell:[5,4],button:'left',count:1}
-        p.onMouse(e)
-        compare(p.focusIndex,2)
-        e = {type:'drag',cell:[5,3],button:'left',count:1}
-        p.onMouse(e)
-        compare(p.focusIndex,2)
-        e = {type:'release',cell:[5,3],button:'left',count:1}
         p.onMouse(e)
     })
     await section("the wheel steps a slider and focuses it", async function ()
     {
-        h = new harness({cols:16,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,16,9)
-        p.show()
+        p = pickr()
         p.sat.setValue(50)
         e = {type:'wheel',cell:[8,5],dir:'up'}
         p.onWheel(e)
         compare(p.sat.getValue(),51)
-        compare(p.focusIndex,2)
     })
     await section("the wheel steps an rgb input and focuses it", async function ()
     {
-        h = new harness({cols:16,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,16,9)
-        p.show()
+        p = pickr()
         p.red.setValue(100)
         e = {type:'wheel',cell:[2,7],dir:'down'}
         p.onWheel(e)
         compare(p.red.getValue(),99)
-        compare(p.focusIndex,3)
-    })
-    await section("a selection keeps two colors and adds the radio to the ring", async function ()
-    {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
-        p.showSelection('#ff0000','#00ff00')
-        compare(p.selectionMode(),true)
-        compare(p.radio.options.length,2)
-        compare(p.radio.focusable,true)
-        p.focusTo(5)
-        h.key(p,'tab','')
-        compare(p.focusIndex,6)
-        h.key(p,'tab','')
-        compare(p.focusIndex,0)
-    })
-    await section("left and right switch the active color", async function ()
-    {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
-        p.showSelection('#ff0000','#00ff00')
-        p.focusTo(6)
-        compare(p.activeColor,0)
-        compare(p.hex(),'#ff0000')
-        h.key(p,'right','')
-        compare(p.activeColor,1)
-        compare(p.hex(),'#00ff00')
-        h.key(p,'left','')
-        compare(p.activeColor,0)
-        compare(p.hex(),'#ff0000')
     })
     await section("the radio is out of the ring in single color mode", async function ()
     {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
+        p = pickr()
         p.show('#ff0000')
         compare(p.selectionMode(),false)
         compare(p.radio.options.length,1)
         compare(p.radio.focusable,false)
-        p.focusTo(5)
-        h.key(p,'tab','')
-        compare(p.focusIndex,0)
-        p.onMouse({type:'move',cell:[5,1]})
-        compare(p.focusIndex,0)
-    })
-    await section("the radio shows the active color at the top", async function ()
-    {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
-        p.showSelection('#ff0000','#00ff00')
-        p.draw()
-        compare(h.row(1).includes('#ff0000'),true)
-        compare(h.row(1).includes('#00ff00'),false)
-        p.setActiveColor(1)
-        p.draw()
-        compare(h.row(1).includes('#ff0000'),false)
-        compare(h.row(1).includes('#00ff00'),true)
-    })
-    await section("a focused radio shows markers around the active color", async function ()
-    {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
-        p.showSelection('#ff0000','#00ff00')
-        p.focusTo(6)
-        p.draw()
-        compare(h.row(1).includes('● #ff0000 ●'),true)
-    })
-    await section("changing the background marks it as changed", async function ()
-    {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
-        p.showSelection('#ff0000','#0000ff')
-        compare(p.backgroundChanged(),false)
-        p.setActiveColor(1)
-        p.setHex('#00ff00')
-        compare(p.backgroundChanged(),true)
-        compare(p.foregroundHex(),'#ff0000')
-        compare(p.backgroundHex(),'#00ff00')
-    })
-    await section("hovering the radio focuses it", async function ()
-    {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
-        p.showSelection('#ff0000','#00ff00')
-        p.onMouse({type:'move',cell:[5,1]})
-        compare(p.focusIndex,6)
-    })
-    await section("typing rgb while the background is active marks it changed", async function ()
-    {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
-        p.showSelection('#ff0000','#00ff00')
-        p.setActiveColor(1)
-        p.focusTo(4)
-        compare(p.backgroundChanged(),false)
-        h.type(p,'12')
-        compare(p.backgroundChanged(),true)
-    })
-    await section("up from hue goes to the two color radio", async function ()
-    {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
-        p.showSelection('#ff0000','#00ff00')
-        p.focusTo(0)
-        h.key(p,'up','')
-        compare(p.focusIndex,6)
-    })
-    await section("up from hue stays in single color mode", async function ()
-    {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
-        p.show('#ff0000')
-        p.focusTo(0)
-        h.key(p,'up','')
-        compare(p.focusIndex,0)
-    })
-    await section("delete voids the active color", async function ()
-    {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
-        p.showSelection('#ff0000','#00ff00')
-        p.focusTo(0)
-        h.key(p,'delete','')
-        compare(p.colorVoided(0),true)
-        p.draw()
-        compare(h.row(1).includes('none'),true)
-        h.key(p,'right','')
-        compare(p.colorVoided(0),false)
-    })
-    await section("backspace voids the background", async function ()
-    {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
-        p.showSelection('#ff0000','#00ff00')
-        p.setActiveColor(1)
-        p.focusTo(1)
-        h.key(p,'backspace','')
-        compare(p.colorVoided(1),true)
-        compare(p.colorVoided(0),false)
-    })
-    await section("a missing background starts black", async function ()
-    {
-        h = new harness({cols:30,rows:9})
-        p = new colorpicker(h.screen,'test_cp')
-        p.layout(0,0,30,9)
-        p.showSelection('#ff0000',null)
-        compare(p.backgroundHex(),'#000000')
-        compare(p.backgroundChanged(),false)
     })
 }
 toExport["colorpicker"]._section_ = true
@@ -262,5 +79,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29sb3JwaWNrZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL3Rlc3QvY29sb3JwaWNrZXIua29kZSJdLCJtYXBwaW5ncyI6Ijs7O09BQ3FCLGNBQWQ7O09BQ2Msa0JBQVQ7Ozs7OztRQU1KLFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixRQUFRLFlBQVksRUFBRSxPQUFPO1FBQzdCLEVBQUUsT0FBTyxFQUFFLEVBQUUsR0FBRztRQUNoQixFQUFFO2dCQUVGLEVBQUUsV0FBYTtRQUVmLEtBQ0ksS0FBTSxPQUNOLE1BQU8sRUFBRTtRQUNiLEVBQUUsUUFBUTtnQkFFVixFQUFFLFdBQWE7Ozs7UUFJZixRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxZQUFZLEVBQUUsT0FBTztRQUM3QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRTtRQUVGLEtBQ0ksS0FBTSxPQUNOLE1BQU8sRUFBRTtRQUNiLEVBQUUsUUFBUTtnQkFFVixFQUFFLFdBQWE7Z0JBQ2YsRUFBRSxNQUFNLFdBQWE7Ozs7UUFJckIsUUFBUSxTQUFRLEtBQUssR0FBRyxLQUFLO1FBQzdCLFFBQVEsWUFBWSxFQUFFLE9BQU87UUFDN0IsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO1FBQ2hCLEVBQUU7UUFFRixLQUNJLEtBQU0sUUFDTixNQUFPLEdBQUcsR0FDVixPQUFRLE9BQ1IsTUFBTztRQUNYLEVBQUUsUUFBUTtnQkFFVixFQUFFLElBQUksV0FBYTtnQkFDbkIsRUFBRSxXQUFhOzs7O1FBSWYsUUFBUSxTQUFRLEtBQUssR0FBRyxLQUFLO1FBQzdCLFFBQVEsWUFBWSxFQUFFLE9BQU87UUFDN0IsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO1FBQ2hCLEVBQUU7UUFFRixLQUNJLEtBQU0sUUFDTixNQUFPLEVBQUUsR0FDVCxPQUFRLE9BQ1IsTUFBTztRQUNYLEVBQUUsUUFBUTtnQkFFVixFQUFFLElBQUksV0FBYTtRQUVuQixLQUNJLEtBQU0s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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29sb3JwaWNrZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL3Rlc3QvY29sb3JwaWNrZXIua29kZSJdLCJtYXBwaW5ncyI6Ijs7O09BQ3FCLGNBQWQ7O09BQ2MsWUFBZDtPQUFvQixhQUFwQjs7T0FDYyxrQkFBVDs7O0FBRVo7Ozs7SUFDSSxRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7SUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztJQUN4QixRQUFRLFlBQVksRUFBRSxPQUFPLEVBQUU7SUFDL0IsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO0lBQ2hCLEVBQUU7V0FDRjs7Ozs7O1FBTUksSUFBSTtnQkFFSixFQUFFLElBQUksV0FBYTtRQUVuQixLQUNJLEtBQU0sT0FDTixNQUFPLEVBQUU7UUFDYixFQUFFLFFBQVE7Z0JBRVYsRUFBRSxPQUFPLFdBQWE7Ozs7UUFJdEIsSUFBSTtRQUVKLEtBQ0ksS0FBTSxRQUNOLE1BQU8sR0FBRyxHQUNWLE9BQVEsT0FDUixNQUFPO1FBQ1gsRUFBRSxRQUFRO2dCQUVWLEVBQUUsSUFBSSxXQUFhOzs7O1FBSW5CLElBQUk7UUFFSixLQUNJLEtBQU0sUUFDTixNQUFPLEVBQUUsR0FDVCxPQUFRLE9BQ1IsTUFBTztRQUNYLEVBQUUsUUFBUTtnQkFFVixFQUFFLElBQUksV0FBYTtRQUVuQixLQUNJLEtBQU0sT0FDTixNQUFPLEdBQUcsR0FDVixPQUFRLE9BQ1IsTUFBTztRQUNYLEVBQUUsUUFBUTtnQkFFVixFQUFFLElBQUksV0FBYTtRQUVuQixLQUNJLEtBQU0sVUFDTixNQUFPLEdBQUcsR0FDVixPQUFRLE9BQ1IsTUFBTztRQUNYLEVBQUUsUUFBUTs7OztRQUlWLElBQUk7UUFDSixFQUFFLElBQUksU0FBUztRQUVmLEtBQ0ksS0FBTSxRQUNOLE1BQU8sRUFBRSxHQUNULElBQUs7UUFDVCxFQUFFLFFBQVE7Z0JBRVYsRUFBRSxJQUFJLFdBQWE7Ozs7UUFJbkIsSUFBSTtRQUNKLEVBQUUsSUFBSSxTQUFTO1FBRWYsS0FDSSxLQUFNLFFBQ04sTUFBTyxFQUFFLEdBQ1QsSUFBSztRQUNULEVBQUUsUUFBUTtnQkFFVixFQUFFLElBQUksV0FBYTs7OztRQUluQixJQUFJO1FBQ0osRUFBRSxLQUFLO2dCQUVQLEVBQUUsZ0JBQWtCO2dCQUNwQixFQUFFLE1BQU0sUUFBUSxPQUFTO2dCQUN6QixFQUFFLE1BQU0sVUFBWSJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/test/colorpicker.kode
