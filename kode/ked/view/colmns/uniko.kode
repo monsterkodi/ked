@@ -6,7 +6,6 @@
      ███████   ███   ███  ███  ███  ███   ███████
 
     a unicode character picker
-    lives below the funtree and above the colorpicker
 ###
 
 use ../../../kxk ▪ kseg post
@@ -23,7 +22,7 @@ function uniko extends view
 
         super @screen name
 
-        @height = 16
+        @height = 28
         @focus  = 'matrix'
 
         @setColor 'bg' theme.uniko.bg
@@ -39,6 +38,7 @@ function uniko extends view
         @matrix.setColor 'scroll_dot'     theme.scroll.dot
 
         @input.on 'action' @onInputAction
+        @matrix.on 'submit' @submit
 
         @allItems = []
         for char,comment of julia
@@ -53,7 +53,12 @@ function uniko extends view
 
         if empty text ➜ ⮐ @matrix.setItems @allItems
 
-        matches = @allItems.filter (item) -> item.search.includes text
+        words = text.split ' '
+        
+        matches = @allItems.filter (item) -> 
+            for word in words
+                ⮐ false if not item.search.includes word
+            true
 
         @matrix.setItems matches
 
@@ -140,30 +145,28 @@ function uniko extends view
         ⮐ false if @hidden()
 
         switch event.combo
-            'esc'      ➜ ⮐ @hide()
-            'return'   ➜ ⮐ @submit()
-            'cmd+c'    ➜ ⮐ @copy()
-            'ctrl+c'   ➜ ⮐ @copy()
-            'cmd+up'   ➜ ⮐ @incScale  1
-            'cmd+down' ➜ ⮐ @incScale -1
-
-        if event.combo == 'space'
-            ⮐ @submit()
+            'esc'       ➜ ⮐ @hide()
+            'cmd+up'    ➜ ⮐ @incScale  1
+            'cmd+down'  ➜ ⮐ @incScale -1
 
         if @focus == 'input'
 
-            if event.combo == 'down'
-                @focusMatrix()
-                ⮐ true
+            switch event.combo 
+                'down'  ➜ ⮐ @focusMatrix()
 
             ⮐ @input.onKey key event
 
-        if valid event.char and event.char.length == 1 and event.char in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+        switch event.combo 
+            'space'     ➜ ⮐ @submit()
+            'return'    ➜ ⮐ @submit()
+            'cmd+c'     ➜ ⮐ @copy()
+            'ctrl+c'    ➜ ⮐ @copy()
+            'up''left''right''down'
+                @matrix.moveSelection event.combo
+
+        if valid event.char and event.char.length == 1
             @focusInput()
             ⮐ @input.onKey key event
-
-        if event.combo in ['up''left''right''down']            
-            @matrix.moveSelection event.combo
 
         false
 
@@ -174,25 +177,10 @@ function uniko extends view
 
     onMouse: event =>
 
-        ⮐ false if @hidden()
-
-        if @input.cells.isInsideEvent event
-            @focusInput()
-            ⮐ @input.onMouse event
-
-        if @matrix.cells.isInsideEvent event
-
-            if event.type == 'press'
-                [x y] = @matrix.cells.posForEvent event
-                [col row] = @matrix.cellAtPos x y
-                @focus = 'matrix'
-                @matrix.selectAt col row
-                @matrix.grabFocus()
-                @submit()
-
-            ⮐ redraw:true
-
-        false
+        ⮐ if @hidden()
+        ret = @input.onMouse event   ; ⮐ ret if ret?.redraw
+        ret = @matrix.onMouse event  ; ⮐ ret if ret?.redraw
+        super event
 
     onWheel: event =>
 

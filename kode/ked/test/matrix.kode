@@ -51,7 +51,7 @@ use ../../kxk    ▪ post
         m = new matrix h.screen 'test_matrix'
         m.layout 0 0 10 5
 
-        m.hasFocus() ▸ false
+        not m.hasFocus() ▸ true
 
         h.focus m
 
@@ -59,7 +59,7 @@ use ../../kxk    ▪ post
 
         post.emit 'focus' 'somewhere_else'
 
-        m.hasFocus() ▸ false
+        not m.hasFocus() ▸ true
 
     ▸ a larger scale uses more cell rows per logical row
 

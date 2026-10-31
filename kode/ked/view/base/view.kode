@@ -12,6 +12,7 @@
         ▪ view features
         ▪ mouse enter and leave
         ▪ current popup
+        ▪ focus
 ###
 
 use ../../../kxk ▪ events post
@@ -31,7 +32,8 @@ function view extends events
         
         @isVisible = true
         @focusable = false
-                        
+        @focused   = false
+                                
     setColor: key clr => @color[key] = color.values(clr)
         
     # ███   ███  ███   ███████  ███  ███████    ███  ███      ███  █████████  ███   ███  
@@ -88,8 +90,7 @@ function view extends events
     
     onMouseLeave: event => post.emit 'redraw'
     onMouseEnter: event => 
-        
-        if @focusable and @grabFocus is func
+        if @focusable
             @grabFocus()
         
         if @pointerType 
@@ -98,6 +99,8 @@ function view extends events
         
     handleHover: event =>
         
+        # log "view.hover #{@name}"
+
         inside = not event.handled and @cells.isInsideEvent event
         if @hover and not inside
             @hover = false
@@ -106,7 +109,25 @@ function view extends events
             @hover = true
             @onMouseEnter event
         @hover
-    
+
+    setFocusable: f=true ->
+     
+        if f and not @focusable
+            @focusable = true
+            post.on 'focus' @onFocus
+        else if @focusable and not f
+            @focusable = false
+            post.removeListener 'focus' @onFocus
+
+    onFocus: name => 
+        # log "view.onFocus #{name} #{@name}"
+        @focused = (@name == name)
+    hasFocus:  => @focused
+    grabFocus: =>
+        # log "view.grabFocus #{@name}"
+        post.emit 'focus' @name
+        post.emit 'redraw'
+        
     onKey: key event => log "view.onKey #{@name}"
         
     # ███████    ████████    ███████   ███   ███  

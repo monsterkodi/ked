@@ -1,8 +1,9 @@
 ###
-    colorslider
-
-    a horizontal slider for the colorpicker
-    draws a gradient and marks the value
+     ███████   ███████   ███       ███████   ████████    ███████  ███      ███  ███████    ████████  ████████ 
+    ███       ███   ███  ███      ███   ███  ███   ███  ███       ███      ███  ███   ███  ███       ███   ███
+    ███       ███   ███  ███      ███   ███  ███████    ███████   ███      ███  ███   ███  ███████   ███████  
+    ███       ███   ███  ███      ███   ███  ███   ███       ███  ███      ███  ███   ███  ███       ███   ███
+     ███████   ███████   ███████   ███████   ███   ███  ███████   ███████  ███  ███████    ████████  ███   ███
 ###
 
 use ../../../kxk ▪ post
@@ -21,13 +22,13 @@ function colorslider extends view
         @min      = 0
         @max      = 100
         @value    = 0
-        @focused  = false
         @gradient = (v) -> [0 0 0]
 
-        @focusable      = true
         @pointerType    = 'ew-resize'
         @onFocusRequest = null
         @onInput        = null
+        
+        @setFocusable()
 
     setValue: v => @value = clamp @min @max int(v)
 
@@ -55,7 +56,7 @@ function colorslider extends view
 
     onMouse: event =>
 
-        ⮐  if @hidden() or @collapsed()
+        ⮐ if @hidden() or @collapsed()
 
         super event
 
@@ -69,7 +70,7 @@ function colorslider extends view
                     @setFromEvent event
                     @onInput() if @onInput is func
                     post.emit 'pointer' 'grabbing'
-                    ⮐  redraw:true
+                    ⮐ redraw:true
 
             'drag'
 
@@ -78,7 +79,7 @@ function colorslider extends view
                     @setFromEvent event
                     @onInput() if @onInput is func
                     post.emit 'pointer' 'grabbing'
-                    ⮐  redraw:true
+                    ⮐ redraw:true
 
                 @hover = false
 
@@ -87,7 +88,7 @@ function colorslider extends view
                 if @doDrag
                     post.emit 'pointer' @pointerType if @hover
                     delete @doDrag
-                    ⮐  redraw:true
+                    ⮐ redraw:true
 
         @hover
 
@@ -98,8 +99,8 @@ function colorslider extends view
 
     onWheel: event =>
 
-        ⮐  if @hidden() or @collapsed()
-        ⮐  if not @cells.isInsideEvent event
+        ⮐ if @hidden() or @collapsed()
+        ⮐ if not @cells.isInsideEvent event
 
         dir = switch event.dir
             'up'    ➜  1
@@ -108,7 +109,7 @@ function colorslider extends view
             'left'  ➜ -1
             else    ➜  0
 
-        ⮐  if not dir
+        ⮐ if not dir
 
         step = 1
         step = 10 if event.shift
@@ -121,10 +122,10 @@ function colorslider extends view
 
     draw: =>
 
-        ⮐  if @hidden() or @collapsed()
+        ⮐ if @hidden() or @collapsed()
 
         w = @cells.cols
-        ⮐  if w < 1
+        ⮐ if w < 1
 
         span = max 1 w-1
 
@@ -139,9 +140,7 @@ function colorslider extends view
             fg = color.adjustForBackground [255 255 255] mbg
             @cells.set_ch_fg mx 0 '●' fg
         else
-            fg = color.adjustForBackground [255 255 255] mbg
-            # fg = color.adjustForBackground @color.fg mbg
-            # @cells.set_ch_fg mx 0 '┃' fg
+            fg = color.adjustForBackground @color.fg mbg
             @cells.set_ch_fg mx 0 '▪' fg
 
         super()

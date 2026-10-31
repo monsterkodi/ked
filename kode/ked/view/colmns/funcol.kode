@@ -6,11 +6,11 @@
 ███        ███████   ███   ███   ███████   ███████   ███████
 ###
 
-use ../../../kxk ▪ post slash kseg kutil
-use ../../theme  ◆ color theme
+use ../../../kxk    ▪ post slash kseg kutil
+use ../../theme     ◆ color theme
 use ../../edit/tool ◆ belt
-use ../base      ◆ view knob
-use              ◆ funtree colorpicker uniko
+use ../base         ◆ view knob
+use                 ◆ funtree colorpicker uniko
 
 function funcol extends view
 
@@ -18,16 +18,16 @@ function funcol extends view
         
         super screen 'funcol' features
         
-        @isVisible = false
-        @active    = false
+        @isVisible     = false
+        @active        = false
         @colorReplace  = null
         @colorDecorate = null
         
         @pointerType = 'pointer'
         
-        @knob    = new knob    screen  "#{@name}_knob"
-        @funtree = new funtree @editor "#{@name}_funtree" ['scrllr']       
-        @colorpicker = new colorpicker screen "#{@name}_colorpicker"
+        @knob        = new knob        screen         "#{@name}_knob"
+        @funtree     = new funtree            @editor "#{@name}_funtree" ['scrllr']       
+        @colorpicker = new colorpicker screen         "#{@name}_colorpicker"
         @uniko       = new uniko       screen @editor "#{@name}_uniko"
         
         @knob.frameSide = 'left'
@@ -50,7 +50,7 @@ function funcol extends view
         
     onSessionMerge: recent =>
     
-        ⮐  if empty recent.funcol
+        ⮐ if empty recent.funcol
         
         if recent.funcol.active
             @active = true
@@ -130,12 +130,11 @@ function funcol extends view
 
         color = @editor.state.colorAtPos @editor.state.mainCursor() layer
 
-        ⮐  color if color?
+        ⮐ color if color?
 
         for rng in @editor.state.s.selections
             if c = @editor.state.colorAtPos [rng[0] rng[1]] layer
-                ⮐  c
-
+                ⮐ c
         null
 
     colorAtCursor: =>
@@ -145,10 +144,10 @@ function funcol extends view
         lines = state.s.lines
         [x y] = mc
 
-        ⮐  if y < 0 or y >= lines.length
+        ⮐ if y < 0 or y >= lines.length
 
         line = lines[y]
-        ⮐  if empty line
+        ⮐ if empty line
 
         word = state.wordAtCursor()
         rng  = belt.rangeOfClosestWordToPos lines mc
@@ -158,8 +157,8 @@ function funcol extends view
                 word = belt.wordAtPos lines [x+1 y]
                 rng  = belt.rangeOfClosestWordToPos lines [x+1 y]
 
-        ⮐  if empty word or empty rng
-        ⮐  if empty color.values(word)
+        ⮐ if empty word or empty rng
+        ⮐ if empty color.values(word)
 
         text = word
 
@@ -172,15 +171,15 @@ function funcol extends view
 
     replaceColor: hex =>
 
-        ⮐  if empty hex
-        ⮐  if empty @colorReplace
+        ⮐ if empty hex
+        ⮐ if empty @colorReplace
 
         [x1 y x2] = @colorReplace.range
 
         state = @editor.state
         lines = state.s.lines.asMutable()
 
-        ⮐  if y < 0 or y >= lines.length
+        ⮐ if y < 0 or y >= lines.length
 
         text = hex
         text = text[1..] if @colorReplace.text[0] != '#' and text[0] == '#'
@@ -219,7 +218,7 @@ function funcol extends view
 
     draw: ->
         
-        ⮐  if @hidden() or @collapsed() or not @active
+        ⮐ if @hidden() or @collapsed() or not @active
         
         @cells.fill_rect 0 1 -1 -1 ' ' null theme.funtree.bg
         @cells.fill_rect 0 0 -1  0 ' ' null theme.gutter.bg
@@ -239,7 +238,7 @@ function funcol extends view
 
     onContext: event =>
     
-        ⮐  if not @hover
+        ⮐ if not @hover
     
         log "funcol.onContext: #{@hover}" event
         
@@ -266,17 +265,13 @@ function funcol extends view
   
     onMouse: event =>
     
-        ⮐  if @hidden() or @collapsed() or not @active
+        ⮐ if @hidden() or @collapsed() or not @active
         
-        ret = super event            ; ⮐  ret if ret?.redraw
-        ret = @knob.onMouse event    ; ⮐  ret if ret?.redraw
-        if @uniko.visible()
-            ret = @uniko.onMouse event
-            ⮐  ret if ret?.redraw
-        if @colorpicker.visible()
-            ret = @colorpicker.onMouse event
-            ⮐  ret if ret?.redraw
-        ret = @funtree.onMouse event ; ⮐  ret if ret?.redraw
+        ret = super event                ; ⮐ ret if ret?.redraw
+        ret = @knob.onMouse event        ; ⮐ ret if ret?.redraw
+        ret = @uniko.onMouse event       ; ⮐ ret if ret?.redraw
+        ret = @colorpicker.onMouse event ; ⮐ ret if ret?.redraw
+        ret = @funtree.onMouse event     ; ⮐ ret if ret?.redraw
         
     # ███   ███  ███   ███  ████████  ████████  ███      
     # ███ █ ███  ███   ███  ███       ███       ███      
@@ -286,15 +281,15 @@ function funcol extends view
     
     onWheel: event =>
         
-        ⮐  if @hidden() or @collapsed() or not @active
+        ⮐ if @hidden() or @collapsed() or not @active
 
         if @uniko.visible()
             if ret = @uniko.onWheel event
-                ⮐  ret
+                ⮐ ret
 
         if @colorpicker.visible()
             if ret = @colorpicker.onWheel event
-                ⮐  ret
+                ⮐ ret
 
         @funtree.onWheel event
         
@@ -306,16 +301,16 @@ function funcol extends view
     
     onKey: key event =>
         
-        ⮐  if @hidden() or @collapsed() or not @active
+        ⮐ if @hidden() or @collapsed() or not @active
 
         if @uniko.visible()
             if ret = @uniko.onKey key event
-                ⮐  ret
+                ⮐ ret
 
         if @colorpicker.visible() and @colorpicker.hasFocus()
-            ⮐  @colorpicker.onKey key event
+            ⮐ @colorpicker.onKey key event
 
-        ⮐  if not @funtree.hasFocus()
+        ⮐ if not @funtree.hasFocus()
         
         @funtree.onKey key event
 

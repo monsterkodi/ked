@@ -30,7 +30,7 @@ function input extends editor
     # ███       ███   ███  ███       ███   ███       ███
     # ███        ███████    ███████   ███████   ███████ 
 
-    hasFocus: -> @state.hasFocus
+    # hasFocus: -> @state.hasFocus
 
     onMouseLeave: event => 
     

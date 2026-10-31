@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, isFunc: function (o) {return typeof o === 'function'}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
 var view
 
@@ -24,6 +24,9 @@ view = (function ()
 
         this["draw"] = this["draw"].bind(this)
         this["onKey"] = this["onKey"].bind(this)
+        this["grabFocus"] = this["grabFocus"].bind(this)
+        this["hasFocus"] = this["hasFocus"].bind(this)
+        this["onFocus"] = this["onFocus"].bind(this)
         this["handleHover"] = this["handleHover"].bind(this)
         this["onMouseEnter"] = this["onMouseEnter"].bind(this)
         this["onMouseLeave"] = this["onMouseLeave"].bind(this)
@@ -41,6 +44,7 @@ view = (function ()
         }
         this.isVisible = true
         this.focusable = false
+        this.focused = false
         return view.__super__.constructor.apply(this, arguments)
     }
 
@@ -133,7 +137,7 @@ view = (function ()
 
     view.prototype["onMouseEnter"] = function (event)
     {
-        if (this.focusable && _k_.isFunc(this.grabFocus))
+        if (this.focusable)
         {
             this.grabFocus()
         }
@@ -162,6 +166,36 @@ view = (function ()
         return this.hover
     }
 
+    view.prototype["setFocusable"] = function (f = true)
+    {
+        if (f && !this.focusable)
+        {
+            this.focusable = true
+            return post.on('focus',this.onFocus)
+        }
+        else if (this.focusable && !f)
+        {
+            this.focusable = false
+            return post.removeListener('focus',this.onFocus)
+        }
+    }
+
+    view.prototype["onFocus"] = function (name)
+    {
+        return this.focused = (this.name === name)
+    }
+
+    view.prototype["hasFocus"] = function ()
+    {
+        return this.focused
+    }
+
+    view.prototype["grabFocus"] = function ()
+    {
+        post.emit('focus',this.name)
+        return post.emit('redraw')
+    }
+
     view.prototype["onKey"] = function (key, event)
     {
         console.log(`view.onKey ${this.name}`)
@@ -180,5 +214,5 @@ view = (function ()
 
 export default view;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidmlldy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy9iYXNlL3ZpZXcua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQWdCYSxVQUFBO0lBQU07SUFBTzs7T0FDUCxZQUFUOztPQUNTLFlBQVo7OztBQUVFLFFBQVQ7O3FCQUFzQjtJQUVsQixNQUFDLGlCQUFjO2FBRWYsTUFBSSxRQUFRLE1BQUs7O1FBQWQ7UUFBUTs7Ozs7Ozs7Ozs7O1FBRVAsS0FBQyxZQUFZLE1BQU0sS0FBQztRQUNwQixLQUFDO1FBQ0QsS0FBQzs0QkFDeUI7OztZQUFMO1lBQXJCLEtBQUMsTUFBTSxLQUFLOztRQUVaLEtBQUMsWUFBWTtRQUNiLEtBQUMsWUFBWTs7OztvQkFFakIsdUJBQVUsS0FBSTs7ZUFBTyxLQUFDLE1BQU0sT0FBTyxNQUFNLE9BQU87OztvQkFRaEQ7Ozs7UUFFSSxLQUFDLFlBQVk7WUFFVixLQUFDOztnQkFDRyxLQUFLLGdCQUFpQixLQUFLLGlCQUFnQjs7Z0JBQzFDLFFBQVEsS0FBSztnQkFDYixLQUFLLGVBQWU7Z0JBQ3BCLE1BQU07O1lBQ1YsS0FBSyxlQUFlO1lBRXBCLEtBQUssS0FBSyxhQUFhLEtBQUM7O1FBRTVCLEtBQUM7Z0JBQ0QsT0FBTzs7O29CQUVYOztRQUVJLEtBQUMsWUFBWTtZQUVWLEtBQUM7O2dCQUNHLFNBQUssS0FBSzs7Z0JBQ1QsS0FBSyxlQUFlO2dCQUVwQixLQUFLLEtBQUssYUFBYSxLQUFDOzs7Z0JBRWhDLE9BQU87OztvQkFFWDs7O29CQUNBOztnQkFBZ0IsS0FBQzs7O29CQUNqQjs7ZUFBWSxLQUFDOzs7b0JBQ2I7O1lBQWUsS0FBQzs7bUJBQWMsS0FBQzs7OzttQkFBWSxLQUFDOzs7O29CQUU1Qzs7ZUFBYyxLQUFDLE1BQU0sUUFBUSxLQUFLLEtBQUMsTUFBTSxRQUFROzs7b0JBRWpELHVCQUFVOztlQUFTLEtBQUMsTUFBTSxZQUFZOzs7b0JBUXRDLHNCQUFTOztlQUFTLEtBQUMsWUFBWTs7O29CQUMvQixzQkFBUzs7O29CQUVULDJCQUFjOztlQUFTLEtBQUssS0FBSzs7O29CQUNqQywyQkFBYzs7WUFFUCxLQUFDLGFBQTRCLFdBQWQsS0FBQzs7WUFDZixLQUFDOztZQUVGLEtBQUM7O1lBQ0EsS0FBSyxLQUFLLFVBQVUsS0FBQzttQkFDckIsS0FBSyxLQUFLOzs7O29CQUVsQiwwQkFBYTs7OztRQUVULFVBQWEsTUFBTSxXQUFZLEtBQUMsTUFBTSxjQUFjO1lBQ2pELEtBQUMsVUFBYzs7WUFDZCxLQUFDLFFBQVE7WUFDVCxLQUFDLGFBQWE7O2lCQUNWLFdBQWUsS0FBQzs7WUFDcEIsS0FBQyxRQUFRO1lBQ1QsS0FBQyxhQUFhOztlQUNsQixLQUFDOzs7b0JBRUwsb0JBQU8sS0FBSTs7UUFBUywwQkFBa0IsS0FBQzs7O29CQVF2QyxxQkFBUSxHQUFFLEdBQUUsR0FBRTs7ZUFBSyxLQUFDLE1BQU0sT0FBTyxFQUFFLEVBQUUsRUFBRTs7O29CQUV2Qzs7O1dBbkdLOzs7ZUFxR0YifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidmlldy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy9iYXNlL3ZpZXcua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQWlCYSxVQUFBO0lBQU07SUFBTzs7T0FDUCxZQUFUOztPQUNTLFlBQVo7OztBQUVFLFFBQVQ7O3FCQUFzQjtJQUVsQixNQUFDLGlCQUFjO2FBRWYsTUFBSSxRQUFRLE1BQUs7O1FBQWQ7UUFBUTs7Ozs7Ozs7Ozs7Ozs7O1FBRVAsS0FBQyxZQUFZLE1BQU0sS0FBQztRQUNwQixLQUFDO1FBQ0QsS0FBQzs0QkFDeUI7OztZQUFMO1lBQXJCLEtBQUMsTUFBTSxLQUFLOztRQUVaLEtBQUMsWUFBWTtRQUNiLEtBQUMsWUFBWTtRQUNiLEtBQUMsVUFBWTs7OztvQkFFakIsdUJBQVUsS0FBSTs7ZUFBTyxLQUFDLE1BQU0sT0FBTyxNQUFNLE9BQU87OztvQkFRaEQ7Ozs7UUFFSSxLQUFDLFlBQVk7WUFFVixLQUFDOztnQkFDRyxLQUFLLGdCQUFpQixLQUFLLGlCQUFnQjs7Z0JBQzFDLFFBQVEsS0FBSztnQkFDYixLQUFLLGVBQWU7Z0JBQ3BCLE1BQU07O1lBQ1YsS0FBSyxlQUFlO1lBRXBCLEtBQUssS0FBSyxhQUFhLEtBQUM7O1FBRTVCLEtBQUM7Z0JBQ0QsT0FBTzs7O29CQUVYOztRQUVJLEtBQUMsWUFBWTtZQUVWLEtBQUM7O2dCQUNHLFNBQUssS0FBSzs7Z0JBQ1QsS0FBSyxlQUFlO2dCQUVwQixLQUFLLEtBQUssYUFBYSxLQUFDOzs7Z0JBRWhDLE9BQU87OztvQkFFWDs7O29CQUNBOztnQkFBZ0IsS0FBQzs7O29CQUNqQjs7ZUFBWSxLQUFDOzs7b0JBQ2I7O1lBQWUsS0FBQzs7bUJBQWMsS0FBQzs7OzttQkFBWSxLQUFDOzs7O29CQUU1Qzs7ZUFBYyxLQUFDLE1BQU0sUUFBUSxLQUFLLEtBQUMsTUFBTSxRQUFROzs7b0JBRWpELHVCQUFVOztlQUFTLEtBQUMsTUFBTSxZQUFZOzs7b0JBUXRDLHNCQUFTOztlQUFTLEtBQUMsWUFBWTs7O29CQUMvQixzQkFBUzs7O29CQUVULDJCQUFjOztlQUFTLEtBQUssS0FBSzs7O29CQUNqQywyQkFBYzs7WUFDUCxLQUFDOztZQUNBLEtBQUM7O1lBRUYsS0FBQzs7WUFDQSxLQUFLLEtBQUssVUFBVSxLQUFDO21CQUNyQixLQUFLLEtBQUs7Ozs7b0JBRWxCLDBCQUFhOzs7O1FBSVQsVUFBYSxNQUFNLFdBQVksS0FBQyxNQUFNLGNBQWM7WUFDakQsS0FBQyxVQUFjOztZQUNkLEtBQUMsUUFBUTtZQUNULEtBQUMsYUFBYTs7aUJBQ1YsV0FBZSxLQUFDOztZQUNwQixLQUFDLFFBQVE7WUFDVCxLQUFDLGFBQWE7O2VBQ2xCLEtBQUM7OztvQkFFTCwyQkFBYyxJQUFFOztZQUVULE1BQVUsS0FBQzs7WUFDVixLQUFDLFlBQVk7bUJBQ2IsS0FBSyxHQUFHLFFBQVEsS0FBQzs7aUJBQ2IsS0FBQyxjQUFrQjs7WUFDdkIsS0FBQyxZQUFZO21CQUNiLEtBQUssZUFBZSxRQUFRLEtBQUM7Ozs7b0JBRXJDLHNCQUFTOztlQUVMLEtBQUMsV0FBVyxLQUFDLFNBQVE7OztvQkFDekI7O2VBQWMsS0FBQzs7O29CQUNmOztRQUVJLEtBQUssS0FBSyxRQUFRLEtBQUM7ZUFDbkIsS0FBSyxLQUFLOzs7b0JBRWQsb0JBQU8sS0FBSTs7UUFBUywwQkFBa0IsS0FBQzs7O29CQVF2QyxxQkFBUSxHQUFFLEdBQUUsR0FBRTs7ZUFBSyxLQUFDLE1BQU0sT0FBTyxFQUFFLEVBQUUsRUFBRTs7O29CQUV2Qzs7O1dBdkhLOzs7ZUF5SEYifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/base/view.kode

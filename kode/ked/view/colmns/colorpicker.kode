@@ -1,14 +1,9 @@
 ###
-    colorpicker
-
-    a keyboard first color picker
-    lives at the bottom of the funcol
-
-    posts
-        colorpicker.show    hex
-        colorpicker.change  hex
-        colorpicker.submit  hex
-        colorpicker.hide
+     ███████   ███████   ███       ███████   ████████   ████████   ███   ███████  ███   ███  ████████  ████████ 
+    ███       ███   ███  ███      ███   ███  ███   ███  ███   ███  ███  ███       ███  ███   ███       ███   ███
+    ███       ███   ███  ███      ███   ███  ███████    ████████   ███  ███       ███████    ███████   ███████  
+    ███       ███   ███  ███      ███   ███  ███   ███  ███        ███  ███       ███  ███   ███       ███   ███
+     ███████   ███████   ███████   ███████   ███   ███  ███        ███   ███████  ███   ███  ████████  ███   ███
 ###
 
 use ../../../kxk ▪ post
@@ -41,11 +36,11 @@ function colorpicker extends view
         @bright = new colorslider screen "#{@name}_bright"
         @sat    = new colorslider screen "#{@name}_sat"
 
-        @red   = new rgbinput screen "#{@name}_red"
-        @green = new rgbinput screen "#{@name}_green"
-        @blue  = new rgbinput screen "#{@name}_blue"
-
-        @radio = new radio screen "#{@name}_radio"
+        @red    = new rgbinput screen "#{@name}_red"
+        @green  = new rgbinput screen "#{@name}_green"
+        @blue   = new rgbinput screen "#{@name}_blue"
+                
+        @radio  = new radio screen "#{@name}_radio"
 
         @sliders = [@hue @bright @sat]
         @inputs  = [@red @green @blue]
@@ -404,16 +399,13 @@ function colorpicker extends view
 
         ⮐  if @hidden() or @collapsed()
 
-        ret = @radio.onMouse event
-        ⮐  ret if ret?.redraw
+        ret = @radio.onMouse event     ; ⮐  ret if ret?.redraw
 
         for slider in @sliders
-            ret = slider.onMouse event
-            ⮐  ret if ret?.redraw
+            ret = slider.onMouse event ; ⮐  ret if ret?.redraw
 
         for input in @inputs
-            ret = input.onMouse event
-            ⮐  ret if ret?.redraw
+            ret = input.onMouse event  ; ⮐  ret if ret?.redraw
 
         super event
 
@@ -422,12 +414,10 @@ function colorpicker extends view
         ⮐  if @hidden() or @collapsed()
 
         for slider in @sliders
-            ret = slider.onWheel event
-            ⮐  ret if ret?.redraw
+            ret = slider.onWheel event ; ⮐  ret if ret?.redraw
 
         for input in @inputs
-            ret = input.onWheel event
-            ⮐  ret if ret?.redraw
+            ret = input.onWheel event  ; ⮐  ret if ret?.redraw
 
         if @cells.isInsideEvent event
             ⮐  redraw:false
