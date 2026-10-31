@@ -11,7 +11,7 @@ use ../../theme     ◆ color theme
 use ../../edit/tool ◆ belt
 use ../base         ◆ view colorslider rgbinput radio
 
-# #3c3cf0 #ABC #8c5900
+# #3c3cf0 #a9b8cc #8c6900
 
 function colorpicker extends view
 
@@ -27,14 +27,12 @@ function colorpicker extends view
         
         @colorReplace  = null
         @colorDecorate = null
-        @twoColors     = false
-        @activeColor   = 0
         @bgChanged     = false
         @voided        = [false false]
-        @colorStates   = [{h: 0 s: 100 v: 100} {h: 0 s: 100 v: 100}]
+        @colorStates   = [{h: 0 s: 100 v: 100}]
 
         @hue    = new colorslider screen "#{@name}_hue"
-        @bright = new colorslider screen "#{@name}_bright"
+        @val    = new colorslider screen "#{@name}_val"
         @sat    = new colorslider screen "#{@name}_sat"
 
         @red    = new rgbinput screen "#{@name}_red"
@@ -43,9 +41,9 @@ function colorpicker extends view
                 
         @radio  = new radio screen "#{@name}_radio"
 
-        @sliders   = [@hue @bright @sat]
+        @sliders   = [@hue @sat @val]
         @inputs    = [@red @green @blue]
-        @focusRing = [@radio @hue @bright @sat @red @green @blue]
+        @focusRing = [@radio @hue @sat @val @red @green @blue]
 
         @red.textColor   = theme.colorpicker.red
         @green.textColor = theme.colorpicker.green
@@ -58,23 +56,25 @@ function colorpicker extends view
         @hue.min = 0
         @hue.max = 360
 
-        @bright.min = 0
-        @bright.max = 100
+        @val.min = 0
+        @val.max = 100
 
         @sat.min = 0
         @sat.max = 100
 
-        @hue.gradient    = (v) => color.hsvToRgb [v 100 100]
-        @bright.gradient = (v) => color.hsvToRgb [@h @s v]
-        @sat.gradient    = (v) => color.hsvToRgb [@h v @v]
+        @hue.gradient = (v) => color.hsvToRgb [v 100 100]
+        @sat.gradient = (v) => color.hsvToRgb [@h v @v]
+        @val.gradient = (v) => color.hsvToRgb [@h @s v]
 
         @hue.on    'valueChange' @sliderChanged
-        @bright.on 'valueChange' @sliderChanged
+        @val.on    'valueChange' @sliderChanged
         @sat.on    'valueChange' @sliderChanged
 
         @red.on    'valueChange' @rgbChanged
         @green.on  'valueChange' @rgbChanged
         @blue.on   'valueChange' @rgbChanged
+        
+        @radio.on 'activeChange' @onRadioActiveChanged
 
         @setColor 'bg' theme.colorpicker.bg
         @setColor 'fg' theme.colorpicker.fg
@@ -98,17 +98,17 @@ function colorpicker extends view
     focusNext: => @focusDelta 1
     focusPrev: => @focusDelta -1
 
-    selectionMode: => @twoColors
-
+    activeIndex: => @radio.active
+    
+    onRadioActiveChanged: => @loadActiveColor()
+    
     backgroundChanged: => @bgChanged
 
     colorVoided: idx => @voided[idx] ? false
 
     voidActiveColor: =>
 
-        ⮐ if not @twoColors
-
-        @voided[@activeColor] = true
+        @voided[@activeIndex()] = true
 
         @syncRadio()
 
@@ -125,36 +125,32 @@ function colorpicker extends view
         color.hex color.hsvToRgb([st.h st.s st.v])
 
     foregroundHex: => @colorHex 0
-    backgroundHex: => if @twoColors then @colorHex 1 else null
+    backgroundHex: => @colorHex 1
 
-    saveColorState: => @colorStates[@activeColor] = {h: @h, s: @s, v: @v}
+    saveColorState: => @colorStates[@activeIndex()] = {h: @h, s: @s, v: @v}
 
     syncSliders: =>
 
         @hue.setValue    @h
-        @bright.setValue @v
         @sat.setValue    @s
+        @val.setValue @v
 
     syncInputs: =>
-
         rgb = @rgb()
-
-        for i in 0...3
+        # log "syncIn #{@h} #{@s} #{@v} #{rgb[0]} #{rgb[1]} #{rgb[2]}"
+        for i in 0..2
             @inputs[i].setValue rgb[i]
 
     syncRadio: =>
 
         opts = []
 
-        fg = @colorHex 0
-        opts.push {color: color.values(fg), label: (@voided[0] ? 'none' : fg)} if fg?
-
-        if @twoColors
-            bg = @colorHex 1
-            opts.push {color: color.values(bg), label: (@voided[1] ? 'none' : bg)} if bg?
+        for cstate,idx in @colorStates
+            col = @colorHex idx
+            opts.push {color: color.values(col), label: (@voided[0] ? 'none' : col)} if col?
 
         @radio.setOptions opts
-        @radio.setActive @activeColor
+        @radio.setActive @activeIndex()
         @radio.setFocusable @twoColors
 
     syncAll: =>
@@ -172,7 +168,7 @@ function colorpicker extends view
 
         @colorStates[idx] = {h: h, s: s, v: v}
 
-        if idx == @activeColor
+        if idx == @activeIndex()
             @h = h
             @s = s
             @v = v
@@ -183,15 +179,15 @@ function colorpicker extends view
     setHex: hex =>
 
         ⮐ if empty hex
-        ⮐ if not @setColorStateFromHex @activeColor hex
+        ⮐ if not @setColorStateFromHex @activeIndex() hex
 
-        @voided[@activeColor] = false
+        @voided[@activeIndex()] = false
 
-        @bgChanged = true if @activeColor == 1
+        @bgChanged = true if @activeIndex() == 1
 
     loadActiveColor: =>
 
-        st = @colorStates[@activeColor]
+        st = @colorStates[@activeIndex()]
 
         @h = st.h
         @s = st.s
@@ -201,78 +197,63 @@ function colorpicker extends view
 
     setActiveColor: idx =>
 
-        ⮐ if not @twoColors
-
-        @saveColorState()
-
-        @activeColor = clamp 0 1 int(idx)
-
-        @loadActiveColor()
-
-        post.emit 'redraw'
-        true
-
-    cycleColor: dir => @setActiveColor (@activeColor + dir + 2) % 2
-
-    syncFromSliders: =>
-
-        @h = @hue.getValue()
-        @v = @bright.getValue()
-        @s = @sat.getValue()
-
-        @saveColorState()
-        @syncInputs()
-        @syncRadio()
-
-        @voided[@activeColor] = false
-        @bgChanged = true if @activeColor == 1
-
-    syncFromRgb: =>
-
-        rgb = [@red.getValue() @green.getValue() @blue.getValue()]
-        [h s v] = color.rgbToHsv rgb
-
-        h = @h if s == 0
-        h = @h if v == 0
-        s = @s if v == 0
-
-        @h = h
-        @s = s
-        @v = v
-
-        @saveColorState()
-        @syncSliders()
-        @syncRadio()
-
-        @voided[@activeColor] = false
-        @bgChanged = true if @activeColor == 1
+        @radio.changeActive clamp(0 1 int(idx))
+        
+    cycleColor: dir => @setActiveColor (@activeIndex() + dir + 2) % 2
 
     sliderChanged: =>
 
-        before = @hex()
-        @syncFromSliders()
-        @emitChanged before
+        @changeHSV @hue.getValue() @sat.getValue() @val.getValue() 
+
+    changeHSV: @h @s @v =>
+
+        @saveColorState()
+
+        @syncInputs()
+        @syncRadio()
+
+        @voided[@activeIndex()] = false
+        @bgChanged = true if @activeIndex() == 1
+
+        @emitChanged()
 
     rgbChanged: =>
 
-        before = @hex()
-        @syncFromRgb()
-        @emitChanged before
+        @changeRGB @red.getValue() @green.getValue() @blue.getValue()
 
-    emitChanged: before =>
+    changeRGB: r g b =>
 
-        after = @hex()
+        [h s v] = color.rgbToHsv [r g b]
+        
+        h = @h if s == 0
+        h = @h if v == 0
+        s = @s if v == 0
+        
+        @h = h
+        @s = s
+        @v = v
+        
+        [nr ng nb] = @rgb()
+        
+        @saveColorState()
 
-        ⮐ if after == before
+        @syncSliders()
+        @syncRadio()
 
-        post.emit 'colorpicker.change' after
+        @voided[@activeIndex()] = false
+        @bgChanged = true if @activeIndex() == 1
+
+        @emitChanged()
+        
+    emitChanged: =>
+
+        post.emit 'colorpicker.change' @hex()
         post.emit 'redraw'
 
     show: hex =>
 
         @twoColors   = false
         @bgChanged   = false
-        @activeColor = 0
         @voided      = [false false]
 
         @radio.setFocusable false
@@ -364,10 +345,7 @@ function colorpicker extends view
     submit: =>
 
         hex = @hex()
-        if @colorReplace?
-            if hex == @colorReplace.from
-                @colorReplace = null
-                ⮐
+        if @colorReplace? and hex != @colorReplace.from
             @replaceColor hex
 
         else if @colorDecorate?
@@ -387,8 +365,6 @@ function colorpicker extends view
 
             @editor.state.setColorsForRanges ranges fg bg voided
 
-        # post.emit 'redraw'
-        
         @hide()
 
     replaceColor: hex =>
@@ -454,13 +430,13 @@ function colorpicker extends view
             'return'        ➜ ⮐ @submit()
             
         # log "colorpicker.onKey #{key}"
-        ⮐ true if @red  .onKey key event
-        ⮐ true if @green.onKey key event
-        ⮐ true if @blue .onKey key event
+        ⮐ true if @red   .onKey key event
+        ⮐ true if @green .onKey key event
+        ⮐ true if @blue  .onKey key event
 
         ⮐ true if @hue   .onKey key event
-        ⮐ true if @bright.onKey key event
         ⮐ true if @sat   .onKey key event
+        ⮐ true if @val   .onKey key event
 
         if @radio.hasFocus() and @twoColors
 
@@ -481,8 +457,8 @@ function colorpicker extends view
         @radio.layout  x+1 y+1 w-2 1
 
         @hue.layout    x+1 y+3 w-2 1
-        @bright.layout x+1 y+4 w-2 1
-        @sat.layout    x+1 y+5 w-2 1
+        @sat.layout    x+1 y+4 w-2 1
+        @val.layout    x+1 y+5 w-2 1
 
         aw = max 1 w-2
         iw = 4
@@ -500,8 +476,8 @@ function colorpicker extends view
         @radio.draw()
 
         @hue.draw()
-        @bright.draw()
         @sat.draw()
+        @val.draw()
 
         @red.draw()
         @green.draw()
@@ -510,3 +486,5 @@ function colorpicker extends view
         super()
 
 export colorpicker
+
+# ked-colors {"v":1,"hash":"2012290734:11898","fg":[[0,1,112,"#f2ff00"],[0,2,112,"#bfc900"],[0,3,112,"#919900"],[0,4,112,"#6d7300"],[0,5,112,"#444700"]],"bg":[]}

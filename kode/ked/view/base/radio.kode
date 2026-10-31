@@ -18,32 +18,31 @@ function radio extends view
         @setColor 'bg' theme.colorpicker.bg
         @setColor 'fg' theme.colorpicker.fg
 
-        @options     = []
-        @active      = 0
-        @pointerType = null
-        @onSelect    = null
+        @options = []
+        @active  = 0
+        @pointerType = 'pointer'
         
         @setFocusable()
 
-    setOptions: options =>
+    setOptions: @options =>
 
-        @options = options ? []
-
-        if empty @options
-            @active = 0
-        else
-            @active = clamp 0 (@options.length-1) @active
+        @setActive @active
 
     setActive: idx =>
 
-        ⮐  if empty @options
+        ▴ valid @options
         @active = clamp 0 (@options.length-1) int(idx)
+        
+    changeActive: idx =>
+    
+        @setActive idx
+        @emit 'activeChange' @active
 
-    getActive: -> @active
+    getActive: => @active
 
     optionAt: x =>
 
-        ⮐  0 if empty @options
+        ⮐ 0 if empty @options
 
         w = max 1 @cells.cols
         idx = int(x * @options.length / w)
@@ -52,30 +51,28 @@ function radio extends view
 
     onMouse: event =>
 
-        ⮐  if @hidden() or @collapsed()
+        ⮐ if @hidden() or @collapsed()
 
         super event
 
         if event.type == 'press' and @hover and @focusable
 
-            @setActive @optionAt(@eventPos(event)[0])
-            @grabFocus()
-            @onSelect @active if @onSelect is func
+            @changeActive @optionAt(@eventPos(event)[0])
             ⮐ redraw:true
 
         @hover
 
     draw: =>
 
-        ⮐  if @hidden() or @collapsed()
+        ⮐ if @hidden() or @collapsed()
 
         w = @cells.cols
-        ⮐  if w < 1
+        ⮐ if w < 1
 
         @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
 
         n = @options.length
-        ⮐  if n < 1
+        ⮐ if n < 1
 
         starts = []
         ends   = []

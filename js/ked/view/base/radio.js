@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, isFunc: function (o) {return typeof o === 'function'}, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, assert: function (f,l,c,m,t) { if (!t) {console.log(f + ':' + l + ':' + c + ' ▴ ' + m)}}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
 
 var radio
 
@@ -16,6 +16,8 @@ radio = (function ()
         this["draw"] = this["draw"].bind(this)
         this["onMouse"] = this["onMouse"].bind(this)
         this["optionAt"] = this["optionAt"].bind(this)
+        this["getActive"] = this["getActive"].bind(this)
+        this["changeActive"] = this["changeActive"].bind(this)
         this["setActive"] = this["setActive"].bind(this)
         this["setOptions"] = this["setOptions"].bind(this)
         radio.__super__.constructor.call(this,screen,name)
@@ -23,31 +25,27 @@ radio = (function ()
         this.setColor('fg',theme.colorpicker.fg)
         this.options = []
         this.active = 0
-        this.pointerType = null
-        this.onSelect = null
+        this.pointerType = 'pointer'
         this.setFocusable()
     }
 
     radio.prototype["setOptions"] = function (options)
     {
-        this.options = (options != null ? options : [])
-        if (_k_.empty(this.options))
-        {
-            return this.active = 0
-        }
-        else
-        {
-            return this.active = _k_.clamp(0,(this.options.length - 1),this.active)
-        }
+        this.options = options
+    
+        return this.setActive(this.active)
     }
 
     radio.prototype["setActive"] = function (idx)
     {
-        if (_k_.empty(this.options))
-        {
-            return
-        }
+        _k_.assert("/home/kodi/s/ked/kode/ked/view/base/radio.kode", 33, 8, "assert failed!" + " !_k_.empty(this.options)", !_k_.empty(this.options))
         return this.active = _k_.clamp(0,(this.options.length - 1),parseInt(idx))
+    }
+
+    radio.prototype["changeActive"] = function (idx)
+    {
+        this.setActive(idx)
+        return this.emit('activeChange',this.active)
     }
 
     radio.prototype["getActive"] = function ()
@@ -77,12 +75,7 @@ radio = (function ()
         radio.__super__.onMouse.call(this,event)
         if (event.type === 'press' && this.hover && this.focusable)
         {
-            this.setActive(this.optionAt(this.eventPos(event)[0]))
-            this.grabFocus()
-            if (_k_.isFunc(this.onSelect))
-            {
-                this.onSelect(this.active)
-            }
+            this.changeActive(this.optionAt(this.eventPos(event)[0]))
             return {redraw:true}
         }
         return this.hover
@@ -90,7 +83,7 @@ radio = (function ()
 
     radio.prototype["draw"] = function ()
     {
-        var candidate, capLeft, capRight, ch, ends, fg, hex, i, idx, label, n, pad, segw, starts, used, w, x, _90_39_
+        var candidate, capLeft, capRight, ch, ends, fg, hex, i, idx, label, n, pad, segw, starts, used, w, x, _87_39_
 
         if (this.hidden() || this.collapsed())
         {
@@ -119,7 +112,7 @@ radio = (function ()
             }
         }
         used = []
-        hex = ((_90_39_=this.options[this.active].label) != null ? _90_39_ : '')
+        hex = ((_87_39_=this.options[this.active].label) != null ? _87_39_ : '')
         segw = ends[this.active] - starts[this.active]
         label = hex
         if (this.focused)
@@ -163,5 +156,5 @@ radio = (function ()
 
 export default radio;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmFkaW8uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS9yYWRpby5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BUWtCLFlBQVI7T0FBYyxZQUFkOztPQUNRLFdBQUE7OztBQUVULFNBQVQ7O3NCQUF1QjthQUVuQixPQUFHLFFBQU87Ozs7Ozs7OENBRUEsT0FBTztRQUViLEtBQUMsU0FBUyxLQUFLLE1BQU0sWUFBWTtRQUNqQyxLQUFDLFNBQVMsS0FBSyxNQUFNLFlBQVk7UUFFakMsS0FBQztRQUNELEtBQUMsU0FBYztRQUNmLEtBQUMsY0FBYztRQUNmLEtBQUMsV0FBYztRQUVmLEtBQUM7OztxQkFFTCx5QkFBWTs7UUFFUixLQUFDLFdBQVUsa0JBQUE7c0JBRUYsS0FBQzs7bUJBQ04sS0FBQyxTQUFTOzs7O21CQUVWLEtBQUMsbUJBQWUsR0FBRyxLQUFDLFFBQVEsU0FBTyxHQUFHLEtBQUM7Ozs7cUJBRS9DLHdCQUFXOztzQkFFSyxLQUFDOzs7O2VBQ2IsS0FBQyxtQkFBZSxHQUFHLEtBQUMsUUFBUSxTQUFPLFlBQU87OztxQkFFOUM7O2VBQWMsS0FBQzs7O3FCQUVmLHVCQUFVOzs7O3NCQUVRLEtBQUM7O21CQUFaOztRQUVILFlBQVEsRUFBRSxLQUFDLE1BQU07UUFDakIsZUFBVSxJQUFJLEtBQUMsUUFBUSxTQUFTO3lCQUUxQixFQUFFLEtBQUMsUUFBUSxTQUFPLEVBQUU7OztxQkFFOUIsc0JBQVM7O1lBRUMsS0FBQyxZQUFZLEtBQUM7Ozs7MENBRWQ7WUFFSCxNQUFNLFNBQVEsV0FBWSxLQUFDLFNBQVUsS0FBQzs7WUFFckMsS0FBQyxVQUFVLEtBQUMsU0FBUyxLQUFDLFNBQVMsT0FBTztZQUN0QyxLQUFDO2dCQUNpQyxXQUFiLEtBQUM7O2dCQUF0QixLQUFDLFNBQVMsS0FBQzs7b0JBQ1QsT0FBTzs7ZUFFYixLQUFDOzs7cUJBRUw7Ozs7WUFFVSxLQUFDLFlBQVksS0FBQzs7OztRQUVwQixJQUFJLEtBQUMsTUFBTTtZQUNMLElBQUk7Ozs7UUFFVixLQUFDLE1BQU0sVUFBVSxFQUFFLEVBQUUsR0FBRyxHQUFHLElBQUksS0FBSyxLQUFDLE1BQU07UUFFM0MsSUFBSSxLQUFDLFFBQVE7WUFDUCxJQUFJOzs7O1FBRVY7UUFDQTt1QkFFSSxNQUFPLFNBQUksdUJBQUEsVUFBQTs7WUFDWCxPQUFPLGNBQVMsTUFBSSxJQUFFO1lBQ3RCLEtBQUssZUFBWSxNQUFJLEtBQUcsSUFBRTsyQkFDdEIsSUFBSyxPQUFPLFlBQU8sS0FBSyx3QkFBTCxLQUFLLFdBQUwsS0FBSzs7Z0JBQ3hCLEtBQUMsTUFBTSxPQUFPLEVBQUUsRUFBRSxLQUFDLFFBQVEsS0FBSzs7O1FBRXhDO1FBQ0EsZ0JBQU8sS0FBQyxRQUFRLEtBQUMsUUFBUSwyQkFBUTtRQUNqQyxPQUFPLEtBQUssS0FBQyxVQUFRLE9BQU8sS0FBQztRQUU3QixRQUFRO1lBRUwsS0FBQzs7d0JBQ2tCLE9BQU8sTUFBTSxLQUFLLE1BQU0sTUFBTTs7O2dCQUE1QztvQkFDRyxVQUFVLFVBQVU7O29CQUNuQixRQUFRO29CQUNSOzs7O1FBRVosUUFBUSxZQUFNLGtCQUFRLEtBQUssTUFBTSwrQkFBWCxLQUFLLE1BQU07UUFFakMsY0FBVSxZQUFPLE9BQU8sTUFBTSxVQUFRO1FBQ3RDLElBQUksT0FBTyxLQUFDLFVBQVU7UUFDdEIsS0FBSyxNQUFNLG9CQUFvQixLQUFDLE1BQU0sR0FBRyxLQUFDLFFBQVEsS0FBQyxRQUFROzZCQUU5QzthQUFMOztZQUFKO1lBQ0EsS0FBQyxNQUFNLElBQUksSUFBRSxFQUFFLEVBQUUsR0FBRyxHQUFHLEtBQUMsUUFBUSxLQUFDLFFBQVE7WUFDekMsS0FBSyxJQUFFLEtBQUs7O1lBRWIsSUFBSTs7WUFFSCxXQUFlLEtBQUs7WUFDcEIsWUFBZSxLQUFLLElBQUU7Z0JBRW5CLFdBQVk7O2dCQUNYLEtBQUMsTUFBTSxJQUFJLEVBQUUsRUFBRSxJQUFJLEtBQUMsUUFBUSxHQUFHLE1BQU0sS0FBQyxNQUFNO3VCQUM1QyxLQUFDLE1BQU0sSUFBSSxJQUFFLEVBQUUsRUFBRSxJQUFJLEtBQUMscUJBQVksTUFBTSxLQUFDLE1BQU07Ozs7O1dBMUd0RDs7O2VBNEdGIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmFkaW8uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS9yYWRpby5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BUWtCLFlBQVI7T0FBYyxZQUFkOztPQUNRLFdBQUE7OztBQUVULFNBQVQ7O3NCQUF1QjthQUVuQixPQUFHLFFBQU87Ozs7Ozs7Ozs4Q0FFQSxPQUFPO1FBRWIsS0FBQyxTQUFTLEtBQUssTUFBTSxZQUFZO1FBQ2pDLEtBQUMsU0FBUyxLQUFLLE1BQU0sWUFBWTtRQUVqQyxLQUFDO1FBQ0QsS0FBQyxTQUFVO1FBQ1gsS0FBQyxjQUFjO1FBRWYsS0FBQzs7O3FCQUVMLHlCQUFhOztRQUFEOztlQUVSLEtBQUMsVUFBVSxLQUFDOzs7cUJBRWhCLHdCQUFXOzs0R0FFQyxLQUFDLHNCQUFELEtBQUM7ZUFDVCxLQUFDLG1CQUFlLEdBQUcsS0FBQyxRQUFRLFNBQU8sWUFBTzs7O3FCQUU5QywyQkFBYzs7UUFFVixLQUFDLFVBQVU7ZUFDWCxLQUFDLEtBQUssZUFBZSxLQUFDOzs7cUJBRTFCOztlQUFjLEtBQUM7OztxQkFFZix1QkFBVTs7OztzQkFFTyxLQUFDOzttQkFBWjs7UUFFRixZQUFRLEVBQUUsS0FBQyxNQUFNO1FBQ2pCLGVBQVUsSUFBSSxLQUFDLFFBQVEsU0FBUzt5QkFFMUIsRUFBRSxLQUFDLFFBQVEsU0FBTyxFQUFFOzs7cUJBRTlCLHNCQUFTOztZQUVBLEtBQUMsWUFBWSxLQUFDOzs7OzBDQUViO1lBRUgsTUFBTSxTQUFRLFdBQVksS0FBQyxTQUFVLEtBQUM7O1lBRXJDLEtBQUMsYUFBYSxLQUFDLFNBQVMsS0FBQyxTQUFTLE9BQU87b0JBQ3ZDLE9BQU87O2VBRWIsS0FBQzs7O3FCQUVMOzs7O1lBRVMsS0FBQyxZQUFZLEtBQUM7Ozs7UUFFbkIsSUFBSSxLQUFDLE1BQU07WUFDTixJQUFJOzs7O1FBRVQsS0FBQyxNQUFNLFVBQVUsRUFBRSxFQUFFLEdBQUcsR0FBRyxJQUFJLEtBQUssS0FBQyxNQUFNO1FBRTNDLElBQUksS0FBQyxRQUFRO1lBQ1IsSUFBSTs7OztRQUVUO1FBQ0E7dUJBRUksTUFBTyxTQUFJLHVCQUFBLFVBQUE7O1lBQ1gsT0FBTyxjQUFTLE1BQUksSUFBRTtZQUN0QixLQUFLLGVBQVksTUFBSSxLQUFHLElBQUU7MkJBQ3RCLElBQUssT0FBTyxZQUFPLEtBQUssd0JBQUwsS0FBSyxXQUFMLEtBQUs7O2dCQUN4QixLQUFDLE1BQU0sT0FBTyxFQUFFLEVBQUUsS0FBQyxRQUFRLEtBQUs7OztRQUV4QztRQUNBLGdCQUFPLEtBQUMsUUFBUSxLQUFDLFFBQVEsMkJBQVE7UUFDakMsT0FBTyxLQUFLLEtBQUMsVUFBUSxPQUFPLEtBQUM7UUFFN0IsUUFBUTtZQUVMLEtBQUM7O3dCQUNrQixPQUFPLE1BQU0sS0FBSyxNQUFNLE1BQU07OztnQkFBNUM7b0JBQ0csVUFBVSxVQUFVOztvQkFDbkIsUUFBUTtvQkFDUjs7OztRQUVaLFFBQVEsWUFBTSxrQkFBUSxLQUFLLE1BQU0sK0JBQVgsS0FBSyxNQUFNO1FBRWpDLGNBQVUsWUFBTyxPQUFPLE1BQU0sVUFBUTtRQUN0QyxJQUFJLE9BQU8sS0FBQyxVQUFVO1FBQ3RCLEtBQUssTUFBTSxvQkFBb0IsS0FBQyxNQUFNLEdBQUcsS0FBQyxRQUFRLEtBQUMsUUFBUTs2QkFFOUM7YUFBTDs7WUFBSjtZQUNBLEtBQUMsTUFBTSxJQUFJLElBQUUsRUFBRSxFQUFFLEdBQUcsR0FBRyxLQUFDLFFBQVEsS0FBQyxRQUFRO1lBQ3pDLEtBQUssSUFBRSxLQUFLOztZQUViLElBQUk7O1lBRUgsV0FBZSxLQUFLO1lBQ3BCLFlBQWUsS0FBSyxJQUFFO2dCQUVuQixXQUFZOztnQkFDWCxLQUFDLE1BQU0sSUFBSSxFQUFFLEVBQUUsSUFBSSxLQUFDLFFBQVEsR0FBRyxNQUFNLEtBQUMsTUFBTTt1QkFDNUMsS0FBQyxNQUFNLElBQUksSUFBRSxFQUFFLEVBQUUsSUFBSSxLQUFDLHFCQUFZLE1BQU0sS0FBQyxNQUFNOzs7OztXQXZHdEQ7OztlQXlHRiJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/base/radio.kode

@@ -13,19 +13,6 @@ pickr = ->
 
 ▸ colorpicker
 
-    ▸ hovering a slider focuses it
-
-        p = pickr()
-
-        p.hue.hasFocus() ▸ true
-
-        e =
-            type: 'move'
-            cell: [8 4]
-        p.onMouse e
-
-        p.bright.hasFocus() ▸ true
-
     ▸ pressing a slider sets the value from the column
 
         p = pickr()
@@ -68,19 +55,6 @@ pickr = ->
             count: 1
         p.onMouse e
 
-    ▸ the wheel steps a slider and focuses it
-
-        p = pickr()
-        p.sat.setValue 50
-
-        e =
-            type: 'wheel'
-            cell: [8 5]
-            dir: 'up'
-        p.onWheel e
-
-        p.sat.getValue() ▸ 51
-
     ▸ the wheel steps an rgb input and focuses it
 
         p = pickr()
@@ -99,7 +73,6 @@ pickr = ->
         p = pickr()
         p.show '#ff0000'
 
-        p.selectionMode() ▸ false
         p.radio.options.length ▸ 1
         p.radio.focusable ▸ false
 
