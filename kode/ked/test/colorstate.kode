@@ -1,11 +1,6 @@
-###
-    color state
 
-    color spans in the editor state and their drawing
-###
-
-use ../edit  ◆ state editor
-use ../util  ◆ harness filecolors
+use ../edit        ◆ state editor
+use ../util        ◆ harness filecolors
 use ../view/editor ◆ mapview
 
 ▸ color state

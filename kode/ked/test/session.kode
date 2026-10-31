@@ -1,11 +1,6 @@
-###
-    session
-
-    headless runs keep their session state apart from terminal runs
-###
 
 use ../../kxk ◆ slash
-use ../util  ◆ session
+use ../util   ◆ session
 
 ▸ session
 

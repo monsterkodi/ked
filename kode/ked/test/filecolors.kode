@@ -1,9 +1,3 @@
-###
-    filecolors
-
-    serialize color spans into a single trailing comment line
-    and read them back
-###
 
 use ../util ◆ filecolors
 

@@ -228,21 +228,8 @@ function uniko extends view
             @focusInput()
             ⮐  @input.onKey key event
 
-        switch event.combo
-
-            'up'
-                if @matrix.moveSelection 'up'
-                    ⮐  true
-                @focusInput()
-                ⮐  true
-
-            'left'
-            'right'
-            'down'
-            'pageup'
-            'pagedown'
-                @matrix.moveSelection event.combo
-                ⮐  true
+        if event.combo in ['up''left''right''down']            
+            @matrix.moveSelection event.combo
 
         false
 

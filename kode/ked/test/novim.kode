@@ -1,16 +1,10 @@
-###
-    novim
 
-    keys become command values, command values become buffer edits.
-    the motions are pure: lines and a position in, a range out.
-###
-
-use ../../kxk       ▪ kseg sleep post clip
-use ../edit         ◆ state mode editor
-use ../edit/tool    ◆ belt motion
-use ../edit/mode    ◆ novim brckts
-use ../theme        ◆ theme
-use ../util         ◆ harness
+use ../../kxk    ▪ kseg sleep post clip
+use ../edit      ◆ state mode editor
+use ../edit/tool ◆ belt motion
+use ../edit/mode ◆ novim brckts
+use ../theme     ◆ theme
+use ../util      ◆ harness
 
 cells = cols:55 rows:66
 s = new state cells 'test'

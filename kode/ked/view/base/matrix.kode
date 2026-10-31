@@ -24,11 +24,11 @@ function matrix extends view
         @setColor 'selection_blur' [60 60 60]
         @setColor 'scroll'         [26 26 26]
         @setColor 'scroll_dot'     [136 136 255]
-
+        @focusable     = true
+        @focused       = false
         @items         = []
         @selectedIndex = 0
         @offset        = 0
-        @focused       = false
         @scale         = 1
 
         post.on 'focus' @onFocus
@@ -69,15 +69,6 @@ function matrix extends view
 
     numItems: -> @items.length
 
-    scrollBarVisible: ->
-
-        ⮐  false if empty @items
-        ⮐  false if @cells.rows < 1
-
-        cols = @columns()
-
-        int((@items.length + cols - 1) / cols) > @viewportRows()
-
     columns: ->
 
         max 1 int((@cells.cols - @scale) / (@scale * 2))
@@ -89,7 +80,6 @@ function matrix extends view
         ⮐ 0 if empty @items
 
         cols = @columns()
-
         Math.ceil(@items.length / cols)
 
     itemText: item =>
@@ -100,14 +90,11 @@ function matrix extends view
             ⮐  item.char ? ''
         item
 
-    selected: -> @items[@selectedIndex]
-
-    selectedText: => @itemText @selected()
+    selectedText: => @itemText @items[@selectedIndex]
 
     selectedPos: ->
 
         cols = @columns()
-
         [@selectedIndex % cols int(@selectedIndex / cols)]
 
     # ███████  ████████  ███      ████████   ███████  █████████  
@@ -123,9 +110,7 @@ function matrix extends view
 
     cellAtPos: x y =>
 
-        s = @scale
-
-        [int((x-s)/(s*2)) int(y/s)]
+        [int((x-@scale)/(@scale*2)) int(y/@scale)]
 
     selectAt: col row =>
 
@@ -135,7 +120,6 @@ function matrix extends view
         ⮐ false if idx < 0 or idx >= @items.length
 
         @selectedIndex = idx
-
         true
 
     ensureVisible: ->
@@ -155,18 +139,18 @@ function matrix extends view
 
         ⮐  false if empty @items
 
-        cols   = @columns()
-        rows   = max 1 @viewportRows()
-        before = @selectedIndex
+        cols      = @columns()
+        rows      = Math.ceil @items.length / cols
+        before    = @selectedIndex
+        row       = int @selectedIndex / cols
+        col       = @selectedIndex % cols
         lastIndex = @items.length - 1
 
         switch dir
-            'left'     ➜ @selectedIndex = max 0 (@selectedIndex - 1)
-            'right'    ➜ @selectedIndex = min lastIndex (@selectedIndex + 1)
-            'up'       ➜ @selectedIndex = max 0 (@selectedIndex - cols)
-            'down'     ➜ @selectedIndex = min lastIndex (@selectedIndex + cols)
-            'pageup'   ➜ @selectedIndex = max 0 (@selectedIndex - cols * rows)
-            'pagedown' ➜ @selectedIndex = min lastIndex (@selectedIndex + cols * rows)
+            'left'     ➜ if col > 0      ➜ @selectedIndex = max 0 (@selectedIndex - 1)
+            'right'    ➜ if col < cols-1 ➜ @selectedIndex = min lastIndex (@selectedIndex + 1)
+            'up'       ➜ if row > 0      ➜ @selectedIndex = max 0 (@selectedIndex - cols)
+            'down'     ➜ if row < rows-1 ➜ @selectedIndex = min lastIndex (@selectedIndex + cols)
 
         @ensureVisible()
 
@@ -245,31 +229,30 @@ function matrix extends view
         for j in 0...@scale
             for i in 0...@scale
                 if i or j
-                    @cells.set x+i y+j (i==0 ? @skipText() : null) null null
+                    @cells.set x+i y+j (i==0 ? "\x1b[#{@scale}C" : null) null null
 
     scaleText: char -> "\x1b]66;s=#{@scale}:w=1;" + char + '\x07'
 
-    skipText: -> "\x1b[#{@scale}C"
-
     drawScrollBar: ->
 
-        ⮐  if not @scrollBarVisible()
-        ⮐  if empty (csz = @screen.t.cellsz)
+        ⮐ if empty @items
+        ⮐ if @cells.rows < 1
+        ⮐ if empty (csz = @screen.t.cellsz)
 
         rows = @viewportRows()
 
-        ⮐  if rows < 1
+        ⮐ if rows < 1
+        ⮐ if int((@items.length + cols - 1) / cols) <= rows
 
         num = @numRows()
 
-        ⮐  if num <= rows
+        ⮐ if num <= rows
 
         regionH = @cells.rows * csz[1]
         rowH    = csz[1] * @scale
 
         kh = ((rows*rows) / num) * rowH
         ky = ((regionH-kh) * @offset / (num-rows))
-
         fg = @color.scroll
 
         x = (@cells.x + @cells.cols) * csz[0]

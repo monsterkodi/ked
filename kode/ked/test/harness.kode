@@ -1,19 +1,9 @@
-###
-    ███   ███   ███████   ████████   ███   ███  ████████   ███████   ███████
-    ███   ███  ███   ███  ███   ███  ████  ███  ███       ███       ███     
-    █████████  █████████  ███████    ███ █ ███  ███████   ███████   ███████ 
-    ███   ███  ███   ███  ███   ███  ███  ████  ███            ███       ███
-    ███   ███  ███   ███  ███   ███  ███   ███  ████████  ███████   ███████ 
-###
 
 use ../util      ◆ harness
 use ../view/base ◆ input crumbs
 use ../view/menu ◆ choices greet
 
 ▸ harness
-
-    #  a headless editor talks to no terminal: what would have been written
-    #  is kept, so a test can look at it
 
     ▸ the terminal is left alone
 
@@ -41,8 +31,6 @@ use ../view/menu ◆ choices greet
 
         h.row 1 ▸ ''
 
-    #  a key goes to a view, the way a terminal would send it
-
     ▸ a key goes to the view
 
         h = new harness
@@ -58,8 +46,6 @@ use ../view/menu ◆ choices greet
 
         c.currentIndex() ▸ 1
 
-    #  the focus is a name, and the view with that name has it
-
     ▸ the focus goes to a view
 
         h = new harness
@@ -70,8 +56,6 @@ use ../view/menu ◆ choices greet
         h.focus i
 
         i.hasFocus() ▸ true
-
-    #  a text goes into a view, one character at a time
 
     ▸ a text goes into a view
 
@@ -86,9 +70,6 @@ use ../view/menu ◆ choices greet
 
         i.current() ▸ 'xyz'
 
-    #  there are no kitty graphics in a headless screen, so the cursor is the
-    #  character in the colors of the other way round
-
     ▸ the cursor is marked
 
         h = new harness
@@ -101,13 +82,8 @@ use ../view/menu ◆ choices greet
         i.state.setMainCursor 1 0
         i.draw()
 
-        #  the character is there, and it is marked
-        
         h.row 0 ▸ 'abc'
         h.rowMarked 0 ▸ 'a\x1b[7;4:3mb\x1b[0mc'
-
-    #  the greeter draws a glow on black, so the whole window is black
-    #  while it is shown, whatever background color the terminal has
 
     ▸ the greeter blacks out the window
 
@@ -118,12 +94,8 @@ use ../view/menu ◆ choices greet
         g.layout 0 0
         g.draw()
 
-        #  the corners are outside of the greeting header
-
         h.screen.get_bg 0  23 ▸ [0 0 0]
         h.screen.get_bg 79 0  ▸ [0 0 0]
-
-    #  the screen can be written out with the colors of the cells
 
     ▸ the colored screen has the colors of the cells
 
@@ -137,8 +109,6 @@ use ../view/menu ◆ choices greet
         line.includes '\x1b[38;2;10;20;30m'  ▸ true
         line.includes 'a'                    ▸ true
         line.endsWith '\x1b[0m'              ▸ true
-
-    #  the cursor is marked in a colored screen too
 
     ▸ the colored screen marks the cursor
 

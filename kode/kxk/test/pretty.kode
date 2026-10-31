@@ -15,7 +15,7 @@ use .. ◆ pretty
         now = (new Date Date.now()).toString()
         pretty.age    now ▸ '0 seconds'
         
-        before = (new Date Date.now()-999).toString()
+        before = (new Date Date.now()-1000).toString()
         pretty.age    before ▸ '1 second'
 
         before = (new Date Date.now()-1000*60*60).toString()

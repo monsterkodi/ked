@@ -1,14 +1,8 @@
-###
-    funcol
 
-    the color picker reads a color from the editor and
-    replaces it when the picker is submitted
-###
-
-use ../../kxk       ▪ kseg
-use ../edit         ◆ editor
-use ../util         ◆ harness
-use ../view/colmns  ◆ funcol
+use ../../kxk      ▪ kseg
+use ../edit        ◆ editor
+use ../util        ◆ harness
+use ../view/colmns ◆ funcol
 
 ▸ funcol color picker
 
