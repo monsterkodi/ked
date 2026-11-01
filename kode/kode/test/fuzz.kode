@@ -9,30 +9,8 @@
 use ./utils ▪ kc
 use ..     ◆ lexer
 
-# two halves, and they do different things.
-#
-# REGRESSIONS is one hand-picked case per bug class that used to escape as
-# a TypeError from kode's own internals. These stay forever: if one of them
-# ever throws an internal error again, something regressed.
-#
-# the generated half is the real fuzzing - random programs assembled out of
-# the token set the lexer knows about, checked against the same rule: either
-# it compiles or it raises a located error, never an internal one.
-
-# seed and size are fixed so a failure is reproducible. 
-#
-#   KODE_FUZZ_SEED=99 node js/test.js kode      # a different seed
-#   KODE_FUZZ_N=20000 node js/test.js kode      # a longer run
-
 SEED  = +(○ process.env.KODE_FUZZ_SEED)  ? 1
 COUNT = +(○ process.env.KODE_FUZZ_N)    ? 3000
-
-# mulberry32: small, fast, and identical on every platform, which is the
-# only property that matters here - the same seed has to give the same
-# programs or a reported failure cannot be reproduced.
-
-# the state lives in an object because it has to advance between calls, and
-# a primitive cannot be written back through a closure.
 
 rand = st =>
 
@@ -45,15 +23,9 @@ rng = seed ->
 
     st = s:seed
 
-    # 0..1, from 31 bits of the state. not a float division of the full
-    # word: the low bits of mulberry32 are the weakest ones.
-
     -> rand(st) / 0x80000000
 
 pick = r list -> list[Math.floor r() * list.length]
-
-# the keyword list is the lexer's own, so a keyword added to Patterns shows
-# up here without anyone remembering to add it a second time
 
 FRAGMENTS = lexer.Patterns.keyword.concat [
     '@'  '@a'  '@.'  'this'  '▸'  '▴'  '⮐'  '◆'  '▪'  '●'  '●▸'  '■'
@@ -67,10 +39,6 @@ FRAGMENTS = lexer.Patterns.keyword.concat [
     '\n'  '  '  '\n    '  '\t'  '# c'  '#'
     'a = 1'  'log x'  'f a b'  '[1, 2]'  '{a: 1}'  '(x)'  'x.y'  'a?[0]'
 ]
-
-# a program is a handful of fragments joined by spaces or newlines. the
-# newline weight matters: without them the block rules are never reached
-# and most of the parser is never exercised.
 
 program = r ->
 
@@ -86,9 +54,6 @@ program = r ->
             parts.push '\n'
 
     parts.join ''
-
-# what counts as an internal error. Kode.compile wraps anything that is not
-# a located error in exactly this prefix.
 
 internal = err -> 'internal kode compiler error' in String err
 

@@ -21,9 +21,6 @@ class Renderer
         @verbose  = @kode.args?.verbose
         @hint     = _k_:{}
         @varstack = []
-
-        # sourcemap tracing: --verbose, or any of the three flags that
-        # already dump an intermediate tree
         @trace    = @verbose or @kode.args?.tokens or @kode.args?.block or @kode.args?.parse
         
     onError: msg info -> @kode.onError msg info        
@@ -40,24 +37,11 @@ class Renderer
         
         @file = source
         if source and globalThis.process
-            # the name of the file, and not a name for it. a path relative
-            # to the working directory means something different in every
-            # directory and names a file that is not there from any of the
-            # others - and the one thing this name is for is to be read
-            # from somewhere else.
             @source = slash.absolute source, globalThis.process.cwd()
-        # log @file, @source
-        
-        # a map left over from a previous run of this renderer has no
-        # business tagging this one
         
         @srcmap = null
         
         if @kode.args.map and @source
-            # the map names its source from where it is written, so that a
-            # stack trace in the js points at the kode file beside it. the
-            # name the rest of the renderer uses is the file itself, and
-            # says nothing about where it is read from.
             
             name = if target then slash.relative(source, slash.dir(target))
             
@@ -94,14 +78,7 @@ class Renderer
 
         if @srcmap
 
-            # the tags come out first, and only then: the map is measured
-            # against the file as it is written, so it has to be the file
-            # as it is written. the header shifts every line but the first.
-
             s = @srcmap.strip s
-
-            # tracing is for --verbose; the three print flags cover the
-            # token/block/parse trees, and are what the error hint names
 
             @srcmap.done s if @trace
 
@@ -111,39 +88,13 @@ class Renderer
             s += @srcmap.jscode sm
 
         else if @source
-
-            # the sourceURL says what this file is and where it came from,
-            # and it goes out whether or not the map does. -map is about
-            # stack traces, which is a different question from provenance,
-            # and the answer to this one is 40-odd bytes against a 6.7k
-            # sourcemap.
-            #
-            # it is also the only thing telling a generated file from a
-            # hand written one - konrad's reconcile can see that nothing
-            # else can - so tying it to -map meant a tree compiled without
-            # maps was a tree nobody could ever clean up.
-            #
-            # the path in it is the path of the file, and not a path to it
-            # from the working directory: this is the line a reader clicks
-            # to open the file it names, and a reader is somewhere else.
-
             s += "\n//# sourceURL=file://#{@source}\n"
 
         s
         
-    # every token is rendered through here, and tagged on its way out. the
-    # tag says which token the text belongs to; where it ends up in the
-    # finished file is for the source map to work out afterwards.
-    
     mark: (s, tok) =>
     
-        # the renderer builds tokens of its own - the bind(this) lines and
-        # friends - and those have no place in the source to point back to
-        
         if @srcmap and tok and valid tok.line then @srcmap.mark s, tok else s
-    
-    # the same text with those tags taken out again, for the places where
-    # the renderer matches or slices what it rendered
     
     plain: (s) =>
     
@@ -393,10 +344,6 @@ class Renderer
 
         s = ''
 
-        # a use has a module and maybe a name or a list of items. the
-        # tokens for both are kept by the parser so the import can point
-        # back at the source it came from.
-
         path = (m, text) => @mark text, (m.base ? m.base : m)
         
         if valid n.items
@@ -474,24 +421,17 @@ class Renderer
     
     export: n ->
         
-        # log '++++++++ export' n
-
         s = ''
         s += 'export '
         if n.args is arr
 
-            # an export can name nothing: the parser rejects a bare one,
-            # but an explicit empty list gets this far
             if empty n.args
                 @onError "export is missing what to export" n
 
             if n.args[0].object
-                # log '------- n.args[0] object' n.args
                 a = @object n.args[0].object ',\n' true
             else
-                # log '------- n.args[0] node' n.args
                 a = @node n.args[0]
-            # log "+++++++ renderer export" a
             if a[0] == "{" 
                 s += 'default ' + a
             else 
@@ -639,9 +579,6 @@ class Renderer
             
             [con, bind] = @prepareMethods mthds
             
-            # extends without a constructor has nowhere to hang the bind or
-            # the super call: there is no function body to put them in
-            
             if con
                 if bind.length
                     for b in bind
@@ -767,10 +704,6 @@ class Renderer
             else
                 name = 'async ' + name
 
-        # tag the name where it stands in the header, whether this is a
-        # plain method or one the old style writes as a quoted property.
-        # 'static foo' is written as just 'foo' in a property.
-
         if n.name?.text and valid n.name.line
             
             mark = n.name.text
@@ -856,12 +789,6 @@ class Renderer
 
         args = args.map (a) =>
             
-            # the text of an argument is cut up here, so the marking goes
-            # on after the cutting: a tag inside would be a character the
-            # string offsets below never counted. a name is a name even
-            # when the arrow is drawn a different way, so whatever token
-            # the argument starts with is the one the text points back at.
-            
             prop = a.prop ? a.operation?.lhs?.prop
 
             tok = a
@@ -923,10 +850,6 @@ class Renderer
             p.callee.text = "console.#{p.callee.text}"
             
         callee = @node p.callee
-        
-        # what the callee is compared against below. with a source map on,
-        # a tag can be riding on it, and the comparisons - and the hints they
-        # set - have to see the name as it reads without one.
         
         name = @plain callee
         
@@ -1573,8 +1496,7 @@ class Renderer
                 close = ')'
                 
             op.operator.text == 'is'
-                # a missing rhs is reported by the parser, which is the
-                # one place an operation is known to be short of one
+
                 if op.rhs?.type in ['single' 'double' 'triple']
                     ⮐ "typeof(#{@atom op.lhs}) === #{@node op.rhs}"
                 else
@@ -1819,19 +1741,11 @@ class Renderer
         lhs = @node(p.lhs)
         rhs = @node(p.rhs)
         
-        # an async comparison waits for both sides before it looks at them.
-        # the brackets are not decoration: await binds tighter than an
-        # operator would, so 'await a + b' is '(await a) + b'
-        
         if p.async
             lhs = "await (#{lhs})"
             rhs = "await (#{rhs})"
         
-        s = 'compare('   \
-          + lhs           \
-          + ','           \
-          + rhs           \
-          + ')'
+        s = 'compare(' + lhs + ',' + rhs + ')'
         s
         
     containsAssert: e ->

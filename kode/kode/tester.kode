@@ -135,10 +135,6 @@ class Tester
         
         logModules = @logModules
             
-        # the sections are walked by key, not with each: the callback of
-        # each is a function of its own, and an await inside it would be
-        # an await in a function that is not async
-        
         keys = Object.keys testModule
         
         for k in keys
@@ -185,11 +181,6 @@ class Tester
             log R1(r3(' ▸ '))
             log g3(@showSpace(fail.rhs))
              
-            # if "[object Object]" in ''+fail.lhs
-                # print.noon 'lhs' fail.lhs            
-            # if "[object Object]" in ''+fail.rhs
-                # print.noon 'rhs' fail.rhs
-        
         if allsuccs or fails.length
             summary  = w2 kstr.now() + ' '
             if valid allfails
@@ -217,14 +208,10 @@ class Tester
         split = split each (v) ->
             if valid v
                 v = ''+v
-                # a = min v.length, 80 - l
-                # l += a
-                # v[...a]
          
         split = split.filter (s) -> s.length
             
         ss = split.join w2('➜ ')
-        # if l >= 100 then ss += w2 '...'
         ss
         
 export new Tester

@@ -12,11 +12,6 @@
 # ███      ███   ███       ███     ███     ███      ███  ███  ████  ███       ███       ███   ███  ███      
 # ███████  ███   ███  ███████      ███     ███████  ███  ███   ███  ████████   ███████   ███████   ███████  
 
-# both of these ask the same question over the same tree - the highest or
-# the lowest line/col pair anywhere below a node - and they get asked on
-# overlapping subtrees from inside the parser, so a walk is not a once per
-# file cost.
-
 walkLast = (out, e) ->
     
     if e?.col?

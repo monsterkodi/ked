@@ -191,11 +191,7 @@ function funcol extends view
         
         ⮐ if @hidden() or @collapsed() or not @active
 
-        # if @uniko.visible()
-        #     if ret = @uniko.onKey key event
-        #         ⮐ ret
         ⮐ true if @uniko.onKey key event
-        # if @colorpicker.visible() and @colorpicker.hasFocus()
         ⮐ true if @colorpicker.onKey key event
 
         ⮐ if not @funtree.hasFocus()

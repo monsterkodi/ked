@@ -6,23 +6,11 @@
     ███████   ███   ███   ███████  ███   ███  ███   ███  ███        
 ###
 
-# the transpiler writes an inline source map at the foot of every file it
-# compiles with a map on: locations in the js, back to locations in the
-# kode it was made from.
-#
-# these tests read the map back out of the compiled js and ask whether it
-# says anything true - that the js is the same js, that a token sits where
-# the map says it does, and that a decoder can make sense of the segments.
-
 use ../kode
 use ../srcmap
 use ../../kxk ◆ slash nfs
 use buffer
 use fs
-
-# 'buffer' resolves to the module object, whose Buffer constructor is the
-# entry point; a bare 'Buffer' name would collide with kode's own register
-# capture operator
 
 B64 = buffer.Buffer
 
@@ -34,16 +22,7 @@ smap = new srcmap
 kmap   = (c s=SRCFILE) -> (new kode header:false, map:true).compile c, s
 kplain = (c) -> (new kode header:false).compile c, SRCFILE
 
-# the js on its own, without the map or the sourceURL at the foot of it. a
-# map counts lines as they are written, so the tests here work on the whole
-# file.
-
 body = (code) ->
-
-    # both go on as newlines and comments. the sourceURL is written whether
-    # or not there is a map, so this cannot look for one by name - and
-    # taking the first of the pair leaves whatever blank line came before it,
-    # which is why the tail is trimmed too.
 
     i = code.indexOf '\n//# source'
     if i >= 0 then code = code[...i]
@@ -51,10 +30,6 @@ body = (code) ->
     code.trimEnd()
 
 linesOf = (code) -> body(code).split '\n'
-
-# a segment is a run of base64 chars, and the continuation bit (32) says
-# whether a value carries on into the next char, so one segment decodes to
-# a LIST of values and not to a single value
 
 VLQ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
@@ -76,10 +51,6 @@ decodeSegment = (s) ->
             sh = 0
 
     vals
-
-# the map of a compiled snippet, decoded into [genLine, genCol, srcLine,
-# srcCol] tuples. mappings separate generated lines with ';', and every
-# value in a segment is relative to the one before it.
 
 decode = (code) ->
 
@@ -124,8 +95,6 @@ jsonOf = (code) ->
     r = decode code
     r ? r[0] : {}
 
-# the text of the token a mapping points at, on the source side
-
 tokAt = (lines, line, col) ->
 
     l = lines[line-1]
@@ -133,10 +102,6 @@ tokAt = (lines, line, col) ->
 
     m = /^[\w$]+/.exec l[col..]
     m ? m[0] : l[col]
-
-# kode rewrites some tokens on the way out, so a mapping is not always text
-# landing on text: log becomes console.log, yes becomes true, and so on.
-# these are the ones the snippets below run into.
 
 rewrites =
 
@@ -161,9 +126,6 @@ same = (st, gt) ->
     ⮐ false if not rewrites[st]?
     gt.startsWith rewrites[st]
 
-# every mapping of a snippet, as [tuple, sourceText, generatedText] - the
-# two ends a decoder would meet when it walked to that mapping
-
 pairs = (c) ->
 
     code = kmap c
@@ -178,8 +140,6 @@ pairs = (c) ->
 
     out
 
-# every kode file under dir
-
 kodfiles = (dir, out=[]) ->
 
     for name in fs.readdirSync dir
@@ -193,9 +153,6 @@ writeJs = c file=JS_FILE ○->
 
     s = slash.swapExt file 'kode'
     js = kmap c, s
-    # log "------------ #{s}"
-    # log js
-    # log "------------"
     
     ○ nfs.write file, js
     file
@@ -218,12 +175,6 @@ writeJs = c file=JS_FILE ○->
 
     ▸ the sourceURL is written either way
 
-        # -map is about stack traces. what a file in js/ is, and where it
-        # came from, is a different question and is answered by the
-        # sourceURL alone - konrad's reconcile can tell a generated file
-        # from a hand written one by nothing else. it is 40-odd bytes
-        # against a 6.7k sourcemap, so keeping it is not what -map is for.
-
         has = 'sourceURL' in kmap 'a = 1'
         has ▸ true
 
@@ -239,12 +190,6 @@ writeJs = c file=JS_FILE ○->
 
     ▸ and it names the file by its own path
 
-        # a path relative to the working directory means something
-        # different in every directory, and names a file that is not there
-        # from any of the others. the sourceURL is what a terminal turns
-        # into a link and what a reader opens in an editor, so it has to
-        # say where the file is, and not where the build was run from.
-
         url = kplain 'a = 1'
         lines = url.split '\n'
         url = lines.find (l) -> l.startsWith '//# sourceURL='
@@ -254,11 +199,6 @@ writeJs = c file=JS_FILE ○->
         url ▸ SRCFILE
 
     ▸ and the js it wraps is untouched
-
-        # `writes the same js either way` below is this for a spread of
-        # snippets; this is the one-liner version, so a change that started
-        # steering the renderer instead of annotating it would be obvious
-        # here before it got interesting there
 
         mapped = kmap   'a = 1'
         plain  = kplain 'a = 1'
@@ -282,10 +222,6 @@ writeJs = c file=JS_FILE ○->
 
     ▸ names it as a file:// uri
 
-        # the comment under the map is what node names a frame after when it
-        # has no map of its own, and what a terminal turns into a link when
-        # it sees a uri - so it is written as one
-
         code = kmap 'a = 1'
         mark = '//# sourceURL='
         at = code.lastIndexOf mark
@@ -297,8 +233,6 @@ writeJs = c file=JS_FILE ○->
 
         url.startsWith 'file://' ▸ true
 
-        # and it still points at the probe file, wherever it is read from
-
         src = url.replace 'file://', ''
         src.endsWith 'probe.kode' ▸ true
 
@@ -306,10 +240,6 @@ writeJs = c file=JS_FILE ○->
         back ▸ SRCFILE
 
     ▸ names its source from where it is written
-
-        # a runtime reads the frames of a stack trace against the file the
-        # map is written into, so the source is named from that file's
-        # directory and not from the working directory
 
         dir = slash.path ◆dir, '..', '..'
         tgt = slash.path dir, 'probe.js'
@@ -322,16 +252,6 @@ writeJs = c file=JS_FILE ○->
         back ▸ SRCFILE
 
     ▸ writes the same js either way
-
-        # a map is a comment at the foot of the file and nothing else. if
-        # the tagging behind it leaked into the js, or steered the renderer
-        # into rendering something else, this is where it shows.
-
-        # the brackets have to be on this line. a '=' with the value starting
-        # on the one below loses the value - this used to be a bare sequence
-        # of strings with no brackets at all, which is a call to a variable
-        # called snips, so snips was 'a = 1' and the loop below walked its
-        # four characters instead of these thirteen snippets
 
         snips = [
             'a = 1'
@@ -360,10 +280,6 @@ writeJs = c file=JS_FILE ○->
 
     ▸ twice over
 
-        # one kode instance can compile more than once, and the parser
-        # renders a node or two while it parses - so a map left behind by
-        # one run must not tag the next
-
         c = 'class Foo\n    @bar: 1\n    mthd: -> @bar\n'
 
         k = new kode header:false, map:true
@@ -375,9 +291,6 @@ writeJs = c file=JS_FILE ○->
         eq ▸ true
 
     ▸ points at the token it maps
-
-        # the strong claim: whatever a mapping says a generated position
-        # came from, the same token sits at both ends of it
 
         out = pairs 'a = 1\nb = a + 2\nc = b + 3\nlog c\n'
 
@@ -407,16 +320,6 @@ writeJs = c file=JS_FILE ○->
 
     ▸ maps every name
 
-        # a map is for finding where a name came from again, so every name
-        # in the source has to be the start of some mapping. not every
-        # token: an operator or a delimiter is not a name, and a keyword
-        # is often syntax the renderer writes out itself.
-        #
-        # the tests below name the class and function cases one by one.
-        # this one is the net under them: a header the renderer builds by
-        # hand is a header nobody tagged, and it shows up here as a name
-        # with no position of its own.
-
         snips = [
             'a = 1\nb = a + 2\nlog b\n'
             'f = (a, b) -> a + b\nf 1 2\n'
@@ -445,9 +348,6 @@ writeJs = c file=JS_FILE ○->
 
         for c in snips
 
-            # names are the tokens with a name in them: variables and the
-            # @ of a this reference
-
             names = (new kode header:false).lexer.tokenize(c).filter (t) -> t.type in ['var' 'this']
 
             got = mapsOf(kmap(c)).map (t) -> "#{t[2]}:#{t[3]}"
@@ -458,11 +358,6 @@ writeJs = c file=JS_FILE ○->
             report ▸ ''
 
     ▸ a class maps its head and its body
-
-        # the name, the keyword and every method header are as much a part
-        # of the class as the assignment in its constructor. this used to
-        # be a gap here, with only the body mapping; it is pinned down now
-        # so the head cannot quietly go back to being untagged.
 
         code = kmap 'class Foo\n    @: ->\n        @a = 1\n    mthd: -> @a\n'
 
@@ -480,19 +375,12 @@ writeJs = c file=JS_FILE ○->
 
     ▸ maps a call
 
-        # log is rewritten into console.log, so the mapping points at where
-        # the call starts, not at where the name ends up
-
         out = mapsOf kmap('log b\n')
 
         out[0] ▸ [1 0 1 0]
         out[1] ▸ [1 12 1 4]
 
     ▸ maps a nested body
-
-        # a body is rendered indented, so generated columns run ahead of the
-        # source, and the source line a mapping gives is the line the token
-        # was written on
 
         c = 'f = ->\n    a = 1\n    b = a + 2\nf()\n'
 
@@ -505,9 +393,6 @@ writeJs = c file=JS_FILE ○->
         src = out.map (t) -> t[2]
         src ▸ [1 2 2 3 3 3 4]
 
-        # the three tokens of 'b = a + 2' are the body's return value, and
-        # they land on the line the renderer put them on
-        
         cols = out.filter((t) -> t[2] == 3).map (t) -> t[1]
         cols ▸ [11 15 19]
 
@@ -516,18 +401,12 @@ writeJs = c file=JS_FILE ○->
 
     ▸ maps a triple string
 
-        # a triple string is rendered as a template literal and comes out
-        # re-indented, but it starts where it started in the source
-
         out = mapsOf kmap('x = """\n    abc\n    def\n    """\n')
 
         out[0] ▸ [3 0 1 0]
         out[1] ▸ [3 4 1 4]
 
     ▸ maps an interpolation
-
-        # the expression inside a string is parsed on its own, and put back
-        # where the string had it
 
         out = mapsOf kmap('x = "a #{b + 1} c"\n')
 
@@ -536,9 +415,6 @@ writeJs = c file=JS_FILE ○->
         out[2] ▸ [3 13 1 13]
 
     ▸ ordered and monotonic
-
-        # a decoder reads the segments of a line in order and adds them up,
-        # so a column that goes backwards is a segment nobody can read
 
         snips = [
             'a = 1\nb = a + 2\nlog b\n'
@@ -557,9 +433,6 @@ writeJs = c file=JS_FILE ○->
 
     ▸ no column twice
 
-        # two tokens cannot start in the same place, and the segments of a
-        # line are read in order, so a second one on a column would lie
-
         snips = [
             'a = 1\nb = a + 2\nlog b\n'
             'f = (a, b) -> if a then a + b else b - a\n'
@@ -574,11 +447,6 @@ writeJs = c file=JS_FILE ○->
             n ▸ 0
 
     ▸ the whole compiler
-
-        # the renderer matches and slices its own output in a few places,
-        # and a tag riding on a token would throw those off - quietly, and
-        # only for the code that runs into them. so every file of kode/kode
-        # has to compile to the same js with a map on as with it off.
 
         dir = slash.path ◆dir, '..', '..', '..', 'kode', 'kode'
         files = kodfiles dir
@@ -606,11 +474,6 @@ writeJs = c file=JS_FILE ○->
         report ▸ ''
 
     ▸ maps every name in the compiler
-
-        # the generic test above is a net under snippets. this is the same
-        # net under every file of kode/kode: each name a compiler source
-        # has must start a mapping in the js compiled from it, or a stack
-        # trace into the compiler loses the name it was looking at.
 
         dir = slash.path ◆dir, '..', '..', '..', 'kode', 'kode'
         files = kodfiles dir
@@ -640,9 +503,6 @@ writeJs = c file=JS_FILE ○->
 
     ▸ sourcePosition finds where a position came from
 
-        # the argument of the call sits at column 12 of the one line of
-        # js, and at column 4 of the one line of kode it was written on
-
         file = ○ writeJs 'log b\n'
         pos  = ○ smap.sourcePosition file, 1, 12
 
@@ -652,9 +512,6 @@ writeJs = c file=JS_FILE ○->
 
     ▸ sourcePosition takes columns from zero
 
-        # the default column is the start of the line, so asking without
-        # one asks about the start of the line
-
         file = ○ writeJs 'log b\n'
         pos  = ○ smap.sourcePosition file, 1
 
@@ -662,9 +519,6 @@ writeJs = c file=JS_FILE ○->
         pos.col  ▸ 0
 
     ▸ sourcePosition takes lines from one
-
-        # the third line of the js is the one the assignment landed on,
-        # and the map counts the source from one too
 
         file = ○ writeJs 'a = 1\n'
         pos  = ○ smap.sourcePosition file, 3, 0
@@ -675,19 +529,12 @@ writeJs = c file=JS_FILE ○->
 
     ▸ sourcePosition says nothing before the first mapping
 
-        # the var declaration is written by the renderer and not from a
-        # token, so the map starts at the assignment below it and a lookup
-        # above that has nothing to answer with
-
         file = ○ writeJs 'a = 1\n'
         pos  = ○ smap.sourcePosition file, 1, 0
 
         pos ▸ undefined
 
     ▸ sourcePosition says nothing for a file with no map
-
-        # -plain writes a sourceURL but no map, and without a map there
-        # is nothing to ask
 
         js = kplain 'a = 1\n'
         ○ nfs.write JS_FILE, js
@@ -703,10 +550,6 @@ writeJs = c file=JS_FILE ○->
 
     ▸ sourcePosition reads the map at the foot and not the marker in the code
 
-        # the marker is what a file carrying one writes, so it stands in
-        # the code of this very snippet: the map is the last one in the
-        # text, and the one in the string is not a map at all
-
         c    = 'x = "//# sourceMappingURL=data:application/json;base64,"\nlog x\n'
         file = ○ writeJs c
         pos  = ○ smap.sourcePosition file, 4, 0
@@ -719,14 +562,6 @@ writeJs = c file=JS_FILE ○->
     
         tmpjs = slash.tmpfile() + ".js"
         
-        #var test
-        #
-        #
-        #test = function ()
-        #{
-        #    console.log("hello")
-        #}
-             
         file = ○ writeJs """
             test = ->
                 log "hello"
@@ -746,31 +581,10 @@ writeJs = c file=JS_FILE ○->
                 method: -> log "hello"
             """ tmpjs
             
-        # var Test
-        # 
-        # 
-        # Test = (function ()
-        # {
-        #     function Test ()
-        #     {}
-        # 
-        #     Test.prototype["method"] = function ()
-        #     {
-        #         console.log("hello")
-        #     }
-        # 
-        #     return Test
-        # })()
-        #        
- 
         pos = ○ smap.sourcePosition file, 9, 5
-        # log "POS" pos
         valid pos ▸ true
 
     ▸ sourcePosition names the source from where the map was written
-
-        # a runtime reads the map against the file it is written into, so
-        # a source named relative to that file resolves the same way here
 
         out = (new kode header:false, map:true).compile 'a = 1\n', SRCFILE, JS_FILE
         ○ nfs.write JS_FILE, out

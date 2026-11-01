@@ -106,15 +106,6 @@ plain = c ->
 
     ▸ dots with nothing to slice
 
-        # '..' is the two-dot end of a slice and of a range. there is a
-        # value on the left that it belongs to - 'a[1..3]', 'a[1..]' - and
-        # on its own it has nothing to take the slice of.
-        #
-        # '...' is not here and will not be: the renderer reads a '...'
-        # straight after a name in an argument list as a rest parameter, so
-        # '(args...)' is '(...args)'. '...' and '[1, 2, ...]' are waiting in
-        # error_todo until that can be told apart.
-
         codemsg '..'                '.. is missing an operand'
 
     ▸ a prefix operator with nothing to its right

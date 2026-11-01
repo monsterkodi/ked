@@ -160,7 +160,6 @@ function fileeditor extends editor
             false
         
         if clss = indexer.singleton.classes[word]
-            log "clss.file" clss.file
             post.emit 'file.open' clss.file clss.line-1
             ⮐ true
             

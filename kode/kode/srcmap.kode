@@ -130,11 +130,6 @@ function SourceMap
         @lines[line].verbose = @verbose
         @lines[line].add column, source, jsstr
 
-    # the map itself. a source map is one line of segments per line of the
-    # generated file, each segment a run of vlq values: generated column,
-    # source, source line, source column - all but the first relative to
-    # whatever came before.
-    
     generate: ->
         
         writingline      = 0
@@ -154,44 +149,22 @@ function SourceMap
                     buffer += ";"
                     writingline++
 
-                # Write a comma if we've already written a segment on this line.
-
                 if needComma
                     buffer += ","
                     needComma = no
 
-                # Write the next segment. Segments can be 1, 4, or 5 values.    
-                # If just one, then it is a generated column which doesn't match anything in the source code.
-                
-                # the fields of ONE segment are concatenated without
-                # separators; the VLQ continuation bit is what tells a
-                # decoder where each value ends. The comma above only
-                # separates one segment from the next.
-                
-                # The starting column in the generated source, relative to any previous recorded
-                # column for the current line:
-
                 buffer += @encodeVlq mapping.column - lastColumn
                 lastColumn = mapping.column
 
-                # The index into the list of sources:
-
                 buffer += @encodeVlq 0
-
-                # The starting line in the original source, relative to the previous source line.
 
                 buffer += @encodeVlq mapping.sourceLine - lastSourceLine
                 lastSourceLine = mapping.sourceLine
-
-                # The starting column in the original source, relative to the previous column.
 
                 buffer += @encodeVlq mapping.sourceColumn - lastSourceColumn
                 lastSourceColumn = mapping.sourceColumn
                 needComma = yes
 
-        # the generated file, and the one source it was made from, named the
-        # way a runtime reading this map out of the js will look for it
-        
         file = slash.file slash.swapExt(@source, 'js')
                 
         version:        3
@@ -210,22 +183,12 @@ function SourceMap
     decodejs: (encoded) ->
         
         JSON.parse @base64decode(encoded)
-        
-    # where in the source a position in a compiled file came from: the map
-    # sits at the foot of the js, and node's own reader answers the lookup.
-    # lines run from one and columns from zero, the way tokens and
-    # splitFileLine count them. a file that cannot be read, one with no map
-    # in it, and a position before the first mapping all read as nothing.
-    
+            
     sourcePosition: file line col=0 ○-> # returns file:srcfile line:srcline col:srccol or undefined
         
         text = ○ nfs.read file
         ⮐ if not text
-        
-        # the marker also stands inside the code of any file that writes
-        # one - this file's own js carries it in a string - so the map is
-        # the last marker in the text, at the foot
-        
+                
         mark = 'sourceMappingURL=data:application/json;base64,'
         at   = text.lastIndexOf mark
         ⮐ if at < 0
@@ -244,10 +207,7 @@ function SourceMap
         if not entry.originalSource
             # warn 'NO ORIGINAL SOURCE' entry
             ⮐ 
-        
-        # the map names its source from where the map itself was written,
-        # so a relative name is read against the directory of the file
-        
+                
         src = slash.absolute entry.originalSource, slash.dir(file)
         
         {
@@ -256,12 +216,6 @@ function SourceMap
             col:  entry.originalColumn
         }
         
-    # Note that SourceMap VLQ encoding is "backwards".  MIDI-style VLQ encoding puts
-    # the most-significant-bit (MSB) from the original value into the MSB of the VLQ
-    # encoded value (see [Wikipedia](https://en.wikipedia.org/wiki/File:Uintvar_coding.svg)).
-    # SourceMap VLQ does things the other way around, with the least significat four
-    # bits of the original value encoded into the first byte of the VLQ encoded value.
-    
     encodeVlq: (value) ->
         
         VLQ_SHIFT            = 5
@@ -272,7 +226,6 @@ function SourceMap
 
         valueToEncode = (Math.abs(value) << 1) + signBit # The next bits are the actual value.
 
-        # Make sure we encode at least one character, even if valueToEncode is 0.
         answer = ''
         while valueToEncode or not answer
             nextChunk = valueToEncode & VLQ_VALUE_MASK

@@ -6,12 +6,6 @@
      ███████    ███████      ███     ███████    ███  ███   ███  
 
     where -o puts a file
-
-    the output path is the input path with the extension swapped, kept in
-    the same shape. a flat input list lands flat, a nested one lands
-    nested - `kode/kode/test/error.kode` has to become
-    `js/kode1/test/error.js` and not `js/kode1/error.js`, or the
-    bootstrap cannot build the tests it runs against itself.
 ###
 
 use ../kode

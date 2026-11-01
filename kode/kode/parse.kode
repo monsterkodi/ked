@@ -360,11 +360,6 @@ function Parse extends parseutils
                                     if @stack[-1] not in ['{']
                                         ⮐ @func null tok tokens
 
-        # a reserved word standing where javascript wants a value. the lexer
-        # has no opinion about most of these and hands them on as names, so
-        # this is the last place that can tell - by here it is
-        # indistinguishable from a variable called 'var'.
-        #
         if (tok.type == 'var' or tok.text == 'in') and tok.text in reserved
             key = tokens[0]?.text == ':' and (tok.type == 'keyword' or tok.text in nameable)
             if not key
@@ -640,16 +635,6 @@ function Parse extends parseutils
                     nxt.text not in ['++' '--' '+' '-' 'not' 'noon' 'new' 'empty' 'valid'] and 
                     e.text not in ['[' '('] and                     
                     '▸arg' not in @stack)
-                    
-                    #  there was a guard here once: 'if the operation is
-                    #  already on the stack, stop the lhs'. it was dead -
-                    #  the condition it tested was a call with the whole
-                    #  condition as its argument, so it could only ever be
-                    #  false - and it could not be turned on. the parser
-                    #  reads an expression to the right and the renderer
-                    #  flattens the chain, so an operator that stopped the
-                    #  lhs would change what the compiler makes of
-                    #  'a <= b < c', of 'x + y = z' and of 'not a is Array'.
                     
                     if 
                         @stack[-1] in ['in?' 'opempty' 'opvalid']

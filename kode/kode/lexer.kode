@@ -95,29 +95,6 @@ Patterns =
     ]
     "var": "[▸a-zA-Z_$][a-zA-Z0-9_$]*"
 
-# operators that are javascript's and not kode's. none of them is in
-# Patterns.op, so the lexer makes two or three tokens out of each and the
-# renderer puts them back together with a space in the wrong place -
-# 'a === b' came out as 'a === =\nb' and node stopped there.
-#
-# twelve of them are the javascript spelling of an operator kode has under
-# another name, and the renderer already emits the javascript one: 'a == b'
-# renders as 'a === b' and 'a and b' renders as 'a && b'. so these are not
-# broken kode that needs fixing - they are a second spelling for something
-# that already works, and the message says so and names the spelling to use.
-#
-# the value is what to write instead, and empty where there is none: '<<=' is
-# '<<' and '=' that javascript joins and kode does not, and there is nothing
-# to write instead of it.
-#
-# '&^' is not a javascript operator at all - it is go's 'and not' - so it
-# gets its own wording. 'a &^ b' was rendering as 'a & ^ b', which node
-# reads as 'a & (~b)': valid, and not what anyone meant.
-#
-# this is a module-level name and not a property because a bare assignment
-# inside the class body does not become one - jsOnlyError below came back
-# undefined that way.
-
 jsOnly =
     '===':  '=='
     '!==':  '!='
@@ -139,12 +116,7 @@ class Lexer
         @verbose  = @kode.args.verbose
         @raw      = @kode.args.raw
         @regs     = []
-        
-        # 'y' asks every pattern the question tokenize is about to ask it -
-        # does this match here, at the cursor - instead of letting it search
-        # the rest of the file for a match the caller is about to throw away.
-        # see test/lexer.kode.
-        
+                
         for key,pat of Patterns
             
             if 
@@ -160,10 +132,6 @@ class Lexer
     onError: msg info -> 
     
         @kode.onError msg info
-
-    # the message for an op match that is really the start of a longer one.
-    # text is the whole rest of the source, still including what matched, so
-    # '===' is caught on the '==' that Patterns.op did match.
 
     jsOnlyError: matched text ->
 
@@ -201,27 +169,15 @@ class Lexer
         while text.length
             before = text.length
             for [key,reg] in @regs
-                
-                # String.match leaves lastIndex where the last match ended
-                # on a sticky pattern, and does not reset it for us. the
-                # cursor is 0 every time.
-                
+                                
                 reg.lastIndex = 0
                 match = text.match reg
                 if match?.index == 0
 
                     value = if key == 'nl' then '' else match[0]
-                    
-                    # simple substitution ➜ then ⮐ return. the text is
-                    # rewritten, but the source is not: a column counts the
-                    # characters that were there, not the ones left over
-                    
+                                        
                     if key == 'then'   ➜ value = 'then';   key = 'keyword'
                     if key == 'return' ➜ value = 'return'; key = 'keyword'
-
-                    # an op that is really the front of a longer one kode does
-                    # not have. caught here because this is the only place
-                    # that still knows what was written next to what
 
                     if key == 'op'
                         if m = @jsOnlyError match[0], text
@@ -260,21 +216,13 @@ class Lexer
                             else
                                 tokens[-1].type = 'op'
                                 tokens[-1].text = trim tokens[-1].text ' \n'
-                                
-                                # the ▸ took the space behind it with it,
-                                # and sometimes the newline as well
-                                
+                                                                
                                 lines = match[0].split '\n'
                                 line += lines.length-1
                                 if lines.length > 1 ➜ col = lines[-1].length
                                                     ➜ col += match[0].length
                                 
                         key == 'atest'
-                            # the async comparison: an operator like ▸, but
-                            # one that waits for both sides before it looks
-                            # at them. in the place of a section title it
-                            # means the same thing ▸ does there - every
-                            # section is async anyway
                             
                             if not tokens[-2]? or tokens[-2].type == 'nl' or tokens[-2].type == 'ws' and tokens[-3]?.type == 'nl'
                                 end = text.indexOf '\n'
@@ -333,13 +281,7 @@ class Lexer
             splt = tok.text[3...-3].split '\n'
             
             if splt.length < 2 then continue
-            
-            # where each line of the body stands in the source. what comes
-            # out of here is re-indented, and anything that reads positions
-            # back out of it - a source map - has to know by how much: the
-            # entry holds the line, and the column the line starts at, so a
-            # line that loses n characters of indent gains n on the column.
-            
+                        
             org = [[tok.line, tok.col+3]]
             
             for i in 1...splt.length ➜ org.push [tok.line+i, 0]
@@ -529,11 +471,6 @@ class Lexer
             block.tokens.push tok
 
         blocks[0]
-
-# Patterns rides along on the class so a test can build its corpus out of
-# the same token set the lexer knows about, instead of a copy that goes
-# stale when a keyword is added. Attaching it here rather than exporting it
-# as a second name keeps the default export the class itself.
 
 Lexer.Patterns = Patterns
 

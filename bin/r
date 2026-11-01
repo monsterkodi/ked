@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+ffmpeg -f alsa -i default -af "highpass=f=120,adeclick,dynaudnorm,alimiter" -ar 16000 -ac 1 -y -v 0 output.wav 
+
+~/s/whisper.cpp/build/bin/whisper-cli -m ~/s/whisper.cpp/models/ggml-small.en.bin -nt -np -pc -f output.wav
