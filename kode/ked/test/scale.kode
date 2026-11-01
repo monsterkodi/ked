@@ -125,7 +125,7 @@ cells = cols:40 rows:20
 
         h = new harness cols:20 rows:5
 
-        h.t.headless = false
+        h.t.textSizing = true
 
         h.screen.add_scaled 0 0 'x' null null 2 ▸ 2
 

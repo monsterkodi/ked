@@ -22,6 +22,7 @@ function TTIO extends events
         
         @headless = opt.headless ? false
         @input    = opt.input ? true
+        @textSizing = opt.textSizing ? not @headless
         
         cols = opt.cols ? 0
         rows = opt.rows ? 0
@@ -77,6 +78,7 @@ function TTIO extends events
             @write '\x1b[?1006h'    # mouse SGR mode
             @write '\x1b[?1016h'    # mouse SGR pixel mode
             @write '\x1b[?1049h'    # alternate screen buffer
+            @write '\x1b[?7l'       # no autowrap: rows are exactly as wide as the screen
             @write '\x1b[?2004h'    # bracketed paste mode
             @write '\x1b[>1s'       # send shift in mouse press events
             @write '\x1b[>1u'       # kitty keyboard protocol
@@ -123,6 +125,7 @@ function TTIO extends events
         @write '\x1b[?1006l' # end mouse SGR mode
         @write '\x1b[?1016l' # end mouse SGR pixel mode
         @write '\x1b[?1049l' # end alternate screen buffer
+        @write '\x1b[?7h'    # autowrap back on
         @write '\x1b[?2004l' # end bracketed paste mode
         @write '\x1b[?1049l' # end scrollback screen buffer
         @showCursor()

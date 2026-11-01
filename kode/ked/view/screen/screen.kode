@@ -55,14 +55,15 @@ function screen
 
         w = max 1 kseg.segWidth(char)
 
-        char = @scaled_char char scale w if not @t.headless
+        if @t.textSizing
+            char = @scaled_char char scale w
 
         @set x y char fg bg
 
         for j in 0...scale
             for i in 0...scale*w
                 if i or j
-                    if j > 0 and i == 0 and not @t.headless
+                    if j > 0 and i == 0 and @t.textSizing
                         @set x+i y+j "\x1b[#{scale*w}C" null null
                     else
                         @set x+i y+j null null null
