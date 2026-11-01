@@ -1,6 +1,8 @@
 use ../../kxk ▪ kseg
 use ../edit   ◆ state editor
+use ../theme  ◆ theme
 use ../util   ◆ harness
+use ../view/menu ◆ choices
 
 cells = cols:40 rows:20
 
@@ -181,6 +183,30 @@ cells = cols:40 rows:20
         second = h.screen.renderString()
 
         second.startsWith("\x1b[1;1H\x1b[15X\x1b[2;1H\x1b[15X\x1b[3;1H\x1b[15X\x1b[H") ▸ true
+
+    ▸ completion is placed and highlighted on normal lines
+
+        h = new harness cols:40 rows:12
+        e = new editor h.screen 'test_scale_complete' ['complete']
+
+        e.layout 0 0 40 12
+        e.state.syntax.setExt 'kode'
+        e.state.loadLines ['funky1 = 1' 'funky2 = 2' 'fun']
+
+        e.complete.posForCursor [3 2] ▸ [3 2]
+
+        e.state.setMainCursor 3 2
+        e.complete.complete()
+
+        h.screen.init()
+        e.draw()
+
+        h.row(2) ▸ 'funky1'
+        h.row(4).includes('funky1') ▸ true
+        h.row(5).includes('funky2') ▸ true
+
+        h.screen.get_bg(4 2) ▸ theme.selection.span
+        h.screen.get_bg(5 2) ▸ theme.selection.span
 
     #  ███████   ███████   ████████   ███████   ███
     #  ███      ███   ███  ███   ███  ███   ███  ███

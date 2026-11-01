@@ -69,7 +69,7 @@ complete = (function ()
 
         state = this.editor.state
         scale = state.scaleOfLine(cursor[1])
-        return [(cursor[0] - state.s.view[0]) * scale,state.rowOfLine,cursor[1]]
+        return [(cursor[0] - state.s.view[0]) * scale,state.rowOfLine(cursor[1])]
     }
 
     complete.prototype["word"] = function (turd)
