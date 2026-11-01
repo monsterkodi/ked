@@ -97,9 +97,9 @@ function title extends view
                 
                 clearTimeout @droopTimer
                 if valid event.mods
-                    post.emit 'dircol.root' path
-                else
                     post.emit 'browse.dir' path
+                else
+                    post.emit 'dircol.root' path
                     
             'enter'
                 
