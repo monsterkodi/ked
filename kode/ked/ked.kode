@@ -28,7 +28,7 @@ function KED
         @version = '0.9.0'
         @args = karg """
             
-            ked [file]
+            ked [file...]
                 options                                       **
                 new        start with empty buffer          = false
                 fresh      don't load previous session      = false
@@ -114,11 +114,7 @@ function KED
         ked_session.set 'ked▸args' @args
         
         if valid @args.options
-            [file line column] = slash.splitFileLine @args.options[0]
-            if line
-               post.emit 'file.open' file line-1 column-1
-            else
-                @currentLoad = @loadFile file
+            @currentLoad = @openArguments()
         else if @args.fresh
             @hideEditor()
             @menu.show true
@@ -407,6 +403,51 @@ function KED
         ⮐  if slash.samePath(file @currentFile)
         
         ○ @loadFile file
+
+    # the first file argument opens, the other existing ones go to the file history
+    openArguments: ○=>
+
+        [file line column] = slash.splitFileLine @args.options[0]
+
+        loading = null
+
+        if line
+            loading = @loadFile file line-1 column-1
+        else
+            loading = @loadFile file
+
+        ○ @addArgumentFiles()
+
+        ○ loading
+
+        @editor.grabFocus()
+
+    # only files that exist can become part of the file history
+    addArgumentFiles: ○=>
+
+        ⮐  if @args.options.length < 2
+
+        files = []
+
+        for option in @args.options[1..]
+
+            [file line column] = slash.splitFileLine option
+
+            absFile = slash.absolute file process.cwd()
+
+            continue if absFile in files
+
+            exists =○ nfs.fileExists absFile
+            continue if not exists
+
+            absFile =○ nfs.resolveSymlink absFile
+            continue if empty absFile
+
+            continue if absFile in files
+
+            files.push absFile
+
+        filepos.addFiles files
                                 
     # ███       ███████    ███████   ███████          ████████  ███  ███      ████████
     # ███      ███   ███  ███   ███  ███   ███        ███       ███  ███      ███     
@@ -546,6 +587,8 @@ function KED
         @editor.setCurrentFile @currentFile
 
         ked_session.set "editor▸file" @currentFile
+
+        filepos.addFiles [@currentFile]
 
         post.emit 'file.loaded' @currentFile
 

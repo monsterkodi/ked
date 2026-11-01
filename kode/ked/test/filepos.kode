@@ -50,3 +50,22 @@ use ../edit/mode ◆ filepos
         ked_session.get("editor▸filepos▸#{file}") ▸ [5 60 0 50]
 
         delete global.ked_session
+
+    ▸ added files go before the current file
+
+        store = {}
+        fakeGet = (key def) -> clone(store[key] ? def)
+        fakeSet = (key value) -> store[key] = clone value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        filepos.fileposl = [['/tmp/current' [1 2 3 4]]]
+        filepos.offset = 0
+
+        ked_session.set 'editor▸file' '/tmp/current'
+        ked_session.set 'editor▸filepos▸/tmp/next' [5 6 7 8]
+
+        filepos.addFiles ['/tmp/next' '/tmp/last']
+
+        filepos.fileposl ▸ [['/tmp/last' [0 0 0 0]] ['/tmp/next' [5 6 7 8]] ['/tmp/current' [1 2 3 4]]]
+
+        delete global.ked_session

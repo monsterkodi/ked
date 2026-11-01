@@ -87,6 +87,34 @@ function filepos
                 @state.setView posview[2..]
                 @restoring = false
 
+    # files from the command line that the editor has not opened yet
+    @addFiles: files =>
+
+        ⮐  if empty files
+
+        files = files[..].reverse()
+
+        entries = []
+
+        for file in files
+            view = ked_session.get "editor▸filepos▸#{file}"
+            view ?= [0 0 0 0]
+            entries.push [file view]
+
+        fposl = filepos.fileposl
+        current = ked_session.get 'editor▸file'
+
+        if fposl.length and current and fposl[-1][0] == current
+            currentEntry = fposl.pop()
+            for entry in entries
+                fposl.push entry
+            fposl.push currentEntry
+        else
+            for entry in entries
+                fposl.push entry
+
+        post.emit 'title.filepos' fposl filepos.offset
+
     #  ███████  ███   ███   ███████   ████████ 
     # ███       ███ █ ███  ███   ███  ███   ███
     # ███████   █████████  █████████  ████████ 
