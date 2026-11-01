@@ -1,0 +1,22 @@
+use ../../kxk ▪ nfs slash
+use ../util    ◆ fileutil
+
+▸ fileutil
+
+    ▸ existing files are absolute, resolved and unique
+
+        first  = slash.tmpfile 'txt'
+        second = slash.tmpfile 'txt'
+        gone   = slash.tmpfile 'txt'
+
+        ○ nfs.write first,  'first'
+        ○ nfs.write second, 'second'
+
+        names = [slash.file(first), slash.file(second), slash.file(gone), slash.file(first)]
+
+        files =○ fileutil.existingFiles names slash.dir(first)
+
+        files ▸ [first, second]
+
+        ○ nfs.remove first
+        ○ nfs.remove second

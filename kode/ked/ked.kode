@@ -8,7 +8,7 @@
 
 use ../kxk        ▪ karg kstr kseg slash post nfs sleep
 use ./index       ◆ prjcts indexer
-use ./util        ◆ logfile session help frecent watcher git config dumpstate filecolors leak
+use ./util        ◆ logfile session help frecent watcher git config dumpstate filecolors leak fileutil
 use ./util/img    ◆ rounded squares sircels
 use ./edit/tool   ◆ belt
 use ./edit        ◆ mode
@@ -416,38 +416,15 @@ function KED
         else
             loading = @loadFile file
 
-        ○ @addArgumentFiles()
+        paths = @args.options[1..].map (option) -> slash.splitFileLine(option)[0]
+
+        files =○ fileutil.existingFiles paths
+
+        filepos.addFiles files
 
         ○ loading
 
         @editor.grabFocus()
-
-    # only files that exist can become part of the file history
-    addArgumentFiles: ○=>
-
-        ⮐  if @args.options.length < 2
-
-        files = []
-
-        for option in @args.options[1..]
-
-            [file line column] = slash.splitFileLine option
-
-            absFile = slash.absolute file process.cwd()
-
-            continue if absFile in files
-
-            exists =○ nfs.fileExists absFile
-            continue if not exists
-
-            absFile =○ nfs.resolveSymlink absFile
-            continue if empty absFile
-
-            continue if absFile in files
-
-            files.push absFile
-
-        filepos.addFiles files
                                 
     # ███       ███████    ███████   ███████          ████████  ███  ███      ████████
     # ███      ███   ███  ███   ███  ███   ███        ███       ███  ███      ███     

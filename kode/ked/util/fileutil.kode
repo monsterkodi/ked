@@ -63,6 +63,31 @@ function fileutil
     #    ███     ███   ███  ███   ███       ███  ███   ███
     #    ███     ███   ███  ███   ███  ███████   ███   ███
 
+    # paths that exist as files, made absolute, symlinks resolved, duplicates removed
+    @existingFiles: paths cwd ○->
+
+        cwd ?= process.cwd()
+
+        files = []
+
+        for path in paths
+
+            absFile = slash.absolute path cwd
+
+            continue if absFile in files
+
+            exists =○ nfs.fileExists absFile
+            continue if not exists
+
+            absFile =○ nfs.resolveSymlink absFile
+            continue if empty absFile
+
+            continue if absFile in files
+
+            files.push absFile
+
+        files
+
     @trash: path ○->
     
         ○ nfs.trash path
