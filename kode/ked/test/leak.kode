@@ -1,0 +1,91 @@
+use ../../kxk ▪ sleep
+use ../util ◆ leak
+
+▸ leak
+
+    ▸ a size is readable
+
+        leak.size(0) ▸ '0 B'
+        leak.size(999) ▸ '999 B'
+        leak.size(1000) ▸ '1.0 kB'
+        leak.size(1536) ▸ '1.5 kB'
+        leak.size(5242880) ▸ '5.2 MB'
+
+    ▸ a difference keeps its sign
+
+        leak.sign(0) ▸ '0 B'
+        leak.sign(2048) ▸ '+2.0 kB'
+        leak.sign(-2048) ▸ '-2.0 kB'
+
+    ▸ a stamp is a span of time
+
+        leak.stamp(0) ▸ '0s'
+        leak.stamp(59000) ▸ '59s'
+        leak.stamp(65000) ▸ '1m05s'
+        leak.stamp(3725000) ▸ '1h02m'
+
+    ▸ memory has the numbers
+
+        mem = leak.memory()
+
+        (mem.rss > 0) ▸ true
+        (mem.heapUsed > 0) ▸ true
+        (mem.limit > 0) ▸ true
+
+    ▸ a headless run samples nothing
+
+        lines = []
+        keep = console.log
+        console.log = (args...) -> lines.push(args)
+
+        leak.start(headless:true interval:10)
+        ○ sleep 30
+        leak.stop()
+        console.log = keep
+
+        lines.length ▸ 0
+
+    ▸ a sample logs one line of memory numbers
+
+        lines = []
+        keep = console.log
+        console.log = (args...) -> lines.push(args.join(' '))
+
+        leak.start(interval:10)
+        ○ sleep 40
+        leak.stop()
+        console.log = keep
+
+        (lines.length > 1) ▸ true
+        (lines[0].includes('sampling every')) ▸ true
+        (lines[1].includes('rss')) ▸ true
+        (lines[1].includes('heap')) ▸ true
+        (lines[1].includes('peak')) ▸ true
+
+    ▸ a sample reports what it measured
+
+        keep = console.log
+        console.log = ->
+
+        mem = leak.sample()
+
+        console.log = keep
+
+        (mem.rss > 0) ▸ true
+        (mem.heapUsed > 0) ▸ true
+
+    ▸ starting twice keeps one timer
+
+        lines = []
+        keep = console.log
+        console.log = (args...) -> lines.push(args)
+
+        leak.start(interval:10)
+        first = leak.timer
+        leak.start(interval:10)
+        second = leak.timer
+        leak.stop()
+        console.log = keep
+
+        (first != second) ▸ true
+        leak.timer ▸ null

@@ -1,0 +1,157 @@
+###
+samples process memory at regular intervals and logs the numbers
+
+a ked session that grows into an out of memory crash leaves a trail in
+ked.log, one line per sample: rss, heap, external and buffer memory, old
+and large object space, and the peaks since the start
+
+the timer is unref'd: sampling never keeps ked alive
+
+KED_LEAK_INTERVAL  sampling interval in ms, default 30000
+###
+
+use v8
+
+function leak
+
+    @interval: 30000
+    @timer: null
+    @began: null
+    @count: 0
+    @previous: null
+    @peak: null
+
+    # start sampling, opt is the ked args or an object with interval
+
+    @start: (opt) ->
+
+        ⮐  if opt?.headless or opt?.colors
+
+        leak.stop()
+
+        interval = opt?.interval ? int(process.env.KED_LEAK_INTERVAL ? 0)
+        leak.interval = if interval is num and interval > 0 ➜ interval else 30000
+
+        leak.began    = Date.now()
+        leak.count    = 0
+        leak.previous = null
+        leak.peak     = null
+
+        head  = "leak ▸ sampling every #{leak.interval}ms"
+        head += " ▸ heap limit #{leak.size(leak.memory().limit)}"
+        head += " ▸ deltas are since the previous sample"
+
+        log head
+
+        leak.sample()
+
+        leak.timer = setInterval (=> leak.sample()) leak.interval
+        leak.timer.unref?()
+
+        leak
+
+    @stop: ->
+
+        clearInterval leak.timer if leak.timer
+        leak.timer = null
+
+    # a number of bytes as a short string
+
+    @size: bytes ->
+
+        ⮐ '0 B' if not bytes
+
+        units = [ 'B' 'kB' 'MB' 'GB' 'TB' ]
+        n = bytes
+        i = 0
+
+        while n >= 1000 and i < units.length - 1
+            n /= 1000
+            i += 1
+
+        if i == 0 ➜ "#{int n} B"
+        else     ➜ "#{n.toFixed(1)} #{units[i]}"
+
+    @sign: bytes ->
+
+        ⮐ '0 B' if not bytes
+
+        prefix = '+'
+        prefix = '-' if bytes < 0
+
+        prefix + leak.size(Math.abs(bytes))
+
+    @stamp: ms ->
+
+        sec = int ms/1000
+
+        ⮐ "#{sec}s" if sec < 60
+
+        min = int sec/60
+
+        ⮐ "#{min}m#{lpad(2, sec%60, '0')}s" if min < 60
+
+        hour = int min/60
+
+        "#{hour}h#{lpad(2, min%60, '0')}m"
+
+    # one reading of everything worth watching
+
+    @spaces: ->
+
+        used = {}
+
+        for stat in v8.getHeapSpaceStatistics()
+            used[stat.space_name] = stat.space_used_size
+
+        used
+
+    @memory: ->
+
+        mem   = process.memoryUsage()
+        heap  = v8.getHeapStatistics()
+        space = leak.spaces()
+
+        result =
+            rss:          mem.rss
+            heapTotal:    mem.heapTotal
+            heapUsed:     mem.heapUsed
+            external:     mem.external
+            arrayBuffers: mem.arrayBuffers
+            limit:        heap.heap_size_limit
+            old:          space.old_space ? 0
+            large:        space.large_object_space ? 0
+
+        result
+
+    # log one line and return the reading
+
+    @sample: ->
+
+        mem    = leak.memory()
+        before = leak.previous ? mem
+        peak   = leak.peak ? mem
+
+        leak.previous = mem
+        leak.count   += 1
+
+        peak.rss      = Math.max peak.rss mem.rss
+        peak.heapUsed = Math.max peak.heapUsed mem.heapUsed
+        leak.peak     = peak
+
+        elapsed = Date.now() - (leak.began ? Date.now())
+        percent = 100 * mem.heapUsed / mem.limit
+
+        line  = "leak ▸ #{lpad(6, leak.stamp(elapsed))} #{lpad(4, '#' + leak.count)}"
+        line += " rss #{leak.size(mem.rss)} (#{leak.sign(mem.rss - before.rss)})"
+        line += " heap #{leak.size(mem.heapUsed)} #{percent.toFixed(1)}% (#{leak.sign(mem.heapUsed - before.heapUsed)})"
+        line += " total #{leak.size(mem.heapTotal)}"
+        line += " ext #{leak.size(mem.external)} buf #{leak.size(mem.arrayBuffers)}"
+        line += " old #{leak.size(mem.old)} large #{leak.size(mem.large)}"
+        line += " peak rss #{leak.size(peak.rss)} heap #{leak.size(peak.heapUsed)}"
+
+        log line
+
+        mem
+
+export leak
