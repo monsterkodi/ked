@@ -1,0 +1,21 @@
+use ../edit       ◆ editor
+use ../util       ◆ harness
+use ../view/title ◆ title
+
+▸ title
+
+    ▸ the crumbs show the folder of a file
+
+        h = new harness cols:100 rows:5
+        e = new editor h.screen 'test_editor' []
+        t = new title h.screen e
+
+        t.setFile '~/s/ked/kode/doesntexist'
+        t.layout 0 0 100 1
+        t.draw()
+
+        row = h.row 0
+
+        row.includes '~'           ▸ true
+        row.includes 'kode'        ▸ true
+        row.includes 'doesntexist' ▸ true

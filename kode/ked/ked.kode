@@ -447,8 +447,7 @@ function KED
         exists =○ nfs.fileExists @loadingFile
         
         if not exists
-            warn "ked.loadFile - file doesn't exist! #{@loadingFile}"
-            delete @loadingFile
+            @loadMissingFile absFile
             ⮐ 
         
         @loadingFile =○ nfs.resolveSymlink @loadingFile
@@ -528,6 +527,40 @@ function KED
             
         @
                     
+    # a missing target starts as an empty buffer that is already bound to its path
+    loadMissingFile: path =>
+
+        @currentFile = path
+
+        ▴ 'currentFile' @currentFile
+
+        delete @loadingFile
+
+        @title.setFile slash.tilde(@currentFile)
+
+        ext = config.data.filetypes[slash.file(@currentFile)]
+        ext ?= slash.ext(@currentFile)
+
+        @editor.state.syntax.setExt ext
+        @editor.state.loadLines ['']
+        @editor.setCurrentFile @currentFile
+
+        ked_session.set "editor▸file" @currentFile
+
+        post.emit 'file.loaded' @currentFile
+
+        @showEditor()
+        @editor.grabFocus()
+
+        @t.setCursor 0 0
+        @t.setTitle slash.file(@currentFile)
+
+        @redraw()
+
+        @saveSessionFile @currentFile 'loaded'
+
+        @
+
     #  ███████   ███████   ███   ███  ████████  
     # ███       ███   ███  ███   ███  ███       
     # ███████   █████████   ███ ███   ███████   

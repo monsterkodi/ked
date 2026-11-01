@@ -1,0 +1,66 @@
+use ../../kxk      ▪ slash sleep
+use ../edit        ◆ editor
+use ../util        ◆ harness
+use ../view/colmns ◆ dircol
+
+▸ dircol crumbs
+
+    ▸ a relative root shows the absolute folder path
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        d = new dircol h.screen e []
+        d.layout 0 0 100 30
+
+        d.setRoot 'kode'
+
+        d.crumbs.path ▸ slash.tilde(slash.path(process.cwd() 'kode'))
+        d.crumbs.split[0] ▸ '~'
+
+        ○ sleep 10
+        delete global.ked_session
+
+    ▸ a dot relative root shows the absolute folder path
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        d = new dircol h.screen e []
+        d.layout 0 0 100 30
+
+        d.setRoot './kode'
+
+        d.crumbs.path ▸ slash.tilde(slash.path(process.cwd() 'kode'))
+        d.crumbs.split[0] ▸ '~'
+
+        ○ sleep 10
+        delete global.ked_session
+
+    ▸ a tilde root stays where it is
+
+        store = {}
+        fakeGet = (key def) -> store[key] ? def
+        fakeSet = (key value) -> store[key] = value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        d = new dircol h.screen e []
+        d.layout 0 0 100 30
+
+        d.setRoot '~/s/ked'
+
+        d.crumbs.path ▸ '~/s/ked'
+        d.crumbs.split[0] ▸ '~'
+
+        ○ sleep 10
+        delete global.ked_session

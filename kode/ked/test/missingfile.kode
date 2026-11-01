@@ -1,0 +1,24 @@
+use child_process ▪ spawn
+use ../../kxk    ▪ slash
+
+▸ missing file target
+
+    ▸ a missing file opens as a buffer bound to its path
+
+        path = slash.path(process.cwd() 'doesntexist')
+
+        output =○ new Promise (resolve) ->
+            
+            proc = spawn slash.path(process.cwd() 'bin' 'ked') ['-H' '--fresh' path]
+            
+            out = ''
+            
+            proc.stdout.on 'data' (data) -> out += data
+            proc.stderr.on 'data' (data) -> out += data
+            
+            proc.on 'close' (code) -> resolve out
+            
+            proc.stdin.end()
+            
+        output.includes("[file: #{path}]") ▸ true
+        output.includes('doesntexist')       ▸ true

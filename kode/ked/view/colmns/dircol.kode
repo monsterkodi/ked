@@ -85,6 +85,7 @@ function dircol extends view
     
         ⮐  if empty path
     
+        path = slash.absolute path process.cwd()
         path = slash.tilde path
         @crumbs.set path
         @dirtree.setRoot path redraw:true
