@@ -1,10 +1,14 @@
 filetypes
-    config      noon
-    .kkache     noon
-    .todo       noon
-    .gitignore  noon
-    kk          js
-    
+    config       noon
+    .kkache      noon
+    .todo        noon
+    .gitignore   noon
+    kk           js
+    ked          js
+    ked_restart  js
+    salter       js
+    where        js
+    zero2blocks  js
 project
     maxDepth    12
     ignore      

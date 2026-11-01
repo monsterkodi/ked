@@ -275,7 +275,7 @@ saveCache = (path, kache, fp, srcmap, srcs, tgts, whole=no) ○->
         source: source
         target: target
 
-    ○ nfs.write path, noon.stringify(out)
+    ○ nfs.write path, noon.stringify(out maxalign:64)
     true
 
 # ███   ███  ███   ███  ████████   ███████    

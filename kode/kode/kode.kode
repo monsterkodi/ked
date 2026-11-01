@@ -34,29 +34,7 @@ class Kode
     # ███       ███   ███  ███   ███  ███   ███  ███   ███  
     # ████████  ███   ███  ███   ███   ███████   ███   ███  
     
-    # the error report, in the shape a compiler should hand one back:
-    #
-    #     ~/s/ked/kode/x.kode:14
-    #     a = foo(
-    #                ^
-    #     explicit call is missing closing bracket )
-    #
-    # the file line is a terminal hyperlink, the source line is syntax
-    # highlighted and linked to the same place, and the ^ sits under the
-    # column the parser actually choked on. no line number on the source
-    # line: the file:line above already carries it, and repeating it only
-    # lets the two drift apart when one of them is wrong.
-    #
-    # info is whatever the call site had to hand - a token, {tok:..},
-    # {tokens:[..]} or {line:..} - which is all of them, across the lexer,
-    # the parser and the renderer.
-
     onError: msg info =>
-
-        # dig a token out of whatever shape info arrived in. when there is
-        # none - end of input, most of the time - fall back to the end of
-        # the last line, so an unclosed paren points at the paren instead
-        # of printing a bare filename with nothing under it.
 
         tok = null
 
@@ -82,8 +60,6 @@ class Kode
 
         afile = slash.absolute slash.path(@file), process.cwd()
 
-        # the url keeps the full path, since ~ would not resolve, and it
-        # carries the line so the click lands where the error is
         url = "file://#{afile}:#{li}"
 
         message = bold(m5(slash.tilde(afile))) + m5(':') + m5(li)
@@ -92,18 +68,9 @@ class Kode
 
         throw message
 
-    # the source line and the ^ under it, as one string, so that a single
-    # hyperlink can cover both without splitting the escape sequence in two
-
     caret: text col ->
 
         hi = if text then kulur.kolorizeChunks kulur.ranges(text) else ''
-
-        # col is a character offset, but ^ has to land under the same
-        # character on screen, so tabs ahead of it count for what they
-        # print as. characters the terminal draws double width are not
-        # accounted for - the line is left long and uncropped on purpose,
-        # so the marker stays next to the source it belongs to.
 
         if valid col
 
@@ -193,12 +160,6 @@ class Kode
     # ███   ███  ███   ███  ███  ████  
     # ███   ███   ███████   ███   ███  
 
-    # the directory a set of inputs shares, which is what -o measures
-    # against. one directory in, one directory out: a flat list of sources
-    # in a flat directory lands exactly where it always did, and a nested
-    # one keeps the shape it had. '/r/kode' and '/r/kol' share the string
-    # '/r/ko' and nothing else, so this walks segments.
-
     @commonDir: files =>
 
         dirs = []
@@ -224,10 +185,6 @@ class Kode
 
         parts.join('/') or '/'
 
-    # where a file goes under -o. inside the shared root it keeps its
-    # shape; outside it has nowhere to go, so it keeps its name and lands
-    # at the top, which is what -o always did with it.
-
     @outPath: (file, outdir, root) =>
 
         rel = slash.name file
@@ -252,10 +209,6 @@ class Kode
             log kode.eval(args.eval 'eval' global)
             process.exit 0
     
-        # -o measures every output against the directory the inputs share,
-        # so a nested source keeps its shape instead of landing on top of
-        # a flat one
-
         absFiles = []
 
         for f in args.files
@@ -267,9 +220,6 @@ class Kode
 
         for file in args.files
     
-            # the source path is what a source map names, so it has to be the
-            # file and not however it was typed on the command line
-            
             file = slash.absolute slash.path(file), process.cwd()
             log gray(file) if args.verbose
     

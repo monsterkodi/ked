@@ -30,16 +30,16 @@ function leak
 
     @size: bytes ->
 
-        n = bytes / 1000000
-        b7(lpad(7 "#{n.toFixed(1)}"))
+        b7(lpad(5 "#{int(bytes / 1000000)}"))
 
     @sign: bytes ->
-        s = lpad(7 (Math.abs(bytes)/1000000).toFixed(1))
-        s = s.replace '0.0' ''
+        s = "#{int(Math.abs(bytes)/1000000)}"
+        s = s.replace '0' ''
+        s = lpad 5 s
         if bytes < 0
-            g2 s
+            g1 s
         else
-            r4 s
+            r6 s
             
     @spaces: ->
 
@@ -79,15 +79,24 @@ function leak
 
         percent = 100 * mem.heapUsed / mem.limit
 
-        line  = "#{leak.size(mem.rss)}"
+        line  = "#{g4(lpad(5 percent.toFixed(1)))}#{g1('%')} "
+        
+        line += b2(" rss ")
+        line += "#{leak.size(mem.rss)}"
         line += "#{leak.sign(mem.rss - before.rss)}"
+        # line += b2(" peak ")
+        # line += "#{leak.size(peak.rss)}"
+        
+        line += b2(" heap ")
         line += "#{leak.size(mem.heapUsed)}"
-        line += "#{g4(lpad(5 percent.toFixed(1)))}#{g2('%')}"
         line += "#{leak.sign(mem.heapUsed - before.heapUsed)}"
+        line += b2(" total ")
         line += "#{leak.size(mem.heapTotal)}"
+        # line += b2(" peak ")
+        # line += "#{leak.size(peak.heapUsed)}"
+        
+        line += b2(" old ")
         line += "#{leak.size(mem.old)}"
-        line += "#{leak.size(peak.rss)}"
-        line += "#{leak.size(peak.heapUsed)}"
 
         log line
 

@@ -148,7 +148,7 @@ function fileeditor extends editor
 
     jumpToWord: word ○=>
     
-        log "fileeditor.jumpToWord '#{word}'"
+        # log "fileeditor.jumpToWord '#{word}'"
         
         currentFile = ked_session.get('editor▸file')
         
