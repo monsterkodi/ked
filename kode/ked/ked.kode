@@ -42,9 +42,10 @@ function KED
         process.on 'uncaughtException' @quit
         @session = new session @args
         @logfile = new logfile @session.name (@args.headless or @args.colors)
-        leak.start @args
         
         log w2("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #{b8 @session.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
+        
+        leak.start @args
         
         config.load()
 
