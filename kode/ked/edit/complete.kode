@@ -282,11 +282,18 @@ function complete
          
         [cx cy] = @posForCursor mc
         
-        fx = cx-@turd.length-2
-        x  = fx+1+@editor.cells.x
-        y  = cy+@editor.cells.y+2
         w  = @choices.cells.cols+1
         h  = @choices.cells.rows
+
+        #  the frame needs a cell around the choices, keep it inside the editor
+
+        fx = cx-@turd.length-2
+        fx = max 0 fx
+        maxx = @editor.cells.cols - w - 2
+        fx = min fx maxx if maxx > 0
+
+        x  = fx+1+@editor.cells.x
+        y  = cy+@editor.cells.y+2
         
         fy = cy+1
 

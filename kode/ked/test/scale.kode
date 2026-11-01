@@ -208,6 +208,41 @@ cells = cols:40 rows:20
         h.screen.get_bg(4 2) ▸ theme.selection.span
         h.screen.get_bg(5 2) ▸ theme.selection.span
 
+    ▸ the completion frame fits at the edges of the editor
+
+        h = new harness cols:30 rows:12
+        e = new editor h.screen 'test_complete_left' ['complete']
+
+        e.layout 0 0 30 12
+        e.state.syntax.setExt 'kode'
+        e.state.loadLines ['funky1 = 1' 'funky2 = 2' 'f']
+
+        e.state.setMainCursor 1 2
+        e.complete.complete()
+
+        h.screen.init()
+        e.draw()
+
+        h.row(3).startsWith('╭') ▸ true
+        h.row(6).startsWith('╰') ▸ true
+
+        h = new harness cols:20 rows:12
+        e = new editor h.screen 'test_complete_right' ['complete']
+
+        e.layout 0 0 20 12
+        e.state.syntax.setExt 'kode'
+        e.state.loadLines ['funky1 = 1' 'funky2 = 2' '...........funky']
+
+        e.state.setMainCursor 16 2
+        e.complete.complete()
+
+        h.screen.init()
+        e.draw()
+
+        h.row(3).startsWith('         ╭') ▸ true
+        h.row(3).endsWith('╮') ▸ true
+        h.row(3).length ▸ 20
+
     #  ███████   ███████   ████████   ███████   ███
     #  ███      ███   ███  ███   ███  ███   ███  ███
     #  ███████  █████████  ███████    ███████    ███
