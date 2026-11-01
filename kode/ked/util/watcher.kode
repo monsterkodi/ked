@@ -16,6 +16,7 @@ function watcher
     @watchers: {}
     @renameTimer: {}
     @fileStats: {}
+    @ignoredWatchErrors: ['EACCES' 'EPERM' 'ENOENT']
     
     #  ███████  ███   ███   ███████   ████████    ███████  ███   ███   ███████   █████████  
     # ███       ████  ███  ███   ███  ███   ███  ███       ███   ███  ███   ███     ███     
@@ -33,6 +34,22 @@ function watcher
         for path,wtch of watcher.watchers
             wtch.close()
         watcher.watchers = {}
+
+    @openWatch: path ->
+
+        try
+            ⮐ fs.watch path
+        catch err
+            if err.code in watcher.ignoredWatchErrors
+                ⮐ null
+            error "watch:'#{path}' error: #{err}"
+            ⮐ null
+
+    @onWatchError: path err ->
+
+        if err.code in watcher.ignoredWatchErrors
+            ⮐
+        error "watch:'#{path}' error: #{err}"
 
     @watch: path opt ○->
     
@@ -56,10 +73,11 @@ function watcher
             
             if empty watcher.watchers[path]
                 # log "watcher ● #{g4 path}"
-                w = fs.watch path
-                w.on 'error' (err) => error "watch file:'#{path}' error: #{err}"
-                w.on 'change' ((dir) => (change path) => @onChange(change path dir))(slash.dir(path))
-                watcher.watchers[path] = w
+                w = watcher.openWatch path
+                if valid w
+                    w.on 'error' (err) => watcher.onWatchError path err
+                    w.on 'change' ((dir) => (change path) => @onChange(change path dir))(slash.dir(path))
+                    watcher.watchers[path] = w
             
             if empty prjPath
                 log "✘ #{r6 path}"
@@ -76,14 +94,15 @@ function watcher
             
             # log "watcher ○ #{y6 dir}"
             
-            w = fs.watch dir
-            w.on 'error' (err) => error "watch dir:'#{dir}' error: #{err}"
+            w = watcher.openWatch dir
+            ⮐ if not w
+            w.on 'error' (err) => watcher.onWatchError dir err
             w.on 'change' ((dir) => (change path) => @onChange(change path dir))(dir)
             watcher.watchers[dir] = w
         
             ⮐  if not opt.recursive
             
-            items =○ nfs.list dir
+            items =○ nfs.list dir recursive:false
             for item in items
                 if item.type == 'dir'
                     if item.file in ['node_modules' '.git']

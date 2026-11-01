@@ -1,0 +1,50 @@
+
+use fs
+use ../../kxk ▪ slash sleep
+use ../util ◆ watcher
+
+▸ watcher
+
+    ▸ watching a directory it cannot read logs nothing
+
+        root = '/tmp/opencode/ked-watcher-eacces'
+        secret = slash.path root 'secret'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.mkdirSync secret
+        fs.chmodSync secret 0
+
+        lines = []
+        keepLog = console.log
+        keepWarn = console.warn
+        keepError = console.error
+
+        console.log = (args...) -> lines.push args
+        console.warn = (args...) -> lines.push args
+        console.error = (args...) -> lines.push args
+
+        thrown = null
+
+        try
+            ○ watcher.watch root
+            ○ sleep 100
+        catch err
+            thrown = err
+
+        parentWatched = watcher.watchers[root] != undefined
+        secretWatched = watcher.watchers[secret] != undefined
+
+        watcher.close()
+
+        console.log = keepLog
+        console.warn = keepWarn
+        console.error = keepError
+
+        fs.chmodSync secret 493
+        fs.rmSync root recursive:true force:true
+
+        (thrown == null) ▸ true
+        lines.length ▸ 0
+        parentWatched ▸ true
+        secretWatched ▸ false
