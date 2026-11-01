@@ -76,7 +76,6 @@ function funcol extends view
 
         ked_session.set 'funcol▸active' @active
         post.emit 'redraw'
-
         
     # ███       ███████   ███   ███   ███████   ███   ███  █████████
     # ███      ███   ███   ███ ███   ███   ███  ███   ███     ███   

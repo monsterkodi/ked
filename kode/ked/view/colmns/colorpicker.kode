@@ -11,7 +11,7 @@ use ../../theme     ◆ color theme
 use ../../edit/tool ◆ belt
 use ../base         ◆ view colorslider rgbinput radio
 
-# #3c3cf0 #a9b8cc #8c6900
+# #3c3cf0 #3ecc12 #8c6900
 
 function colorpicker extends view
 
@@ -21,19 +21,15 @@ function colorpicker extends view
 
         @height = 9
 
-        @h = 0
-        @s = 100
-        @v = 100
-        
         @colorReplace  = null
         @colorDecorate = null
         @bgChanged     = false
         @voided        = [false false]
-        @colorStates   = [{h: 0 s: 100 v: 100}]
+        @colorStates   = []
 
-        @hue    = new colorslider screen "#{@name}_hue"
-        @val    = new colorslider screen "#{@name}_val"
-        @sat    = new colorslider screen "#{@name}_sat"
+        @hue    = new colorslider screen "#{@name}_hue" 360 (v) => color.hsvToRgb [v 100 100]
+        @sat    = new colorslider screen "#{@name}_sat" 100 (v) => color.hsvToRgb [@h() v @v()]
+        @val    = new colorslider screen "#{@name}_val" 100 (v) => color.hsvToRgb [@h() @s() v]
 
         @red    = new rgbinput screen "#{@name}_red"
         @green  = new rgbinput screen "#{@name}_green"
@@ -51,20 +47,6 @@ function colorpicker extends view
 
         @radio.setColor 'bg' theme.colorpicker.bg
         @radio.setColor 'fg' theme.colorpicker.fg
-        @radio.onSelect = (idx) => @setActiveColor idx
-
-        @hue.min = 0
-        @hue.max = 360
-
-        @val.min = 0
-        @val.max = 100
-
-        @sat.min = 0
-        @sat.max = 100
-
-        @hue.gradient = (v) => color.hsvToRgb [v 100 100]
-        @sat.gradient = (v) => color.hsvToRgb [@h v @v]
-        @val.gradient = (v) => color.hsvToRgb [@h @s v]
 
         @hue.on    'valueChange' @sliderChanged
         @val.on    'valueChange' @sliderChanged
@@ -80,8 +62,6 @@ function colorpicker extends view
         @setColor 'fg' theme.colorpicker.fg
 
         @isVisible = false
-
-        @syncAll()
 
     focusDelta: delta =>
     
@@ -100,7 +80,7 @@ function colorpicker extends view
 
     activeIndex: => @radio.active
     
-    onRadioActiveChanged: => @loadActiveColor()
+    onRadioActiveChanged: => @syncAll()
     
     backgroundChanged: => @bgChanged
 
@@ -114,66 +94,51 @@ function colorpicker extends view
 
         post.emit 'redraw'
 
-    rgb: => color.hsvToRgb [@h @s @v]
+    rgb: => @colorStates[@activeIndex()]
     hex: => color.hex @rgb()
+    hsv: => color.rgbToHsv @rgb()
+    h: => @hsv()[0]
+    s: => @hsv()[1]
+    v: => @hsv()[2]
 
-    colorHex: idx =>
-
-        st = @colorStates[idx]
-        ⮐ null if not st?
-
-        color.hex color.hsvToRgb([st.h st.s st.v])
-
+    colorHex: idx  => color.hex @colorStates[idx]
     foregroundHex: => @colorHex 0
     backgroundHex: => @colorHex 1
 
-    saveColorState: => @colorStates[@activeIndex()] = {h: @h, s: @s, v: @v}
+    syncAll: =>
 
-    syncSliders: =>
-
-        @hue.setValue    @h
-        @sat.setValue    @s
-        @val.setValue @v
-
-    syncInputs: =>
-        rgb = @rgb()
-        # log "syncIn #{@h} #{@s} #{@v} #{rgb[0]} #{rgb[1]} #{rgb[2]}"
-        for i in 0..2
-            @inputs[i].setValue rgb[i]
+        @syncRadio()
+        @syncSliders()
+        @syncInputs()
 
     syncRadio: =>
 
         opts = []
 
-        for cstate,idx in @colorStates
+        for idx in 0...@colorStates.length
             col = @colorHex idx
             opts.push {color: color.values(col), label: (@voided[0] ? 'none' : col)} if col?
 
         @radio.setOptions opts
         @radio.setActive @activeIndex()
-        @radio.setFocusable @twoColors
+        @radio.setFocusable opts.length > 1
 
-    syncAll: =>
+    syncSliders: =>
 
-        @syncSliders()
-        @syncInputs()
-        @syncRadio()
+        @hue.setValue @h()
+        @sat.setValue @s()
+        @val.setValue @v()
+
+    syncInputs: =>
+        rgb = @rgb()
+        for i in 0..2
+            @inputs[i].setValue rgb[i]
 
     setColorStateFromHex: (idx hex) =>
 
         rgb = color.values hex
         ⮐ false if empty rgb
-
-        [h s v] = color.rgbToHsv rgb
-
-        @colorStates[idx] = {h: h, s: s, v: v}
-
-        if idx == @activeIndex()
-            @h = h
-            @s = s
-            @v = v
-            @syncAll()
-
+        @colorStates[idx] = rgb
         true
 
     setHex: hex =>
@@ -185,83 +150,45 @@ function colorpicker extends view
 
         @bgChanged = true if @activeIndex() == 1
 
-    loadActiveColor: =>
-
-        st = @colorStates[@activeIndex()]
-
-        @h = st.h
-        @s = st.s
-        @v = st.v
-
-        @syncAll()
-
     setActiveColor: idx =>
 
         @radio.changeActive clamp(0 1 int(idx))
         
-    cycleColor: dir => @setActiveColor (@activeIndex() + dir + 2) % 2
-
     sliderChanged: =>
 
-        @changeHSV @hue.getValue() @sat.getValue() @val.getValue() 
+        @colorStates[@activeIndex()] = color.hsvToRgb [@hue.getValue() @sat.getValue() @val.getValue()]
 
-    changeHSV: @h @s @v =>
-
-        @saveColorState()
-
-        @syncInputs()
         @syncRadio()
-
-        @voided[@activeIndex()] = false
-        @bgChanged = true if @activeIndex() == 1
-
+        @syncInputs()
         @emitChanged()
 
     rgbChanged: =>
 
-        @changeRGB @red.getValue() @green.getValue() @blue.getValue()
+        @colorStates[@activeIndex()] = [@red.getValue() @green.getValue() @blue.getValue()]
 
-    changeRGB: r g b =>
-
-        [h s v] = color.rgbToHsv [r g b]
-        
-        h = @h if s == 0
-        h = @h if v == 0
-        s = @s if v == 0
-        
-        @h = h
-        @s = s
-        @v = v
-        
-        [nr ng nb] = @rgb()
-        
-        @saveColorState()
-
-        @syncSliders()
         @syncRadio()
-
-        @voided[@activeIndex()] = false
-        @bgChanged = true if @activeIndex() == 1
-
+        @syncSliders()
         @emitChanged()
         
     emitChanged: =>
+
+        @voided[@activeIndex()] = false
+        @bgChanged = true if @activeIndex() == 1
 
         post.emit 'colorpicker.change' @hex()
         post.emit 'redraw'
 
     show: hex =>
 
-        @twoColors   = false
-        @bgChanged   = false
-        @voided      = [false false]
-
-        @radio.setFocusable false
-
+        @bgChanged    = false
+        @voided       = [false false]
+        @colorStates  = []
+        @radio.active = 0
+        
         if hex?
             @setHex hex
         else
-            if found = @colorAtCursor()
+            if found = @hexAtCursor()
                 hex = found.text
                 @colorReplace = found
                 @setHex hex
@@ -269,9 +196,7 @@ function colorpicker extends view
                 
             else if not empty @editor.state.s.selections
                 
-                @twoColors = true
                 @colorDecorate = ranges:clone(@editor.state.s.selections)
-                @colorStates = [{h: 0 s: 100 v: 100} {h: 0 s: 100 v: 100}]
                 
                 fg = @colorAtSelection('fg') ? '#ff0000'
                 bg = @colorAtSelection('bg') ? '#000000'
@@ -279,10 +204,10 @@ function colorpicker extends view
                 @setColorStateFromHex 0 fg
                 @setColorStateFromHex 1 bg
                 
-                @loadActiveColor()
-                    
-                @radio.setFocusable true
-
+            else
+                @setHex "#ffffff"
+        # log "colorpicker show" @colorStates        
+        @syncAll()
         super()
 
         @hue.grabFocus()
@@ -298,7 +223,7 @@ function colorpicker extends view
                 ⮐ c
         null
         
-    colorAtCursor: =>
+    hexAtCursor: =>
 
         state = @editor.state
         mc    = state.mainCursor()
@@ -428,6 +353,8 @@ function colorpicker extends view
             'up''shift+tab' ➜ ⮐ @focusPrev()
             'esc'           ➜ ⮐ @cancel()
             'return'        ➜ ⮐ @submit()
+            'delete' 
+            'backspace'     ➜ ⮐ @voidActiveColor()
             
         # log "colorpicker.onKey #{key}"
         ⮐ true if @red   .onKey key event
@@ -437,16 +364,8 @@ function colorpicker extends view
         ⮐ true if @hue   .onKey key event
         ⮐ true if @sat   .onKey key event
         ⮐ true if @val   .onKey key event
-
-        if @radio.hasFocus() and @twoColors
-
-            switch event.combo
-                'delete' 
-                'backspace' ➜ ⮐ @voidActiveColor()
-                'left'      ➜ ⮐ @cycleColor -1
-                'right'     ➜ ⮐ @cycleColor  1
-                'down'      ➜ ⮐ @hue.grabFocus()
-                            ➜ ⮐ false
+        
+        ⮐ true if @radio .onKey key event
 
         false
 
@@ -487,4 +406,4 @@ function colorpicker extends view
 
 export colorpicker
 
-# ked-colors {"v":1,"hash":"2012290734:11898","fg":[[0,1,112,"#f2ff00"],[0,2,112,"#bfc900"],[0,3,112,"#919900"],[0,4,112,"#6d7300"],[0,5,112,"#444700"]],"bg":[]}
+# ked-colors {"v":1,"hash":"1528614203:10377","fg":[[3,1,13,"#e1ff00"],[13,1,24,"#c8e300"],[24,1,33,"#b2c900"],[33,1,44,"#9bb000"],[44,1,55,"#859600"],[55,1,66,"#808026"],[66,1,71,"#859600"],[71,1,81,"#9bb000"],[81,1,92,"#b2c900"],[92,1,102,"#c8e300"],[102,1,112,"#e1ff00"],[3,2,13,"#e1ff00"],[13,2,24,"#c8e300"],[24,2,33,"#b2c900"],[33,2,44,"#9bb000"],[44,2,55,"#859600"],[55,2,66,"#808026"],[66,2,71,"#859600"],[71,2,81,"#9bb000"],[81,2,92,"#b2c900"],[92,2,102,"#c8e300"],[102,2,112,"#e1ff00"],[3,3,13,"#e1ff00"],[13,3,24,"#c8e300"],[24,3,33,"#b2c900"],[33,3,44,"#9bb000"],[44,3,55,"#859600"],[55,3,66,"#808026"],[66,3,71,"#859600"],[71,3,81,"#9bb000"],[81,3,92,"#b2c900"],[92,3,102,"#c8e300"],[102,3,112,"#e1ff00"],[3,4,13,"#e1ff00"],[13,4,24,"#c8e300"],[24,4,33,"#b2c900"],[33,4,44,"#9bb000"],[44,4,55,"#859600"],[55,4,66,"#808026"],[66,4,71,"#859600"],[71,4,81,"#9bb000"],[81,4,92,"#b2c900"],[92,4,102,"#c8e300"],[102,4,112,"#e1ff00"],[3,5,13,"#e1ff00"],[13,5,24,"#c8e300"],[24,5,33,"#b2c900"],[33,5,44,"#9bb000"],[44,5,55,"#859600"],[55,5,66,"#808026"],[66,5,71,"#859600"],[71,5,81,"#9bb000"],[81,5,92,"#b2c900"],[92,5,102,"#c8e300"],[102,5,112,"#e1ff00"]],"bg":[[3,1,13,"#802626"],[13,1,24,"#661f1f"],[24,1,33,"#802626"],[33,1,44,"#661f1f"],[44,1,55,"#802626"],[55,1,66,"#dbe645"],[66,1,71,"#802626"],[71,1,81,"#661f1f"],[81,1,92,"#802626"],[92,1,102,"#661f1f"],[102,1,112,"#802626"],[3,2,13,"#802626"],[13,2,24,"#661f1f"],[24,2,33,"#802626"],[33,2,44,"#661f1f"],[44,2,55,"#802626"],[55,2,66,"#dbe645"],[66,2,71,"#802626"],[71,2,81,"#661f1f"],[81,2,92,"#802626"],[92,2,102,"#661f1f"],[102,2,112,"#802626"],[3,3,13,"#802626"],[13,3,24,"#661f1f"],[24,3,33,"#802626"],[33,3,44,"#661f1f"],[44,3,55,"#802626"],[55,3,66,"#dbe645"],[66,3,71,"#802626"],[71,3,81,"#661f1f"],[81,3,92,"#802626"],[92,3,102,"#661f1f"],[102,3,112,"#802626"],[3,4,13,"#802626"],[13,4,24,"#661f1f"],[24,4,33,"#802626"],[33,4,44,"#661f1f"],[44,4,55,"#802626"],[55,4,66,"#dbe645"],[66,4,71,"#802626"],[71,4,81,"#661f1f"],[81,4,92,"#802626"],[92,4,102,"#661f1f"],[102,4,112,"#802626"],[3,5,13,"#802626"],[13,5,24,"#661f1f"],[24,5,33,"#802626"],[33,5,44,"#661f1f"],[44,5,55,"#802626"],[55,5,66,"#dbe645"],[66,5,71,"#802626"],[71,5,81,"#661f1f"],[81,5,92,"#802626"],[92,5,102,"#661f1f"],[102,5,112,"#802626"]]}

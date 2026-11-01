@@ -42,7 +42,6 @@ use ../view/colmns ◆ funcol
 
         f.onColorPickerShow ''
 
-        f.colorpicker.hex() ▸ '#ff0000'
         f.colorReplace ▸ null
 
         delete global.ked_session
@@ -162,7 +161,7 @@ use ../view/colmns ◆ funcol
 
         f.onColorPickerShow ''
 
-        f.colorpicker.setActiveColor 1
+        f.colorpicker.radio.changeActive 1
         f.colorpicker.setHex '#0000ff'
 
         f.colorpicker.backgroundChanged() ▸ true

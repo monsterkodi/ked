@@ -12,17 +12,15 @@ use             ◆ view
 
 function colorslider extends view
 
-    @: screen name ->
+    @: @screen @name @max @gradient ->
 
-        super screen name
+        super @screen @name
 
         @setColor 'bg' theme.colorpicker.bg
         @setColor 'fg' theme.colorpicker.fg
 
         @min      = 0
-        @max      = 100
         @value    = 0
-        @gradient = (v) -> [0 0 0]
 
         @pointerType = 'pointer'
         @setFocusable()

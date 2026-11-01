@@ -34,9 +34,11 @@ function radio extends view
         @active = clamp 0 (@options.length-1) int(idx)
         
     changeActive: idx =>
-    
-        @setActive idx
-        @emit 'activeChange' @active
+        
+        if idx != @active
+            @setActive idx
+            @emit 'activeChange' @active
+        true
 
     getActive: => @active
 
@@ -61,6 +63,17 @@ function radio extends view
             ⮐ redraw:true
 
         @hover
+        
+    onKey: key event =>
+    
+        ⮐ false if not @hasFocus()
+        ⮐ false if @hidden() or @collapsed()
+        
+        switch event.combo
+            'left'  ➜ ⮐ @changeActive Math.max(@active-1, 0)
+            'right' ➜ ⮐ @changeActive Math.min(@active+1, @options.length-1)
+        
+        false
 
     draw: =>
 
@@ -90,7 +103,7 @@ function radio extends view
         label = hex
 
         if @focused
-            for candidate in ['● ' + hex + ' ●' '●' + hex + '●']
+            for candidate in ['● '+hex+' ●' '●'+hex+'●']
                 if candidate.length <= segw
                     label = candidate
                     break
