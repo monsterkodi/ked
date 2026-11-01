@@ -12,19 +12,12 @@ function leak
 
     @interval: 10000
     @timer:    null
-    @began:    null
     @peak:     null
     @previous: null
 
     @start: (opt) ->
 
-        ⮐  if opt?.headless or opt?.colors
-
-        leak.stop()
-
-        leak.began    = Date.now()
-        leak.previous = null
-        leak.peak     = null
+        ⮐ if opt?.headless
 
         head  = "leak ▸ sampling every #{leak.interval}ms"
         head += " ▸ heap limit #{leak.size(leak.memory().limit)}"
@@ -35,44 +28,23 @@ function leak
         leak.timer = setInterval (=> leak.sample()) leak.interval
         leak.timer.unref?()
 
-        leak
-
-    @stop: ->
-
-        clearInterval leak.timer if leak.timer
-        leak.timer = null
-
     @size: bytes ->
 
-        ⮐ lpad 9 '' if not bytes
-
-        units = [ 'b' 'k' 'M' 'G' 'T' ]
-        n = bytes
-        i = 0
-
-        while n >= 1000 and i < units.length - 1
-            n /= 1000
-            i += 1
-
-        if i == 0 ➜ b7(lpad(7 "#{int n}")) + w3(" #{units[i]}")
-        else      ➜ b7(lpad(7 "#{n.toFixed(1)}")) + w3(" #{units[i]}")
+        n = bytes / 1000000
+        b7(lpad(7 "#{n.toFixed(1)}")))
 
     @sign: bytes ->
-
-        ⮐ '' if not bytes
-
-        prefix = '+'
-        prefix = '-' if bytes < 0
-
-        prefix + leak.size(Math.abs(bytes))
-
+        s = lpad(7 (Math.abs(bytes)/1000000).toFixed(1))
+        if bytes < 0
+            g3 s
+        else
+            r6 s
+            
     @spaces: ->
 
         used = {}
-
         for stat in v8.getHeapSpaceStatistics()
             used[stat.space_name] = stat.space_used_size
-
         used
 
     @memory: ->
@@ -89,7 +61,6 @@ function leak
             arrayBuffers: mem.arrayBuffers
             limit:        heap.heap_size_limit
             old:          space.old_space ? 0
-            large:        space.large_object_space ? 0
 
         result
 
@@ -107,8 +78,11 @@ function leak
 
         percent = 100 * mem.heapUsed / mem.limit
 
-        line  = "#{leak.size(mem.rss)} #{lpad(10 leak.sign(mem.rss - before.rss))}"
-        line += "#{leak.size(mem.heapUsed)} #{g4(lpad(5 percent.toFixed(1)))}#{g2('%')} #{lpad(10 leak.sign(mem.heapUsed - before.heapUsed) )}"
+        line  = "#{leak.size(mem.rss)}"
+        line += "#{leak.sign(mem.rss - before.rss)}"
+        line += "#{leak.size(mem.heapUsed)}"
+        line += "#{g4(lpad(5 percent.toFixed(1)))}#{g2('%')}"
+        line += "#{leak.sign(mem.heapUsed - before.heapUsed)}"
         line += "#{leak.size(mem.heapTotal)}"
         line += "#{leak.size(mem.old)}"
         line += "#{leak.size(peak.rss)}"
