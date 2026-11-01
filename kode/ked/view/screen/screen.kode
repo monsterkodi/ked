@@ -25,6 +25,8 @@ function screen
         
         @c = belt.cells @cols @rows
         # @meta_clear()
+
+        @frameRuns = []
         
     #  ███████  ████████  █████████  
     # ███       ███          ███     
@@ -45,6 +47,23 @@ function screen
             @set x y char fg bg
             1
 
+    #  the blocks of a scaled line form a run of adjacent cells. a run is
+    #  remembered so the next frame can erase its whole rectangle: erasing
+    #  only the top left cell of a block leaves the row offsets of the cells
+    #  below it behind, and the terminal shifts a new block right when it
+    #  hits one of those
+
+    addRun: x y scale w =>
+
+        @frameRuns ?= []
+
+        if run = @frameRuns[-1]
+            if run[1] == y and run[2] == scale and run[0] + run[3]*scale == x
+                run[3] = run[3] + w
+                ⮐
+
+        @frameRuns.push [x y scale w]
+
     #  a character in a block of scale by scale cells
 
     scaled_char: char scale width -> "\x1b]66;s=#{scale}:w=#{width};#{char}\x07"
@@ -57,6 +76,7 @@ function screen
 
         if @t.textSizing
             char = @scaled_char char scale w
+            @addRun x y scale w
 
         @set x y char fg bg
 
@@ -271,10 +291,28 @@ function screen
     
     render: =>
         
-        @t.setCursor 0 0
+        @t.write @renderString()
+
+    #  the frame as it is written to the terminal
+    #
+    #  the block runs of the previous frame are erased first. the erase must
+    #  cover the whole rectangle of a run: the terminal keeps the row offset
+    #  of the cells below a block's first row even after the block is gone
+
+    renderString: =>
+
         s = ''
         pbg = ''
         pfg = ''
+
+        for [bx by scale width] in @lastRuns ? []
+            for r in by...by+scale
+                s += "\x1b[#{r+1};#{bx+1}H\x1b[#{width*scale}X"
+
+        @lastRuns  = @frameRuns ? []
+        @frameRuns = []
+
+        s += '\x1b[H'
         
         for y in 0...@rows
             for x in 0...@cols
@@ -301,6 +339,6 @@ function screen
                 
             s += '\n' if y != @rows-1
 
-        @t.write s
+        s
         
 export screen
