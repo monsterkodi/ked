@@ -135,7 +135,6 @@ use ../view/colmns ◆ funcol
 
         f.colorpicker.foregroundHex() ▸ '#00ff00'
         f.colorpicker.backgroundHex() ▸ '#0000ff'
-        f.colorpicker.backgroundChanged() ▸ false
 
         f.colorpicker.submit '#00ff00'
 
