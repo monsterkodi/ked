@@ -69,6 +69,15 @@ function complete
     # ███   ███  ███   ███  ███   ███  ███   ███  
     # ██     ██   ███████   ███   ███  ███████    
     
+    #  the cell position of a cursor on its line
+
+    posForCursor: cursor =>
+
+        state = @editor.state
+        scale = state.scaleOfLine cursor[1]
+
+        [(cursor[0] - state.s.view[0]) * scale, state.rowOfLine cursor[1]]
+
     word: @turd ->
     
         # log "complete.word(#{@turd}"
@@ -95,8 +104,7 @@ function complete
         
         head = @words[0]
         
-        cx = mc[0] - @editor.state.s.view[0]     
-        cy = mc[1] - @editor.state.s.view[1]
+        [cx cy] = @posForCursor mc
         
         if @words.length <= 1
             @choices.clear()                    
@@ -251,11 +259,13 @@ function complete
         
         for pos in @editor.state.s.cursors # highlight the insertions
             
-            cx = pos[0] - @editor.state.s.view[0]
-            cy = pos[1] - @editor.state.s.view[1]
+            [cx cy] = @posForCursor pos
+            scale = @editor.state.scaleOfLine pos[1]
             
             for ci in 0...word.length-@turd.length
-                @editor.cells.set_bg cx+ci cy @color.complete
+                for r in cy...cy+scale
+                    for i in 0...scale
+                        @editor.cells.set_bg cx+ci*scale+i r @color.complete
 
     # ███████    ████████    ███████   ███   ███       ████████    ███████   ████████   ███   ███  ████████   
     # ███   ███  ███   ███  ███   ███  ███ █ ███       ███   ███  ███   ███  ███   ███  ███   ███  ███   ███  
@@ -270,8 +280,7 @@ function complete
         
         mc = @editor.state.mainCursor()  
          
-        cx = mc[0] - @editor.state.s.view[0]    
-        cy = mc[1] - @editor.state.s.view[1]
+        [cx cy] = @posForCursor mc
         
         fx = cx-@turd.length-2
         x  = fx+1+@editor.cells.x

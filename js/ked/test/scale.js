@@ -1,0 +1,187 @@
+var toExport = {}
+var cells, e, h, s
+
+import kxk from "../../kxk.js"
+let kseg = kxk.kseg
+
+import state from "../edit/state.js"
+import editor from "../edit/editor.js"
+
+import harness from "../util/harness.js"
+
+cells = {cols:40,rows:20}
+toExport["scale"] = async function ()
+{
+    await section("markdown headings scale by level", async function ()
+    {
+        s = new state(cells,'test_scale')
+        s.syntax.setExt('md')
+        s.loadLines(['# One','## Two','### Three','#### Four','text'])
+        compare(s.scaleOfLine(0),3)
+        compare(s.scaleOfLine(1),2)
+        compare(s.scaleOfLine(2),1)
+        compare(s.scaleOfLine(3),1)
+        compare(s.scaleOfLine(4),1)
+    })
+    await section("headings in other files keep their size", async function ()
+    {
+        s = new state(cells,'test_scale')
+        s.syntax.setExt('kode')
+        s.loadLines(['# One','## Two'])
+        compare(s.scaleOfLine(0),1)
+        compare(s.scaleOfLine(1),1)
+    })
+    await section("the row map counts the scaled row of every line", async function ()
+    {
+        s = new state(cells,'test_scale')
+        s.syntax.setExt('md')
+        s.loadLines(['# One','a','## Two','b'])
+        compare(s.rowOfLine(0),0)
+        compare(s.rowOfLine(1),3)
+        compare(s.rowOfLine(2),4)
+        compare(s.rowOfLine(3),6)
+    })
+    await section("the row map finds the line at a row", async function ()
+    {
+        s = new state(cells,'test_scale')
+        s.syntax.setExt('md')
+        s.loadLines(['# One','a','## Two','b'])
+        compare(s.lineAtRow(0),0)
+        compare(s.lineAtRow(2),0)
+        compare(s.lineAtRow(3),1)
+        compare(s.lineAtRow(4),2)
+        compare(s.lineAtRow(5),2)
+        compare(s.lineAtRow(6),3)
+        compare(s.lineAtRow(7),3)
+    })
+    await section("a cell position maps to a logical position", async function ()
+    {
+        s = new state(cells,'test_scale')
+        s.syntax.setExt('md')
+        s.loadLines(['# One','a','## Two'])
+        compare(s.posForCell(0,0),[0,0])
+        compare(s.posForCell(2,0),[0,0])
+        compare(s.posForCell(3,0),[1,0])
+        compare(s.posForCell(5,0),[1,0])
+        compare(s.posForCell(6,0),[2,0])
+        compare(s.posForCell(0,3),[0,1])
+        compare(s.posForCell(3,3),[3,1])
+        compare(s.posForCell(0,4),[0,2])
+        compare(s.posForCell(1,4),[0,2])
+        compare(s.posForCell(3,4),[1,2])
+        compare(s.posForCell(6,4),[3,2])
+    })
+    await section("a heading is drawn in a block of cells", async function ()
+    {
+        h = new harness({cols:40,rows:10})
+        e = new editor(h.screen,'test_scale_draw',[])
+        e.layout(0,0,40,10)
+        e.state.syntax.setExt('md')
+        e.state.loadLines(['# One','a','## Two','b'])
+        e.draw()
+        compare(h.screen.get_char(0,0),'#')
+        compare(h.screen.get_char(3,0),' ')
+        compare(h.screen.get_char(6,0),'O')
+        compare(h.screen.get_char(12,0),'e')
+        compare(h.screen.get_char(0,3),'a')
+        compare(h.screen.get_char(0,4),'#')
+        compare(h.screen.get_char(2,4),'#')
+        compare(h.screen.get_char(6,4),'T')
+        compare(h.screen.get_char(0,6),'b')
+    })
+    await section("a scaled character carries the text sizing escape", async function ()
+    {
+        h = new harness({cols:10,rows:5})
+        compare(h.screen.scaled_char('x',2,1),'\x1b]66;s=2:w=1;x\x07')
+        compare(h.screen.scaled_char('🌈',3,2),'\x1b]66;s=3:w=2;🌈\x07')
+    })
+    await section("a scaled block fills its cells with placeholders", async function ()
+    {
+        h = new harness({cols:20,rows:5})
+        h.t.headless = false
+        compare(h.screen.add_scaled(0,0,'x',null,null,2),2)
+        compare(h.screen.get_char(0,0),'\x1b]66;s=2:w=1;x\x07')
+        compare(h.screen.get_char(1,0),null)
+        compare(h.screen.get_char(0,1),'\x1b[2C')
+        compare(h.screen.get_char(1,1),null)
+        compare(h.screen.add_scaled(5,0,'🌈',null,null,2),4)
+        compare(h.screen.get_char(5,0),'\x1b]66;s=2:w=2;🌈\x07')
+        compare(h.screen.get_char(6,0),null)
+        compare(h.screen.get_char(5,1),'\x1b[4C')
+        compare(h.screen.get_char(8,1),null)
+    })
+    await section("the cursor sits on the scaled line", async function ()
+    {
+        h = new harness({cols:40,rows:10})
+        e = new editor(h.screen,'test_scale_cursor',[])
+        e.layout(0,0,40,10)
+        e.state.syntax.setExt('md')
+        e.state.loadLines(['# One','## Two','text'])
+        e.state.setMainCursor(0,1)
+        e.draw()
+        compare(h.screen.c[3][0].mark,'main')
+    })
+    await section("the view scrolls so a tall line fits above the bottom", async function ()
+    {
+        h = new harness({cols:20,rows:6})
+        e = new editor(h.screen,'test_scale_scroll',[])
+        e.layout(0,0,20,6)
+        e.state.syntax.setExt('md')
+        e.state.loadLines(['a','b','c','d','e','f','# h1'])
+        e.state.setMainCursor(0,6)
+        compare(e.state.s.view[1],3)
+    })
+    await section("a scaled line has fewer visible columns", async function ()
+    {
+        h = new harness({cols:20,rows:8})
+        e = new editor(h.screen,'test_scale_cols',[])
+        e.layout(0,0,20,8)
+        e.state.syntax.setExt('md')
+        e.state.loadLines(['# a long heading line'])
+        e.state.setMainCursor(20,0)
+        compare(e.state.s.view[0],16)
+    })
+    await section("a short file with a tall line can scroll to its last line", async function ()
+    {
+        h = new harness({cols:20,rows:6})
+        e = new editor(h.screen,'test_scale_short',[])
+        e.layout(0,0,20,6)
+        e.state.syntax.setExt('md')
+        e.state.loadLines(['# h1','a','b','c','d'])
+        compare(e.state.maxViewLine(),1)
+        e.state.scrollView('down')
+        compare(e.state.s.view[1],1)
+    })
+    await section("the last line stays reachable at the end of a tall file", async function ()
+    {
+        h = new harness({cols:20,rows:6})
+        e = new editor(h.screen,'test_scale_end',[])
+        e.layout(0,0,20,6)
+        e.state.syntax.setExt('md')
+        e.state.loadLines(['# h1','a','b','c','d','e','f'])
+        compare(e.state.maxViewLine(),1)
+        e.state.setMainCursor(0,6)
+        compare(e.state.s.view[1],1)
+    })
+    await section("the gutter numbers a scaled line only on its first row", async function ()
+    {
+        h = new harness({cols:30,rows:10})
+        e = new editor(h.screen,'test_scale_gutter',['gutter'])
+        e.layout(0,0,30,10)
+        e.state.syntax.setExt('md')
+        e.state.loadLines(['# One','a','b'])
+        e.draw()
+        compare(h.row(0).startsWith('  1 '),true)
+        compare(h.row(1),'')
+        compare(h.row(2),'')
+        compare(h.row(3).startsWith('  2 '),true)
+        compare(h.row(4).startsWith('  3 '),true)
+    })
+}
+toExport["scale"]._section_ = true
+toExport._test_ = true
+export default toExport
+
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2NhbGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL3Rlc3Qvc2NhbGUua29kZSJdLCJtYXBwaW5ncyI6Ijs7O09BQVUsVUFBQTtJQUFNOztPQUNBLFlBQVQ7T0FBZSxhQUFmOztPQUNTLGNBQVQ7O0FBRVAsU0FBUSxLQUFLLEdBQUcsS0FBSzs7Ozs7UUFZYixRQUFRLE1BQU0sTUFBTTtRQUNwQixFQUFFLE9BQU8sT0FBTztRQUNoQixFQUFFLFdBQVcsUUFBUSxTQUFTLFlBQVksWUFBWTtnQkFFdEQsRUFBRSxZQUFZLEdBQUk7Z0JBQ2xCLEVBQUUsWUFBWSxHQUFJO2dCQUNsQixFQUFFLFlBQVksR0FBSTtnQkFDbEIsRUFBRSxZQUFZLEdBQUk7Z0JBQ2xCLEVBQUUsWUFBWSxHQUFJOzs7O1FBSWxCLFFBQVEsTUFBTSxNQUFNO1FBQ3BCLEVBQUUsT0FBTyxPQUFPO1FBQ2hCLEVBQUUsV0FBVyxRQUFRO2dCQUVyQixFQUFFLFlBQVksR0FBSTtnQkFDbEIsRUFBRSxZQUFZLEdBQUk7Ozs7UUFVbEIsUUFBUSxNQUFNLE1BQU07UUFDcEIsRUFBRSxPQUFPLE9BQU87UUFDaEIsRUFBRSxXQUFXLFFBQVEsSUFBSSxTQUFTO2dCQUVsQyxFQUFFLFVBQVUsR0FBSTtnQkFDaEIsRUFBRSxVQUFVLEdBQUk7Z0JBQ2hCLEVBQUUsVUFBVSxHQUFJO2dCQUNoQixFQUFFLFVBQVUsR0FBSTs7OztRQUloQixRQUFRLE1BQU0sTUFBTTtRQUNwQixFQUFFLE9BQU8sT0FBTztRQUNoQixFQUFFLFdBQVcsUUFBUSxJQUFJLFNBQVM7Z0JBRWxDLEVBQUUsVUFBVSxHQUFJO2dCQUNoQixFQUFFLFVBQVUsR0FBSTtnQkFDaEIsRUFBRSxVQUFVLEdBQUk7Z0JBQ2hCLEVBQUUsVUFBVSxHQUFJO2dCQUNoQixFQUFFLFVBQVUsR0FBSTtnQkFDaEIsRUFBRSxVQUFVLEdBQUk7Z0JBQ2hCLEVBQUUsVUFBVSxHQUFJOzs7O1FBSWhCLFFBQVEsTUFBTSxNQUFNO1FBQ3BCLEVBQUUsT0FB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
+//# sourceURL=file:///home/kodi/s/ked/kode/ked/test/scale.kode

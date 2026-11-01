@@ -74,7 +74,7 @@ function gutter extends view
                 
         if valid @gitChanges and (event.cmd or event.ctrl or event.alt)            
             pos = @eventPos event
-            idx = pos[1]+@state.s.view[1]
+            idx = @state.lineAtRow pos[1]
             if @gitChanges[idx]
                 if event.type == 'press'
                     log 'todo: press on git change!' idx @gitChanges
@@ -195,10 +195,16 @@ function gutter extends view
         
         mainCursor = @state.mainCursor()
         
-        for row in 0...@cells.rows
-                        
-            y = @state.s.view[1] + row
-            
+        li  = @state.s.view[1]
+        row = 0
+
+        while row < @cells.rows and li < @state.s.lines.length
+
+            scale = @state.scaleOfLine li
+
+            break if row + scale > @cells.rows # a tall line that does not fit is left out
+
+            y = li
             lineno = @lineno y
             
             hasCursor   = @state.isAnyCursorInLine  y
@@ -235,6 +241,9 @@ function gutter extends view
                     bg = color.darken bg if selected and not @cells.screen.t.hasFocus
                     
                     @cells.set col row (y<@state.s.lines.length) ? c : ' ' fg bg
+
+            row += scale
+            li  += 1
                     
         @drawPreviews()
         @drawGitScroll()

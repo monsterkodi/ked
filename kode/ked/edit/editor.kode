@@ -151,8 +151,12 @@ function editor extends draw
         cursor ?= @state.mainCursor()
                 
         v = @state.s.view
-        
-        v[0] <= cursor[0] < v[0] + @cells.cols and v[1] <= cursor[1] < v[1] + @cells.rows
+
+        scale = @state.scaleOfLine cursor[1]
+        row   = @state.rowOfLine cursor[1]
+        cols  = max 1 int(@cells.cols / scale)
+
+        v[0] <= cursor[0] < v[0] + cols and 0 <= row and row + scale <= @cells.rows
         
     # ████████   ███████    ███████  ███   ███   ███████  
     # ███       ███   ███  ███       ███   ███  ███       

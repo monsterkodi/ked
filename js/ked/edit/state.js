@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, eql: function (a,b,s) { var i, k, v; s = (s != null ? s : []); if (Object.is(a,b)) { return true }; if (typeof(a) !== typeof(b)) { return false }; if (!(Array.isArray(a)) && !(typeof(a) === 'object')) { return false }; if (Array.isArray(a)) { if (a.length !== b.length) { return false }; var list = _k_.list(a); for (i = 0; i < list.length; i++) { v = list[i]; s.push(i); if (!_k_.eql(v,b[i],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } } else if (_k_.isStr(a)) { return a === b } else { if (!_k_.eql(Object.keys(a),Object.keys(b))) { return false }; for (k in a) { v = a[k]; s.push(k); if (!_k_.eql(v,b[k],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } }; return true }, isArr: function (o) {return Array.isArray(o)}, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}, copy: function (o) { return Array.isArray(o) ? o.slice() : typeof o == 'object' && o.constructor.name == 'Object' ? Object.assign({}, o) : typeof o == 'string' ? ''+o : o }, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, isStr: function (o) {return typeof o === 'string' || o instanceof String}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, eql: function (a,b,s) { var i, k, v; s = (s != null ? s : []); if (Object.is(a,b)) { return true }; if (typeof(a) !== typeof(b)) { return false }; if (!(Array.isArray(a)) && !(typeof(a) === 'object')) { return false }; if (Array.isArray(a)) { if (a.length !== b.length) { return false }; var list = _k_.list(a); for (i = 0; i < list.length; i++) { v = list[i]; s.push(i); if (!_k_.eql(v,b[i],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } } else if (_k_.isStr(a)) { return a === b } else { if (!_k_.eql(Object.keys(a),Object.keys(b))) { return false }; for (k in a) { v = a[k]; s.push(k); if (!_k_.eql(v,b[k],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } }; return true }, isArr: function (o) {return Array.isArray(o)}, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}, copy: function (o) { return Array.isArray(o) ? o.slice() : typeof o == 'object' && o.constructor.name == 'Object' ? Object.assign({}, o) : typeof o == 'string' ? ''+o : o }, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, isStr: function (o) {return typeof o === 'string' || o instanceof String}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }}
 
 var state
 
@@ -58,6 +58,13 @@ state = (function ()
         this["isInvalidLineIndex"] = this["isInvalidLineIndex"].bind(this)
         this["isValidLineIndex"] = this["isValidLineIndex"].bind(this)
         this["clearLines"] = this["clearLines"].bind(this)
+        this["posForCell"] = this["posForCell"].bind(this)
+        this["maxViewLine"] = this["maxViewLine"].bind(this)
+        this["startForRow"] = this["startForRow"].bind(this)
+        this["lineAtRow"] = this["lineAtRow"].bind(this)
+        this["rowOfLine"] = this["rowOfLine"].bind(this)
+        this["lineHeight"] = this["lineHeight"].bind(this)
+        this["scaleOfLine"] = this["scaleOfLine"].bind(this)
         this["linesInView"] = this["linesInView"].bind(this)
         this["appendLines"] = this["appendLines"].bind(this)
         this["addLine"] = this["addLine"].bind(this)
@@ -99,6 +106,8 @@ state = (function ()
         this.handleKey = keys.bind(this)
         this.syntax = new syntax(this.name + '.syntax')
         this.hasFocus = false
+        this.scales = {h1:3,h2:2}
+        this.scaledExts = ['md','markdown']
         this.yankFlash = null
         this.yankFlashTimer = null
         this.clearSingle()
@@ -166,12 +175,12 @@ state = (function ()
 
     state.prototype["setColorsForRanges"] = function (ranges, fg, bg, voided = [])
     {
-        var bgSpans, colors, fgSpans, next, _80_28_, _81_28_, _97_23_
+        var bgSpans, colors, fgSpans, next, _101_23_, _84_28_, _85_28_
 
         colors = this.s.colors
         colors = (colors != null ? colors : {fg:[],bg:[]})
-        fgSpans = ((_80_28_=colors.fg) != null ? _80_28_ : [])
-        bgSpans = ((_81_28_=colors.bg) != null ? _81_28_ : [])
+        fgSpans = ((_84_28_=colors.fg) != null ? _84_28_ : [])
+        bgSpans = ((_85_28_=colors.bg) != null ? _85_28_ : [])
         if (_k_.in('fg',voided))
         {
             fgSpans = colorspans.clear(fgSpans,ranges)
@@ -201,15 +210,15 @@ state = (function ()
 
     state.prototype["clearColorsForRanges"] = function (ranges)
     {
-        var bgSpans, colors, fgSpans, next, _109_46_, _110_46_
+        var bgSpans, colors, fgSpans, next, _113_46_, _114_46_
 
         colors = this.s.colors
         if (!(colors != null))
         {
             return
         }
-        fgSpans = colorspans.clear((((_109_46_=colors.fg) != null ? _109_46_ : [])),ranges)
-        bgSpans = colorspans.clear((((_110_46_=colors.bg) != null ? _110_46_ : [])),ranges)
+        fgSpans = colorspans.clear((((_113_46_=colors.fg) != null ? _113_46_ : [])),ranges)
+        bgSpans = colorspans.clear((((_114_46_=colors.bg) != null ? _114_46_ : [])),ranges)
         next = {fg:fgSpans,bg:bgSpans}
         if (_k_.eql(colors, next))
         {
@@ -241,26 +250,26 @@ state = (function ()
 
     state.prototype["colorAtPos"] = function (pos, layer)
     {
-        var colors, _138_45_
+        var colors, _142_45_
 
         colors = this.s.colors
         if (!(colors != null))
         {
             return null
         }
-        return colorspans.colorAtPos((((_138_45_=colors[layer]) != null ? _138_45_ : [])),pos)
+        return colorspans.colorAtPos((((_142_45_=colors[layer]) != null ? _142_45_ : [])),pos)
     }
 
     state.prototype["loadColors"] = function (colors)
     {
-        var bgSpans, fgSpans, next, _146_32_, _147_32_
+        var bgSpans, fgSpans, next, _150_32_, _151_32_
 
         fgSpans = []
         bgSpans = []
         if ((colors != null))
         {
-            fgSpans = ((_146_32_=colors.fg) != null ? _146_32_ : [])
-            bgSpans = ((_147_32_=colors.bg) != null ? _147_32_ : [])
+            fgSpans = ((_150_32_=colors.fg) != null ? _150_32_ : [])
+            bgSpans = ((_151_32_=colors.bg) != null ? _151_32_ : [])
         }
         next = {fg:fgSpans,bg:bgSpans}
         this.s = this.s.set('colors',next)
@@ -270,10 +279,10 @@ state = (function ()
 
     state.prototype["setCursors"] = function (cursors, opt)
     {
-        var cur, idx, main, mainCursor, _166_15_
+        var cur, idx, main, mainCursor, _170_15_
 
         opt = (opt != null ? opt : {})
-        opt.mc = ((_166_15_=opt.mc) != null ? _166_15_ : this.mainCursor())
+        opt.mc = ((_170_15_=opt.mc) != null ? _170_15_ : this.mainCursor())
         main = opt.main
         if (!opt.keepAnchors)
         {
@@ -408,29 +417,29 @@ state = (function ()
 
     state.prototype["addLine"] = function (line, ext)
     {
-        var segl, _283_15_
+        var segl, _287_15_
 
         segl = kseg(line)
         this.syntax.addSegl(segl,ext)
-        this.segls = ((_283_15_=this.segls) != null ? _283_15_ : [])
+        this.segls = ((_287_15_=this.segls) != null ? _287_15_ : [])
         this.segls.push(segl)
         return this.changeLinesSegls()
     }
 
     state.prototype["appendLines"] = function (lines, ext)
     {
-        var segls, _292_15_
+        var segls, _296_15_
 
         segls = kseg.segls(lines)
         this.syntax.appendSegls(segls,ext)
-        this.segls = ((_292_15_=this.segls) != null ? _292_15_ : [])
+        this.segls = ((_296_15_=this.segls) != null ? _296_15_ : [])
         this.segls = this.segls.concat(segls)
         return this.changeLinesSegls()
     }
 
     state.prototype["changeLinesSegls"] = function ()
     {
-        var bgSpans, colors, diff, fgSpans, next, oldLines, _315_55_, _316_55_
+        var bgSpans, colors, diff, fgSpans, next, oldLines, _319_55_, _320_55_
 
         oldLines = this.s.lines
         this.s = this.s.set('lines',this.segls)
@@ -439,8 +448,8 @@ state = (function ()
             colors = this.s.colors
             if ((colors != null) && (!_k_.empty(colors.fg) || !_k_.empty(colors.bg)))
             {
-                fgSpans = colorspans.adjust((((_315_55_=colors.fg) != null ? _315_55_ : [])),oldLines,this.s.lines)
-                bgSpans = colorspans.adjust((((_316_55_=colors.bg) != null ? _316_55_ : [])),oldLines,this.s.lines)
+                fgSpans = colorspans.adjust((((_319_55_=colors.fg) != null ? _319_55_ : [])),oldLines,this.s.lines)
+                bgSpans = colorspans.adjust((((_320_55_=colors.bg) != null ? _320_55_ : [])),oldLines,this.s.lines)
                 next = {fg:fgSpans,bg:bgSpans}
                 this.s = this.s.set('colors',next)
             }
@@ -451,7 +460,97 @@ state = (function ()
 
     state.prototype["linesInView"] = function ()
     {
-        return this.s.lines.slice(this.s.view[1], this.s.view[1] + this.cells.rows)
+        return this.s.lines.slice(this.s.view[1], this.lineAtRow(this.cells.rows - 1) + 1)
+    }
+
+    state.prototype["scaleOfLine"] = function (li)
+    {
+        var clss, scale
+
+        if (!(_k_.in(this.syntax.ext,this.scaledExts)))
+        {
+            return 1
+        }
+        for (clss in this.scales)
+        {
+            scale = this.scales[clss]
+            if (this.syntax.hasClass(li,clss))
+            {
+                return scale
+            }
+        }
+        return 1
+    }
+
+    state.prototype["lineHeight"] = function (li)
+    {
+        return this.scaleOfLine(li)
+    }
+
+    state.prototype["rowOfLine"] = function (li)
+    {
+        var row, y
+
+        row = 0
+        for (var _a_ = y = this.s.view[1], _b_ = li; (_a_ <= _b_ ? y < li : y > li); (_a_ <= _b_ ? ++y : --y))
+        {
+            row += this.lineHeight(y)
+        }
+        return row
+    }
+
+    state.prototype["lineAtRow"] = function (row)
+    {
+        var h, li, r
+
+        r = 0
+        for (var _a_ = li = this.s.view[1], _b_ = this.s.lines.length; (_a_ <= _b_ ? li < this.s.lines.length : li > this.s.lines.length); (_a_ <= _b_ ? ++li : --li))
+        {
+            h = this.lineHeight(li)
+            if (row < r + h)
+            {
+                return li
+            }
+            r += h
+        }
+        return _k_.max(0,this.s.lines.length - 1)
+    }
+
+    state.prototype["startForRow"] = function (li, target)
+    {
+        var rows, start
+
+        target = _k_.max(0,target)
+        start = li
+        rows = 0
+        while (start > 0 && rows < target)
+        {
+            start -= 1
+            rows += this.lineHeight(start)
+        }
+        return start
+    }
+
+    state.prototype["maxViewLine"] = function ()
+    {
+        var h, li
+
+        h = 0
+        li = this.s.lines.length - 1
+        while (li >= 0 && h + this.lineHeight(li) <= this.cells.rows)
+        {
+            h += this.lineHeight(li)
+            li -= 1
+        }
+        return li + 1
+    }
+
+    state.prototype["posForCell"] = function (x, row)
+    {
+        var li
+
+        li = this.lineAtRow(row)
+        return [parseInt(x / this.lineHeight(li)) + this.s.view[0],li]
     }
 
     state.prototype["clearLines"] = function ()
@@ -586,9 +685,9 @@ state = (function ()
         view = this.s.view.asMutable()
         view[0] += sx
         view[1] += sy
-        view[1] = _k_.clamp(0,_k_.max(0,this.s.lines.length - this.cells.rows),view[1])
-        maxOffsetX = _k_.max(0,this.maxLineWidth - this.cells.cols + 2)
-        maxOffsetX = _k_.max(maxOffsetX,this.mainCursor()[0] - this.cells.cols + 2)
+        view[1] = _k_.clamp(0,this.maxViewLine(),view[1])
+        maxOffsetX = _k_.max(0,this.maxLineWidth - parseInt(this.cells.cols / this.lineHeight(this.mainCursor()[1])) + 2)
+        maxOffsetX = _k_.max(maxOffsetX,this.mainCursor()[0] - parseInt(this.cells.cols / this.lineHeight(this.mainCursor()[1])) + 2)
         view[0] = _k_.clamp(0,maxOffsetX,view[0])
         if (_k_.eql(view, this.s.view))
         {
@@ -599,7 +698,7 @@ state = (function ()
 
     state.prototype["adjustViewForMainCursor"] = function (opt)
     {
-        var botDelta, dir, dtb, dtt, topBotDelta, topDelta, view, x, y
+        var botDelta, cols, dir, height, row, topBotDelta, topDelta, view, x, y
 
         opt = (opt != null ? opt : {})
         if (this.cells.cols <= 0 || this.cells.rows <= 0)
@@ -616,28 +715,32 @@ state = (function ()
         topBotDelta = 7
         topDelta = 7
         botDelta = _k_.max(topDelta,parseInt(this.cells.rows / 2))
+        row = this.rowOfLine(y)
+        height = this.lineHeight(y)
         if (opt.adjust === 'topDelta')
         {
-            view[1] = y - topDelta
+            view[1] = this.startForRow(y,topDelta)
         }
         else if (opt.adjust === 'topBotDeltaGrow' && opt.mc)
         {
-            dtt = y - view[1]
-            dtb = y - (view[1] + this.cells.rows)
-            if (dtt < 0)
+            if (row < 0)
             {
-                view[1] = y - topDelta
+                view[1] = this.startForRow(y,topDelta)
             }
-            else if (dtb > 0)
+            else if (row + height > this.cells.rows)
             {
-                view[1] = y - (this.cells.rows - botDelta)
+                view[1] = this.startForRow(y,(this.cells.rows - botDelta - height))
             }
             else
             {
                 dir = y - opt.mc[1]
-                if (dtt < topDelta && dir < 0 || -dtb < botDelta && dir > 0)
+                if (row < topDelta && dir < 0)
                 {
-                    view[1] += dir
+                    view[1] = this.startForRow(y,topDelta)
+                }
+                else if (row + height > this.cells.rows - botDelta && dir > 0)
+                {
+                    view[1] = this.startForRow(y,(this.cells.rows - botDelta - height))
                 }
             }
         }
@@ -647,22 +750,20 @@ state = (function ()
             {
                 topBotDelta = 0
             }
-            if (y >= view[1] + this.cells.rows - 1 - topBotDelta)
+            if (row + height > this.cells.rows - topBotDelta)
             {
-                view[1] = y - this.cells.rows + 1 + topBotDelta
+                view[1] = this.startForRow(y,(this.cells.rows - topBotDelta - height))
             }
-            else if (y < view[1] + topBotDelta)
+            else if (row < topBotDelta)
             {
-                view[1] = y - topBotDelta
+                view[1] = this.startForRow(y,topBotDelta)
             }
         }
-        if (view[1] > 0 && this.s.lines.length <= this.cells.rows)
-        {
-            view[1] = 0
-        }
+        view[1] = _k_.min(view[1],this.maxViewLine())
         if (!this.skipAdjustViewForMainCursor)
         {
-            view[0] = _k_.max(0,x - this.cells.cols + 2)
+            cols = _k_.max(1,parseInt(this.cells.cols / height))
+            view[0] = _k_.max(0,x - cols + 2)
         }
         if (_k_.eql(view, this.s.view))
         {
@@ -676,7 +777,7 @@ state = (function ()
         var view
 
         view = this.s.view.asMutable()
-        view[1] = _k_.clamp(0,_k_.max(0,this.s.lines.length - this.cells.rows),view[1])
+        view[1] = _k_.clamp(0,this.maxViewLine(),view[1])
         view[0] = _k_.max(0,view[0])
         return this.setView(view)
     }
@@ -702,5 +803,5 @@ state = (function ()
 
 export default state;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RhdGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2VkaXQvc3RhdGUua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQWNVLFVBQUE7SUFBTTtJQUFVO0lBQUs7SUFBSztJQUFPOztPQUMzQixXQUFOOztPQUNNLGFBQVQ7O09BQ1MsVUFBVjtPQUFjLGFBQWQ7T0FBcUIsYUFBckI7T0FBNEIsV0FBNUI7T0FBaUMsYUFBakM7T0FBd0MsWUFBeEM7T0FBOEMsV0FBOUM7T0FBbUQsWUFBbkQ7O09BQ1UsV0FBVjtPQUFlLGlCQUFmOztPQUNVLFdBQUE7T0FBSyxXQUFBOzs7QUFFWixTQUFUOztzQkFBdUI7YUFFbkIsT0FBSSxPQUFNOztRQUFQOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztRQUVDLEtBQUMsT0FBTyxPQUFPO1FBRWYsS0FBQztvQkFFVyxJQUFJLE9BQU8sT0FBTyxLQUFLLE9BQU8sTUFBTSxLQUFLOzs7WUFBakQ7aUJBQ0ksS0FBTzs7Z0JBQUwsSUFBSztnQkFDUCxLQUFFLEtBQUssRUFBRSxLQUFLOzs7UUFFdEIsS0FBQyxZQUFZLEtBQUssS0FBSztRQUV2QixLQUFDLGFBQWUsT0FBTyxLQUFDLE9BQU87UUFDL0IsS0FBQyxXQUFXO1FBRVosS0FBQyxZQUFpQjtRQUNsQixLQUFDLGlCQUFpQjtRQUVsQixLQUFDOzs7O3FCQUVMLHlCQUFZOztZQUE4QixLQUFDLGFBQWE7O21CQUFwQyxLQUFLLE9BQU8sS0FBRTs7OztxQkFDbEMsd0JBQVk7O1lBQThCLEtBQUMsYUFBYTs7bUJBQXBDLEtBQUssTUFBTyxLQUFFOzs7O3FCQUNsQyx1QkFBWTs7WUFBOEIsS0FBQyxhQUFhOzttQkFBcEMsS0FBSyxLQUFPLEtBQUU7Ozs7cUJBRWxDOztZQUVPLEtBQUMsS0FBSyxTQUFTOzttQkFDZCxLQUFDLFdBQUs7Ozs7bUJBRU4sS0FBQzs7OztxQkFFVDs7UUFFSSxLQUFDLEtBQUssS0FBQztlQUNQLEtBQUM7Oztx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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RhdGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2VkaXQvc3RhdGUua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQWNVLFVBQUE7SUFBTTtJQUFVO0lBQUs7SUFBSztJQUFPOztPQUMzQixXQUFOOztPQUNNLGFBQVQ7O09BQ1MsVUFBVjtPQUFjLGFBQWQ7T0FBcUIsYUFBckI7T0FBNEIsV0FBNUI7T0FBaUMsYUFBakM7T0FBd0MsWUFBeEM7T0FBOEMsV0FBOUM7T0FBbUQsWUFBbkQ7O09BQ1UsV0FBVjtPQUFlLGlCQUFmOztPQUNVLFdBQUE7T0FBSyxXQUFBOzs7QUFFWixTQUFUOztzQkFBdUI7YUFFbkIsT0FBSSxPQUFNOztRQUFQOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7UUFFQyxLQUFDLE9BQU8sT0FBTztRQUVmLEtBQUM7b0JBRVcsSUFBSSxPQUFPLE9BQU8sS0FBSyxPQUFPLE1BQU0sS0FBSzs7O1lBQWpEO2lCQUNJLEtBQU87O2dCQUFMLElBQUs7Z0JBQ1AsS0FBRSxLQUFLLEVBQUUsS0FBSzs7O1FBRXRCLEtBQUMsWUFBWSxLQUFLLEtBQUs7UUFFdkIsS0FBQyxhQUFlLE9BQU8sS0FBQyxPQUFPO1FBQy9CLEtBQUMsV0FBVztRQUdaLEtBQUMsVUFBYyxHQUFHLEVBQUUsR0FBRztRQUN2QixLQUFDLGNBQWMsS0FBSztRQUVwQixLQUFDLFlBQWlCO1FBQ2xCLEtBQUMsaUJBQWlCO1FBRWxCLEtBQUM7Ozs7cUJBRUwseUJBQVk7O1lBQThCLEtBQUMsYUFBYTs7bUJBQXBDLEtBQUssT0FBTyxLQUFFOzs7O3FCQUNsQyx3QkFBWTs7WUFBOEIsS0FBQyxhQUFhOzttQkFBcEMsS0FBSyxNQUFPLEtBQUU7Ozs7cUJBQ2xDLHVCQUFZOztZQUE4QixLQUFDLGFBQWE7O21CQUFwQyxLQUFLLEtBQU8sS0FBRTs7OztxQkFFbEM7O1lBRU8sS0FBQyxLQUFLLFNBQVM7O21CQUNkLEtBQUMsV0FB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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/state.kode

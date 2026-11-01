@@ -35,6 +35,7 @@ function cells
     outside: x y -> not @inside x y
     
     add:        x y char fg bg => if @inside(x y) ➜ @screen.add       @wx(x) @wy(y) char fg bg else Infinity
+    add_scaled: x y char fg bg scale => if @inside(x y) ➜ @screen.add_scaled @wx(x) @wy(y) char fg bg scale else Infinity
     set:        x y char fg bg => if @inside(x y) ➜ @screen.set       @wx(x) @wy(y) char fg bg
     set_unsafe: x y char fg bg =>                   @screen.set        @x+x   @y+y  char fg bg
     set_char:   x y char       => if @inside(x y) ➜ @screen.set_char  @wx(x) @wy(y) char

@@ -46,15 +46,21 @@ function draw extends view
         lines  = @complete.preDrawLines lines if @complete?
         # lines  = mode.preDrawLines @state @state.s.lines
         
-        for row in 0...@cells.rows
+        y   = view[1]
+        row = 0
+        
+        while y < lines.length and row < @cells.rows
             
-            y = row+view[1]
+            scale = @state.scaleOfLine y
             
-            break if y >= lines.length
+            break if row + scale > @cells.rows # a tall line that does not fit is left out
             
-            @drawLine lines[y] y row
+            @drawLine lines[y] y row scale
             
-        @drawTrailingRows()        
+            row += scale
+            y   += 1
+            
+        @drawTrailingRows row        
         @drawHighlights()
         @drawSelections()
         @drawYank()
@@ -79,9 +85,10 @@ function draw extends view
     # ███      ███  ███  ████  ███     
     # ███████  ███  ███   ███  ████████
 
-    drawLine: line y row ->
+    drawLine: line y row scale=1, classes=null ->
     
-        row ?= y-@state.s.view[1]
+        row   ?= @state.rowOfLine y
+        scale ?= @state.scaleOfLine y
         bg = @color.bg
         
         checkColor = false
@@ -99,19 +106,20 @@ function draw extends view
             for span in colorspans.spansForLine (@state.s.colors.bg ? []) y
                 bgSpans.push [span[0] span[1] color.values(span[2])]
     
-        classes = syntax.getClasses y # one scan per line, not per column
+        classes ?= syntax.getClasses y # one scan per line, not per column
     
-        linel = kseg.width(line) - view[0]
+        linel = (kseg.width(line) - view[0]) * scale
         
         c = 0
         firstIndex = kseg.indexAtWidth line view[0] # check if leftmost grapheme is 
         firstSegi  = kseg.segiAtWidth line view[0]  # cut in half, if yes, start at
         c = 1 if firstIndex != firstSegi            # one column to the right 
         
+        cols = max 1 int(@cells.cols / scale) # logical columns that fit
         x = 0
         si = 0
         sw = 0
-        while x < @cells.cols
+        while x < cols
             
             ci = x+view[0]
             # advance the grapheme cursor instead of rescanning the line
@@ -146,31 +154,33 @@ function draw extends view
             cw = max 1 cw # todo: this is to prevent endless loop with zero width characters, should be fixed eventually
             x += cw
             
-            if x < @cells.cols
+            if x < cols
                 # @cells.meta_clone c row # ϵ⌶⟙ℍϵℜ 𝛋𝚒⟅⟅ 𝚒𝜏 ⊚ℜ ⫐◯ 𝚒𝜏!
-                c += @cells.add c row ch fg bg
+                @cells.add_scaled c*scale row ch fg bg scale
+                c += cw
             
             if clss == 'invert_bg'
                 bg = @color.bg
                 
-        @drawRowBackground row linel
+        @drawRowBackground y row linel scale
                 
-        @drawColorPills  line row linel       if checkColor
-        @drawAsciiHeader line row headerClass if headerClass
-        @drawColorBackgrounds row bgSpans
+        @drawColorPills  line row linel scale       if checkColor
+        @drawAsciiHeader line row headerClass y scale if headerClass
+        @drawColorBackgrounds row bgSpans scale
 
-    drawColorBackgrounds: row spans ->
+    drawColorBackgrounds: row spans scale=1 ->
 
         view = @state.s.view
 
         for span in spans
 
-            x1 = max 0 span[0]-view[0]
-            x2 = min @cells.cols span[1]-view[0]
+            x1 = max 0 ((span[0]-view[0]) * scale)
+            x2 = min @cells.cols ((span[1]-view[0]) * scale)
 
             continue if x1 >= x2
 
-            @cells.bg_rect x1 row (x2-1) row span[2]
+            for r in row...row+scale
+                @cells.bg_rect x1 r (x2-1) r span[2]
         
     # ████████    ███████   ███   ███       ███████     ███████    ███████  ███   ███   ███████   ████████   ███████    
     # ███   ███  ███   ███  ███ █ ███       ███   ███  ███   ███  ███       ███  ███   ███        ███   ███  ███   ███  
@@ -178,17 +188,12 @@ function draw extends view
     # ███   ███  ███   ███  ███   ███       ███   ███  ███   ███  ███       ███  ███   ███   ███  ███   ███  ███   ███  
     # ███   ███   ███████   ██     ██       ███████    ███   ███   ███████  ███   ███   ███████   ███   ███  ███████    
     
-    drawRowBackground: row linel ->
+    drawRowBackground: y row linel scale=1 ->
         
-        if row+view[1] == @state.mainCursor()[1]
+        for r in row...min(@cells.rows, row+scale)
             if linel > 0
-                @cells.bg_rect 0 row linel row @color.cursor.main
-            if linel < @cells.cols
-                @cells.bg_fill max(0 linel) row -1 row @color.cursor.empty
-        else
-            if linel > 0
-                @cells.bg_rect 0 row linel row @color.bg
-            @cells.bg_fill max(0 linel) row -1 row @color.empty
+                @cells.bg_rect 0 r linel r @color.bg
+            @cells.bg_fill max(0 linel) r -1 r @color.empty
             
     # █████████  ████████    ███████   ███  ███      ███  ███   ███   ███████   
     #    ███     ███   ███  ███   ███  ███  ███      ███  ████  ███  ███        
@@ -196,13 +201,10 @@ function draw extends view
     #    ███     ███   ███  ███   ███  ███  ███      ███  ███  ████  ███   ███  
     #    ███     ███   ███  ███   ███  ███  ███████  ███  ███   ███   ███████   
     
-    drawTrailingRows: -> # fill empty rows below last line
+    drawTrailingRows: row=0 -> # fill empty rows below last line
         
-        vl = @state.s.lines.length - @state.s.view[1]
-        ⮐  if vl >= @cells.rows 
-
-        for row in vl...@cells.rows
-            @cells.bg_fill 0 row -1 row @color.empty         
+        for r in row...@cells.rows
+            @cells.bg_fill 0 r -1 r @color.empty         
                 
     # ███   ███  ███   ███████   ███   ███  ███      ███   ███████   ███   ███  █████████   ███████  
     # ███   ███  ███  ███        ███   ███  ███      ███  ███        ███   ███     ███     ███       
@@ -219,26 +221,36 @@ function draw extends view
         [vx vy] = @state.s.view
         
         for highlight in @state.s.highlights
+
+            li    = highlight[1]
+            row   = @state.rowOfLine li
+            scale = @state.scaleOfLine li
+            cols  = max 1 int(@cells.cols / scale)
             
-            y = highlight[1]-vy
-            
-            break if y >= @cells.rows
+            break if row >= @cells.rows
+            continue if row + scale <= 0
                 
             # clip the span to the visible columns - a bracket pair spanning
             # a very long line must not redraw every column every frame
             xs = max highlight[0], vx
-            xe = min highlight[2], vx+@cells.cols
+            xe = min highlight[2], vx+cols
             
             for x in xs...xe
-                hlc = @cells.get_char x-vx y
+
+                cx  = (x-vx)*scale
+                hlc = @cells.get_char cx row
+
                 switch hlc
                     '{' '[' '(' ')' ']' '}' ➜ ulc = @color.highlight.bracket_ul ; bgc = @color.highlight.bracket
                     "'" '"'                 ➜ ulc = @color.highlight.string_ul  ; bgc = @color.highlight.string
                                             ➜ ulc = ul ; bgc = bg
                 
-                @cells.set_bg x-vx y bgc
-                @cells.set_char x-vx y color.ul_rgb(ulc)+'\x1b[4:1m'+hlc+'\x1b[4:0m'
-                @cells.adjustContrastForHighlight x-vx y bgc
+                for r in row...min(@cells.rows, row+scale)
+                    for i in 0...scale
+                        @cells.set_bg cx+i r bgc
+
+                @cells.set_char cx row color.ul_rgb(ulc)+'\x1b[4:1m'+hlc+'\x1b[4:0m'
+                @cells.adjustContrastForHighlight cx row bgc
                     
     #  ███████  ████████  ███      ████████   ███████  █████████  ███   ███████   ███   ███   ███████  
     # ███       ███       ███      ███       ███          ███     ███  ███   ███  ████  ███  ███       
@@ -261,11 +273,17 @@ function draw extends view
                 
             bg = belt.isSpanLineRange(@state.s.lines selection) ? spanbg : linebg
             
-            for li in selection[1]..selection[3]
+            start = max selection[1], @state.s.view[1]
+            row   = @state.rowOfLine start
+
+            continue if start > selection[3]
+
+            for li in start..selection[3]
                 
-                y = li-@state.s.view[1]
+                scale = @state.scaleOfLine li
+                cols  = max 1 int(@cells.cols / scale)
                 
-                break if y >= @cells.rows
+                break if row >= @cells.rows
                 
                 if li == selection[1]
                     xs = selection[0]
@@ -277,9 +295,17 @@ function draw extends view
                 else
                     xe = kseg.width(@state.s.lines[li])
                 
+                xs = max xs @state.s.view[0]
+                xe = min xe @state.s.view[0]+cols
+                
                 for x in xs...xe
-                    @cells.set_bg x-@state.s.view[0] y bg 
-                    @cells.adjustContrastForHighlight x y bg
+                    cx = (x-@state.s.view[0])*scale
+                    for r in row...min(@cells.rows, row+scale)
+                        for i in 0...scale
+                            @cells.set_bg cx+i r bg 
+                            @cells.adjustContrastForHighlight cx+i r bg
+
+                row += scale
                     
         # prof.end 'selection'
 
@@ -293,11 +319,17 @@ function draw extends view
 
         for rng in @state.yankFlash
 
-            for li in rng[1]..rng[3]
+            start = max rng[1], vy
+            row   = @state.rowOfLine start
 
-                y = li-vy
+            continue if start > rng[3]
 
-                break if y >= @cells.rows
+            for li in start..rng[3]
+
+                scale = @state.scaleOfLine li
+                cols  = max 1 int(@cells.cols / scale)
+
+                break if row >= @cells.rows
 
                 if li == rng[1]
                     xs = rng[0]
@@ -310,11 +342,16 @@ function draw extends view
                     xe = kseg.width(@state.s.lines[li])
 
                 xs = max xs vx
-                xe = min xe vx+@cells.cols
+                xe = min xe vx+cols
 
                 for x in xs...xe
-                    @cells.set_bg x-vx y bg
-                    @cells.adjustContrastForHighlight x-vx y bg
+                    cx = (x-vx)*scale
+                    for r in row...min(@cells.rows, row+scale)
+                        for i in 0...scale
+                            @cells.set_bg cx+i r bg
+                            @cells.adjustContrastForHighlight cx+i r bg
+
+                row += scale
 
     #  ███████  ███   ███  ████████    ███████   ███████   ████████    ███████  
     # ███       ███   ███  ███   ███  ███       ███   ███  ███   ███  ███       
@@ -339,7 +376,9 @@ function draw extends view
             
             if @isCursorVisible cursor
              
-                @cells.draw_rounded_multi_cursor cursor[0]-s.view[0] cursor[1]-s.view[1] bg
+                scale = @state.scaleOfLine cursor[1]
+                cx = (cursor[0]-s.view[0])*scale
+                @cells.draw_rounded_multi_cursor cx @state.rowOfLine(cursor[1]) bg
                         
         if @isCursorVisible mainCursor
              
@@ -349,7 +388,8 @@ function draw extends view
 
             if not @hasFocus() ➜ bg = color.darken bg 
              
-            [x y] = [mainCursor[0]-s.view[0] mainCursor[1]-s.view[1]]
+            scale = @state.scaleOfLine mainCursor[1]
+            [x y] = [ (mainCursor[0]-s.view[0])*scale, @state.rowOfLine(mainCursor[1]) ]
              
             if s.cursors.length <= 1
                 if @isCursorInEmpty()
@@ -367,7 +407,7 @@ function draw extends view
     # ███       ███   ███  ███      ███   ███  ███   ███  ███        ███  ███      ███           ███  
     #  ███████   ███████   ███████   ███████   ███   ███  ███        ███  ███████  ███████  ███████   
     
-    drawColorPills: line row linel ->
+    drawColorPills: line row linel scale=1 ->
         
         if rngs = kstr.colorRanges kseg.str(line)
             cx = max(0 linel)+1
@@ -378,18 +418,19 @@ function draw extends view
                 @cells.bg_rect cx row cx+dta row rng.color; cx += dta
                 if idx == rngs.length-1 ➜ @cells.set cx row '' rng.color @color.empty
                     
-    drawAsciiHeader: line row clss ->
+    drawAsciiHeader: line row clss y=null, scale=1 ->
         
         # █ █ █ █ █ █ █ █
         # █ ▉ ▊ ▋ ▌ ▍ ▏ ▕
         
         # log "▸ #{kseg.str line}"
         
+        y ?= row + @state.s.view[1]
+
         fgSpans = []
         bgSpans = []
 
         if @state.s.colors?
-            y = row + @state.s.view[1]
             fgSpans = colorspans.spansForLine (@state.s.colors.fg ? []) y
             bgSpans = colorspans.spansForLine (@state.s.colors.bg ? []) y
 
@@ -408,7 +449,7 @@ function draw extends view
             ix0 = chunk.index
 
             if not custom ix0
-                x = ix0-@state.s.view[0]
+                x = (ix0-@state.s.view[0])*scale
                 @cells.set x row '▎' theme.syntax[clss+' highlight'] theme.syntax[clss]
             
             continue if chunk.segl.length <= 1
@@ -416,7 +457,7 @@ function draw extends view
             ix1 = chunk.index + chunk.segl.length - 1
 
             if not custom ix1
-                x = ix1-@state.s.view[0]
+                x = (ix1-@state.s.view[0])*scale
                 @cells.set x row '▋' theme.syntax[clss] theme.syntax[clss+' shadow']
 
 export draw

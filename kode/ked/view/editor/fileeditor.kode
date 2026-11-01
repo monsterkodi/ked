@@ -271,8 +271,7 @@ function fileeditor extends editor
 
                     @state.deselect() if not event.shift and event.button=='left'
                     
-                    x = col + @state.s.view[0]
-                    y = row + @state.s.view[1]
+                    [x y] = @state.posForCell col row
                     
                     @state.clearHighlights()
                     
@@ -292,8 +291,7 @@ function fileeditor extends editor
                     
                 else
                     
-                    x = col + @state.s.view[0]
-                    y = row + @state.s.view[1]
+                    [x y] = @state.posForCell col row
                     
                     if event.cmd or event.ctrl
                         if word = belt.wordAtPos @state.s.lines [x y]
@@ -320,8 +318,7 @@ function fileeditor extends editor
             
                 if @dragStart
                     
-                    x = col + @state.s.view[0]
-                    y = row + @state.s.view[1]
+                    [x y] = @state.posForCell col row
                     
                     start = [@dragStart[0] @dragStart[1]]
                     
