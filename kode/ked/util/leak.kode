@@ -31,14 +31,15 @@ function leak
     @size: bytes ->
 
         n = bytes / 1000000
-        b7(lpad(7 "#{n.toFixed(1)}")))
+        b7(lpad(7 "#{n.toFixed(1)}"))
 
     @sign: bytes ->
         s = lpad(7 (Math.abs(bytes)/1000000).toFixed(1))
+        s = s.replace '0.0' ''
         if bytes < 0
-            g3 s
+            g2 s
         else
-            r6 s
+            r4 s
             
     @spaces: ->
 
