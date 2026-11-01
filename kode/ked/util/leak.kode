@@ -11,11 +11,10 @@ use v8
 function leak
 
     @interval: 10000
-    @timer: null
-    @began: null
-    @count: 0
+    @timer:    null
+    @began:    null
+    @peak:     null
     @previous: null
-    @peak: null
 
     @start: (opt) ->
 
@@ -24,7 +23,6 @@ function leak
         leak.stop()
 
         leak.began    = Date.now()
-        leak.count    = 0
         leak.previous = null
         leak.peak     = null
 
@@ -43,8 +41,6 @@ function leak
 
         clearInterval leak.timer if leak.timer
         leak.timer = null
-
-    # a number of bytes as a short string
 
     @size: bytes ->
 
@@ -97,8 +93,6 @@ function leak
 
         result
 
-    # log one line and return the reading
-
     @sample: ->
 
         mem    = leak.memory()
@@ -106,7 +100,6 @@ function leak
         peak   = leak.peak ? mem
 
         leak.previous = mem
-        leak.count   += 1
 
         peak.rss      = Math.max peak.rss mem.rss
         peak.heapUsed = Math.max peak.heapUsed mem.heapUsed
@@ -114,12 +107,12 @@ function leak
 
         percent = 100 * mem.heapUsed / mem.limit
 
-        line = "#{leak.size(mem.rss)} #{lpad(10, leak.sign(mem.rss - before.rss))}"
-        line += "#{leak.size(mem.heapUsed)} #{g4(percent.toFixed(1))}#{g2('%')} #{lpad(10, leak.sign(mem.heapUsed - before.heapUsed) )}"
+        line  = "#{leak.size(mem.rss)} #{lpad(10 leak.sign(mem.rss - before.rss))}"
+        line += "#{leak.size(mem.heapUsed)} #{g4(lpad(5 percent.toFixed(1)))}#{g2('%')} #{lpad(10 leak.sign(mem.heapUsed - before.heapUsed) )}"
         line += "#{leak.size(mem.heapTotal)}"
-        line += "#{leak.size(mem.external)} #{leak.size(mem.arrayBuffers)}"
-        line += "#{leak.size(mem.old)} #{leak.size(mem.large)}"
-        line += "#{leak.size(peak.rss)} #{leak.size(peak.heapUsed)}"
+        line += "#{leak.size(mem.old)}"
+        line += "#{leak.size(peak.rss)}"
+        line += "#{leak.size(peak.heapUsed)}"
 
         log line
 
