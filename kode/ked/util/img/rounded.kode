@@ -243,12 +243,12 @@ function rounded
     # ███        ███      ███   ███  ███       ███     
     # ███        ███████  ███   ███   ███████  ████████
 
-    @place: x y name fg xe ye z bg ->
+    @place: x y name fg xe ye z bg scale=1 ->
         
         csz = ked_ttio.cellsz
         ⮐  if empty csz
         
-        key = name+fg 
+        key = name+fg+scale
         img = @cache[key]
         
         if empty img
@@ -266,13 +266,13 @@ function rounded
                 'rounded.vertical'      ➜ @vertical                     csz[0] csz[1] fg bg
                 'rounded.horizontal'    ➜ @horizontal                   csz[0] csz[1] fg bg
                 'rounded.border.br_ns'  ➜ @borderBottomRightNoShadow    csz[0] csz[1] fg bg
-                'rounded.cursor'        ➜ @cursor                   int(csz[0]/5 )*2+1 csz[1] fg 
-                'rounded.multi'         ➜ @multi                    int(csz[0]/10)*2+1 csz[1] fg 
+                'rounded.cursor'        ➜ @cursor                   int(csz[0]/5 )*2+1 csz[1]*scale fg
+                'rounded.multi'         ➜ @multi                    int(csz[0]/10)*2+1 csz[1]*scale fg
             # img.name = name 
             @cache[key] = img
 
         switch name 
-            'rounded.cursor' ➜ ked_ttio.placeImg img x-1 y int(9*csz[0]/10)+1 null null null 666
+            'rounded.cursor' ➜ ked_ttio.placeImg img x-1 y int(9*csz[0]/10)+1 null null csz[1]*scale 666
                              ➜ ked_ttio.placeImg img x   y               null null null null z
         
         if xe and xe > x

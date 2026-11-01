@@ -257,7 +257,7 @@ function cells
     # ███       ███   ███  ███   ███       ███  ███   ███  ███   ███
     #  ███████   ███████   ███   ███  ███████    ███████   ███   ███
 
-    draw_rounded_cursor: x y fg =>
+    draw_rounded_cursor: x y fg scale=1 =>
         
         #  there are no kitty graphics in a headless screen, so the cursor
         #  is the character in the colors of the other way round
@@ -267,16 +267,16 @@ function cells
             @swap_fg_bg x y
             ⮐
             
-        @img x y "rounded.cursor" fg
+        rounded.place @wx(x) @wy(y) "rounded.cursor" fg null null 1000 null scale
         
-    draw_rounded_multi_cursor: x y fg =>
+    draw_rounded_multi_cursor: x y fg scale=1 =>
         
         if @screen.t.headless
             @set_mark x y 'multi'
             @swap_fg_bg x y
             ⮐
             
-        @img x y "rounded.multi" fg
+        rounded.place @wx(x) @wy(y) "rounded.multi" fg null null 1000 null scale
         
     #  a cell that carries a cursor
     

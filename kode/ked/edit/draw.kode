@@ -378,7 +378,7 @@ function draw extends view
              
                 scale = @state.scaleOfLine cursor[1]
                 cx = (cursor[0]-s.view[0])*scale
-                @cells.draw_rounded_multi_cursor cx @state.rowOfLine(cursor[1]) bg
+                @cells.draw_rounded_multi_cursor cx @state.rowOfLine(cursor[1]) bg scale
                         
         if @isCursorVisible mainCursor
              
@@ -399,7 +399,7 @@ function draw extends view
                      
             bg = color.darken bg if not @cells.screen.t.hasFocus
                  
-            @cells.draw_rounded_cursor x y bg
+            @cells.draw_rounded_cursor x y bg scale
 
     #  ███████   ███████   ███       ███████   ████████   ████████   ███  ███      ███       ███████  
     # ███       ███   ███  ███      ███   ███  ███   ███  ███   ███  ███  ███      ███      ███       
