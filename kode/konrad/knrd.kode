@@ -7,7 +7,7 @@
 
     transpiles kode and noon files
     
-    assumes to be run from a cwd() that has a js|kode structure (see bundleDir)
+    assumes to be run from a cwd() that has a js|kode structure
 ###
 
 use ../kode ◆ kode
@@ -62,10 +62,7 @@ tgtForSrc = srcFile rule ->
     
 bundlePath = p='' -> slash.path bundleDir() p
     
-bundleDir = -> 
-    # this is used by side-projects already.
-    # make sure we execute relative to those.
-    process.cwd()
+bundleDir = -> process.cwd()
   
 #  ███████    ███████   █████████  ███   ███  ████████  ████████   
 # ███        ███   ███     ███     ███   ███  ███       ███   ███  
@@ -89,20 +86,6 @@ gatherFiles = ○->
 # ███████      ███     █████████  █████████  ████████ 
 #      ███     ███     ███   ███  ███ █ ███  ███      
 # ███████      ███     ███   ███  ███   ███  ███      
-###
-    
-    the absolute path of the source a generated file was made from, or '' if
-    kode did not make it. it is the only thing telling a generated file from
-    a hand written one.
-    
-    there are two ways a compiled file says where it came from, and both are
-    resolved here rather than at the call site:
-    
-      //# sourceURL=file://<path>   the path of the file itself. written
-                                    whether or not there is a sourcemap
-      the map's sources[0]          from the file carrying it, the way a
-                                    stack frame is
-###
 
 stampSource = (text, file) =>
 
@@ -186,12 +169,6 @@ hash = text -> crypto.createHash('sha1').update(text).digest('hex')
 
 fpDirs = ['kode' 'kxk' 'kolor'] # the modules whose source can reach the compiler.
 
-# the compiler is the one next to this file. it is not the one in the tree
-# being built: a side project has its own js directory and no compiler in
-# it, and a fingerprint taken from there would be the hash of nothing -
-# the same for every version of the compiler, which is the one thing a
-# fingerprint must not be.
-
 compilerDir = -> slash.path(◆dir, '..')
 
 fingerprint = ○-> # generates the fingerprint for the kode compiler
@@ -245,10 +222,6 @@ usable = (kache, fp, srcmap) ->
 
     shaped(kache) and (kache.kode == fp) and (kache.srcmap == srcmap)
 
-# the cache says which compiler built the tree. if that is not the one
-# that would build it now, the tree is older than the compiler, and a
-# test run against it is a test run against something else
-
 stale = ○->
 
     path = cachePath()
@@ -277,23 +250,6 @@ isCurrent = (kache, srcFile, tgtFile, srcText) ○->
 saveCache = (path, kache, fp, srcmap, srcs, tgts, whole=no) ○->
 
     ⮐ false if empty srcs
-
-    # a partial build may not write over a cache belonging to another
-    # compiler: it cannot vouch for the files it never looked at, and it
-    # would leave them marked current under a fingerprint they were never
-    # compiled with. since it is also the one that declines to write, the
-    # cache would stay wrong until somebody deleted it by hand.
-    #
-    # a whole build is the one that can - it went over every file, and a
-    # cache it finds void makes every one of them a miss, so it arrives here
-    # having rewritten the lot anyway.
-    #
-    # what it may not do is replace. a build records only what it compiled,
-    # and what it did not compile was not stale - it was already right, which
-    # is what the cache it read said. replacing drops those entries, and the
-    # next build finds every one of them a miss and rebuilds the tree to put
-    # them back. so both kinds of build merge, and 'whole' waives nothing but
-    # the guard above
 
     ⮐ false if not whole and shaped(kache) and not (usable(kache, fp, srcmap))
 
@@ -387,9 +343,6 @@ knrd = files=[] opt={} ○->
             dirs.push dir if dir not in dirs
             
             srcText  =○ nfs.read srcFile
-            
-            # nothing to do is the common case, so it is worth not doing it
-            # twice over: ask the cache first, and only compile on a miss
             
             if ○ isCurrent cache, srcFile, tgtFile, srcText
                 log g2('▸') m3(slash.tilde(tgtFile)) w4('cached') if opt.verbose
