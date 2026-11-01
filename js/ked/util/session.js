@@ -43,7 +43,7 @@ session = (function ()
         this.timeout = ((_33_31_=opt.timeout) != null ? _33_31_ : 1000)
         this.sep = ((_35_30_=opt.separator) != null ? _35_30_ : '▸')
         this.headless = false
-        if (opt.headless || opt.colors)
+        if (opt.headless || opt.headless_colors)
         {
             this.headless = true
         }

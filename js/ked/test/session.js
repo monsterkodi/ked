@@ -23,7 +23,7 @@ toExport["session"] = async function ()
     })
     await section("a colored headless session uses the headless directory", async function ()
     {
-        s = new session({fresh:true,colors:true})
+        s = new session({fresh:true,headless_colors:true})
         compare(s.headless,true)
         compare(s.dir,slash.absolute("~/.config/ked/headless-sessions/"))
     })
@@ -33,5 +33,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2Vzc2lvbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC9zZXNzaW9uLmtvZGUiXSwibWFwcGluZ3MiOiI7OztPQUNnQixZQUFOOztPQUNNLGNBQVQ7Ozs7OztRQU1DLFFBQVEsU0FBUSxNQUFNO2dCQUV0QixFQUFFLFNBQVc7Z0JBQ2IsRUFBRSxJQUFNLE1BQU0sU0FBUztnQkFDdkIsRUFBRSxLQUFPLE1BQU0sS0FBSyxFQUFFLE9BQU8sRUFBRTs7OztRQUkvQixRQUFRLFNBQVEsTUFBTSxLQUFLLFNBQVM7Z0JBRXBDLEVBQUUsU0FBVztnQkFDYixFQUFFLElBQU0sTUFBTSxTQUFTO2dCQUN2QixFQUFFLEtBQU8sTUFBTSxLQUFLLEVBQUUsT0FBTyxFQUFFOzs7O1FBSS9CLFFBQVEsU0FBUSxNQUFNLEtBQUssT0FBTztnQkFFbEMsRUFBRSxTQUFXO2dCQUNiLEVBQUUsSUFBTSxNQUFNLFNBQVMifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2Vzc2lvbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC9zZXNzaW9uLmtvZGUiXSwibWFwcGluZ3MiOiI7OztPQUNnQixZQUFOOztPQUNNLGNBQVQ7Ozs7OztRQU1DLFFBQVEsU0FBUSxNQUFNO2dCQUV0QixFQUFFLFNBQVc7Z0JBQ2IsRUFBRSxJQUFNLE1BQU0sU0FBUztnQkFDdkIsRUFBRSxLQUFPLE1BQU0sS0FBSyxFQUFFLE9BQU8sRUFBRTs7OztRQUkvQixRQUFRLFNBQVEsTUFBTSxLQUFLLFNBQVM7Z0JBRXBDLEVBQUUsU0FBVztnQkFDYixFQUFFLElBQU0sTUFBTSxTQUFTO2dCQUN2QixFQUFFLEtBQU8sTUFBTSxLQUFLLEVBQUUsT0FBTyxFQUFFOzs7O1FBSS9CLFFBQVEsU0FBUSxNQUFNLEtBQUssZ0JBQWdCO2dCQUUzQyxFQUFFLFNBQVc7Z0JBQ2IsRUFBRSxJQUFNLE1BQU0sU0FBUyJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/test/session.kode

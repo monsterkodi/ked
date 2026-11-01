@@ -17,7 +17,7 @@ function leak
 
     @start: (opt) ->
 
-        ⮐ if opt?.headless
+        ⮐ if opt?.headless or opt?.headless_colors
 
         head  = "leak ▸ sampling every #{leak.interval}ms"
         head += " ▸ heap limit #{leak.size(leak.memory().limit)}"

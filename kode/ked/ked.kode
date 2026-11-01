@@ -35,13 +35,13 @@ function KED
                 timeout    session save timeout in ms       = 1000
                 version    log version                      = false
                 headless   run without a terminal           = false -H
-                colors     headless with terminal colors    = false -C
+                headless_colors    headless with terminal colors    = false -C --headless-colors
                 
             """ preHelp:help.header() version:@version
         
         process.on 'uncaughtException' @quit
         @session = new session @args
-        @logfile = new logfile @session.name (@args.headless or @args.colors)
+        @logfile = new logfile @session.name (@args.headless or @args.headless_colors)
         
         log w2("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #{b8 @session.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
         
@@ -51,7 +51,7 @@ function KED
 
         global.ked_session = @session
         
-        @t = new ttio headless:(@args.headless or @args.colors)
+        @t = new ttio headless:(@args.headless or @args.headless_colors)
         
         @screen   = new screen @t
         
@@ -147,7 +147,7 @@ function KED
         
         ked = new KED
         
-        ○ ked.runHeadless() if ked.args.headless or ked.args.colors
+        ○ ked.runHeadless() if ked.args.headless or ked.args.headless_colors
         
         ked
 
@@ -205,7 +205,7 @@ function KED
         
         process.stdout.write "\n=== #{line}\n"
         
-        if @args.colors
+        if @args.headless_colors
             process.stdout.write @screen.textColored().join('\n') + '\n'
         else
             process.stdout.write @screen.textMarked().join('\n') + '\n'
@@ -337,7 +337,7 @@ function KED
                 'rename' ➜ @reloadFile()
                 
         ⮐ if KED.building
-        ⮐ if @args.headless
+        ⮐ if @args.headless or @args.headless_colors
         ⮐ if true
         if event.change == 'rename' and slash.ext(event.path) == 'kode'        
             # log "src change?" event

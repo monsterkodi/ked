@@ -35,7 +35,7 @@ function session extends events
         @sep  = opt.separator ? '▸'
 
         @headless = false
-        @headless = true if opt.headless or opt.colors
+        @headless = true if opt.headless or opt.headless_colors
         
         @dir  = slash.absolute "~/.config/ked/sessions/"
         @dir  = slash.absolute "~/.config/ked/headless-sessions/" if @headless

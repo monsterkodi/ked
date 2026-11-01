@@ -22,7 +22,7 @@ use ../util   ◆ session
 
     ▸ a colored headless session uses the headless directory
 
-        s = new session fresh:true colors:true
+        s = new session fresh:true headless_colors:true
 
         s.headless ▸ true
         s.dir ▸ slash.absolute("~/.config/ked/headless-sessions/")
