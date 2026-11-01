@@ -105,6 +105,7 @@ function complete
         head = @words[0]
         
         [cx cy] = @posForCursor mc
+        scale   = @editor.state.scaleOfLine mc[1]
         
         if @words.length <= 1
             @choices.clear()                    
@@ -113,7 +114,7 @@ function complete
             
             h = min 8 @words.length
             x  = @editor.cells.x+cx-@turd.length
-            y  = @editor.cells.y+cy+1
+            y  = @editor.cells.y+cy+scale+1
             
             @choices.layout x y mlw+3 h
             @choices.set @words.map((w) -> ' '+w)
@@ -281,6 +282,7 @@ function complete
         mc = @editor.state.mainCursor()  
          
         [cx cy] = @posForCursor mc
+        scale   = @editor.state.scaleOfLine mc[1]
         
         w  = @choices.cells.cols+1
         h  = @choices.cells.rows
@@ -293,9 +295,9 @@ function complete
         fx = min fx maxx if maxx > 0
 
         x  = fx+1+@editor.cells.x
-        y  = cy+@editor.cells.y+2
+        y  = cy+@editor.cells.y+scale+1
         
-        fy = cy+1
+        fy = cy+scale
 
         @editor.cells.draw_rounded_border fx fy fx+w+1 fy+h+1 fg:@color.bg
         

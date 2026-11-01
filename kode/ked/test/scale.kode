@@ -243,6 +243,28 @@ cells = cols:40 rows:20
         h.row(3).endsWith('╮') ▸ true
         h.row(3).length ▸ 20
 
+    ▸ the completion frame moves below a scaled line
+
+        h = new harness cols:40 rows:14
+        e = new editor h.screen 'test_complete_scale' ['complete']
+
+        e.layout 0 0 40 14
+        e.state.syntax.setExt 'md'
+        e.state.loadLines ['# fu' '' 'funky1 = 1' 'funky2 = 2']
+
+        e.state.setMainCursor 4 0
+        e.complete.complete()
+
+        h.screen.init()
+        e.draw()
+
+        e.state.scaleOfLine(0) ▸ 3
+
+        h.row(1) ▸ ''
+        h.row(2) ▸ ''
+        h.row(3).startsWith('        ╭') ▸ true
+        h.row(6).startsWith('        ╰') ▸ true
+
     #  ███████   ███████   ████████   ███████   ███
     #  ███      ███   ███  ███   ███  ███   ███  ███
     #  ███████  █████████  ███████    ███████    ███
