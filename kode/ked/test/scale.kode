@@ -721,6 +721,44 @@ cells = cols:40 rows:20
         h.screen.get_char(0 3) ▸ ' '
         h.screen.get_char(0 4) ▸ 't'
 
+    ▸ the map cuts a line at its top edge
+
+        h = new harness cols:40 rows:10
+        e = new editor h.screen 'test_scale_map_split_top' []
+
+        e.layout 0 0 40 10
+        e.state.syntax.setExt 'md'
+
+        lines = []
+        for i in 0...20
+            lines.push '# h1'
+        e.state.loadLines lines
+        e.state.applyScales {enabled:true md:{h1:7}}
+
+        m = new mapscr e
+        m.cells.layout 30 0 12 10
+        m.csz = [10 20]
+        m.images = []
+        for i in 0...20
+            m.images.push 100+i
+
+        e.state.setView [0 10]
+        m.calcView()
+
+        m.topRow ▸ 48
+        m.topLine ▸ 6
+        m.lineOffset(6) ▸ -24
+
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+        h.screen.t.out = []
+
+        m.drawImages()
+
+        out = h.screen.t.written()
+
+        (out.split('i=106,').length - 1) ▸ 4
+
     ▸ the map follows the display rows near the end of a long file
 
         h = new harness cols:40 rows:10
