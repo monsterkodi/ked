@@ -247,7 +247,12 @@ function gutter extends view
                     
                     @cells.set col row (y<@state.s.lines.length) ? c : ' ' fg bg
 
-            row += scale
+            for s in 1...scale
+                row += 1
+                for c,i in lineno
+                    @cells.set i row ' ' fg bg
+
+            row += 1
             li  += 1
                     
         @drawPreviews()

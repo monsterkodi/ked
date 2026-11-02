@@ -138,6 +138,8 @@ function view extends events
     
     layout: x y w h -> @cells.layout x y w h 
     
+    erase: => @cells.erase_scaled 0 0 -1 -1
+    
     draw: => 
         
 export view

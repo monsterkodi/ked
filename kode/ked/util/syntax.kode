@@ -48,7 +48,7 @@ function syntax
                         ds.clss = trim ds.clss.map(kstr.trim).join(' ') 
                 @diss.push dss
         else
-            ⮐  if @partialUpdate segls
+            ⮐ if @partialUpdate segls
         
             @clear()
             
@@ -66,8 +66,8 @@ function syntax
 
     partialUpdate: segls =>
         
-        ⮐  if @diss.length != segls.length
-        ⮐  if empty @hash
+        ⮐ if @diss.length != segls.length
+        ⮐ if empty @hash
         
         newHash = {}
         
@@ -104,7 +104,7 @@ function syntax
         
         for dss in @diss[y]
             if dss.start <= x < dss.start+dss.length
-                ⮐  dss.clss
+                ⮐ dss.clss
         'text'
         
     getClasses: y =>
@@ -114,6 +114,12 @@ function syntax
             for x in dss.start...dss.start+dss.length
                 classes[x] = dss.clss
         classes
+        
+    hasPureClass: y clss =>
+        pclss = [clss "text "+clss "punct "+clss]
+        for dss in @diss[y] ? []
+            ⮐ true if dss.clss in pclss
+        false
 
     hasClass: y clss =>
         
@@ -129,7 +135,7 @@ function syntax
 
     getColor: x y clss =>
         
-        if @ansi ➜ ⮐  @getAnsiColor x y
+        if @ansi ➜ ⮐ @getAnsiColor x y
         
         if not clss?
             if x is num
@@ -151,9 +157,9 @@ function syntax
             if clr.x <= x
                 if clr.w? 
                     if x < clr.x + clr.w
-                        ⮐  clr.fg
+                        ⮐ clr.fg
                 else
-                    ⮐  clr.fg
+                    ⮐ clr.fg
                 
         [256 0 256]
         

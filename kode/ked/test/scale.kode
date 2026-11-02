@@ -173,7 +173,7 @@ hed = cols rows ext='md' feats=[]->
         e.state.loadLines ['# abc']
 
         e.draw()
-
+        
         h.screen.get_char(12 0) ▸ 'c'
 
         [h e] = hed 14 6
