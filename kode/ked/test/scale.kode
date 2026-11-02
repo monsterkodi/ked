@@ -607,6 +607,39 @@ cells = cols:40 rows:20
         (out.split('i=100,').length - 1) ▸ 4
         (out.split('i=102,').length - 1) ▸ 12
 
+    ▸ a scaled line is also wider in the map
+
+        h = new harness cols:40 rows:10
+        e = new editor h.screen 'test_scale_map_wide' []
+
+        e.layout 0 0 40 10
+        e.state.syntax.setExt 'md'
+        e.state.loadLines ['#']
+        e.state.applyScales {enabled:true md:{h1:7}}
+
+        m = new mapscr e
+        m.cells.layout 30 0 12 10
+        m.csz = [10 20]
+
+        bg = m.color.bg
+        data = Buffer.alloc (m.cells.cols*m.csz[0]*3)
+
+        m.imageForLine data e.state.s.lines[0] 0
+
+        not (data[18] == bg[0] and data[19] == bg[1] and data[20] == bg[2]) ▸ true
+
+        m.calcView()
+        (m.pixelPos([1 0])[0] - m.mapX) ▸ 14
+        m.pixelPos([1 0])[1] ▸ m.mapY
+
+        e.state.syntax.setExt 'txt'
+        data.fill 0
+        m.imageForLine data e.state.s.lines[0] 0
+
+        data[18] ▸ bg[0]
+        data[19] ▸ bg[1]
+        data[20] ▸ bg[2]
+
     ▸ the map follows the display rows near the end of a long file
 
         h = new harness cols:40 rows:10

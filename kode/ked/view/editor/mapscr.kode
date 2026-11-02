@@ -221,7 +221,7 @@ function mapscr extends mapview
         
     pixelPos: pos -> 
        [
-           @mapX + pos[0]*@pixelsPerCol
+           @mapX + pos[0]*@pixelsPerCol*@lineRows(pos[1])
            @mapY + @lineOffset(pos[1])
        ]
     

@@ -194,15 +194,20 @@ function mapview extends view
             
     imageForLine: data line y syntax =>
     
+        scale  = @lineRows y
+        stride = @pixelsPerCol * scale
+
         charPixels = x rgb =>
         
-            for xr in 0..@pixelsPerCol
-                data[(x*@pixelsPerCol+xr)*3+0] = rgb[0]
-                data[(x*@pixelsPerCol+xr)*3+1] = rgb[1]
-                data[(x*@pixelsPerCol+xr)*3+2] = rgb[2]
+            for xr in 0..stride
+                i = (x*stride+xr)*3
+                if i+2 < data.length
+                    data[i+0] = rgb[0]
+                    data[i+1] = rgb[1]
+                    data[i+2] = rgb[2]
                 
         w      = data.length / 3
-        maxX   = w/@pixelsPerCol
+        maxX   = w/stride
         syntax = @getSyntax()
         classes = syntax.getClasses y
 
@@ -243,9 +248,10 @@ function mapview extends view
                 bg = customColor bgSpans x @color.bg
                 charPixels x bg
                     
-        for x in line.length...maxX
-            bg = customColor bgSpans x @color.bg
-            charPixels x bg
+        if line.length < maxX
+            for x in line.length...maxX
+                bg = customColor bgSpans x @color.bg
+                charPixels x bg
             
     # ███████    ████████    ███████   ███   ███  
     # ███   ███  ███   ███  ███   ███  ███ █ ███  
