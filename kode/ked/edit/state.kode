@@ -278,6 +278,7 @@ function state extends events
             cursors:     [[0 0]]
             main:        0
             view:        [0 0]
+            scrollOffset: 0
             colors:      {fg: [], bg: []}
             
         @syntax.clear()
@@ -336,7 +337,7 @@ function state extends events
             diff = belt.diffLines oldLines @s.lines            
             @emit 'lines.changed' diff
 
-    linesInView: => @s.lines[@s.view[1]...@lineAtRow(@cells.rows-1)+1]
+    linesInView: => @s.lines[@lineAtRow(0)...@lineAtRow(@cells.rows-1)+1]
 
     #  ████████    ███████   ███   ███        ██     ██   ███████   ████████ 
     #  ███   ███  ███   ███  ███ █ ███        ███   ███  ███   ███  ███   ███
@@ -429,7 +430,7 @@ function state extends events
 
     #  the display row of the first line in the view, relative to the buffer top
 
-    viewTopRow: => @rowsBeforeLine @s.view[1]
+    viewTopRow: => @rowsBeforeLine(@s.view[1]) + @s.scrollOffset
 
     #  the display row of a line, relative to the top of the view
 
@@ -439,13 +440,7 @@ function state extends events
 
     lineAtRow: row =>
 
-        r = 0
-        for li in @s.view[1]...@s.lines.length
-            h = @lineHeight li
-            ⮐ li if row < r+h
-            r += h
-
-        max 0 @s.lines.length-1
+        @lineAtAbsoluteRow (@viewTopRow() + row)
 
     #  the line to show at the top so that line li starts at row target
 
@@ -474,6 +469,10 @@ function state extends events
             li -= 1
 
         li+1
+
+    #  the largest display row that can sit at the top of the view
+
+    maxTopRow: => @rowsBeforeLine @maxViewLine()
 
     #  the logical position of a cell in the editor
 
@@ -592,9 +591,10 @@ function state extends events
         view = @s.view.asMutable()
 
         view[0] += sx
-        view[1] += sy
 
-        view[1] = clamp 0 @maxViewLine() view[1]
+        topRow     = clamp 0 @maxTopRow() (@viewTopRow() + sy)
+        view[1]    = @lineAtAbsoluteRow topRow
+        scrollOffset = topRow - @rowsBeforeLine(view[1])
 
         @rowPrefix()
 
@@ -606,9 +606,9 @@ function state extends events
         maxOffsetX = max maxOffsetX cursorRight-@cells.cols+2
         view[0] = clamp 0 maxOffsetX view[0]
         
-        ⮐  if view eql @s.view
+        ⮐  if view eql @s.view and scrollOffset == @s.scrollOffset
 
-        @setView view
+        @setView view scrollOffset
 
     #  ███████   ███████          ███  ███   ███   ███████  █████████       ███   ███  ███  ████████  ███   ███  
     # ███   ███  ███   ███        ███  ███   ███  ███          ███          ███   ███  ███  ███       ███ █ ███  
@@ -634,23 +634,29 @@ function state extends events
 
         row    = @rowOfLine y
         height = @lineHeight y
+        scrollOffset = @s.scrollOffset
         
         if opt.adjust == 'topDelta'
 
             view[1] = @startForRow y topDelta
+            scrollOffset = 0
             
         else if opt.adjust == 'topBotDeltaGrow' and opt.mc
         
             if row < 0
                 view[1] = @startForRow y topDelta
+                scrollOffset = 0
             else if row + height > @cells.rows
                 view[1] = @startForRow y (@cells.rows - botDelta - height)
+                scrollOffset = 0
             else
                 dir = y - opt.mc[1]
                 if row < topDelta and dir < 0
                     view[1] = @startForRow y topDelta
+                    scrollOffset = 0
                 else if row + height > @cells.rows - botDelta and dir > 0
                     view[1] = @startForRow y (@cells.rows - botDelta - height)
+                    scrollOffset = 0
         else        
         
             if opt.adjust != 'topBotDelta'
@@ -658,17 +664,19 @@ function state extends events
     
             if row + height > @cells.rows - topBotDelta
                 view[1] = @startForRow y (@cells.rows - topBotDelta - height)
+                scrollOffset = 0
             else if row < topBotDelta
                 view[1] = @startForRow y topBotDelta
+                scrollOffset = 0
 
         view[1] = min view[1] @maxViewLine()
 
         if not @skipAdjustViewForMainCursor
             view[0] = max 0 x*height + height + 1 - @cells.cols
         
-        ⮐  if view eql @s.view
+        ⮐  if view eql @s.view and scrollOffset == @s.scrollOffset
         
-        @setView view
+        @setView view scrollOffset
 
     initView: =>
 
@@ -679,15 +687,31 @@ function state extends events
 
         @setView view
 
-    setView: view =>
-        
-        ⮐  if @s.view eql view
-        @set 'view' view
+    setView: view scrollOffset=0 =>
+
+        scrollOffset ?= 0
+
+        ⮐  if @s.view eql view and @s.scrollOffset == scrollOffset
+
+        @s = @s.set 'view' view
+        @s = @s.set 'scrollOffset' scrollOffset
+        @swapState()
         @emit 'view.changed' @s.view
         @
 
+    #  put an absolute display row at the top of the view
+
+    setScrollTop: row =>
+
+        row = clamp 0 @maxTopRow() row
+        li  = @lineAtAbsoluteRow row
+        view = @s.view.asMutable()
+        view[1] = li
+
+        @setView view (row - @rowsBeforeLine(li))
+
     rangeForVisibleLines: =>
 
-        [@s.view[0] @s.view[1] @s.view[0]+@cells.cols-1 @s.view[1]+@cells.rows-1]
+        [@s.view[0] @lineAtRow(0) @s.view[0]+@cells.cols-1 @lineAtRow(@cells.rows-1)]
 
 export state

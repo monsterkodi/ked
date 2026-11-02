@@ -291,7 +291,7 @@ function mapscr extends mapview
         ⮐  if @hidden() or @collapsed()
         
         maxKy = max 0 @mapHeight-@knobHeight
-        offsetRow = @lineOffset @state.s.view[1]
+        offsetRow = (@state.viewTopRow() - @rowAtTopLine) * @pixelsPerRow
         ky    = clamp 0 maxKy offsetRow
         
         @cells.screen.t.placeImageOverlay @knobId @cells.x @cells.y ky @mapWidth @knobHeight

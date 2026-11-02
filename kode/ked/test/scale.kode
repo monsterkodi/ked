@@ -524,7 +524,7 @@ cells = cols:40 rows:20
 
         e.state.maxViewLine() ▸ 1
 
-        e.state.scrollView 'down'
+        e.state.scrollView 'down' 3
 
         e.state.s.view[1] ▸ 1
 
@@ -773,3 +773,102 @@ cells = cols:40 rows:20
 
         e.state.s.view[1] ▸ e.state.maxViewLine()
         e.state.s.view[1] ▸ 13
+
+    #  ███████   ███████   ███████   ███████       ███████   ████████  ████████  ██████   ███████
+    # ███       ███   ███  ███   ███  ███   ███    ███   ███  ███       ███        ███    ███
+    # ███████   ███   ███  █████████  ███████      ███   ███  ███████   ███████    ███    ███████
+    #      ███  ███   ███  ███   ███  ███   ███    ███   ███  ███       ███        ███         ███
+    # ███████    ███████   ███   ███  ███   ███     ███████   ███       ███      ██████   ███████
+
+    ▸ the scroll offset moves the top of the view inside a line
+
+        small = cols:20 rows:3
+        s = new state small 'test_scale_scroll_offset'
+        s.syntax.setExt 'md'
+        s.loadLines ['# a' 'b' '## c' 'd']
+
+        s.setScrollTop 2
+
+        s.viewTopRow() ▸ 2
+        s.rowOfLine 0 ▸ -2
+        s.rowOfLine 1 ▸ 1
+        s.rowOfLine 2 ▸ 2
+
+        s.setScrollTop 4
+
+        s.s.view[1] ▸ 2
+        s.s.scrollOffset ▸ 0
+
+    ▸ the wheel scrolls a scaled line one row at a time
+
+        small = cols:20 rows:3
+        s = new state small 'test_scale_wheel_rows'
+        s.syntax.setExt 'md'
+        s.loadLines ['# abc' 'a' 'b' 'c']
+
+        s.scrollView 'down'
+        s.viewTopRow() ▸ 1
+        s.s.view[1] ▸ 0
+        s.rowOfLine 1 ▸ 2
+
+        s.scrollView 'down'
+        s.viewTopRow() ▸ 2
+        s.rowOfLine 1 ▸ 1
+
+        s.scrollView 'down'
+        s.viewTopRow() ▸ 3
+        s.s.view[1] ▸ 1
+        s.rowOfLine 1 ▸ 0
+
+    ▸ a cut top line is blanked while the rest moves row by row
+
+        h = new harness cols:20 rows:8
+        e = new editor h.screen 'test_scale_top_clip' []
+
+        e.layout 0 0 20 8
+        e.state.syntax.setExt 'md'
+        e.state.loadLines ['# abc' 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j']
+
+        e.draw()
+
+        h.screen.get_char(0 0) ▸ '#'
+        h.screen.get_char(0 3) ▸ 'a'
+
+        h.screen.init()
+        e.state.setScrollTop 1
+        e.draw()
+
+        h.screen.get_char(0 0) ▸ ' '
+        h.screen.get_char(0 1) ▸ ' '
+        h.screen.get_char(0 2) ▸ 'a'
+        h.screen.get_char(0 3) ▸ 'b'
+
+        h.screen.init()
+        e.state.setScrollTop 2
+        e.draw()
+
+        h.screen.get_char(0 0) ▸ ' '
+        h.screen.get_char(0 1) ▸ 'a'
+        h.screen.get_char(0 2) ▸ 'b'
+
+        h.screen.init()
+        e.state.setScrollTop 3
+        e.draw()
+
+        h.screen.get_char(0 0) ▸ 'a'
+        h.screen.get_char(0 1) ▸ 'b'
+
+    ▸ moving the cursor into view clears the scroll offset
+
+        h = new harness cols:20 rows:8
+        e = new editor h.screen 'test_scale_offset_reset' []
+
+        e.layout 0 0 20 8
+        e.state.syntax.setExt 'md'
+        e.state.loadLines ['# abc' 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j']
+
+        e.state.setScrollTop 1
+        e.state.setMainCursor 0 0
+
+        e.state.viewTopRow() ▸ 0
+        e.isCursorVisible [0 0] ▸ true

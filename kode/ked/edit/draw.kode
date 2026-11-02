@@ -47,15 +47,22 @@ function draw extends view
         # lines  = mode.preDrawLines @state @state.s.lines
         
         y   = view[1]
-        row = 0
-        
+        row = -@state.s.scrollOffset
+
         while y < lines.length and row < @cells.rows
             
             scale = @state.scaleOfLine y
-            
-            break if row + scale > @cells.rows # a tall line that does not fit is left out
-            
-            @drawLine lines[y] y row scale
+
+            if row < 0
+                # a line cut by the top edge is left out, but its rows stay
+                # reserved so the lines below keep moving one row at a time
+                blankRows = min @cells.rows (row+scale)
+                for r in 0...blankRows
+                    @cells.bg_fill 0 r -1 r @color.empty
+
+            if row >= 0
+                break if row + scale > @cells.rows # a tall line that does not fit is left out
+                @drawLine lines[y] y row scale
             
             row += scale
             y   += 1
@@ -274,7 +281,11 @@ function draw extends view
                 
                 scale = @state.scaleOfLine li
                 vx    = @state.s.view[0]
-                
+
+                if row < 0
+                    row += scale
+                    continue
+
                 break if row >= @cells.rows
                 break if row + scale > @cells.rows
                 
@@ -324,6 +335,10 @@ function draw extends view
             for li in start..rng[3]
 
                 scale = @state.scaleOfLine li
+
+                if row < 0
+                    row += scale
+                    continue
 
                 break if row >= @cells.rows
                 break if row + scale > @cells.rows

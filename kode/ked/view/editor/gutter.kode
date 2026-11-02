@@ -196,11 +196,16 @@ function gutter extends view
         mainCursor = @state.mainCursor()
         
         li  = @state.s.view[1]
-        row = 0
+        row = -@state.s.scrollOffset
 
         while row < @cells.rows and li < @state.s.lines.length
 
             scale = @state.scaleOfLine li
+
+            if row < 0
+                row += scale
+                li  += 1
+                continue
 
             break if row + scale > @cells.rows # a tall line that does not fit is left out
 
