@@ -145,27 +145,23 @@ function mapscr extends mapview
         
         clickOffset = config.data?.mapScroll?.clickOffset ? 0
         
-        row  = @topRow + int((pixel[1] - clickOffset - @mapY) / @pixelsPerRow)
+        row  = @topRow + int((pixel[1] - clickOffset                 - @mapY) / @pixelsPerRow)
         crow = @topRow + int((pixel[1] + clickOffset * @pixelsPerRow - @mapY) / @pixelsPerRow)
         li   = @state.lineAtAbsoluteRow row
         cli  = @state.lineAtAbsoluteRow crow
         scrollOffset = row - @state.rowsBeforeLine(li)
-        log "scrollToPixel #{li} #{cli} #{clickOffset}"
         view[1] = li
-        # view[1] -= clickOffset # offset so that clicking inside a header scrolls it into view
         view[1] = clamp 0 @state.maxViewLine() view[1]
         
         mc = @state.mainCursor()
         
         if view eql @state.s.view and scrollOffset == @state.s.scrollOffset
             if cli != mc[1]
-                # @state.setCursors [[mc[0] li+clickOffset]] main:0 adjust:false
                 @state.setCursors [[mc[0] cli]] main:0 adjust:false
                 ⮐  redraw:true
             ⮐  
         
         @state.setView view scrollOffset
-        # @state.setCursors [[mc[0] li+clickOffset]] main:0 adjust:false
         @state.setCursors [[mc[0] cli]] main:0 adjust:false
         
         @drawKnob()
