@@ -1,0 +1,54 @@
+
+use fs
+use ../../kxk ▪ slash
+use ../util ◆ walker
+
+▸ walker
+
+    ▸ maxDepth zero lists only the root
+
+        root = '/tmp/opencode/ked-walker-depth'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync slash.path(root 'one' 'two') recursive:true
+        fs.writeFileSync slash.path(root 'a.md') ''
+        fs.writeFileSync slash.path(root 'one' 'b.md') ''
+        fs.writeFileSync slash.path(root 'one' 'two' 'c.md') ''
+
+        walk = new walker
+            root:       root
+            maxDepth:   0
+            ignore:     []
+            includeExt: ['md']
+
+        result =○ walk.start()
+
+        fs.rmSync root recursive:true force:true
+
+        result.files.includes(slash.path(root 'a.md')) ▸ true
+        result.files.includes(slash.path(root 'one' 'b.md')) ▸ false
+        result.files.includes(slash.path(root 'one' 'two' 'c.md')) ▸ false
+
+    ▸ maxDepth one descends one level
+
+        root = '/tmp/opencode/ked-walker-depth'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync slash.path(root 'one' 'two') recursive:true
+        fs.writeFileSync slash.path(root 'a.md') ''
+        fs.writeFileSync slash.path(root 'one' 'b.md') ''
+        fs.writeFileSync slash.path(root 'one' 'two' 'c.md') ''
+
+        walk = new walker
+            root:       root
+            maxDepth:   1
+            ignore:     []
+            includeExt: ['md']
+
+        result =○ walk.start()
+
+        fs.rmSync root recursive:true force:true
+
+        result.files.includes(slash.path(root 'a.md')) ▸ true
+        result.files.includes(slash.path(root 'one' 'b.md')) ▸ true
+        result.files.includes(slash.path(root 'one' 'two' 'c.md')) ▸ false

@@ -36,11 +36,11 @@ class walker
         
         @running = true
         
-        toWalk = [dir]
+        toWalk = [[dir 0]]
         
         while valid toWalk
             
-            listDir = toWalk.shift()
+            [listDir depth] = toWalk.shift()
             
             # log 'walk dir' listDir
         
@@ -72,7 +72,7 @@ class walker
                 if item.type == 'dir'
                     if @cfg.dir is func
                         continue if not @cfg.dir item.path 
-                    toWalk.push item.path
+                    toWalk.push [item.path depth+1] if depth < @cfg.maxDepth
                 else
                     if ext in @cfg.includeExt or slash.file(item.path) in @cfg.include or @cfg.includeExt.indexOf('') >= 0
                         @cfg.file item.path if @cfg.file is func
