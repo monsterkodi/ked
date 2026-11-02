@@ -280,6 +280,7 @@ cells = cols:40 rows:20
     ▸ a popup over a scaled line erases the block under it
 
         h = new harness cols:40 rows:12
+        h.t.textSizing = true
         e = new editor h.screen 'test_erase_popup' ['complete']
 
         e.layout 0 0 40 12
@@ -293,6 +294,7 @@ cells = cols:40 rows:20
         e.draw()
 
         h.screen.renderString().startsWith("\x1b[2;1H\x1b[11X") ▸ true
+        h.screen.get_char(11 1) ▸ ' '
 
     ▸ a context menu erases the block under it
 
@@ -305,6 +307,36 @@ cells = cols:40 rows:20
         c.draw()
 
         h.screen.renderString().startsWith("\x1b[2;6H\x1b[7X") ▸ true
+
+    ▸ the cleared rectangle never leaves a block half drawn
+
+        h = new harness cols:40 rows:12
+        h.t.textSizing = true
+        e = new editor h.screen 'test_erase_loop' ['complete']
+
+        e.layout 0 0 40 12
+        e.state.syntax.setExt 'md'
+        e.state.loadLines ['fu  fu  fu  fu  fu' '# funky1' '# funky2']
+
+        for cx in [2 6 10 14 18]
+
+            e.state.setMainCursor cx 0
+            e.complete.complete()
+            h.screen.init()
+            e.draw()
+
+            rect = h.screen.eraseRects[0]
+
+            for [bx by scale w] in h.screen.frameBlocks
+
+                continue if bx > rect[2]
+                continue if bx + scale*w - 1 < rect[0]
+                continue if by > rect[3]
+                continue if by + scale   - 1 < rect[1]
+
+                for xx in bx..bx+scale*w-1
+                    for yy in by..by+scale-1
+                        (valid h.screen.get_char(xx yy)) ▸ true
 
     #  ███████   ███████   ████████   ███████   ███
     #  ███      ███   ███  ███   ███  ███   ███  ███

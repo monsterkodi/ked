@@ -26,8 +26,9 @@ function screen
         @c = belt.cells @cols @rows
         # @meta_clear()
 
-        @frameRuns  = []
-        @eraseRects = []
+        @frameRuns   = []
+        @frameBlocks = []
+        @eraseRects  = []
         
     #  ███████  ████████  █████████  
     # ███       ███          ███     
@@ -78,6 +79,8 @@ function screen
         if @t.textSizing
             char = @scaled_char char scale w
             @addRun x y scale w
+            @frameBlocks ?= []
+            @frameBlocks.push [x y scale w]
 
         @set x y char fg bg
 
@@ -319,6 +322,17 @@ function screen
                 @c[y][x].char = ' '
                 @c[y][x].bg   = bg if bg?
 
+        #  the terminal removes a whole block when any of its cells is
+        #  erased, so its other cells must be written too, or the null
+        #  placeholders would shift the glyphs after it to the left
+
+        for [bx by scale w] in @frameBlocks ? []
+            continue if bx > x2 or bx + scale*w - 1 < x1
+            continue if by > y2 or by + scale   - 1 < y1
+            for yy in by..min(@rows-1 by+scale-1)
+                for xx in bx..min(@cols-1 bx+scale*w-1)
+                    @c[yy][xx].char = ' '
+
     #  the frame as it is written to the terminal
     #
     #  the block runs of the previous frame are erased first. the erase must
@@ -340,8 +354,9 @@ function screen
                 s += "\x1b[#{r+1};#{x1+1}H\x1b[#{x2-x1+1}X"
 
         @lastRuns   = @frameRuns ? []
-        @frameRuns  = []
-        @eraseRects = []
+        @frameRuns   = []
+        @frameBlocks = []
+        @eraseRects  = []
 
         s += '\x1b[H'
         
