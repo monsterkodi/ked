@@ -65,31 +65,18 @@ function fileeditor extends editor
     
         @gutter.clearChanges()
         
-    #  ███████   ███  █████████     ███████    ███  ████████  ████████
-    # ███        ███     ███        ███   ███  ███  ███       ███     
-    # ███  ████  ███     ███        ███   ███  ███  ██████    ██████  
-    # ███   ███  ███     ███        ███   ███  ███  ███       ███     
-    #  ███████   ███     ███        ███████    ███  ███       ███     
-
     onGitDiff: diff =>
     
         currentFile = ked_session.get 'editor▸file'
         if diff.file == currentFile
             @gutter.onGitDiff diff
             
-    ###        
-     ███████    ███████   █████████   ███████         ███      ███  ███   ███  ████████  
-    ███        ███   ███     ███     ███   ███        ███      ███  ████  ███  ███       
-    ███  ████  ███   ███     ███     ███   ███        ███      ███  ███ █ ███  ███████   
-    ███   ███  ███   ███     ███     ███   ███        ███      ███  ███  ████  ███       
-     ███████    ███████      ███      ███████         ███████  ███  ███   ███  ████████  
-    
-    sets the main cursor:
-        ◆ row       zero based line index to move the main cursor to
-        ◆ col       optional column for the main cursor
-        ◆ view      optional view offset
-    ###
-        
+        ###        
+        sets the main cursor:
+            ◆ row       zero based line index to move the main cursor to
+            ◆ col       optional column for the main cursor
+            ◆ view      optional view offset
+        ###
     onGotoLine: row col view =>
         
         mc = @state.mainCursor()
@@ -114,12 +101,6 @@ function fileeditor extends editor
         if li = @funtree.lineIndexForFunc(func)
             @onGotoLine li 'ind' 'topDelta'
             
-    #  ███████   ███████   ███   ███  █████████  ████████  ███   ███  █████████
-    # ███       ███   ███  ████  ███     ███     ███        ███ ███      ███   
-    # ███       ███   ███  ███ █ ███     ███     ███████     █████       ███   
-    # ███       ███   ███  ███  ████     ███     ███        ███ ███      ███   
-    #  ███████   ███████   ███   ███     ███     ████████  ███   ███     ███   
-
     onContext: event =>
     
         word = @state.textOfSelectionOrWordAtCursor()
@@ -140,12 +121,6 @@ function fileeditor extends editor
             switch choice
                 'status' ➜ post.emit 'differ.status'
                 
-    #       ███  ███   ███  ██     ██  ████████         █████████   ███████         ███   ███   ███████   ████████   ███████  
-    #       ███  ███   ███  ███   ███  ███   ███           ███     ███   ███        ███ █ ███  ███   ███  ███   ███  ███   ███
-    #       ███  ███   ███  █████████  ████████            ███     ███   ███        █████████  ███   ███  ███████    ███   ███
-    # ███   ███  ███   ███  ███ █ ███  ███                 ███     ███   ███        ███   ███  ███   ███  ███   ███  ███   ███
-    #  ███████    ███████   ███   ███  ███                 ███      ███████         ██     ██   ███████   ███   ███  ███████  
-
     jumpToWord: word ○=>
     
         # log "fileeditor.jumpToWord '#{word}'"
@@ -200,12 +175,6 @@ function fileeditor extends editor
         
         post.emit 'redraw'
             
-    #  ███████   ███████   ███   ███  ███   ███  █████████  ████████  ████████   ████████    ███████   ████████   █████████
-    # ███       ███   ███  ███   ███  ████  ███     ███     ███       ███   ███  ███   ███  ███   ███  ███   ███     ███   
-    # ███       ███   ███  ███   ███  ███ █ ███     ███     ███████   ███████    ████████   █████████  ███████       ███   
-    # ███       ███   ███  ███   ███  ███  ████     ███     ███       ███   ███  ███        ███   ███  ███   ███     ███   
-    #  ███████   ███████    ███████   ███   ███     ███     ████████  ███   ███  ███        ███   ███  ███   ███     ███   
-
     jumpToCounterpart: ○=>
             
         currentFile = ked_session.get 'editor▸file'
@@ -248,12 +217,6 @@ function fileeditor extends editor
 
         log 'cant find counterpart' currentFile
         
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
-    
     onMouse: event =>
     
         ret = super event ; ⮐  ret if ret?.redraw
@@ -348,12 +311,6 @@ function fileeditor extends editor
                     post.emit 'pointer' 'vertical-text'
         @hover
         
-    # ███   ███  ███   ███  ████████  ████████  ███      
-    # ███ █ ███  ███   ███  ███       ███       ███      
-    # █████████  █████████  ███████   ███████   ███      
-    # ███   ███  ███   ███  ███       ███       ███      
-    # ██     ██  ███   ███  ████████  ████████  ███████  
-    
     onWheel: event =>
         
         ⮐  if event.cell[1] >= @cells.y + @cells.rows

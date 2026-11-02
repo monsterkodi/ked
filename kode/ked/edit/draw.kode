@@ -44,7 +44,6 @@ function draw extends view
         view   = @state.s.view
         lines  = @state.s.lines
         lines  = @complete.preDrawLines lines if @complete?
-        # lines  = mode.preDrawLines @state @state.s.lines
         
         y   = view[1]
         row = -@state.s.scrollOffset
@@ -53,9 +52,7 @@ function draw extends view
             
             scale = @state.scaleOfLine y
 
-            if row < 0
-                # a line cut by the top edge is left out, but its rows stay
-                # reserved so the lines below keep moving one row at a time
+            if row < 0 # a line cut by the top edge is left out, but its rows stay
                 blankRows = min @cells.rows (row+scale)
                 for r in 0...blankRows
                     @cells.bg_fill 0 r -1 r @color.empty
@@ -272,7 +269,7 @@ function draw extends view
                 
             bg = belt.isSpanLineRange(@state.s.lines selection) ? spanbg : linebg
             
-            start = max selection[1], @state.s.view[1]
+            start = max selection[1] @state.s.view[1]
             row   = @state.rowOfLine start
 
             continue if start > selection[3]

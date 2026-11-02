@@ -20,15 +20,15 @@ Patterns =
     regex: "(?<!\\d\\s*)\\/(?:\\\\[\\/]|\\([^\\n\\s]*\\)|[^\\n\\s\\)])*\\/[gimsuy]*(?!\\s*\\d)"
     dots: "(?<!\\.)\\.\\.\\.?(?!\\.)"
     paren: "[\\(\\)\\[\\]\\{\\}]"
-    func: "(○->|○=>|->|=>)"
+    func: "(○->|○=>|->|=>)" # use ◯-> and ◯=> instead
     then: "➜"
     this: "@"
     test: "(?<!●)▸[\\s\\n]+"
     profile: "●▸"
     profilend: "●▪"
     prof: "●"
-    atest: "○▸"
-    await: "○"
+    atest: "○▸" # use ◯▸ instead
+    await: "○"  # use ◯  instead
     assert: "▴"
     down: "▾"
     left: "◂"

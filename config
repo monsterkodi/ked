@@ -37,8 +37,8 @@ scale
         h5        3
         li1       2
     kode
-        class     2
-        # function  3
+        class     3
+        method    2
         
 novim
     autoStart           false

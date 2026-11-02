@@ -1,9 +1,37 @@
 
 use ../../kxk    ▪ kseg immutable
+use ../util      ◆ harness
+use ../edit      ◆ editor
 use ../edit/tool ◆ belt
 
-▸ tool edit
+hed = cols rows ext='md' feats=[]->     
+        h = new harness 
+        e = new editor h.screen 'editor' feats
+        e.layout 0 0 cols rows
+        e.state.syntax.setExt ext
+        e.state.applyScales {enabled:true md:{h1:3 h2:2}}
+        e.grabFocus()
+        [h e]
 
+▸ edit
+
+    ▸ select
+        
+        [h e] = hed 40 10
+        e.state.loadLines ['' 'line b' 'line c' 'line d']
+
+        h.key e 'shift+down'
+        e.state.mainCursor()[1] ▸ 1
+        e.state.s.selections ▸ [[0 0 0 1]]
+
+        h.key e 'shift+down'
+        e.state.mainCursor()[1] ▸ 2
+        e.state.s.selections ▸ [[0 0 0 2]]
+
+        h.key e 'shift+down'
+        e.state.mainCursor()[1] ▸ 3
+        e.state.s.selections ▸ [[0 0 0 3]]
+        
     # █████████   ███████    ███████    ███████   ███      ████████   ███████   ███████   ██     ██  ██     ██  ████████  ███   ███  █████████
     #    ███     ███   ███  ███        ███        ███      ███       ███       ███   ███  ███   ███  ███   ███  ███       ████  ███     ███   
     #    ███     ███   ███  ███  ████  ███  ████  ███      ███████   ███       ███   ███  █████████  █████████  ███████   ███ █ ███     ███   
