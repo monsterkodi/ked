@@ -34,7 +34,7 @@ class NFS
         try
             dirents =○ fsp.readdir dir withFileTypes:true
         catch err
-            log err
+            log err if err.code not in ['EACCES' 'EPERM' 'ENOENT']
             ⮐ opt.found
         
         for dirent in dirents

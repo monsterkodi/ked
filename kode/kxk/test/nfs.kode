@@ -1,0 +1,30 @@
+
+use fs
+use .. ◆ nfs slash
+
+▸ nfs
+
+    ▸ listing a directory it cannot read logs nothing
+
+        root = '/tmp/opencode/kxk-nfs-eacces'
+        secret = slash.path root 'secret'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.mkdirSync secret
+        fs.chmodSync secret 0
+
+        lines = []
+        keep = console.log
+
+        console.log = (args...) -> lines.push args
+
+        items =○ nfs.list secret recursive:false
+
+        console.log = keep
+
+        fs.chmodSync secret 493
+        fs.rmSync root recursive:true force:true
+
+        lines.length ▸ 0
+        items.length ▸ 0
