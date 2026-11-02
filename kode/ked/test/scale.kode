@@ -270,9 +270,11 @@ cells = cols:40 rows:20
         h = new harness cols:20 rows:8
 
         h.screen.set 2 3 'X' null null
+        h.screen.set_bg 2 3 [7 8 9]
         h.screen.erase_scaled 2 3 5 3
 
         h.screen.get_char(2 3) ▸ ' '
+        h.screen.get_bg(2 3) ▸ [7 8 9]
         h.screen.renderString().startsWith("\x1b[4;3H\x1b[4X") ▸ true
 
     ▸ a popup over a scaled line erases the block under it
