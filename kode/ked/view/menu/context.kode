@@ -94,6 +94,7 @@ function context extends inputchoice
         ⮐  if @hidden()
         
         @arrange()
+        @cells.erase_scaled 0 0 -1 -1 @color.bg
         @drawFrame()
         @drawChoices()
         

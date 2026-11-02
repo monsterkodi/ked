@@ -26,7 +26,8 @@ function screen
         @c = belt.cells @cols @rows
         # @meta_clear()
 
-        @frameRuns = []
+        @frameRuns  = []
+        @eraseRects = []
         
     #  ███████  ████████  █████████  
     # ███       ███          ███     
@@ -293,6 +294,31 @@ function screen
         
         @t.write @renderString()
 
+    #  erase a rectangle of cells, including any scaled text drawn there
+    #  earlier in the frame
+    #
+    #  the terminal keeps the cells below the first row of a text sizing
+    #  block after the block itself is overwritten, so the rectangle is
+    #  erased on the terminal as well, before the frame is written. this is
+    #  what lets a popup draw over a scaled line.
+
+    erase_scaled: x1 y1 x2 y2 bg=null =>
+
+        x1 = max 0 x1
+        y1 = max 0 y1
+        x2 = min @cols-1 x2
+        y2 = min @rows-1 y2
+
+        ⮐  if x1 > x2 or y1 > y2
+
+        @eraseRects ?= []
+        @eraseRects.push [x1 y1 x2 y2]
+
+        for y in y1..y2
+            for x in x1..x2
+                @c[y][x].char = ' '
+                @c[y][x].bg   = bg if bg?
+
     #  the frame as it is written to the terminal
     #
     #  the block runs of the previous frame are erased first. the erase must
@@ -309,8 +335,13 @@ function screen
             for r in by...by+scale
                 s += "\x1b[#{r+1};#{bx+1}H\x1b[#{width*scale}X"
 
-        @lastRuns  = @frameRuns ? []
-        @frameRuns = []
+        for [x1 y1 x2 y2] in @eraseRects ? []
+            for r in y1..y2
+                s += "\x1b[#{r+1};#{x1+1}H\x1b[#{x2-x1+1}X"
+
+        @lastRuns   = @frameRuns ? []
+        @frameRuns  = []
+        @eraseRects = []
 
         s += '\x1b[H'
         

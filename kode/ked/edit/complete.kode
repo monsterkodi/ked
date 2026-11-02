@@ -299,6 +299,7 @@ function complete
         
         fy = cy+scale
 
+        @editor.cells.erase_scaled fx fy fx+w+1 fy+h+1 @color.bg
         @editor.cells.draw_rounded_border fx fy fx+w+1 fy+h+1 fg:@color.bg
         
         @choices.layout x y w h
