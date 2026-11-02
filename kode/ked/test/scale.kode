@@ -943,6 +943,38 @@ cells = cols:40 rows:20
 
         config.data = saved
 
+    ▸ entering a scaled line at the margin scrolls one row
+
+        saved = config.data
+        config.data = cursor:{topOffset:2 bottomOffset:10}
+
+        big = cols:20 rows:20
+        h = new harness cols:20 rows:20
+        e = new editor h.screen 'test_scale_cursor_margin' []
+
+        e.layout 0 0 20 20
+        e.state.syntax.setExt 'md'
+
+        lines = []
+        for i in 0...9
+            lines.push 'text'
+        lines.push '# h'
+        for i in 0...10
+            lines.push 'text'
+        e.state.loadLines lines
+        e.state.applyScales {enabled:true md:{h1:7}}
+
+        e.state.setView [0 0]
+        e.state.setCursors [[0 9]] main:0 adjust:'topBotDeltaGrow' mc:[0 8]
+
+        e.state.viewTopRow() ▸ 1
+        e.state.s.view[1] ▸ 1
+        e.state.s.scrollOffset ▸ 0
+        e.state.rowOfLine(9) ▸ 8
+        e.isCursorVisible [0 9] ▸ true
+
+        config.data = saved
+
     ▸ a cursor scroll uses the row offset instead of jumping a line
 
         saved = config.data
@@ -959,13 +991,14 @@ cells = cols:40 rows:20
         e.state.setCursors [[0 7]] main:0 adjust:'topBotDeltaGrow' mc:[0 6]
 
         e.state.s.view[1] ▸ 0
-        e.state.s.scrollOffset ▸ 2
-        e.state.viewTopRow() ▸ 2
+        e.state.s.scrollOffset ▸ 1
+        e.state.viewTopRow() ▸ 1
 
         h.screen.init()
         e.draw()
 
         h.screen.get_char(0 0) ▸ ' '
-        h.screen.get_char(0 1) ▸ 'a'
+        h.screen.get_char(0 1) ▸ ' '
+        h.screen.get_char(0 2) ▸ 'a'
 
         config.data = saved

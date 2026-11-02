@@ -693,7 +693,27 @@ function state extends events
             else if row < topDelta
                 topRow = @rowsBeforeLine(y) - topDelta
 
+        if opt.adjust in ['topBotDeltaGrow' 'topBotDelta']
+            current = @viewTopRow()
+            delta = topRow - current
+
+            if delta > 1
+                topRow = current + 1
+            else if delta < -1
+                topRow = current - 1
+
         topRow = clamp 0 @maxTopRow() topRow
+
+        # soft margins: never let the cursor block leave the viewport,
+        # but do not jump the whole line when it can stay visible
+
+        blockTop   = @rowsBeforeLine y
+        visibleTop = blockTop + height - @cells.rows
+
+        topRow = max visibleTop topRow
+        topRow = min blockTop topRow
+        topRow = clamp 0 @maxTopRow() topRow
+
         view[1] = @lineAtAbsoluteRow topRow
         scrollOffset = topRow - @rowsBeforeLine(view[1])
 
