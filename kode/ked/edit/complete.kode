@@ -262,6 +262,9 @@ function complete
             
             [cx cy] = @posForCursor pos
             scale = @editor.state.scaleOfLine pos[1]
+
+            continue if cy < 0
+            continue if cy + scale > @editor.cells.rows
             
             for ci in 0...word.length-@turd.length
                 for r in cy...cy+scale

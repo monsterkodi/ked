@@ -228,7 +228,8 @@ function draw extends view
             cols  = max 1 int(@cells.cols / scale)
             
             break if row >= @cells.rows
-            continue if row + scale <= 0
+            continue if row < 0
+            continue if row + scale > @cells.rows
                 
             # clip the span to the visible columns - a bracket pair spanning
             # a very long line must not redraw every column every frame
@@ -284,6 +285,7 @@ function draw extends view
                 cols  = max 1 int(@cells.cols / scale)
                 
                 break if row >= @cells.rows
+                break if row + scale > @cells.rows
                 
                 if li == selection[1]
                     xs = selection[0]
@@ -330,6 +332,7 @@ function draw extends view
                 cols  = max 1 int(@cells.cols / scale)
 
                 break if row >= @cells.rows
+                break if row + scale > @cells.rows
 
                 if li == rng[1]
                     xs = rng[0]

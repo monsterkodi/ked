@@ -94,6 +94,44 @@ cells = cols:40 rows:20
         s.lineAtRow 6 ▸ 3
         s.lineAtRow 7 ▸ 3
 
+    ▸ lines above the view have negative rows
+
+        s = new state cells 'test_scale_above'
+        s.loadLines ['a' 'b' 'c' 'd' 'e' 'f']
+        s.setView [0 4]
+
+        s.rowOfLine 4 ▸ 0
+        s.rowOfLine 3 ▸ -1
+        s.rowOfLine 1 ▸ -3
+
+    ▸ highlights and cursors above the view are not drawn
+
+        h = new harness cols:40 rows:10
+        e = new editor h.screen 'test_scale_above_draw' []
+        e.layout 0 0 40 10
+        e.state.loadLines [("line #{i}") for i in 0...20]
+
+        e.state.setView [0 8]
+        e.state.setHighlights [[0 4 4 4] [0 10 4 10]]
+
+        h.screen.init()
+        e.draw()
+
+        h.screen.get_bg(0 2) ▸ theme.highlight.bg
+        h.screen.get_bg(0 4) ▸ theme.editor.bg
+
+        e.state.setCursors [[0 10] [0 4]]
+        e.state.setView [0 8]
+
+        e.isCursorVisible [0 4] ▸ false
+        e.isCursorVisible [0 10] ▸ true
+
+        h.screen.init()
+        e.draw()
+
+        (valid h.screen.c[4][0].mark) ▸ false
+        h.screen.c[2][0].mark ▸ 'multi'
+
     ▸ a cell position maps to a logical position
 
         s = new state cells 'test_scale'

@@ -369,6 +369,12 @@ function state extends events
 
     rowOfLine: li =>
 
+        if li < @s.view[1]
+            row = 0
+            for y in li...@s.view[1]
+                row -= @lineHeight y
+            ⮐ row
+
         row = 0
         for y in @s.view[1]...li
             row += @lineHeight y
