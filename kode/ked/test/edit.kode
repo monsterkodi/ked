@@ -48,6 +48,23 @@ hed = cols rows ext='md' feats=[]->
         h.screen.c[0][2].mark ▸ 'main'
         (valid h.screen.c[0][3].mark) ▸ false
 
+    ▸ a selection through an empty line keeps its rows
+
+        [h e] = hed 40 10
+        e.state.loadLines ['abcdef' '' 'ghijkl' 'mnopqr']
+
+        e.state.setCursors [[4 3]]
+        e.state.setSelections [[0 0 4 3]]
+
+        h.screen.init()
+        e.draw()
+
+        h.screen.c[0][0].mark ▸ 'selection'
+        h.screen.c[2][0].mark ▸ 'selection'
+        h.screen.c[3][0].mark ▸ 'selection'
+        h.screen.c[3][3].mark ▸ 'selection'
+        h.screen.c[3][4].mark ▸ 'main'
+
     ▸ highlight cells are marked
 
         [h e] = hed 40 10

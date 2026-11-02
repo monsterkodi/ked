@@ -303,7 +303,9 @@ function draw extends view
                 xs = max xs int(vx/scale)
                 xe = min xe (int((vx+@cells.cols-1)/scale)+1)
 
-                continue if xs >= xe
+                if xs >= xe
+                    row += scale
+                    continue
 
                 for x in xs...xe
                     cx = x*scale - vx
@@ -358,7 +360,9 @@ function draw extends view
                 xs = max xs int(vx/scale)
                 xe = min xe (int((vx+@cells.cols-1)/scale)+1)
 
-                continue if xs >= xe
+                if xs >= xe
+                    row += scale
+                    continue
 
                 for x in xs...xe
                     cx = x*scale - vx
