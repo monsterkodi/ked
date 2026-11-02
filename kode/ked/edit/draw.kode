@@ -154,7 +154,7 @@ function draw extends view
             cw = max 1 cw # todo: this is to prevent endless loop with zero width characters, should be fixed eventually
             x += cw
             
-            if x < cols
+            if (c + cw) * scale <= @cells.cols
                 # @cells.meta_clone c row # ϵ⌶⟙ℍϵℜ 𝛋𝚒⟅⟅ 𝚒𝜏 ⊚ℜ ⫐◯ 𝚒𝜏!
                 @cells.add_scaled c*scale row ch fg bg scale
                 c += cw

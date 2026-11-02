@@ -182,6 +182,30 @@ cells = cols:40 rows:20
 
         h.screen.get_char(0  6) ▸ 'b'
 
+    ▸ a scaled character that ends exactly at the right edge is drawn
+
+        h = new harness cols:15 rows:6
+        e = new editor h.screen 'test_scale_clip' []
+
+        e.layout 0 0 15 6
+        e.state.syntax.setExt 'md'
+        e.state.loadLines ['# abc']
+
+        e.draw()
+
+        h.screen.get_char(12 0) ▸ 'c'
+
+        h = new harness cols:14 rows:6
+        e = new editor h.screen 'test_scale_clip_none' []
+
+        e.layout 0 0 14 6
+        e.state.syntax.setExt 'md'
+        e.state.loadLines ['# abc']
+
+        e.draw()
+
+        h.screen.get_char(12 0) ▸ ' '
+
     ▸ a scaled character carries the text sizing escape
 
         h = new harness cols:10 rows:5
