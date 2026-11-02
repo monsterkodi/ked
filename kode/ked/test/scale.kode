@@ -1,7 +1,7 @@
 use ../../kxk ▪ kseg
 use ../edit   ◆ state editor
 use ../theme  ◆ theme
-use ../util   ◆ harness
+use ../util   ◆ harness config
 use ../view/menu   ◆ choices context
 use ../view/editor ◆ mapscr
 use ../view/base   ◆ scroll
@@ -918,3 +918,54 @@ cells = cols:40 rows:20
 
         e.state.viewTopRow() ▸ 0
         e.isCursorVisible [0 0] ▸ true
+
+    #  ███████   ███████   ███   ███   ███████   ████████        ███   ███    ███████   ███████
+    # ███       ███   ███  ████  ███  ███       ███                ███   ███  ███   ███  ███
+    # ███       ███   ███  ███ █ ███  ███████   ███████            ███   ███  █████████  ███████
+    # ███       ███   ███  ███  ████       ███  ███                ███   ███  ███   ███       ███
+    #  ███████   ███████   ███   ███  ███████   ████████            ███████   ███   ███  ███████
+
+    ▸ cursor margins take rows or screen percentages
+
+        s = new state cells 'test_scale_margins'
+
+        s.marginValue 7 3 ▸ 7
+        s.marginValue 0 3 ▸ 0
+        s.marginValue '25%' 3 ▸ 5
+        s.marginValue '50%' 3 ▸ 10
+        s.marginValue null 3 ▸ 3
+
+        saved = config.data
+        config.data = cursor:{topOffset:3 bottomOffset:'25%'}
+
+        s.viewMargin 'topOffset' 7 ▸ 3
+        s.viewMargin 'bottomOffset' 7 ▸ 5
+
+        config.data = saved
+
+    ▸ a cursor scroll uses the row offset instead of jumping a line
+
+        saved = config.data
+        config.data = cursor:{topOffset:2 bottomOffset:2}
+
+        h = new harness cols:20 rows:10
+        e = new editor h.screen 'test_scale_cursor_offset' []
+
+        e.layout 0 0 20 10
+        e.state.syntax.setExt 'md'
+        e.state.loadLines ['# h' 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j']
+
+        e.state.setView [0 0]
+        e.state.setCursors [[0 7]] main:0 adjust:'topBotDeltaGrow' mc:[0 6]
+
+        e.state.s.view[1] ▸ 0
+        e.state.s.scrollOffset ▸ 2
+        e.state.viewTopRow() ▸ 2
+
+        h.screen.init()
+        e.draw()
+
+        h.screen.get_char(0 0) ▸ ' '
+        h.screen.get_char(0 1) ▸ 'a'
+
+        config.data = saved

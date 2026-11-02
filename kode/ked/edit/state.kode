@@ -14,7 +14,7 @@
 
 use ../../kxk ▪ immutable kstr kseg events absMin
 use ../../kxk ◆ clip
-use ../util   ◆ syntax
+use ../util   ◆ syntax config
 use ./act     ◆ del insert select join indent multi main novim
 use ./tool    ◆ belt colorspans
 use           ◆ keys mode
@@ -474,6 +474,27 @@ function state extends events
 
     maxTopRow: => @rowsBeforeLine @maxViewLine()
 
+    #  a cursor margin from the config: a row count or a screen percentage
+
+    marginValue: val fallback =>
+
+        ⮐ fallback if not valid val
+
+        if val is str and val.endsWith '%'
+            pct = int val[0...-1]
+            ⮐ int(@cells.rows * pct / 100)
+
+        ⮐ int val if val is num
+
+        fallback
+
+    viewMargin: name fallback =>
+
+        conf = config.data?.cursor
+        ⮐ fallback if not valid conf
+
+        @marginValue (conf[name]) fallback
+
     #  the logical position of a cell in the editor
 
     posForCell: x row =>
@@ -627,49 +648,54 @@ function state extends events
         [x y] = @mainCursor()
 
         view = @s.view.asMutable()
-        
-        topBotDelta = 7
-        topDelta = 7
-        botDelta = max topDelta int(@cells.rows/2)
 
-        row    = @rowOfLine y
-        height = @lineHeight y
-        scrollOffset = @s.scrollOffset
-        
+        topFallback = 7
+        botFallback = max topMargin int(@cells.rows/2)
+
+        topMargin = @viewMargin 'topOffset' topFallback
+        botMargin = @viewMargin 'bottomOffset' botFallback
+
+        topMargin = clamp 0 @cells.rows topMargin
+        botMargin = clamp 0 @cells.rows botMargin
+
+        row     = @rowOfLine y
+        height  = @lineHeight y
+        topRow  = @viewTopRow()
+
         if opt.adjust == 'topDelta'
 
-            view[1] = @startForRow y topDelta
-            scrollOffset = 0
-            
+            topRow = @rowsBeforeLine(y) - topMargin
+
         else if opt.adjust == 'topBotDeltaGrow' and opt.mc
-        
+
             if row < 0
-                view[1] = @startForRow y topDelta
-                scrollOffset = 0
+                topRow = @rowsBeforeLine(y) - topMargin
             else if row + height > @cells.rows
-                view[1] = @startForRow y (@cells.rows - botDelta - height)
-                scrollOffset = 0
+                topRow = @rowsBeforeLine(y) - (@cells.rows - botMargin - height)
             else
                 dir = y - opt.mc[1]
-                if row < topDelta and dir < 0
-                    view[1] = @startForRow y topDelta
-                    scrollOffset = 0
-                else if row + height > @cells.rows - botDelta and dir > 0
-                    view[1] = @startForRow y (@cells.rows - botDelta - height)
-                    scrollOffset = 0
-        else        
-        
-            if opt.adjust != 'topBotDelta'
-                topBotDelta = 0
-    
-            if row + height > @cells.rows - topBotDelta
-                view[1] = @startForRow y (@cells.rows - topBotDelta - height)
-                scrollOffset = 0
-            else if row < topBotDelta
-                view[1] = @startForRow y topBotDelta
-                scrollOffset = 0
+                if row < topMargin and dir < 0
+                    topRow = @rowsBeforeLine(y) - topMargin
+                else if row + height > @cells.rows - botMargin and dir > 0
+                    topRow = @rowsBeforeLine(y) - (@cells.rows - botMargin - height)
 
-        view[1] = min view[1] @maxViewLine()
+        else
+
+            topDelta = 0
+            botDelta = 0
+
+            if opt.adjust == 'topBotDelta'
+                topDelta = topMargin
+                botDelta = botMargin
+
+            if row + height > @cells.rows - botDelta
+                topRow = @rowsBeforeLine(y) - (@cells.rows - botDelta - height)
+            else if row < topDelta
+                topRow = @rowsBeforeLine(y) - topDelta
+
+        topRow = clamp 0 @maxTopRow() topRow
+        view[1] = @lineAtAbsoluteRow topRow
+        scrollOffset = topRow - @rowsBeforeLine(view[1])
 
         if not @skipAdjustViewForMainCursor
             view[0] = max 0 x*height + height + 1 - @cells.cols

@@ -23,6 +23,10 @@ mouse
 mapScroll
     clickOffset   0
 
+cursor
+    topOffset     7
+    bottomOffset  50%
+
 scale
     enabled   true
     md
