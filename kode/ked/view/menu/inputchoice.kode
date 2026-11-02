@@ -104,7 +104,7 @@ function inputchoice extends view
     
     onInputChange: text =>
         
-        ⮐  if text == @choices.filterText
+        ⮐ if text == @choices.filterText
 
         @choices.filter text
         @choices.state.selectLine 0
@@ -116,10 +116,10 @@ function inputchoice extends view
     onInputAction: action text =>
         
         switch action
-            'submit' ➜ ⮐  @applyChoice @choices.current()
-            'change' ➜ ⮐  @onInputChange text
+            'submit' ➜ ⮐ @applyChoice @choices.current()
+            'change' ➜ ⮐ @onInputChange text
             'up'          
-            'down'   ➜ ⮐  @choices.moveSelection action
+            'down'   ➜ ⮐ @choices.moveSelection action
     
     autoHide: => @input.hide() if @autoHideInput and not @inputIsActive()
         
@@ -135,7 +135,7 @@ function inputchoice extends view
             'click'
             'right'
             'space'
-            'return' ➜ ⮐  @applyChoice @choices.current()
+            'return' ➜ ⮐ @applyChoice @choices.current()
             
             'hover'  ➜ @autoHide()
             
@@ -143,7 +143,7 @@ function inputchoice extends view
             'left'
                 if @input.visible() 
                     @input.grabFocus()
-                    ⮐  true
+                    ⮐ true
                                              
     choicesFiltered: ->
         
@@ -160,9 +160,10 @@ function inputchoice extends view
 
     draw: ->
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         @arrange()
+        @erase()
         @drawFrame()
         @drawChoices()
 
@@ -212,7 +213,7 @@ function inputchoice extends view
 
     onKey: key event =>
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
 
         switch event.combo
             
@@ -222,12 +223,12 @@ function inputchoice extends view
         if @input.hasFocus()
             if result = @input.onKey key event
                 @autoHide()
-                ⮐  result
+                ⮐ result
             #  up and down became input actions that already moved the choices
             if event.combo in ['up' 'down']
                 @choices.grabFocus() if event.combo == 'down'
                 @autoHide()
-                ⮐  true
+                ⮐ true
             # log "focused input didn't handle key #{key}?"
 
         if result = @choices.onKey key event
@@ -236,11 +237,11 @@ function inputchoice extends view
                 @input.grabFocus()
                 if result = @input.onKey key event
                     @autoHide()
-                    ⮐  result
+                    ⮐ result
             else
                 @choices.grabFocus() if key == 'down'
                 @autoHide()
-                ⮐  result
+                ⮐ result
         true
         
     # ██     ██   ███████   ███   ███   ███████  ████████  
@@ -251,16 +252,16 @@ function inputchoice extends view
     
     onMouse: event =>
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
-        ret = @input.onMouse   event ; ⮐  ret if ret?.redraw
-        ret = @choices.onMouse event ; ⮐  ret if ret?.redraw
-        ret = super event            ; ⮐  ret if ret?.redraw
+        ret = @input.onMouse   event ; ⮐ ret if ret?.redraw
+        ret = @choices.onMouse event ; ⮐ ret if ret?.redraw
+        ret = super event            ; ⮐ ret if ret?.redraw
         
         if event.type == 'press' and not @hover
             post.emit 'focus' 'editor'
             @hide() 
-            ⮐  # give other views a chance to handle the closing click
+            ⮐ # give other views a chance to handle the closing click
             
         @hover
 
@@ -272,12 +273,12 @@ function inputchoice extends view
     
     onWheel: event =>
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
 
-        ret = @input.onWheel   event ; ⮐  ret if ret?.redraw
-        ret = @choices.onWheel event ; ⮐  ret if ret?.redraw
+        ret = @input.onWheel   event ; ⮐ ret if ret?.redraw
+        ret = @choices.onWheel event ; ⮐ ret if ret?.redraw
         
         inside = @cells.isInsideEvent event
-        if inside ➜ ⮐  redraw:false 
+        if inside ➜ ⮐ redraw:false 
         
 export inputchoice

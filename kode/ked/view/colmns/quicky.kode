@@ -79,6 +79,7 @@ function quicky extends inputchoice
         ⮐  if @hidden()
          
         @arrange()
+        @erase()
         @drawFrame()
         @crumbs.draw()
         @drawChoices()
