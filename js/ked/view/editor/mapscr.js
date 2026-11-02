@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, eql: function (a,b,s) { var i, k, v; s = (s != null ? s : []); if (Object.is(a,b)) { return true }; if (typeof(a) !== typeof(b)) { return false }; if (!(Array.isArray(a)) && !(typeof(a) === 'object')) { return false }; if (Array.isArray(a)) { if (a.length !== b.length) { return false }; var list = _k_.list(a); for (i = 0; i < list.length; i++) { v = list[i]; s.push(i); if (!_k_.eql(v,b[i],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } } else if (_k_.isStr(a)) { return a === b } else { if (!_k_.eql(Object.keys(a),Object.keys(b))) { return false }; for (k in a) { v = a[k]; s.push(k); if (!_k_.eql(v,b[k],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } }; return true }, isStr: function (o) {return typeof o === 'string' || o instanceof String}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, eql: function (a,b,s) { var i, k, v; s = (s != null ? s : []); if (Object.is(a,b)) { return true }; if (typeof(a) !== typeof(b)) { return false }; if (!(Array.isArray(a)) && !(typeof(a) === 'object')) { return false }; if (Array.isArray(a)) { if (a.length !== b.length) { return false }; var list = _k_.list(a); for (i = 0; i < list.length; i++) { v = list[i]; s.push(i); if (!_k_.eql(v,b[i],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } } else if (_k_.isStr(a)) { return a === b } else { if (!_k_.eql(Object.keys(a),Object.keys(b))) { return false }; for (k in a) { v = a[k]; s.push(k); if (!_k_.eql(v,b[k],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } }; return true }, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, isStr: function (o) {return typeof o === 'string' || o instanceof String}, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
 
 var mapscr
 
@@ -28,6 +28,8 @@ mapscr = (function ()
         this["drawImages"] = this["drawImages"].bind(this)
         this["draw"] = this["draw"].bind(this)
         this["maxLinesToLoad"] = this["maxLinesToLoad"].bind(this)
+        this["lineOffsetPixels"] = this["lineOffsetPixels"].bind(this)
+        this["lineRows"] = this["lineRows"].bind(this)
         this["scrollToPixel"] = this["scrollToPixel"].bind(this)
         this["onResize"] = this["onResize"].bind(this)
         this["onMouse"] = this["onMouse"].bind(this)
@@ -41,6 +43,8 @@ mapscr = (function ()
         this.knobId = this.imgId + 0xeeee
         this.topLine = 0
         this.botLine = 0
+        this.topRow = 0
+        this.rowAtTopLine = 0
         this.knobHeight = 0
         this.mapWidth = 0
         this.mapHeight = 0
@@ -186,18 +190,14 @@ mapscr = (function ()
 
     mapscr.prototype["scrollToPixel"] = function (pixel)
     {
-        var li, maxY, mc, view
+        var li, mc, row, view
 
         view = this.state.s.view.asMutable()
-        li = this.topLine + parseInt((pixel[1] - this.mapY) / this.pixelsPerRow)
+        row = this.topRow + parseInt((pixel[1] - this.mapY) / this.pixelsPerRow)
+        li = this.state.lineAtAbsoluteRow(row)
         view[1] = li
         view[1] -= 5
-        maxY = this.state.s.lines.length - this.cells.rows
-        if (maxY > 0)
-        {
-            view[1] = _k_.min(maxY,view[1])
-        }
-        view[1] = _k_.max(0,view[1])
+        view[1] = _k_.clamp(0,this.state.maxViewLine(),view[1])
         mc = this.state.mainCursor()
         if (_k_.eql(view, this.state.s.view))
         {
@@ -216,32 +216,64 @@ mapscr = (function ()
 
     mapscr.prototype["calcView"] = function ()
     {
-        var editorLinesHeight, maxOffset, viewFactor
+        var bottom, denom, h, last, li, maxOffset, row, totalRows, viewFactor, viewTopRow
 
         this.mapX = this.cells.x * this.csz[0]
         this.mapY = this.cells.y * this.csz[1]
         this.mapHeight = this.cells.rows * this.csz[1]
         this.mapWidth = this.cells.cols * this.csz[0]
         this.mapBot = this.mapY + this.mapHeight - this.pixelsPerRow
-        this.linesInMap = parseInt(this.mapHeight / this.pixelsPerRow)
+        this.linesInMap = _k_.max(1,parseInt(this.mapHeight / this.pixelsPerRow))
         this.knobHeight = this.state.cells.rows * this.pixelsPerRow
-        editorLinesHeight = this.state.s.lines.length * this.pixelsPerRow
-        if (editorLinesHeight > this.mapHeight && this.state.s.view[1] > 0)
+        totalRows = this.state.totalRows()
+        viewTopRow = this.state.viewTopRow()
+        if (totalRows > this.linesInMap && viewTopRow > 0)
         {
-            maxOffset = this.state.s.lines.length - this.linesInMap
-            viewFactor = this.state.s.view[1] / (this.state.s.lines.length - this.cells.rows)
-            this.topLine = parseInt(viewFactor * maxOffset)
+            maxOffset = _k_.max(0,totalRows - this.linesInMap)
+            denom = _k_.max(1,totalRows - this.state.cells.rows)
+            viewFactor = _k_.clamp(0,1,(viewTopRow / denom))
+            this.topRow = parseInt(viewFactor * maxOffset)
+            this.topLine = this.state.lineAtAbsoluteRow(this.topRow)
+            this.rowAtTopLine = this.state.rowsBeforeLine(this.topLine)
+            this.topRow = this.rowAtTopLine
         }
         else
         {
+            this.topRow = 0
             this.topLine = 0
+            this.rowAtTopLine = 0
         }
-        return this.botLine = _k_.min(this.state.s.lines.length - 1,this.topLine + this.linesInMap)
+        bottom = this.topRow + this.linesInMap
+        li = this.topLine
+        row = this.topRow
+        last = this.topLine - 1
+        while (li < this.state.s.lines.length)
+        {
+            h = this.state.lineHeight(li)
+            if (row + h > bottom)
+            {
+                break
+            }
+            last = li
+            row += h
+            li += 1
+        }
+        return this.botLine = last
+    }
+
+    mapscr.prototype["lineRows"] = function (y)
+    {
+        return this.state.lineHeight(y)
+    }
+
+    mapscr.prototype["lineOffsetPixels"] = function (y)
+    {
+        return this.lineOffset(y)
     }
 
     mapscr.prototype["lineOffset"] = function (y)
     {
-        return (y - this.topLine) * this.pixelsPerRow
+        return (this.state.rowsBeforeLine(y) - this.rowAtTopLine) * this.pixelsPerRow
     }
 
     mapscr.prototype["pixelPos"] = function (pos)
@@ -270,32 +302,43 @@ mapscr = (function ()
 
     mapscr.prototype["drawImages"] = function ()
     {
-        var id, t, y
+        var id, py, rh, t, y
 
         t = this.cells.screen.t
         if (_k_.empty(t.pixels) || this.hidden() || this.collapsed())
         {
             return
         }
-        for (var _a_ = y = this.topLine, _b_ = this.botLine; (_a_ <= _b_ ? y <= this.botLine : y >= this.botLine); (_a_ <= _b_ ? ++y : --y))
+        this.calcView()
+        if (this.botLine >= this.topLine)
         {
-            id = this.images[y]
-            t.placeLineImage(id,this.cells.x,this.cells.y,this.lineOffset(y),this.pixelsPerRow)
+            py = 0
+            for (var _a_ = y = this.topLine, _b_ = this.botLine; (_a_ <= _b_ ? y <= this.botLine : y >= this.botLine); (_a_ <= _b_ ? ++y : --y))
+            {
+                id = this.images[y]
+                if (!!_k_.empty(id))
+                {
+                    break
+                }
+                rh = this.state.lineHeight(y) * this.pixelsPerRow
+                t.placeLineImage(id,this.cells.x,this.cells.y,py,rh)
+                py += rh
+            }
         }
-        if (this.topLine)
+        if (this.topLine > 0 && this.topLine <= this.images.length)
         {
             t.hideImagesInRange(this.images[0],this.images[this.topLine - 1])
         }
-        if (this.botLine < this.images.length)
+        if (this.botLine >= this.topLine && this.botLine + 1 < this.images.length)
         {
-            t.hideImagesInRange(this.images[this.botLine],this.images.slice(-1)[0])
+            t.hideImagesInRange(this.images[this.botLine + 1],this.images.slice(-1)[0])
         }
         return this.drawKnob()
     }
 
     mapscr.prototype["drawKnob"] = function ()
     {
-        var ky
+        var ky, maxKy, offsetRow
 
         if (_k_.empty(this.csz))
         {
@@ -306,7 +349,9 @@ mapscr = (function ()
         {
             return
         }
-        ky = this.lineOffset(this.state.s.view[1])
+        maxKy = _k_.max(0,this.mapHeight - this.knobHeight)
+        offsetRow = this.lineOffset(this.state.s.view[1])
+        ky = _k_.clamp(0,maxKy,offsetRow)
         return this.cells.screen.t.placeImageOverlay(this.knobId,this.cells.x,this.cells.y,ky,this.mapWidth,this.knobHeight)
     }
 
@@ -402,5 +447,5 @@ mapscr = (function ()
 
 export default mapscr;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFwc2NyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2VkaXRvci9tYXBzY3Iua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQVVhLFVBQUE7SUFBUzs7T0FDQSxZQUFaOztPQUNZLGNBQUE7O09BQ0EsV0FBUDs7T0FDTyxjQUFBOzs7QUFFYixVQUFUOzt1QkFBd0I7YUFFcEIsUUFBSTs7UUFBRDs7Ozs7Ozs7Ozs7Ozs7OzsrQ0FFTyxLQUFDLE9BQU8sT0FBTyxLQUFDLE9BQU87UUFFN0IsS0FBQyxNQUFNLEdBQUcsZUFBZSxLQUFDO1FBRTFCLEtBQUMsY0FBYztRQUVmLEtBQUMsU0FBUyxLQUFDLFFBQU07UUFFakIsS0FBQyxVQUFhO1FBQ2QsS0FBQyxVQUFhO1FBQ2QsS0FBQyxhQUFhO1FBQ2QsS0FBQyxXQUFhO1FBQ2QsS0FBQyxZQUFhO1FBQ2QsS0FBQyxhQUFhO1FBRWQsS0FBQyxTQUFTLEtBQVksTUFBTSxPQUFPO1FBQ25DLEtBQUMsU0FBUyxZQUFZLE1BQU0sVUFBVTtRQUN0QyxLQUFDLFNBQVMsWUFBWSxNQUFNLFVBQVU7UUFDdEMsS0FBQyxTQUFTLFdBQVksTUFBTSxVQUFVO1FBRXRDLEtBQUMsT0FBTyxFQUFFLEdBQUcsWUFBWSxLQUFDO1FBRTFCLEtBQUssR0FBRyxhQUFhLEtBQUM7UUFDdEIsS0FBSyxHQUFHLGFBQWEsS0FBQztRQUN0QixLQUFLLEdBQUcsYUFBYSxLQUFDO1FBQ3RCLEtBQUssR0FBRyx3QkFBYzs7dUJBQ1AsTUFBUyxTQUFTOztnQkFBN0IsS0FBQzs7dUJBQ1UsTUFBUyxTQUFTOzt1QkFBN0IsS0FBQzs7O1FBRUwsS0FBQyxPQUFPLE1BQU0sR0FBRyxnQkFBZ0IsS0FBQztRQUNsQyxLQUFDLE9BQU8sTUFBTSxHQUFHOzttQkFBcUIsS0FBQzs7UUFFdkMsS0FBQzs7O3NCQVFMLDZCQUFnQjs7OzthQUVULEtBQUssSUFBSSxXQUFVLEtBQUEsTUFBSyxLQUFLLElBQUk7O21CQUNoQyxLQUFDOzs7O2dCQUVF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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFwc2NyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2VkaXRvci9tYXBzY3Iua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQVVhLFVBQUE7SUFBUzs7T0FDQSxZQUFaOztPQUNZLGNBQUE7O09BQ0EsV0FBUDs7T0FDTyxjQUFBOzs7QUFFYixVQUFUOzt1QkFBd0I7YUFFcEIsUUFBSTs7UUFBRDs7Ozs7Ozs7Ozs7Ozs7Ozs7OytDQUVPLEtBQUMsT0FBTyxPQUFPLEtBQUMsT0FBTztRQUU3QixLQUFDLE1BQU0sR0FBRyxlQUFlLEtBQUM7UUFFMUIsS0FBQyxjQUFjO1FBRWYsS0FBQyxTQUFTLEtBQUMsUUFBTTtRQUVqQixLQUFDLFVBQWE7UUFDZCxLQUFDLFVBQWE7UUFDZCxLQUFDLFNBQWE7UUFDZCxLQUFDLGVBQWU7UUFDaEIsS0FBQyxhQUFhO1FBQ2QsS0FBQyxXQUFhO1FBQ2QsS0FBQyxZQUFhO1FBQ2QsS0FBQyxhQUFhO1FBRWQsS0FBQyxTQUFTLEtBQVksTUFBTSxPQUFPO1FBQ25DLEtBQUMsU0FBUyxZQUFZLE1BQU0sVUFBVTtRQUN0QyxLQUFDLFNBQVMsWUFBWSxNQUFNLFVBQVU7UUFDdEMsS0FBQyxTQUFTLFdBQVksTUFBTSxVQUFVO1FBRXRDLEtBQUMsT0FBTyxFQUFFLEdBQUcsWUFBWSxLQUFDO1FBRTFCLEtBQUssR0FBRyxhQUFhLEtBQUM7UUFDdEIsS0FBSyxHQUFHLGFBQWEsS0FBQztRQUN0QixLQUFLLEdBQUcsYUFBYSxLQUFDO1FBQ3RCLEtBQUssR0FBRyx3QkFBYzs7dUJBQ1AsTUFBUyxTQUFTOztnQkFBN0IsS0FBQzs7dUJBQ1UsTUFBUyxTQUFTOzt1QkFBN0IsS0FBQzs7O1FBRUwsS0FBQyxPQUFPLE1BQU0sR0FBRyxnQkFBZ0IsS0FBQztRQUNsQyxLQUFDLE9BQU8sTUFBTSxHQUFHOzttQkFBcUIsS0FBQzs7UUFFdkMsS0FBQzs7O3NCQVFMLDZCQUFnQjs7OzthQUVULEtBQUssSUFBSSxXQUFVLEtBQUEsTUFB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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/editor/mapscr.kode

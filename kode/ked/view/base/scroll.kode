@@ -68,8 +68,32 @@ function scroll extends view
         @hover
         
     isActive: ->
+
+        @state.totalRows() > @cells.rows
+
+    knobHeight: csz =>
         
-        @state.s.lines.length > @cells.rows
+        rows  = @cells.rows
+        total = @state.totalRows()
+
+        ⮐ 0 if total <= rows
+
+        kh = int ((rows*rows) / total) * csz[1]
+        clamp csz[1] rows*csz[1] kh
+
+    knobOffset: csz =>
+
+        rows  = @cells.rows
+        total = @state.totalRows()
+
+        ⮐ 0 if total <= rows
+
+        kh     = @knobHeight csz
+        maxTop = max 1 total-rows
+        track  = max 0 rows*csz[1]-kh
+        offset = int ((track * @state.viewTopRow()) / maxTop)
+
+        clamp 0 track offset
         
     #  ███████   ███████  ████████    ███████   ███      ███      █████████   ███████   
     # ███       ███       ███   ███  ███   ███  ███      ███         ███     ███   ███  
@@ -83,14 +107,16 @@ function scroll extends view
 
         view = @state.s.view.asMutable()
         
+        rows   = @cells.rows
+        total  = @state.totalRows()
+        maxTop = max 0 total-rows
+
         rowf = pixel[1]/csz[1]-@cells.y
-        view[1] = floor(rowf * (@state.s.lines.length - @cells.rows + 1)  / (@cells.rows-1))
-        
-        maxY = @state.s.lines.length - @cells.rows
-        
-        view[1] = min maxY view[1] if maxY > 0
-        view[1] = max 0 view[1]
-        
+        row  = floor(rowf * (maxTop+1) / max(1 rows-1))
+
+        view[1] = @state.lineAtAbsoluteRow row
+        view[1] = clamp 0 @state.maxViewLine() view[1]
+
         ⮐  true if view eql @state.s.view
         
         @state.setView view 
@@ -111,12 +137,12 @@ function scroll extends view
         
         @cells.fill_col 0 0 rows ' ' null @color.bg
         
-        lnum = @state.s.lines.length
+        total = @state.totalRows()
         
-        ⮐  if lnum <= rows
+        ⮐  if total <= rows
         
-        kh = ((rows*rows) / lnum) * csz[1]
-        ky = ((rows*csz[1]-kh) * @state.s.view[1] / (lnum-rows)) 
+        kh = @knobHeight csz
+        ky = @knobOffset csz
 
         fg = @hover ? @color.hover : @color.knob
         

@@ -44,6 +44,9 @@ function state extends events
         @yankFlash      = null
         @yankFlashTimer = null
 
+        @rowCache    = null
+        @rowCacheExt = null
+
         @clearSingle()
 
     toggleMode: name => mode.toggle @ name if @allowedModes[name]
@@ -277,6 +280,8 @@ function state extends events
             colors:      {fg: [], bg: []}
             
         @syntax.clear()
+
+        @rowCache = null
         
         @h = []
         @r = []
@@ -310,6 +315,7 @@ function state extends events
         oldLines = @s.lines
     
         @s = @s.set 'lines' @segls
+        @rowCache = null
         
         if oldLines != @s.lines
 
@@ -352,6 +358,8 @@ function state extends events
         else
             @scales = {h1:3 h2:2}
 
+        @rowCache = null
+
     scaleOfLine: li =>
 
         ⮐ 1 if not @scaling
@@ -365,20 +373,61 @@ function state extends events
 
     lineHeight: li => @scaleOfLine li
 
+    #  the height of the whole buffer in display rows
+
+    rowPrefix: =>
+
+        ⮐ @rowCache if @rowCache and @rowCacheExt == @syntax.ext
+
+        rows = [0]
+        for li in 0...@s.lines.length
+            rows.push (rows[li] + @lineHeight(li))
+
+        @rowCacheExt = @syntax.ext
+        @rowCache = rows
+
+    totalRows: =>
+
+        @rowPrefix()[@s.lines.length]
+
+    #  the display row at which a line starts, relative to the buffer top
+
+    rowsBeforeLine: li =>
+
+        n = @s.lines.length
+        li = clamp 0 n li
+
+        @rowPrefix()[li]
+
+    #  the line containing an absolute display row
+
+    lineAtAbsoluteRow: row =>
+
+        n = @s.lines.length
+        ⮐ 0 if n == 0
+
+        rows = @rowPrefix()
+        row = clamp 0 rows[n]-1 row
+
+        lo = 0
+        hi = n-1
+
+        while lo < hi
+            mid = int((lo+hi+1)/2)
+            if rows[mid] <= row
+                lo = mid
+            else
+                hi = mid-1
+
+        lo
+
+    #  the display row of the first line in the view, relative to the buffer top
+
+    viewTopRow: => @rowsBeforeLine @s.view[1]
+
     #  the display row of a line, relative to the top of the view
 
-    rowOfLine: li =>
-
-        if li < @s.view[1]
-            row = 0
-            for y in li...@s.view[1]
-                row -= @lineHeight y
-            ⮐ row
-
-        row = 0
-        for y in @s.view[1]...li
-            row += @lineHeight y
-        row
+    rowOfLine: li => @rowsBeforeLine(li) - @viewTopRow()
 
     #  the line at a display row of the view
 

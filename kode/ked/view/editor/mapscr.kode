@@ -28,10 +28,12 @@ function mapscr extends mapview
         
         @topLine    = 0 # index of first visible line
         @botLine    = 0 # index of last visible line
+        @topRow     = 0 # display row of the first visible line
+        @rowAtTopLine = 0 # display row where topLine starts
         @knobHeight = 0 # height of the knob in pixels
         @mapWidth   = 0 # width of the map in pixels
         @mapHeight  = 0 # height of the map in pixels
-        @linesInMap = 0 # number of lines that fit into map
+        @linesInMap = 0 # number of display rows that fit into map
         
         @setColor 'bg'        theme.editor.mapscr
         @setColor 'highlight' theme.highlight.map
@@ -141,14 +143,12 @@ function mapscr extends mapview
         
         view = @state.s.view.asMutable()
         
-        li   = @topLine + int((pixel[1] - @mapY) / @pixelsPerRow)
+        row = @topRow + int((pixel[1] - @mapY) / @pixelsPerRow)
+        li  = @state.lineAtAbsoluteRow row
         
         view[1] = li
         view[1] -= 5 # offset so that clicking inside a header scrolls it into view
-        
-        maxY = @state.s.lines.length - @cells.rows
-        view[1] = min maxY view[1] if maxY > 0
-        view[1] = max 0 view[1]
+        view[1] = clamp 0 @state.maxViewLine() view[1]
         
         mc = @state.mainCursor()
         
@@ -180,20 +180,44 @@ function mapscr extends mapview
         
         @mapBot     = @mapY + @mapHeight - @pixelsPerRow
         
-        @linesInMap = int @mapHeight / @pixelsPerRow
+        @linesInMap = max 1 int(@mapHeight / @pixelsPerRow)
         @knobHeight = @state.cells.rows * @pixelsPerRow
-        
-        editorLinesHeight = @state.s.lines.length * @pixelsPerRow
-        if editorLinesHeight > @mapHeight and @state.s.view[1] > 0
-            maxOffset  = @state.s.lines.length - @linesInMap
-            viewFactor = @state.s.view[1] / (@state.s.lines.length - @cells.rows)
-            @topLine   = int viewFactor * maxOffset
-        else
-            @topLine = 0 
-            
-        @botLine = min @state.s.lines.length-1 @topLine+@linesInMap 
 
-    lineOffset: y -> (y-@topLine)*@pixelsPerRow
+        totalRows  = @state.totalRows()
+        viewTopRow = @state.viewTopRow()
+
+        if totalRows > @linesInMap and viewTopRow > 0
+            maxOffset  = max 0 totalRows - @linesInMap
+            denom      = max 1 totalRows - @state.cells.rows
+            viewFactor = clamp 0 1 (viewTopRow / denom)
+            @topRow    = int(viewFactor * maxOffset)
+            @topLine   = @state.lineAtAbsoluteRow @topRow
+            @rowAtTopLine = @state.rowsBeforeLine @topLine
+            @topRow    = @rowAtTopLine
+        else
+            @topRow       = 0
+            @topLine      = 0
+            @rowAtTopLine = 0
+
+        bottom = @topRow + @linesInMap
+        li     = @topLine
+        row    = @topRow
+        last   = @topLine-1
+
+        while li < @state.s.lines.length
+            h = @state.lineHeight li
+            break if row+h > bottom
+            last = li
+            row += h
+            li  += 1
+
+        @botLine = last
+
+    lineRows: y => @state.lineHeight y
+
+    lineOffsetPixels: y => @lineOffset y
+
+    lineOffset: y -> (@state.rowsBeforeLine(y) - @rowAtTopLine) * @pixelsPerRow
         
     pixelPos: pos -> 
        [
@@ -233,15 +257,22 @@ function mapscr extends mapview
         t = @cells.screen.t
         
         ⮐  if empty t.pixels or @hidden() or @collapsed()
-        
-        for y in @topLine..@botLine
-            id = @images[y]
-            t.placeLineImage id @cells.x @cells.y @lineOffset(y) @pixelsPerRow
+
+        @calcView()
+
+        if @botLine >= @topLine
+            py = 0
+            for y in @topLine..@botLine
+                id = @images[y]
+                break if not valid id
+                rh = @state.lineHeight(y) * @pixelsPerRow
+                t.placeLineImage id @cells.x @cells.y py rh
+                py += rh
             
-        if @topLine
+        if @topLine > 0 and @topLine <= @images.length
             t.hideImagesInRange @images[0] @images[@topLine-1]
-        if @botLine < @images.length
-            t.hideImagesInRange @images[@botLine] @images[-1]
+        if @botLine >= @topLine and @botLine+1 < @images.length
+            t.hideImagesInRange @images[@botLine+1] @images[-1]
         
         @drawKnob()
                 
@@ -259,7 +290,9 @@ function mapscr extends mapview
                 
         ⮐  if @hidden() or @collapsed()
         
-        ky = @lineOffset @state.s.view[1]
+        maxKy = max 0 @mapHeight-@knobHeight
+        offsetRow = @lineOffset @state.s.view[1]
+        ky    = clamp 0 maxKy offsetRow
         
         @cells.screen.t.placeImageOverlay @knobId @cells.x @cells.y ky @mapWidth @knobHeight
 

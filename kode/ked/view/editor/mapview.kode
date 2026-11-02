@@ -157,16 +157,30 @@ function mapview extends view
         
         Buffer.alloc bytes
     
+    lineRows: y -> 1
+
+    lineOffsetPixels: y -> y*@pixelsPerRow
+
     updateLine: y data => 
     
         data ?= @lineData()        
         ⮐  if empty data
+
+        csz = @cells.screen.t.cellsz
+        ⮐  if empty csz
+        @csz = csz
+
         id = @imgId+y
         @imageForLine data @getSegls()[y] y
         t = @cells.screen.t
         t.deleteImage id
         t.sendImageData data id data.length/3 1
-        t.placeLineImage id @cells.x @cells.y+@rowOffset y*@pixelsPerRow @pixelsPerRow
+
+        py = @lineOffsetPixels y
+        rh = @lineRows(y) * @pixelsPerRow
+
+        if py >= 0 and py+rh <= @cells.rows*csz[1]
+            t.placeLineImage id @cells.x @cells.y+@rowOffset py rh
         
     updateFromLine: y =>
         
@@ -248,7 +262,7 @@ function mapview extends view
         # @csz = t.cellsz # should have been set in createImages 
         
         for id,y in @images
-            t.placeLineImage id @cells.x @cells.y+@rowOffset y*@pixelsPerRow @pixelsPerRow
+            t.placeLineImage id @cells.x @cells.y+@rowOffset (@lineOffsetPixels(y)) (@lineRows(y)*@pixelsPerRow)
         @
         
     draw: =>
