@@ -35,6 +35,34 @@ cells = cols:40 rows:20
         s.scaleOfLine 0 ▸ 1
         s.scaleOfLine 1 ▸ 1
 
+    ▸ the configured scales change or disable the scaling
+
+        s = new state cells 'test_scale_config'
+        s.syntax.setExt 'md'
+        s.loadLines ['# one' '## two' '### three' '#### four' '##### five']
+
+        s.applyScales {enabled:true headings:{h1:6 h2:5 h3:4 h4:3 h5:2}}
+
+        s.scaleOfLine 0 ▸ 6
+        s.scaleOfLine 1 ▸ 5
+        s.scaleOfLine 2 ▸ 4
+        s.scaleOfLine 3 ▸ 3
+        s.scaleOfLine 4 ▸ 2
+
+        s.applyScales {enabled:false}
+
+        s.scaleOfLine 0 ▸ 1
+        s.scaleOfLine 1 ▸ 1
+
+        s.applyScales {}
+
+        s.scaleOfLine 0 ▸ 3
+        s.scaleOfLine 1 ▸ 2
+
+        s.applyScales {enabled:true headings:{h1:9}}
+
+        s.scaleOfLine 0 ▸ 7
+
     #  ████████    ███████   ██     ██        ███   ███    ███████   ███████
     #  ███   ███  ███   ███  ███   ███        ████ ████  ███   ███  ███   ███
     #  ███████    ███   ███  ███ █ ███        ███ █ ███  █████████  ███████

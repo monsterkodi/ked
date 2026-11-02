@@ -39,6 +39,7 @@ function state extends events
         #  the display scale of markdown headings: syntax class -> rows
         @scales     = {h1:3 h2:2}
         @scaledExts = ['md' 'markdown']
+        @scaling    = true
 
         @yankFlash      = null
         @yankFlashTimer = null
@@ -339,12 +340,26 @@ function state extends events
     #  the height of a line in rows. most lines are one row high,
     #  a markdown heading is drawn in a block of 2 or 3 rows.
 
+    #  the config controls how markdown headings are scaled, or disables
+    #  scaling altogether
+
+    applyScales: conf =>
+
+        @scaling = conf?.enabled != false
+
+        if valid conf?.headings
+            @scales = conf.headings
+        else
+            @scales = {h1:3 h2:2}
+
     scaleOfLine: li =>
 
+        ⮐ 1 if not @scaling
         ⮐ 1 if @syntax.ext not in @scaledExts
 
         for clss,scale of @scales
-            ⮐ scale if @syntax.hasClass li clss
+            s = clamp 1 7 scale
+            ⮐ s if s > 1 and @syntax.hasClass li clss
 
         1
 

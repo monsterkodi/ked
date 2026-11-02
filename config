@@ -19,6 +19,15 @@ project
 mouse
     wheelSteps    2
     wheelSpeedup  2
+
+scale
+    enabled   true
+    headings
+        h1  6
+        h2  5
+        h3  4
+        h4  3
+        h5  2
     
 novim
     autoStart           false
