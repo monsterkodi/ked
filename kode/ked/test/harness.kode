@@ -1,11 +1,12 @@
 
-use ../util      ◆ harness
-use ../view/base ◆ input crumbs
-use ../view/menu ◆ choices greet
+use ../util        ◆ harness
+use ../view/base   ◆ input crumbs
+use ../view/menu   ◆ choices greet
+use ../view/screen ◆ screen
 
 ▸ harness
 
-    ▸ the terminal is left alone
+    ▸ write and written
 
         h = new harness
 
@@ -15,7 +16,7 @@ use ../view/menu ◆ choices greet
 
         h.t.written() ▸ 'hello'
 
-    ▸ the screen is text
+    ▸ crumbs are shown
 
         h = new harness
 
@@ -31,7 +32,7 @@ use ../view/menu ◆ choices greet
 
         h.row 1 ▸ ''
 
-    ▸ a key goes to the view
+    ▸ key presses
 
         h = new harness
 
@@ -46,7 +47,7 @@ use ../view/menu ◆ choices greet
 
         c.currentIndex() ▸ 1
 
-    ▸ the focus goes to a view
+    ▸ view focus
 
         h = new harness
 
@@ -57,7 +58,7 @@ use ../view/menu ◆ choices greet
 
         i.hasFocus() ▸ true
 
-    ▸ a text goes into a view
+    ▸ view typing
 
         h = new harness
 
@@ -83,9 +84,27 @@ use ../view/menu ◆ choices greet
         i.draw()
 
         h.row 0 ▸ 'abc'
-        h.rowMarked 0 ▸ 'a\x1b[7;4:1mb\x1b[0mc'
+        h.rowMarked 0 ▸ "a#{screen.MAIN_MARK}b#{screen.END_MARK}c"
 
-    ▸ the greeter blacks out the window
+    ▸ selection is marked
+
+        h = new harness
+
+        h.screen.set 0 0 'a'
+        h.screen.set_mark 0 0 'selection'
+
+        h.rowMarked 0 ▸ "#{screen.SELECT_MARK}a#{screen.END_MARK}"
+
+    ▸ highlight is marked
+
+        h = new harness
+
+        h.screen.set 0 0 'a'
+        h.screen.set_mark 0 0 'highlight'
+
+        h.rowMarked 0 ▸ "#{screen.HILGHT_MARK}a#{screen.END_MARK}"
+
+    ▸ greeter blacks out the window
 
         h = new harness
 
@@ -97,26 +116,50 @@ use ../view/menu ◆ choices greet
         h.screen.get_bg 0  23 ▸ [0 0 0]
         h.screen.get_bg 79 0  ▸ [0 0 0]
 
-    ▸ the colored screen has the colors of the cells
+    ▸ colored screen 
+    
+        ▸ draws colors
 
-        h = new harness
-
-        h.screen.set 0 0 'a' [10 20 30] [1 2 3]
-
-        line = h.screen.textColored()[0]
-
-        line.includes '\x1b[48;2;1;2;3m'     ▸ true
-        line.includes '\x1b[38;2;10;20;30m'  ▸ true
-        line.includes 'a'                    ▸ true
-        line.endsWith '\x1b[0m'              ▸ true
-
-    ▸ the colored screen marks the cursor
-
-        h = new harness
-
-        h.screen.set 0 0 'a' [10 20 30] [1 2 3]
-        h.screen.set_mark 0 0 'main'
-
-        line = h.screen.textColored()[0]
-
-        line.includes '\x1b[7;4:1ma\x1b[0m' ▸ true
+            h = new harness
+    
+            h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+    
+            line = h.screen.textColored()[0]
+    
+            line.includes '\x1b[48;2;1;2;3m'     ▸ true
+            line.includes '\x1b[38;2;10;20;30m'  ▸ true
+            line.includes 'a'                    ▸ true
+            line.endsWith '\x1b[0m'              ▸ true
+    
+        ▸ marks the cursor
+    
+            h = new harness
+    
+            h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+            h.screen.set_mark 0 0 'main'
+    
+            line = h.screen.textColored()[0]
+    
+            line.includes "#{screen.MAIN_MARK}a#{screen.END_MARK}" ▸ true
+    
+        ▸ marks the selection
+    
+            h = new harness
+    
+            h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+            h.screen.set_mark 0 0 'selection'
+    
+            line = h.screen.textColored()[0]
+    
+            line.includes "#{screen.SELECT_MARK}a#{screen.END_MARK}" ▸ true
+    
+        ▸ marks the highlight
+    
+            h = new harness
+    
+            h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+            h.screen.set_mark 0 0 'highlight'
+    
+            line = h.screen.textColored()[0]
+    
+            line.includes "#{screen.HILGHT_MARK}a#{screen.END_MARK}" ▸ true

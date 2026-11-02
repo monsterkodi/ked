@@ -12,13 +12,13 @@ use ../../../kxk    ▪ kseg
 use ../../theme     ◆ color
 use ../../edit/tool ◆ belt
 
-MAIN_MARK   = '\x1b[7;4:1m'
-MULTI_MARK  = '\x1b[7;4:5m'
-SELECT_MARK = '\x1b[7;4:3m'
-HILGHT_MARK = '\x1b[7;4:4m'
-END_MARK    = '\x1b[0m'
-
 function screen
+
+    @MAIN_MARK: '\x1b[4:1m'
+    @MULTI_MARK: '\x1b[4:5m'
+    @SELECT_MARK: '\x1b[7;4:3m'
+    @HILGHT_MARK: '\x1b[7;4:4m'
+    @END_MARK: '\x1b[0m'
 
     @: @t -> 
     
@@ -215,11 +215,12 @@ function screen
                 ch = ' ' if not valid ch
                 
                 if mark = @c[y][x].mark
-                    if mark == 'main'
-                        line += MAIN_MARK
-                    else
-                        line += MULTI_MARK
-                    line += ch + END_MARK
+                    switch mark
+                        'selection' ➜ line += screen.SELECT_MARK
+                        'highlight' ➜ line += screen.HILGHT_MARK
+                        'main'      ➜ line += screen.MAIN_MARK
+                                    ➜ line += screen.MULTI_MARK
+                    line += ch + screen.END_MARK
                 else
                     line += ch
             
@@ -256,14 +257,18 @@ function screen
                     pfg = fg
                 
                 if mark = cell.mark
-                    line += mark == 'main' ? MAIN_MARK : MULTI_MARK
-                    line += ch + END_MARK
+                    switch mark
+                        'selection' ➜ line += screen.SELECT_MARK
+                        'highlight' ➜ line += screen.HILGHT_MARK
+                        'main'      ➜ line += screen.MAIN_MARK
+                                    ➜ line += screen.MULTI_MARK
+                    line += ch + screen.END_MARK
                     pbg = ''
                     pfg = ''
                 else
                     line += ch
             
-            lines.push line + END_MARK
+            lines.push line + screen.END_MARK
         
         lines
     

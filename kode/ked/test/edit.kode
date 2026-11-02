@@ -31,7 +31,39 @@ hed = cols rows ext='md' feats=[]->
         h.key e 'shift+down'
         e.state.mainCursor()[1] ▸ 3
         e.state.s.selections ▸ [[0 0 0 3]]
-        
+
+    ▸ selection cells are marked
+
+        [h e] = hed 40 10
+        e.state.loadLines ['abcdef']
+
+        e.state.setCursors [[2 0]]
+        e.state.setSelections [[0 0 2 0]]
+
+        h.screen.init()
+        e.draw()
+
+        h.screen.c[0][0].mark ▸ 'selection'
+        h.screen.c[0][1].mark ▸ 'selection'
+        h.screen.c[0][2].mark ▸ 'main'
+        (valid h.screen.c[0][3].mark) ▸ false
+
+    ▸ highlight cells are marked
+
+        [h e] = hed 40 10
+        e.state.loadLines ['abcdef']
+
+        e.state.setHighlights [[0 0 3 0]]
+        e.state.setCursors [[5 0]]
+
+        h.screen.init()
+        e.draw()
+
+        h.screen.c[0][0].mark ▸ 'highlight'
+        h.screen.c[0][2].mark ▸ 'highlight'
+        (valid h.screen.c[0][3].mark) ▸ false
+        h.screen.c[0][5].mark ▸ 'main'
+
     # █████████   ███████    ███████    ███████   ███      ████████   ███████   ███████   ██     ██  ██     ██  ████████  ███   ███  █████████
     #    ███     ███   ███  ███        ███        ███      ███       ███       ███   ███  ███   ███  ███   ███  ███       ████  ███     ███   
     #    ███     ███   ███  ███  ████  ███  ████  ███      ███████   ███       ███   ███  █████████  █████████  ███████   ███ █ ███     ███   
