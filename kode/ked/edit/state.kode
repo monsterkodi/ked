@@ -46,6 +46,7 @@ function state extends events
 
         @rowCache    = null
         @rowCacheExt = null
+        @maxWidthCache = 0
 
         @clearSingle()
 
@@ -380,11 +381,16 @@ function state extends events
         ⮐ @rowCache if @rowCache and @rowCacheExt == @syntax.ext
 
         rows = [0]
-        for li in 0...@s.lines.length
-            rows.push (rows[li] + @lineHeight(li))
+        maxWidth = 0
 
-        @rowCacheExt = @syntax.ext
-        @rowCache = rows
+        for li in 0...@s.lines.length
+            h = @lineHeight li
+            rows.push (rows[li] + h)
+            maxWidth = max maxWidth (kseg.width(@s.lines[li]) * h)
+
+        @maxWidthCache = maxWidth
+        @rowCacheExt   = @syntax.ext
+        @rowCache      = rows
 
     totalRows: =>
 
@@ -474,8 +480,9 @@ function state extends events
     posForCell: x row =>
 
         li = @lineAtRow row
+        h  = @lineHeight li
 
-        [int(x / @lineHeight(li)) + @s.view[0] li]
+        [int((x+@s.view[0]) / h) li]
 
     clearLines: =>
 
@@ -589,8 +596,14 @@ function state extends events
 
         view[1] = clamp 0 @maxViewLine() view[1]
 
-        maxOffsetX = max 0 @maxLineWidth-int(@cells.cols/@lineHeight(@mainCursor()[1]))+2
-        maxOffsetX = max maxOffsetX @mainCursor()[0]-int(@cells.cols/@lineHeight(@mainCursor()[1]))+2
+        @rowPrefix()
+
+        cursor      = @mainCursor()
+        cursorScale = @lineHeight cursor[1]
+        cursorRight = cursor[0]*cursorScale + cursorScale
+
+        maxOffsetX = max 0 @maxWidthCache-@cells.cols+2
+        maxOffsetX = max maxOffsetX cursorRight-@cells.cols+2
         view[0] = clamp 0 maxOffsetX view[0]
         
         ⮐  if view eql @s.view
@@ -651,8 +664,7 @@ function state extends events
         view[1] = min view[1] @maxViewLine()
 
         if not @skipAdjustViewForMainCursor
-            cols = max 1 int(@cells.cols / height)
-            view[0] = max 0 x - cols + 2 # adding one for wide graphemes
+            view[0] = max 0 x*height + height + 1 - @cells.cols
         
         ⮐  if view eql @s.view
         

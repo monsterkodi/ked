@@ -76,7 +76,7 @@ function complete
         state = @editor.state
         scale = state.scaleOfLine cursor[1]
 
-        [(cursor[0] - state.s.view[0]) * scale, state.rowOfLine(cursor[1])]
+        [cursor[0]*scale - state.s.view[0], state.rowOfLine(cursor[1])]
 
     word: @turd ->
     

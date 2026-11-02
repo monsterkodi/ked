@@ -154,9 +154,9 @@ function editor extends draw
 
         scale = @state.scaleOfLine cursor[1]
         row   = @state.rowOfLine cursor[1]
-        cols  = max 1 int(@cells.cols / scale)
+        x     = cursor[0]*scale - v[0]
 
-        v[0] <= cursor[0] < v[0] + cols and 0 <= row and row + scale <= @cells.rows
+        0 <= x and x + scale <= @cells.cols and 0 <= row and row + scale <= @cells.rows
         
     # ████████   ███████    ███████  ███   ███   ███████  
     # ███       ███   ███  ███       ███   ███  ███       

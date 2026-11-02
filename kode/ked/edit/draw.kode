@@ -108,59 +108,46 @@ function draw extends view
     
         classes ?= syntax.getClasses y # one scan per line, not per column
     
-        linel = (kseg.width(line) - view[0]) * scale
-        
-        c = 0
-        firstIndex = kseg.indexAtWidth line view[0] # check if leftmost grapheme is 
-        firstSegi  = kseg.segiAtWidth line view[0]  # cut in half, if yes, start at
-        c = 1 if firstIndex != firstSegi            # one column to the right 
-        
-        cols = max 1 int(@cells.cols / scale) # logical columns that fit
-        x = 0
+        linel = kseg.width(line)*scale - view[0]
+
         si = 0
         sw = 0
-        while x < cols
-            
-            ci = x+view[0]
-            # advance the grapheme cursor instead of rescanning the line
-            # from the start for every column - colorful long lines are
-            # O(cols*linewidth) otherwise
-            while sw < ci and si < line.length
-                sw += kseg.segWidth line[si]
-                si += 1
-            
-            # log "draw #{@name} #{ci} #{si} #{view} #{r3 kseg.str(line)} #{row} #{@cells.cols} #{@cells.rows} #{y} #{lines.length}"
-            
-            if si >= line.length
-                # log "#{@name} #{r5 'break!'}"
-                break 
-            
-            clss = classes[ci]
-            clss ?= 'text'
-            
-            fg = syntax.getColor ci y clss
 
-            for span in fgSpans
-                if span[0] <= ci < span[1]
-                    fg = span[2]
-                    break
-                
-            ch = syntax.getChar ci y line[si] clss
-            if ch == "#" ➜ checkColor = true
-            else if ch in '0█' 
-                if clss.endsWith('header') ➜ headerClass = clss
+        while si < line.length
 
             cw = kseg.segWidth line[si]
             cw = max 1 cw # todo: this is to prevent endless loop with zero width characters, should be fixed eventually
-            x += cw
-            
-            if (c + cw) * scale <= @cells.cols
-                # @cells.meta_clone c row # ϵ⌶⟙ℍϵℜ 𝛋𝚒⟅⟅ 𝚒𝜏 ⊚ℜ ⫐◯ 𝚒𝜏!
-                @cells.add_scaled c*scale row ch fg bg scale
-                c += cw
-            
-            if clss == 'invert_bg'
-                bg = @color.bg
+
+            px = sw*scale - view[0]
+
+            break if px >= @cells.cols
+
+            if px >= 0 and px+cw*scale <= @cells.cols
+
+                ci = sw
+                clss = classes[ci]
+                clss ?= 'text'
+
+                fg = syntax.getColor ci y clss
+
+                for span in fgSpans
+                    if span[0] <= ci < span[1]
+                        fg = span[2]
+                        break
+
+                ch = syntax.getChar ci y line[si] clss
+                if ch == "#" ➜ checkColor = true
+                else if ch in '0█'
+                    if clss.endsWith('header') ➜ headerClass = clss
+
+                # @cells.meta_clone px row # ϵ⌶⟙ℍϵℜ 𝛋𝚒⟅⟅ 𝚒𝜏 ⊚ℜ ⫐◯ 𝚒𝜏!
+                @cells.add_scaled px row ch fg bg scale
+
+                if clss == 'invert_bg'
+                    bg = @color.bg
+
+            sw += cw
+            si += 1
                 
         @drawRowBackground y row linel scale
                 
@@ -174,8 +161,8 @@ function draw extends view
 
         for span in spans
 
-            x1 = max 0 ((span[0]-view[0]) * scale)
-            x2 = min @cells.cols ((span[1]-view[0]) * scale)
+            x1 = max 0 (span[0]*scale - view[0])
+            x2 = min @cells.cols (span[1]*scale - view[0])
 
             continue if x1 >= x2
 
@@ -225,7 +212,6 @@ function draw extends view
             li    = highlight[1]
             row   = @state.rowOfLine li
             scale = @state.scaleOfLine li
-            cols  = max 1 int(@cells.cols / scale)
             
             break if row >= @cells.rows
             continue if row < 0
@@ -233,12 +219,17 @@ function draw extends view
                 
             # clip the span to the visible columns - a bracket pair spanning
             # a very long line must not redraw every column every frame
-            xs = max highlight[0], vx
-            xe = min highlight[2], vx+cols
-            
+            xs = max highlight[0], int(vx/scale)
+            xe = min highlight[2], (int((vx+@cells.cols-1)/scale)+1)
+
+            continue if xs >= xe
+
             for x in xs...xe
 
-                cx  = (x-vx)*scale
+                cx = x*scale - vx
+                continue if cx < 0
+                continue if cx+scale > @cells.cols
+
                 hlc = @cells.get_char cx row
 
                 switch hlc
@@ -282,7 +273,7 @@ function draw extends view
             for li in start..selection[3]
                 
                 scale = @state.scaleOfLine li
-                cols  = max 1 int(@cells.cols / scale)
+                vx    = @state.s.view[0]
                 
                 break if row >= @cells.rows
                 break if row + scale > @cells.rows
@@ -297,11 +288,15 @@ function draw extends view
                 else
                     xe = kseg.width(@state.s.lines[li])
                 
-                xs = max xs @state.s.view[0]
-                xe = min xe @state.s.view[0]+cols
-                
+                xs = max xs int(vx/scale)
+                xe = min xe (int((vx+@cells.cols-1)/scale)+1)
+
+                continue if xs >= xe
+
                 for x in xs...xe
-                    cx = (x-@state.s.view[0])*scale
+                    cx = x*scale - vx
+                    continue if cx < 0
+                    continue if cx+scale > @cells.cols
                     for r in row...min(@cells.rows, row+scale)
                         for i in 0...scale
                             @cells.set_bg cx+i r bg 
@@ -329,7 +324,6 @@ function draw extends view
             for li in start..rng[3]
 
                 scale = @state.scaleOfLine li
-                cols  = max 1 int(@cells.cols / scale)
 
                 break if row >= @cells.rows
                 break if row + scale > @cells.rows
@@ -344,11 +338,15 @@ function draw extends view
                 else
                     xe = kseg.width(@state.s.lines[li])
 
-                xs = max xs vx
-                xe = min xe vx+cols
+                xs = max xs int(vx/scale)
+                xe = min xe (int((vx+@cells.cols-1)/scale)+1)
+
+                continue if xs >= xe
 
                 for x in xs...xe
-                    cx = (x-vx)*scale
+                    cx = x*scale - vx
+                    continue if cx < 0
+                    continue if cx+scale > @cells.cols
                     for r in row...min(@cells.rows, row+scale)
                         for i in 0...scale
                             @cells.set_bg cx+i r bg
@@ -380,7 +378,7 @@ function draw extends view
             if @isCursorVisible cursor
              
                 scale = @state.scaleOfLine cursor[1]
-                cx = (cursor[0]-s.view[0])*scale
+                cx = cursor[0]*scale - s.view[0]
                 @cells.draw_rounded_multi_cursor cx @state.rowOfLine(cursor[1]) bg scale
                         
         if @isCursorVisible mainCursor
@@ -392,7 +390,7 @@ function draw extends view
             if not @hasFocus() ➜ bg = color.darken bg 
              
             scale = @state.scaleOfLine mainCursor[1]
-            [x y] = [ (mainCursor[0]-s.view[0])*scale, @state.rowOfLine(mainCursor[1]) ]
+            [x y] = [ mainCursor[0]*scale - s.view[0], @state.rowOfLine(mainCursor[1]) ]
              
             if s.cursors.length <= 1
                 if @isCursorInEmpty()
@@ -452,7 +450,7 @@ function draw extends view
             ix0 = chunk.index
 
             if not custom ix0
-                x = (ix0-@state.s.view[0])*scale
+                x = ix0*scale - @state.s.view[0]
                 @cells.set x row '▎' theme.syntax[clss+' highlight'] theme.syntax[clss]
             
             continue if chunk.segl.length <= 1
@@ -460,7 +458,7 @@ function draw extends view
             ix1 = chunk.index + chunk.segl.length - 1
 
             if not custom ix1
-                x = (ix1-@state.s.view[0])*scale
+                x = ix1*scale - @state.s.view[0]
                 @cells.set x row '▋' theme.syntax[clss] theme.syntax[clss+' shadow']
 
 export draw
