@@ -681,11 +681,12 @@ function state extends events
     initView: =>
 
         view = @s.view.asMutable()
-        
-        view[1] = clamp 0 @maxViewLine() view[1]
+
+        topRow = clamp 0 @maxTopRow() @viewTopRow()
+        view[1] = @lineAtAbsoluteRow topRow
         view[0] = max 0 view[0]
 
-        @setView view
+        @setView view (topRow - @rowsBeforeLine(view[1]))
 
     setView: view scrollOffset=0 =>
 

@@ -687,6 +687,40 @@ cells = cols:40 rows:20
         data[19] ▸ bg[1]
         data[20] ▸ bg[2]
 
+    ▸ clicking a cut line in the map keeps the row offset
+
+        h = new harness cols:40 rows:10
+        e = new editor h.screen 'test_scale_map_click_offset' []
+
+        e.layout 0 0 40 10
+        e.state.syntax.setExt 'md'
+
+        lines = []
+        for i in 0...20
+            lines.push '# h1'
+            for j in 0...9
+                lines.push 'text'
+        e.state.loadLines lines
+        e.state.applyScales {enabled:true md:{h1:7}}
+
+        m = new mapscr e
+        m.cells.layout 30 0 8 10
+        m.csz = [10 20]
+
+        e.state.setView [0 0]
+        m.calcView()
+        m.scrollToPixel [0 (m.mapY + m.lineOffset(0) + 12)]
+
+        e.state.s.view[1] ▸ 0
+        e.state.s.scrollOffset ▸ 3
+
+        h.screen.init()
+        e.draw()
+
+        h.screen.get_char(0 0) ▸ ' '
+        h.screen.get_char(0 3) ▸ ' '
+        h.screen.get_char(0 4) ▸ 't'
+
     ▸ the map follows the display rows near the end of a long file
 
         h = new harness cols:40 rows:10
@@ -853,6 +887,22 @@ cells = cols:40 rows:20
 
         h.screen.get_char(0 0) ▸ 'a'
         h.screen.get_char(0 1) ▸ 'b'
+
+    ▸ layout keeps the row offset
+
+        h = new harness cols:20 rows:8
+        e = new editor h.screen 'test_scale_offset_layout' []
+
+        e.layout 0 0 20 8
+        e.state.syntax.setExt 'md'
+        e.state.loadLines ['# abc' 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j']
+
+        e.state.setScrollTop 1
+
+        e.layout 0 0 20 8
+
+        e.state.viewTopRow() ▸ 1
+        e.state.s.scrollOffset ▸ 1
 
     ▸ moving the cursor into view clears the scroll offset
 

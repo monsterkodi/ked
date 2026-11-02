@@ -156,7 +156,7 @@ function mapscr extends mapview
         
         mc = @state.mainCursor()
         
-        if view eql @state.s.view
+        if view eql @state.s.view and scrollOffset == @state.s.scrollOffset
             if li != mc[1]
                 @state.setCursors [[mc[0] li+clickOffset]] main:0 adjust:false
                 ⮐  redraw:true
