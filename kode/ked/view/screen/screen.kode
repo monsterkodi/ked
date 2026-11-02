@@ -12,13 +12,19 @@ use ../../../kxk    ▪ kseg
 use ../../theme     ◆ color
 use ../../edit/tool ◆ belt
 
+MAIN_MARK   = '\x1b[7;4:1m'
+MULTI_MARK  = '\x1b[7;4:5m'
+SELECT_MARK = '\x1b[7;4:3m'
+HILGHT_MARK = '\x1b[7;4:4m'
+END_MARK    = '\x1b[0m'
+
 function screen
 
     @: @t -> 
     
         @init()        
     
-    init: => # called by ked before every screen redraw
+    init: => # called by ked before every redraw
     
         @rows = @t.rows()
         @cols = @t.cols()
@@ -49,11 +55,8 @@ function screen
             @set x y char fg bg
             1
 
-    #  the blocks of a scaled line form a run of adjacent cells. a run is
-    #  remembered so the next frame can erase its whole rectangle: erasing
-    #  only the top left cell of a block leaves the row offsets of the cells
-    #  below it behind, and the terminal shifts a new block right when it
-    #  hits one of those
+    #  the blocks of a scaled line form a run of adjacent cells. 
+    #  a run is remembered so the next frame can erase its whole rectangle.
 
     addRun: x y scale w =>
 
@@ -65,8 +68,6 @@ function screen
                 ⮐
 
         @frameRuns.push [x y scale w]
-
-    #  a character in a block of scale by scale cells
 
     scaled_char: char scale width -> "\x1b]66;s=#{scale}:w=#{width};#{char}\x07"
 
@@ -178,9 +179,6 @@ function screen
         []
         
     #  the buffer as text, one line per row
-    #  
-    #  the trailing spaces are gone, so a line can be compared as it is
-    #  a wide character takes two cells, and the second one is empty
     
     text: =>
         
@@ -201,11 +199,7 @@ function screen
         
         lines
     
-    #  the buffer as text, with the cursors marked
-    #  
-    #  a cursor is a character with escape sequences around it: the main
-    #  cursor is in the colors of the other way round and underlined, the
-    #  other cursors are in the colors of the other way round
+    #  the buffer as uncolored text, with the cursors, selections and highlights marked
     
     textMarked: =>
         
@@ -222,10 +216,10 @@ function screen
                 
                 if mark = @c[y][x].mark
                     if mark == 'main'
-                        line += '\x1b[7;4:3m'
+                        line += MAIN_MARK
                     else
-                        line += '\x1b[7m'
-                    line += ch + '\x1b[0m'
+                        line += MULTI_MARK
+                    line += ch + END_MARK
                 else
                     line += ch
             
@@ -233,13 +227,7 @@ function screen
         
         lines
     
-    #  the buffer as text, with the colors of the cells and the cursors
-    #  
-    #  a line ends with a reset, so its colors do not run into the text
-    #  that follows it
-    #  
-    #  a cursor is a character with escape sequences around it, the same
-    #  way it is marked in textMarked
+    #  the buffer as colored text, with the cursors, selections and highlights marked
     
     textColored: =>
         
@@ -268,19 +256,16 @@ function screen
                     pfg = fg
                 
                 if mark = cell.mark
-                    line += mark == 'main' ? '\x1b[7;4:3m' : '\x1b[7m'
-                    line += ch + '\x1b[0m'
-                    #  the reset also clears the colors, so they are set again
+                    line += mark == 'main' ? MAIN_MARK : MULTI_MARK
+                    line += ch + END_MARK
                     pbg = ''
                     pfg = ''
                 else
                     line += ch
             
-            lines.push line + '\x1b[0m'
+            lines.push line + END_MARK
         
         lines
-    
-    #  a cell that carries a cursor
     
     set_mark: x y kind =>
         
@@ -298,12 +283,6 @@ function screen
         @t.write @renderString()
 
     #  erase a rectangle of cells, including any scaled text drawn there
-    #  earlier in the frame
-    #
-    #  the terminal keeps the cells below the first row of a text sizing
-    #  block after the block itself is overwritten, so the rectangle is
-    #  erased on the terminal as well, before the frame is written. this is
-    #  what lets a popup draw over a scaled line.
 
     erase_scaled: x1 y1 x2 y2 bg=null =>
 
@@ -322,10 +301,6 @@ function screen
                 @c[y][x].char = ' '
                 @c[y][x].bg   = bg if bg?
 
-        #  the terminal removes a whole block when any of its cells is
-        #  erased, so its other cells must be written too, or the null
-        #  placeholders would shift the glyphs after it to the left
-
         for [bx by scale w] in @frameBlocks ? []
             continue if bx > x2 or bx + scale*w - 1 < x1
             continue if by > y2 or by + scale   - 1 < y1
@@ -334,11 +309,7 @@ function screen
                     @c[yy][xx].char = ' '
 
     #  the frame as it is written to the terminal
-    #
-    #  the block runs of the previous frame are erased first. the erase must
-    #  cover the whole rectangle of a run: the terminal keeps the row offset
-    #  of the cells below a block's first row even after the block is gone
-
+    
     renderString: =>
 
         s = ''

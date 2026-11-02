@@ -68,7 +68,7 @@ toExport["harness"] = async function ()
         i.state.setMainCursor(1,0)
         i.draw()
         compare(h.row(0),'abc')
-        compare(h.rowMarked(0),'a\x1b[7;4:3mb\x1b[0mc')
+        compare(h.rowMarked(0),'a\x1b[7;4:1mb\x1b[0mc')
     })
     await section("the greeter blacks out the window", async function ()
     {
@@ -96,7 +96,7 @@ toExport["harness"] = async function ()
         h.screen.set(0,0,'a',[10,20,30],[1,2,3])
         h.screen.set_mark(0,0,'main')
         line = h.screen.textColored()[0]
-        compare(line.includes('\x1b[7;4:3ma\x1b[0m'),true)
+        compare(line.includes('\x1b[7;4:1ma\x1b[0m'),true)
     })
 }
 toExport["harness"]._section_ = true

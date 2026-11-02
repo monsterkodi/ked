@@ -83,7 +83,7 @@ use ../view/menu ◆ choices greet
         i.draw()
 
         h.row 0 ▸ 'abc'
-        h.rowMarked 0 ▸ 'a\x1b[7;4:3mb\x1b[0mc'
+        h.rowMarked 0 ▸ 'a\x1b[7;4:1mb\x1b[0mc'
 
     ▸ the greeter blacks out the window
 
@@ -119,4 +119,4 @@ use ../view/menu ◆ choices greet
 
         line = h.screen.textColored()[0]
 
-        line.includes '\x1b[7;4:3ma\x1b[0m' ▸ true
+        line.includes '\x1b[7;4:1ma\x1b[0m' ▸ true
