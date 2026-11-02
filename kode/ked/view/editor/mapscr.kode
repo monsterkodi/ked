@@ -10,6 +10,7 @@
 
 use ../../../kxk    ▪ post
 use ../../theme     ◆ theme
+use ../../util      ◆ config
 use ../../util/img  ◆ squares
 use ../../edit/tool ◆ belt
 use                 ◆ mapview
@@ -145,21 +146,24 @@ function mapscr extends mapview
         
         row = @topRow + int((pixel[1] - @mapY) / @pixelsPerRow)
         li  = @state.lineAtAbsoluteRow row
+        scrollOffset = row - @state.rowsBeforeLine(li)
+        # log "scrollToPixel #{pixel[1]} -> row: #{row} li:  #{li} scroff: #{scrollOffset}"
+        clickOffset = config.data?.mapscroll?.clickOffset ? 0
         
         view[1] = li
-        view[1] -= 5 # offset so that clicking inside a header scrolls it into view
+        view[1] -= clickOffset # offset so that clicking inside a header scrolls it into view
         view[1] = clamp 0 @state.maxViewLine() view[1]
         
         mc = @state.mainCursor()
         
         if view eql @state.s.view
             if li != mc[1]
-                @state.setCursors [[mc[0] li+5]] main:0 adjust:false
+                @state.setCursors [[mc[0] li+clickOffset]] main:0 adjust:false
                 ⮐  redraw:true
             ⮐  
         
-        @state.setView view
-        @state.setCursors [[mc[0] li+5]] main:0 adjust:false
+        @state.setView view scrollOffset
+        @state.setCursors [[mc[0] li+clickOffset]] main:0 adjust:false
         
         @drawKnob()
         redraw:true

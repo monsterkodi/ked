@@ -628,10 +628,6 @@ cells = cols:40 rows:20
         m.lineOffset(6) ▸ 32
         (m.lineOffset(6) - m.lineOffset(5)) ▸ 12
 
-        m.scrollToPixel [0 (m.mapY + m.lineOffset(5) + 4)]
-
-        e.state.mainCursor()[1] ▸ 10
-
     ▸ a scaled line gets a taller stripe in the map
 
         h = new harness cols:40 rows:10

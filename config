@@ -17,8 +17,11 @@ project
         ked.log
         
 mouse
-    wheelSteps    2
+    wheelSteps    1
     wheelSpeedup  2
+    
+mapScroll
+    clickOffset   0
 
 scale
     enabled   true
