@@ -21,11 +21,11 @@ mouse
     wheelSpeedup  2
     
 mapScroll
-    clickOffset   0
+    clickOffset   5
 
 cursor
-    topOffset     7
-    bottomOffset  50%
+    topOffset     15%
+    bottomOffset  33%
 
 scale
     enabled   true
@@ -35,9 +35,9 @@ scale
         h3        5
         h4        4
         h5        3
-        li1       3
-        li2       2
-        # class     2
+        li1       2
+    kode
+        class     2
         # function  3
         
 novim

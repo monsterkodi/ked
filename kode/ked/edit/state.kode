@@ -354,23 +354,17 @@ function state extends events
     applyScales: conf =>
 
         @scaling = conf?.enabled != false
-
-        if valid conf?.md
-            @scales = conf.md
-        else
-            @scales = {h1:3 h2:2}
-
+        @scales  = conf ? {}
         @rowCache = null
 
     scaleOfLine: li =>
 
         ⮐ 1 if not @scaling
-        ⮐ 1 if @syntax.ext not in @scaledExts
+        ⮐ 1 if @syntax.ext not in Object.keys @scales
 
-        for clss,scale of @scales
+        for clss,scale of @scales[@syntax.ext]
             s = clamp 1 7 scale
             ⮐ s if s > 1 and @syntax.hasClass li clss
-
         1
 
     lineHeight: li => @scaleOfLine li

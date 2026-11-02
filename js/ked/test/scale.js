@@ -1,7 +1,7 @@
 var toExport = {}
 var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
-var bg, big, bx, by, c, cells, csz, cx, data, e, first, h, i, j, lines, m, out, rect, s, saved, sc, scale, second, small, w, xx, yy
+var bg, bx, by, c, cells, csz, cx, data, e, first, h, hed, i, j, lines, m, out, rect, s, saved, sc, scale, second, small, tstt, w, xx, yy
 
 import kxk from "../../kxk.js"
 let kseg = kxk.kseg
@@ -22,12 +22,33 @@ import mapscr from "../view/editor/mapscr.js"
 import scroll from "../view/base/scroll.js"
 
 cells = {cols:40,rows:20}
+
+tstt = function (ext = 'md')
+{
+    var s
+
+    s = new state(cells,'test_scale')
+    s.syntax.setExt(ext)
+    s.applyScales({enabled:true,md:{h1:3,h2:2}})
+    return s
+}
+
+hed = function (cols, rows, ext = 'md', feats = [])
+{
+    var e, h
+
+    h = new harness
+    e = new editor(h.screen,'test_scale',feats)
+    e.layout(0,0,cols,rows)
+    e.state.syntax.setExt(ext)
+    e.state.applyScales({enabled:true,md:{h1:3,h2:2}})
+    return [h,e]
+}
 toExport["scale"] = async function ()
 {
     await section("markdown headings scale by level", async function ()
     {
-        s = new state(cells,'test_scale')
-        s.syntax.setExt('md')
+        s = tstt()
         s.loadLines(['# One','## Two','### Three','#### Four','text'])
         compare(s.scaleOfLine(0),3)
         compare(s.scaleOfLine(1),2)
@@ -37,16 +58,14 @@ toExport["scale"] = async function ()
     })
     await section("headings in other files keep their size", async function ()
     {
-        s = new state(cells,'test_scale')
-        s.syntax.setExt('kode')
+        s = tstt('kode')
         s.loadLines(['# One','## Two'])
         compare(s.scaleOfLine(0),1)
         compare(s.scaleOfLine(1),1)
     })
     await section("the configured scales change or disable the scaling", async function ()
     {
-        s = new state(cells,'test_scale_config')
-        s.syntax.setExt('md')
+        s = tstt()
         s.loadLines(['# one','## two','### three','#### four','##### five'])
         s.applyScales({enabled:true,md:{h1:6,h2:5,h3:4,h4:3,h5:2}})
         compare(s.scaleOfLine(0),6)
@@ -58,15 +77,14 @@ toExport["scale"] = async function ()
         compare(s.scaleOfLine(0),1)
         compare(s.scaleOfLine(1),1)
         s.applyScales({})
-        compare(s.scaleOfLine(0),3)
-        compare(s.scaleOfLine(1),2)
+        compare(s.scaleOfLine(0),1)
+        compare(s.scaleOfLine(1),1)
         s.applyScales({enabled:true,md:{h1:9}})
         compare(s.scaleOfLine(0),7)
     })
     await section("the row map counts the scaled row of every line", async function ()
     {
-        s = new state(cells,'test_scale')
-        s.syntax.setExt('md')
+        s = tstt()
         s.loadLines(['# One','a','## Two','b'])
         compare(s.rowOfLine(0),0)
         compare(s.rowOfLine(1),3)
@@ -75,8 +93,7 @@ toExport["scale"] = async function ()
     })
     await section("the row map finds the line at a row", async function ()
     {
-        s = new state(cells,'test_scale')
-        s.syntax.setExt('md')
+        s = tstt()
         s.loadLines(['# One','a','## Two','b'])
         compare(s.lineAtRow(0),0)
         compare(s.lineAtRow(2),0)
@@ -88,7 +105,7 @@ toExport["scale"] = async function ()
     })
     await section("lines above the view have negative rows", async function ()
     {
-        s = new state(cells,'test_scale_above')
+        s = tstt()
         s.loadLines(['a','b','c','d','e','f'])
         s.setView([0,4])
         compare(s.rowOfLine(4),0)
@@ -97,10 +114,9 @@ toExport["scale"] = async function ()
     })
     await section("highlights and cursors above the view are not drawn", async function ()
     {
-        h = new harness({cols:40,rows:10})
-        e = new editor(h.screen,'test_scale_above_draw',[])
-        e.layout(0,0,40,10)
-        e.state.loadLines((function () { var r_a_ = []; for (i = 0; i < 20; i++)  { r_a_.push((`line ${i}`))  } return r_a_ }).bind(this)())
+        var _a_ = hed(40,10); h = _a_[0]; e = _a_[1]
+
+        e.state.loadLines((function () { var r_b_ = []; for (i = 0; i < 20; i++)  { r_b_.push((`line ${i}`))  } return r_b_ }).bind(this)())
         e.state.setView([0,8])
         e.state.setHighlights([[0,4,4,4],[0,10,4,10]])
         h.screen.init()
@@ -118,8 +134,7 @@ toExport["scale"] = async function ()
     })
     await section("a cell position maps to a logical position", async function ()
     {
-        s = new state(cells,'test_scale')
-        s.syntax.setExt('md')
+        s = tstt()
         s.loadLines(['# One','a','## Two'])
         compare(s.posForCell(0,0),[0,0])
         compare(s.posForCell(2,0),[0,0])
@@ -135,10 +150,8 @@ toExport["scale"] = async function ()
     })
     await section("a heading is drawn in a block of cells", async function ()
     {
-        h = new harness({cols:40,rows:10})
-        e = new editor(h.screen,'test_scale_draw',[])
-        e.layout(0,0,40,10)
-        e.state.syntax.setExt('md')
+        var _c_ = hed(40,10); h = _c_[0]; e = _c_[1]
+
         e.state.loadLines(['# One','a','## Two','b'])
         e.draw()
         compare(h.screen.get_char(0,0),'#')
@@ -153,17 +166,13 @@ toExport["scale"] = async function ()
     })
     await section("a scaled character that ends exactly at the right edge is drawn", async function ()
     {
-        h = new harness({cols:15,rows:6})
-        e = new editor(h.screen,'test_scale_clip',[])
-        e.layout(0,0,15,6)
-        e.state.syntax.setExt('md')
+        var _d_ = hed(15,6); h = _d_[0]; e = _d_[1]
+
         e.state.loadLines(['# abc'])
         e.draw()
         compare(h.screen.get_char(12,0),'c')
-        h = new harness({cols:14,rows:6})
-        e = new editor(h.screen,'test_scale_clip_none',[])
-        e.layout(0,0,14,6)
-        e.state.syntax.setExt('md')
+        var _e_ = hed(14,6); h = _e_[0]; e = _e_[1]
+
         e.state.loadLines(['# abc'])
         e.draw()
         compare(h.screen.get_char(12,0),' ')
@@ -191,10 +200,8 @@ toExport["scale"] = async function ()
     })
     await section("the cursor sits on the scaled line", async function ()
     {
-        h = new harness({cols:40,rows:10})
-        e = new editor(h.screen,'test_scale_cursor',[])
-        e.layout(0,0,40,10)
-        e.state.syntax.setExt('md')
+        var _f_ = hed(40,10); h = _f_[0]; e = _f_[1]
+
         e.state.loadLines(['# One','## Two','text'])
         e.state.setMainCursor(0,1)
         e.draw()
@@ -202,10 +209,8 @@ toExport["scale"] = async function ()
     })
     await section("horizontal scrolling moves scaled and normal lines together", async function ()
     {
-        h = new harness({cols:20,rows:8})
-        e = new editor(h.screen,'test_scale_hscroll',[])
-        e.layout(0,0,20,8)
-        e.state.syntax.setExt('md')
+        var _10_ = hed(20,8); h = _10_[0]; e = _10_[1]
+
         e.state.loadLines(['# abc','abc'])
         e.state.setView([0,0])
         e.draw()
@@ -219,10 +224,8 @@ toExport["scale"] = async function ()
     })
     await section("horizontal positions use display columns", async function ()
     {
-        h = new harness({cols:20,rows:8})
-        e = new editor(h.screen,'test_scale_hcursor',[])
-        e.layout(0,0,20,8)
-        e.state.syntax.setExt('md')
+        var _11_ = hed(20,8); h = _11_[0]; e = _11_[1]
+
         e.state.loadLines(['# abc','abc'])
         e.state.setView([1,0])
         compare(e.state.posForCell(0,0),[0,0])
@@ -240,11 +243,9 @@ toExport["scale"] = async function ()
     })
     await section("the block rectangle of the previous frame is erased", async function ()
     {
-        h = new harness({cols:20,rows:8})
+        var _12_ = hed(20,8); h = _12_[0]; e = _12_[1]
+
         h.t.textSizing = true
-        e = new editor(h.screen,'test_scale_erase',[])
-        e.layout(0,0,20,8)
-        e.state.syntax.setExt('md')
         e.state.loadLines(['# big','a','b','c','d','e','f','g','h'])
         h.screen.init()
         e.draw()
@@ -258,10 +259,8 @@ toExport["scale"] = async function ()
     })
     await section("completion is placed and highlighted on normal lines", async function ()
     {
-        h = new harness({cols:40,rows:12})
-        e = new editor(h.screen,'test_scale_complete',['complete'])
-        e.layout(0,0,40,12)
-        e.state.syntax.setExt('kode')
+        var _13_ = hed(40,12,'kode',['complete']); h = _13_[0]; e = _13_[1]
+
         e.state.loadLines(['funky1 = 1','funky2 = 2','fun'])
         compare(e.complete.posForCursor([3,2]),[3,2])
         e.state.setMainCursor(3,2)
@@ -276,10 +275,8 @@ toExport["scale"] = async function ()
     })
     await section("the completion frame fits at the edges of the editor", async function ()
     {
-        h = new harness({cols:30,rows:12})
-        e = new editor(h.screen,'test_complete_left',['complete'])
-        e.layout(0,0,30,12)
-        e.state.syntax.setExt('kode')
+        var _14_ = hed(30,12,'kode',['complete']); h = _14_[0]; e = _14_[1]
+
         e.state.loadLines(['funky1 = 1','funky2 = 2','f'])
         e.state.setMainCursor(1,2)
         e.complete.complete()
@@ -287,10 +284,8 @@ toExport["scale"] = async function ()
         e.draw()
         compare(h.row(3).startsWith('╭'),true)
         compare(h.row(6).startsWith('╰'),true)
-        h = new harness({cols:20,rows:12})
-        e = new editor(h.screen,'test_complete_right',['complete'])
-        e.layout(0,0,20,12)
-        e.state.syntax.setExt('kode')
+        var _15_ = hed(20,12,'kode',['complete']); h = _15_[0]; e = _15_[1]
+
         e.state.loadLines(['funky1 = 1','funky2 = 2','...........funky'])
         e.state.setMainCursor(16,2)
         e.complete.complete()
@@ -302,10 +297,8 @@ toExport["scale"] = async function ()
     })
     await section("the completion frame moves below a scaled line", async function ()
     {
-        h = new harness({cols:40,rows:14})
-        e = new editor(h.screen,'test_complete_scale',['complete'])
-        e.layout(0,0,40,14)
-        e.state.syntax.setExt('md')
+        var _16_ = hed(40,14,'md',['complete']); h = _16_[0]; e = _16_[1]
+
         e.state.loadLines(['# fu','','funky1 = 1','funky2 = 2'])
         e.state.setMainCursor(4,0)
         e.complete.complete()
@@ -329,11 +322,9 @@ toExport["scale"] = async function ()
     })
     await section("a popup over a scaled line erases the block under it", async function ()
     {
-        h = new harness({cols:40,rows:12})
+        var _17_ = hed(40,12,'md',['complete']); h = _17_[0]; e = _17_[1]
+
         h.t.textSizing = true
-        e = new editor(h.screen,'test_erase_popup',['complete'])
-        e.layout(0,0,40,12)
-        e.state.syntax.setExt('md')
         e.state.loadLines(['fu','# funky1','# funky2'])
         e.state.setMainCursor(2,0)
         e.complete.complete()
@@ -344,7 +335,8 @@ toExport["scale"] = async function ()
     })
     await section("a context menu erases the block under it", async function ()
     {
-        h = new harness({cols:40,rows:12})
+        var _18_ = hed(40,12); h = _18_[0]; e = _18_[1]
+
         c = new context(h.screen)
         c.show([5,2],(function ()
         {}),['one','two'])
@@ -354,28 +346,26 @@ toExport["scale"] = async function ()
     })
     await section("the cleared rectangle never leaves a block half drawn", async function ()
     {
-        h = new harness({cols:40,rows:12})
+        var _19_ = hed(40,12,'md',['complete']); h = _19_[0]; e = _19_[1]
+
         h.t.textSizing = true
-        e = new editor(h.screen,'test_erase_loop',['complete'])
-        e.layout(0,0,40,12)
-        e.state.syntax.setExt('md')
         e.state.loadLines(['fu  fu  fu  fu  fu','# funky1','# funky2'])
         var list = [2,6,10,14,18]
-        for (var _b_ = 0; _b_ < list.length; _b_++)
+        for (var _1a_ = 0; _1a_ < list.length; _1a_++)
         {
-            cx = list[_b_]
+            cx = list[_1a_]
             e.state.setMainCursor(cx,0)
             e.complete.complete()
             h.screen.init()
             e.draw()
             rect = h.screen.eraseRects[0]
             var list1 = _k_.list(h.screen.frameBlocks)
-            for (var _c_ = 0; _c_ < list1.length; _c_++)
+            for (var _1b_ = 0; _1b_ < list1.length; _1b_++)
             {
-                bx = list1[_c_][0]
-                by = list1[_c_][1]
-                scale = list1[_c_][2]
-                w = list1[_c_][3]
+                bx = list1[_1b_][0]
+                by = list1[_1b_][1]
+                scale = list1[_1b_][2]
+                w = list1[_1b_][3]
                 if (bx > rect[2])
                 {
                     continue
@@ -392,9 +382,9 @@ toExport["scale"] = async function ()
                 {
                     continue
                 }
-                for (var _d_ = xx = bx, _e_ = bx + scale * w - 1; (_d_ <= _e_ ? xx <= bx + scale * w - 1 : xx >= bx + scale * w - 1); (_d_ <= _e_ ? ++xx : --xx))
+                for (var _1c_ = xx = bx, _1d_ = bx + scale * w - 1; (_1c_ <= _1d_ ? xx <= bx + scale * w - 1 : xx >= bx + scale * w - 1); (_1c_ <= _1d_ ? ++xx : --xx))
                 {
-                    for (var _f_ = yy = by, _10_ = by + scale - 1; (_f_ <= _10_ ? yy <= by + scale - 1 : yy >= by + scale - 1); (_f_ <= _10_ ? ++yy : --yy))
+                    for (var _1e_ = yy = by, _1f_ = by + scale - 1; (_1e_ <= _1f_ ? yy <= by + scale - 1 : yy >= by + scale - 1); (_1e_ <= _1f_ ? ++yy : --yy))
                     {
                         compare((!_k_.empty(h.screen.get_char(xx,yy))),true)
                     }
@@ -404,30 +394,24 @@ toExport["scale"] = async function ()
     })
     await section("the view scrolls so a tall line fits above the bottom", async function ()
     {
-        h = new harness({cols:20,rows:6})
-        e = new editor(h.screen,'test_scale_scroll',[])
-        e.layout(0,0,20,6)
-        e.state.syntax.setExt('md')
+        var _20_ = hed(20,6); h = _20_[0]; e = _20_[1]
+
         e.state.loadLines(['a','b','c','d','e','f','# h1'])
         e.state.setMainCursor(0,6)
         compare(e.state.s.view[1],3)
     })
     await section("a scaled line needs a larger horizontal offset", async function ()
     {
-        h = new harness({cols:20,rows:8})
-        e = new editor(h.screen,'test_scale_cols',[])
-        e.layout(0,0,20,8)
-        e.state.syntax.setExt('md')
+        var _21_ = hed(20,8); h = _21_[0]; e = _21_[1]
+
         e.state.loadLines(['# a long heading line'])
         e.state.setMainCursor(20,0)
         compare(e.state.s.view[0],44)
     })
     await section("a short file with a tall line can scroll to its last line", async function ()
     {
-        h = new harness({cols:20,rows:6})
-        e = new editor(h.screen,'test_scale_short',[])
-        e.layout(0,0,20,6)
-        e.state.syntax.setExt('md')
+        var _22_ = hed(20,6); h = _22_[0]; e = _22_[1]
+
         e.state.loadLines(['# h1','a','b','c','d'])
         compare(e.state.maxViewLine(),1)
         e.state.scrollView('down',3)
@@ -435,10 +419,8 @@ toExport["scale"] = async function ()
     })
     await section("the last line stays reachable at the end of a tall file", async function ()
     {
-        h = new harness({cols:20,rows:6})
-        e = new editor(h.screen,'test_scale_end',[])
-        e.layout(0,0,20,6)
-        e.state.syntax.setExt('md')
+        var _23_ = hed(20,6); h = _23_[0]; e = _23_[1]
+
         e.state.loadLines(['# h1','a','b','c','d','e','f'])
         compare(e.state.maxViewLine(),1)
         e.state.setMainCursor(0,6)
@@ -446,10 +428,8 @@ toExport["scale"] = async function ()
     })
     await section("the gutter numbers a scaled line only on its first row", async function ()
     {
-        h = new harness({cols:30,rows:10})
-        e = new editor(h.screen,'test_scale_gutter',['gutter'])
-        e.layout(0,0,30,10)
-        e.state.syntax.setExt('md')
+        var _24_ = hed(30,10,'md',['gutter']); h = _24_[0]; e = _24_[1]
+
         e.state.loadLines(['# One','a','b'])
         e.draw()
         compare(h.row(0).startsWith('  1 '),true)
@@ -460,8 +440,7 @@ toExport["scale"] = async function ()
     })
     await section("the buffer height is measured in display rows", async function ()
     {
-        s = new state(cells,'test_scale_rows')
-        s.syntax.setExt('md')
+        s = tstt()
         s.loadLines(['# a','b','## c','d'])
         compare(s.totalRows(),7)
         compare(s.rowsBeforeLine(0),0)
@@ -487,10 +466,8 @@ toExport["scale"] = async function ()
     })
     await section("the map shows scaled lines with their real height", async function ()
     {
-        h = new harness({cols:40,rows:10})
-        e = new editor(h.screen,'test_scale_map_rows',[])
-        e.layout(0,0,40,10)
-        e.state.syntax.setExt('md')
+        var _25_ = hed({cols:40,rows:10}); h = _25_[0]; e = _25_[1]
+
         e.state.loadLines(['a','b','c','d','e','# h1','f','g','h','i','j'])
         m = new mapscr(e)
         m.cells.layout(30,0,12,10)
@@ -505,10 +482,8 @@ toExport["scale"] = async function ()
     })
     await section("a scaled line gets a taller stripe in the map", async function ()
     {
-        h = new harness({cols:40,rows:10})
-        e = new editor(h.screen,'test_scale_map_stripe',[])
-        e.layout(0,0,40,10)
-        e.state.syntax.setExt('md')
+        var _26_ = hed(40,10); h = _26_[0]; e = _26_[1]
+
         e.state.loadLines(['a','b','# h1','c','d'])
         m = new mapscr(e)
         m.cells.layout(30,0,12,10)
@@ -525,10 +500,8 @@ toExport["scale"] = async function ()
     })
     await section("a scaled line is also wider in the map", async function ()
     {
-        h = new harness({cols:40,rows:10})
-        e = new editor(h.screen,'test_scale_map_wide',[])
-        e.layout(0,0,40,10)
-        e.state.syntax.setExt('md')
+        var _27_ = hed({cols:40,rows:10}); h = _27_[0]; e = _27_[1]
+
         e.state.loadLines(['#'])
         e.state.applyScales({enabled:true,md:{h1:7}})
         m = new mapscr(e)
@@ -550,10 +523,8 @@ toExport["scale"] = async function ()
     })
     await section("clicking a cut line in the map keeps the row offset", async function ()
     {
-        h = new harness({cols:40,rows:10})
-        e = new editor(h.screen,'test_scale_map_click_offset',[])
-        e.layout(0,0,40,10)
-        e.state.syntax.setExt('md')
+        var _28_ = hed(40,10); h = _28_[0]; e = _28_[1]
+
         lines = []
         for (i = 0; i < 20; i++)
         {
@@ -581,10 +552,8 @@ toExport["scale"] = async function ()
     })
     await section("the map cuts a line at its top edge", async function ()
     {
-        h = new harness({cols:40,rows:10})
-        e = new editor(h.screen,'test_scale_map_split_top',[])
-        e.layout(0,0,40,10)
-        e.state.syntax.setExt('md')
+        var _29_ = hed(40,10); h = _29_[0]; e = _29_[1]
+
         lines = []
         for (i = 0; i < 20; i++)
         {
@@ -614,10 +583,8 @@ toExport["scale"] = async function ()
     })
     await section("the map follows the display rows near the end of a long file", async function ()
     {
-        h = new harness({cols:40,rows:10})
-        e = new editor(h.screen,'test_scale_map_deep',[])
-        e.layout(0,0,40,10)
-        e.state.syntax.setExt('md')
+        var _2a_ = hed(40,10); h = _2a_[0]; e = _2a_[1]
+
         lines = []
         for (i = 0; i < 200; i++)
         {
@@ -635,10 +602,8 @@ toExport["scale"] = async function ()
     })
     await section("the scrollbar reflects the display rows", async function ()
     {
-        h = new harness({cols:40,rows:10})
-        e = new editor(h.screen,'test_scale_scrollbar',[])
-        e.layout(0,0,40,10)
-        e.state.syntax.setExt('md')
+        var _2b_ = hed(40,10); h = _2b_[0]; e = _2b_[1]
+
         lines = []
         for (i = 0; i < 20; i++)
         {
@@ -662,10 +627,8 @@ toExport["scale"] = async function ()
     })
     await section("clicking the scrollbar reaches the last display rows", async function ()
     {
-        h = new harness({cols:40,rows:10})
-        e = new editor(h.screen,'test_scale_scrollbar_click',[])
-        e.layout(0,0,40,10)
-        e.state.syntax.setExt('md')
+        var _2c_ = hed(40,10); h = _2c_[0]; e = _2c_[1]
+
         lines = []
         for (i = 0; i < 20; i++)
         {
@@ -686,6 +649,7 @@ toExport["scale"] = async function ()
         small = {cols:20,rows:3}
         s = new state(small,'test_scale_scroll_offset')
         s.syntax.setExt('md')
+        s.applyScales({enabled:true,md:{h1:3,h2:2}})
         s.loadLines(['# a','b','## c','d'])
         s.setScrollTop(2)
         compare(s.viewTopRow(),2)
@@ -701,6 +665,7 @@ toExport["scale"] = async function ()
         small = {cols:20,rows:3}
         s = new state(small,'test_scale_wheel_rows')
         s.syntax.setExt('md')
+        s.applyScales({enabled:true,md:{h1:3,h2:2}})
         s.loadLines(['# abc','a','b','c'])
         s.scrollView('down')
         compare(s.viewTopRow(),1)
@@ -716,10 +681,8 @@ toExport["scale"] = async function ()
     })
     await section("a cut top line is blanked while the rest moves row by row", async function ()
     {
-        h = new harness({cols:20,rows:8})
-        e = new editor(h.screen,'test_scale_top_clip',[])
-        e.layout(0,0,20,8)
-        e.state.syntax.setExt('md')
+        var _2d_ = hed(20,8); h = _2d_[0]; e = _2d_[1]
+
         e.state.loadLines(['# abc','a','b','c','d','e','f','g','h','i','j'])
         e.draw()
         compare(h.screen.get_char(0,0),'#')
@@ -745,10 +708,8 @@ toExport["scale"] = async function ()
     })
     await section("layout keeps the row offset", async function ()
     {
-        h = new harness({cols:20,rows:8})
-        e = new editor(h.screen,'test_scale_offset_layout',[])
-        e.layout(0,0,20,8)
-        e.state.syntax.setExt('md')
+        var _2e_ = hed(20,8); h = _2e_[0]; e = _2e_[1]
+
         e.state.loadLines(['# abc','a','b','c','d','e','f','g','h','i','j'])
         e.state.setScrollTop(1)
         e.layout(0,0,20,8)
@@ -757,10 +718,8 @@ toExport["scale"] = async function ()
     })
     await section("moving the cursor into view clears the scroll offset", async function ()
     {
-        h = new harness({cols:20,rows:8})
-        e = new editor(h.screen,'test_scale_offset_reset',[])
-        e.layout(0,0,20,8)
-        e.state.syntax.setExt('md')
+        var _2f_ = hed(20,8); h = _2f_[0]; e = _2f_[1]
+
         e.state.loadLines(['# abc','a','b','c','d','e','f','g','h','i','j'])
         e.state.setScrollTop(1)
         e.state.setMainCursor(0,0)
@@ -769,7 +728,7 @@ toExport["scale"] = async function ()
     })
     await section("cursor margins take rows or screen percentages", async function ()
     {
-        s = new state(cells,'test_scale_margins')
+        s = tstt()
         compare(s.marginValue(7,3),7)
         compare(s.marginValue(0,3),0)
         compare(s.marginValue('25%',3),5)
@@ -785,11 +744,8 @@ toExport["scale"] = async function ()
     {
         saved = config.data
         config.data = {cursor:{topOffset:2,bottomOffset:10}}
-        big = {cols:20,rows:20}
-        h = new harness({cols:20,rows:20})
-        e = new editor(h.screen,'test_scale_cursor_margin',[])
-        e.layout(0,0,20,20)
-        e.state.syntax.setExt('md')
+        var _30_ = hed(20,20); h = _30_[0]; e = _30_[1]
+
         lines = []
         for (i = 0; i < 9; i++)
         {
@@ -815,10 +771,8 @@ toExport["scale"] = async function ()
     {
         saved = config.data
         config.data = {cursor:{topOffset:2,bottomOffset:2}}
-        h = new harness({cols:20,rows:10})
-        e = new editor(h.screen,'test_scale_cursor_offset',[])
-        e.layout(0,0,20,10)
-        e.state.syntax.setExt('md')
+        var _31_ = hed(20,10); h = _31_[0]; e = _31_[1]
+
         e.state.loadLines(['# h','a','b','c','d','e','f','g','h','i','j'])
         e.state.setView([0,0])
         e.state.setCursors([[0,7]],{main:0,adjust:'topBotDeltaGrow',mc:[0,6]})
@@ -838,5 +792,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2NhbGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL3Rlc3Qvc2NhbGUua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7T0FBVSxVQUFBO0lBQU07O09BQ0EsWUFBVDtPQUFlLGFBQWY7O09BQ1MsWUFBVDs7T0FDUyxjQUFUO09BQWlCLGFBQWpCOztPQUNjLGNBQVI7T0FBZ0IsY0FBaEI7O09BQ1EsYUFBVDs7T0FDUyxhQUFUOztBQUVaLFNBQVEsS0FBSyxHQUFHLEtBQUs7Ozs7O1FBWWIsUUFBUSxNQUFNLE1BQU07UUFDcEIsRUFBRSxPQUFPLE9BQU87UUFDaEIsRUFBRSxXQUFXLFFBQVEsU0FBUyxZQUFZLFlBQVk7Z0JBRXRELEVBQUUsWUFBWSxHQUFJO2dCQUNsQixFQUFFLFlBQVksR0FBSTtnQkFDbEIsRUFBRSxZQUFZLEdBQUk7Z0JBQ2xCLEVBQUUsWUFBWSxHQUFJO2dCQUNsQixFQUFFLFlBQVksR0FBSTs7OztRQUlsQixRQUFRLE1BQU0sTUFBTTtRQUNwQixFQUFFLE9BQU8sT0FBTztRQUNoQixFQUFFLFdBQVcsUUFBUTtnQkFFckIsRUFBRSxZQUFZLEdBQUk7Z0JBQ2xCLEVBQUUsWUFBWSxHQUFJOzs7O1FBSWxCLFFBQVEsTUFBTSxNQUFNO1FBQ3BCLEVBQUUsT0FBTyxPQUFPO1FBQ2hCLEVBQUUsV0FBVyxRQUFRLFNBQVMsWUFBWSxZQUFZO1FBRXRELEVBQUUsYUFBYSxRQUFRLEtBQUssSUFBSSxHQUFHLEVBQUUsR0FBRyxFQUFFLEdBQUcsRUFBRSxHQUFHLEVBQUUsR0FBRztnQkFFdkQsRUFBRSxZQUFZLEdBQUk7Z0JBQ2xCLEVBQUUsWUFBWSxHQUFJO2dCQUNsQixFQUFFLFlBQVksR0FBSTtnQkFDbEIsRUFBRSxZQUFZLEdBQUk7Z0JBQ2xCLEVBQUUsWUFBWSxHQUFJO1FBRWxCLEVBQUUsYUFBYSxRQUFRO2dCQUV2QixFQUFFLFlBQVksR0FBSTtnQkFDbEIsRUFBRSxZQUFZLEdBQUk7UUFFbEIsRUFBRTtnQkFFRixFQUFFLFlBQVksR0FBSTtnQkFDbEIsRUFBRSxZQUFZLEdBQUk7UUFFbEIsRUFBRSxhQUFhLFFBQVEsS0FBSyxJQUFJLEdBQUc7Z0JBRW5DLEVBQUUsWUFBWSxHQUFJOzs7O1FBVWxCLFFBQVEsTUFBTSxNQUFNO1FBQ3BCLEVBQUUsT0FBTyxPQUFPO1FBQ2hCLEVBQUUsV0FBVyxRQUFRLElBQUksU0FBUztnQkFFbEMsRUFBRSxVQUFVLEdBQUk7Z0JBQ2hCLEVBQUUsVUFBVSxHQUFJO2dCQUNoQixFQUFFLFVBQVUsR0FBSTtnQkFDaEIsRUFBRSxVQUFVLEdBQUk7Ozs7UUFJaEIsUUFBUSxNQUFNLE1BQU07UUFDcEIsRUFBRSxPQUFPLE9BQU87UUFDaEIsRUFBRSxXQUFXLFFBQVEsSUFBSSxTQUFTO2dCQUVsQyxFQUFFLFVBQVUsR0FBSTtnQkFDaEIsRUFBRSxVQUFVLEdBQUk7Z0JBQ2hCLEVBQUUsVUFBVSxHQUFJO2dCQUNoQixFQUFFLFVBQVUsR0FBSTtnQkFDaEIsRUFBRSxVQUFVLEdBQUk7Z0JBQ2hCLEVBQUUsVUFBVSxHQUFJO2dCQUNoQixFQUFFLFVBQVUsR0FBSTs7OztRQUloQixRQUFRLE1BQU0sTUFBTTtRQUNwQixFQUFFLFdBQVcsSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJO1FBQ2pDLEVBQUUsU0FBUyxFQUFFO2dCQUViLEVBQUUsVUFBVSxHQUFJO2dCQUNoQixFQUFFLFVBQVUsR0FBSTtnQkFDaEIsRUFBRSxVQUFVLEdBQUk7Ozs7UUFJaEIsUUFBUSxTQUFRLEtBQUssR0FBRyxLQUFLO1FBQzdCLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFDeEIsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO1FBQ2hCLEVBQUUsTUFBTSw2Q0FBNkIsSUFBSyxPQUFJLCtCQUFsQjtRQUU1QixFQUFFLE1BQU0sU0FBUyxFQUFFO1FBQ25CLEVBQUUsTUFBTSxnQkFBZ0IsRUFBRSxFQUFFLEVBQUUsSUFBSSxFQUFFLEdBQUcsRUFBRTtRQUV6QyxFQUFFLE9BQU87UUFDVCxFQUFFO2dCQUVGLEVBQUUsT0FBTyxPQUFPLEVBQUUsR0FBSyxNQUFNLFVBQVU7Z0JBQ3ZDLEVBQUUsT0FBTyxPQUFPLEVBQUUsR0FBSyxNQUFNLE9BQU87UUFFcEMsRUFBRSxNQUFNLGFBQWEsRUFBRSxLQUFLLEVBQUU7UUFDOUIsRUFBRSxNQUFNLFNBQVMsRUFBRTtnQkFFbkIsRUFBRSxpQkFBaUIsRUFBRSxJQUFLO2dCQUMxQixFQUFFLGlCQUFpQixFQUFFLEtBQU07UUFFM0IsRUFBRSxPQUFPO1FBQ1QsRUFBRTs0QkFFSyxFQUFFLE9BQU8sRUFBRSxHQUFHLEdBQUcsT0FBUTtnQkFDaEMsRUFBRSxPQUFPLEVBQUUsR0FBRyxHQUFHLEtBQU87Ozs7UUFJeEIsUUFBUSxNQUFNLE1BQU07UUFDcEIsRUFBRSxPQUFPLE9BQU87UUFDaEIsRUFBRSxXQUFXLFFBQVEsSUFBSTtnQkFFekIsRUFBRSxXQUFXLEVBQUUsSUFBSyxFQUFFO2dCQUN0QixFQUFFLFdBQVcsRUFBRSxJQUFLLEVBQUU7Z0JBQ3RCLEVBQUUsV0FBVyxFQUFFLElBQUssRUFBRTtnQkFDdEIsRUFBRSxXQUFXLEVBQUUsSUFBSyxFQUFFO2dCQUN0QixFQUFFLFdBQVcsRUFBRSxJQUFLLEVBQUU7Z0JBRXRCLEVBQUUsV0FBVyxFQUFFLElBQUssRUFBRTtnQkFDdEIsRUFBRSxXQUFXLEVBQUUsSUFBSyxFQUFFO2dCQUV0QixFQUFFLFdBQVcsRUFBRSxJQUFLLEVBQUU7Z0JBQ3RCLEVBQUUsV0FBVyxFQUFFLElBQUssRUFBRTtnQkFDdEIsRUFBRSxXQUFXLEVBQUUsSUFBSyxFQUFFO2dCQUN0QixFQUFFLFdBQVcsRUFBRSxJQUFLLEVBQUU7Ozs7UUFVdEIsUUFBUSxTQUFRLEtBQUssR0FBRyxLQUFLO1FBQzdCLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFFeEIsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO1FBQ2hCLEVBQUUsTUFBTSxPQUFPLE9BQU87UUFDdEIsRUFBRSxNQUFNLFdBQVcsUUFBUSxJQUFJLFNBQVM7UUFFeEMsRUFBRTtnQkFFRixFQUFFLE9BQU8sU0FBUyxFQUFHLEdBQUs7Z0JBQzFCLEVBQUUsT0FBTyxTQUFTLEVBQUcsR0FBSztnQkFDMUIsRUFBRSxPQUFPLFNBQVMsRUFBRyxHQUFLO2dCQUMxQixFQUFFLE9BQU8sU0FBUyxHQUFHLEdBQUs7Z0JBRTFCLEVBQUUsT0FBTyxTQUFTLEVBQUcsR0FBSztnQkFFMUIsRUFBRSxPQUFPLFNBQVMsRUFBRyxHQUFLO2dCQUMxQixFQUFFLE9BQU8sU0FBUyxFQUFHLEdBQUs7Z0JBQzFCLEVBQUUsT0FBTyxTQUFTLEVBQUcsR0FBSztnQkFFMUIsRUFBRSxPQUFPLFNBQVMsRUFBRyxHQUFLOzs7O1FBSTFCLFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBRXhCLEVBQUUsT0FBTyxFQUFFLEVBQUUsR0FBRztRQUNoQixFQUFFLE1BQU0sT0FBTyxPQUFPO1FBQ3RCLEVBQUUsTUFBTSxXQUFXO1FBRW5CLEVBQUU7Z0JBRUYsRUFBRSxPQUFPLFNBQVMsR0FBRyxHQUFLO1FBRTFCLFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBRXhCLEVBQUUsT0FBTyxFQUFFLEVBQUUsR0FBRztRQUNoQixFQUFFLE1BQU0sT0FBTyxPQUFPO1FBQ3RCLEVBQUUsTUFBTSxXQUFXO1FBRW5CLEVBQUU7Z0JBRUYsRUFBRSxPQUFPLFNBQVMsR0FBRyxHQUFLOzs7O1FBSTFCLFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztnQkFFN0IsRUFBRSxPQUFPLFlBQVksSUFBSSxFQUFFLEdBQUk7Z0JBQy9CLEVBQUUsT0FBTyxZQUFZLEtBQUssRUFBRSxHQUFJOzs7O1FBSWhDLFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUU3QixFQUFFLEVBQUUsYUFBYTtnQkFFakIsRUFBRSxPQUFPLFdBQVcsRUFBRSxFQUFFLElBQUksS0FBSyxLQUFLLEdBQUk7Z0JBRTFDLEVBQUUsT0FBTyxTQUFTLEVBQUUsR0FBSztnQkFDekIsRUFBRSxPQUFPLFNBQVMsRUFBRSxHQUFLO2dCQUN6QixFQUFFLE9BQU8sU0FBUyxFQUFFLEdBQUs7Z0JBQ3pCLEVBQUUsT0FBTyxTQUFTLEVBQUUsR0FBSztnQkFFekIsRUFBRSxPQUFPLFdBQVcsRUFBRSxFQUFFLEtBQUssS0FBSyxLQUFLLEdBQUk7Z0JBRTNDLEVBQUUsT0FBTyxTQUFTLEVBQUUsR0FBSztnQkFDekIsRUFBRSxPQUFPLFNBQVMsRUFBRSxHQUFLO2dCQUN6QixFQUFFLE9BQU8sU0FBUyxFQUFFLEdBQUs7Z0JBQ3pCLEVBQUUsT0FBTyxTQUFTLEVBQUUsR0FBSzs7OztRQUl6QixRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUN0QixFQUFFLE1BQU0sV0FBVyxRQUFRLFNBQVM7UUFFcEMsRUFBRSxNQUFNLGNBQWMsRUFBRTtRQUN4QixFQUFFO2dCQUVGLEVBQUUsT0FBTyxFQUFFLEdBQUcsR0FBRyxLQUFPOzs7O1FBSXhCLFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBRXhCLEVBQUUsT0FBTyxFQUFFLEVBQUUsR0FBRztRQUNoQixFQUFFLE1BQU0sT0FBTyxPQUFPO1FBQ3RCLEVBQUUsTUFBTSxXQUFXLFFBQVE7UUFFM0IsRUFBRSxNQUFNLFNBQVMsRUFBRTtRQUNuQixFQUFFO2dCQUVGLEVBQUUsT0FBTyxTQUFTLEVBQUUsR0FBSztnQkFDekIsRUFBRSxPQUFPLFNBQVMsRUFBRSxHQUFLO1FBRXpCLEVBQUUsT0FBTztRQUNULEVBQUUsTUFBTSxTQUFTLEVBQUU7UUFDbkIsRUFBRTtnQkFFRixFQUFFLE9BQU8sU0FBUyxFQUFFLEdBQUs7Z0JBQ3pCLEVBQUUsT0FBTyxTQUFTLEVBQUUsR0FBSzs7OztRQUl6QixRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUN0QixFQUFFLE1BQU0sV0FBVyxRQUFRO1FBRTNCLEVBQUUsTUFBTSxTQUFTLEVBQUU7Z0JBRW5CLEVBQUUsTUFBTSxXQUFXLEVBQUUsSUFBSyxFQUFFO2dCQUM1QixFQUFFLE1BQU0sV0FBVyxFQUFFLElBQUssRUFBRTtRQUU1QixFQUFFLE1BQU0sYUFBYSxFQUFFLEtBQUksS0FBSyxFQUFFLE9BQU87UUFDekMsRUFBRSxNQUFNLFNBQVMsRUFBRTtRQUVuQixFQUFFLE9BQU87UUFDVCxFQUFFO2dCQUVGLEVBQUUsT0FBTyxFQUFFLEdBQUcsR0FBRyxLQUFPO2dCQUN4QixFQUFFLGlCQUFpQixFQUFFLElBQUs7UUFFMUIsRUFBRSxNQUFNLFNBQVMsRUFBRTtRQUNuQixFQUFFLE1BQU0sY0FBYyxHQUFHO1FBQ3pCLEVBQUUsTUFBTTtnQkFFUixFQUFFLE1BQU0sRUFBRSxLQUFLLEdBQUs7Ozs7UUFJcEIsUUFBUSxTQUFRLEtBQUssR0FBRyxLQUFLO1FBQzdCLEVBQUUsRUFBRSxhQUFhO1FBRWpCLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFFeEIsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO1FBQ2hCLEVBQUUsTUFBTSxPQUFPLE9BQU87UUFDdEIsRUFBRSxNQUFNLFdBQVcsUUFBUSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJO1FBRXZELEVBQUUsT0FBTztRQUNULEVBQUU7UUFFRixRQUFRLEVBQUUsT0FBTztnQkFFakIsTUFBTSxXQUFXLFVBQVk7UUFFN0IsRUFBRSxNQUFNLFdBQVc7UUFFbkIsRUFBRSxPQUFPO1FBQ1QsRUFBRTtRQUVGLFNBQVMsRUFBRSxPQUFPO2dCQUVsQixPQUFPLFdBQVcsNkRBQStEOzs7O1FBSWpGLFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixRQUFRLE9BQU8sRUFBRSxPQUFPLHVCQUF1QjtRQUUvQyxFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUN0QixFQUFFLE1BQU0sV0FBVyxhQUFhLGFBQWE7Z0JBRTdDLEVBQUUsU0FBUyxjQUFjLEVBQUUsS0FBTSxFQUFFO1FBRW5DLEVBQUUsTUFBTSxjQUFjLEVBQUU7UUFDeEIsRUFBRSxTQUFTO1FBRVgsRUFBRSxPQUFPO1FBQ1QsRUFBRTtnQkFFRixFQUFFLElBQUksR0FBSztnQkFDWCxFQUFFLElBQUksR0FBRyxTQUFTLFVBQVk7Z0JBQzlCLEVBQUUsSUFBSSxHQUFHLFNBQVMsVUFBWTtnQkFFOUIsRUFBRSxPQUFPLE9BQU8sRUFBRSxHQUFLLE1BQU0sVUFBVTtnQkFDdkMsRUFBRSxPQUFPLE9BQU8sRUFBRSxHQUFLLE1BQU0sVUFBVTs7OztRQUl2QyxRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTyxzQkFBc0I7UUFFOUMsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO1FBQ2hCLEVBQUUsTUFBTSxPQUFPLE9BQU87UUFDdEIsRUFBRSxNQUFNLFdBQVcsYUFBYSxhQUFhO1FBRTdDLEVBQUUsTUFBTSxjQUFjLEVBQUU7UUFDeEIsRUFBRSxTQUFTO1FBRVgsRUFBRSxPQUFPO1FBQ1QsRUFBRTtnQkFFRixFQUFFLElBQUksR0FBRyxXQUFXLEtBQU87Z0JBQzNCLEVBQUUsSUFBSSxHQUFHLFdBQVcsS0FBTztRQUUzQixRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTyx1QkFBdUI7UUFFL0MsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO1FBQ2hCLEVBQUUsTUFBTSxPQUFPLE9BQU87UUFDdEIsRUFBRSxNQUFNLFdBQVcsYUFBYSxhQUFhO1FBRTdDLEVBQUUsTUFBTSxjQUFjLEdBQUc7UUFDekIsRUFBRSxTQUFTO1FBRVgsRUFBRSxPQUFPO1FBQ1QsRUFBRTtnQkFFRixFQUFFLElBQUksR0FBRyxXQUFXLGNBQWdCO2dCQUNwQyxFQUFFLElBQUksR0FBRyxTQUFTLEtBQU87Z0JBQ3pCLEVBQUUsSUFBSSxHQUFHLE9BQVM7Ozs7UUFJbEIsUUFBUSxTQUFRLEtBQUssR0FBRyxLQUFLO1FBQzdCLFFBQVEsT0FBTyxFQUFFLE9BQU8sdUJBQXVCO1FBRS9DLEVBQUUsT0FBTyxFQUFFLEVBQUUsR0FBRztRQUNoQixFQUFFLE1BQU0sT0FBTyxPQUFPO1FBQ3RCLEVBQUUsTUFBTSxXQUFXLE9BQU8sR0FBRyxhQUFhO1FBRTFDLEVBQUUsTUFBTSxjQUFjLEVBQUU7UUFDeEIsRUFBRSxTQUFTO1FBRVgsRUFBRSxPQUFPO1FBQ1QsRUFBRTtnQkFFRixFQUFFLE1BQU0sWUFBWSxHQUFLO2dCQUV6QixFQUFFLElBQUksR0FBSztnQkFDWCxFQUFFLElBQUksR0FBSztnQkFDWCxFQUFFLElBQUksR0FBRyxXQUFXLGFBQWU7Z0JBQ25DLEVBQUUsSUFBSSxHQUFHLFdBQVcsYUFBZTs7OztRQUluQyxRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFFN0IsRUFBRSxPQUFPLElBQUksRUFBRSxFQUFFLElBQUksS0FBSztRQUMxQixFQUFFLE9BQU8sT0FBTyxFQUFFLEdBQUcsRUFBRSxFQUFFO1FBQ3pCLEVBQUUsT0FBTyxhQUFhLEVBQUUsRUFBRSxFQUFFO2dCQUU1QixFQUFFLE9BQU8sU0FBUyxFQUFFLEdBQUs7Z0JBQ3pCLEVBQUUsT0FBTyxPQUFPLEVBQUUsSUFBTSxFQUFFLEVBQUU7Z0JBQzVCLEVBQUUsT0FBTyxlQUFlLFdBQVcsb0JBQXNCOzs7O1FBSXpELFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixFQUFFLEVBQUUsYUFBYTtRQUNqQixRQUFRLE9BQU8sRUFBRSxPQUFPLG9CQUFvQjtRQUU1QyxFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUN0QixFQUFFLE1BQU0sV0FBVyxLQUFLLFdBQVc7UUFFbkMsRUFBRSxNQUFNLGNBQWMsRUFBRTtRQUN4QixFQUFFLFNBQVM7UUFFWCxFQUFFLE9BQU87UUFDVCxFQUFFO2dCQUVGLEVBQUUsT0FBTyxlQUFlLFdBQVcscUJBQXVCO2dCQUMxRCxFQUFFLE9BQU8sU0FBUyxHQUFHLEdBQUs7Ozs7UUFJMUIsUUFBUSxTQUFRLEtBQUssR0FBRyxLQUFLO1FBQzdCLFFBQVEsUUFBUSxFQUFFO1FBRWxCLEVBQUUsTUFBTSxFQUFFO2FBQVcsTUFBTTtRQUUzQixFQUFFLE9BQU87UUFDVCxFQUFFO2dCQUVGLEVBQUUsT0FBTyxlQUFlLFdBQVcsb0JBQXNCOzs7O1FBSXpELFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixFQUFFLEVBQUUsYUFBYTtRQUNqQixRQUFRLE9BQU8sRUFBRSxPQUFPLG1CQUFtQjtRQUUzQyxFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUN0QixFQUFFLE1BQU0sV0FBVyxxQkFBcUIsV0FBVztvQkFFeEMsRUFBRSxFQUFFLEdBQUcsR0FBRzs7O1lBQWpCO1lBRUEsRUFBRSxNQUFNLGNBQWMsR0FBRztZQUN6QixFQUFFLFNBQVM7WUFDWCxFQUFFLE9BQU87WUFDVCxFQUFFO1lBRUYsT0FBTyxFQUFFLE9BQU8sV0FBVztpQ0FFSixFQUFFLE9BQU87OztnQkFBM0I7Z0JBQUc7Z0JBQUc7Z0JBQU07b0JBRUQsS0FBSyxLQUFLOztvQkFBdEI7O29CQUNZLEtBQUssUUFBTSxJQUFJLElBQUksS0FBSzs7b0JBQXBDOztvQkFDWSxLQUFLLEtBQUs7O29CQUF0Qjs7b0JBQ1ksS0FBSyxRQUFVLElBQUksS0FBSzs7b0JBQXBDOzsrQkFFSSxLQUFNLFVBQUksS0FBRyxRQUFNLElBQUUsdUJBQVgsS0FBRyxRQUFNLElBQUUsVUFBWCxLQUFHLFFBQU0sSUFBRTs7bUNBQ2pCLEtBQU0sV0FBSSxLQUFHLFFBQU0sd0JBQVQsS0FBRyxRQUFNLFVBQVQsS0FBRyxRQUFNOzs0Q0FDWixFQUFFLE9BQU8sU0FBUyxHQUFHLE1BQU87Ozs7Ozs7O1FBVW5ELFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBRXhCLEVBQUUsT0FBTyxFQUFFLEVBQUUsR0FBRztRQUNoQixFQUFFLE1BQU0sT0FBTyxPQUFPO1FBQ3RCLEVBQUUsTUFBTSxXQUFXLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJO1FBRTNDLEVBQUUsTUFBTSxjQUFjLEVBQUU7Z0JBRXhCLEVBQUUsTUFBTSxFQUFFLEtBQUssR0FBSzs7OztRQUlwQixRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUN0QixFQUFFLE1BQU0sV0FBVztRQUVuQixFQUFFLE1BQU0sY0FBYyxHQUFHO2dCQUV6QixFQUFFLE1BQU0sRUFBRSxLQUFLLEdBQUs7Ozs7UUFJcEIsUUFBUSxTQUFRLEtBQUssR0FBRyxLQUFLO1FBQzdCLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFFeEIsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO1FBQ2hCLEVBQUUsTUFBTSxPQUFPLE9BQU87UUFDdEIsRUFBRSxNQUFNLFdBQVcsT0FBTyxJQUFJLElBQUksSUFBSTtnQkFFdEMsRUFBRSxNQUFNLGNBQWdCO1FBRXhCLEVBQUUsTUFBTSxXQUFXLE9BQU87Z0JBRTFCLEVBQUUsTUFBTSxFQUFFLEtBQUssR0FBSzs7OztRQUlwQixRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUN0QixFQUFFLE1BQU0sV0FBVyxPQUFPLElBQUksSUFBSSxJQUFJLElBQUksSUFBSTtnQkFFOUMsRUFBRSxNQUFNLGNBQWdCO1FBRXhCLEVBQUUsTUFBTSxjQUFjLEVBQUU7Z0JBRXhCLEVBQUUsTUFBTSxFQUFFLEtBQUssR0FBSzs7OztRQVVwQixRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTyxxQkFBcUI7UUFFN0MsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO1FBQ2hCLEVBQUUsTUFBTSxPQUFPLE9BQU87UUFDdEIsRUFBRSxNQUFNLFdBQVcsUUFBUSxJQUFJO1FBRS9CLEVBQUU7Z0JBRUYsRUFBRSxJQUFJLEdBQUcsV0FBVyxRQUFVO2dCQUM5QixFQUFFLElBQUksR0FBSztnQkFDWCxFQUFFLElBQUksR0FBSztnQkFDWCxFQUFFLElBQUksR0FBRyxXQUFXLFFBQVU7Z0JBQzlCLEVBQUUsSUFBSSxHQUFHLFdBQVcsUUFBVTs7OztRQVU5QixRQUFRLE1BQU0sTUFBTTtRQUNwQixFQUFFLE9BQU8sT0FBTztRQUNoQixFQUFFLFdBQVcsTUFBTSxJQUFJLE9BQU87Z0JBRTlCLEVBQUUsWUFBYztnQkFFaEIsRUFBRSxlQUFlLEdBQUk7Z0JBQ3JCLEVBQUUsZUFBZSxHQUFJO2dCQUNyQixFQUFFLGVBQWUsR0FBSTtnQkFDckIsRUFBRSxlQUFlLEdBQUk7Z0JBQ3JCLEVBQUUsZUFBZSxHQUFJO2dCQUVyQixFQUFFLGtCQUFrQixHQUFJO2dCQUN4QixFQUFFLGtCQUFrQixHQUFJO2dCQUN4QixFQUFFLGtCQUFrQixHQUFJO2dCQUN4QixFQUFFLGtCQUFrQixHQUFJO2dCQUN4QixFQUFFLGtCQUFrQixHQUFJO2dCQUN4QixFQUFFLGtCQUFrQixHQUFJO2dCQUN4QixFQUFFLGtCQUFrQixJQUFLO1FBRXpCLEVBQUUsU0FBUyxFQUFFO2dCQUViLEVBQUUsYUFBZTtnQkFDakIsRUFBRSxVQUFVLEdBQUk7Z0JBQ2hCLEVBQUUsVUFBVSxHQUFJO1FBRWhCLEVBQUUsT0FBTyxPQUFPO2dCQUNoQixFQUFFLFlBQWM7UUFFaEIsRUFBRSxPQUFPLE9BQU87Z0JBQ2hCLEVBQUUsWUFBYzs7OztRQUloQixRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUN0QixFQUFFLE1BQU0sV0FBVyxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksT0FBTyxJQUFJLElBQUksSUFBSSxJQUFJO1FBRTlELFFBQVEsT0FBTztRQUNmLEVBQUUsTUFBTSxPQUFPLEdBQUcsRUFBRSxHQUFHO1FBQ3ZCLEVBQUUsT0FBTyxHQUFHO1FBRVosRUFBRSxNQUFNLFNBQVMsRUFBRTtRQUNuQixFQUFFO2dCQUVGLEVBQUUsUUFBVTtnQkFDWixFQUFFLFFBQVU7Z0JBQ1osRUFBRSxXQUFXLEdBQUs7Z0JBQ2xCLEVBQUUsV0FBVyxHQUFLO2lCQUNqQixFQUFFLFdBQVcsS0FBSyxFQUFFLFdBQVcsSUFBTTs7OztRQUl0QyxRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUN0QixFQUFFLE1BQU0sV0FBVyxJQUFJLElBQUksT0FBTyxJQUFJO1FBRXRDLFFBQVEsT0FBTztRQUNmLEVBQUUsTUFBTSxPQUFPLEdBQUcsRUFBRSxHQUFHO1FBQ3ZCLEVBQUUsT0FBTyxHQUFHO1FBQ1osRUFBRSxVQUFVLElBQUksSUFBSSxJQUFJLElBQUk7UUFFNUIsRUFBRSxPQUFPLEVBQUUsVUFBVSxJQUFJO1FBQ3pCLEVBQUUsT0FBTyxFQUFFLFVBQVUsR0FBRztRQUN4QixFQUFFLE9BQU8sRUFBRTtRQUVYLEVBQUUsTUFBTSxTQUFTLEVBQUU7UUFDbkIsRUFBRTtRQUVGLE1BQU0sRUFBRSxPQUFPLEVBQUU7aUJBRWhCLElBQUksTUFBTSxVQUFVLFNBQVMsR0FBSztpQkFDbEMsSUFBSSxNQUFNLFVBQVUsU0FBUyxHQUFLOzs7O1FBSW5DLFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBRXhCLEVBQUUsT0FBTyxFQUFFLEVBQUUsR0FBRztRQUNoQixFQUFFLE1BQU0sT0FBTyxPQUFPO1FBQ3RCLEVBQUUsTUFBTSxXQUFXO1FBQ25CLEVBQUUsTUFBTSxhQUFhLFFBQVEsS0FBSyxJQUFJLEdBQUc7UUFFekMsUUFBUSxPQUFPO1FBQ2YsRUFBRSxNQUFNLE9BQU8sR0FBRyxFQUFFLEdBQUc7UUFDdkIsRUFBRSxPQUFPLEdBQUc7UUFFWixLQUFLLEVBQUUsTUFBTTtRQUNiLE9BQU8sT0FBTyxPQUFPLEVBQUUsTUFBTSxPQUFLLEVBQUUsSUFBSSxLQUFHO1FBRTNDLEVBQUUsYUFBYSxLQUFLLEVBQUUsTUFBTSxFQUFFLE1BQU0sR0FBRztrQkFFbEMsS0FBSyxRQUFPLEdBQUcsTUFBTyxLQUFLLFFBQU8sR0FBRyxNQUFPLEtBQUssUUFBTyxHQUFHLElBQU07UUFFdEUsRUFBRTtpQkFDRCxFQUFFLFVBQVUsRUFBRSxJQUFJLEtBQUssRUFBRSxNQUFRO2dCQUNsQyxFQUFFLFVBQVUsRUFBRSxJQUFJLEdBQUssRUFBRTtRQUV6QixFQUFFLE1BQU0sT0FBTyxPQUFPO1FBQ3RCLEtBQUssS0FBSztRQUNWLEVBQUUsYUFBYSxLQUFLLEVBQUUsTUFBTSxFQUFFLE1BQU0sR0FBRztnQkFFdkMsS0FBSyxJQUFNLEdBQUc7Z0JBQ2QsS0FBSyxJQUFNLEdBQUc7Z0JBQ2QsS0FBSyxJQUFNLEdBQUc7Ozs7UUFJZCxRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUV0QjthQUNJLElBQUssT0FBSTs7WUFDVCxNQUFNLEtBQUs7aUJBQ1AsSUFBSyxPQUFJOztnQkFDVCxNQUFNLEtBQUs7OztRQUNuQixFQUFFLE1BQU0sVUFBVTtRQUNsQixFQUFFLE1BQU0sYUFBYSxRQUFRLEtBQUssSUFBSSxHQUFHO1FBRXpDLFFBQVEsT0FBTztRQUNmLEVBQUUsTUFBTSxPQUFPLEdBQUcsRUFBRSxFQUFFO1FBQ3RCLEVBQUUsT0FBTyxHQUFHO1FBRVosRUFBRSxNQUFNLFNBQVMsRUFBRTtRQUNuQixFQUFFO1FBQ0YsRUFBRSxlQUFlLEdBQUcsRUFBRSxPQUFPLEVBQUUsV0FBVyxLQUFLO2dCQUUvQyxFQUFFLE1BQU0sRUFBRSxLQUFLLEdBQUs7Z0JBQ3BCLEVBQUUsTUFBTSxFQUFFLGFBQWU7UUFFekIsRUFBRSxPQUFPO1FBQ1QsRUFBRTtnQkFFRixFQUFFLE9BQU8sU0FBUyxFQUFFLEdBQUs7Z0JBQ3pCLEVBQUUsT0FBTyxTQUFTLEVBQUUsR0FBSztnQkFDekIsRUFBRSxPQUFPLFNBQVMsRUFBRSxHQUFLOzs7O1FBSXpCLFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBRXhCLEVBQUUsT0FBTyxFQUFFLEVBQUUsR0FBRztRQUNoQixFQUFFLE1BQU0sT0FBTyxPQUFPO1FBRXRCO2FBQ0ksSUFBSyxPQUFJOztZQUNULE1BQU0sS0FBSzs7UUFDZixFQUFFLE1BQU0sVUFBVTtRQUNsQixFQUFFLE1BQU0sYUFBYSxRQUFRLEtBQUssSUFBSSxHQUFHO1FBRXpDLFFBQVEsT0FBTztRQUNmLEVBQUUsTUFBTSxPQUFPLEdBQUcsRUFBRSxHQUFHO1FBQ3ZCLEVBQUUsT0FBTyxHQUFHO1FBQ1osRUFBRTthQUNFLElBQUssT0FBSTs7WUFDVCxFQUFFLE9BQU8sS0FBSyxNQUFJOztRQUV0QixFQUFFLE1BQU0sU0FBUyxFQUFFO1FBQ25CLEVBQUU7Z0JBRUYsRUFBRSxPQUFTO2dCQUNYLEVBQUUsUUFBVTtnQkFDWixFQUFFLFdBQVcsR0FBSztRQUVsQixFQUFFLE9BQU8sRUFBRSxVQUFVLElBQUk7UUFDekIsRUFBRSxPQUFPLEVBQUUsVUFBVSxHQUFHO1FBQ3hCLEVBQUUsT0FBTyxFQUFFO1FBRVgsRUFBRTtRQUVGLE1BQU0sRUFBRSxPQUFPLEVBQUU7aUJBRWhCLElBQUksTUFBTSxVQUFVLFNBQVMsR0FBSzs7OztRQUluQyxRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUV0QjthQUNJLElBQUssT0FBSTs7WUFDVCxNQUFNLE9BQU0sSUFBSSxPQUFNLEtBQUssU0FBUzs7UUFDeEMsRUFBRSxNQUFNLFVBQVU7UUFFbEIsUUFBUSxPQUFPO1FBQ2YsRUFBRSxNQUFNLE9BQU8sR0FBRyxFQUFFLEdBQUc7UUFDdkIsRUFBRSxPQUFPLEdBQUc7UUFFWixFQUFFLE1BQU0sU0FBUyxFQUFFO1FBQ25CLEVBQUU7Z0JBRUYsRUFBRSxRQUFVO2dCQUNaLEVBQUUsV0FBVyxLQUFPO2lCQUNuQixFQUFFLFdBQVcsT0FBTyxFQUFFLE1BQU0sT0FBSyxJQUFNOzs7O1FBSXhDLFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBRXhCLEVBQUUsT0FBTyxFQUFFLEVBQUUsR0FBRztRQUNoQixFQUFFLE1BQU0sT0FBTyxPQUFPO1FBRXRCO2FBQ0ksSUFBSyxPQUFJOztZQUNULE1BQU0sS0FBSzs7UUFDZixNQUFNLEtBQUs7UUFDWCxFQUFFLE1BQU0sVUFBVTtRQUVsQixTQUFTLE9BQU8sRUFBRSxPQUFPLEVBQUUsTUFBTTtRQUNqQyxHQUFHLE9BQU8sRUFBRSxFQUFFLEVBQUU7UUFFaEIsT0FBTyxHQUFHO2dCQUVWLEdBQUcsV0FBYTtnQkFDaEIsR0FBRyxXQUFXLEtBQU87Z0JBQ3JCLEdBQUcsV0FBVyxLQUFPO1FBRXJCLEVBQUUsTUFBTSxTQUFTLEVBQUUsRUFBRSxNQUFNO2dCQUUzQixHQUFHLFdBQVcsS0FBTztpQkFDcEIsR0FBRyxXQUFXLE9BQU8sR0FBRyxXQUFXLE1BQVE7UUFFNUMsRUFBRSxNQUFNLFdBQVcsSUFBSSxJQUFJO2dCQUUzQixHQUFHLFdBQWE7Z0JBQ2hCLEdBQUcsV0FBVyxLQUFPO2dCQUNyQixHQUFHLFdBQVcsS0FBTzs7OztRQUlyQixRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUV0QjthQUNJLElBQUssT0FBSTs7WUFDVCxNQUFNLEtBQUs7O1FBQ2YsTUFBTSxLQUFLO1FBQ1gsRUFBRSxNQUFNLFVBQVU7UUFFbEIsU0FBUyxPQUFPLEVBQUUsT0FBTyxFQUFFLE1BQU07UUFDakMsR0FBRyxPQUFPLEVBQUUsRUFBRSxFQUFFO1FBRWhCLEVBQUUsT0FBTyxFQUFFLFVBQVUsR0FBRztRQUV4QixFQUFFLE1BQU0sU0FBUyxFQUFFO1FBQ25CLEdBQUcsZUFBZSxFQUFFO2dCQUVwQixFQUFFLE1BQU0sRUFBRSxLQUFLLEdBQUssRUFBRSxNQUFNO2dCQUM1QixFQUFFLE1BQU0sRUFBRSxLQUFLLEdBQUs7Ozs7UUFVcEIsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUNyQixRQUFRLE1BQU0sTUFBTTtRQUNwQixFQUFFLE9BQU8sT0FBTztRQUNoQixFQUFFLFdBQVcsTUFBTSxJQUFJLE9BQU87UUFFOUIsRUFBRSxhQUFhO2dCQUVmLEVBQUUsYUFBZTtnQkFDakIsRUFBRSxVQUFVLEdBQUk7Z0JBQ2hCLEVBQUUsVUFBVSxHQUFJO2dCQUNoQixFQUFFLFVBQVUsR0FBSTtRQUVoQixFQUFFLGFBQWE7Z0JBRWYsRUFBRSxFQUFFLEtBQUssR0FBSztnQkFDZCxFQUFFLEVBQUUsYUFBZTs7OztRQUluQixTQUFRLEtBQUssR0FBRyxLQUFLO1FBQ3JCLFFBQVEsTUFBTSxNQUFNO1FBQ3BCLEVBQUUsT0FBTyxPQUFPO1FBQ2hCLEVBQUUsV0FBVyxRQUFRLElBQUksSUFBSTtRQUU3QixFQUFFLFdBQVc7Z0JBQ2IsRUFBRSxhQUFlO2dCQUNqQixFQUFFLEVBQUUsS0FBSyxHQUFLO2dCQUNkLEVBQUUsVUFBVSxHQUFJO1FBRWhCLEVBQUUsV0FBVztnQkFDYixFQUFFLGFBQWU7Z0JBQ2pCLEVBQUUsVUFBVSxHQUFJO1FBRWhCLEVBQUUsV0FBVztnQkFDYixFQUFFLGFBQWU7Z0JBQ2pCLEVBQUUsRUFBRSxLQUFLLEdBQUs7Z0JBQ2QsRUFBRSxVQUFVLEdBQUk7Ozs7UUFJaEIsUUFBUSxTQUFRLEtBQUssR0FBRyxLQUFLO1FBQzdCLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFFeEIsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO1FBQ2hCLEVBQUUsTUFBTSxPQUFPLE9BQU87UUFDdEIsRUFBRSxNQUFNLFdBQVcsUUFBUSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSTtRQUUvRCxFQUFFO2dCQUVGLEVBQUUsT0FBTyxTQUFTLEVBQUUsR0FBSztnQkFDekIsRUFBRSxPQUFPLFNBQVMsRUFBRSxHQUFLO1FBRXpCLEVBQUUsT0FBTztRQUNULEVBQUUsTUFBTSxhQUFhO1FBQ3JCLEVBQUU7Z0JBRUYsRUFBRSxPQUFPLFNBQVMsRUFBRSxHQUFLO2dCQUN6QixFQUFFLE9BQU8sU0FBUyxFQUFFLEdBQUs7Z0JBQ3pCLEVBQUUsT0FBTyxTQUFTLEVBQUUsR0FBSztnQkFDekIsRUFBRSxPQUFPLFNBQVMsRUFBRSxHQUFLO1FBRXpCLEVBQUUsT0FBTztRQUNULEVBQUUsTUFBTSxhQUFhO1FBQ3JCLEVBQUU7Z0JBRUYsRUFBRSxPQUFPLFNBQVMsRUFBRSxHQUFLO2dCQUN6QixFQUFFLE9BQU8sU0FBUyxFQUFFLEdBQUs7Z0JBQ3pCLEVBQUUsT0FBTyxTQUFTLEVBQUUsR0FBSztRQUV6QixFQUFFLE9BQU87UUFDVCxFQUFFLE1BQU0sYUFBYTtRQUNyQixFQUFFO2dCQUVGLEVBQUUsT0FBTyxTQUFTLEVBQUUsR0FBSztnQkFDekIsRUFBRSxPQUFPLFNBQVMsRUFBRSxHQUFLOzs7O1FBSXpCLFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBRXhCLEVBQUUsT0FBTyxFQUFFLEVBQUUsR0FBRztRQUNoQixFQUFFLE1BQU0sT0FBTyxPQUFPO1FBQ3RCLEVBQUUsTUFBTSxXQUFXLFFBQVEsSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUk7UUFFL0QsRUFBRSxNQUFNLGFBQWE7UUFFckIsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO2dCQUVoQixFQUFFLE1BQU0sYUFBZTtnQkFDdkIsRUFBRSxNQUFNLEVBQUUsYUFBZTs7OztRQUl6QixRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUN0QixFQUFFLE1BQU0sV0FBVyxRQUFRLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJO1FBRS9ELEVBQUUsTUFBTSxhQUFhO1FBQ3JCLEVBQUUsTUFBTSxjQUFjLEVBQUU7Z0JBRXhCLEVBQUUsTUFBTSxhQUFlO2dCQUN2QixFQUFFLGlCQUFpQixFQUFFLElBQUs7Ozs7UUFVMUIsUUFBUSxNQUFNLE1BQU07Z0JBRXBCLEVBQUUsWUFBWSxFQUFFLEdBQUk7Z0JBQ3BCLEVBQUUsWUFBWSxFQUFFLEdBQUk7Z0JBQ3BCLEVBQUUsWUFBWSxNQUFNLEdBQUk7Z0JBQ3hCLEVBQUUsWUFBWSxNQUFNLEdBQUk7Z0JBQ3hCLEVBQUUsWUFBWSxLQUFLLEdBQUk7UUFFdkIsUUFBUSxPQUFPO1FBQ2YsT0FBTyxRQUFPLFFBQVEsVUFBVSxFQUFFLGFBQWE7Z0JBRS9DLEVBQUUsV0FBVyxZQUFZLEdBQUk7Z0JBQzdCLEVBQUUsV0FBVyxlQUFlLEdBQUk7UUFFaEMsT0FBTyxPQUFPOzs7O1FBSWQsUUFBUSxPQUFPO1FBQ2YsT0FBTyxRQUFPLFFBQVEsVUFBVSxFQUFFLGFBQWE7UUFFL0MsT0FBTSxLQUFLLEdBQUcsS0FBSztRQUNuQixRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUV0QjthQUNJLElBQUssT0FBSTs7WUFDVCxNQUFNLEtBQUs7O1FBQ2YsTUFBTSxLQUFLO2FBQ1AsSUFBSyxPQUFJOztZQUNULE1BQU0sS0FBSzs7UUFDZixFQUFFLE1BQU0sVUFBVTtRQUNsQixFQUFFLE1BQU0sYUFBYSxRQUFRLEtBQUssSUFBSSxHQUFHO1FBRXpDLEVBQUUsTUFBTSxTQUFTLEVBQUU7UUFDbkIsRUFBRSxNQUFNLGFBQWEsRUFBRSxLQUFJLEtBQUssRUFBRSxPQUFPLGtCQUFrQixJQUFJLEVBQUU7Z0JBRWpFLEVBQUUsTUFBTSxhQUFlO2dCQUN2QixFQUFFLE1BQU0sRUFBRSxLQUFLLEdBQUs7Z0JBQ3BCLEVBQUUsTUFBTSxFQUFFLGFBQWU7Z0JBQ3pCLEVBQUUsTUFBTSxVQUFVLEdBQUs7Z0JBQ3ZCLEVBQUUsaUJBQWlCLEVBQUUsSUFBSztRQUUxQixPQUFPLE9BQU87Ozs7UUFJZCxRQUFRLE9BQU87UUFDZixPQUFPLFFBQU8sUUFBUSxVQUFVLEVBQUUsYUFBYTtRQUUvQyxRQUFRLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFDN0IsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFDaEIsRUFBRSxNQUFNLE9BQU8sT0FBTztRQUN0QixFQUFFLE1BQU0sV0FBVyxNQUFNLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJO1FBRTdELEVBQUUsTUFBTSxTQUFTLEVBQUU7UUFDbkIsRUFBRSxNQUFNLGFBQWEsRUFBRSxLQUFJLEtBQUssRUFBRSxPQUFPLGtCQUFrQixJQUFJLEVBQUU7Z0JBRWpFLEVBQUUsTUFBTSxFQUFFLEtBQUssR0FBSztnQkFDcEIsRUFBRSxNQUFNLEVBQUUsYUFBZTtnQkFDekIsRUFBRSxNQUFNLGFBQWU7UUFFdkIsRUFBRSxPQUFPO1FBQ1QsRUFBRTtnQkFFRixFQUFFLE9BQU8sU0FBUyxFQUFFLEdBQUs7Z0JBQ3pCLEVBQUUsT0FBTyxTQUFTLEVBQUUsR0FBSztnQkFDekIsRUFBRSxPQUFPLFNBQVMsRUFBRSxHQUFLO1FBRXpCLE9BQU8sT0FBTyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2NhbGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL3Rlc3Qvc2NhbGUua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7T0FBVSxVQUFBO0lBQU07O09BQ0EsWUFBVDtPQUFlLGFBQWY7O09BQ1MsWUFBVDs7T0FDUyxjQUFUO09BQWlCLGFBQWpCOztPQUNjLGNBQVI7T0FBZ0IsY0FBaEI7O09BQ1EsYUFBVDs7T0FDUyxhQUFUOztBQUVaLFNBQVEsS0FBSyxHQUFHLEtBQUs7O0FBQ3JCLGlCQUFPLE1BQUk7Ozs7SUFDUCxRQUFRLE1BQU0sTUFBTTtJQUNwQixFQUFFLE9BQU8sT0FBTztJQUNoQixFQUFFLGFBQWEsUUFBUSxLQUFLLElBQUksR0FBRyxFQUFFLEdBQUc7V0FDeEM7OztBQUVKLGdCQUFNLE1BQUssTUFBSyxNQUFJLE1BQUs7Ozs7SUFDakIsUUFBUTtJQUNSLFFBQVEsT0FBTyxFQUFFLE9BQU8sYUFBYTtJQUNyQyxFQUFFLE9BQU8sRUFBRSxFQUFFLEtBQUs7SUFDbEIsRUFBRSxNQUFNLE9BQU8sT0FBTztJQUN0QixFQUFFLE1BQU0sYUFBYSxRQUFRLEtBQUssSUFBSSxHQUFHLEVBQUUsR0FBRztZQUM3QyxFQUFFOzs7Ozs7UUFNSCxJQUFJO1FBQ0osRUFBRSxXQUFXLFFBQVEsU0FBUyxZQUFZLFlBQVk7Z0JBRXRELEVBQUUsWUFBWSxHQUFJO2dCQUNsQixFQUFFLFlBQVksR0FBSTtnQkFDbEIsRUFBRSxZQUFZLEdBQUk7Z0JBQ2xCLEVBQUUsWUFBWSxHQUFJO2dCQUNsQixFQUFFLFlBQVksR0FBSTs7OztRQUlsQixJQUFJLEtBQUs7UUFDVCxFQUFFLFdBQVcsUUFBUTtnQkFFckIsRUFBRSxZQUFZLEdBQUk7Z0JBQ2xCLEVBQUUsWUFBWSxHQUFJOzs7O1FBSWxCLElBQUk7UUFDSixFQUFFLFdBQVcsUUFBUSxTQUFTLFlBQVksWUFBWTtRQUV0RCxFQUFFLGFBQWEsUUFBUSxLQUFLLElBQUksR0FBRyxFQUFFLEdBQUcsRUFBRSxHQUFHLEVBQUUs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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/test/scale.kode
