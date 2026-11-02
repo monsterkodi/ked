@@ -38,7 +38,7 @@ function state extends events
 
         #  the display scale of markdown headings: syntax class -> rows
         @scales     = {h1:3 h2:2}
-        @scaledExts = ['md' 'markdown']
+        @scaledExts = ['md' 'markdown' 'kode']
         @scaling    = true
 
         @yankFlash      = null
@@ -331,11 +331,11 @@ function state extends events
 
     linesInView: => @s.lines[@s.view[1]...@lineAtRow(@cells.rows-1)+1]
 
-    #  ████████    ███████   ██     ██        ███   ███    ███████   ███████
-    #  ███   ███  ███   ███  ███   ███        ████ ████  ███   ███  ███   ███
-    #  ███████    ███   ███  ███ █ ███        ███ █ ███  █████████  ███████
-    #  ███   ███  ███   ███  ███  ████        ███   ███  ███   ███  ███
-    #  ███   ███   ███████   ███   ███        ███   ███  ███   ███  ███
+    #  ████████    ███████   ███   ███        ██     ██   ███████   ████████ 
+    #  ███   ███  ███   ███  ███ █ ███        ███   ███  ███   ███  ███   ███
+    #  ███████    ███   ███  █████████        █████████  █████████  ████████ 
+    #  ███   ███  ███   ███  ███   ███        ███ █ ███  ███   ███  ███      
+    #  ███   ███   ███████   ██     ██        ███   ███  ███   ███  ███      
 
     #  the height of a line in rows. most lines are one row high,
     #  a markdown heading is drawn in a block of 2 or 3 rows.
@@ -347,8 +347,8 @@ function state extends events
 
         @scaling = conf?.enabled != false
 
-        if valid conf?.headings
-            @scales = conf.headings
+        if valid conf?.md
+            @scales = conf.md
         else
             @scales = {h1:3 h2:2}
 

@@ -22,13 +22,17 @@ mouse
 
 scale
     enabled   true
-    headings
-        h1  6
-        h2  5
-        h3  4
-        h4  3
-        h5  2
-    
+    md
+        h1        7
+        h2        6
+        h3        5
+        h4        4
+        h5        3
+        li1       3
+        li2       2
+        # class     2
+        # function  3
+        
 novim
     autoStart           false
     autoEnableOnEscape  true

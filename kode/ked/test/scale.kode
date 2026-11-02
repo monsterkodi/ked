@@ -41,7 +41,7 @@ cells = cols:40 rows:20
         s.syntax.setExt 'md'
         s.loadLines ['# one' '## two' '### three' '#### four' '##### five']
 
-        s.applyScales {enabled:true headings:{h1:6 h2:5 h3:4 h4:3 h5:2}}
+        s.applyScales {enabled:true md:{h1:6 h2:5 h3:4 h4:3 h5:2}}
 
         s.scaleOfLine 0 ▸ 6
         s.scaleOfLine 1 ▸ 5
@@ -59,7 +59,7 @@ cells = cols:40 rows:20
         s.scaleOfLine 0 ▸ 3
         s.scaleOfLine 1 ▸ 2
 
-        s.applyScales {enabled:true headings:{h1:9}}
+        s.applyScales {enabled:true md:{h1:9}}
 
         s.scaleOfLine 0 ▸ 7
 
