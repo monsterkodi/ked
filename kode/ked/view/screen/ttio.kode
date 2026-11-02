@@ -239,6 +239,11 @@ function TTIO extends events
             @placedImgs[img.id][[x y px py pw ph]] = placed
             ⮐
 
+        #  a second placement at the same position in the same frame would
+        #  replace the recorded id, leaving the first one on screen forever
+
+        ⮐  if @placedImgs[img.id]?[[x y px py pw ph]]
+
         img.pid ?= 0                   
         img.pid++
         

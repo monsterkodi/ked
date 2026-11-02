@@ -313,7 +313,7 @@ function mapscr extends mapview
         selw = @pixelsPerCol*16
         hlw  = @pixelsPerCol*8
     
-        for li in belt.lineIndicesForRanges @state.s.selections
+        for li in belt.lineIndicesForRangesAndPositions @state.s.selections []
                 
             sy = @mapY + @lineOffset(li) 
             continue if sy < @mapY or sy >= @mapBot

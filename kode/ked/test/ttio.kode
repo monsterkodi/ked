@@ -26,6 +26,17 @@ use ../view/screen ◆ ttio
         seqs[0].esc ▸ 'OP'
         seqs[1].csi ▸ 'B'
 
+    ▸ an image placement is sent only once per frame
+
+        t = new ttio headless:true input:false
+        t.cellsz = [10 20]
+        img = {id:42}
+
+        t.placeImg img 1 2 null null null null 1000
+        t.placeImg img 1 2 null null null null 1000
+
+        (t.written().split('a=p').length - 1) ▸ 1
+
     ▸ the keys of a chunk are keys of their own
 
         keys = []
