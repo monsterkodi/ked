@@ -177,8 +177,12 @@ class indexer
 
     async index (file, opt)
     {
-        var fileExt
+        var currentClass, fileExt, fileInfo, funcAdded, funcStack, hash, isCpp, isHpp, isJS, lines, text
 
+        await new Promise(function (resolve)
+        {
+            return setImmediate(resolve)
+        })
         if ((this.files[file] != null) && !(opt != null ? opt.refresh : undefined))
         {
             post.emit('file.indexed',file,this.files[file])
@@ -190,70 +194,66 @@ class indexer
             this.files[file] = {}
             return
         }
-        nfs.read(file).then((function (text)
+        text = await nfs.read(file)
+        if (_k_.empty(text))
         {
-            var currentClass, fileInfo, funcAdded, funcStack, hash, isCpp, isHpp, isJS, lines
-
-            if (_k_.empty(text))
-            {
-                return
-            }
-            hash = kstr.hash(text)
-            if ((this.files[file] != null ? this.files[file].hash : undefined) === hash)
-            {
-                post.emit('file.indexed',file,this.files[file])
-                return
-            }
-            lines = text.split(/\r?\n/)
-            fileInfo = {lines:lines.length,funcs:[],classes:[],hash:hash}
-            funcAdded = false
-            funcStack = []
-            currentClass = null
-            isCpp = _k_.in(fileExt,['cpp','cc','c','frag','vert'])
-            isHpp = _k_.in(fileExt,['hpp','h'])
-            isJS = _k_.in(fileExt,['js','mjs'])
-            if (isHpp || isCpp)
-            {
-                return this.applyIndexer(file,fileInfo,text,index_hpp)
-            }
-            else if (isJS)
-            {
-                return this.applyIndexer(file,fileInfo,text,index_js)
-            }
-            else if (fileExt === 'mm')
-            {
-                return this.applyIndexer(file,fileInfo,text,index_mm)
-            }
-            else if (fileExt === 'styl')
-            {
-                return this.applyIndexer(file,fileInfo,text,index_styl)
-            }
-            else if (fileExt === 'kode')
-            {
-                return this.applyIndexer(file,fileInfo,text,index_kode)
-            }
-            else if (fileExt === 'nim')
-            {
-                return this.applyIndexer(file,fileInfo,text,index_nim)
-            }
-            else if (fileExt === 'lua')
-            {
-                return this.applyIndexer(file,fileInfo,text,index_lua)
-            }
-            else if (fileExt === 'kim')
-            {
-                return this.applyIndexer(file,fileInfo,text,index_kim)
-            }
-            else if (fileExt === 'kua')
-            {
-                return this.applyIndexer(file,fileInfo,text,index_kua)
-            }
-        }).bind(this))
+            return
+        }
+        hash = kstr.hash(text)
+        if ((this.files[file] != null ? this.files[file].hash : undefined) === hash)
+        {
+            post.emit('file.indexed',file,this.files[file])
+            return
+        }
+        lines = text.split(/\r?\n/)
+        fileInfo = {lines:lines.length,funcs:[],classes:[],hash:hash}
+        funcAdded = false
+        funcStack = []
+        currentClass = null
+        isCpp = _k_.in(fileExt,['cpp','cc','c','frag','vert'])
+        isHpp = _k_.in(fileExt,['hpp','h'])
+        isJS = _k_.in(fileExt,['js','mjs'])
+        if (isHpp || isCpp)
+        {
+            return this.applyIndexer(file,fileInfo,text,index_hpp)
+        }
+        else if (isJS)
+        {
+            return this.applyIndexer(file,fileInfo,text,index_js)
+        }
+        else if (fileExt === 'mm')
+        {
+            return this.applyIndexer(file,fileInfo,text,index_mm)
+        }
+        else if (fileExt === 'styl')
+        {
+            return this.applyIndexer(file,fileInfo,text,index_styl)
+        }
+        else if (fileExt === 'kode')
+        {
+            return this.applyIndexer(file,fileInfo,text,index_kode)
+        }
+        else if (fileExt === 'nim')
+        {
+            return this.applyIndexer(file,fileInfo,text,index_nim)
+        }
+        else if (fileExt === 'lua')
+        {
+            return this.applyIndexer(file,fileInfo,text,index_lua)
+        }
+        else if (fileExt === 'kim')
+        {
+            return this.applyIndexer(file,fileInfo,text,index_kim)
+        }
+        else if (fileExt === 'kua')
+        {
+            return this.applyIndexer(file,fileInfo,text,index_kua)
+        }
         return this
     }
 }
 
 export default indexer;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhlci5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhlci5rb2RlIl0sIm1hcHBpbmdzIjoiOztPQUNVLFVBQUE7SUFBTTtJQUFPO0lBQU87SUFBUztJQUFLO0lBQUk7SUFBTztJQUFNO0lBQUs7O09BQ2xELGVBQVQ7O09BQ1MsYUFBQTtPQUFPLGtCQUFBO09BQVksaUJBQUE7T0FBVyxpQkFBQTtPQUFXLGVBQUE7T0FBUyxnQkFBQTtPQUFVLGVBQUE7T0FBUyxnQkFBQTtPQUFVLGdCQUFBO09BQVUsZ0JBQUE7T0FBVSxnQkFBQTs7QUFFbkgsTUFBTTs7SUFFRjs7OztRQUVJLFFBQVEsWUFBWTtRQUVwQixLQUFLLEdBQUcsa0JBQWtCLEtBQUM7UUFDM0IsS0FBSyxHQUFHLG1CQUFlOzttQkFBUyxLQUFDLE1BQU07O1FBQ3ZDLEtBQUssR0FBRyx5QkFBZTs7Z0JBQ2hCLEtBQUMsTUFBTSxLQUFLOzt1QkFDWCxLQUFDLE1BQU0sS0FBSyxNQUFLLFFBQVE7OztRQUVqQyxLQUFDLE9BQVUsT0FBTyxPQUFPO1FBQ3pCLEtBQUMsUUFBVSxPQUFPLE9BQU87UUFDekIsS0FBQyxVQUFVLE9BQU8sT0FBTztRQUN6QixLQUFDLFFBQVUsT0FBTyxPQUFPO1FBQ3pCLEtBQUMsUUFBVSxPQUFPLE9BQU87OztJQUU3QixPQUFDLE1BQU07O2VBQVEsS0FBQyxVQUFVLE1BQU07OztJQUVoQyxhQUFhLFVBQVM7Ozs7YUFFUjs7OztZQUVQLFNBQVMsU0FBUyxLQUFNLFNBQVMsV0FBVzs7WUFDM0MsV0FBVyxTQUFTLE1BQU07WUFDMUIsU0FBUyxTQUFTOztRQUV0QixTQUFTLE9BQU87UUFFaEIsc0JBQVksS0FBQyxNQUFNO2NBQ2dCLFVBQWI7O1lBQXRCOztRQUNBLFVBQVUsS0FBSztRQUNmLEtBQUMsTUFBTSxZQUFZO2VBRW5COzs7SUFFSixXQUFXLFdBQVUsVUFBUyxNQUFLLElBQUcsT0FBTSxPQUFNLFNBQU87Ozs7UUFFckQsV0FBVyxLQUFDLFlB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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhlci5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhlci5rb2RlIl0sIm1hcHBpbmdzIjoiOztPQUNVLFVBQUE7SUFBTTtJQUFPO0lBQU87SUFBUztJQUFLO0lBQUk7SUFBTztJQUFNO0lBQUs7O09BQ2xELGVBQVQ7O09BQ1MsYUFBQTtPQUFPLGtCQUFBO09BQVksaUJBQUE7T0FBVyxpQkFBQTtPQUFXLGVBQUE7T0FBUyxnQkFBQTtPQUFVLGVBQUE7T0FBUyxnQkFBQTtPQUFVLGdCQUFBO09BQVUsZ0JBQUE7T0FBVSxnQkFBQTs7QUFFbkgsTUFBTTs7SUFFRjs7OztRQUVJLFFBQVEsWUFBWTtRQUVwQixLQUFLLEdBQUcsa0JBQWtCLEtBQUM7UUFDM0IsS0FBSyxHQUFHLG1CQUFlOzttQkFBUyxLQUFDLE1BQU07O1FBQ3ZDLEtBQUssR0FBRyx5QkFBZTs7Z0JBQ2hCLEtBQUMsTUFBTSxLQUFLOzt1QkFDWCxLQUFDLE1BQU0sS0FBSyxNQUFLLFFBQVE7OztRQUVqQyxLQUFDLE9BQVUsT0FBTyxPQUFPO1FBQ3pCLEtBQUMsUUFBVSxPQUFPLE9BQU87UUFDekIsS0FBQyxVQUFVLE9BQU8sT0FBTztRQUN6QixLQUFDLFFBQVUsT0FBTyxPQUFPO1FBQ3pCLEtBQUMsUUFBVSxPQUFPLE9BQU87OztJQUU3QixPQUFDLE1BQU07O2VBQVEsS0FBQyxVQUFVLE1BQU07OztJQUVoQyxhQUFhLFVBQVM7Ozs7YUFFUjs7OztZQUVQLFNBQVMsU0FBUyxLQUFNLFNBQVMsV0FBVzs7WUFDM0MsV0FBVyxTQUFTLE1BQU07WUFDMUIsU0FBUyxTQUFTOztRQUV0QixTQUFTLE9BQU87UUFFaEIsc0JBQVksS0FBQyxNQUFNO2NBQ2dCLFVBQWI7O1lBQXRCOztRQUNBLFVBQVUsS0FBSztRQUNmLEtBQUMsTUFBTSxZQUFZO2VBRW5COzs7SUFFSixXQUFXLFdBQVUsVUFBUyxNQUFLLElBQUcsT0FBTSxPQUFNLFNBQU87Ozs7UUFFckQsV0FBVyxLQUFDLFlB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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/index/indexer.kode

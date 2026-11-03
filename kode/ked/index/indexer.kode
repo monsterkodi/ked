@@ -114,6 +114,10 @@ class indexer
             
     index: file opt ○=>
         
+        #  let input and timers run between files while a project is indexed
+        
+        ○ new Promise (resolve) -> setImmediate resolve
+        
         # ● indexFile
         
         if @files[file]? and not opt?.refresh
@@ -129,49 +133,49 @@ class indexer
             @files[file] = {}
             ⮐ 
                     
-        nfs.read(file).then (text) =>
+        text =○ nfs.read file
         
-            ⮐  if empty text
+        ⮐  if empty text
+        
+        # ●▸ hash
+        hash = kstr.hash text
+        # ●▪ hash
+        
+        if @files[file]?.hash == hash
+            # log "index.match #{slash.file file}"
+            post.emit 'file.indexed' file @files[file]
+            ⮐ 
+        
+        # ●▸ index
+        lines = text.split /\r?\n/
+        
+        fileInfo =
+            lines:   lines.length
+            funcs:   []
+            classes: []
+            hash:    hash
             
-            # ●▸ hash
-            hash = kstr.hash text
-            # ●▪ hash
+        funcAdded = false
+        funcStack = []
+        currentClass = null
+        
+        isCpp = fileExt in ['cpp' 'cc' 'c' 'frag' 'vert']
+        isHpp = fileExt in ['hpp' 'h' ]
+        isJS  = fileExt in ['js' 'mjs']
+        
+        if 
             
-            if @files[file]?.hash == hash
-                # log "index.match #{slash.file file}"
-                post.emit 'file.indexed' file @files[file]
-                ⮐ 
-            
-            # ●▸ index
-            lines = text.split /\r?\n/
-            
-            fileInfo =
-                lines:   lines.length
-                funcs:   []
-                classes: []
-                hash:    hash
-                
-            funcAdded = false
-            funcStack = []
-            currentClass = null
-            
-            isCpp = fileExt in ['cpp' 'cc' 'c' 'frag' 'vert']
-            isHpp = fileExt in ['hpp' 'h' ]
-            isJS  = fileExt in ['js' 'mjs']
-            
-            if 
-                
-                isHpp or isCpp    ➜ ⮐  @applyIndexer file fileInfo text index_hpp
-                isJS              ➜ ⮐  @applyIndexer file fileInfo text index_js
-                fileExt == 'mm'   ➜ ⮐  @applyIndexer file fileInfo text index_mm
-                fileExt == 'styl' ➜ ⮐  @applyIndexer file fileInfo text index_styl
-                fileExt == 'kode' ➜ ⮐  @applyIndexer file fileInfo text index_kode
-                fileExt == 'nim'  ➜ ⮐  @applyIndexer file fileInfo text index_nim
-                fileExt == 'lua'  ➜ ⮐  @applyIndexer file fileInfo text index_lua
-                fileExt == 'kim'  ➜ ⮐  @applyIndexer file fileInfo text index_kim
-                fileExt == 'kua'  ➜ ⮐  @applyIndexer file fileInfo text index_kua
-                        
-            # ●▪ index
+            isHpp or isCpp    ➜ ⮐  @applyIndexer file fileInfo text index_hpp
+            isJS              ➜ ⮐  @applyIndexer file fileInfo text index_js
+            fileExt == 'mm'   ➜ ⮐  @applyIndexer file fileInfo text index_mm
+            fileExt == 'styl' ➜ ⮐  @applyIndexer file fileInfo text index_styl
+            fileExt == 'kode' ➜ ⮐  @applyIndexer file fileInfo text index_kode
+            fileExt == 'nim'  ➜ ⮐  @applyIndexer file fileInfo text index_nim
+            fileExt == 'lua'  ➜ ⮐  @applyIndexer file fileInfo text index_lua
+            fileExt == 'kim'  ➜ ⮐  @applyIndexer file fileInfo text index_kim
+            fileExt == 'kua'  ➜ ⮐  @applyIndexer file fileInfo text index_kua
+                    
+        # ●▪ index
         @
 
 export indexer

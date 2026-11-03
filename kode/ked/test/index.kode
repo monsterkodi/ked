@@ -1,4 +1,6 @@
-use ../index ◆ index_kode index_utils
+use fs
+use ../../kxk ▪ slash
+use ../index ◆ index_kode index_utils indexer
 
 ▸ index
 
@@ -28,3 +30,19 @@ use ../index ◆ index_kode index_utils
         result.classes[0].line ▸ 0
         result.classes[1].name ▸ 'Bar'
         result.classes[1].line ▸ 2
+
+    ▸ index waits for the file to be read and parsed
+
+        root = '/tmp/opencode/ked-index-waits'
+        file = slash.path root 'waits.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file 'x = 1'
+
+        idx = new indexer
+        ○ idx.index file
+
+        fs.rmSync root recursive:true force:true
+
+        (valid idx.files[file]) ▸ true
