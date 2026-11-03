@@ -1,10 +1,3 @@
-###
-████████  ███  ███      ████████  ████████  ███████    ███  █████████   ███████   ████████ 
-███       ███  ███      ███       ███       ███   ███  ███     ███     ███   ███  ███   ███
-██████    ███  ███      ███████   ███████   ███   ███  ███     ███     ███   ███  ███████  
-███       ███  ███      ███       ███       ███   ███  ███     ███     ███   ███  ███   ███
-███       ███  ███████  ████████  ████████  ███████    ███     ███      ███████   ███   ███
-###
 
 use ../../../kode   ◆ srcmap
 use ../../../kxk    ▪ post kstr slash nfs
@@ -15,8 +8,7 @@ use ../../index     ◆ indexer
 use ../base         ◆ view 
 use ../menu         ◆ context
 use                 ◆ mapscr 
-
-function fileeditor extends editor
+■fileeditor extends editor
 
     @: screen name ->
         
@@ -47,8 +39,12 @@ function fileeditor extends editor
         post.on 'git.diff'         @onGitDiff
         post.on 'git.commit'       @onGitCommit
         post.on 'jumpToWord'       @jumpToWord
-        
+        post.on 'config.loaded'    @onConfigLoaded        
         post.on 'funtree.loaded'   @onFuntreeLoaded
+        
+    onConfigLoaded: data =>
+        
+        @state.applyScales data?.scale
         
     setCurrentFile: @currentFile =>
         

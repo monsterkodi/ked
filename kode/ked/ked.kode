@@ -212,7 +212,6 @@ use child_process ▪ spawn exec
     startup: ○=>
         
         ○ config.loaded if config.loaded
-        @editor.state.applyScales config.data?.scale
         ○ @session.loaded
         
         ⮐  if @args.fresh

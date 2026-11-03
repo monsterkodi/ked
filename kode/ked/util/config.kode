@@ -1,20 +1,59 @@
 
 use ../../kxk ▪ noon slash post
+use           ◆ watcher
 ■config
 
     @data   = null
     @loaded = null # resolves when the config file is read and merged
+    @file   = null # the config file, re-read when it changes
+    @reloadTimer: null
     
     @load: ○->
     
         @loaded = new Promise (resolve) => @resolveLoaded = resolve
+        @file ?= slash.path ◆dir '../../../config'
         
-        configFile = slash.path ◆dir '../../../config'
-        log 'load config file' configFile
-        @data =○ noon.load configFile
+        log 'load config file' @file
+        
+        #  watch the file, not every file in the project
+        ○ watcher.watch @file recursive:false
+        ○ @read()
+        
         # log 'config loaded' #@data
-        post.emit 'config.loaded'
+        post.emit 'config.loaded' config.data
         
         @resolveLoaded()
+    
+    #  remember the file state before reading it,
+    #  so that reading it does not look like a change
+    
+    @read: ○->
+        
+        ○ watcher.snapshot @file
+        @data =○ noon.load @file
+    
+    @onFileChange: event =>
+
+        ⮐ if event.path != @file
+        ⮐ if event.change not in ['change' 'rename']
+
+        clearTimeout @reloadTimer if @reloadTimer
+        @reloadTimer = setTimeout (=> @reload()) 100
+
+    @reload: ○->
+
+        log 'reload config file' @file
+
+        @loaded = new Promise (resolve) => @resolveLoaded = resolve
+
+        try
+            ○ @read()
+            post.emit 'config.loaded' config.data
+        catch err
+            log 'config reload failed' err
+
+        @resolveLoaded()
+
+post.on 'file.change' (event) => config.onFileChange event
 
 export config

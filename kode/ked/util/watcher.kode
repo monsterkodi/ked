@@ -1,28 +1,15 @@
-###
-    ███   ███   ███████   █████████   ███████  ███   ███  ████████  ████████ 
-    ███ █ ███  ███   ███     ███     ███       ███   ███  ███       ███   ███
-    █████████  █████████     ███     ███       █████████  ███████   ███████  
-    ███   ███  ███   ███     ███     ███       ███   ███  ███       ███   ███
-    ██     ██  ███   ███     ███      ███████  ███   ███  ████████  ███   ███
-
-    watches for file system changes and posts notifications when changes occur
-###
 
 use ../../kxk ▪ watch slash post nfs
 use fs
 
-function watcher
+■watcher
+
+    # watches for file system changes and posts notifications when changes occur
 
     @watchers: {}
     @renameTimer: {}
     @fileStats: {}
     @ignoredWatchErrors: ['EACCES' 'EPERM' 'ENOENT']
-    
-    #  ███████  ███   ███   ███████   ████████    ███████  ███   ███   ███████   █████████  
-    # ███       ████  ███  ███   ███  ███   ███  ███       ███   ███  ███   ███     ███     
-    # ███████   ███ █ ███  █████████  ████████   ███████   █████████  ███   ███     ███     
-    #      ███  ███  ████  ███   ███  ███             ███  ███   ███  ███   ███     ███     
-    # ███████   ███   ███  ███   ███  ███        ███████   ███   ███   ███████      ███     
     
     @snapshot: file ○->
     

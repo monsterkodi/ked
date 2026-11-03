@@ -1,10 +1,9 @@
-###
-    ██     ██   ███████   ███████    ████████
-    ███   ███  ███   ███  ███   ███  ███     
-    █████████  ███   ███  ███   ███  ███████ 
-    ███ █ ███  ███   ███  ███   ███  ███     
-    ███   ███   ███████   ███████    ████████
 
+use ../../kxk ▪ kseg slash post nfs
+use ../theme  ◆ theme
+ 
+■mode
+###
     stores modes per editor state
     
     modes handle input and text insertion:
@@ -15,23 +14,12 @@
     unype    unicode type writer
 ###
 
-use ../../kxk ▪ kseg slash post nfs
-use ../theme  ◆ theme
- 
-function mode
-
     @active:  {} # maps editor state names to active mode instances
     @modes:   {} # maps mode names to mode classes
     @pending: [] # list of editors that requested autostart before modes were loaded
     @loaded:  null # resolves when the mode modules are in @modes
     
     @names: -> Object.keys mode.modes
-    
-    # ███       ███████    ███████   ███████        ██     ██   ███████   ███████     ███   ███  ███      ████████   ███████  
-    # ███      ███   ███  ███   ███  ███   ███      ███   ███  ███   ███  ███   ███   ███   ███  ███      ███       ███       
-    # ███      ███   ███  █████████  ███   ███      █████████  ███   ███  ███   ███   ███   ███  ███      ███████   ███████   
-    # ███      ███   ███  ███   ███  ███   ███      ███ █ ███  ███   ███  ███   ███   ███   ███  ███      ███            ███  
-    # ███████   ███████   ███   ███  ███████        ███   ███   ███████   ███████      ███████   ███████  ████████  ███████   
     
     @loadModules: ○->
 
@@ -57,12 +45,6 @@ function mode
         while valid mode.pending
             mode.autoStartForEditor mode.pending.shift()
         
-    #  ███████   ███   ███  █████████   ███████    ███████  █████████   ███████   ████████   █████████  
-    # ███   ███  ███   ███     ███     ███   ███  ███          ███     ███   ███  ███   ███     ███     
-    # █████████  ███   ███     ███     ███   ███  ███████      ███     █████████  ███████       ███     
-    # ███   ███  ███   ███     ███     ███   ███       ███     ███     ███   ███  ███   ███     ███     
-    # ███   ███   ███████      ███      ███████   ███████      ███     ███   ███  ███   ███     ███     
-    
     @autoStartForEditor: editor ->
         
         if empty mode.modes
@@ -72,12 +54,6 @@ function mode
             if editor.feats[name] and mode.modes[name].autoStart
                 mode.start editor.state name
 
-    #  ███████  █████████   ███████   ████████   █████████
-    # ███          ███     ███   ███  ███   ███     ███   
-    # ███████      ███     █████████  ███████       ███   
-    #      ███     ███     ███   ███  ███   ███     ███   
-    # ███████      ███     ███   ███  ███   ███     ███   
-    
     @start: state name ->
     
         ⮐  if @isActive state name
@@ -104,12 +80,6 @@ function mode
         else
             @start state name
         
-    #  ███████    ███████  █████████  ███  ███   ███  ████████
-    # ███   ███  ███          ███     ███  ███   ███  ███     
-    # █████████  ███          ███     ███   ███ ███   ███████ 
-    # ███   ███  ███          ███     ███     ███     ███     
-    # ███   ███   ███████     ███     ███      █      ████████
-
     @isActive: state name -> valid @get(state name)
         
     @get: state name ->
