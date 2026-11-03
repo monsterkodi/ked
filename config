@@ -38,6 +38,8 @@ scale
     kode
         class     7
         section   2
+        h1        7
+        h2        6
         
 novim
     autoStart           false
