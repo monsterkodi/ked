@@ -42,6 +42,17 @@ hed = cols rows ext='md' feats=[]->
         s.scaleOfLine 0 ▸ 1
         s.scaleOfLine 1 ▸ 1
 
+    ▸ bang comments scale by level
+
+        s = tstt 'kode'
+        s.applyScales {enabled:true kode:{bang:6 bangbang:7}}
+        s.loadLines ['#! one' '#!! two' '# three' 'text']
+
+        s.scaleOfLine 0 ▸ 6
+        s.scaleOfLine 1 ▸ 7
+        s.scaleOfLine 2 ▸ 1
+        s.scaleOfLine 3 ▸ 1
+
     ▸ the configured scales change or disable the scaling
 
         s = tstt()

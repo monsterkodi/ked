@@ -116,7 +116,7 @@ function syntax
         classes
         
     hasPureClass: y clss =>
-        pclss = [clss "text "+clss "punct "+clss]
+        pclss = [clss "text "+clss "punct "+clss "comment "+clss]
         for dss in @diss[y] ? []
             ⮐ true if dss.clss in pclss
         false

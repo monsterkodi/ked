@@ -258,5 +258,7 @@ exports.map =
         'comment triple':                   'w4'
         'comment header':                   ['g1' 'G1']
         'comment triple header':            ['g2' 'G2']
+        'comment bang':                     ['g1' 'G1']
+        'comment bangbang':                 ['g2' 'G2']
 
 export exports

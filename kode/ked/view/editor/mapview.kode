@@ -1,22 +1,15 @@
 
-###
-    ██     ██   ███████   ████████   ███   ███  ███  ████████  ███   ███  
-    ███   ███  ███   ███  ███   ███  ███   ███  ███  ███       ███ █ ███  
-    █████████  █████████  ████████    ███ ███   ███  ███████   █████████  
-    ███ █ ███  ███   ███  ███           ███     ███  ███       ███   ███  
-    ███   ███  ███   ███  ███            █      ███  ████████  ██     ██  
-
-    the base of fileditor's mapscr 
-    also used for browse and quicky previews
-###
-
 use ../../../kxk    ▪ kstr post
 use ../../util      ◆ prof syntax 
 use ../../util/img  ◆ glyphs
 use ../../theme     ◆ color theme
 use ../../edit/tool ◆ colorspans
 use ../base         ◆ view
-function mapview extends view
+■mapview extends view
+    ###
+        the base of fileditor's mapscr 
+        also used for browse and quicky previews
+    ###
 
     @: screen @state ->
         
@@ -35,12 +28,7 @@ function mapview extends view
         @pixelsPerCol = 2
         @textScale    = 4 
             
-    #  ███████  ███   ███   ███████   ███   ███  
-    # ███       ███   ███  ███   ███  ███ █ ███  
-    # ███████   █████████  ███   ███  █████████  
-    #      ███  ███   ███  ███   ███  ███   ███  
-    # ███████   ███   ███   ███████   ██     ██  
-    
+##show    
     reload: => 
     
         @createImages()
@@ -99,11 +87,7 @@ function mapview extends view
         
         @redraw = true        
     
-    # ███  ██     ██   ███████    ███████   ████████   ███████  
-    # ███  ███   ███  ███   ███  ███        ███       ███       
-    # ███  █████████  █████████  ███  ████  ███████   ███████   
-    # ███  ███ █ ███  ███   ███  ███   ███  ███            ███  
-    # ███  ███   ███  ███   ███   ███████   ████████  ███████   
+##images
     
     maxLinesToLoad: => (@cells.rows-@rowOffset) * @csz[1] / @pixelsPerRow
     
@@ -138,11 +122,7 @@ function mapview extends view
                 
         # prof.end @state.name+'.map'
         
-    # ███   ███  ████████   ███████     ███████   █████████  ████████
-    # ███   ███  ███   ███  ███   ███  ███   ███     ███     ███     
-    # ███   ███  ████████   ███   ███  █████████     ███     ███████ 
-    # ███   ███  ███        ███   ███  ███   ███     ███     ███     
-    #  ███████   ███        ███████    ███   ███     ███     ████████
+##update
 
     lineData: y =>
         
@@ -250,6 +230,7 @@ function mapview extends view
             f = 1 if scale >= @textScale # no darkening for lines that are rendered via fontmap
             clss = classes[x]
             clss ?= 'text'
+            f = 2 if 'bang' in clss
             if ch in '0█'
                 if 'header' in clss
                     f = 2.0
@@ -282,11 +263,7 @@ function mapview extends view
                         data[i+1] = fg[1]
                         data[i+2] = fg[2]
             
-    # ███████    ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  
-    # ███   ███  ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███   ███  ███   ███  ██     ██  
+##draw
     
     drawImages: =>
         

@@ -1,5 +1,6 @@
 
 use ../edit        ◆ state editor
+use ../theme       ◆ theme
 use ../util        ◆ harness filecolors
 use ../view/editor ◆ mapview
 
@@ -201,3 +202,8 @@ use ../view/editor ◆ mapview
 
         s.s.colors.fg ▸ [[0 0 1 '#ff0000'] [1 0 4 '#00ff00'] [4 0 6 '#ff0000']]
         s.s.colors.bg ▸ [[0 0 1 '#0000ff'] [4 0 6 '#0000ff']]
+
+    ▸ bang comments use the header greens
+
+        theme.syntax['comment bang']     ▸ theme.syntax['comment header']
+        theme.syntax['comment bangbang'] ▸ theme.syntax['comment triple header']

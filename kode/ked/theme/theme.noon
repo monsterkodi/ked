@@ -248,6 +248,10 @@ syntax
     comment header highlight                #030   
     comment header                          #040   
     comment header shadow                   #050   
+    punct comment bang                      #020   
+    punct comment bang!                     #020   
+    comment bang                            #050   
+    comment bang!                           #0c0   
 
     # ██     ██  ███████  
     # ███   ███  ███   ███
@@ -339,4 +343,3 @@ syntax
     file_tiff                               #040   
     file_image                              #030   
     
-# ked-colors {"v":1,"hash":"682139429:15114","fg":[[2,1,55,"#8e80ff"],[2,2,55,"#7866ff"],[2,3,55,"#614dff"],[2,4,55,"#4b33ff"],[2,5,55,"#3419ff"]],"bg":[]}

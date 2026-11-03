@@ -1,14 +1,4 @@
-###
-███   ███  ███   ███  ███      ███   ███  ████████
-███  ███   ███   ███  ███      ███   ███  ███   ███
-███████    ███   ███  ███      ███   ███  ███████
-███  ███   ███   ███  ███      ███   ███  ███   ███
-███   ███   ███████   ███████   ███████   ███   ███
-###
-
-#!! kulur
-#!  kulur
-
+#!kulur
 use ../kxk/kseg
 use ../kxk/klor
 use ./extlang ▪ exts lang
@@ -26,12 +16,6 @@ for ext in exts
 SPACE   = /\s/
 HEADER  = /^[0█]+$/u
 
-# the letters that are not punctuation. a letter that is not on this list
-# splits the word around it and gets a different colour than the letters
-# that are on it, so the list has to have all of them.
-#
-# \u0100-\u017f is latin extended-a. the rest is latin-1, by hand.
-
 PUNCT   = /[^\wäöüßÄÖÜáéíóúÁÉÍÓÚñÑçÇàèìòùÀÈÌÒÙâêîôûÂÊÎÔÛãõÃÕåÅæÆœŒøØłŁđĐÀËÏÐÝÞëïðþÿĀ-ſ]+/u
 NUMBER  = /^\d+$/
 FLOAT   = /^\d+f$/
@@ -42,21 +26,11 @@ LI      = /(\sli\d\s|\sh\d\s)/
 
 codeTypes = ['interpolation' 'code triple']
 
-# the character a grapheme is built on. a grapheme can be more than one
-# character - a quote with a combining mark on it is two - and the
-# highlighter compares characters, not graphemes.
-
 base = s ->
     ⮐  '' if not s
     ⮐  s if s.length == 1
     String.fromCodePoint s.codePointAt(0)
-
-#  ███████  ███   ███  ███   ███  ███   ███  ███   ███  ████████  ███████
-# ███       ███   ███  ███   ███  ████  ███  ███  ███   ███       ███   ███
-# ███       █████████  ███   ███  ███ █ ███  ███████    ███████   ███   ███
-# ███       ███   ███  ███   ███  ███  ████  ███  ███   ███       ███   ███
-#  ███████  ███   ███   ███████   ███   ███  ███   ███  ████████  ███████
-
+#!chunked
 ###
     returns array of
 
@@ -167,14 +141,6 @@ chunked = segls ext ->
 
     chunkd
     
-###
-███   ███   ███████   ███   ███  ███████    ███      ████████  ████████    ███████
-███   ███  ███   ███  ████  ███  ███   ███  ███      ███       ███   ███  ███
-█████████  █████████  ███ █ ███  ███   ███  ███      ███████   ███████    ███████
-███   ███  ███   ███  ███  ████  ███   ███  ███      ███       ███   ███       ███
-███   ███  ███   ███  ███   ███  ███████    ███████  ████████  ███   ███  ███████
-###
-
 extStack   = []
 stack      = []
 handl      = []
@@ -187,12 +153,7 @@ line       = null
 chunk      = null
 chunkIndex = 0
 
-#  ███████   ███████   ██     ██  ██     ██  ████████  ███   ███  █████████
-# ███       ███   ███  ███   ███  ███   ███  ███       ████  ███     ███
-# ███       ███   ███  █████████  █████████  ███████   ███ █ ███     ███
-# ███       ███   ███  ███ █ ███  ███ █ ███  ███       ███  ████     ███
-#  ███████   ███████   ███   ███  ███   ███  ████████  ███   ███     ███
-
+##comment
 fillComment = n ->
 
     for i in 0...n
@@ -209,6 +170,13 @@ fillComment = n ->
                 c.clss += ' header'
     line.chunks.length - chunkIndex + n
 
+bangComment = n name ->
+
+    addAndJoinValues n "comment #{name}"
+    for c in line.chunks[chunkIndex+1..]
+        c.clss = "comment #{name}"
+    line.chunks.length - chunkIndex
+
 hashComment = ->
 
     ⮐  if stackTop and topType != 'regexp triple'
@@ -216,6 +184,15 @@ hashComment = ->
         ⮐ # comments inside triple regexp only valid on internal lines?
 
     if chunk.match == "#"
+    
+        if ext == 'kode'
+
+            if chunk.turd?.startsWith '#!'
+                ⮐  bangComment 2 'bang!'
+
+            if chunk.turd?.startsWith "##"
+                ⮐  bangComment 2 'bang'
+    
         fillComment 1
 
 noonComment = ->

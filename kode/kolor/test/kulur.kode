@@ -342,6 +342,38 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
     
         dss = dissect "/*\n 0 0 0 \n*/"
         inc dss[1] 1 "0"   ▸ 'comment triple header'
+
+    ▸ bang comments
+
+        lang 'kode'
+
+        rgs = ranges "#!title"
+        inc rgs 0  "#!"     ▸ 'punct comment bang'
+        inc rgs 2  "title"  ▸ 'comment bang'
+
+        rgs = ranges "#!!title"
+        inc rgs 0  "#!!"    ▸ 'punct comment bangbang'
+        inc rgs 3  "title"  ▸ 'comment bangbang'
+
+        rgs = ranges "#! title"
+        inc rgs 0  "#!"     ▸ 'punct comment bang'
+        inc rgs 3  "title"  ▸ 'comment bang'
+
+        rgs = ranges "#!! title"
+        inc rgs 0  "#!!"    ▸ 'punct comment bangbang'
+        inc rgs 4  "title"  ▸ 'comment bangbang'
+
+        rgs = ranges "# title"
+        inc rgs 0  "#"      ▸ 'punct comment'
+        inc rgs 2  "title"  ▸ 'comment'
+
+        lang 'py'
+
+        rgs = ranges "#!title"
+        inc rgs 0  "#"      ▸ 'punct comment'
+        inc rgs 2  "title"  ▸ 'comment'
+
+        lang 'styl'
         
     # ███   ███  ███   ███  ██     ██  ███████    ████████  ████████    ███████  
     # ████  ███  ███   ███  ███   ███  ███   ███  ███       ███   ███  ███       
