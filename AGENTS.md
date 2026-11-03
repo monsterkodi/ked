@@ -11,25 +11,25 @@ Includes a self-hosting toolchain for a custom language (**kode**) that compiles
 
 ## kode/ modules
 
-| module | what it is |
-|---|---|
-| `kode` | the Kode compiler |
-| `kxk` | utility library |
-| `ked` | the TUI editor |
-| `kolor` | syntax highlighting and language definitions |
+| module   | what it is                 |
+|----------|----------------------------|
+| `kode`   | the Kode compiler          |
+| `kxk`    | utility library            |
+| `ked`    | the TUI editor             |
+| `kolor`  | syntax highlighting        |
 | `konrad` | build / test driver (`kk`) |
 
 ## kk - build tool
 
 usage: `./kk <flag>`
 
-| command | does |
-|---|---|
-| `kk -i` | dry run: transpiles to memory, **writes nothing**. Safe. |
-| `kk -k` | transpiles `kode/**` → `js/**`; `*.kode` to `*.js` and `*.noon` to `*.json` |
-| `kk -k <file.kode>` | transpiles a single source file |
-| `kk -t` | runs all tests |
-| `kk -t <module>` | tests one module: `kode` \| `kxk` \| `kolor` \| `ked` |
+| command          | does                                                                    |
+|------------------|-------------------------------------------------------------------------|
+| `kk -i`          | dry run: transpiles to memory, **writes nothing**. Safe.                |
+| `kk -k`          | transpiles `kode/**` → `js/**`; `*.kode` → `*.js` ; `*.noon` → `*.json` |
+| `kk -k <file>`   | transpiles a single source file                                         |
+| `kk -t`          | runs all tests                                                          |
+| `kk -t <module>` | tests one module: `kode` `kxk` `kolor` `ked`                            |
 
 ## files outside the transpiler
 
@@ -74,7 +74,7 @@ for x in xs ➜ body
 
 see `kode.md` for more details and kode examples
 
-## checking snippets without building
+### checking snippets
 
 ```sh
 node js/kode/kode.js --help
