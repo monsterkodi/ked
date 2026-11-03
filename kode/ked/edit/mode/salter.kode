@@ -1,15 +1,10 @@
-#  ███████   ███████   ███    █████████  ████████  ████████ 
-# ███       ███   ███  ███       ███     ███       ███   ███
-# ███████   █████████  ███       ███     ███████   ███████  
-#      ███  ███   ███  ███       ███     ███       ███   ███
-# ███████   ███   ███  ███████   ███     ████████  ███   ███
 
 use ../../../kxk ◆ salter
 use ../../theme  ◆ color theme
 use ../tool      ◆ belt
 use ..           ◆ mode
       
-function salterMode
+■salterMode
         
     @syms: []
 
@@ -109,6 +104,12 @@ function salterMode
         @state.deselect()
         mode.start @state 'salter' # 𝜏𝖍𝚒𝖘 𝚒𝖘 ϝ𝓊⊂𝛋ϵ𝒹 𝓊𝔭 𝖘⊚⫙ϵ𝖍⊚⟒, 𝔟𝓊𝜏 𝚒𝜏 𝓢ϵξ⫙𝖘 𝜏⊚ ⟒◯ɼ𝛋 ϝ⊚ɼ ∩⊚⟒
         true
+        
+    desalt: ->
+    
+        selections = belt.lineRangesForPositions @state.s.lines @state.s.cursors
+        text       = belt.textForLineRanges @state.s.lines selections
+        log "desalt" selections text
     
     # ███   ███  ████████  ███   ███
     # ███  ███   ███        ███ ███ 
@@ -136,6 +137,10 @@ function salterMode
                     @state.s = @state.s.set 'cursors' [@state.mainCursor()]
                     @state.s = @state.s.set 'main' 0
                     ⮐  'unhandled'
+                    
+            'shift+cmd+b'
+                if @isSaltedLine @state.mainCursor()[1]
+                    ⮐ @desalt()
             
         char = valid(event.char) ? event.char : key
             
