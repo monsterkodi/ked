@@ -1,7 +1,7 @@
-use ../../kxk ▪ kseg
-use ../edit   ◆ state editor
-use ../theme  ◆ theme
-use ../util   ◆ harness config
+use ../../kxk      ▪ kseg
+use ../edit        ◆ state editor
+use ../theme       ◆ theme
+use ../util        ◆ harness config
 use ../view/menu   ◆ choices context
 use ../view/editor ◆ mapscr
 use ../view/base   ◆ scroll

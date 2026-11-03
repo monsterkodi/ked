@@ -1,5 +1,5 @@
 use child_process ▪ spawn
-use ../../kxk    ▪ slash
+use ../../kxk     ▪ slash
 
 ▸ file arguments
 
