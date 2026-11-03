@@ -1,6 +1,6 @@
 var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, trim: function (s,c=' ') {return _k_.ltrim(_k_.rtrim(s,c),c)}, last: function (o) {return o != null ? o.length ? o[o.length-1] : undefined : o}, ltrim: function (s,c=' ') { while (_k_.in(s[0],c)) { s = s.slice(1) } return s}, rtrim: function (s,c=' ') {while (_k_.in(s.slice(-1)[0],c)) { s = s.slice(0, s.length - 1) } return s}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
 
-var index_kode
+var index_kode, maskStrings, stringOrComment
 
 import kxk from "../../kxk.js"
 let kstr = kxk.kstr
@@ -8,6 +8,19 @@ let slash = kxk.slash
 
 import index_utils from "./index_utils.js"
 
+stringOrComment = /###[\s\S]*?###|#.*|"""[\s\S]*?"""|"(?:\\.|\#\{[^\}]*}|[^\n\\"])*"|'(?:\\['\\]|[^\n'])*'/g
+
+maskStrings = function (text)
+{
+    return text.replace(stringOrComment,function (m)
+    {
+        if (m[0] === '#')
+        {
+            return m
+        }
+        return m.replace(/[^\n]/g,' ')
+    })
+}
 
 index_kode = (function ()
 {
@@ -16,9 +29,10 @@ index_kode = (function ()
 
     index_kode.prototype["parse"] = function (text)
     {
-        var addFuncInfo, async, bound, boundIndex, className, currentClass, firstClass, funcInfo, funcName, funcStack, indent, li, line, lines, m, methodName, result, unbndIndex, word, words, _105_27_
+        var addFuncInfo, async, bound, boundIndex, className, code, codeLines, currentClass, firstClass, funcInfo, funcName, funcStack, indent, li, line, lines, m, methodName, result, unbndIndex, word, words, _118_27_
 
         lines = kstr.lines(text)
+        codeLines = kstr.lines(maskStrings(text))
         bound = {}
         result = {classes:[],funcs:[],words:new Set(),lines:lines.length}
         funcStack = []
@@ -41,7 +55,8 @@ index_kode = (function ()
         for (li = 0; li < list.length; li++)
         {
             line = list[li]
-            if (_k_.empty(_k_.trim(line)))
+            code = codeLines[li]
+            if (_k_.empty(_k_.trim(code)))
             {
                 continue
             }
@@ -54,14 +69,17 @@ index_kode = (function ()
             }
             if ((currentClass != null))
             {
-                if (methodName = index_utils.methodNameInLine(line))
+                if (code.includes('->') || code.includes('=>'))
                 {
-                    unbndIndex = line.indexOf('->')
-                    boundIndex = line.indexOf('=>')
-                    bound = boundIndex > 0 && (unbndIndex < 0 || boundIndex < unbndIndex)
-                    async = line.indexOf('○') >= 0
-                    funcInfo = {line:li,name:methodName,class:currentClass,async:async,bound:bound}
-                    funcStack.push([indent,funcInfo])
+                    if (methodName = index_utils.methodNameInLine(code))
+                    {
+                        unbndIndex = code.indexOf('->')
+                        boundIndex = code.indexOf('=>')
+                        bound = boundIndex > 0 && (unbndIndex < 0 || boundIndex < unbndIndex)
+                        async = code.indexOf('○') >= 0
+                        funcInfo = {line:li,name:methodName,class:currentClass,async:async,bound:bound}
+                        funcStack.push([indent,funcInfo])
+                    }
                 }
             }
             else
@@ -70,15 +88,18 @@ index_kode = (function ()
                 {
                     currentClass = null
                 }
-                if (funcName = index_utils.funcNameInLine(line))
+                if (funcName = index_utils.funcNameInLine(code))
                 {
-                    funcInfo = addFuncInfo(funcName,{line:li,async:line.indexOf('○') >= 0})
+                    funcInfo = addFuncInfo(funcName,{line:li,async:code.indexOf('○') >= 0})
                     funcStack.push([indent,funcInfo])
                 }
-                else if (funcName = index_utils.postNameInLine(line))
+                else if (code.includes('post.on'))
                 {
-                    funcInfo = addFuncInfo(funcName,{line:li,post:true})
-                    funcStack.push([indent,funcInfo])
+                    if (funcName = index_utils.postNameInLine(line))
+                    {
+                        funcInfo = addFuncInfo(funcName,{line:li,post:true})
+                        funcStack.push([indent,funcInfo])
+                    }
                 }
                 else
                 {
@@ -90,13 +111,13 @@ index_kode = (function ()
                     }
                 }
             }
-            if (className = index_utils.classNameInLine(line))
+            if (className = index_utils.classNameInLine(code))
             {
                 firstClass = (firstClass != null ? firstClass : className)
                 currentClass = className
                 result.classes.push({name:className,line:li})
             }
-            words = line.split(index_utils.splitRegExp)
+            words = code.split(index_utils.splitRegExp)
             var list1 = _k_.list(words)
             for (var _b_ = 0; _b_ < list1.length; _b_++)
             {
@@ -108,7 +129,7 @@ index_kode = (function ()
         {
             _k_.last(funcStack)[1].last = li - 1
             funcInfo = funcStack.pop()[1]
-            funcInfo.class = ((_105_27_=funcInfo.class) != null ? _105_27_ : firstClass)
+            funcInfo.class = ((_118_27_=funcInfo.class) != null ? _118_27_ : firstClass)
             result.funcs.push(funcInfo)
         }
         result.words = Array.from(result.words)
@@ -120,5 +141,5 @@ index_kode = (function ()
 
 export default index_kode;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhfa29kZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhfa29kZS5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNO0lBQUs7O09BQ0wsa0JBQUE7OztBQUVmLGNBQUQ7O2FBRUk7OzswQkFFQSxvQkFBTzs7OztRQUVILFFBQVEsS0FBSyxNQUFNO1FBRW5CO1FBQ0EsVUFDSSxXQUNBLFNBQ0EsVUFBYSxNQUNiLE1BQVMsTUFBTTtRQUVuQjtRQUNBLGVBQWU7UUFFZix3QkFBYyxVQUFTOztpQkFFVDs7OztnQkFFUCxTQUFTLFNBQVMsS0FBTSxTQUFTLFdBQVc7O2dCQUMzQyxXQUFXLFNBQVMsTUFBTTtnQkFDMUIsU0FBUyxTQUFTOztZQUV0QixTQUFTLE9BQU87bUJBQ2hCOzs0QkFFVzthQUFOOztZQUFMO21DQUV1Qjs7Z0JBQXZCOztZQUVBLFNBQVMsS0FBSyxPQUFPO21CQUVmLFVBQVUsVUFBVyxtQkFBZSxXQUFXOzt5QkFDNUMsV0FBVyxHQUFHLE9BQU8sS0FBSztnQkFDL0IsV0FBVyxVQUFVLE1BQU07Z0JBQzNCLE9BQU8sTUFBTSxLQUFLOztpQkFFbkI7O29CQUVJLGFBQWEsWUFBWSxpQkFBaUI7O29CQUN6QyxhQUFhLEtBQUssUUFBUTtvQkFDMUIsYUFBYSxLQUFLLFFBQVE7b0JBQzFCLFFBQVEsYUFBYSxNQUFPLGFBQWEsS0FBSyxhQUFhO29CQUMzRCxRQUFRLEtBQUssUUFBUSxRQUFNO29CQUUzQixZQUNJLEtBQVEsR0FDUixLQUFRLFdBQ1IsTUFBUSxhQUNSLE1BQVEsTUFDUixNQUFRO29CQUVaLFVBQVUsTUFBTSxPQUFPOzs7OztvQkFHSixTQUFTOztvQkFBaEMsZUFBZTs7b0JBRVosV0FBVyxZQUFZLGVBQWU7O29CQUNyQyxXQUFXLFlBQVksVUFDbkIsS0FBTSxHQUNOLE1BQU8sS0FBSyxRQUFRLFFBQU07b0JBRTlCLFVBQVUsTUFBTSxPQUFPOzt5QkFFbkIsV0FBVyxZQUFZLGVBQWU7O29CQUMxQyxXQUFXLFlBQVksVUFDbkIsS0FBTSxHQUNOLEtBQU07b0JBRVYsVUFBVSxNQUFNLE9BQU87Ozs7b0JBR3ZCLElBQUksS0FBSyxNQUFNLFlBQVk7MEJBQ3hCLFlBQUEsRUFBRzs7d0JBRUYsV0FBVyxZQUFZLEVBQUUsSUFDckIsS0FBTSxHQUNOLEtBQU07d0JBRVYsVUFBVSxNQUFNLE9BQU87Ozs7Z0JBRWhDLFlBQVksWUFBWSxnQkFBZ0I7O2dCQUV2QyxjQUFBLHFCQUFBLGFBQWU7Z0JBQ2YsZUFBZTtnQkFFZixPQUFPLFFBQVEsTUFDWCxLQUFNLFVBQ04sS0FBTTs7WUFFZCxRQUFRLEtBQUssTUFBTSxZQUFZO2lDQUNuQjs7O2dCQUFSO2dCQUNBLE9BQU8sTUFBTSxJQUFJOzs7ZUFFbkIsVUFBVTs7cUJBQ1AsV0FBVyxHQUFHLE9BQU8sS0FBSztZQUMvQixXQUFXLFVBQVUsTUFBTTtZQUMzQixTQUFTLG1CQUFULFNBQVMsNEJBQVM7WUFDbEIsT0FBTyxNQUFNLEtBQUs7O1FBRXRCLE9BQU8sUUFBUSxNQUFNLEtBQUssT0FBTztlQUVqQzs7O1dBekdQOzs7ZUEyR00ifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhfa29kZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhfa29kZS5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNO0lBQUs7O09BQ0wsa0JBQUE7O0FBRWhCLGtCQUFrQjs7QUFFbEIsd0JBQWU7O1dBQ1gsS0FBSyxRQUFRLDBCQUFrQjs7WUFDbkIsRUFBRSxPQUFNOzttQkFBYjs7ZUFDSCxFQUFFLFFBQVEsU0FBVTs7OztBQUUzQixjQUFEOzthQUVJOzs7MEJBRUEsb0JBQU87Ozs7UUFFSCxRQUFRLEtBQUssTUFBTTtRQUNuQixZQUFZLEtBQUssTUFBTSxZQUFZO1FBRW5DO1FBQ0EsVUFDSSxXQUNBLFNBQ0EsVUFBYSxNQUNiLE1BQVMsTUFBTTtRQUVuQjtRQUNBLGVBQWU7UUFFZix3QkFBYyxVQUFTOztpQkFFVDs7OztnQkFFUCxTQUFTLFNBQVMsS0FBTSxTQUFTLFdBQVc7O2dCQUMzQyxXQUFXLFNBQVMsTUFBTTtnQkFDMUIsU0FBUyxTQUFTOztZQUV0QixTQUFTLE9BQU87bUJBQ2hCOzs0QkFFVzthQUFOOztZQUFMO1lBRUEsT0FBTyxVQUFVO21DQUNNOztnQkFBdkI7O1lBRUEsU0FBUyxLQUFLLE9BQU87bUJBRWYsVUFBVSxVQUFXLG1CQUFlLFdBQVc7O3lCQUM1QyxXQUFXLEdBQUcsT0FBTyxLQUFLO2dCQUMvQixXQUFXLFVBQVUsTUFBTTtnQkFDM0IsT0FBTyxNQUFNLEtBQUs7O2lCQUVuQjs7b0JBRUksS0FBSyxTQUFTLFNBQVMsS0FBSyxTQUFTOzt3QkFFakMsYUFBYSxZQUFZLGlCQUFpQjs7d0JBQ3pDLGFBQWEsS0FBSyxRQUFRO3dCQUMxQixhQUFhLEtBQUssUUFBUTt3QkFDMUIsUUFBUSxhQUFhLE1BQU8sYUFBYSxLQUFLLGFBQWE7d0JBQzNELFFBQVEsS0FBSyxRQUFRLFFBQU07d0JBRTNCLFlBQ0ksS0FBUSxHQUNSLEtBQVEsV0FDUixNQUFRLGFBQ1IsTUFBUSxNQUNSLE1BQVE7d0JBRVosVUFBVSxNQUFNLE9BQU87Ozs7OztvQkFHUixTQUFTOztvQkFBaEMsZUFBZTs7b0JBRVosV0FBVyxZQUFZLGVBQWU7O29CQUNyQyxXQUFXLFlBQVksVUFDbkIsS0FBTSxHQUNOLE1BQU8sS0FBSyxRQUFRLFFBQU07b0JBRTlCLFVBQVUsTUFBTSxPQUFPOzt5QkFFbkIsS0FBSyxTQUFTOzt3QkFFZixXQUFXLFlBQVksZUFBZTs7d0JBQ3JDLFdBQVcsWUFBWSxVQUNuQixLQUFNLEdBQ04sS0FBTTt3QkFFVixVQUFVLE1BQU0sT0FBTzs7Ozs7b0JBRzNCLElBQUksS0FBSyxNQUFNLFlBQVk7MEJBQ3hCLFlBQUEsRUFBRzs7d0JBRUYsV0FBVyxZQUFZLEVBQUUsSUFDckIsS0FBTSxHQUNOLEtBQU07d0JBRVYsVUFBVSxNQUFNLE9BQU87Ozs7Z0JBRWhDLFlBQVksWUFBWSxnQkFBZ0I7O2dCQUV2QyxjQUFBLHFCQUFBLGFBQWU7Z0JBQ2YsZUFBZTtnQkFFZixPQUFPLFFBQVEsTUFDWCxLQUFNLFVBQ04sS0FBTTs7WUFFZCxRQUFRLEtBQUssTUFBTSxZQUFZO2lDQUNuQjs7O2dCQUFSO2dCQUNBLE9BQU8sTUFBTSxJQUFJOzs7ZUFFbkIsVUFBVTs7cUJBQ1AsV0FBVyxHQUFHLE9BQU8sS0FBSztZQUMvQixXQUFXLFVBQVUsTUFBTTtZQUMzQixTQUFTLG1CQUFULFNBQVMsNEJBQVM7WUFDbEIsT0FBTyxNQUFNLEtBQUs7O1FBRXRCLE9BQU8sUUFBUSxNQUFNLEtBQUssT0FBTztlQUVqQzs7O1dBL0dQOzs7ZUFpSE0ifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/index/index_kode.kode

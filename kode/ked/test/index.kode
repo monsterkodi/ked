@@ -31,6 +31,64 @@ use ../index ◆ index_kode index_utils indexer
         result.classes[1].name ▸ 'Bar'
         result.classes[1].line ▸ 2
 
+    ▸ strings do not define classes or words
+
+        idx = new index_kode
+
+        text = [
+            '■Before'
+            '    method: -> 1'
+            "taken = 'class InsideSingle'"
+            'other = "■InsideDouble"'
+            'quoted = """'
+            '    class InsideTriple'
+            '    ■ ShortcutInsideTriple'
+            '    """'
+            '■After'
+            '    other: -> 2'
+            ].join '\n'
+
+        result = idx.parse text
+
+        result.classes.length ▸ 2
+        result.classes[0].name ▸ 'Before'
+        result.classes[0].line ▸ 0
+        result.classes[1].name ▸ 'After'
+        result.classes[1].line ▸ 8
+
+        result.words.includes('InsideSingle') ▸ false
+        result.words.includes('InsideDouble') ▸ false
+        result.words.includes('InsideTriple') ▸ false
+        result.words.includes('ShortcutInsideTriple') ▸ false
+        result.words.includes('After') ▸ true
+
+    ▸ post handlers keep their string event name
+
+        idx = new index_kode
+        result = idx.parse "post.on 'quit' -> 1"
+
+        result.funcs.length ▸ 1
+        result.funcs[0].name ▸ 'quit'
+        result.funcs[0].post ▸ true
+
+    ▸ a compare between strings is not a test marker
+
+        idx = new index_kode
+
+        text = [
+            '▸ bad'
+            '    ke  """'
+            '        hello'
+            '        """ ▸ """'
+            '        world'
+            '        """'
+            ].join '\n'
+
+        result = idx.parse text
+
+        result.funcs.length ▸ 1
+        result.funcs[0].name ▸ '▸ bad'
+
     ▸ index waits for the file to be read and parsed
 
         root = '/tmp/opencode/ked-index-waits'

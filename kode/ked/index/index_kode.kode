@@ -2,6 +2,13 @@
 use ../../kxk ▪ kstr slash
 use           ◆ index_utils
 
+stringOrComment = /###[\s\S]*?###|#.*|"""[\s\S]*?"""|"(?:\\.|\#\{[^\}]*}|[^\n\\"])*"|'(?:\\['\\]|[^\n'])*'/g
+
+maskStrings = (text) ->
+    text.replace stringOrComment, (m) ->
+        ⮐  m if m[0] == '#'
+        m.replace /[^\n]/g, ' '
+
 ■index_kode
 
     @: ->
@@ -9,6 +16,7 @@ use           ◆ index_utils
     parse: text ->
         
         lines = kstr.lines text
+        codeLines = kstr.lines(maskStrings(text))
 
         bound = {}
         result = 
@@ -33,7 +41,8 @@ use           ◆ index_utils
             
         for line,li in lines
 
-            continue if empty trim line # ignore empty lines
+            code = codeLines[li]
+            continue if empty trim code # ignore empty lines
         
             indent = line.search /\S/
     
@@ -44,37 +53,41 @@ use           ◆ index_utils
     
             if currentClass? 
     
-                if methodName = index_utils.methodNameInLine line
-                    unbndIndex = line.indexOf '->'
-                    boundIndex = line.indexOf '=>'
-                    bound = boundIndex > 0 and (unbndIndex < 0 or boundIndex < unbndIndex)
-                    async = line.indexOf('○')>=0
+                if code.includes('->') or code.includes('=>')
+                    
+                    if methodName = index_utils.methodNameInLine code
+                        unbndIndex = code.indexOf '->'
+                        boundIndex = code.indexOf '=>'
+                        bound = boundIndex > 0 and (unbndIndex < 0 or boundIndex < unbndIndex)
+                        async = code.indexOf('○')>=0
 
-                    funcInfo = 
-                        line:   li
-                        name:   methodName
-                        class:  currentClass
-                        async:  async
-                        bound:  bound
-                        
-                    funcStack.push [indent funcInfo]
+                        funcInfo = 
+                            line:   li
+                            name:   methodName
+                            class:  currentClass
+                            async:  async
+                            bound:  bound
+                            
+                        funcStack.push [indent funcInfo]
             else
     
                 currentClass = null if indent < 2 
     
-                if funcName = index_utils.funcNameInLine line
+                if funcName = index_utils.funcNameInLine code
                     funcInfo = addFuncInfo funcName,
                         line: li
-                        async: line.indexOf('○')>=0
+                        async: code.indexOf('○')>=0
     
                     funcStack.push [indent funcInfo]
     
-                else if funcName = index_utils.postNameInLine line
-                    funcInfo = addFuncInfo funcName,
-                        line: li
-                        post: true
-    
-                    funcStack.push [indent funcInfo]
+                else if code.includes('post.on')
+                    
+                    if funcName = index_utils.postNameInLine line
+                        funcInfo = addFuncInfo funcName,
+                            line: li
+                            post: true
+        
+                        funcStack.push [indent funcInfo]
                     
                 else                    
                     m = line.match index_utils.testRegExp
@@ -86,7 +99,7 @@ use           ◆ index_utils
                     
                         funcStack.push [indent funcInfo]
     
-            if className = index_utils.classNameInLine line
+            if className = index_utils.classNameInLine code
 
                 firstClass  ?= className
                 currentClass = className
@@ -95,7 +108,7 @@ use           ◆ index_utils
                     name: className
                     line: li
 
-            words = line.split index_utils.splitRegExp
+            words = code.split index_utils.splitRegExp
             for word in words
                 result.words.add word
         
