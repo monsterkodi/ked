@@ -10,7 +10,7 @@ use ../../util   ◆ prof
                           
         # prof.start 'insert'
         
-        ⮐  [lines posl] if empty text
+        ⮐ [lines posl] if empty text
         
         if text == '\t'
             pos  = posl[0]
@@ -124,7 +124,7 @@ use ../../util   ◆ prof
         lines = lines.map (l) -> l
         posl  = clone posl
         
-        ⮐  [lines posl] if empty rngs
+        ⮐ [lines posl] if empty rngs
         
         for ri in rngs.length-1..0
         
@@ -166,7 +166,7 @@ use ../../util   ◆ prof
         
     @adjustPositionsForDeletedLineRange: posl lines rng ->
         
-        ⮐  posl if empty posl
+        ⮐ posl if empty posl
         
         for pi in posl.length-1..0
             pos = posl[pi]
@@ -195,8 +195,8 @@ use ../../util   ◆ prof
             cursors[ci][0] += delta
             ci++
             
-            ⮐  if ci >= cursors.length
-            ⮐  if cursors[ci][1] > cursor[1]
+            ⮐ if ci >= cursors.length
+            ⮐ if cursors[ci][1] > cursor[1]
             
 #!add
     
@@ -218,7 +218,7 @@ use ../../util   ◆ prof
             else if c[1] < lines.length-1
                 addLineAtIndex c c[1]+1 
 
-        ⮐  [posl rngs] if empty newp
+        ⮐ [posl rngs] if empty newp
         
         [newp newr]
     
@@ -250,7 +250,7 @@ use ../../util   ◆ prof
     @moveLineRangesAndPositionsAtIndicesInDirection: lines rngs posl indices dir ->
         
         if empty indices or dir == 'down' and indices[-1] >= lines.length-1 or dir == 'up' and indices[0] <= 0
-            ⮐  [lines rngs posl]
+            ⮐ [lines rngs posl]
         
         newLines = lines.map (l) -> l
         newRngs  = rngs.asMutable()
@@ -287,7 +287,7 @@ use ../../util   ◆ prof
     @cloneLineBlockRangesAndMoveRangesAndPositionsInDirection: lines blocks rngs posl dir ->
         
         if empty blocks or dir == 'down' and blocks[-1][3] > lines.length-1 or dir == 'up' and blocks[0][1] < 0
-            ⮐  [lines rngs posl]
+            ⮐ [lines rngs posl]
         
         newLines = lines.asMutable()
         newRngs  = rngs.asMutable()
@@ -329,7 +329,7 @@ use ../../util   ◆ prof
         
     @toggleCommentsInLineRangesAtIndices: lines rngs posl indices ->
         
-        ⮐  [lines rngs posl] if empty indices
+        ⮐ [lines rngs posl] if empty indices
         
         newLines = lines.asMutable()
         newRngs  = rngs.asMutable()
@@ -362,7 +362,7 @@ use ../../util   ◆ prof
         
     @toggleCommentTypesInLineRangesAtIndices: lines rngs posl indices ->
         
-        ⮐  [lines rngs posl] if empty indices
+        ⮐ [lines rngs posl] if empty indices
         
         newLines = lines.map (l) -> l
         newRngs  = rngs.asMutable()
@@ -376,7 +376,7 @@ use ../../util   ◆ prof
 
     @deindentLineRangesAndPositionsAtIndices: lines rngs posl indices ->
         
-        ⮐  [lines rngs posl] if empty indices  
+        ⮐ [lines rngs posl] if empty indices  
         
         newLines = lines.map (l) -> l
         newRngs  = rngs.asMutable()
@@ -406,7 +406,7 @@ use ../../util   ◆ prof
 
     @indentLineRangesAndPositionsAtIndices: lines rngs posl indices ->
         
-        ⮐  [lines rngs posl] if empty indices  
+        ⮐ [lines rngs posl] if empty indices  
         
         newLines = lines.map (l) -> l
         newRngs  = rngs.asMutable()
@@ -433,7 +433,7 @@ use ../../util   ◆ prof
 
     @extendLineRangesFromPositionToPosition: lines rngs start pos ->
 
-        if empty rngs ➜ ⮐  [@rangeFromStartToEnd(start pos)]
+        if empty rngs ➜ ⮐ [@rangeFromStartToEnd(start pos)]
 
         newRngs = rngs.asMutable()
         
@@ -517,7 +517,7 @@ use ../../util   ◆ prof
     
     @removeFromLineRangesBetweenPositions: rngs pos1 pos2 ->
     
-        ⮐  rngs if empty rngs or @samePos pos1 pos2
+        ⮐ rngs if empty rngs or @samePos pos1 pos2
         
         if pos1[1] > pos2[1] or pos1[1] == pos2[1] and pos1[0] > pos2[0]
             [pos1 pos2] = [pos2 pos1]

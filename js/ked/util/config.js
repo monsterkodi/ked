@@ -24,6 +24,7 @@ config = (function ()
             return this.resolveLoaded = resolve
         }).bind(this))
         configFile = slash.path(_k_.dir(),'../../../config')
+        console.log('load config file',configFile)
         this.data = await noon.load(configFile)
         post.emit('config.loaded')
         return this.resolveLoaded()
@@ -34,5 +35,5 @@ config = (function ()
 
 export default config;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uZmlnLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL2NvbmZpZy5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNO0lBQUs7SUFBTTs7O0FBRTFCLFVBQUQ7Ozs7Ozs7SUFLSSxRQUFDOzs7O1FBRUcsS0FBQyxhQUFhLG1CQUFTOzttQkFBWSxLQUFDLGdCQUFnQjs7UUFFcEQsYUFBYSxNQUFNLEtBQU0sVUFBSTtRQUU3QixLQUFDLGFBQVEsS0FBSyxLQUFLO1FBRW5CLEtBQUssS0FBSztlQUVWLEtBQUM7OztXQWZSOzs7ZUFpQk0ifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uZmlnLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL2NvbmZpZy5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNO0lBQUs7SUFBTTs7O0FBQzFCLFVBQUQ7Ozs7Ozs7SUFLSSxRQUFDOzs7O1FBRUcsS0FBQyxhQUFhLG1CQUFTOzttQkFBWSxLQUFDLGdCQUFnQjs7UUFFcEQsYUFBYSxNQUFNLEtBQU0sVUFBSTtRQUM3QixZQUFJLG1CQUFtQjtRQUN2QixLQUFDLGFBQVEsS0FBSyxLQUFLO1FBRW5CLEtBQUssS0FBSztlQUVWLEtBQUM7OztXQWZSOzs7ZUFpQk0ifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/util/config.kode

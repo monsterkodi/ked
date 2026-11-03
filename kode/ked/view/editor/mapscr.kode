@@ -145,7 +145,7 @@ function mapscr extends mapview
         
         clickOffset = config.data?.mapScroll?.clickOffset ? 0
         
-        row  = @topRow + int((pixel[1] - clickOffset                 - @mapY) / @pixelsPerRow)
+        row  = @topRow + int((pixel[1] - clickOffset * @pixelsPerRow - @mapY) / @pixelsPerRow)
         crow = @topRow + int((pixel[1] + clickOffset * @pixelsPerRow - @mapY) / @pixelsPerRow)
         li   = @state.lineAtAbsoluteRow row
         cli  = @state.lineAtAbsoluteRow crow
