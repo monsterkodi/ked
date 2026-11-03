@@ -370,8 +370,8 @@ function Parse extends parseutils
         if tok.text == '?' and not (nxt and (nxt.text == '.' or nxt.type == 'op'))
             @onError '? is missing a left operand' tok:tok
 
-        if tok.text == '■'
-            @onError '■ is not a kode character' tok:tok
+        # if tok.text == '■'
+        #     @onError '■ is not a kode character' tok:tok
 
         if tok.text in ['▪' '▸']
             @onError "#{tok.text} is missing what it goes with" tok:tok

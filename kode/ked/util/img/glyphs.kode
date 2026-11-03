@@ -9,7 +9,7 @@
 
 import fontmap from './fontmap.json' with { type: "json" }
 
-function glyphs
+■glyphs
 
     @cache: {}
 

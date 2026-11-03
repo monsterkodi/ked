@@ -1,10 +1,3 @@
-###
-    ███   ███  ████████  ███████    
-    ███  ███   ███       ███   ███  
-    ███████    ███████   ███   ███  
-    ███  ███   ███       ███   ███  
-    ███   ███  ████████  ███████    
-###
 
 use ../kxk        ▪ karg kstr kseg slash post nfs sleep
 use ./index       ◆ prjcts indexer
@@ -21,11 +14,11 @@ use ./view/menu   ◆ context menu macro finder searcher differ vinder
 use ./view/colmns ◆ browse dircol funcol quicky droop saveas
 use child_process ▪ spawn exec
 
-function KED
+■KED
 
     @: ->
 
-        @version = '0.9.0'
+        @version = '1.0'
         @args = karg """
             
             ked [file...]

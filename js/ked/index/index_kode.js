@@ -16,7 +16,7 @@ index_kode = (function ()
 
     index_kode.prototype["parse"] = function (text)
     {
-        var addFuncInfo, async, bound, boundIndex, className, currentClass, firstClass, funcInfo, funcName, funcStack, indent, li, line, lines, m, methodName, result, unbndIndex, word, words, _140_27_
+        var addFuncInfo, async, bound, boundIndex, className, currentClass, firstClass, funcInfo, funcName, funcStack, indent, li, line, lines, m, methodName, result, unbndIndex, word, words, _105_27_
 
         lines = kstr.lines(text)
         bound = {}
@@ -90,32 +90,25 @@ index_kode = (function ()
                     }
                 }
             }
+            if (className = index_utils.classNameInLine(line))
+            {
+                firstClass = (firstClass != null ? firstClass : className)
+                currentClass = className
+                result.classes.push({name:className,line:li})
+            }
             words = line.split(index_utils.splitRegExp)
             var list1 = _k_.list(words)
             for (var _b_ = 0; _b_ < list1.length; _b_++)
             {
                 word = list1[_b_]
                 result.words.add(word)
-                switch (word)
-                {
-                    case 'class':
-                    case 'function':
-                        if (className = index_utils.classNameInLine(line))
-                        {
-                            firstClass = (firstClass != null ? firstClass : className)
-                            currentClass = className
-                            result.classes.push({name:className,line:li})
-                        }
-                        break
-                }
-
             }
         }
         while (funcStack.length)
         {
             _k_.last(funcStack)[1].last = li - 1
             funcInfo = funcStack.pop()[1]
-            funcInfo.class = ((_140_27_=funcInfo.class) != null ? _140_27_ : firstClass)
+            funcInfo.class = ((_105_27_=funcInfo.class) != null ? _105_27_ : firstClass)
             result.funcs.push(funcInfo)
         }
         result.words = Array.from(result.words)
@@ -127,5 +120,5 @@ index_kode = (function ()
 
 export default index_kode;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhfa29kZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhfa29kZS5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BUVUsVUFBQTtJQUFNO0lBQUs7O09BQ0wsa0JBQUE7OztBQUVQLGNBQVQ7O2FBRUk7OzswQkFRQSxvQkFBTzs7OztRQUVILFFBQVEsS0FBSyxNQUFNO1FBRW5CO1FBQ0EsVUFDSSxXQUNBLFNBQ0EsVUFBYSxNQUNiLE1BQVMsTUFBTTtRQUVuQjtRQUNBLGVBQWU7UUFFZix3QkFBYyxVQUFTOztpQkFFVDs7OztnQkFFUCxTQUFTLFNBQVMsS0FBTSxTQUFTLFdBQVc7O2dCQUMzQyxXQUFXLFNBQVMsTUFBTTtnQkFDMUIsU0FBUyxTQUFTOztZQUV0QixTQUFTLE9BQU87bUJBQ2hCOzs0QkFFVzthQUFOOztZQUFMO21DQUV1Qjs7Z0JBQXZCOztZQUVBLFNBQVMsS0FBSyxPQUFPO21CQUVmLFVBQVUsVUFBVyxtQkFBZSxXQUFXOzt5QkFDNUMsV0FBVyxHQUFHLE9BQU8sS0FBSztnQkFDL0IsV0FBVyxVQUFVLE1BQU07Z0JBQzNCLE9BQU8sTUFBTSxLQUFLOztpQkFFbkI7O29CQVFJLGFBQWEsWUFBWSxpQkFBaUI7O29CQUN6QyxhQUFhLEtBQUssUUFBUTtvQkFDMUIsYUFBYSxLQUFLLFFBQVE7b0JBQzFCLFFBQVEsYUFBYSxNQUFPLGFBQWEsS0FBSyxhQUFhO29CQUMzRCxRQUFRLEtBQUssUUFBUSxRQUFNO29CQUUzQixZQUNJLEtBQVEsR0FDUixLQUFRLFdBQ1IsTUFBUSxhQUNSLE1BQVEsTUFDUixNQUFRO29CQUVaLFVBQVUsTUFBTSxPQUFPOzs7OztvQkFTSixTQUFTOztvQkFBaEMsZUFBZTs7b0JBRVosV0FBVyxZQUFZLGVBQWU7O29CQUNyQyxXQUFXLFlBQVksVUFDbkIsS0FBTSxHQUNOLE1BQU8sS0FBSyxRQUFRLFFBQU07b0JBRTlCLFVBQVUsTUFBTSxPQUFPOzt5QkFFbkIsV0FBVyxZQUFZLGVBQWU7O29CQUMxQyxXQUFXLFlBQVksVUFDbkIsS0FBTSxHQUNOLEtBQU07b0JBRVYsVUFBVSxNQUFNLE9BQU87Ozs7b0JBR3ZCLElBQUksS0FBSyxNQUFNLFlBQVk7MEJBQ3hCLFlBQUEsRUFBRzs7d0JBRUYsV0FBVyxZQUFZLEVBQUUsSUFDckIsS0FBTSxHQUNOLEtBQU07d0JBRVYsVUFBVSxNQUFNLE9BQU87Ozs7WUFFbkMsUUFBUSxLQUFLLE1BQU0sWUFBWTtpQ0FFbkI7OztnQkFBUjtnQkFDQSxPQUFPLE1BQU0sSUFBSTt3QkFDVjs7eUJBUUg7eUJBQVE7NEJBRUQsWUFBWSxZQUFZLGdCQUFnQjs7NEJBRXZDLGNBQUEscUJBQUEsYUFBZTs0QkFDZixlQUFlOzRCQUVmLE9BQU8sUUFBUSxNQUNYLEtBQU0sVUFDTixLQUFNOzs7Ozs7O2VBRXhCLFVBQVU7O3FCQUNQLFdBQVcsR0FBRyxPQUFPLEtBQUs7WUFDL0IsV0FBVyxVQUFVLE1BQU07WUFDM0IsU0FBUyxtQkFBVCxTQUFTLDRCQUFTO1lBQ2xCLE9BQU8sTUFBTSxLQUFLOztRQUV0QixPQUFPLFFBQVEsTUFBTSxLQUFLLE9BQU87ZUFFakM7OztXQXJJQzs7O2VBdUlGIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhfa29kZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhfa29kZS5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNO0lBQUs7O09BQ0wsa0JBQUE7OztBQUVmLGNBQUQ7O2FBRUk7OzswQkFFQSxvQkFBTzs7OztRQUVILFFBQVEsS0FBSyxNQUFNO1FBRW5CO1FBQ0EsVUFDSSxXQUNBLFNBQ0EsVUFBYSxNQUNiLE1BQVMsTUFBTTtRQUVuQjtRQUNBLGVBQWU7UUFFZix3QkFBYyxVQUFTOztpQkFFVDs7OztnQkFFUCxTQUFTLFNBQVMsS0FBTSxTQUFTLFdBQVc7O2dCQUMzQyxXQUFXLFNBQVMsTUFBTTtnQkFDMUIsU0FBUyxTQUFTOztZQUV0QixTQUFTLE9BQU87bUJBQ2hCOzs0QkFFVzthQUFOOztZQUFMO21DQUV1Qjs7Z0JBQXZCOztZQUVBLFNBQVMsS0FBSyxPQUFPO21CQUVmLFVBQVUsVUFBVyxtQkFBZSxXQUFXOzt5QkFDNUMsV0FBVyxHQUFHLE9BQU8sS0FBSztnQkFDL0IsV0FBVyxVQUFVLE1BQU07Z0JBQzNCLE9BQU8sTUFBTSxLQUFLOztpQkFFbkI7O29CQUVJLGFBQWEsWUFBWSxpQkFBaUI7O29CQUN6QyxhQUFhLEtBQUssUUFBUTtvQkFDMUIsYUFBYSxLQUFLLFFBQVE7b0JBQzFCLFFBQVEsYUFBYSxNQUFPLGFBQWEsS0FBSyxhQUFhO29CQUMzRCxRQUFRLEtBQUssUUFBUSxRQUFNO29CQUUzQixZQUNJLEtBQVEsR0FDUixLQUFRLFdBQ1IsTUFBUSxhQUNSLE1BQVEsTUFDUixNQUFRO29CQUVaLFVBQVUsTUFBTSxPQUFPOzs7OztvQkFHSixTQUFTOztvQkFBaEMsZUFBZTs7b0JBRVosV0FBVyxZQUFZLGVBQWU7O29CQUNyQyxXQUFXLFlBQVksVUFDbkIsS0FBTSxHQUNOLE1BQU8sS0FBSyxRQUFRLFFBQU07b0JBRTlCLFVBQVUsTUFBTSxPQUFPOzt5QkFFbkIsV0FBVyxZQUFZLGVBQWU7O29CQUMxQyxXQUFXLFlBQVksVUFDbkIsS0FBTSxHQUNOLEtBQU07b0JBRVYsVUFBVSxNQUFNLE9BQU87Ozs7b0JBR3ZCLElBQUksS0FBSyxNQUFNLFlBQVk7MEJBQ3hCLFlBQUEsRUFBRzs7d0JBRUYsV0FBVyxZQUFZLEVBQUUsSUFDckIsS0FBTSxHQUNOLEtBQU07d0JBRVYsVUFBVSxNQUFNLE9BQU87Ozs7Z0JBRWhDLFlBQVksWUFBWSxnQkFBZ0I7O2dCQUV2QyxjQUFBLHFCQUFBLGFBQWU7Z0JBQ2YsZUFBZTtnQkFFZixPQUFPLFFBQVEsTUFDWCxLQUFNLFVBQ04sS0FBTTs7WUFFZCxRQUFRLEtBQUssTUFBTSxZQUFZO2lDQUNuQjs7O2dCQUFSO2dCQUNBLE9BQU8sTUFBTSxJQUFJOzs7ZUFFbkIsVUFBVTs7cUJBQ1AsV0FBVyxHQUFHLE9BQU8sS0FBSztZQUMvQixXQUFXLFVBQVUsTUFBTTtZQUMzQixTQUFTLG1CQUFULFNBQVMsNEJBQVM7WUFDbEIsT0FBTyxNQUFNLEtBQUs7O1FBRXRCLE9BQU8sUUFBUSxNQUFNLEtBQUssT0FBTztlQUVqQzs7O1dBekdQOzs7ZUEyR00ifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/index/index_kode.kode

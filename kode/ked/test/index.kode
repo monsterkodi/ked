@@ -1,0 +1,30 @@
+use ../index ◆ index_kode index_utils
+
+▸ index
+
+    ▸ class names in line
+
+        index_utils.classNameInLine('class Foo')        ▸ 'Foo'
+        index_utils.classNameInLine('function foo')     ▸ 'foo'
+        index_utils.classNameInLine('Foo = class Bar')  ▸ 'Bar'
+        index_utils.classNameInLine('classFoo')         ▸ undefined
+        index_utils.classNameInLine('■')                ▸ undefined
+        index_utils.classNameInLine('■Class')           ▸ 'Class'
+        index_utils.classNameInLine('■ Class')          ▸ 'Class'
+        index_utils.classNameInLine('Foo = ■Bar')       ▸ 'Bar'
+
+    ▸ shortcut classes are indexed
+
+        idx = new index_kode
+        result = idx.parse """
+            ■Foo
+                method: -> 1
+            ■ Bar
+                other: -> 2
+            """
+
+        result.classes.length ▸ 2
+        result.classes[0].name ▸ 'Foo'
+        result.classes[0].line ▸ 0
+        result.classes[1].name ▸ 'Bar'
+        result.classes[1].line ▸ 2

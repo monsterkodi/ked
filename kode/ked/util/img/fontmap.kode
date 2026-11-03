@@ -3,7 +3,7 @@ use fs os
 use child_process ▪ spawnSync
 use ../../../kxk  ▪ noon slash
 
-function fontmap
+■fontmap
     ###
         node js/ked/util/img/fontmap.js
     ###

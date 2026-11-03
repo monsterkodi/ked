@@ -1,16 +1,3 @@
-###
-     ███████  █████████   ███████   █████████  ████████  
-    ███          ███     ███   ███     ███     ███       
-    ███████      ███     █████████     ███     ███████   
-         ███     ███     ███   ███     ███     ███       
-    ███████      ███     ███   ███     ███     ████████  
-
-    handles basic text editing for the editor
-    wraps text and editor state like cursors and selections 
-        in an immutable to simplify undo
-    delegates almost all text manipulation to pure functions
-        in tool▸belt to simplify testing
-###
 
 use ../../kxk ▪ immutable kstr kseg events absMin
 use ../../kxk ◆ clip
@@ -19,7 +6,14 @@ use ./act     ◆ del insert select join indent multi main novim
 use ./tool    ◆ belt colorspans
 use           ◆ keys mode
 
-function state extends events
+■state extends events
+    ###
+        handles basic text editing for the editor
+        wraps text and editor state like cursors and selections 
+            in an immutable to simplify undo
+        delegates almost all text manipulation to pure functions
+            in tool▸belt to simplify testing
+    ###
 
     @: @cells name ->
 

@@ -424,6 +424,9 @@ kodePunct = ->
         
     if chunk.match in '⮐'
         ⮐  addValue 0 'keyword return'
+        
+    if chunk.match in '■'
+        ⮐  addValue 0 'function'
 
     if next = getChunk 1
         
@@ -500,7 +503,7 @@ kodeWord = ->
                     c.clss = 'section'
                 ⮐ line.chunks.length - chunkIndex
                 
-        if prev.match in ['class' 'extends' 'function']
+        if prev.match in ['class' 'extends' 'function' '■']
             setValue 0 'class'
             ⮐  1
             

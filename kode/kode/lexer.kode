@@ -34,7 +34,7 @@ Patterns =
     left: "◂"
     right: "▸"
     use: "▪"
-    square: "■"
+    function: "■"
     diamond: "◆"
     return: "⮐"
     op: "(\\band\\b|\\bor\\b|\\bnot\\b|\\*\\*|\\+\\+|--|==|!=|>=|<=|\\+=|-=|\\*=|\\/=|\\|=|\\^=|\\?=|\\&=|%=|<<|>>>|>>|=|\\*|\\/|\\+|-|%|\\^|~|\\&|\\||<|>|\\beql\\b|\\bnew\\b|\\bis\\b|\\binstanceof\\b|\\bdelete\\b|\\bnoon\\b|\\bcopy\\b|\\bclone\\b)"
@@ -176,8 +176,9 @@ class Lexer
 
                     value = if key == 'nl' then '' else match[0]
                                         
-                    if key == 'then'   ➜ value = 'then';   key = 'keyword'
-                    if key == 'return' ➜ value = 'return'; key = 'keyword'
+                    if key == 'then'     ➜ value = 'then';     key = 'keyword'
+                    if key == 'return'   ➜ value = 'return';   key = 'keyword'
+                    if key == 'function' ➜ value = 'function'; key = 'keyword'
 
                     if key == 'op'
                         if m = @jsOnlyError match[0], text

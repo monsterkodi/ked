@@ -1,18 +1,12 @@
 ###
-     ███████  ████████   ████████   ███████   ███████
-    ███       ███   ███  ███       ███       ███     
-    ███████   ████████   ███████   ███       ███████ 
-         ███  ███        ███       ███            ███
-    ███████   ███        ████████   ███████  ███████ 
-
     provides support for quick insertion of certain 
-    unicode symbols: (spe)cial (c)haracter(s)  
+    unicode symbols: (spe)cial (c)haracter(s)
 ###
 
-function specs
+■specs
     
     @replex: # auto replacements by replex mode 
-        
+                     
         '~c':   '●'
         '~s':   '▪'
         '~d':   '◆'
@@ -29,13 +23,14 @@ function specs
         '~o':   '✔'
         '~x':   '✘'
         '~b':   '■'
+        '~f':   '■'
         '~B':   '█'
         '~r':   '⮐ '
         '~t':   '➜'
         
     @trigger: # prepended to auto completion 
                          
-        '~': [  '◌' '∙' '○' '◇' '□' '✔' '✘' '▸' '▾' '▴' '◂' '●' '◆' '▪' '◼' '■' '█' '⮐ ' '➜ ' '△' '▷' '▽' '◁' '◯'
+        '~': [  '■' '◯' '◌' '∙' '○' '◇' '□' '✔' '✘' '▸' '▾' '▴' '◂' '●' '◆' '▪' '◼' '█' '⮐ ' '➜ ' '△' '▷' '▽' '◁' 
                 '│' '─' '┬' '├' '┼' '┤' '┴' '╭' '' '╰' '╮' '' '╯' 
              ]
         'r': [ '⮐ ']

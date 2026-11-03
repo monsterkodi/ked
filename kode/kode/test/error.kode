@@ -357,10 +357,8 @@ plain = c ->
 
     ▸ a glyph on its own
 
-        codemsg '■'                 '■ is not a kode character'
         codemsg '▪'                 '▪ is missing what it goes with'
         codemsg '▸'                 '▸ is missing what it goes with'
-        codemsg "'s' ■"             '■ is not a kode character'
         codemsg '(x) ▪'             '▪ is missing what it goes with'
 
         codemsg '◆'                 '◆ is missing what it calls'

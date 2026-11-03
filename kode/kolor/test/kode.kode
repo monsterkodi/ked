@@ -25,6 +25,12 @@ lang 'kode'
         inc rgs, 6  'Macro'     ▸ 'class'
         inc rgs, 12 'extends'   ▸ 'keyword'
         inc rgs, 20 'Command'   ▸ 'class'
+        
+        rgs = ranges "■ Func extends Base"
+        inc rgs, 0  '■'         ▸ 'punct function'
+        inc rgs, 2  'Func'      ▸ 'class'
+        inc rgs, 7  'extends'   ▸ 'keyword'
+        inc rgs, 15 'Base'      ▸ 'class'
     
     # ████████   ████████    ███████   ████████   ████████  ████████   █████████  ███   ███  
     # ███   ███  ███   ███  ███   ███  ███   ███  ███       ███   ███     ███      ███ ███   
