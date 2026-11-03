@@ -9,6 +9,7 @@ filetypes
     salter       js
     where        js
     zero2blocks  js
+    
 project
     maxDepth    12
     ignore      
@@ -40,6 +41,8 @@ scale
         section   2
         bang!     7
         bang      7
+    noon
+        obj       2
         
 novim
     autoStart           false
