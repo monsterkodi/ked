@@ -1,0 +1,218 @@
+###
+    fontmap
+
+    renders the characters that salter can draw, plus uppercase,
+    with the JetBrainsMono Nerd Font into small grayscale glyph maps
+
+    every map is a coverage bitmap: one byte per pixel, 0 is empty,
+    255 is fully covered, in between is antialiased
+
+    the sizes are the pixel sizes a map line of a given scale occupies
+    in the mapview: 2 pixels wide and 4 pixels high per scale step
+
+    writes kode/ked/util/img/fontmap.noon with one entry per size,
+    and white on black previews to img/fontmap-<w>x<h>.png
+
+    the character set is not stored, it is the same for every size
+
+    requires pango-view and imagemagick at generation time only
+
+    to regenerate:
+
+        node js/ked/util/img/fontmap.js
+        ./kk -k kode/ked/util/img/fontmap.noon
+###
+
+use child_process ▪ spawnSync
+use fs
+use os
+use ../../../kxk    ▪ noon slash
+
+function fontmap
+
+    @font:   'JetBrainsMono NFM'
+    @sizes:  [[4 8] [6 12] [8 16] [10 20] [12 24] [14 28]]
+    @chars:  Array.from("0123456789!?-+_=/><^[](){}" + "\"'#*$@%&:;., " + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    @out:    slash.path(◆dir, '../../../../img')
+    @mapFile: slash.path(◆dir, '../../../../kode/ked/util/img/fontmap.noon')
+
+    @tmp: name -> slash.path(os.tmpdir(), "ked-fontmap-#{name}.png")
+
+    @fontFile: ->
+
+        result = @exec 'fc-match' ['-f' '%{file}' @font]
+        ⮐  '' if not result
+
+        slash.file(String(result.stdout).trim())
+
+
+    @exec: cmd args ->
+        
+        result = child_process.spawnSync cmd args maxBuffer:0x10000000
+        
+        if result.status != 0
+            error "fontmap: #{cmd} failed with #{result.status}"
+            error String(result.stderr)
+            ⮐  null
+        
+        result
+
+    @identify: file ->
+
+        result = @exec 'magick' ['identify' '-format' '%wx%h' file]
+        ⮐  null if not result
+
+        [w h] = String(result.stdout).trim().split 'x'
+        [int(w) int(h)]
+
+    @render: text px file ->
+
+        @exec 'pango-view' ['-q' '--pixels' "--font=#{@font} #{px}" '--background=black' '--foreground=white' '--margin=0' "--text=#{text}" '-o' file]
+        
+        @identify file
+
+    @grayscale: file w h ->
+
+        result = @exec 'magick' [file '-filter' 'Triangle' '-resize' "#{w}x#{h}!" '-depth' '8' 'gray:-']
+        ⮐  null if not result
+
+        result.stdout
+
+
+    @pxFor: height ->
+        
+        best = null
+        
+        for px in 3..44
+            
+            m = @render('MMMMMMMMMM', px, @tmp('probe'))
+            ⮐  null if not m
+            
+            d = abs m[1]-height
+            
+            if not best or d < best.d
+                best = d:d px:px
+            
+            break if m[1] > height+4
+            
+        best.px
+
+
+    @buildMap: w h px ->
+        
+        result = @render(@chars.join(''), px, @tmp('glyphs'))
+        ⮐  null if not result
+        
+        total = w * @chars.length
+        data  = @grayscale(@tmp('glyphs'), total, h)
+        ⮐  null if not data
+        
+        glyphs = {}
+        
+        for ch,i in @chars
+            cov = new Uint8Array new ArrayBuffer(w*h)
+            for y in 0...h
+                for x in 0...w
+                    cov[y*w+x] = data[y*total+i*w+x]
+            glyphs[ch] = cov
+            
+        glyphs
+
+    @rowsFor: cov w h ->
+
+        rows = []
+        
+        for y in 0...h
+            
+            row = '0x'
+            for x in 0...w
+                row += cov[y*w+x].toString(16).padStart(2 '0')
+            rows.push row
+            
+        rows
+
+    @noonFor: maps ->
+
+        data = {}
+
+        for key,map of maps
+
+            gl = {}
+
+            for ch in @chars
+                gl[ch] = @rowsFor(map.glyphs[ch], map.width, map.height)
+
+            data[key] = width:map.width height:map.height font:map.font file:map.file glyphs:gl
+
+        noon.stringify(data, {indent:4 maxalign:8}) + '\n'
+
+
+    @savePNG: file image ->
+
+        result = child_process.spawnSync 'magick' ['-size' "#{image.w}x#{image.h}" '-depth' '8' 'rgba:-' '-strip' file] input:image.rgba maxBuffer:0x10000000
+
+        if result.status != 0
+            error "fontmap: magick could not write #{file}"
+            error String(result.stderr)
+
+    @preview: glyphs w h ->
+
+        gz   = 4
+        cols = 13
+        gap  = 1
+        rows = ceil @chars.length/cols
+        
+        pw = cols*w*gz + (cols-1)*gap
+        ph = rows*h*gz + (rows-1)*gap
+        
+        pixels = new Uint32Array new ArrayBuffer(pw*ph*4)
+        pixels.fill 0xff000000
+        
+        for ch,i in @chars
+            
+            cx = (i%cols)*(w*gz+gap)
+            cy = int(i/cols)*(h*gz+gap)
+            cov = glyphs[ch]
+            
+            for y in 0...h
+                for x in 0...w
+                    c = cov[y*w+x]
+                    v = c | c<<8 | c<<16 | 0xff000000
+                    for yy in 0...gz
+                        for xx in 0...gz
+                            pixels[(cy+y*gz+yy)*pw+cx+x*gz+xx] = v
+        
+        w:pw h:ph rgba:pixels
+
+
+    @generate: ->
+
+        fs.mkdirSync @out recursive:true
+
+        log "font #{@fontFile()}"
+
+        maps = {}
+
+        for [w h] in @sizes
+            
+            px = @pxFor h
+            ⮐  if not px
+            
+            glyphs = @buildMap w h px
+            ⮐  if not glyphs
+
+            maps["#{w}x#{h}"] = width:w height:h font:@font file:@fontFile() glyphs:glyphs
+
+            pngFile = slash.path @out "fontmap-#{w}x#{h}.png"
+            @savePNG pngFile (@preview(glyphs, w, h))
+            
+            log "glyphs #{w}x#{h} px=#{px}"
+
+        fs.writeFileSync(@mapFile, @noonFor(maps))
+        log "map #{@mapFile}"
+
+◆main
+
+    fontmap.generate()
+
+export fontmap
