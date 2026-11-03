@@ -12,10 +12,10 @@ dumpstate = (function ()
 
     dumpstate["tags"] = function (state, file)
     {
-        var names, novim, tags, _19_41_, _23_54_
+        var names, novim, tags, _10_41_, _14_54_
 
         tags = []
-        names = (((_19_41_=mode.active[state.name]) != null ? _19_41_ : [])).map(function (m)
+        names = (((_10_41_=mode.active[state.name]) != null ? _10_41_ : [])).map(function (m)
         {
             return m.name
         }).sort()
@@ -47,5 +47,5 @@ dumpstate = (function ()
 
 export default dumpstate;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZHVtcHN0YXRlLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL2R1bXBzdGF0ZS5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BVWMsV0FBUDs7O0FBRUUsYUFBVDs7Ozs7SUFFSSxXQUFDLG1CQUFPLE9BQU07Ozs7UUFFVjtRQUVBLG1CQUFTLEtBQUssT0FBTyxNQUFNLGdDQUFZLGNBQUs7O21CQUFNLEVBQUU7V0FBTTt1QkFDWjs7WUFBOUMsS0FBSyxlQUFlLE1BQU0sS0FBSzs7UUFFL0IsUUFBUSxLQUFLLElBQUksTUFBTTtjQUNjLGdCQUFBLE1BQU87O1lBQTVDLEtBQUssa0JBQWtCLE1BQU07O1lBRVIsTUFBTTs7WUFBM0IsS0FBSyxLQUFLOzt1QkFDeUI7O1lBQW5DLEtBQUssY0FBYzs7ZUFFbkIsS0FBSyxjQUFLOzt1QkFBWTtXQUFRLEtBQUs7OztXQWZsQzs7O2VBaUJGIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZHVtcHN0YXRlLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL2R1bXBzdGF0ZS5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2MsV0FBUDs7O0FBRU4sYUFBRDs7Ozs7SUFFSSxXQUFDLG1CQUFPLE9BQU07Ozs7UUFFVjtRQUVBLG1CQUFTLEtBQUssT0FBTyxNQUFNLGdDQUFZLGNBQUs7O21CQUFNLEVBQUU7V0FBTTt1QkFDWjs7WUFBOUMsS0FBSyxlQUFlLE1BQU0sS0FBSzs7UUFFL0IsUUFBUSxLQUFLLElBQUksTUFBTTtjQUNjLGdCQUFBLE1BQU87O1lBQTVDLEtBQUssa0JBQWtCLE1BQU07O1lBRVIsTUFBTTs7WUFBM0IsS0FBSyxLQUFLOzt1QkFDeUI7O1lBQW5DLEtBQUssY0FBYzs7ZUFFbkIsS0FBSyxjQUFLOzt1QkFBWTtXQUFRLEtBQUs7OztXQWYxQzs7O2VBaUJNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/util/dumpstate.kode

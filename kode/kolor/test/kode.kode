@@ -1,10 +1,3 @@
-###
-███   ███   ███████   ███████    ████████
-███  ███   ███   ███  ███   ███  ███     
-███████    ███   ███  ███   ███  ███████ 
-███  ███   ███   ███  ███   ███  ███     
-███   ███   ███████   ███████    ████████
-###
 
 use ./util ▪ inc ranges lang
 
@@ -12,12 +5,6 @@ lang 'kode'
 
 ▸ kode
 
-    #  ███████  ███       ███████    ███████   ███████  
-    # ███       ███      ███   ███  ███       ███       
-    # ███       ███      █████████  ███████   ███████   
-    # ███       ███      ███   ███       ███       ███  
-    #  ███████  ███████  ███   ███  ███████   ███████   
-    
     ▸ class
     
         rgs = ranges "class Macro extends Command"
@@ -27,16 +14,10 @@ lang 'kode'
         inc rgs, 20 'Command'   ▸ 'class'
         
         rgs = ranges "■ Func extends Base"
-        inc rgs, 0  '■'         ▸ 'punct function'
+        inc rgs, 0  '■'         ▸ 'punct function class'
         inc rgs, 2  'Func'      ▸ 'class'
         inc rgs, 7  'extends'   ▸ 'keyword'
         inc rgs, 15 'Base'      ▸ 'class'
-    
-    # ████████   ████████    ███████   ████████   ████████  ████████   █████████  ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███       ███   ███     ███      ███ ███   
-    # ████████   ███████    ███   ███  ████████   ███████   ███████       ███       █████    
-    # ███        ███   ███  ███   ███  ███        ███       ███   ███     ███        ███     
-    # ███        ███   ███   ███████   ███        ████████  ███   ███     ███        ███     
     
     ▸ property
         
@@ -56,12 +37,6 @@ lang 'kode'
         inc rgs, 13 "."         ▸ 'punct property'
         inc rgs, 14 "someProp"  ▸ 'property'
     
-    # ███       ███████    ███████   ███   ███████  
-    # ███      ███   ███  ███        ███  ███       
-    # ███      ███   ███  ███  ████  ███  ███       
-    # ███      ███   ███  ███   ███  ███  ███       
-    # ███████   ███████    ███████   ███   ███████  
-    
     ▸ logic
         
         rgs = ranges "a and b"
@@ -77,24 +52,12 @@ lang 'kode'
         rgs = ranges "switch a"
         inc rgs, 0 "switch"     ▸ 'keyword'
         
-    # ███████    ███   ███████  █████████  ███   ███████   ███   ███   ███████   ████████   ███   ███  
-    # ███   ███  ███  ███          ███     ███  ███   ███  ████  ███  ███   ███  ███   ███   ███ ███   
-    # ███   ███  ███  ███          ███     ███  ███   ███  ███ █ ███  █████████  ███████      █████    
-    # ███   ███  ███  ███          ███     ███  ███   ███  ███  ████  ███   ███  ███   ███     ███     
-    # ███████    ███   ███████     ███     ███   ███████   ███   ███  ███   ███  ███   ███     ███     
-    
     ▸ dictionary
         
         rgs = ranges " a: b"
         inc rgs, 1 "a"          ▸ 'dictionary key'
         inc rgs, 2 ":"          ▸ 'punct dictionary'
             
-    #  ███████   ████████   ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███   ███   ███ ███   
-    # █████████  ███████    ███████    █████████    █████    
-    # ███   ███  ███   ███  ███   ███  ███   ███     ███     
-    # ███   ███  ███   ███  ███   ███  ███   ███     ███     
-    
     ▸ array
     
         rgs = ranges "a[0].prop"
@@ -106,16 +69,7 @@ lang 'kode'
         rgs = ranges "[ f , f ]"
         inc rgs, 2 'f'          ▸ 'text'
         
-    # ████████    ███████   ███   ███   ███████   ████████  
-    # ███   ███  ███   ███  ████  ███  ███        ███       
-    # ███████    █████████  ███ █ ███  ███  ████  ███████   
-    # ███   ███  ███   ███  ███  ████  ███   ███  ███       
-    # ███   ███  ███   ███  ███   ███   ███████   ████████  
-    
     ▸ range
-        
-        #  the dots of a range are one chunk each - the highlighter does
-        #  not merge them into a ligature, so '..' is two dots.
         
         rgs = ranges "a[...2]"
         inc rgs, 2 '.'          ▸ 'punct range'
@@ -136,20 +90,10 @@ lang 'kode'
         inc rgs, 5 '.'          ▸ 'punct'
         inc rgs, 6 '.'          ▸ 'punct'
         
-        # rgs = ranges "@f [1]"
-        # inc rgs, 0 "@"          ▸ 'punct function call'
-        # inc rgs, 1 "f"          ▸ 'function call'
-    
         rgs = ranges "@f = 1"
         inc rgs, 0 "@"          ▸ 'punct this'
         inc rgs, 1 "f"          ▸ 'text this'
         
-    # ███   ███  ███   ███  ██     ██  ███████    ████████  ████████   
-    # ████  ███  ███   ███  ███   ███  ███   ███  ███       ███   ███  
-    # ███ █ ███  ███   ███  █████████  ███████    ███████   ███████    
-    # ███  ████  ███   ███  ███ █ ███  ███   ███  ███       ███   ███  
-    # ███   ███   ███████   ███   ███  ███████    ████████  ███   ███  
-    
     ▸ number
     
         rgs = ranges "1 'a'"
@@ -160,19 +104,8 @@ lang 'kode'
         inc rgs, 1 'height'     ▸ 'text this'
         inc rgs, 8 "2"          ▸ 'number'
                 
-    # ████████  ███   ███  ███   ███   ███████  █████████  ███   ███████   ███   ███  
-    # ███       ███   ███  ████  ███  ███          ███     ███  ███   ███  ████  ███  
-    # ██████    ███   ███  ███ █ ███  ███          ███     ███  ███   ███  ███ █ ███  
-    # ███       ███   ███  ███  ████  ███          ███     ███  ███   ███  ███  ████  
-    # ███        ███████   ███   ███   ███████     ███     ███   ███████   ███   ███  
-    
     ▸ function
     
-        # rgs = ranges "obj.prop.call 1"
-        # inc rgs, 0 'obj'        ▸ 'obj'
-        # inc rgs, 4 'prop'       ▸ 'property'
-        # inc rgs, 9 'call'       ▸ 'property'
-        
         rgs = ranges "dolate: => "
         inc rgs, 8 '=>'          ▸ 'punct function bound'
     
@@ -183,19 +116,6 @@ lang 'kode'
         inc rgs, 6 '○'          ▸ 'punct function async'
         inc rgs, 7 '-'          ▸ 'punct function tail'
         inc rgs, 8 '>'          ▸ 'punct function head'
-                
-        # rgs = ranges "@a @b 'c'"
-        # inc rgs, 0 '@'          ▸ 'punct function call'
-        # inc rgs, 1 'a'          ▸ 'function call'
-        # inc rgs, 3 '@'          ▸ 'punct function call'
-        # inc rgs, 4 'b'          ▸ 'function call'
-        
-        # rgs = ranges "@a 3 @b '5'"
-        # inc rgs, 0 '@'          ▸ 'punct function call'
-        # inc rgs, 1 'a'          ▸ 'function call'
-    
-        # rgs = ranges "fff 1"
-        # inc rgs, 0 "fff"        ▸ 'function call'
                 
         rgs = ranges "f 'a'"
         inc rgs, 0 "f"          ▸ 'function call'
@@ -224,12 +144,6 @@ lang 'kode'
         rgs = ranges "pos= (item, p) -> "
         inc rgs, 0 "pos"        ▸ 'function'
         
-    #  ███████   ████████    ███████    ███████  
-    # ███   ███  ███   ███  ███        ███       
-    # █████████  ███████    ███  ████  ███████   
-    # ███   ███  ███   ███  ███   ███       ███  
-    # ███   ███  ███   ███   ███████   ███████   
-    
     ▸ args
     
         rgs = ranges "f = a b ->"
@@ -237,15 +151,11 @@ lang 'kode'
         inc rgs, 6 'b'              ▸ 'function argument'
         inc rgs, 8 '->'             ▸ 'punct function'
 
-    ▸ args
-    
         rgs = ranges "    f: a b ->"
         inc rgs, 7 'a'              ▸ 'function argument'
         inc rgs, 9 'b'              ▸ 'function argument'
         inc rgs, 11 '->'            ▸ 'punct function'
 
-    ▸ args
-    
         rgs = ranges "    f: a b ○->"
         inc rgs, 7 'a'              ▸ 'function argument'
         inc rgs, 9 'b'              ▸ 'function argument'
@@ -253,12 +163,6 @@ lang 'kode'
         inc rgs, 12 '-'             ▸ 'punct function tail'
         inc rgs, 13 '>'             ▸ 'punct function head'
         
-    # ███   ███   ███████          ███████   ███████   ███      ███      
-    # ████  ███  ███   ███        ███       ███   ███  ███      ███      
-    # ███ █ ███  ███   ███        ███       █████████  ███      ███      
-    # ███  ████  ███   ███        ███       ███   ███  ███      ███      
-    # ███   ███   ███████          ███████  ███   ███  ███████  ███████  
-    
     ▸ no call
         
         rgs = ranges "i != false"
@@ -306,12 +210,6 @@ lang 'kode'
         rgs = ranges "i == 3"
         inc rgs, 0 'i'              ▸ 'text'
     
-    # ███      ███   ███████    ███████   █████████  ███   ███  ████████   ████████  
-    # ███      ███  ███        ███   ███     ███     ███   ███  ███   ███  ███       
-    # ███      ███  ███  ████  █████████     ███     ███   ███  ███████    ███████   
-    # ███      ███  ███   ███  ███   ███     ███     ███   ███  ███   ███  ███       
-    # ███████  ███   ███████   ███   ███     ███      ███████   ███   ███  ████████  
-    
     ▸ ligature
         
         rgs = ranges " @: ->"
@@ -323,12 +221,6 @@ lang 'kode'
         inc rgs, 1 "@"  ▸ 'method'
         inc rgs, 2 ":"  ▸ 'punct method'
         inc rgs, 3 "->" ▸ 'punct function'
-    
-    # ███   ███  ████████  ███   ███  ███   ███   ███████   ████████   ███████    
-    # ███  ███   ███        ███ ███   ███ █ ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███████     █████    █████████  ███   ███  ███████    ███   ███  
-    # ███  ███   ███          ███     ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███   ███  ████████     ███     ██     ██   ███████   ███   ███  ███████    
     
     ▸ keyword
         
@@ -343,12 +235,6 @@ lang 'kode'
         inc rgs, 14 "first" ▸ 'keyword'
         inc rgs, 20 "last"  ▸ 'keyword'
         
-    # █████████  ████████   ███████  █████████   ███████  
-    #    ███     ███       ███          ███     ███       
-    #    ███     ███████   ███████      ███     ███████   
-    #    ███     ███            ███     ███          ███  
-    #    ███     ████████  ███████      ███     ███████   
-    
     ▸ tests
         
         rgs = ranges "▸ some text"
@@ -365,23 +251,11 @@ lang 'kode'
         inc rgs, 9 "▸"      ▸ 'punct keyword'
         inc rgs, 11 "test"  ▸ 'text'
     
-    # █████████  ███   ███  ████████  ███   ███  
-    #    ███     ███   ███  ███       ████  ███  
-    #    ███     █████████  ███████   ███ █ ███  
-    #    ███     ███   ███  ███       ███  ████  
-    #    ███     ███   ███  ████████  ███   ███  
-    
     ▸ then
         
         rgs = ranges "➜"
         inc rgs, 0 "➜"      ▸ 'punct keyword'
         
-    # ███   ███████  
-    # ███  ███       
-    # ███  ███████   
-    # ███       ███  
-    # ███  ███████   
-    
     ▸ is
         
         rgs = ranges "a is str"
@@ -403,12 +277,6 @@ lang 'kode'
         rgs = ranges "a is elem"
         inc rgs, 5 "elem"   ▸ 'keyword'
         
-    # ███████    ███  ████████   
-    # ███   ███  ███  ███   ███  
-    # ███   ███  ███  ███████    
-    # ███   ███  ███  ███   ███  
-    # ███████    ███  ███   ███  
-    
     ▸ dir
     
         rgs = ranges "◆dir"
@@ -418,12 +286,6 @@ lang 'kode'
         rgs = ranges "◆Dir"
         inc rgs, 0 "◆"     ▸ 'punct'
         inc rgs, 1 "Dir"   ▸ 'text'
-        
-    # ████████  ███  ███      ████████  
-    # ███       ███  ███      ███       
-    # ██████    ███  ███      ███████   
-    # ███       ███  ███      ███       
-    # ███       ███  ███████  ████████  
     
     ▸ file
         
@@ -435,12 +297,6 @@ lang 'kode'
         inc rgs, 0 "◆"     ▸ 'punct'
         inc rgs, 1 "files"  ▸ 'text'
         
-    # ███   ███   ███████  ████████  
-    # ███   ███  ███       ███       
-    # ███   ███  ███████   ███████   
-    # ███   ███       ███  ███       
-    #  ███████   ███████   ████████  
-    
     ▸ use
     
         rgs = ranges "use fs"
@@ -473,12 +329,6 @@ lang 'kode'
         inc rgs, 8 "bC"     ▸ 'text require string'
         inc rgs, 11 "d"     ▸ 'text require string'
     
-    # ███   ███   ███████          ███████   ███████   ██     ██  ██     ██   ███████   
-    # ████  ███  ███   ███        ███       ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███ █ ███  ███   ███        ███       ███   ███  █████████  █████████  █████████  
-    # ███  ████  ███   ███        ███       ███   ███  ███ █ ███  ███ █ ███  ███   ███  
-    # ███   ███   ███████          ███████   ███████   ███   ███  ███   ███  ███   ███  
-    
     ▸ no comma
         
         rgs = ranges "[1 'x' a:1 c:d]"
@@ -486,12 +336,6 @@ lang 'kode'
         inc rgs, 4  "x"     ▸ 'string single'
         inc rgs, 7  "a"     ▸ 'dictionary key'
         inc rgs, 11 "c"     ▸ 'dictionary key'
-    
-    # ██     ██  ████████  █████████  ███   ███   ███████   ███████    
-    # ███   ███  ███          ███     ███   ███  ███   ███  ███   ███  
-    # █████████  ███████      ███     █████████  ███   ███  ███   ███  
-    # ███ █ ███  ███          ███     ███   ███  ███   ███  ███   ███  
-    # ███   ███  ████████     ███     ███   ███   ███████   ███████    
     
     ▸ method
         
@@ -513,12 +357,6 @@ lang 'kode'
         rgs = ranges "@mthd: (arg) ->"
         inc rgs, 0 '@'      ▸ 'punct method class'
         inc rgs, 1 'mthd'   ▸ 'method class'
-    
-    # ████████   ████████  █████████  ███   ███  ████████   ███   ███  
-    # ███   ███  ███          ███     ███   ███  ███   ███  ████  ███  
-    # ███████    ███████      ███     ███   ███  ███████    ███ █ ███  
-    # ███   ███  ███          ███     ███   ███  ███   ███  ███  ████  
-    # ███   ███  ████████     ███      ███████   ███   ███  ███   ███  
     
     ▸ return
     

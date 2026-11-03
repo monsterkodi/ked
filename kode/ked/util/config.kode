@@ -1,14 +1,7 @@
-###
-     ███████   ███████   ███   ███  ████████  ███   ███████   
-    ███       ███   ███  ████  ███  ███       ███  ███        
-    ███       ███   ███  ███ █ ███  ██████    ███  ███  ████  
-    ███       ███   ███  ███  ████  ███       ███  ███   ███  
-     ███████   ███████   ███   ███  ███       ███   ███████   
-###
 
 use ../../kxk ▪ noon slash post
 
-function config
+■config
 
     @data = null
     @loaded = null # resolves when the config file is read and merged

@@ -1,15 +1,8 @@
-###
-      ████████  ███  ███      ████████  ███   ███  █████████  ███  ███      
-      ███       ███  ███      ███       ███   ███     ███     ███  ███      
-      ██████    ███  ███      ███████   ███   ███     ███     ███  ███      
-      ███       ███  ███      ███       ███   ███     ███     ███  ███      
-      ███       ███  ███████  ████████   ███████      ███     ███  ███████  
-###
 
 use ../../kxk ▪ post slash nfs 
 use ../../kxk ◆ salter
 
-function fileutil
+■fileutil
 
     # move these to some config! 𝖘𝜏⊚𝔭 ⫙⊚⩗𝚒∩𝚐 𝜏𝖍𝚒𝖘 𝕒ɼ𝕒⊚𝓊∩⫐, 𝒹𝕒⫙⫙𝚒𝜏!
     @indexFileExtensions:  [ 'kode' 'mm' 'zig' 'cc' 'c' 'h' 'hpp' 'cpp' 'nim' 'kim' 'lua' 'kua'] 
@@ -17,12 +10,6 @@ function fileutil
     @sourceFileExtensions: fileutil.indexFileExtensions.concat(fileutil.dotFileExtensions [ 'ts' 'js' 'mjs' 'swift' 'styl' 'css' 'pug' 'html' 'md' 'noon' 'json' 'txt' 'log' 'sh' 'fish' 'py' 'frag' 'vert' 'config' 'toml' 'conf' 'gitignore' 'plist' ]) 
     @imageExtensions:      ['png' 'jpg' 'jpeg' 'gif' 'tiff' 'pxm' 'icns' 'webp']
     
-    #  ███████   ███████   ███   ███  ███   ███  █████████  ████████  ████████ 
-    # ███       ███   ███  ███   ███  ████  ███     ███     ███       ███   ███
-    # ███       ███   ███  ███   ███  ███ █ ███     ███     ███████   ███████  
-    # ███       ███   ███  ███   ███  ███  ████     ███     ███       ███   ███
-    #  ███████   ███████    ███████   ███   ███     ███     ████████  ███   ███
-
     @counterparts: # todo: move this to a config file?
         mm:      ['h']
         cpp:     ['hpp' 'h']
@@ -44,12 +31,6 @@ function fileutil
         css:     ['styl']
         styl:    ['css']
     
-    #  ███████  ███   ███   ███████   ████████ 
-    # ███       ███ █ ███  ███   ███  ███   ███
-    # ███████   █████████  █████████  ████████ 
-    #      ███  ███   ███  ███   ███  ███      
-    # ███████   ██     ██  ███   ███  ███      
-
     @swapLastDir: path from to ->
 
         lastIndex = path.lastIndexOf "/#{from}/"
@@ -57,12 +38,6 @@ function fileutil
             path = path[..lastIndex] + to + path[lastIndex+("/#{from}").length..]
         path
         
-    # █████████  ████████    ███████    ███████  ███   ███
-    #    ███     ███   ███  ███   ███  ███       ███   ███
-    #    ███     ███████    █████████  ███████   █████████
-    #    ███     ███   ███  ███   ███       ███  ███   ███
-    #    ███     ███   ███  ███   ███  ███████   ███   ███
-
     # paths that exist as files, made absolute, symlinks resolved, duplicates removed
     @existingFiles: paths cwd ○->
 
@@ -92,12 +67,6 @@ function fileutil
     
         ○ nfs.trash path
         
-    #  ███████  ███       ███████    ███████   ███████
-    # ███       ███      ███   ███  ███       ███     
-    # ███       ███      █████████  ███████   ███████ 
-    # ███       ███      ███   ███       ███       ███
-    #  ███████  ███████  ███   ███  ███████   ███████ 
-
     @class: name ○->
     
         currentDir = slash.dir ked_session.get('editor▸file')
@@ -119,12 +88,6 @@ function fileutil
             
         post.emit 'file.open' file 6 'eol'
         
-    # ███   ███  ████████  ███   ███        ████████   ███████   ███      ███████    ████████  ████████ 
-    # ████  ███  ███       ███ █ ███        ███       ███   ███  ███      ███   ███  ███       ███   ███
-    # ███ █ ███  ███████   █████████        ██████    ███   ███  ███      ███   ███  ███████   ███████  
-    # ███  ████  ███       ███   ███        ███       ███   ███  ███      ███   ███  ███       ███   ███
-    # ███   ███  ████████  ██     ██        ███        ███████   ███████  ███████    ████████  ███   ███
-
     @newFolder: parent ○->
     
         dir = slash.path parent 'new_folder'
@@ -132,12 +95,6 @@ function fileutil
         if res == dir
             post.emit 'redraw'
         
-    # ████████   ████████  ███   ███   ███████   ██     ██  ████████
-    # ███   ███  ███       ████  ███  ███   ███  ███   ███  ███     
-    # ███████    ███████   ███ █ ███  █████████  █████████  ███████ 
-    # ███   ███  ███       ███  ████  ███   ███  ███ █ ███  ███     
-    # ███   ███  ████████  ███   ███  ███   ███  ███   ███  ████████
-
     @rename: oldPath newPath ○->
         
         ⮐  if oldPath == newPath

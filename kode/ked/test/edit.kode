@@ -4,7 +4,7 @@ use ../util      ◆ harness
 use ../edit      ◆ editor
 use ../edit/tool ◆ belt
 
-hed = cols rows ext='md' feats=[]->     
+hed = cols=40 rows=10 ext='md' feats=[]->     
         h = new harness 
         e = new editor h.screen 'editor' feats
         e.layout 0 0 cols rows
@@ -15,9 +15,20 @@ hed = cols rows ext='md' feats=[]->
 
 ▸ edit
 
+    ▸ delete cursor line
+    
+        [h e] = hed()
+        e.state.loadLines ['line a' '' '' 'line d']
+
+        h.key e 'down'
+        e.state.mainCursor()[1] ▸ 1
+        h.key e 'cmd+x'
+        e.state.mainCursor()[1] ▸ 1
+        kseg.str(e.state.s.lines) ▸ "line a\n\nline d"
+
     ▸ select
         
-        [h e] = hed 40 10
+        [h e] = hed()
         e.state.loadLines ['' 'line b' 'line c' 'line d']
 
         h.key e 'shift+down'
@@ -34,7 +45,7 @@ hed = cols rows ext='md' feats=[]->
 
     ▸ selection cells are marked
 
-        [h e] = hed 40 10
+        [h e] = hed()
         e.state.loadLines ['abcdef']
 
         e.state.setCursors [[2 0]]
@@ -48,9 +59,9 @@ hed = cols rows ext='md' feats=[]->
         h.screen.c[0][2].mark ▸ 'main'
         (valid h.screen.c[0][3].mark) ▸ false
 
-    ▸ a selection through an empty line keeps its rows
+    ▸ selection through an empty line
 
-        [h e] = hed 40 10
+        [h e] = hed()
         e.state.loadLines ['abcdef' '' 'ghijkl' 'mnopqr']
 
         e.state.setCursors [[4 3]]
@@ -67,7 +78,7 @@ hed = cols rows ext='md' feats=[]->
 
     ▸ highlight cells are marked
 
-        [h e] = hed 40 10
+        [h e] = hed()
         e.state.loadLines ['abcdef']
 
         e.state.setHighlights [[0 0 3 0]]
@@ -105,8 +116,6 @@ hed = cols rows ext='md' feats=[]->
             code = 'yes' # trailing
             """
             
-        # belt.toggleCommentTypesInLineRangesAtIndices lines [] [0 1] [1] ▸ [result [] [0 1]]
-
     # ███████    ████████  ███      ████████  █████████  ████████  ███      ███  ███   ███  ████████   ███████  
     # ███   ███  ███       ███      ███          ███     ███       ███      ███  ████  ███  ███       ███       
     # ███   ███  ███████   ███      ███████      ███     ███████   ███      ███  ███ █ ███  ███████   ███████   

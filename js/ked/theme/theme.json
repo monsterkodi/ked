@@ -39,10 +39,10 @@
     "func_async": "#66f",
     "bound": "#f88",
     "bound_async": "#c44",
-    "test0": "#0f0",
-    "test1": "#0a0",
-    "test2": "#080",
-    "test3": "#060"
+    "test0": "#ccf",
+    "test1": "#aaf",
+    "test2": "#88f",
+    "test3": "#44f"
   },
   "colorpicker": {
     "bg": "#161616",
@@ -187,6 +187,7 @@
     "punct range": "#55d",
     "punct keyword return": "#44c",
     "punct keyword": "#33b",
+    "punct function class": "#220",
     "url domain": "#d00",
     "punct regexp start": "#c00",
     "punct regexp end": "#c00",

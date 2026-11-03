@@ -1,15 +1,13 @@
-###
-    filecolors
-
-    serialize editor color spans into one trailing comment line
-    and read them back when the whole file hash still matches
-###
 
 use ../../kxk    ▪ kstr slash
 use ../../kolor  ◆ kulur
 use ../edit/tool ◆ colorspans
 
-function filecolors
+■filecolors
+###
+    serialize editor color spans into one trailing comment line
+    and read them back when the whole file hash still matches
+###
 
     @commentStyle: path -> kulur.commentStyle slash.ext(path)
 

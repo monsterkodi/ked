@@ -1,10 +1,9 @@
-###
-    ███   ███  ███  ████████  ███   ███ 
-    ███   ███  ███  ███       ███ █ ███ 
-     ███ ███   ███  ███████   █████████ 
-       ███     ███  ███       ███   ███ 
-        █      ███  ████████  ██     ██ 
 
+use ../../../kxk ▪ events post
+use ../../theme  ◆ color
+use ../screen    ◆ cells 
+■view extends events
+###
     keeps track of
         ▪ screen cells
         ▪ visibility
@@ -14,12 +13,6 @@
         ▪ current popup
         ▪ focus
 ###
-
-use ../../../kxk ▪ events post
-use ../../theme  ◆ color
-use ../screen    ◆ cells 
-
-function view extends events
 
     @currentPopup: null
 

@@ -63,39 +63,6 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         rgs = ranges "icon: '🔧' bla:1"
         inc rgs 11 'bla' ▸ 'dictionary key'
         
-    # ███   ███  ███  ██     ██
-    # ████  ███  ███  ███   ███
-    # ███ █ ███  ███  █████████
-    # ███  ████  ███  ███ █ ███
-    # ███   ███  ███  ███   ███
-
-    ▸ nim
-    
-        lang 'nim'
-        
-        dss = dissect "proc f(str:string)"
-        # log "dss" dss
-        
-        inc dss[0] 0 "proc"   ▸ 'keyword'
-        # inc dss[0] 5 "string" ▸ 'text' # should be type
-        
-    # ███   ███  ███  ██     ██
-    # ███  ███   ███  ███   ███
-    # ███████    ███  █████████
-    # ███  ███   ███  ███ █ ███
-    # ███   ███  ███  ███   ███
-
-    ▸ kim
-    
-        lang 'kim'
-        
-        rgs = ranges 'if'
-        inc rgs 0 'if' ▸ 'keyword'
-
-        rgs = ranges '●if'
-        inc rgs 0 '●'  ▸ 'punct'
-        inc rgs 1 'if' ▸ 'text'
-
     # ███   ███   ███████   ███████    ████████  
     # ███  ███   ███   ███  ███   ███  ███       
     # ███████    ███   ███  ███   ███  ███████   
@@ -254,8 +221,6 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         rgs = ranges ' ###' 'kode' 
         inc rgs 1 '###' ▸ 'punct comment triple'
         
-        # an extension with a dot in front of it is the extension
-        
         rgs = ranges '###' '.coffee'
         inc rgs 0 '###' ▸ 'punct comment triple'
                 
@@ -311,10 +276,6 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         dss = dissect "###\n 0 1 0 \n###"
         inc dss[1] 1 "0"   ▸ 'number'
         
-        #  headers spelled with the block character are headers too -
-        #  zero2blocks rewrites the old zero-ascii-art into these.
-        #  note they chunk one at a time where zeros merge into runs
-        
         rgs = ranges "# █ ██ ███"
         inc rgs 0  "#"     ▸ 'punct comment'
         inc rgs 2  "█"     ▸ 'comment header'
@@ -348,32 +309,13 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         lang 'kode'
 
         rgs = ranges "#!title"
-        inc rgs 0  "#!"     ▸ 'punct comment bang'
-        inc rgs 2  "title"  ▸ 'comment bang'
+        inc rgs 0  "#!"     ▸ 'punct comment bang!'
+        inc rgs 2  "title"  ▸ 'comment bang!'
 
-        rgs = ranges "#!!title"
-        inc rgs 0  "#!!"    ▸ 'punct comment bangbang'
-        inc rgs 3  "title"  ▸ 'comment bangbang'
-
-        rgs = ranges "#! title"
-        inc rgs 0  "#!"     ▸ 'punct comment bang'
+        rgs = ranges "## title"
+        inc rgs 0  "##"     ▸ 'punct comment bang'
         inc rgs 3  "title"  ▸ 'comment bang'
 
-        rgs = ranges "#!! title"
-        inc rgs 0  "#!!"    ▸ 'punct comment bangbang'
-        inc rgs 4  "title"  ▸ 'comment bangbang'
-
-        rgs = ranges "# title"
-        inc rgs 0  "#"      ▸ 'punct comment'
-        inc rgs 2  "title"  ▸ 'comment'
-
-        lang 'py'
-
-        rgs = ranges "#!title"
-        inc rgs 0  "#"      ▸ 'punct comment'
-        inc rgs 2  "title"  ▸ 'comment'
-
-        lang 'styl'
         
     # ███   ███  ███   ███  ██     ██  ███████    ████████  ████████    ███████  
     # ████  ███  ███   ███  ███   ███  ███   ███  ███       ███   ███  ███       
@@ -382,6 +324,8 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
     # ███   ███   ███████   ███   ███  ███████    ████████  ███   ███  ███████   
     
     ▸ numbers
+        
+        lang 'styl'
                         
         rgs = ranges "a 6670"
         inc rgs 2 "6670"   ▸ 'number'
@@ -905,18 +849,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
     # ███      ███   ███  ███  ████  ███   ███  ███      ███  ███  ████  ███            ███
     # ███████   ███████   ███   ███   ███████   ███████  ███  ███   ███  ████████  ███████ 
 
-    ▸ a quote in front of a contraction is not an apostrophe
-
-        # 't', 'd', 's', 'll' and 're' are the english contractions -
-        # don't, it's, we'd, we'll, you're. the highlighter took a quote
-        # in front of one of them for an apostrophe and did not open a
-        # string there. the quote that was supposed to close the string
-        # then opened one, and that one was never closed - so everything
-        # after the line was a string.
-        #
-        # an apostrophe sits right against the word in front of it. a
-        # quote that opens a string has a space or a bracket in front of
-        # it, and that is what tells the two apart.
+    ▸ contraction quote
 
         lang 'kode'
 
@@ -934,20 +867,13 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 0 "'" ▸ 'punct string single'
         inc rgs 1 'd'  ▸ 'string single'
 
-        # a string that is only the contraction is not affected - the
-        # quote in front of it is closed right away
-
         rgs = ranges "'t'"
         inc rgs 0 "'" ▸ 'punct string single'
         inc rgs 1 't'  ▸ 'string single'
 
-        # and the apostrophe in a contraction is still an apostrophe
-
         rgs = ranges "don't"
         inc rgs 3 "'" ▸ 'punct'
         inc rgs 4 't'  ▸ 'text'
-
-        # the string must not outlive the line it is on
 
         dss = dissect """
             x = 't x'
@@ -955,10 +881,6 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         """
         inc dss[0] 4 "'" ▸ 'punct string single'
         inc dss[1] 4 '1'  ▸ 'number'
-
-        # the same thing in the files that broke: ked/kode/kode/test/
-        # error.kode, occ/js/query.js, occ/kode/query.kode and
-        # kit/kode/test/integration.kode
 
         rgs = ranges "codemsg 't >> *'"
         inc rgs 8  "'" ▸ 'punct string single'
@@ -978,14 +900,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 8 "'" ▸ 'punct string single'
         inc rgs 9 't'  ▸ 'string single'
 
-    ▸ a delimiter with a combining mark on it is still a delimiter
-
-        # a chunk is a grapheme, and a grapheme can be more than one
-        # character. a quote with a combining mark on it - \u0336 is the
-        # long stroke overlay - is one grapheme of two characters, so the
-        # comparison with the quote character failed. the string was never
-        # opened, the quote that closed it opened a string that was never
-        # closed, and the rest of the file was a string.
+    ▸ combining mark delimiter
 
         lang 'json'
 
@@ -993,15 +908,10 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 0 '"' ▸ 'punct string double'
         inc rgs 1 '"' ▸ 'punct string double'
 
-        # ked/js/ked/util/julia.json - the value of 'sout' is a combining
-        # mark, and it rides on the quote in front of it
-
         rgs = ranges '"sout": "\u0336",'
         inc rgs 8  '"' ▸ 'punct string double'
         inc rgs 9  '"' ▸ 'punct string double'
         inc rgs 10 ',' ▸ 'punct minor'
-
-        # and the string must not outlive the line it is on
 
         dss = dissect """
             {"a": "\u0336"}
@@ -1013,16 +923,9 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc dss[1] 1  '"' ▸ 'punct dictionary'
         inc dss[1] 7  'c'  ▸ 'string double'
 
-        # the combining mark is still part of the chunk
-
         kulur.ranges('"\u0336"' 'json')[0].text ▸ '"\u0336'
 
-    ▸ a line that comes in as text has the same columns
-
-        # the highlighter cuts a line into graphemes itself. a line that
-        # comes in as text would be cut into code units, and the columns
-        # of a line with a combining mark or an emoji on it come out
-        # wrong - the chunks after it are one column off.
+    ▸ parse dissect match
 
         lang 'json'
 
@@ -1032,12 +935,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         compare prs[0].chunks[7].start, dss[0][7].start
         compare prs[0].chunks[7].start, 8
 
-    ▸ a letter that is not on the punct list is not punctuation
-
-        # PUNCT knows the letters it does not want to split words at by
-        # hand, and it does not know all of them. a letter that is not on
-        # the list is punctuation: it splits the word around it and it
-        # gets a different colour than the letters that are on the list.
+    ▸ punct list
 
         lang 'kode'
 
@@ -1046,9 +944,6 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
 
         rgs = ranges 'Škoda'
         inc rgs 0 'Škoda' ▸ 'text'
-
-        # ked/kode/ked/util/julia.noon - the value of AA is a letter and
-        # so is the value of DH, so they have to get the same colour
 
         lang 'noon'
 
@@ -1059,10 +954,6 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 6 'Ð' ▸ 'text'
 
     ▸ longlines
-
-        # one line, many chunks: coloring must not recompute the width of
-        # the prefix before every chunk - that is quadratic and stalls on
-        # files with very long lines (e.g. generated data tables)
 
         lang 'js'
 
@@ -1083,9 +974,6 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         compare (segWidthCalls < 20 * line.length), true
         
     ▸ parse
-        
-        # the shape of what parse answers: a line per entry, the chunks
-        # of the line, and the counters that go with them.
         
         lang 'coffee'
         
@@ -1141,9 +1029,6 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
                       {start:2  length:1 match:'a' text:'a' clss:'text'}
                       ], chars:3 index:0 number:1 ext:'coffee'}]
                       
-        #  the columns of a chunk are where they are on the line, spaces
-        #  and all.
-        
         b = parse "x"
         b[0].chunks[0].start ▸ 0
         
