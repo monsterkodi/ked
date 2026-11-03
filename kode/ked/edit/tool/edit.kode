@@ -1,22 +1,11 @@
-###
-    ████████  ███████    ███  █████████
-    ███       ███   ███  ███     ███   
-    ███████   ███   ███  ███     ███   
-    ███       ███   ███  ███     ███   
-    ████████  ███████    ███     ███   
-###
 
 use ../../../kxk ▪ kstr kseg
 use ../../util   ◆ prof
 
-function edit
+■edit
     
-    # ███  ███   ███   ███████  ████████  ████████   █████████
-    # ███  ████  ███  ███       ███       ███   ███     ███   
-    # ███  ███ █ ███  ███████   ███████   ███████       ███   
-    # ███  ███  ████       ███  ███       ███   ███     ███   
-    # ███  ███   ███  ███████   ████████  ███   ███     ███   
-    
+#!insert
+
     @insertTextAtPositions: lines text posl ->
                           
         # prof.start 'insert'
@@ -70,6 +59,12 @@ function edit
                     else                                 # insert into single cursor with autoindent
                         # log 'insert multiple lines into single cursor with autoindent'
                         posLineIndent = @numIndent line
+                        
+                        if posl.length == 1 and text == '\n' and posl[0][0] > posLineIndent
+                            nextLineIndent = @numIndentBelowPos lines posl[0]
+                            if nextLineIndent > posLineIndent
+                                posLineIndent = nextLineIndent
+                        
                         indent = kseg lpad(posLineIndent)
                         before.push line.concat(txtls[0])
                         
@@ -96,19 +91,15 @@ function edit
                     newls.push line                    #     
             
             before = after
-            
+                
         newls = newls.concat before if posl[-1][1] < lines.length
             
         # prof.end 'insert'
         
-        [newls newpl]  
-        
-    #  ███████  ███   ███  ████████   ████████    ███████   ███   ███  ███   ███  ███████    
-    # ███       ███   ███  ███   ███  ███   ███  ███   ███  ███   ███  ████  ███  ███   ███  
-    # ███████   ███   ███  ███████    ███████    ███   ███  ███   ███  ███ █ ███  ███   ███  
-    #      ███  ███   ███  ███   ███  ███   ███  ███   ███  ███   ███  ███  ████  ███   ███  
-    # ███████    ███████   ███   ███  ███   ███   ███████    ███████   ███   ███  ███████    
-    
+        [newls newpl]
+             
+#!surround
+
     @insertSurroundAtRanges: lines rngs trigger pair ->
         
         begl = @startPositionsOfRanges rngs
@@ -126,12 +117,8 @@ function edit
         else
             [lines endl]
 
-    # ███████    ████████  ███      ████████  █████████  ████████  
-    # ███   ███  ███       ███      ███          ███     ███       
-    # ███   ███  ███████   ███      ███████      ███     ███████   
-    # ███   ███  ███       ███      ███          ███     ███       
-    # ███████    ████████  ███████  ████████     ███     ████████  
-    
+#!delete
+
     @deleteLineRangesAndAdjustPositions: lines rngs posl linewise=true ->
         
         lines = lines.map (l) -> l
@@ -211,11 +198,7 @@ function edit
             ⮐  if ci >= cursors.length
             ⮐  if cursors[ci][1] > cursor[1]
             
-    #  ███████   ███████    ███████          ████████    ███████   ███   ███   ███████   ████████   ███████  
-    # ███   ███  ███   ███  ███   ███        ███   ███  ███   ███  ████  ███  ███        ███       ███       
-    # █████████  ███   ███  ███   ███        ███████    █████████  ███ █ ███  ███  ████  ███████   ███████   
-    # ███   ███  ███   ███  ███   ███        ███   ███  ███   ███  ███  ████  ███   ███  ███            ███  
-    # ███   ███  ███████    ███████          ███   ███  ███   ███  ███   ███   ███████   ████████  ███████   
+#!add
     
     @addLinesBelowPositionsToRanges: lines posl rngs ->
     
@@ -239,11 +222,7 @@ function edit
         
         [newp newr]
     
-    # ████████   ████████  ██     ██   ███████   ███   ███  ████████     ████████   ███   ███   ███████    ███████    
-    # ███   ███  ███       ███   ███  ███   ███  ███   ███  ███          ███   ███  ████  ███  ███        ███         
-    # ███████    ███████   █████████  ███   ███   ███ ███   ███████      ███████    ███ █ ███  ███  ████  ███████     
-    # ███   ███  ███       ███ █ ███  ███   ███     ███     ███          ███   ███  ███  ████  ███   ███       ███    
-    # ███   ███  ████████  ███   ███   ███████       █      ████████     ███   ███  ███   ███   ███████   ███████     
+#!remove
     
     @removeLinesAtPositionsFromRanges: lines posl rngs ->
         
@@ -266,12 +245,8 @@ function edit
         
     @rangesForJoiningLines: lines idxs -> idxs.map (idx) => @rangeForJoiningLine lines idx
     
-    # ██     ██   ███████   ███   ███  ████████         ███      ███  ███   ███  ████████   ███████  
-    # ███   ███  ███   ███  ███   ███  ███              ███      ███  ████  ███  ███       ███       
-    # █████████  ███   ███   ███ ███   ███████          ███      ███  ███ █ ███  ███████   ███████   
-    # ███ █ ███  ███   ███     ███     ███              ███      ███  ███  ████  ███            ███  
-    # ███   ███   ███████       █      ████████         ███████  ███  ███   ███  ████████  ███████   
-    
+#!move lines
+
     @moveLineRangesAndPositionsAtIndicesInDirection: lines rngs posl indices dir ->
         
         if empty indices or dir == 'down' and indices[-1] >= lines.length-1 or dir == 'up' and indices[0] <= 0
@@ -307,11 +282,7 @@ function edit
         
         [newLines newRngs newPosl]
 
-    #  ███████  ███       ███████   ███   ███  ████████        ███      ███  ███   ███  ████████   ███████  
-    # ███       ███      ███   ███  ████  ███  ███             ███      ███  ████  ███  ███       ███       
-    # ███       ███      ███   ███  ███ █ ███  ███████         ███      ███  ███ █ ███  ███████   ███████   
-    # ███       ███      ███   ███  ███  ████  ███             ███      ███  ███  ████  ███            ███  
-    #  ███████  ███████   ███████   ███   ███  ████████        ███████  ███  ███   ███  ████████  ███████   
+#!clone lines
     
     @cloneLineBlockRangesAndMoveRangesAndPositionsInDirection: lines blocks rngs posl dir ->
         
@@ -354,12 +325,8 @@ function edit
         
         [newLines newRngs newPosl]
         
-    #  ███████   ███████   ██     ██  ██     ██  ████████  ███   ███  █████████   ███████  
-    # ███       ███   ███  ███   ███  ███   ███  ███       ████  ███     ███     ███       
-    # ███       ███   ███  █████████  █████████  ███████   ███ █ ███     ███     ███████   
-    # ███       ███   ███  ███ █ ███  ███ █ ███  ███       ███  ████     ███          ███  
-    #  ███████   ███████   ███   ███  ███   ███  ████████  ███   ███     ███     ███████   
-    
+#!comments
+        
     @toggleCommentsInLineRangesAtIndices: lines rngs posl indices ->
         
         ⮐  [lines rngs posl] if empty indices
@@ -405,12 +372,8 @@ function edit
         
         [newLines newRngs newPosl]  
         
-    # ███████    ████████  ███  ███   ███  ███████    ████████  ███   ███  █████████  
-    # ███   ███  ███       ███  ████  ███  ███   ███  ███       ████  ███     ███     
-    # ███   ███  ███████   ███  ███ █ ███  ███   ███  ███████   ███ █ ███     ███     
-    # ███   ███  ███       ███  ███  ████  ███   ███  ███       ███  ████     ███     
-    # ███████    ████████  ███  ███   ███  ███████    ████████  ███   ███     ███     
-    
+#!deindent
+
     @deindentLineRangesAndPositionsAtIndices: lines rngs posl indices ->
         
         ⮐  [lines rngs posl] if empty indices  
@@ -439,12 +402,8 @@ function edit
         
         [newLines newRngs newPosl]
 
-    # ███  ███   ███  ███████    ████████  ███   ███  █████████  
-    # ███  ████  ███  ███   ███  ███       ████  ███     ███     
-    # ███  ███ █ ███  ███   ███  ███████   ███ █ ███     ███     
-    # ███  ███  ████  ███   ███  ███       ███  ████     ███     
-    # ███  ███   ███  ███████    ████████  ███   ███     ███     
-    
+#!indent
+
     @indentLineRangesAndPositionsAtIndices: lines rngs posl indices ->
         
         ⮐  [lines rngs posl] if empty indices  
@@ -470,12 +429,8 @@ function edit
         
         [newLines newRngs newPosl]
         
-    # ████████  ███   ███  █████████  ████████  ███   ███  ███████          ████████   ███   ███   ███████    ███████  
-    # ███        ███ ███      ███     ███       ████  ███  ███   ███        ███   ███  ████  ███  ███        ███       
-    # ███████     █████       ███     ███████   ███ █ ███  ███   ███        ███████    ███ █ ███  ███  ████  ███████   
-    # ███        ███ ███      ███     ███       ███  ████  ███   ███        ███   ███  ███  ████  ███   ███       ███  
-    # ████████  ███   ███     ███     ████████  ███   ███  ███████          ███   ███  ███   ███   ███████   ███████   
-    
+#!extend
+
     @extendLineRangesFromPositionToPosition: lines rngs start pos ->
 
         if empty rngs ➜ ⮐  [@rangeFromStartToEnd(start pos)]

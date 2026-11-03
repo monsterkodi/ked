@@ -1,15 +1,8 @@
-###
-█████████  ████████  ███   ███  █████████
-   ███     ███        ███ ███      ███   
-   ███     ███████     █████       ███   
-   ███     ███        ███ ███      ███   
-   ███     ████████  ███   ███     ███   
-###
 
 use ../../../kxk ▪ kstr kseg 
 use ../../theme  ◆ color
 
-function text
+■text
 
     @linesForText: text -> kstr.lines text
         
@@ -210,6 +203,10 @@ function text
             continue if empty trim line
             ⮐ @numIndent line
         0
+        
+    @numIndentBelowPos: lines pos ->
+        
+        @numIndentOfLines lines[pos[1]+1...lines.length]
         
     @lineIndentAtPos: lines pos -> 
 
