@@ -3,11 +3,17 @@ var _k_ = {clone: function (o,v) { v ??= new Map(); if (Array.isArray(o)) { if (
 
 var cells, fakeGet, fakeSet, file, fp, i, lines, reload, s, store, text
 
+import kxk from "../../kxk.js"
+let slash = kxk.slash
+
 import belt from "../edit/tool/belt.js"
 
 import state from "../edit/state.js"
 
 import filepos from "../edit/mode/filepos.js"
+
+import child_process from "child_process"
+let spawn = child_process.spawn
 
 toExport["filepos"] = async function ()
 {
@@ -16,9 +22,9 @@ toExport["filepos"] = async function ()
         store = {}
         fakeGet = function (key, def)
         {
-            var _12_48_
+            var _14_48_
 
-            return _k_.clone((((_12_48_=store[key]) != null ? _12_48_ : def)))
+            return _k_.clone((((_14_48_=store[key]) != null ? _14_48_ : def)))
         }
         fakeSet = function (key, value)
         {
@@ -60,9 +66,9 @@ toExport["filepos"] = async function ()
         store = {}
         fakeGet = function (key, def)
         {
-            var _57_48_
+            var _59_48_
 
-            return _k_.clone((((_57_48_=store[key]) != null ? _57_48_ : def)))
+            return _k_.clone((((_59_48_=store[key]) != null ? _59_48_ : def)))
         }
         fakeSet = function (key, value)
         {
@@ -77,11 +83,15 @@ toExport["filepos"] = async function ()
         compare(filepos.fileposl,[['/tmp/last',[0,0,0,0]],['/tmp/next',[5,6,7,8]],['/tmp/current',[1,2,3,4]]])
         delete global.ked_session
     })
+    await section("file arguments go to the history", async function ()
+    {
+        compare(true,true)
+    })
 }
 toExport["filepos"]._section_ = true
 toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmlsZXBvcy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC9maWxlcG9zLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7O09BQ21CLFdBQVA7O09BQ08sWUFBWjs7T0FDWSxjQUFOOzs7Ozs7UUFNTDtRQUVBLG9CQUFXLEtBQUk7Ozs7d0NBQWMsTUFBTSwwQkFBTzs7UUFDMUMsb0JBQVcsS0FBSTs7bUJBQVUsTUFBTSxpQkFBYTs7UUFDNUMsT0FBTyxlQUFjLElBQUksUUFBUSxJQUFJO1FBRXJDLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFFckIsUUFBUSxNQUFNLE1BQU07UUFFcEI7YUFDSSxJQUFLLE9BQUk7O1lBQ1QsTUFBTSxhQUFhOztRQUV2QixPQUFPLE1BQU0sS0FBSztRQUVsQixFQUFFLFVBQVUsS0FBSyxhQUFhO1FBRTlCLE9BQU87UUFFUCxTQUFTLFFBQVE7UUFFakIsRUFBRSxHQUFHOzttQkFBaUIsR0FBRzs7UUFFekIsWUFBWSxJQUFJLGNBQWM7UUFHOUIsWUFBWSxzQkFBc0IsUUFBUSxFQUFFLEdBQUcsRUFBRTtRQUVqRDs7WUFDSSxFQUFFLFVBQVUsS0FBSyxhQUFhO21CQUM5QixHQUFHLFdBQVc7O1FBRWxCO2dCQUNBLEVBQUUsRUFBRSxNQUFRLEVBQUU7Z0JBQ2QsRUFBRSxjQUFnQixFQUFFO1FBRXBCO2dCQUNBLEVBQUUsRUFBRSxNQUFRLEVBQUU7Z0JBRWQsWUFBWSxzQkFBc0IsU0FBVyxFQUFFLEdBQUcsRUFBRTtlQUU3QyxPQUFPOzs7O1FBSWQ7UUFDQSxvQkFBVyxLQUFJOzs7O3dDQUFjLE1BQU0sMEJBQU87O1FBQzFDLG9CQUFXLEtBQUk7O21CQUFVLE1BQU0saUJBQWE7O1FBQzVDLE9BQU8sZUFBYyxJQUFJLFFBQVEsSUFBSTtRQUVyQyxRQUFRLGFBQWEsZ0JBQWdCLEVBQUUsRUFBRSxFQUFFO1FBQzNDLFFBQVEsU0FBUztRQUVqQixZQUFZLElBQUksY0FBYztRQUM5QixZQUFZLElBQUksNEJBQTRCLEVBQUUsRUFBRSxFQUFFO1FBRWxELFFBQVEsVUFBVSxZQUFZO2dCQUU5QixRQUFRLFdBQWEsYUFBYSxFQUFFLEVBQUUsRUFBRSxLQUFLLGFBQWEsRUFBRSxFQUFFLEVBQUUsS0FBSyxnQkFBZ0IsRUFBRSxFQUFFLEVBQUU7ZUFFcEYsT0FBTyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmlsZXBvcy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC9maWxlcG9zLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7O09BQ1UsVUFBQTtJQUFVOztPQUNBLFdBQVI7O09BQ1EsWUFBYjs7T0FDYSxjQUFQOztPQUNULG9CQUFBO0lBQWdCOzs7Ozs7UUFNWjtRQUVBLG9CQUFXLEtBQUk7Ozs7d0NBQWMsTUFBTSwwQkFBTzs7UUFDMUMsb0JBQVcsS0FBSTs7bUJBQVUsTUFBTSxpQkFBYTs7UUFDNUMsT0FBTyxlQUFjLElBQUksUUFBUSxJQUFJO1FBRXJDLFNBQVEsS0FBSyxHQUFHLEtBQUs7UUFFckIsUUFBUSxNQUFNLE1BQU07UUFFcEI7YUFDSSxJQUFLLE9BQUk7O1lBQ1QsTUFBTSxhQUFhOztRQUV2QixPQUFPLE1BQU0sS0FBSztRQUVsQixFQUFFLFVBQVUsS0FBSyxhQUFhO1FBRTlCLE9BQU87UUFFUCxTQUFTLFFBQVE7UUFFakIsRUFBRSxHQUFHOzttQkFBaUIsR0FBRzs7UUFFekIsWUFBWSxJQUFJLGNBQWM7UUFHOUIsWUFBWSxzQkFBc0IsUUFBUSxFQUFFLEdBQUcsRUFBRTtRQUVqRDs7WUFDSSxFQUFFLFVBQVUsS0FBSyxhQUFhO21CQUM5QixHQUFHLFdBQVc7O1FBRWxCO2dCQUNBLEVBQUUsRUFBRSxNQUFRLEVBQUU7Z0JBQ2QsRUFBRSxjQUFnQixFQUFFO1FBRXBCO2dCQUNBLEVBQUUsRUFBRSxNQUFRLEVBQUU7Z0JBRWQsWUFBWSxzQkFBc0IsU0FBVyxFQUFFLEdBQUcsRUFBRTtlQUU3QyxPQUFPOzs7O1FBSWQ7UUFDQSxvQkFBVyxLQUFJOzs7O3dDQUFjLE1BQU0sMEJBQU87O1FBQzFDLG9CQUFXLEtBQUk7O21CQUFVLE1BQU0saUJBQWE7O1FBQzVDLE9BQU8sZUFBYyxJQUFJLFFBQVEsSUFBSTtRQUVyQyxRQUFRLGFBQWEsZ0JBQWdCLEVBQUUsRUFBRSxFQUFFO1FBQzNDLFFBQVEsU0FBUztRQUVqQixZQUFZLElBQUksY0FBYztRQUM5QixZQUFZLElBQUksNEJBQTRCLEVBQUUsRUFBRSxFQUFFO1FBRWxELFFBQVEsVUFBVSxZQUFZO2dCQUU5QixRQUFRLFdBQWEsYUFBYSxFQUFFLEVBQUUsRUFBRSxLQUFLLGFBQWEsRUFBRSxFQUFFLEVBQUUsS0FBSyxnQkFBZ0IsRUFBRSxFQUFFLEVBQUU7ZUFFcEYsT0FBTzs7OztnQkFJZCxLQUFPIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/test/filepos.kode

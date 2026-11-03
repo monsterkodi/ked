@@ -1,25 +1,24 @@
-SPLITS = ['"' '.' ',' "'"]
 
 class index_js
 
     @: ->
         
-        @classPtn     = @tokenize('class ●name' [])
-        @funcClassPtn = @tokenize('●name = (function ()' [])
+        @classPtn     = @tokenize 'class ●name' false
+        @funcClassPtn = @tokenize '●name = (function ()' false
         
         @classMethodPtns = [
-            [@tokenize('●name ○args' SPLITS)               {}]
-            [@tokenize('async ●name ○args' SPLITS)         {async:true}]
-            [@tokenize('static ●name ○args' SPLITS)        {static:true}]
-            [@tokenize('static async ●name ○args' SPLITS)  {static:true async:true}]
+            [@tokenize('●name ○args')               {}]
+            [@tokenize('async ●name ○args')         {async:true}]
+            [@tokenize('static ●name ○args')        {static:true}]
+            [@tokenize('static async ●name ○args')  {static:true async:true}]
         ]
         
-        @classBoundPtn = @tokenize('this.●name = this.●bound.bind(this)' SPLITS)
-        @funcBoundPtn  = @tokenize("""this["●name"] = this["●bound"].bind(this)""" SPLITS)
+        @classBoundPtn = @tokenize('this.●name = this.●bound.bind(this)')
+        @funcBoundPtn  = @tokenize('this["●name"] = this["●bound"].bind(this)')
         
         @topPtns = [
-            [@tokenize('●name = function ○args' SPLITS)        {}]
-            [@tokenize('●name = async function ○args' SPLITS)  {async:true}]
+            [@tokenize('●name = function ○args')        {}]
+            [@tokenize('●name = async function ○args')  {async:true}]
         ]
         
         @funcClassName = null
@@ -37,12 +36,13 @@ class index_js
         
         out
 
-    tokenize: (line splits) ->
+    tokenize: (line doSplit=true) ->
         
         tokens = trim(line).split /\s+/
         
-        for splitBy in splits
-            tokens = @splitWords tokens splitBy
+        if doSplit
+            for splitBy in ['"' '.' ',' "'"]
+                tokens = @splitWords tokens splitBy
         
         tokens
 
@@ -119,11 +119,11 @@ class index_js
             @funcClassName = className
             
             @funcClassPtns = [
-                [@tokenize("function #{className} ○args" SPLITS)                                {name:className}]
-                [@tokenize("""#{className}["●name"] = function ○args""" SPLITS)                 {static:true}]
-                [@tokenize("""#{className}["●name"] = async function ○args""" SPLITS)           {static:true async:true}]
-                [@tokenize("""#{className}.prototype["●name"] = function ○args""" SPLITS)       {}]
-                [@tokenize("""#{className}.prototype["●name"] = async function ○args""" SPLITS) {async:true}]
+                [@tokenize("""function #{className} ○args""")                            {name:className}]
+                [@tokenize("""#{className}["●name"] = function ○args""")                 {static:true}]
+                [@tokenize("""#{className}["●name"] = async function ○args""")           {static:true async:true}]
+                [@tokenize("""#{className}.prototype["●name"] = function ○args""")       {}]
+                [@tokenize("""#{className}.prototype["●name"] = async function ○args""") {async:true}]
             ]
             
         @funcClassPtns
@@ -157,7 +157,7 @@ class index_js
             
             if (t.includes('(') and t.endsWith(')')) or t.includes('.bind(this)')
                 
-                tokens ?= @tokenize t, SPLITS
+                tokens ?= @tokenize t
                 
                 ptns = classType == 'class' ? @classMethodPtns : @funcClassPatterns(className)
                 
@@ -182,7 +182,7 @@ class index_js
         
         if top and t.includes('function') and t.endsWith(')')
             
-            tokens ?= @tokenize t, SPLITS
+            tokens ?= @tokenize t
             
             for [ptn opt] in @topPtns
                 

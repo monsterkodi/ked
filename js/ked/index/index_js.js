@@ -1,18 +1,15 @@
 var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, trim: function (s,c=' ') {return _k_.ltrim(_k_.rtrim(s,c),c)}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, ltrim: function (s,c=' ') { while (_k_.in(s[0],c)) { s = s.slice(1) } return s}, rtrim: function (s,c=' ') {while (_k_.in(s.slice(-1)[0],c)) { s = s.slice(0, s.length - 1) } return s}}
 
-var SPLITS
-
-SPLITS = ['"','.',',',"'"]
 class index_js
 {
     constructor ()
     {
-        this.classPtn = this.tokenize('class ●name',[])
-        this.funcClassPtn = this.tokenize('●name = (function ()',[])
-        this.classMethodPtns = [[this.tokenize('●name ○args',SPLITS),{}],[this.tokenize('async ●name ○args',SPLITS),{async:true}],[this.tokenize('static ●name ○args',SPLITS),{static:true}],[this.tokenize('static async ●name ○args',SPLITS),{static:true,async:true}]]
-        this.classBoundPtn = this.tokenize('this.●name = this.●bound.bind(this)',SPLITS)
-        this.funcBoundPtn = this.tokenize(`this["●name"] = this["●bound"].bind(this)`,SPLITS)
-        this.topPtns = [[this.tokenize('●name = function ○args',SPLITS),{}],[this.tokenize('●name = async function ○args',SPLITS),{async:true}]]
+        this.classPtn = this.tokenize('class ●name',false)
+        this.funcClassPtn = this.tokenize('●name = (function ()',false)
+        this.classMethodPtns = [[this.tokenize('●name ○args'),{}],[this.tokenize('async ●name ○args'),{async:true}],[this.tokenize('static ●name ○args'),{static:true}],[this.tokenize('static async ●name ○args'),{static:true,async:true}]]
+        this.classBoundPtn = this.tokenize('this.●name = this.●bound.bind(this)')
+        this.funcBoundPtn = this.tokenize('this["●name"] = this["●bound"].bind(this)')
+        this.topPtns = [[this.tokenize('●name = function ○args'),{}],[this.tokenize('●name = async function ○args'),{async:true}]]
         this.funcClassName = null
         this.funcClassPtns = null
     }
@@ -41,16 +38,19 @@ class index_js
         return out
     }
 
-    tokenize (line, splits)
+    tokenize (line, doSplit = true)
     {
         var splitBy, tokens
 
         tokens = _k_.trim(line).split(/\s+/)
-        var list = _k_.list(splits)
-        for (var _a_ = 0; _a_ < list.length; _a_++)
+        if (doSplit)
         {
-            splitBy = list[_a_]
-            tokens = this.splitWords(tokens,splitBy)
+            var list = ['"','.',',',"'"]
+            for (var _a_ = 0; _a_ < list.length; _a_++)
+            {
+                splitBy = list[_a_]
+                tokens = this.splitWords(tokens,splitBy)
+            }
         }
         return tokens
     }
@@ -167,7 +167,7 @@ class index_js
         if (this.funcClassName !== className)
         {
             this.funcClassName = className
-            this.funcClassPtns = [[this.tokenize(`function ${className} ○args`,SPLITS),{name:className}],[this.tokenize(`${className}["●name"] = function ○args`,SPLITS),{static:true}],[this.tokenize(`${className}["●name"] = async function ○args`,SPLITS),{static:true,async:true}],[this.tokenize(`${className}.prototype["●name"] = function ○args`,SPLITS),{}],[this.tokenize(`${className}.prototype["●name"] = async function ○args`,SPLITS),{async:true}]]
+            this.funcClassPtns = [[this.tokenize(`function ${className} ○args`),{name:className}],[this.tokenize(`${className}["●name"] = function ○args`),{static:true}],[this.tokenize(`${className}["●name"] = async function ○args`),{static:true,async:true}],[this.tokenize(`${className}.prototype["●name"] = function ○args`),{}],[this.tokenize(`${className}.prototype["●name"] = async function ○args`),{async:true}]]
         }
         return this.funcClassPtns
     }
@@ -206,7 +206,7 @@ class index_js
             classType = this.result.classes.slice(-1)[0].type
             if ((t.includes('(') && t.endsWith(')')) || t.includes('.bind(this)'))
             {
-                tokens = (tokens != null ? tokens : this.tokenize(t,SPLITS))
+                tokens = (tokens != null ? tokens : this.tokenize(t))
                 ptns = (classType === 'class' ? this.classMethodPtns : this.funcClassPatterns(className))
                 var list = _k_.list(ptns)
                 for (var _a_ = 0; _a_ < list.length; _a_++)
@@ -244,7 +244,7 @@ class index_js
         }
         if (top && t.includes('function') && t.endsWith(')'))
         {
-            tokens = (tokens != null ? tokens : this.tokenize(t,SPLITS))
+            tokens = (tokens != null ? tokens : this.tokenize(t))
             var list1 = _k_.list(this.topPtns)
             for (var _b_ = 0; _b_ < list1.length; _b_++)
             {
@@ -286,5 +286,5 @@ class index_js
 
 export default index_js;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhfanMuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2luZGV4L2luZGV4X2pzLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7QUFBQSxVQUFVLElBQUksSUFBSSxJQUFJO0FBRXRCLE1BQU07O0lBRUY7O1FBRUksS0FBQyxXQUFlLEtBQUMsU0FBUztRQUMxQixLQUFDLGVBQWUsS0FBQyxTQUFTO1FBRTFCLEtBQUMsb0JBQ0ksS0FBQyxTQUFTLGNBQWMsYUFDeEIsS0FBQyxTQUFTLG9CQUFvQixTQUFpQixNQUFNLFFBQ3JELEtBQUMsU0FBUyxxQkFBcUIsU0FBZ0IsT0FBTyxRQUN0RCxLQUFDLFNBQVMsMkJBQTJCLFNBQVUsT0FBTyxLQUFLLE1BQU07UUFHdEUsS0FBQyxnQkFBZ0IsS0FBQyxTQUFTLHNDQUFzQztRQUNqRSxLQUFDLGVBQWdCLEtBQUMsU0FBUyw0Q0FBZ0Q7UUFFM0UsS0FBQyxZQUNJLEtBQUMsU0FBUyx5QkFBeUIsYUFDbkMsS0FBQyxTQUFTLCtCQUErQixTQUFVLE1BQU07UUFHOUQsS0FBQyxnQkFBZ0I7UUFDakIsS0FBQyxnQkFBZ0I7OztJQUVyQixZQUFhLE9BQU07Ozs7UUFFZjs0QkFFWTs7O1lBQVI7WUFDQSxRQUFRLEtBQUssTUFBTTtpQ0FDSDtpQkFBUDs7Z0JBQUw7Z0JBQ0EsSUFBSSxLQUFLO29CQUNXLE1BQU0sTUFBTSxTQUFPOztvQkFBdkMsSUFBSSxLQUFLOzs7O2VBRWpCOzs7SUFFSixVQUFXLE1BQUs7Ozs7UUFFWixrQkFBYyxNQUFNLE1BQU07NEJBRVg7OztZQUFYO1lBQ0EsU0FBUyxLQUFDLFdBQVcsT0FBTzs7ZUFFaEM7OztJQUVKLGFBQWMsUUFBTzs7OztzQkFFTDs7OztRQUVaLGNBQWM7UUFDZCxZQUFZO1FBQ1osVUFBVTtRQUVWLEtBQUs7UUFDTCxLQUFLO1FBQ0w7ZUFFTSxLQUFLLElBQUk7O1lBRVgsS0FBSyxJQUFJO2dCQUVOLE9BQU0sT0FBTzs7Z0JBQ1osY0FBYztnQkFDZCxVQUFVO2dCQUNWO2dC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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhfanMuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2luZGV4L2luZGV4X2pzLmtvZGUiXSwibWFwcGluZ3MiOiI7O0FBQ0EsTUFBTTs7SUFFRjs7UUFFSSxLQUFDLFdBQWUsS0FBQyxTQUFTLGNBQWM7UUFDeEMsS0FBQyxlQUFlLEtBQUMsU0FBUyx1QkFBdUI7UUFFakQsS0FBQyxvQkFDSSxLQUFDLFNBQVMsb0JBQ1YsS0FBQyxTQUFTLHNCQUE4QixNQUFNLFFBQzlDLEtBQUMsU0FBUyx1QkFBOEIsT0FBTyxRQUMvQyxLQUFDLFNBQVMsNkJBQThCLE9BQU8sS0FBSyxNQUFNO1FBRy9ELEtBQUMsZ0JBQWdCLEtBQUMsU0FBUztRQUMzQixLQUFDLGVBQWdCLEtBQUMsU0FBUztRQUUzQixLQUFDLFlBQ0ksS0FBQyxTQUFTLCtCQUNWLEtBQUMsU0FBUyxpQ0FBa0MsTUFBTTtRQUd2RCxLQUFDLGdCQUFnQjtRQUNqQixLQUFDLGdCQUFnQjs7O0lBRXJCLFlBQWEsT0FBTTs7OztRQUVmOzRCQUVZOzs7WUFBUjtZQUNBLFFBQVEsS0FBSyxNQUFNO2lDQUNIO2lCQUFQOztnQkFBTDtnQkFDQSxJQUFJLEtBQUs7b0JBQ1csTUFBTSxNQUFNLFNBQU87O29CQUF2QyxJQUFJLEtBQUs7Ozs7ZUFFakI7OztJQUVKLFVBQVcsTUFBSyxVQUFROzs7O1FBRXBCLGtCQUFjLE1BQU0sTUFBTTtZQUV2Qjs7d0JBQ2lCLElBQUksSUFBSSxJQUFJOzs7Z0JBQXhCO2dCQUNBLFNBQVMsS0FBQyxXQUFXLE9BQU87OztlQUVwQzs7O0lBRUosYUFBYyxRQUFPOzs7O3NCQUVMOzs7O1FBRVosY0FBYztRQUNkLFlBQVk7UUFDWixVQUFVO1FBRVYsS0FBSztRQUNMLEtBQUs7UUFDTDtlQUVNLEtBQUssSUFBSTs7WUFFWCxLQUFLLElBQUk7Z0JBRU4sT0FBTSxPQUFPOztnQkFDWixjQUFjO2dCQUNkLFVBQVU7Z0JBQ1Y7Z0JBQ0E7Z0JBQ0E7O3dCQUVELGFBQUEsR0FBSSxnQkFB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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/index/index_js.kode
