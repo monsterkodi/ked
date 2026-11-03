@@ -265,7 +265,11 @@ function mapscr extends mapview
                 rh = @state.lineHeight(y) * @pixelsPerRow
                 y1 = max 0 py
                 y2 = min @mapHeight (py+rh)
-                t.placeLineImage id @cells.x @cells.y y1 (y2-y1) if y2 > y1
+                if y2 > y1
+                    if @textLine(y)
+                        t.placeImageSlice id @cells.x @cells.y y1 (y1-py) (y2-y1) @mapWidth
+                    else
+                        t.placeLineImage id @cells.x @cells.y y1 (y2-y1)
                 py += rh
             
         if @topLine > 0 and @topLine <= @images.length

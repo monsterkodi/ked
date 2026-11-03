@@ -9,6 +9,8 @@ let post = kxk.post
 import prof from "../../util/prof.js"
 import syntax from "../../util/syntax.js"
 
+import glyphs from "../../util/img/glyphs.js"
+
 import color from "../../theme/color.js"
 import theme from "../../theme/theme.js"
 
@@ -26,7 +28,6 @@ mapview = (function ()
     
         this["draw"] = this["draw"].bind(this)
         this["drawImages"] = this["drawImages"].bind(this)
-        this["imageForLine"] = this["imageForLine"].bind(this)
         this["updateFromLine"] = this["updateFromLine"].bind(this)
         this["updateLine"] = this["updateLine"].bind(this)
         this["lineData"] = this["lineData"].bind(this)
@@ -53,6 +54,7 @@ mapview = (function ()
         this.csz = []
         this.pixelsPerRow = 4
         this.pixelsPerCol = 2
+        this.textScale = 2
     }
 
     mapview.prototype["reload"] = function ()
@@ -133,9 +135,9 @@ mapview = (function ()
 
     mapview.prototype["getColors"] = function ()
     {
-        var _86_26_
+        var _88_26_
 
-        return ((_86_26_=this.colors) != null ? _86_26_ : this.state.s.colors)
+        return ((_88_26_=this.colors) != null ? _88_26_ : this.state.s.colors)
     }
 
     mapview.prototype["setColors"] = function (colors)
@@ -161,7 +163,7 @@ mapview = (function ()
 
     mapview.prototype["createImages"] = function ()
     {
-        var bytes, data, id, line, lines, maxY, t, w, y
+        var data, h, id, line, lines, maxY, t, w, y
 
         t = this.cells.screen.t
         if (_k_.empty(t.cellsz))
@@ -171,22 +173,22 @@ mapview = (function ()
         this.csz = t.cellsz
         this.clearImages()
         w = this.cells.cols * this.csz[0]
-        bytes = w * 3
-        if (bytes <= 0)
+        if (w <= 0)
         {
             return
         }
         lines = this.getSegls()
-        data = Buffer.alloc(bytes)
         maxY = this.maxLinesToLoad()
         var list = _k_.list(lines)
         for (y = 0; y < list.length; y++)
         {
             line = list[y]
-            this.imageForLine(data,line,y)
+            h = this.imageHeight(y)
+            data = Buffer.alloc(w * h * 3)
+            this.imageForLine(data,line,y,h)
             id = this.imgId + y
             this.images.push(id)
-            t.sendImageData(data,id,w,1)
+            t.sendImageData(data,id,w,h)
             if (y > maxY)
             {
                 break
@@ -194,7 +196,7 @@ mapview = (function ()
         }
     }
 
-    mapview.prototype["lineData"] = function ()
+    mapview.prototype["lineData"] = function (y)
     {
         var bytes, csz, w
 
@@ -204,7 +206,7 @@ mapview = (function ()
             return
         }
         w = this.cells.cols * csz[0]
-        bytes = w * 3
+        bytes = w * this.imageHeight(y) * 3
         if (bytes <= 0)
         {
             return
@@ -217,6 +219,16 @@ mapview = (function ()
         return 1
     }
 
+    mapview.prototype["textLine"] = function (y)
+    {
+        return this.lineRows(y) >= this.textScale && glyphs.hasScale(this.lineRows(y))
+    }
+
+    mapview.prototype["imageHeight"] = function (y)
+    {
+        return (this.textLine(y) ? this.lineRows(y) * this.pixelsPerRow : 1)
+    }
+
     mapview.prototype["lineOffsetPixels"] = function (y)
     {
         return y * this.pixelsPerRow
@@ -224,9 +236,9 @@ mapview = (function ()
 
     mapview.prototype["updateLine"] = function (y, data)
     {
-        var csz, id, py, rh, t
+        var csz, h, id, py, rh, t, w
 
-        data = (data != null ? data : this.lineData())
+        data = (data != null ? data : this.lineData(y))
         if (_k_.empty(data))
         {
             return
@@ -238,28 +250,34 @@ mapview = (function ()
         }
         this.csz = csz
         id = this.imgId + y
-        this.imageForLine(data,this.getSegls()[y],y)
+        h = this.imageHeight(y)
+        this.imageForLine(data,this.getSegls()[y],y,h)
+        w = parseInt(data.length / (3 * h))
         t = this.cells.screen.t
         t.deleteImage(id)
-        t.sendImageData(data,id,data.length / 3,1)
+        t.sendImageData(data,id,w,h)
         py = this.lineOffsetPixels(y)
         rh = this.lineRows(y) * this.pixelsPerRow
         if (py >= 0 && py + rh <= this.cells.rows * csz[1])
         {
-            return t.placeLineImage(id,this.cells.x,this.cells.y + this.rowOffset,py,rh)
+            if (this.textLine(y))
+            {
+                return t.placeImageSlice(id,this.cells.x,this.cells.y + this.rowOffset,py,0,rh,w)
+            }
+            else
+            {
+                return t.placeLineImage(id,this.cells.x,this.cells.y + this.rowOffset,py,rh)
+            }
         }
     }
 
     mapview.prototype["updateFromLine"] = function (y)
     {
-        var data, li
+        var li
 
-        if (data = this.lineData())
+        for (var _a_ = li = y, _b_ = this.state.s.lines.length; (_a_ <= _b_ ? li < this.state.s.lines.length : li > this.state.s.lines.length); (_a_ <= _b_ ? ++li : --li))
         {
-            for (var _a_ = li = y, _b_ = this.state.s.lines.length; (_a_ <= _b_ ? li < this.state.s.lines.length : li > this.state.s.lines.length); (_a_ <= _b_ ? ++li : --li))
-            {
-                this.updateLine(li,data)
-            }
+            this.updateLine(li)
         }
         while (this.images.length > this.state.s.lines.length)
         {
@@ -267,29 +285,15 @@ mapview = (function ()
         }
     }
 
-    mapview.prototype["imageForLine"] = function (data, line, y, syntax)
+    mapview.prototype["imageForLine"] = function (data, line, y, h)
     {
-        var bg, bgSpans, ch, charPixels, classes, clss, colors, customColor, f, fgSpans, maxX, rgb, scale, stride, w, x, _219_57_, _220_57_
+        var a, base, bg, bgSpans, ch, classes, clss, colors, cov, customColor, f, fg, fgSpans, hgt, i, mask, masks, maxX, px, py, scale, stride, syntax, w, x, _218_57_, _219_57_
 
         scale = this.lineRows(y)
         stride = this.pixelsPerCol * scale
-        charPixels = (function (x, rgb)
-        {
-            var i, xr
-
-            for (var _a_ = xr = 0, _b_ = stride; (_a_ <= _b_ ? xr <= stride : xr >= stride); (_a_ <= _b_ ? ++xr : --xr))
-            {
-                i = (x * stride + xr) * 3
-                if (i + 2 < data.length)
-                {
-                    data[i + 0] = rgb[0]
-                    data[i + 1] = rgb[1]
-                    data[i + 2] = rgb[2]
-                }
-            }
-        }).bind(this)
-        w = data.length / 3
-        maxX = w / stride
+        hgt = (h != null ? h : this.imageHeight(y))
+        w = parseInt(data.length / (3 * hgt))
+        maxX = parseInt(w / stride)
         syntax = this.getSyntax()
         classes = syntax.getClasses(y)
         fgSpans = []
@@ -297,17 +301,17 @@ mapview = (function ()
         colors = this.getColors()
         if ((colors != null))
         {
-            fgSpans = colorspans.spansForLine((((_219_57_=colors.fg) != null ? _219_57_ : [])),y)
-            bgSpans = colorspans.spansForLine((((_220_57_=colors.bg) != null ? _220_57_ : [])),y)
+            fgSpans = colorspans.spansForLine((((_218_57_=colors.fg) != null ? _218_57_ : [])),y)
+            bgSpans = colorspans.spansForLine((((_219_57_=colors.bg) != null ? _219_57_ : [])),y)
         }
         customColor = function (spans, x, fallback)
         {
             var span
 
             var list = _k_.list(spans)
-            for (var _c_ = 0; _c_ < list.length; _c_++)
+            for (var _a_ = 0; _a_ < list.length; _a_++)
             {
-                span = list[_c_]
+                span = list[_a_]
                 if ((span[0] <= x && x < span[1]))
                 {
                     return color.values(span[2])
@@ -315,45 +319,89 @@ mapview = (function ()
             }
             return fallback
         }
-        for (var _d_ = x = 0, _e_ = line.length; (_d_ <= _e_ ? x < line.length : x > line.length); (_d_ <= _e_ ? ++x : --x))
+        base = this.color.bg
+        for (var _b_ = i = 0, _c_ = (w * hgt); (_b_ <= _c_ ? i < (w * hgt) : i > (w * hgt)); (_b_ <= _c_ ? ++i : --i))
         {
-            if (x > maxX)
-            {
-                break
-            }
+            data[i * 3 + 0] = base[0]
+            data[i * 3 + 1] = base[1]
+            data[i * 3 + 2] = base[2]
+        }
+        masks = (this.textLine(y) ? glyphs.forScale(scale) : null)
+        for (var _d_ = x = 0, _e_ = maxX; (_d_ <= _e_ ? x < maxX : x > maxX); (_d_ <= _e_ ? ++x : --x))
+        {
             ch = line[x]
-            if (!_k_.empty(ch) && ch !== ' ')
+            bg = customColor(bgSpans,x,base)
+            for (var _f_ = py = 0, _10_ = hgt; (_f_ <= _10_ ? py < hgt : py > hgt); (_f_ <= _10_ ? ++py : --py))
             {
-                f = 0.7
-                clss = classes[x]
-                clss = (clss != null ? clss : 'text')
-                if (_k_.in(ch,'0█'))
+                for (var _11_ = px = 0, _12_ = stride; (_11_ <= _12_ ? px < stride : px > stride); (_11_ <= _12_ ? ++px : --px))
                 {
-                    if (_k_.in('header',clss))
+                    i = ((py * w) + (x * stride + px)) * 3
+                    data[i + 0] = bg[0]
+                    data[i + 1] = bg[1]
+                    data[i + 2] = bg[2]
+                }
+            }
+            if (!!_k_.empty(ch) || ch === ' ')
+            {
+                continue
+            }
+            f = 0.7
+            clss = classes[x]
+            clss = (clss != null ? clss : 'text')
+            if (_k_.in(ch,'0█'))
+            {
+                if (_k_.in('header',clss))
+                {
+                    f = 2.0
+                }
+            }
+            fg = syntax.getColor(x,y,clss)
+            fg = fg.map(function (v)
+            {
+                return _k_.clamp(0,255,parseInt(f * v))
+            })
+            fg = customColor(fgSpans,x,fg)
+            mask = (masks != null ? masks[ch] : undefined)
+            if ((mask != null))
+            {
+                for (var _13_ = py = 0, _14_ = hgt; (_13_ <= _14_ ? py < hgt : py > hgt); (_13_ <= _14_ ? ++py : --py))
+                {
+                    for (var _15_ = px = 0, _16_ = stride; (_15_ <= _16_ ? px < stride : px > stride); (_15_ <= _16_ ? ++px : --px))
                     {
-                        f = 2.0
+                        cov = mask[py * stride + px]
+                        if (cov === 0)
+                        {
+                            continue
+                        }
+                        i = ((py * w) + (x * stride + px)) * 3
+                        if (cov === 255)
+                        {
+                            data[i + 0] = fg[0]
+                            data[i + 1] = fg[1]
+                            data[i + 2] = fg[2]
+                        }
+                        else
+                        {
+                            a = cov / 255
+                            data[i + 0] = parseInt(fg[0] * a + bg[0] * (1 - a))
+                            data[i + 1] = parseInt(fg[1] * a + bg[1] * (1 - a))
+                            data[i + 2] = parseInt(fg[2] * a + bg[2] * (1 - a))
+                        }
                     }
                 }
-                rgb = syntax.getColor(x,y,clss)
-                rgb = rgb.map(function (v)
-                {
-                    return _k_.clamp(0,255,parseInt(f * v))
-                })
-                rgb = customColor(fgSpans,x,rgb)
-                charPixels(x,rgb)
             }
             else
             {
-                bg = customColor(bgSpans,x,this.color.bg)
-                charPixels(x,bg)
-            }
-        }
-        if (line.length < maxX)
-        {
-            for (var _f_ = x = line.length, _10_ = maxX; (_f_ <= _10_ ? x < maxX : x > maxX); (_f_ <= _10_ ? ++x : --x))
-            {
-                bg = customColor(bgSpans,x,this.color.bg)
-                charPixels(x,bg)
+                for (var _17_ = py = 0, _18_ = hgt; (_17_ <= _18_ ? py < hgt : py > hgt); (_17_ <= _18_ ? ++py : --py))
+                {
+                    for (var _19_ = px = 0, _1a_ = stride; (_19_ <= _1a_ ? px < stride : px > stride); (_19_ <= _1a_ ? ++px : --px))
+                    {
+                        i = ((py * w) + (x * stride + px)) * 3
+                        data[i + 0] = fg[0]
+                        data[i + 1] = fg[1]
+                        data[i + 2] = fg[2]
+                    }
+                }
             }
         }
     }
@@ -391,5 +439,5 @@ mapview = (function ()
 
 export default mapview;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFwdmlldy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy9lZGl0b3IvbWFwdmlldy5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BWWEsVUFBQTtJQUFNO0lBQUs7O09BQ0wsV0FBUjtPQUFhLGFBQWI7O09BQ1EsWUFBVDtPQUFlLFlBQWY7O09BQ1ksaUJBQVA7O09BQ0ksV0FBWjs7O0FBRUUsV0FBVDs7d0JBQXlCO2FBRXJCLFNBQUcsUUFBUTs7UUFBRDs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Z0RBRUEsT0FBTyxLQUFDLE1BQU0sVUFBVTtRQUU5QixLQUFDLFNBQVMsS0FBSyxNQUFNLE9BQU87UUFFNUIsS0FBQyxRQUFTLEtBQUssS0FBSyxLQUFDLE1BQU0sUUFBUTtRQUFDO1FBQ3BDLEtBQUMsWUFBYTtRQUNkLEtBQUM7UUFDRCxLQUFDLE1BQU0sT0FBTztRQUNkLEtBQUMsU0FBYTtRQUVkLEtBQUM7UUFDRCxLQUFDLGVBQWU7UUFDaEIsS0FBQyxlQUFlOzs7dUJBUXBCOztRQUVJLEtBQUM7ZUFDRCxLQUFDOzs7dUJBRUw7Ozs7O3VCQUlBOztZQUVVLEtBQUM7Ozs7UUFFUCxLQUFDLE1BQU0sT0FBTyxFQUFFLGtCQUFrQixLQUFDLE9BQU8sR0FBRyxLQUFDOzs7O3VCQUlsRDs7OztzQkFFZ0IsS0FBQzs7OztZQUVWLFFBQVEsSUFBSSxTQUFROztZQUNuQixLQUFDLE1BQU0sT0FBTyxFQUFFLG9CQUFvQixLQUFDLE9BQU8sR0FBRyxLQUFDOzs7O2dDQUV0QyxLQUFDOzs7Z0JBQVA7Z0JBQ0EsS0FBQyxNQUFNLE9BQU8sRUFBRSxZQUFZOzs7ZUFFcEMsS0FBQzs7O3VCQUVMLHFCQUFRLEdBQUUsR0FBRSxHQUFFOzs7O1FBRVYsVUFBVSxNQUFLLEtBQUMsTUFBTSxLQUFLLE1BQUssS0FBQyxNQUFNLEtBQUssTUFBSyxLQUFDLE1BQU0sUUFBUSxNQUFLLEtBQUMsTUFBTTsyQ0FDdEUsRUFBRSxFQUFFLEVBQUU7WUFFTixLQUFDOzs7O1lBRUosS0FBQyxVQUFVOztnQkFDUyxLQUFDOztnQkFBcEIsS0FBQzs7bUJBQ00sS0FBQzttQkFDUixLQUFDOzs7O3VCQUVUOztlQUFjLEtBQUM7Ozt1QkFDZjs7ZUFBYyxLQUFDOzs7dUJBQ2Y7Ozs7eUJBQWMsS0FBQyw0QkFBUyxLQUFDLE1BQU0sRUFBRTs7O3VCQUVqQyx3QkFBVzs7UUFFUCxLQUFDLFNBQVM7ZUFDVixLQUFDLFNBQVM7Ozt1QkFFZCw2QkFBZ0IsS0FBSzs7UUFBRDs7UUFFaEIsS0FBQyxhQUFhO1FBQ2QsS0FBQyxPQUFPLE9BQU87UUFDZixLQUFDLE9BQU8sU0FBUyxLQUFDO2VBRWxCLEtBQUMsU0FBUzs7O3VCQVFkOztnQkFBb0IsS0FBQyxNQUFNLE9BQUssS0FBQyxhQUFhLEtBQUMsSUFBSSxLQUFLLEtBQUM7Ozt1QkFFekQ7Ozs7UUFFSSxJQUFJLEtBQUMsTUFBTSxPQUFPO3NCQUNOLEVBQUU7Ozs7UUFFZCxLQUFDLE1BQU0sRUFBRTtRQUVULEtBQUM7UUFJRCxJQUFJLEtBQUMsTUFBTSxPQUFPLEtBQUMsSUFBSTtRQUN2QixRQUFRLElBQUU7WUFFSixTQUFTOzs7O1FBRWYsUUFBUSxLQUFDO1FBRVQsT0FBUSxPQUFPLE1BQU07UUFFckIsT0FBUSxLQUFDOzRCQUVLO2FBQUw7O1lBQUw7WUFFQSxLQUFDLGFBQWEsS0FBSyxLQUFLO1lBQ3hCLEtBQUssS0FBQyxRQUFNO1lBQ1osS0FBQyxPQUFPLEtBQUs7WUFDYixFQUFFLGNBQWMsS0FBSyxHQUFHLEVBQUU7Z0JBQ2pCLElBQUk7O2dCQUFiOzs7Ozt1QkFVUjs7OztRQUVJLE1BQU0sS0FBQyxNQUFNLE9BQU8sRUFBRTtzQkFFVjs7OztRQUVaLElBQUksS0FBQyxNQUFNLE9BQU8sSUFBSTtRQUN0QixRQUFRLElBQUU7WUFFSixTQUFTOzs7O2VBRWYsT0FBTyxNQUFNOzs7dUJBRWpCLHVCQUFVOztlQUFLOzs7dUJBRWYsK0JBQWtCOztlQUFLLElBQUUsS0FBQzs7O3VCQUUxQix5QkFBWSxHQUFFOzs7O1FBRVYsUUFBQSxlQUFBLE9BQVEsS0FBQztzQkFDRzs7OztRQUVaLE1BQU0sS0FBQyxNQUFNLE9BQU8sRUFBRTtzQkFDVjs7OztRQUNaLEtBQUMsTUFBTTtRQUVQLEtBQUssS0FBQyxRQUFNO1FBQ1osS0FBQyxhQUFhLEtBQUssS0FBQyxXQUFXLEdBQUc7UUFDbEMsSUFBSSxLQUFDLE1BQU0sT0FBTztRQUNsQixFQUFFLFlBQVk7UUFDZCxFQUFFLGNBQWMsS0FBSyxHQUFHLEtBQUssU0FBTyxFQUFFO1FBRXRDLEtBQUssS0FBQyxpQkFBaUI7UUFDdkIsS0FBSyxLQUFDLFNBQVMsS0FBSyxLQUFDO1lBRWxCLE1BQU0sS0FBTSxLQUFHLE1BQU0sS0FBQyxNQUFNLE9BQUssSUFBSTs7bUJBQ3BDLEVBQUUsZUFBZSxHQUFHLEtBQUMsTUFBTSxFQUFFLEtBQUMsTUFBTSxJQUFFLEtBQUMsVUFBVSxHQUFHOzs7O3VCQUU1RCw2QkFBZ0I7Ozs7WUFFVCxPQUFPLEtBQUM7OzJCQUVILEtBQU0sU0FBSSxLQUFDLE1BQU0sRUFBRSxNQUFNLDJCQUFmLEtBQUMsTUFBTSxFQUFFLE1BQU0sY0FBZixLQUFDLE1BQU0sRUFBRSxNQUFNOztnQkFDekIsS0FBQyxXQUFXLEdBQUc7OztlQUVqQixLQUFDLE9BQU8sU0FBUyxLQUFDLE1BQU0sRUFBRSxNQUFNOztZQUNsQyxLQUFDLE1BQU0sT0FBTyxFQUFFLFlBQVksS0FBQyxPQUFPOzs7O3VCQUU1QywyQkFBYyxNQUFLLE1BQUssR0FBRTs7OztRQUV0QixRQUFTLEtBQUMsU0FBUztRQUNuQixTQUFTLEtBQUMsZUFBZTtRQUV6Qix3QkFBYSxHQUFFOzs7OzJCQUVQLEtBQU0sU0FBRyw0QkFBQSxlQUFBOztnQkFDVCxLQUFLLElBQUUsU0FBTyxNQUFJO29CQUNmLElBQUUsSUFBSSxLQUFLOztvQkFDVixLQUFLLElBQUUsS0FBSyxJQUFJO29CQUNoQixLQUFLLElBQUUsS0FBSyxJQUFJO29CQUNoQixLQUFLLElBQUUsS0FBSyxJQUFJOzs7O1FBRTVCLElBQVMsS0FBSyxTQUFTO1FBQ3ZCLE9BQVMsSUFBRTtRQUNYLFNBQVMsS0FBQztRQUNWLFVBQVUsT0FBTyxXQUFXO1FBRTVCO1FBQ0E7UUFDQSxTQUFVLEtBQUM7YUFFUjs7WUFDQyxVQUFVLFdBQVcseUJBQWMsT0FBTyw4QkFBUztZQUNuRCxVQUFVLFdBQVcseUJBQWMsT0FBTyw4QkFBUzs7UUFFdkQsd0JBQWUsT0FBTSxHQUFFOzs7O2dDQUNQOzs7Z0JBQVI7cUJBQ0csS0FBSyxNQUFNLEtBQUEsSUFBSSxLQUFLOzsyQkFDaEIsTUFBTSxPQUFPLEtBQUs7OzttQkFDN0I7O3VCQUVBLElBQUssU0FBSSxLQUFLLDBCQUFMLEtBQUssYUFBTCxLQUFLOztnQkFFTCxJQUFJOztnQkFBYjs7WUFFQSxLQUFLLEtBQUs7MkJBRUQsT0FBTyxPQUFNOztnQkFFbEIsSUFBSTtnQkFDSixPQUFPLFFBQVE7Z0JBQ2YsUUFBQSxlQUFBLE9BQVE7MkJBQ0wsR0FBTTs7K0JBQ0YsU0FBWTs7d0JBQ1gsSUFBSTs7O2dCQUNaLE1BQU0sT0FBTyxTQUFTLEVBQUUsRUFBRTtnQkFDMUIsTUFBTSxJQUFJLGNBQUs7O3FDQUFZLEVBQUUsYUFBUSxJQUFFOztnQkFDdkMsTUFBTSxZQUFZLFFBQVEsRUFBRTtnQkFFNUIsV0FBVyxFQUFFOzs7O2dCQUViLEtBQUssWUFBWSxRQUFRLEVBQUUsS0FBQyxNQUFNO2dCQUNsQyxXQUFXLEVBQUU7OztZQUVsQixLQUFLLFNBQVM7OzJCQUNULElBQUssS0FBSyxlQUFTLHlCQUFBLFdBQUE7O2dCQUNuQixLQUFLLFlBQVksUUFBUSxFQUFFLEtBQUMsTUFBTTtnQkFDbEMsV0FBVyxFQUFFOzs7Ozt1QkFRekI7Ozs7UUFFSSxJQUFJLEtBQUMsTUFBTSxPQUFPO3NCQUVOLEVBQUUsV0FBVSxLQUFDLFlBQVksS0FBQzs7Ozs0QkFJMUIsS0FBQzthQUFOOztZQUFIO1lBQ0EsRUFBRSxlQUFlLEdBQUcsS0FBQyxNQUFNLEVBQUUsS0FBQyxNQUFNLElBQUUsS0FBQyxXQUFXLEtBQUMsaUJBQWlCLEtBQUssS0FBQyxTQUFTLEtBQUcsS0FBQzs7ZUFDM0Y7Ozt1QkFFSjs7WUFFVSxLQUFDLFlBQVksS0FBQzs7OztRQUlwQixLQUFDLE1BQU0sVUFBVSxFQUFFLEVBQUUsS0FBQyxNQUFNLE9BQUssRUFBRSxLQUFDLE1BQU0sT0FBSyxFQUFFLElBQUksS0FBSyxLQUFDLE1BQU07ZUFFakUsS0FBQzs7O1dBdlFBOzs7ZUF5UUYifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFwdmlldy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy9lZGl0b3IvbWFwdmlldy5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BWWEsVUFBQTtJQUFNO0lBQUs7O09BQ0wsV0FBUjtPQUFhLGFBQWI7O09BQ1UsYUFBQTs7T0FDRixZQUFUO09BQWUsWUFBZjs7T0FDWSxpQkFBUDs7T0FDSSxXQUFaOzs7QUFFRSxXQUFUOzt3QkFBeUI7YUFFckIsU0FBRyxRQUFROztRQUFEOzs7Ozs7Ozs7Ozs7Ozs7Ozs7O2dEQUVBLE9BQU8sS0FBQyxNQUFNLFVBQVU7UUFFOUIsS0FBQyxTQUFTLEtBQUssTUFBTSxPQUFPO1FBRTVCLEtBQUMsUUFBUyxLQUFLLEtBQUssS0FBQyxNQUFNLFFBQVE7UUFBQztRQUNwQyxLQUFDLFlBQWE7UUFDZCxLQUFDO1FBQ0QsS0FBQyxNQUFNLE9BQU87UUFDZCxLQUFDLFNBQWE7UUFFZCxLQUFDO1FBQ0QsS0FBQyxlQUFlO1FBQ2hCLEtBQUMsZUFBZTtRQUNoQixLQUFDLFlBQWU7Ozt1QkFRcEI7O1FBRUksS0FBQztlQUNELEtBQUM7Ozt1QkFFTDs7Ozs7dUJBSUE7O1lBRVUsS0FBQzs7OztRQUVQLEtBQUMsTUFBTSxPQUFPLEVBQUUsa0JBQWtCLEtBQUMsT0FBTyxHQUFHLEtBQUM7Ozs7dUJBSWxEOzs7O3NCQUVnQixLQUFDOzs7O1lBRVYsUUFBUSxJQUFJLFNBQVE7O1lBQ25CLEtBQUMsTUFBTSxPQUFPLEVBQUUsb0JBQW9CLEtBQUMsT0FBTyxHQUFHLEtBQUM7Ozs7Z0NBRXRDLEtBQUM7OztnQkFBUDtnQkFDQSxLQUFDLE1BQU0sT0FBTyxFQUFFLFlBQVk7OztlQUVwQyxLQUFDOzs7dUJBRUwscUJBQVEsR0FBRSxHQUFFLEdBQUU7Ozs7UUFFVixVQUFVLE1BQUssS0FBQyxNQUFNLEtBQUssTUFBSyxLQUFDLE1BQU0sS0FBSyxNQUFLLEtBQUMsTUFBTSxRQUFRLE1BQUssS0FBQyxNQUFNOzJDQUN0RSxFQUFFLEVBQUUsRUFBRTtZQUVOLEtBQUM7Ozs7WUFFSixLQUFDLFVBQVU7O2dCQUNTLEtBQUM7O2dCQUFwQixLQUFDOzttQkFDTSxLQUFDO21CQUNSLEtBQUM7Ozs7dUJBRVQ7O2VBQWMsS0FBQzs7O3VCQUNmOztlQUFjLEtBQUM7Ozt1QkFDZjs7Ozt5QkFBYyxLQUFDLDRCQUFTLEtBQUMsTUFBTSxFQUFFOzs7dUJBRWpDLHdCQUFXOztRQUVQLEtBQUMsU0FBUztlQUNWLEtBQUMsU0FBUzs7O3VCQUVkLDZCQUFnQixLQUFLOztRQUFEOztRQUVoQixLQUFDLGFBQWE7UUFDZCxLQUFDLE9BQU8sT0FBTztRQUNmLEtBQUMsT0FBTyxTQUFTLEtBQUM7ZUFFbEIsS0FBQyxTQUFTOzs7dUJBUWQ7O2dCQUFvQixLQUFDLE1BQU0sT0FBSyxLQUFDLGFBQWEsS0FBQyxJQUFJLEtBQUssS0FBQzs7O3VCQUV6RDs7OztRQUVJLElBQUksS0FBQyxNQUFNLE9BQU87c0JBQ04sRUFBRTs7OztRQUVkLEtBQUMsTUFBTSxFQUFFO1FBRVQsS0FBQztRQUlELElBQUksS0FBQyxNQUFNLE9BQU8sS0FBQyxJQUFJO1lBRWpCLEtBQUs7Ozs7UUFFWCxRQUFRLEtBQUM7UUFDVCxPQUFRLEtBQUM7NEJBRUs7YUFBTDs7WUFBTDtZQUVBLElBQU8sS0FBQyxZQUFZO1lBQ3BCLE9BQU8sT0FBTyxNQUFNLElBQUUsSUFBRTtZQUV4QixLQUFDLGFBQWEsS0FBSyxLQUFLLEVBQUU7WUFDMUIsS0FBSyxLQUFDLFFBQU07WUFDWixLQUFDLE9BQU8sS0FBSztZQUNiLEVBQUUsY0FBYyxLQUFLLEdBQUcsRUFBRTtnQkFDakIsSUFBSTs7Z0JBQWI7Ozs7O3VCQVVSLHVCQUFVOzs7O1FBRU4sTUFBTSxLQUFDLE1BQU0sT0FBTyxFQUFFO3NCQUVWOzs7O1FBRVosSUFBSSxLQUFDLE1BQU0sT0FBTyxJQUFJO1FBQ3RCLFFBQVEsSUFBRSxLQUFDLFlBQVksS0FBRztZQUVwQixTQUFTOzs7O2VBRWYsT0FBTyxNQUFNOzs7dUJBRWpCLHVCQUFVOztlQUFLOzs7dUJBRWYsdUJBQVU7O2VBQUssS0FBQyxTQUFTLE1BQU0sS0FBQyxhQUFjLE9BQU8sU0FBUyxLQUFDLFNBQVM7Ozt1QkFFeEUsMEJBQWE7O2dCQUFLLEtBQUMsU0FBUyxLQUFLLEtBQUMsU0FBUyxLQUFHLEtBQUMsZUFBZTs7O3VCQUU5RCwrQkFBa0I7O2VBQUssSUFBRSxLQUFDOzs7dUJBRTFCLHlCQUFZLEdBQUU7Ozs7UUFFVixRQUFBLGVBQUEsT0FBUSxLQUFDLFNBQVM7c0JBQ047Ozs7UUFFWixNQUFNLEtBQUMsTUFBTSxPQUFPLEVBQUU7c0JBQ1Y7Ozs7UUFDWixLQUFDLE1BQU07UUFFUCxLQUFLLEtBQUMsUUFBTTtRQUNaLElBQUssS0FBQyxZQUFZO1FBQ2xCLEtBQUMsYUFBYSxLQUFLLEtBQUMsV0FBVyxHQUFHLEVBQUU7UUFDcEMsYUFBUyxLQUFLLFVBQVEsSUFBRTtRQUN4QixJQUFLLEtBQUMsTUFBTSxPQUFPO1FBQ25CLEVBQUUsWUFBWTtRQUNkLEVBQUUsY0FBYyxLQUFLLEdBQUcsRUFBRTtRQUUxQixLQUFLLEtBQUMsaUJBQWlCO1FBQ3ZCLEtBQUssS0FBQyxTQUFTLEtBQUssS0FBQztZQUVsQixNQUFNLEtBQU0sS0FBRyxNQUFNLEtBQUMsTUFBTSxPQUFLLElBQUk7O2dCQUNqQyxLQUFDLFNBQVM7O3VCQUNULEVBQUUsZ0JBQWdCLEdBQUcsS0FBQyxNQUFNLEVBQUUsS0FBQyxNQUFNLElBQUUsS0FBQyxVQUFVLEdBQUcsRUFBRSxHQUFHOzs7O3VCQUUxRCxFQUFFLGVBQWUsR0FBRyxLQUFDLE1BQU0sRUFBRSxLQUFDLE1BQU0sSUFBRSxLQUFDLFVBQVUsR0FBRzs7Ozs7dUJBRWhFLDZCQUFnQjs7Ozt1QkFFUixLQUFNLFNBQUksS0FBQyxNQUFNLEVBQUUsTUFBTSwyQkFBZixLQUFDLE1BQU0sRUFBRSxNQUFNLGNBQWYsS0FBQyxNQUFNLEVBQUUsTUFBTTs7WUFDekIsS0FBQyxXQUFXOztlQUVWLEtBQUMsT0FBTyxTQUFTLEtBQUMsTUFBTSxFQUFFLE1BQU07O1lBQ2xDLEtBQUMsTUFBTSxPQUFPLEVBQUUsWUFBWSxLQUFDLE9BQU87Ozs7dUJBRTVDLDJCQUFjLE1BQUssTUFBSyxHQUFFOzs7O1FBRXRCLFFBQVMsS0FBQyxTQUFTO1FBQ25CLFNBQVMsS0FBQyxlQUFlO1FBQ3pCLE9BQVMsWUFBQSxJQUFJLEtBQUMsWUFBWTtRQUMxQixhQUFhLEtBQUssVUFBUSxJQUFFO1FBQzVCLGdCQUFhLElBQUU7UUFDZixTQUFTLEtBQUM7UUFDVixVQUFVLE9BQU8sV0FBVztRQUU1QjtRQUNBO1FBQ0EsU0FBVSxLQUFDO2FBRVI7O1lBQ0MsVUFBVSxXQUFXLHlCQUFjLE9BQU8sOEJBQVM7WUFDbkQsVUFBVSxXQUFXLHlCQUFjLE9BQU8sOEJBQVM7O1FBRXZELHdCQUFlLE9BQU0sR0FBRTs7OztnQ0FDUDs7O2dCQUFSO3FCQUNHLEtBQUssTUFBTSxLQUFBLElBQUksS0FBSzs7MkJBQ2hCLE1BQU0sT0FBTyxLQUFLOzs7bUJBQzdCOztRQUVKLE9BQU8sS0FBQyxNQUFNO3VCQUVWLElBQUssVUFBSyxJQUFFLHlCQUFGLElBQUUsWUFBRixJQUFFOztZQUNaLEtBQUssSUFBRSxJQUFFLEtBQUssS0FBSztZQUNuQixLQUFLLElBQUUsSUFBRSxLQUFLLEtBQUs7WUFDbkIsS0FBSyxJQUFFLElBQUUsS0FBSyxLQUFLOztRQUV2QixTQUFRLEtBQUMsU0FBUyxLQUFLLE9BQU8sU0FBUyxTQUFTO3VCQUU1QyxJQUFLLFNBQUksd0JBQUEsV0FBQTs7WUFFVCxLQUFLLEtBQUs7WUFDVixLQUFLLFlBQVksUUFBUSxFQUFFOzJCQUV2QixLQUFNLFVBQUkseUJBQUEsV0FBQTs7Z0NBQ04sS0FBTSxVQUFJLDZCQUFBLGNBQUE7O29CQUNWLE1BQU0sS0FBRyxNQUFJLElBQUUsU0FBTyxPQUFLO29CQUMzQixLQUFLLElBQUUsS0FBSyxHQUFHO29CQUNmLEtBQUssSUFBRSxLQUFLLEdBQUc7b0JBQ2YsS0FBSyxJQUFFLEtBQUssR0FBRzs7OzRCQUVELE9BQU0sT0FBTTs7Z0JBQWxDOztZQUVBLElBQUk7WUFDSixPQUFPLFFBQVE7WUFDZixRQUFBLGVBQUEsT0FBUTt1QkFDTCxHQUFNOzsyQkFDRixTQUFZOztvQkFDWCxJQUFJOzs7WUFDWixLQUFLLE9BQU8sU0FBUyxFQUFFLEVBQUU7WUFDekIsS0FBSyxHQUFHLGNBQUs7O2lDQUFZLEVBQUUsYUFBUSxJQUFFOztZQUNyQyxLQUFLLFlBQVksUUFBUSxFQUFFO1lBRTNCLFFBQU8sZ0JBQUEsTUFBTztpQkFFWDs7Z0NBQ0ssS0FBTSxVQUFJLDBCQUFBLFdBQUE7O29DQUNOLEtBQU0sVUFBSSw2QkFBQSxjQUFBOzt3QkFDVixNQUFNLEtBQUssS0FBRyxTQUFPOzRCQUNULFFBQU87OzRCQUFuQjs7d0JBQ0EsTUFBTSxLQUFHLE1BQUksSUFBRSxTQUFPLE9BQUs7NEJBQ3hCLFFBQU87OzRCQUNOLEtBQUssSUFBRSxLQUFLLEdBQUc7NEJBQ2YsS0FBSyxJQUFFLEtBQUssR0FBRzs0QkFDZixLQUFLLElBQUUsS0FBSyxHQUFHOzs7OzRCQUVmLElBQUksTUFBSTs0QkFDUixLQUFLLElBQUUsY0FBUyxHQUFHLEtBQUcsSUFBSSxHQUFHLE1BQUksSUFBRTs0QkFDbkMsS0FBSyxJQUFFLGNBQVMsR0FBRyxLQUFHLElBQUksR0FBRyxNQUFJLElBQUU7NEJBQ25DLEtBQUssSUFBRSxjQUFTLEdBQUcsS0FBRyxJQUFJLEdBQUcsTUFBSSxJQUFFOzs7Ozs7O2dDQUUzQyxLQUFNLFVBQUksMEJBQUEsV0FBQTs7b0NBQ04sS0FBTSxVQUFJLDZCQUFBLGNBQUE7O3dCQUNWLE1BQU0sS0FBRyxNQUFJLElBQUUsU0FBTyxPQUFLO3dCQUMzQixLQUFLLElBQUUsS0FBSyxHQUFHO3dCQUNmLEtBQUssSUFBRSxLQUFLLEdBQUc7d0JBQ2YsS0FBSyxJQUFFLEtBQUssR0FBRzs7Ozs7Ozt1QkFRbkM7Ozs7UUFFSSxJQUFJLEtBQUMsTUFBTSxPQUFPO3NCQUVOLEVBQUUsV0FBVSxLQUFDLFlBQVksS0FBQzs7Ozs0QkFJMUIsS0FBQzthQUFOOztZQUFIO1lBQ0EsRUFBRSxlQUFlLEdBQUcsS0FBQyxNQUFNLEVBQUUsS0FBQyxNQUFNLElBQUUsS0FBQyxXQUFXLEtBQUMsaUJBQWlCLEtBQUssS0FBQyxTQUFTLEtBQUcsS0FBQzs7ZUFDM0Y7Ozt1QkFFSjs7WUFFVSxLQUFDLFlBQVksS0FBQzs7OztRQUlwQixLQUFDLE1BQU0sVUFBVSxFQUFFLEVBQUUsS0FBQyxNQUFNLE9BQUssRUFBRSxLQUFDLE1BQU0sT0FBSyxFQUFFLElBQUksS0FBSyxLQUFDLE1BQU07ZUFFakUsS0FBQzs7O1dBblNBOzs7ZUFxU0YifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/editor/mapview.kode

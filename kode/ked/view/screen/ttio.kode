@@ -183,6 +183,15 @@ function TTIO extends events
             
             @write "\x1b_Gq=1,a=p,i=#{id},p=#{placement+1},X=0,Y=#{oy},C=1\x1b\\"
 
+    placeImageSlice: id cx y py srcY srcH iw ->
+
+        cy = y + int(py / @cellsz[1])
+        oy = py % @cellsz[1]
+
+        @setCursor cx cy
+
+        @write "\x1b_Gq=1,a=p,i=#{id},p=1,X=0,Y=#{oy},x=0,y=#{srcY},w=#{iw},h=#{srcH},C=1\x1b\\"
+
     #  ███████   ███   ███  ████████  ████████   ███       ███████   ███   ███  
     # ███   ███  ███   ███  ███       ███   ███  ███      ███   ███   ███ ███   
     # ███   ███   ███ ███   ███████   ███████    ███      █████████    █████    

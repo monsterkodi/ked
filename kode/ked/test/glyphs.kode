@@ -1,0 +1,44 @@
+###
+    glyph tests
+
+    the runtime glyph maps that fontmap.kode generates
+###
+
+use ../util/img ◆ glyphs
+
+▸ glyphs
+
+    ▸ every map scale decodes
+
+        for scale in 2..7
+
+            map = glyphs.forScale scale
+
+            valid map ▸ true
+            map['a'].length ▸ 8*scale*scale
+
+            top = 0
+            for i in 0...map['a'].length
+                top = max top map['a'][i]
+            (top > 0) ▸ true
+
+            top = 0
+            for i in 0...map[' '].length
+                top = max top map[' '][i]
+            top ▸ 0
+
+    ▸ uppercase is included
+
+        map = glyphs.forScale 4
+
+        map['A'].length ▸ 8*4*4
+        map['Z'].length ▸ 8*4*4
+
+    ▸ forScale and forSize share their decoded map
+
+        (glyphs.forScale(5) == glyphs.forSize(10, 20)) ▸ true
+
+    ▸ unknown scales have no map
+
+        glyphs.forScale 1 ▸ null
+        glyphs.forScale 8 ▸ null

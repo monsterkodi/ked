@@ -12,6 +12,7 @@
 
 use ../../../kxk ▪ kstr post
 use ../../util   ◆ prof syntax 
+use ../../util/img ◆ glyphs
 use ../../theme  ◆ color theme
 use ../../edit/tool ◆ colorspans
 use ../base      ◆ view
@@ -33,6 +34,7 @@ function mapview extends view
         @csz          = []
         @pixelsPerRow = 4
         @pixelsPerCol = 2
+        @textScale    = 2 # 4x8 is mushy, but still rendered for now
             
     #  ███████  ███   ███   ███████   ███   ███  
     # ███       ███   ███  ███   ███  ███ █ ███  
@@ -118,22 +120,21 @@ function mapview extends view
         # prof.start @state.name+'.map'
         
         w = @cells.cols * @csz[0]
-        bytes = w*3
         
-        ⮐  if bytes <= 0
+        ⮐  if w <= 0
         
         lines = @getSegls()
-        
-        data  = Buffer.alloc bytes
-                
         maxY  = @maxLinesToLoad()
         
         for line,y in lines
             
-            @imageForLine data line y
+            h    = @imageHeight y
+            data = Buffer.alloc w*h*3
+            
+            @imageForLine data line y h
             id = @imgId+y
             @images.push id
-            t.sendImageData data id w 1
+            t.sendImageData data id w h
             break if y > maxY
                 
         # prof.end @state.name+'.map'
@@ -144,14 +145,14 @@ function mapview extends view
     # ███   ███  ███        ███   ███  ███   ███     ███     ███     
     #  ███████   ███        ███████    ███   ███     ███     ████████
 
-    lineData: =>
+    lineData: y =>
         
         csz = @cells.screen.t.cellsz
         
         ⮐  if empty csz
         
         w = @cells.cols * csz[0]
-        bytes = w*3
+        bytes = w*@imageHeight(y)*3
         
         ⮐  if bytes <= 0
         
@@ -159,11 +160,15 @@ function mapview extends view
     
     lineRows: y -> 1
 
+    textLine: y -> @lineRows(y) >= @textScale and glyphs.hasScale(@lineRows(y))
+
+    imageHeight: y -> @textLine(y) ? @lineRows(y)*@pixelsPerRow : 1
+
     lineOffsetPixels: y -> y*@pixelsPerRow
 
     updateLine: y data => 
     
-        data ?= @lineData()        
+        data ?= @lineData(y)        
         ⮐  if empty data
 
         csz = @cells.screen.t.cellsz
@@ -171,43 +176,37 @@ function mapview extends view
         @csz = csz
 
         id = @imgId+y
-        @imageForLine data @getSegls()[y] y
-        t = @cells.screen.t
+        h  = @imageHeight y
+        @imageForLine data @getSegls()[y] y h
+        w  = int(data.length/(3*h))
+        t  = @cells.screen.t
         t.deleteImage id
-        t.sendImageData data id data.length/3 1
+        t.sendImageData data id w h
 
         py = @lineOffsetPixels y
         rh = @lineRows(y) * @pixelsPerRow
 
         if py >= 0 and py+rh <= @cells.rows*csz[1]
-            t.placeLineImage id @cells.x @cells.y+@rowOffset py rh
+            if @textLine(y)
+                t.placeImageSlice id @cells.x @cells.y+@rowOffset py 0 rh w
+            else
+                t.placeLineImage id @cells.x @cells.y+@rowOffset py rh
         
     updateFromLine: y =>
         
-        if data = @lineData()
-            
-            for li in y...@state.s.lines.length
-                @updateLine li data
+        for li in y...@state.s.lines.length
+            @updateLine li
                 
         while @images.length > @state.s.lines.length
             @cells.screen.t.deleteImage @images.pop()
             
-    imageForLine: data line y syntax =>
+    imageForLine: data line y h ->
     
         scale  = @lineRows y
         stride = @pixelsPerCol * scale
-
-        charPixels = x rgb =>
-        
-            for xr in 0..stride
-                i = (x*stride+xr)*3
-                if i+2 < data.length
-                    data[i+0] = rgb[0]
-                    data[i+1] = rgb[1]
-                    data[i+2] = rgb[2]
-                
-        w      = data.length / 3
-        maxX   = w/stride
+        hgt    = h ? @imageHeight(y)
+        w      = int(data.length/(3*hgt))
+        maxX   = int(w/stride)
         syntax = @getSyntax()
         classes = syntax.getClasses y
 
@@ -225,33 +224,63 @@ function mapview extends view
                     ⮐  color.values span[2]
             fallback
 
-        for x in 0...line.length
-            
-            break if x > maxX
-                                
+        base = @color.bg
+
+        for i in 0...(w*hgt)
+            data[i*3+0] = base[0]
+            data[i*3+1] = base[1]
+            data[i*3+2] = base[2]
+
+        masks = @textLine(y) ? glyphs.forScale(scale) : null
+
+        for x in 0...maxX
+
             ch = line[x]
-            
-            if valid ch and ch != ' '
-             
-                f = 0.7
-                clss = classes[x]
-                clss ?= 'text'
-                if ch in '0█'
-                    if 'header' in clss
-                        f = 2.0
-                rgb = syntax.getColor x y clss
-                rgb = rgb.map (v) -> clamp(0 255 int(f*v))
-                rgb = customColor fgSpans x rgb
-                 
-                charPixels x rgb
+            bg = customColor bgSpans x base
+
+            for py in 0...hgt
+                for px in 0...stride
+                    i = ((py*w)+(x*stride+px))*3
+                    data[i+0] = bg[0]
+                    data[i+1] = bg[1]
+                    data[i+2] = bg[2]
+
+            continue if not valid ch or ch == ' '
+
+            f = 0.7
+            clss = classes[x]
+            clss ?= 'text'
+            if ch in '0█'
+                if 'header' in clss
+                    f = 2.0
+            fg = syntax.getColor x y clss
+            fg = fg.map (v) -> clamp(0 255 int(f*v))
+            fg = customColor fgSpans x fg
+
+            mask = masks?[ch]
+
+            if mask?
+                for py in 0...hgt
+                    for px in 0...stride
+                        cov = mask[py*stride+px]
+                        continue if cov == 0
+                        i = ((py*w)+(x*stride+px))*3
+                        if cov == 255
+                            data[i+0] = fg[0]
+                            data[i+1] = fg[1]
+                            data[i+2] = fg[2]
+                        else
+                            a = cov/255
+                            data[i+0] = int(fg[0]*a + bg[0]*(1-a))
+                            data[i+1] = int(fg[1]*a + bg[1]*(1-a))
+                            data[i+2] = int(fg[2]*a + bg[2]*(1-a))
             else
-                bg = customColor bgSpans x @color.bg
-                charPixels x bg
-                    
-        if line.length < maxX
-            for x in line.length...maxX
-                bg = customColor bgSpans x @color.bg
-                charPixels x bg
+                for py in 0...hgt
+                    for px in 0...stride
+                        i = ((py*w)+(x*stride+px))*3
+                        data[i+0] = fg[0]
+                        data[i+1] = fg[1]
+                        data[i+2] = fg[2]
             
     # ███████    ████████    ███████   ███   ███  
     # ███   ███  ███   ███  ███   ███  ███ █ ███  

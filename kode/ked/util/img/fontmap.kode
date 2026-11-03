@@ -100,10 +100,11 @@ function fontmap
 
     @buildMap: w h px ->
         
-        result = @render(@chars.join(''), px, @tmp('glyphs'))
+        sequence = @chars.join(' ')
+        result = @render(sequence, px, @tmp('glyphs'))
         ⮐  null if not result
         
-        total = w * @chars.length
+        total = w * (@chars.length*2 - 1)
         data  = @grayscale(@tmp('glyphs'), total, h)
         ⮐  null if not data
         
@@ -113,7 +114,7 @@ function fontmap
             cov = new Uint8Array new ArrayBuffer(w*h)
             for y in 0...h
                 for x in 0...w
-                    cov[y*w+x] = data[y*total+i*w+x]
+                    cov[y*w+x] = data[y*total+(i*2)*w+x]
             glyphs[ch] = cov
             
         glyphs
