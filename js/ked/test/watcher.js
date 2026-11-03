@@ -11,7 +11,7 @@ import watcher from "../util/watcher.js"
 
 toExport["watcher"] = async function ()
 {
-    await section("watching a directory it cannot read logs nothing", async function ()
+    await section("no read error logs", async function ()
     {
         root = '/tmp/opencode/ked-watcher-eacces'
         secret = slash.path(root,'secret')

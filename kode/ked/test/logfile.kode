@@ -3,7 +3,7 @@ use ../util ◆ logfile
 
 ▸ logfile
 
-    ▸ a headless logfile leaves the console alone
+  ▸ a headless logfile leaves the console alone
 
         before = [console.log console.warn console.error]
         log = new logfile 'test' true
@@ -13,13 +13,13 @@ use ../util ◆ logfile
         (console.warn == before[1]) ▸ true
         (console.error == before[2]) ▸ true
 
-    ▸ a headless logfile writes nowhere
+  ▸ a headless logfile writes nowhere
 
         log = new logfile 'test' true
 
         log.write 'nothing happens'
 
-    ▸ a headless logfile still closes
+  ▸ a headless logfile still closes
 
         log = new logfile 'test' true
         closed = false

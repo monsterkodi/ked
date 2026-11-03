@@ -13,7 +13,7 @@ use           ◆ watcher
         @loaded = new Promise (resolve) => @resolveLoaded = resolve
         @file ?= slash.path ◆dir '../../../config'
         
-        log 'load config file' @file
+        # log 'load config file' @file
         
         #  watch the file, not every file in the project
         ○ watcher.watch @file recursive:false
@@ -42,7 +42,7 @@ use           ◆ watcher
 
     @reload: ○->
 
-        log 'reload config file' @file
+        # log 'reload config file' @file
 
         @loaded = new Promise (resolve) => @resolveLoaded = resolve
 

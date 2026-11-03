@@ -32,7 +32,7 @@ sel = r... -> s.allSelections() ▸ r
     # ███       ███   ███  ███     ███     ███  ███  ████  ███   ███  
     # ████████  ███████    ███     ███     ███  ███   ███   ███████   
     
-    ▸ editing
+  ▸ editing
     
         s.setMainCursor 1 1
         
@@ -58,7 +58,7 @@ sel = r... -> s.allSelections() ▸ r
     # ███ █ ███  ███   ███     ███     ███             ███      ███  ███  ████  ███            ███  
     # ███   ███   ███████       █      ████████        ███████  ███  ███   ███  ████████  ███████   
     
-    ▸ move lines
+  ▸ move lines
     
         s.moveSelectionOrCursorLines 'up'
         cur 1 0
@@ -78,7 +78,7 @@ sel = r... -> s.allSelections() ▸ r
     # ███ █ ███  ███   ███  ███         ███     ███  ███        ███      ███       
     # ███   ███   ███████   ███████     ███     ███  ███        ███████  ████████  
     
-    ▸ multiple
+  ▸ multiple
     
         s.expandCursors   'up'
         
@@ -132,7 +132,7 @@ sel = r... -> s.allSelections() ▸ r
             3
             """    
             
-    ▸ backtrack selection
+  ▸ backtrack selection
     
         s.loadLines belt.linesForText('abcdef')
         s.setMainCursor 2 0
@@ -157,7 +157,7 @@ sel = r... -> s.allSelections() ▸ r
         cur 1 0
         sel [1 0 2 0]
         
-    ▸ backtrack selection stays sticky after moving
+  ▸ backtrack selection stays sticky after moving
     
         s.loadLines belt.linesForText('abcdef')
         s.setMainCursor 2 0
@@ -173,7 +173,7 @@ sel = r... -> s.allSelections() ▸ r
         cur 6 0
         sel [2 0 4 0] [5 0 6 0]
         
-    ▸ backtrack selection with multiple cursors
+  ▸ backtrack selection with multiple cursors
     
         s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
         s.setCursors [[0 0] [0 1]]
@@ -194,7 +194,7 @@ sel = r... -> s.allSelections() ▸ r
         mul [0 0] [0 1]
         sel()
         
-    ▸ backtrack selection past end of line
+  ▸ backtrack selection past end of line
     
         s.loadLines belt.linesForText("abc\ndefgh")
         s.setMainCursor 5 0
@@ -213,7 +213,7 @@ sel = r... -> s.allSelections() ▸ r
     # ███   ███  ███  ████  ███  ███       ███   ███  ███   ███  ███       
     #  ███████   ███   ███  ███   ███████   ███████   ███████    ████████  
     
-    ▸ unicode
+  ▸ unicode
     
         text = """
             s = "🧑🌾"
@@ -235,7 +235,7 @@ sel = r... -> s.allSelections() ▸ r
         
         txt text
         
-        ▸ selection
+    ▸ selection
         
             text = """
                 'a'        ▸ 1
@@ -332,7 +332,7 @@ sel = r... -> s.allSelections() ▸ r
     # ███       ███ █ ███  ███           ███        ███     
     # ████████  ███   ███  ███           ███        ███     
     
-    ▸ empty
+  ▸ empty
     
         s.syntax.ext = 'kode'
         s.loadLines belt.linesForText('')
@@ -353,7 +353,7 @@ sel = r... -> s.allSelections() ▸ r
     # ███   ███  ███       ███      ███          ███     ███             ███   ███  ███   ███  ███       ███  ███   
     # ███████    ████████  ███████  ████████     ███     ████████        ███████    ███   ███   ███████  ███   ███  
     
-    ▸ delete back
+  ▸ delete back
     
         text = """
             xxxx            1
@@ -395,7 +395,7 @@ sel = r... -> s.allSelections() ▸ r
     # ███       ███      ███   ███  ███  ████  ███              ███      ███  ███  ████  ███            ███  
     #  ███████  ███████   ███████   ███   ███  ████████         ███████  ███  ███   ███  ████████  ███████   
     
-    ▸ cloneSelectionAndCursorLines
+  ▸ cloneSelectionAndCursorLines
     
         text = """
             line 1
@@ -456,7 +456,7 @@ sel = r... -> s.allSelections() ▸ r
     # ███   ███  ███       ███            ███   ███  ███   ███  ███  ████  ███   ███  ███            ███  
     # ███████    ████████  ███████        ███   ███  ███   ███  ███   ███   ███████   ████████  ███████   
     
-    ▸ deleteRanges
+  ▸ deleteRanges
     
         text = """
             line 1
@@ -492,7 +492,7 @@ sel = r... -> s.allSelections() ▸ r
     # ███   ███  ███   ███  ███  ███  ████        ███      ███  ███  ████  ███            ███  
     #  ███████    ███████   ███  ███   ███        ███████  ███  ███   ███  ████████  ███████   
     
-    ▸ joinLines
+  ▸ joinLines
     
         text = """
             line 1

@@ -3,12 +3,12 @@ use ../view/screen ◆ ttio
 
 ▸ ttio
 
-    ▸ a headless ttio has no cells
+  ▸ a headless ttio has no cells
 
         t = new ttio headless:true input:false
         t.cellsz ▸ []
 
-    ▸ a csi sequence ends with its final byte
+  ▸ a csi sequence ends with its final byte
 
         t = new ttio headless:true input:false
 
@@ -18,7 +18,7 @@ use ../view/screen ◆ ttio
         seqs[0].csi ▸ 'B'
         seqs[1].raw ▸ '\r'
 
-    ▸ a sequence that is not a csi one ends where the next escape is
+  ▸ a sequence that is not a csi one ends where the next escape is
 
         seqs = t.parseData Buffer.from('\x1bOP\x1b[B')
 
@@ -26,7 +26,7 @@ use ../view/screen ◆ ttio
         seqs[0].esc ▸ 'OP'
         seqs[1].csi ▸ 'B'
 
-    ▸ an image placement is sent only once per frame
+  ▸ an image placement is sent only once per frame
 
         t = new ttio headless:true input:false
         t.cellsz = [10 20]
@@ -37,7 +37,7 @@ use ../view/screen ◆ ttio
 
         (t.written().split('a=p').length - 1) ▸ 1
 
-    ▸ the keys of a chunk are keys of their own
+  ▸ the keys of a chunk are keys of their own
 
         keys = []
 

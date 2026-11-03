@@ -23,7 +23,7 @@ hed = cols rows ext='md' feats=[]->
 
 ▸ scale
 
-    ▸ markdown headings scale by level
+  ▸ markdown headings scale by level
 
         s = tstt()
         s.loadLines ['# One' '## Two' '### Three' '#### Four' 'text']
@@ -34,7 +34,7 @@ hed = cols rows ext='md' feats=[]->
         s.scaleOfLine 3 ▸ 1
         s.scaleOfLine 4 ▸ 1
 
-    ▸ headings in other files keep their size
+  ▸ headings in other files keep their size
 
         s = tstt 'kode'
         s.loadLines ['# One' '## Two']
@@ -42,7 +42,7 @@ hed = cols rows ext='md' feats=[]->
         s.scaleOfLine 0 ▸ 1
         s.scaleOfLine 1 ▸ 1
 
-    ▸ the configured scales change or disable the scaling
+  ▸ the configured scales change or disable the scaling
 
         s = tstt()
         s.loadLines ['# one' '## two' '### three' '#### four' '##### five']
@@ -69,7 +69,7 @@ hed = cols rows ext='md' feats=[]->
 
         s.scaleOfLine 0 ▸ 7
 
-    ▸ the row map counts the scaled row of every line
+  ▸ the row map counts the scaled row of every line
 
         s = tstt()
         s.loadLines ['# One' 'a' '## Two' 'b']
@@ -79,7 +79,7 @@ hed = cols rows ext='md' feats=[]->
         s.rowOfLine 2 ▸ 4
         s.rowOfLine 3 ▸ 6
 
-    ▸ the row map finds the line at a row
+  ▸ the row map finds the line at a row
 
         s = tstt()
         s.loadLines ['# One' 'a' '## Two' 'b']
@@ -92,7 +92,7 @@ hed = cols rows ext='md' feats=[]->
         s.lineAtRow 6 ▸ 3
         s.lineAtRow 7 ▸ 3
 
-    ▸ lines above the view have negative rows
+  ▸ lines above the view have negative rows
 
         s = tstt()
         s.loadLines ['a' 'b' 'c' 'd' 'e' 'f']
@@ -102,7 +102,7 @@ hed = cols rows ext='md' feats=[]->
         s.rowOfLine 3 ▸ -1
         s.rowOfLine 1 ▸ -3
 
-    ▸ highlights and cursors above the view are not drawn
+  ▸ highlights and cursors above the view are not drawn
 
         [h e] = hed 40 10
         e.state.loadLines [("line #{i}") for i in 0...20]
@@ -128,7 +128,7 @@ hed = cols rows ext='md' feats=[]->
         (valid h.screen.c[4][0].mark) ▸ false
         h.screen.c[2][0].mark ▸ 'multi'
 
-    ▸ a cell position maps to a logical position
+  ▸ a cell position maps to a logical position
 
         s = tstt()
         s.loadLines ['# One' 'a' '## Two']
@@ -147,7 +147,7 @@ hed = cols rows ext='md' feats=[]->
         s.posForCell 3 4 ▸ [1 2]
         s.posForCell 6 4 ▸ [3 2]
 
-    ▸ a heading is drawn in a block of cells
+  ▸ a heading is drawn in a block of cells
         
         [h e] = hed 40 10        
         e.state.loadLines ['# One' 'a' '## Two' 'b']
@@ -167,7 +167,7 @@ hed = cols rows ext='md' feats=[]->
 
         h.screen.get_char(0  6) ▸ 'b'
 
-    ▸ a scaled character that ends exactly at the right edge is drawn
+  ▸ a scaled character that ends exactly at the right edge is drawn
 
         [h e] = hed 15 6
         e.state.loadLines ['# abc']
@@ -183,14 +183,14 @@ hed = cols rows ext='md' feats=[]->
 
         h.screen.get_char(12 0) ▸ ' '
 
-    ▸ a scaled character carries the text sizing escape
+  ▸ a scaled character carries the text sizing escape
 
         h = new harness cols:10 rows:5
 
         h.screen.scaled_char 'x' 2 1 ▸ '\x1b]66;s=2:w=1;x\x07'
         h.screen.scaled_char '🌈' 3 2 ▸ '\x1b]66;s=3:w=2;🌈\x07'
 
-    ▸ a scaled block fills its cells with placeholders
+  ▸ a scaled block fills its cells with placeholders
 
         h = new harness cols:20 rows:5
 
@@ -210,7 +210,7 @@ hed = cols rows ext='md' feats=[]->
         h.screen.get_char(5 1) ▸ '\x1b[4C'
         h.screen.get_char(8 1) ▸ null
 
-    ▸ the cursor sits on the scaled line
+  ▸ the cursor sits on the scaled line
 
         [h e] = hed 40 10
         e.state.loadLines ['# One' '## Two' 'text']
@@ -220,7 +220,7 @@ hed = cols rows ext='md' feats=[]->
 
         h.screen.c[3][0].mark ▸ 'main'
 
-    ▸ horizontal scrolling moves scaled and normal lines together
+  ▸ horizontal scrolling moves scaled and normal lines together
 
         [h e] = hed 20 8
         e.state.loadLines ['# abc' 'abc']
@@ -238,7 +238,7 @@ hed = cols rows ext='md' feats=[]->
         h.screen.get_char(5 0) ▸ 'a'
         h.screen.get_char(0 3) ▸ 'b'
 
-    ▸ horizontal positions use display columns
+  ▸ horizontal positions use display columns
 
         [h e] = hed 20 8
         e.state.loadLines ['# abc' 'abc']
@@ -263,7 +263,7 @@ hed = cols rows ext='md' feats=[]->
 
         e.state.s.view[0] ▸ 14
 
-    ▸ the block rectangle of the previous frame is erased
+  ▸ the block rectangle of the previous frame is erased
 
         [h e] = hed 20 8
         h.t.textSizing = true
@@ -285,7 +285,7 @@ hed = cols rows ext='md' feats=[]->
 
         second.startsWith("\x1b[1;1H\x1b[15X\x1b[2;1H\x1b[15X\x1b[3;1H\x1b[15X\x1b[H") ▸ true
 
-    ▸ completion is placed and highlighted on normal lines
+  ▸ completion is placed and highlighted on normal lines
 
         [h e] = hed 40 12 'kode' ['complete']
         e.state.loadLines ['funky1 = 1' 'funky2 = 2' 'fun']
@@ -305,7 +305,7 @@ hed = cols rows ext='md' feats=[]->
         h.screen.get_bg(4 2) ▸ theme.selection.span
         h.screen.get_bg(5 2) ▸ theme.selection.span
 
-    ▸ the completion frame fits at the edges of the editor
+  ▸ the completion frame fits at the edges of the editor
 
         [h e] = hed 30 12 'kode' ['complete']
         e.state.loadLines ['funky1 = 1' 'funky2 = 2' 'f']
@@ -332,7 +332,7 @@ hed = cols rows ext='md' feats=[]->
         h.row(3).endsWith('╮') ▸ true
         h.row(3).length ▸ 20
 
-    ▸ the completion frame moves below a scaled line
+  ▸ the completion frame moves below a scaled line
 
         [h e] = hed 40 14 'md' ['complete']
         e.state.loadLines ['# fu' '' 'funky1 = 1' 'funky2 = 2']
@@ -350,7 +350,7 @@ hed = cols rows ext='md' feats=[]->
         h.row(3).startsWith('        ╭') ▸ true
         h.row(6).startsWith('        ╰') ▸ true
 
-    ▸ an erased area is cleared in the cells and on the screen
+  ▸ an erased area is cleared in the cells and on the screen
 
         h = new harness cols:20 rows:8
 
@@ -362,7 +362,7 @@ hed = cols rows ext='md' feats=[]->
         h.screen.get_bg(2 3) ▸ [7 8 9]
         h.screen.renderString().startsWith("\x1b[4;3H\x1b[4X") ▸ true
 
-    ▸ a popup over a scaled line erases the block under it
+  ▸ a popup over a scaled line erases the block under it
 
         [h e] = hed 40 12 'md' ['complete']
         h.t.textSizing = true
@@ -377,7 +377,7 @@ hed = cols rows ext='md' feats=[]->
         h.screen.renderString().startsWith("\x1b[2;1H\x1b[11X") ▸ true
         h.screen.get_char(11 1) ▸ ' '
 
-    ▸ a context menu erases the block under it
+  ▸ a context menu erases the block under it
 
         [h e] = hed 40 12
         c = new context h.screen
@@ -389,7 +389,7 @@ hed = cols rows ext='md' feats=[]->
 
         h.screen.renderString().startsWith("\x1b[2;6H\x1b[7X") ▸ true
 
-    ▸ the cleared rectangle never leaves a block half drawn
+  ▸ the cleared rectangle never leaves a block half drawn
 
         [h e] = hed 40 12 'md' ['complete']
         h.t.textSizing = true
@@ -415,7 +415,7 @@ hed = cols rows ext='md' feats=[]->
                     for yy in by..by+scale-1
                         (valid h.screen.get_char(xx yy)) ▸ true
 
-    ▸ the view scrolls so a tall line fits above the bottom
+  ▸ the view scrolls so a tall line fits above the bottom
 
         [h e] = hed 20 6
         e.state.loadLines ['a' 'b' 'c' 'd' 'e' 'f' '# h1']
@@ -424,7 +424,7 @@ hed = cols rows ext='md' feats=[]->
 
         e.state.s.view[1] ▸ 3
 
-    ▸ a scaled line needs a larger horizontal offset
+  ▸ a scaled line needs a larger horizontal offset
 
         [h e] = hed 20 8
         e.state.loadLines ['# a long heading line']
@@ -433,7 +433,7 @@ hed = cols rows ext='md' feats=[]->
 
         e.state.s.view[0] ▸ 44
 
-    ▸ a short file with a tall line can scroll to its last line
+  ▸ a short file with a tall line can scroll to its last line
 
         [h e] = hed 20 6
         e.state.loadLines ['# h1' 'a' 'b' 'c' 'd']
@@ -444,7 +444,7 @@ hed = cols rows ext='md' feats=[]->
 
         e.state.s.view[1] ▸ 1
 
-    ▸ the last line stays reachable at the end of a tall file
+  ▸ the last line stays reachable at the end of a tall file
 
         [h e] = hed 20 6
         e.state.loadLines ['# h1' 'a' 'b' 'c' 'd' 'e' 'f']
@@ -455,7 +455,7 @@ hed = cols rows ext='md' feats=[]->
 
         e.state.s.view[1] ▸ 1
 
-    ▸ the gutter numbers a scaled line only on its first row
+  ▸ the gutter numbers a scaled line only on its first row
 
         [h e] = hed 30 10 'md' ['gutter']
         e.state.loadLines ['# One' 'a' 'b']
@@ -468,7 +468,7 @@ hed = cols rows ext='md' feats=[]->
         h.row(3).startsWith('  2 ') ▸ true
         h.row(4).startsWith('  3 ') ▸ true
 
-    ▸ the buffer height is measured in display rows
+  ▸ the buffer height is measured in display rows
 
         s = tstt()
         s.loadLines ['# a' 'b' '## c' 'd']
@@ -501,7 +501,7 @@ hed = cols rows ext='md' feats=[]->
         s.syntax.setExt 'md'
         s.totalRows() ▸ 7
 
-    ▸ the map shows scaled lines with their real height
+  ▸ the map shows scaled lines with their real height
 
         [h e] = hed  cols:40 rows:10
         e.state.loadLines ['a' 'b' 'c' 'd' 'e' '# h1' 'f' 'g' 'h' 'i' 'j']
@@ -519,7 +519,7 @@ hed = cols rows ext='md' feats=[]->
         m.lineOffset(6) ▸ 32
         (m.lineOffset(6) - m.lineOffset(5)) ▸ 12
 
-    ▸ a scaled line gets a taller stripe in the map
+  ▸ a scaled line gets a taller stripe in the map
 
         [h e] = hed 40 10
         e.state.loadLines ['a' 'b' '# h1' 'c' 'd']
@@ -540,7 +540,7 @@ hed = cols rows ext='md' feats=[]->
 
         (out.split('i=100,').length - 1) ▸ 4
 
-    ▸ a scaled line is also wider in the map
+  ▸ a scaled line is also wider in the map
 
         [h e] = hed  cols:40 rows:10
         e.state.loadLines ['#']
@@ -575,7 +575,7 @@ hed = cols rows ext='md' feats=[]->
         data[19] ▸ bg[1]
         data[20] ▸ bg[2]
 
-    ▸ clicking a cut line in the map keeps the row offset
+  ▸ clicking a cut line in the map keeps the row offset
 
         [h e] = hed 40 10
 
@@ -605,7 +605,7 @@ hed = cols rows ext='md' feats=[]->
         h.screen.get_char(0 3) ▸ ' '
         h.screen.get_char(0 4) ▸ 't'
 
-    ▸ the map cuts a line at its top edge
+  ▸ the map cuts a line at its top edge
 
         [h e] = hed 40 10
         lines = []
@@ -639,7 +639,7 @@ hed = cols rows ext='md' feats=[]->
         (out.split('i=106,').length - 1) ▸ 1
         out.includes('y=24,w=120,h=4') ▸ true
 
-    ▸ the map cuts a line at its bottom edge
+  ▸ the map cuts a line at its bottom edge
 
         [h e] = hed 40 10
         lines = []
@@ -670,7 +670,7 @@ hed = cols rows ext='md' feats=[]->
         (out.split('i=107,').length - 1) ▸ 1
         out.includes('y=0,w=120,h=4') ▸ true
 
-    ▸ the map follows the display rows near the end of a long file
+  ▸ the map follows the display rows near the end of a long file
 
         [h e] = hed 40 10
 
@@ -690,7 +690,7 @@ hed = cols rows ext='md' feats=[]->
         m.lineOffset(100) ▸ 84
         (m.lineOffset(100) < m.cells.rows*20) ▸ true
 
-    ▸ the scrollbar reflects the display rows
+  ▸ the scrollbar reflects the display rows
 
         [h e] = hed 40 10
         lines = []
@@ -719,7 +719,7 @@ hed = cols rows ext='md' feats=[]->
         sc.knobHeight(csz) ▸ 0
         sc.knobOffset(csz) ▸ 0
 
-    ▸ clicking the scrollbar reaches the last display rows
+  ▸ clicking the scrollbar reaches the last display rows
 
         [h e] = hed 40 10
         lines = []
@@ -739,7 +739,7 @@ hed = cols rows ext='md' feats=[]->
         e.state.s.view[1] ▸ e.state.maxViewLine()
         e.state.s.view[1] ▸ 13
 
-    ▸ the scroll offset moves the top of the view inside a line
+  ▸ the scroll offset moves the top of the view inside a line
 
         small = cols:20 rows:3
         s = new state small 'test_scale_scroll_offset'
@@ -759,7 +759,7 @@ hed = cols rows ext='md' feats=[]->
         s.s.view[1] ▸ 2
         s.s.scrollOffset ▸ 0
 
-    ▸ the wheel scrolls a scaled line one row at a time
+  ▸ the wheel scrolls a scaled line one row at a time
 
         small = cols:20 rows:3
         s = new state small 'test_scale_wheel_rows'
@@ -781,7 +781,7 @@ hed = cols rows ext='md' feats=[]->
         s.s.view[1] ▸ 1
         s.rowOfLine 1 ▸ 0
 
-    ▸ a cut top line is blanked while the rest moves row by row
+  ▸ a cut top line is blanked while the rest moves row by row
 
         [h e] = hed 20 8
         e.state.loadLines ['# abc' 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j']
@@ -815,7 +815,7 @@ hed = cols rows ext='md' feats=[]->
         h.screen.get_char(0 0) ▸ 'a'
         h.screen.get_char(0 1) ▸ 'b'
 
-    ▸ layout keeps the row offset
+  ▸ layout keeps the row offset
 
         [h e] = hed 20 8
         e.state.loadLines ['# abc' 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j']
@@ -827,7 +827,7 @@ hed = cols rows ext='md' feats=[]->
         e.state.viewTopRow() ▸ 1
         e.state.s.scrollOffset ▸ 1
 
-    ▸ moving the cursor into view clears the scroll offset
+  ▸ moving the cursor into view clears the scroll offset
 
         [h e] = hed 20 8
         e.state.loadLines ['# abc' 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j']
@@ -838,7 +838,7 @@ hed = cols rows ext='md' feats=[]->
         e.state.viewTopRow() ▸ 0
         e.isCursorVisible [0 0] ▸ true
 
-    ▸ cursor margins take rows or screen percentages
+  ▸ cursor margins take rows or screen percentages
 
         s = tstt()
         s.marginValue 7 3 ▸ 7
@@ -855,7 +855,7 @@ hed = cols rows ext='md' feats=[]->
 
         config.data = saved
 
-    ▸ entering a scaled line at the margin scrolls one row
+  ▸ entering a scaled line at the margin scrolls one row
 
         saved = config.data
         config.data = cursor:{topOffset:2 bottomOffset:10}
@@ -881,7 +881,7 @@ hed = cols rows ext='md' feats=[]->
 
         config.data = saved
 
-    ▸ a cursor scroll uses the row offset instead of jumping a line
+  ▸ a cursor scroll uses the row offset instead of jumping a line
 
         saved = config.data
         config.data = cursor:{topOffset:2 bottomOffset:2}

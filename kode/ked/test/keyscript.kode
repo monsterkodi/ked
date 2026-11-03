@@ -3,7 +3,7 @@ use ../util ◆ keyscript
 
 ▸ keyscript
 
-    ▸ a word that names a key
+  ▸ a word that names a key
 
         keyscript.bytes 'down' ▸ '\x1b[B'
         keyscript.bytes 'up' ▸ '\x1b[A'
@@ -13,12 +13,12 @@ use ../util ◆ keyscript
         keyscript.bytes 'space' ▸ ' '
         keyscript.bytes 'esc' ▸ '\x1b[27u'
 
-    ▸ a word that names nothing is the characters it is made of
+  ▸ a word that names nothing is the characters it is made of
 
         keyscript.bytes 'ab' ▸ 'ab'
         keyscript.bytes 'a' ▸ 'a'
 
-    ▸ a word can have modifiers
+  ▸ a word can have modifiers
 
         keyscript.bytes 'cmd+o' ▸ '\x1b[111;9u'
         keyscript.bytes 'ctrl+s' ▸ '\x1b[115;5u'
@@ -27,22 +27,22 @@ use ../util ◆ keyscript
         keyscript.bytes 'cmd+down' ▸ '\x1b[1;9B'
         keyscript.bytes 'cmd+tab' ▸ '\x1b[9;9u'
 
-    ▸ a word that is not a modifier is not a combination
+  ▸ a word that is not a modifier is not a combination
 
         keyscript.bytes 'cmd+foo' ▸ 'cmd+foo'
         keyscript.bytes 'o+' ▸ 'o+'
 
-    ▸ an escape sequence is a sequence already
+  ▸ an escape sequence is a sequence already
 
         keyscript.bytes '\x1b[B' ▸ '\x1b[B'
 
-    ▸ a script is the words of it
+  ▸ a script is the words of it
 
         keyscript.script 'cmd+o down' ▸ '\x1b[111;9u\x1b[B'
         keyscript.script 'a b' ▸ 'ab'
         keyscript.script '  ' ▸ ''
 
-    ▸ the steps of a script are the keys of it, one by one
+  ▸ the steps of a script are the keys of it, one by one
 
         keyscript.steps 'cmd+o down' ▸ [['cmd+o' '\x1b[111;9u'] ['down' '\x1b[B']]
         keyscript.steps 'ab' ▸ [['a' 'a'] ['b' 'b']]

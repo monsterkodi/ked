@@ -3,7 +3,7 @@ use ../edit/tool ◆ colorspans
 
 ▸ colorspans
 
-    ▸ overlay adds a span
+  ▸ overlay adds a span
 
         lines = [['a' 'b' 'c' 'd' 'e']]
 
@@ -11,7 +11,7 @@ use ../edit/tool ◆ colorspans
 
         spans ▸ [[1 0 4 '#f00']]
 
-    ▸ overlay splits an existing span
+  ▸ overlay splits an existing span
 
         lines = [['a' 'b' 'c' 'd' 'e']]
 
@@ -19,7 +19,7 @@ use ../edit/tool ◆ colorspans
 
         spans ▸ [[0 0 2 '#00f'] [2 0 3 '#f00'] [3 0 5 '#00f']]
 
-    ▸ overlay turns a multiline range into lines
+  ▸ overlay turns a multiline range into lines
 
         lines = [['a' 'b' 'c' 'd' 'e'] ['a' 'b' 'c' 'd' 'e'] ['a' 'b' 'c' 'd' 'e']]
 
@@ -27,19 +27,19 @@ use ../edit/tool ◆ colorspans
 
         spans ▸ [[2 0 5 '#f00'] [0 1 5 '#f00'] [0 2 3 '#f00']]
 
-    ▸ normalize merges touching spans of the same color
+  ▸ normalize merges touching spans of the same color
 
         spans = colorspans.normalize [[0 0 2 '#f00'] [2 0 4 '#f00'] [5 0 6 '#0f0']]
 
         spans ▸ [[0 0 4 '#f00'] [5 0 6 '#0f0']]
 
-    ▸ clear removes and splits
+  ▸ clear removes and splits
 
         spans = colorspans.clear [[0 0 5 '#00f'] [6 0 9 '#00f']] [[2 0 7 0]]
 
         spans ▸ [[0 0 2 '#00f'] [7 0 9 '#00f']]
 
-    ▸ an insertion inside a span stretches it
+  ▸ an insertion inside a span stretches it
 
         oldLines = [['a' 'b' 'c' 'd']]
         newLines = [['a' 'b' 'X' 'c' 'd']]
@@ -48,7 +48,7 @@ use ../edit/tool ◆ colorspans
 
         spans ▸ [[0 0 5 '#f00']]
 
-    ▸ an insertion before a span moves it
+  ▸ an insertion before a span moves it
 
         oldLines = [['a' 'b' 'c' 'd']]
         newLines = [['a' 'b' 'X' 'c' 'd']]
@@ -57,7 +57,7 @@ use ../edit/tool ◆ colorspans
 
         spans ▸ [[3 0 5 '#f00']]
 
-    ▸ a deletion inside a span shrinks it
+  ▸ a deletion inside a span shrinks it
 
         oldLines = [['a' 'b' 'c' 'd' 'e']]
         newLines = [['a' 'b' 'e']]
@@ -66,7 +66,7 @@ use ../edit/tool ◆ colorspans
 
         spans ▸ [[0 0 3 '#f00']]
 
-    ▸ inserting a line moves spans below
+  ▸ inserting a line moves spans below
 
         oldLines = [['a'] ['b'] ['c']]
         newLines = [['a'] ['x'] ['b'] ['c']]
@@ -75,7 +75,7 @@ use ../edit/tool ◆ colorspans
 
         spans ▸ [[0 2 1 '#f00'] [0 3 1 '#0f0']]
 
-    ▸ deleting a line moves spans below
+  ▸ deleting a line moves spans below
 
         oldLines = [['a'] ['x'] ['b'] ['c']]
         newLines = [['a'] ['b'] ['c']]
@@ -84,7 +84,7 @@ use ../edit/tool ◆ colorspans
 
         spans ▸ [[0 1 1 '#f00'] [0 2 1 '#0f0']]
 
-    ▸ colorAtPos finds the span at a position
+  ▸ colorAtPos finds the span at a position
 
         spans = [[1 2 4 '#f00'] [6 2 9 '#0f0']]
 

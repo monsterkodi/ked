@@ -6,7 +6,7 @@ use ../view/screen ◆ screen
 
 ▸ harness
 
-    ▸ write and written
+  ▸ write and written
 
         h = new harness
 
@@ -16,7 +16,7 @@ use ../view/screen ◆ screen
 
         h.t.written() ▸ 'hello'
 
-    ▸ crumbs are shown
+  ▸ crumbs are shown
 
         h = new harness
 
@@ -32,7 +32,7 @@ use ../view/screen ◆ screen
 
         h.row 1 ▸ ''
 
-    ▸ key presses
+  ▸ key presses
 
         h = new harness
 
@@ -47,7 +47,7 @@ use ../view/screen ◆ screen
 
         c.currentIndex() ▸ 1
 
-    ▸ view focus
+  ▸ view focus
 
         h = new harness
 
@@ -58,7 +58,7 @@ use ../view/screen ◆ screen
 
         i.hasFocus() ▸ true
 
-    ▸ view typing
+  ▸ view typing
 
         h = new harness
 
@@ -71,7 +71,7 @@ use ../view/screen ◆ screen
 
         i.current() ▸ 'xyz'
 
-    ▸ the cursor is marked
+  ▸ the cursor is marked
 
         h = new harness
 
@@ -86,7 +86,7 @@ use ../view/screen ◆ screen
         h.row 0 ▸ 'abc'
         h.rowMarked 0 ▸ "a#{screen.MAIN_MARK}b#{screen.END_MARK}c"
 
-    ▸ selection is marked
+  ▸ selection is marked
 
         h = new harness
 
@@ -95,7 +95,7 @@ use ../view/screen ◆ screen
 
         h.rowMarked 0 ▸ "#{screen.SELECT_MARK}a#{screen.END_MARK}"
 
-    ▸ highlight is marked
+  ▸ highlight is marked
 
         h = new harness
 
@@ -104,7 +104,7 @@ use ../view/screen ◆ screen
 
         h.rowMarked 0 ▸ "#{screen.HILGHT_MARK}a#{screen.END_MARK}"
 
-    ▸ greeter blacks out the window
+  ▸ greeter blacks out the window
 
         h = new harness
 
@@ -116,9 +116,9 @@ use ../view/screen ◆ screen
         h.screen.get_bg 0  23 ▸ [0 0 0]
         h.screen.get_bg 79 0  ▸ [0 0 0]
 
-    ▸ colored screen 
+  ▸ colored screen 
     
-        ▸ draws colors
+    ▸ draws colors
 
             h = new harness
     
@@ -126,12 +126,12 @@ use ../view/screen ◆ screen
     
             line = h.screen.textColored()[0]
     
-            line.includes '\x1b[48;2;1;2;3m'     ▸ true
+            line.includes '\x1b[48;2;1;2;3m'   ▸ true
             line.includes '\x1b[38;2;10;20;30m'  ▸ true
-            line.includes 'a'                    ▸ true
-            line.endsWith '\x1b[0m'              ▸ true
+            line.includes 'a'                  ▸ true
+            line.endsWith '\x1b[0m'            ▸ true
     
-        ▸ marks the cursor
+    ▸ marks the cursor
     
             h = new harness
     
@@ -142,7 +142,7 @@ use ../view/screen ◆ screen
     
             line.includes "#{screen.MAIN_MARK}a#{screen.END_MARK}" ▸ true
     
-        ▸ marks the selection
+    ▸ marks the selection
     
             h = new harness
     
@@ -153,7 +153,7 @@ use ../view/screen ◆ screen
     
             line.includes "#{screen.SELECT_MARK}a#{screen.END_MARK}" ▸ true
     
-        ▸ marks the highlight
+    ▸ marks the highlight
     
             h = new harness
     

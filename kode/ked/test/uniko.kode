@@ -7,7 +7,7 @@ use ../view/colmns  ◆ uniko
 
 ▸ uniko
 
-    ▸ comments are searchable and the match is case insensitive
+  ▸ comments are searchable and the match is case insensitive
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []
@@ -19,7 +19,7 @@ use ../view/colmns  ◆ uniko
 
         u.matrix.numItems() > 0 ▸ true
 
-    ▸ an empty search shows the whole list again
+  ▸ an empty search shows the whole list again
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []
@@ -34,7 +34,7 @@ use ../view/colmns  ◆ uniko
 
         u.matrix.numItems() ▸ all
 
-    ▸ the matrix starts focused and typing moves the focus to the input
+  ▸ the matrix starts focused and typing moves the focus to the input
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []
@@ -50,7 +50,7 @@ use ../view/colmns  ◆ uniko
         u.focus ▸ 'input'
         u.input.current() ▸ 's'
 
-    ▸ return inserts the selected character at the cursors but keeps the picker open
+  ▸ return inserts the selected character at the cursors but keeps the picker open
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []
@@ -69,7 +69,7 @@ use ../view/colmns  ◆ uniko
         u.focus ▸ 'matrix'
         e.hasFocus() ▸ false
 
-    ▸ space inserts the selected character and keeps the matrix focused
+  ▸ space inserts the selected character and keeps the matrix focused
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []
@@ -88,7 +88,7 @@ use ../view/colmns  ◆ uniko
         u.focus ▸ 'matrix'
         e.hasFocus() ▸ false
 
-    ▸ a mouse click inserts the clicked character and keeps the matrix focused
+  ▸ a mouse click inserts the clicked character and keeps the matrix focused
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []
@@ -112,7 +112,7 @@ use ../view/colmns  ◆ uniko
         u.focus ▸ 'matrix'
         e.hasFocus() ▸ false
 
-    ▸ copy writes the selected character to the clipboard
+  ▸ copy writes the selected character to the clipboard
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []
@@ -133,7 +133,7 @@ use ../view/colmns  ◆ uniko
 
         clip.copy = before
 
-    ▸ escape closes without a change and gives the focus back
+  ▸ escape closes without a change and gives the focus back
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []
@@ -150,7 +150,7 @@ use ../view/colmns  ◆ uniko
         u.hidden() ▸ true
         e.hasFocus() ▸ true
 
-    ▸ scale change
+  ▸ scale change
 
         h = new harness cols:60 rows:30
         e = new editor h.screen 'test_editor' []

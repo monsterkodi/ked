@@ -5,7 +5,7 @@ use ../util   ◆ watcher
 
 ▸ watcher
 
-    ▸ watching a directory it cannot read logs nothing
+  ▸ no read error logs
 
         root = '/tmp/opencode/ked-watcher-eacces'
         secret = slash.path root 'secret'

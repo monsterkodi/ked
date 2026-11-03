@@ -5,7 +5,7 @@ use ../../kxk    ▪ post
 
 ▸ matrix
 
-    ▸ selection moves through the items in reading order
+  ▸ selection moves through the items in reading order
 
         h = new harness cols:10 rows:5
         m = new matrix h.screen 'test_matrix'
@@ -25,7 +25,7 @@ use ../../kxk    ▪ post
         m.moveSelection 'down' ▸ true
         m.selectedIndex ▸ cols
 
-    ▸ left at the first item stays put
+  ▸ left at the first item stays put
 
         h = new harness cols:10 rows:5
         m = new matrix h.screen 'test_matrix'
@@ -35,7 +35,7 @@ use ../../kxk    ▪ post
         m.moveSelection 'left' ▸ false
         m.selectedIndex ▸ 0
 
-    ▸ up in the first row stays put
+  ▸ up in the first row stays put
 
         h = new harness cols:10 rows:5
         m = new matrix h.screen 'test_matrix'
@@ -45,7 +45,7 @@ use ../../kxk    ▪ post
         m.moveSelection 'up' ▸ false
         m.selectedIndex ▸ 0
 
-    ▸ the matrix knows whether it has the focus
+  ▸ the matrix knows whether it has the focus
 
         h = new harness cols:10 rows:5
         m = new matrix h.screen 'test_matrix'
@@ -61,7 +61,7 @@ use ../../kxk    ▪ post
 
         not m.hasFocus() ▸ true
 
-    ▸ a larger scale uses more cell rows per logical row
+  ▸ a larger scale uses more cell rows per logical row
 
         h = new harness cols:20 rows:20
         m = new matrix h.screen 'test_matrix'
@@ -88,7 +88,7 @@ use ../../kxk    ▪ post
         m.scale ▸ 1
         m.viewportRows() ▸ 20
 
-    ▸ scaled cells and the selection line up at every scale
+  ▸ scaled cells and the selection line up at every scale
 
         for s in [2 3]
 

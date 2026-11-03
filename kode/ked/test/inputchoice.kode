@@ -4,7 +4,7 @@ use ../view/menu ◆ inputchoice
 
 ▸ inputchoice
 
-    ▸ down after filtering moves the selection one line
+  ▸ down after filtering moves the selection one line
 
         h = new harness
 

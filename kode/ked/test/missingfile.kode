@@ -3,7 +3,7 @@ use ../../kxk     ▪ slash
 
 ▸ missing file target
 
-    ▸ a missing file opens as a buffer bound to its path
+  ▸ a missing file opens as a buffer bound to its path
 
         path = slash.path(process.cwd() 'doesntexist')
 

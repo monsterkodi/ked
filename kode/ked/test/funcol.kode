@@ -6,7 +6,7 @@ use ../view/colmns ◆ funcol
 
 ▸ funcol color picker
 
-    ▸ a cursor on the hash picks the color
+  ▸ a cursor on the hash picks the color
 
         store = {}
         fakeGet = (key def) -> store[key] ? def
@@ -26,7 +26,7 @@ use ../view/colmns ◆ funcol
 
         delete global.ked_session
 
-    ▸ a word that is not a color keeps the default and no replace mode
+  ▸ a word that is not a color keeps the default and no replace mode
 
         store = {}
         fakeGet = (key def) -> store[key] ? def
@@ -46,7 +46,7 @@ use ../view/colmns ◆ funcol
 
         delete global.ked_session
 
-    ▸ submitting without changes keeps the original color string
+  ▸ submitting without changes keeps the original color string
 
         store = {}
         fakeGet = (key def) -> store[key] ? def
@@ -69,7 +69,7 @@ use ../view/colmns ◆ funcol
 
         delete global.ked_session
 
-    ▸ an explicit show does not replace anything
+  ▸ an explicit show does not replace anything
 
         store = {}
         fakeGet = (key def) -> store[key] ? def
@@ -93,7 +93,7 @@ use ../view/colmns ◆ funcol
 
         delete global.ked_session
 
-    ▸ a selection color seeds the picker
+  ▸ a selection color seeds the picker
 
         store = {}
         fakeGet = (key def) -> store[key] ? def
@@ -115,7 +115,7 @@ use ../view/colmns ◆ funcol
 
         delete global.ked_session
 
-    ▸ a selection keeps its existing background when only the foreground changes
+  ▸ a selection keeps its existing background when only the foreground changes
 
         store = {}
         fakeGet = (key def) -> store[key] ? def
@@ -143,7 +143,7 @@ use ../view/colmns ◆ funcol
 
         delete global.ked_session
 
-    ▸ a changed background is applied on submit
+  ▸ a changed background is applied on submit
 
         store = {}
         fakeGet = (key def) -> store[key] ? def

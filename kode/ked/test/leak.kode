@@ -3,7 +3,7 @@ use ../util ◆ leak
 
 ▸ leak
 
-    ▸ a headless run samples nothing
+  ▸ a headless run samples nothing
 
         lines = []
         keep = console.log
@@ -18,7 +18,7 @@ use ../util ◆ leak
 
         lines.length ▸ 0
 
-    ▸ a colored headless run samples nothing
+  ▸ a colored headless run samples nothing
 
         lines = []
         keep = console.log

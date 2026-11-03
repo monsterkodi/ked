@@ -13,7 +13,7 @@ pickr = ->
 
 ▸ colorpicker
 
-    ▸ pressing a slider sets the value from the column
+  ▸ pressing a slider sets the value from the column
 
         p = pickr()
 
@@ -26,7 +26,7 @@ pickr = ->
 
         p.hue.getValue() ▸ 133
 
-    ▸ dragging a slider keeps tracking outside of it
+  ▸ dragging a slider keeps tracking outside of it
 
         p = pickr()
 
@@ -55,7 +55,7 @@ pickr = ->
             count: 1
         p.onMouse e
 
-    ▸ the wheel steps an rgb input and focuses it
+  ▸ the wheel steps an rgb input and focuses it
 
         p = pickr()
         p.red.setValue 100
@@ -68,7 +68,7 @@ pickr = ->
 
         p.red.getValue() ▸ 99
 
-    ▸ the radio is out of the ring in single color mode
+  ▸ the radio is out of the ring in single color mode
 
         p = pickr()
         p.show '#ff0000'

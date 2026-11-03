@@ -5,7 +5,7 @@ use ../util   ◆ walker
 
 ▸ walker
 
-    ▸ maxDepth zero lists only the root
+  ▸ maxDepth zero lists only the root
 
         root = '/tmp/opencode/ked-walker-depth'
 
@@ -29,7 +29,7 @@ use ../util   ◆ walker
         result.files.includes(slash.path(root 'one' 'b.md')) ▸ false
         result.files.includes(slash.path(root 'one' 'two' 'c.md')) ▸ false
 
-    ▸ maxDepth one descends one level
+  ▸ maxDepth one descends one level
 
         root = '/tmp/opencode/ked-walker-depth'
 

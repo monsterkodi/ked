@@ -5,7 +5,7 @@ use ../view/colmns ◆ dircol
 
 ▸ dircol crumbs
 
-    ▸ a relative root shows the absolute folder path
+  ▸ a relative root shows the absolute folder path
 
         store = {}
         fakeGet = (key def) -> store[key] ? def
@@ -25,7 +25,7 @@ use ../view/colmns ◆ dircol
         ○ sleep 10
         delete global.ked_session
 
-    ▸ a dot relative root shows the absolute folder path
+  ▸ a dot relative root shows the absolute folder path
 
         store = {}
         fakeGet = (key def) -> store[key] ? def
@@ -45,7 +45,7 @@ use ../view/colmns ◆ dircol
         ○ sleep 10
         delete global.ked_session
 
-    ▸ a tilde root stays where it is
+  ▸ a tilde root stays where it is
 
         store = {}
         fakeGet = (key def) -> store[key] ? def

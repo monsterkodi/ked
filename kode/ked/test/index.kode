@@ -4,7 +4,7 @@ use ../index ◆ index_kode index_utils indexer
 
 ▸ index
 
-    ▸ class names in line
+  ▸ class names in line
 
         index_utils.classNameInLine('class Foo')        ▸ 'Foo'
         index_utils.classNameInLine('function foo')     ▸ 'foo'
@@ -15,7 +15,7 @@ use ../index ◆ index_kode index_utils indexer
         index_utils.classNameInLine('■ Class')          ▸ 'Class'
         index_utils.classNameInLine('Foo = ■Bar')       ▸ 'Bar'
 
-    ▸ shortcut classes are indexed
+  ▸ shortcut classes are indexed
 
         idx = new index_kode
         result = idx.parse """
@@ -31,7 +31,7 @@ use ../index ◆ index_kode index_utils indexer
         result.classes[1].name ▸ 'Bar'
         result.classes[1].line ▸ 2
 
-    ▸ strings do not define classes or words
+  ▸ strings do not define classes or words
 
         idx = new index_kode
 
@@ -62,7 +62,7 @@ use ../index ◆ index_kode index_utils indexer
         result.words.includes('ShortcutInsideTriple') ▸ false
         result.words.includes('After') ▸ true
 
-    ▸ post handlers keep their string event name
+  ▸ post handlers keep their string event name
 
         idx = new index_kode
         result = idx.parse "post.on 'quit' -> 1"
@@ -71,7 +71,7 @@ use ../index ◆ index_kode index_utils indexer
         result.funcs[0].name ▸ 'quit'
         result.funcs[0].post ▸ true
 
-    ▸ a compare between strings is not a test marker
+  ▸ a compare between strings is not a test marker
 
         idx = new index_kode
 
@@ -89,7 +89,7 @@ use ../index ◆ index_kode index_utils indexer
         result.funcs.length ▸ 1
         result.funcs[0].name ▸ '▸ bad'
 
-    ▸ index waits for the file to be read and parsed
+  ▸ index waits for the file to be read and parsed
 
         root = '/tmp/opencode/ked-index-waits'
         file = slash.path root 'waits.kode'

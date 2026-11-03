@@ -11,7 +11,7 @@ use ../edit/tool ◆ belt
     # ███   ███  ███        ███ ███   
     # ███   ███  ████████  ███   ███  
     
-    ▸ hex
+  ▸ hex
     
         color.hex [0 0 0]     ▸ '#000000'
         color.hex [0 255 0]   ▸ '#00ff00'
@@ -25,7 +25,7 @@ use ../edit/tool ◆ belt
     # ███   ███  ███   ███  ███   ███  ███  ███   ███       ███  ████  
     # ███████    ███   ███  ███   ███  ███   ███  ████████  ███   ███  
     
-    ▸ darken
+  ▸ darken
     
         color.darken color.values('ffff00') 1    ▸ color.values '#ffff00'
         color.darken color.values('ffff00') 0.9  ▸ color.values '#e5e500'
@@ -45,7 +45,7 @@ use ../edit/tool ◆ belt
     # ███       ███   ███  ███      ███   ███  ███   ███           ███  ███       ███   ███  ███           ███  
     #  ███████   ███████   ███████   ███████   ███   ███      ███████   ████████   ███████   ███████  ███████   
     
-    ▸ colorSeglsForText
+  ▸ colorSeglsForText
     
         belt.colorSeglsForText "hello\nworld" ▸ [[] kseg.segls("hello\nworld")]
         belt.colorSeglsForText r5("red") ▸ [[[x:0 fg:[255 0 0] w:3]] kseg.segls("red")]
@@ -58,7 +58,7 @@ use ../edit/tool ◆ belt
 
         belt.colorSeglsForText "▸ #{color.fg_rgb([255 255 00])}#{color.fg_rgb()} ms" ▸ [[[{x:2 fg:[255 255 0] w:1}]] kseg.segls("▸  ms")]
         
-    ▸ adjustForBackground
+  ▸ adjustForBackground
     
         color.adjustForBackground [255 255 0] [0 0 0]         ▸ [255 255 0]
         color.adjustForBackground [255 255 0] [200 200 0]     ▸ [76 77 0]

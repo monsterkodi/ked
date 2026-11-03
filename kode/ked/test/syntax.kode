@@ -3,7 +3,7 @@ use ../util ◆ syntax
 
 ▸ syntax
 
-    ▸ getClass argument
+  ▸ getClass argument
 
         s = new syntax 'test'
         s.setExt 'kode'
@@ -37,7 +37,7 @@ use ../util ◆ syntax
     #     ███   ███  ███          ███     ███       ███      ███   ███       ███       ███  ███            ███
     #      ███████   ████████     ███      ███████  ███████  ███   ███  ███████   ███████   ████████  ███████ 
 
-    ▸ getClasses
+  ▸ getClasses
 
         s = new syntax 'test'
         s.setExt 'kode'

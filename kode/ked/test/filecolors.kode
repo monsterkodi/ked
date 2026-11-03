@@ -3,28 +3,28 @@ use ../util ◆ filecolors
 
 ▸ filecolors
 
-    ▸ js uses a block comment
+  ▸ js uses a block comment
 
         filecolors.commentStyle('x.js').start ▸ '/*'
         filecolors.commentStyle('x.js').end ▸ '*/'
 
-    ▸ python uses a hash comment
+  ▸ python uses a hash comment
 
         filecolors.commentStyle('x.py').start ▸ '#'
         filecolors.commentStyle('x.py').end ▸ ''
 
-    ▸ json has no comment style
+  ▸ json has no comment style
 
         filecolors.commentStyle('x.json') ▸ null
 
-    ▸ other file types use their kolor comment style
+  ▸ other file types use their kolor comment style
 
         filecolors.commentStyle('x.css').start ▸ '/*'
         filecolors.commentStyle('x.lua').start ▸ '--'
         filecolors.commentStyle('x.html').start ▸ '<!--'
         filecolors.commentStyle('x.kode').start ▸ '#'
 
-    ▸ join and split roundtrip
+  ▸ join and split roundtrip
 
         colors =
             fg: [[0 0 3 '#f00']]
@@ -44,7 +44,7 @@ use ../util ◆ filecolors
         back.text ▸ text
         back.colors ▸ colors
 
-    ▸ a trailing newline is kept
+  ▸ a trailing newline is kept
 
         colors = fg: [[0 0 3 '#f00']] bg: []
 
@@ -57,17 +57,17 @@ use ../util ◆ filecolors
         back.text ▸ text
         back.colors ▸ colors
 
-    ▸ no colors means no comment
+  ▸ no colors means no comment
 
         filecolors.join 'x.js' 'abc' {fg:[] bg:[]} ▸ 'abc'
 
-    ▸ unsupported file types are left alone
+  ▸ unsupported file types are left alone
 
         colors = fg: [[0 0 3 '#f00']] bg: []
 
         filecolors.join 'x.json' '{"a":1}' colors ▸ '{"a":1}'
 
-    ▸ a changed file discards the colors but strips the comment
+  ▸ a changed file discards the colors but strips the comment
 
         colors = fg: [[0 0 3 '#f00']] bg: []
 

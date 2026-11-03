@@ -5,7 +5,7 @@ use ../util/img ◆ squares
 
     squares.csz = [10 20] 
     
-    ▸ tilesInRect
+  ▸ tilesInRect
 
         squares.tilesInRect  0  0 10 10 ▸ [[0 0 0  0 10 10]]
         squares.tilesInRect  5  5  5  5 ▸ [[0 0 5  5  5  5]]

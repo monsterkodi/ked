@@ -4,7 +4,7 @@ use ../util ◆ config session
 
 ▸ startup
 
-    ▸ the modes announce when they are loaded
+  ▸ the modes announce when they are loaded
 
         (mode.loaded instanceof Promise) ▸ true
 
@@ -13,7 +13,7 @@ use ../util ◆ config session
         mode.names().includes('novim') ▸ true
         mode.pending.length ▸ 0
 
-    ▸ the config announces when it is loaded
+  ▸ the config announces when it is loaded
 
         loading = config.load()
 
@@ -24,7 +24,7 @@ use ../util ◆ config session
 
         (config.data != null) ▸ true
 
-    ▸ the session announces when it is loaded
+  ▸ the session announces when it is loaded
 
         s = new session fresh:true
 

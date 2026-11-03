@@ -4,7 +4,7 @@ use ../view/title ◆ title
 
 ▸ title
 
-    ▸ the crumbs show the folder of a file
+  ▸ the crumbs show the folder of a file
 
         h = new harness cols:100 rows:5
         e = new editor h.screen 'test_editor' []
