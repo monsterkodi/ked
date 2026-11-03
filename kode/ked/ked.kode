@@ -74,21 +74,21 @@ use child_process ▪ spawn exec
         @editor.state.hasFocus = true
         @editor.funtree = @funcol.funtree
         
-        post.on 'redraw'        @redraw
-        post.on 'window.focus'  @redraw
-        post.on 'window.blur'   @redraw
-        post.on 'input.popup'   @onInputPopup
-        post.on 'view.size'     @onViewSize
-        post.on 'quicky'        @onQuicky
-        post.on 'file.new'      @newFile
-        post.on 'file.reload'   @reloadFile
-        post.on 'file.open'     @openFile
-        post.on 'file.save'     @saveFile
-        post.on 'file.saveAndQuit' @saveAndQuit
-        post.on 'file.saveas'   @onSaveAs
-        post.on 'quit'          @quit
-        post.on 'file.change'   @onFileChange
-        post.on 'git.status'    @onGitStatus
+        post.on 'redraw'            @redraw
+        post.on 'window.focus'      @redraw
+        post.on 'window.blur'       @redraw
+        post.on 'input.popup'       @onInputPopup
+        post.on 'view.size'         @onViewSize
+        post.on 'quicky'            @onQuicky
+        post.on 'file.new'          @newFile
+        post.on 'file.reload'       @reloadFile
+        post.on 'file.open'         @openFile
+        post.on 'file.save'         @saveFile
+        post.on 'file.saveAndQuit'  @saveAndQuit
+        post.on 'file.saveas'       @onSaveAs
+        post.on 'quit'              @quit
+        post.on 'file.change'       @onFileChange
+        post.on 'git.status'        @onGitStatus
         # post.on 'focus'         (name) -> log "focus: '#{name}'"
         
         @contextHandlers = [                                                                                               @editor         @dircol @funcol ]
@@ -517,7 +517,7 @@ use child_process ▪ spawn exec
         @showEditor()
         @redraw()
         
-        @indexer.index @currentFile
+        @indexer.index @currentFile ext:@editor.state.syntax.ext
         prjcts.index   @currentFile
         git.diff       @currentFile
         

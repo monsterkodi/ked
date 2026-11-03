@@ -1,10 +1,3 @@
-###
-████████  ███   ███  ███   ███   ███████   ███████   ███    
-███       ███   ███  ████  ███  ███       ███   ███  ███    
-██████    ███   ███  ███ █ ███  ███       ███   ███  ███    
-███       ███   ███  ███  ████  ███       ███   ███  ███    
-███        ███████   ███   ███   ███████   ███████   ███████
-###
 
 use ../../../kxk    ▪ post slash kseg kutil
 use ../../theme     ◆ color theme
@@ -12,7 +5,7 @@ use ../../edit/tool ◆ belt
 use ../base         ◆ view knob
 use                 ◆ funtree colorpicker uniko
 
-function funcol extends view
+■funcol extends view
 
     @: screen @editor features ->
         

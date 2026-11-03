@@ -1,6 +1,6 @@
 use fs
 use ../../kxk ▪ slash
-use ../index ◆ index_kode index_utils indexer
+use ../index ◆ index_kode index_noon index_json index_utils indexer
 
 ▸ index
 
@@ -30,6 +30,61 @@ use ../index ◆ index_kode index_utils indexer
         result.classes[0].line ▸ 0
         result.classes[1].name ▸ 'Bar'
         result.classes[1].line ▸ 2
+
+  ▸ noon top level objects are indexed
+
+        idx = new index_noon
+        result = idx.parse """
+            name      ked
+            scripts
+                      build     pnpm run build
+            # comment
+            version   ^0.1.2
+            """
+
+        result.funcs.length ▸ 3
+        result.funcs[0].name ▸ 'name'
+        result.funcs[0].line ▸ 0
+        result.funcs[1].name ▸ 'scripts'
+        result.funcs[1].line ▸ 1
+        result.funcs[2].name ▸ 'version'
+        result.funcs[2].line ▸ 4
+
+  ▸ json top level objects are indexed
+
+        idx = new index_json
+        result = idx.parse """
+            {
+                "name": "ked",
+                "scripts": {
+                    "build": "pnpm run build",
+                    "test":  "node js/test.js"
+                },
+                "url": "http://example.com",
+                "version": "0.1.2"
+            }
+            """
+
+        result.funcs.length ▸ 4
+        result.funcs[0].name ▸ 'name'
+        result.funcs[0].line ▸ 1
+        result.funcs[1].name ▸ 'scripts'
+        result.funcs[1].line ▸ 2
+        result.funcs[2].name ▸ 'url'
+        result.funcs[2].line ▸ 6
+        result.funcs[3].name ▸ 'version'
+        result.funcs[3].line ▸ 7
+
+  ▸ json objects on one line are indexed
+
+        idx = new index_json
+        result = idx.parse '{"a": 1, "b": {"c": 2}, "d": [3]}'
+
+        result.funcs.length ▸ 3
+        result.funcs[0].name ▸ 'a'
+        result.funcs[1].name ▸ 'b'
+        result.funcs[2].name ▸ 'd'
+        result.funcs[0].line ▸ 0
 
   ▸ strings do not define classes or words
 
@@ -88,6 +143,48 @@ use ../index ◆ index_kode index_utils indexer
 
         result.funcs.length ▸ 1
         result.funcs[0].name ▸ '▸ bad'
+
+  ▸ noon files list top level objects
+
+        root = '/tmp/opencode/ked-index-noon'
+        file = slash.path root 'top.noon'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file 'alpha\n    beta  1\ngamma  2\n'
+
+        idx = new indexer
+        ○ idx.index file
+
+        info = idx.files[file]
+        fs.rmSync root recursive:true force:true
+
+        info.funcs.length ▸ 2
+        info.funcs[0].name ▸ 'alpha'
+        info.funcs[0].line ▸ 1
+        info.funcs[1].name ▸ 'gamma'
+        info.funcs[1].line ▸ 3
+
+  ▸ json files list top level objects
+
+        root = '/tmp/opencode/ked-index-json'
+        file = slash.path root 'top.json'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file '{\n  "alpha": 1,\n  "beta": {"gamma": 2}\n}\n'
+
+        idx = new indexer
+        ○ idx.index file
+
+        info = idx.files[file]
+        fs.rmSync root recursive:true force:true
+
+        info.funcs.length ▸ 2
+        info.funcs[0].name ▸ 'alpha'
+        info.funcs[0].line ▸ 2
+        info.funcs[1].name ▸ 'beta'
+        info.funcs[1].line ▸ 3
 
   ▸ index waits for the file to be read and parsed
 

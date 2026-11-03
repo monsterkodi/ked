@@ -15,7 +15,6 @@ use           ◆ watcher
         
         # log 'load config file' @file
         
-        #  watch the file, not every file in the project
         ○ watcher.watch @file recursive:false
         ○ @read()
         

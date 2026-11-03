@@ -1,0 +1,29 @@
+
+use ../../kxk ▪ kstr
+
+class index_noon
+
+    parseLine: index line ->
+        
+        ⮐  if empty line
+        ⮐  if line[0] in [' ' '\t'] # only top level lines
+        ⮐  if line[0] == '#'      # comments
+        
+        words = line.split(/\s+/)
+        name = words[0]
+        ⮐  if empty name
+        
+        @result.funcs.push name:name line:index
+
+    parse: text ->
+        
+        lines = kstr.lines text
+
+        @result = classes:[] funcs:[] lines:lines.length
+        
+        for line,index in lines
+            @parseLine index line
+
+        @result
+
+export index_noon

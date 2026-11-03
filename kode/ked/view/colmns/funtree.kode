@@ -1,21 +1,8 @@
-#    ████████  ███   ███  ███   ███  █████████  ████████   ████████  ████████  
-#    ███       ███   ███  ████  ███     ███     ███   ███  ███       ███       
-#    ██████    ███   ███  ███ █ ███     ███     ███████    ███████   ███████   
-#    ███       ███   ███  ███  ████     ███     ███   ███  ███       ███       
-#    ███        ███████   ███   ███     ███     ███   ███  ████████  ████████  
 
 use ../../../kxk    ▪ post slash nfs
 use ../../theme     ◆ color theme icons
 use ../../edit/tool ◆ belt
 use ../menu         ◆ choices 
-
-###
-     ███████  ███   ███  ███   ███  █████████   ███████   ███   ███
-    ███        ███ ███   ████  ███     ███     ███   ███   ███ ███ 
-    ███████     █████    ███ █ ███     ███     █████████    █████  
-         ███     ███     ███  ████     ███     ███   ███   ███ ███ 
-    ███████      ███     ███   ███     ███     ███   ███  ███   ███
-###
 
 SYMBOL = 
     clss:          '■'  
@@ -24,7 +11,7 @@ SYMBOL =
     async_unbound: '○→'
     async_bound:   '●→' 
         
-function funSyntax
+■funSyntax
 
     @: @tree ->
     
@@ -45,12 +32,6 @@ function funSyntax
     setLines: lines => log 'setLines'
     setSegls: segls =>
         
-    #  ███████   ███████   ███       ███████   ████████ 
-    # ███       ███   ███  ███      ███   ███  ███   ███
-    # ███       ███   ███  ███      ███   ███  ███████  
-    # ███       ███   ███  ███      ███   ███  ███   ███
-    #  ███████   ███████   ███████   ███████   ███   ███
-
     getClass: x y => ''
     getClasses: y => []
     getColor: x y =>
@@ -81,15 +62,7 @@ function funSyntax
         
     getChar: x y char => char
 
-###    
-    ████████  ███   ███  ███   ███  █████████  ████████   ████████  ████████
-    ███       ███   ███  ████  ███     ███     ███   ███  ███       ███     
-    ██████    ███   ███  ███ █ ███     ███     ███████    ███████   ███████ 
-    ███       ███   ███  ███  ████     ███     ███   ███  ███       ███     
-    ███        ███████   ███   ███     ███     ███   ███  ████████  ████████
-###
-
-function funtree extends choices
+■funtree extends choices
 
     @: @editor @name features ->
         
@@ -119,12 +92,6 @@ function funtree extends choices
     lineIndexOfNextFunc:    => @items[@currentIndex()+1]?.line-1 
     lineIndexOfPrevFunc:    => @items[@currentIndex()-1]?.line-1
     
-    # ███      ███  ███   ███  ████████        ████████   ███████   ████████         ████████  ███   ███  ███   ███   ███████
-    # ███      ███  ████  ███  ███             ███       ███   ███  ███   ███        ███       ███   ███  ████  ███  ███     
-    # ███      ███  ███ █ ███  ███████         ██████    ███   ███  ███████          ██████    ███   ███  ███ █ ███  ███     
-    # ███      ███  ███  ████  ███             ███       ███   ███  ███   ███        ███       ███   ███  ███  ████  ███     
-    # ███████  ███  ███   ███  ████████        ███        ███████   ███   ███        ███        ███████   ███   ███   ███████
-    
     lineIndexForFunc: func => 
     
         for item in @items
@@ -132,23 +99,16 @@ function funtree extends choices
                 ⮐  item.line-1 
                 
         if func.name == "   -> #{func.class}" and func.line
-            ⮐  @lineIndexForFunc class:func.class name:'   -> @'
-            
+            ⮐  @lineIndexForFunc class:func.class, name:'   -> @'
     
         if func.name == "   -> @" and func.line
-            ⮐  @lineIndexForFunc class:func.class name: "   -> #{func.class}"
+            ⮐  @lineIndexForFunc class:func.class, name: "   -> #{func.class}"
                 
         # log "can't find func: items:" @items
         log "can't find func:" func
         
-    #  ███████   ███   ███        ███  ███   ███  ███████    ████████  ███   ███
-    # ███   ███  ████  ███        ███  ████  ███  ███   ███  ███        ███ ███ 
-    # ███   ███  ███ █ ███        ███  ███ █ ███  ███   ███  ███████     █████  
-    # ███   ███  ███  ████        ███  ███  ████  ███   ███  ███        ███ ███ 
-    #  ███████   ███   ███        ███  ███   ███  ███████    ████████  ███   ███
-
     onFileIndexed: path info =>
-    
+        # log "#{path}" #info
         ⮐  if path != @editor.currentFile
         ⮐  if empty info.classes and empty info.funcs
     
@@ -187,12 +147,6 @@ function funtree extends choices
         @onCursorsSet()
         post.emit 'redraw'
         
-    #  ███████    ███████  █████████  ███   ███████   ███   ███  
-    # ███   ███  ███          ███     ███  ███   ███  ████  ███  
-    # █████████  ███          ███     ███  ███   ███  ███ █ ███  
-    # ███   ███  ███          ███     ███  ███   ███  ███  ████  
-    # ███   ███   ███████     ███     ███   ███████   ███   ███  
-    
     emitAction: action choice event  ->
     
         if empty choice

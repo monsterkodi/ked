@@ -1,0 +1,59 @@
+
+use ../../kxk ▪ kstr
+
+class index_json
+
+    parseLine: index line ->
+        
+        inString = false
+        escaped = false
+        stringStart = 0
+        i = 0
+        
+        while i < line.length
+            
+            ch = line[i]
+            
+            if inString
+                
+                if escaped
+                    escaped = false
+                else if ch == '\\'
+                    escaped = true
+                else if ch == '"'
+                    
+                    inString = false
+                    
+                    j = i+1
+                    while j < line.length and line[j] in [' ' '\t']
+                        j++
+                    
+                    if @depth == 1 and line[j] == ':'
+                        name = line[stringStart...i]
+                        if not empty name
+                            @result.funcs.push name:name line:index
+            else
+                
+                if ch == '"'
+                    inString = true
+                    stringStart = i+1
+                else if ch in ['{' '[']
+                    @depth++
+                else if ch in ['}' ']']
+                    @depth--
+            
+            i++
+
+    parse: text ->
+        
+        lines = kstr.lines text
+
+        @depth = 0
+        @result = classes:[] funcs:[] lines:lines.length
+        
+        for line,index in lines
+            @parseLine index line
+
+        @result
+
+export index_json
