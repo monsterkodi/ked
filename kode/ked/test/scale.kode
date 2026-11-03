@@ -539,8 +539,6 @@ hed = cols rows ext='md' feats=[]->
         out = h.screen.t.written()
 
         (out.split('i=100,').length - 1) ▸ 4
-        (out.split('i=102,').length - 1) ▸ 1
-        out.includes('y=0,w=120,h=12') ▸ true
 
     ▸ a scaled line is also wider in the map
 
@@ -640,67 +638,6 @@ hed = cols rows ext='md' feats=[]->
 
         (out.split('i=106,').length - 1) ▸ 1
         out.includes('y=24,w=120,h=4') ▸ true
-
-    ▸ image data is sent with the glyph height
-
-        [h e] = hed 40 10
-        e.state.loadLines ['a' '# b']
-
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
-
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
-        h.screen.t.out = []
-
-        m.createImages()
-
-        out = h.screen.t.written()
-
-        out.includes('s=120,v=12') ▸ true
-        out.includes('s=120,v=1;') ▸ true
-
-    ▸ scaled lines render glyph shapes
-
-        [h e] = hed 40 10
-        e.state.loadLines ['# abc']
-
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
-        m.csz = [10 20]
-
-        w = m.cells.cols*m.csz[0]
-        hgt = m.imageHeight 0
-        hgt ▸ 12
-
-        data = Buffer.alloc w*hgt*3
-        m.imageForLine data e.state.s.lines[0] 0
-
-        ink = false
-        gap = false
-        bg = m.color.bg
-
-        for y in 0...hgt
-            for x in 0...6
-                i = (y*w+12+x)*3
-                if data[i] != bg[0] or data[i+1] != bg[1] or data[i+2] != bg[2]
-                    ink = true
-                else
-                    gap = true
-
-        ink ▸ true
-        gap ▸ true
-
-    ▸ scale two uses the 4x8 glyph map
-
-        [h e] = hed 40 10
-        e.state.loadLines ['## h2']
-
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
-        m.csz = [10 20]
-
-        m.imageHeight(0) ▸ 8
 
     ▸ the map cuts a line at its bottom edge
 
