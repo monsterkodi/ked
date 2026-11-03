@@ -434,6 +434,13 @@ cached = fp ○->
         
         fpOne != knrd.hash('')  ▸ true
 
+    ▸ the fingerprint leaves out test files
+
+        files = ○ knrd.fingerprintFiles()
+
+        files.length > 0 ▸ true
+        files.filter((f) -> f.includes '/test/').length ▸ 0
+
     ▸ the cache lives beside the sources it describes
 
         knrd.cachePath().endsWith 'kode/.kkache'  ▸ true

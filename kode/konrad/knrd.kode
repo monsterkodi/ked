@@ -171,20 +171,29 @@ fpDirs = ['kode' 'kxk' 'kolor'] # the modules whose source can reach the compile
 
 compilerDir = -> slash.path(◆dir, '..')
 
-fingerprint = ○-> # generates the fingerprint for the kode compiler
-
+fingerprintFiles = ○->
+    
     files = []
-
+    
     for d in fpDirs
-
+        
         dir = slash.path(compilerDir(), d)
         here = ○ nfs.isDir dir
         if not here ➜ continue
-
+        
         for item in ○ nfs.list dir
-            files.push item.path if item.type == 'file' and slash.ext(item.path) == 'js'
-
+            
+            continue if item.type != 'file'
+            continue if slash.ext(item.path) != 'js'
+            continue if slash.relative(item.path, dir).startsWith 'test/'
+            
+            files.push item.path
+    
     files.sort()
+
+fingerprint = ○-> # generates the fingerprint for the kode compiler
+
+    files =○ fingerprintFiles()
 
     parts = []
     for f in files
@@ -382,6 +391,7 @@ knrd.stampSource = stampSource
 knrd.reconcile   = reconcile
 knrd.cachePath   = cachePath
 knrd.fingerprint = fingerprint
+knrd.fingerprintFiles = fingerprintFiles
 knrd.stale       = stale
 knrd.hash        = hash
 knrd.rel         = rel

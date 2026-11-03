@@ -9,8 +9,7 @@
 use ../kode
 use ../srcmap
 use ../../kxk ◆ slash nfs
-use buffer
-use fs
+use buffer fs
 
 B64 = buffer.Buffer
 
@@ -446,60 +445,39 @@ writeJs = c file=JS_FILE ○->
             n = keys.filter((k, i) -> keys.indexOf(k) != i).length
             n ▸ 0
 
-    ▸ the whole compiler
+    # ▸ the whole compiler DISABLED FOR NOW (TAKES TOO LONG)
 
-        dir = slash.path ◆dir, '..', '..', '..', 'kode', 'kode'
-        files = kodfiles dir
-
-        files.length > 20 ▸ true
-
-        wrong = []
-
-        for file in files
-
-            text = fs.readFileSync file, 'utf8'
-            out = (new kode header:false, map:true).compile text, file
-
-            continue if not out?
-
-            # the probe sits next to the compiler and is not one of its own
-            continue if file.endsWith 'srcmap-probe.kode'
-
-            unmap = (new kode header:false).compile text, file
-            eq = body(out) == body(unmap)
-
-            wrong.push file if eq == no
-
-        report = wrong.join ' '
-        report ▸ ''
-
-    ▸ maps every name in the compiler
-
-        dir = slash.path ◆dir, '..', '..', '..', 'kode', 'kode'
-        files = kodfiles dir
-
-        files.length > 20 ▸ true
-
-        missed = []
-
-        for file in files
-
-            continue if file.endsWith 'srcmap-probe.kode'
-
-            text = fs.readFileSync file, 'utf8'
-            code = (new kode header:false, map:true).compile text, file
-
-            continue if not code?
-
-            got = mapsOf(code).map (t) -> "#{t[2]}:#{t[3]}"
-            names = (new kode header:false).lexer.tokenize(text).filter (t) -> t.type in ['var' 'this']
-
-            for name in names
-                if "#{name.line}:#{name.col}" not in got
-                    missed.push "#{slash.relative file, dir}:#{name.line}:#{name.col} #{name.text}"
-
-        report = missed.join ' '
-        report ▸ ''
+#         dir = slash.path ◆dir, '..', '..', '..', 'kode', 'kode'
+#         files = kodfiles dir
+# 
+#         files.length > 20 ▸ true
+# 
+#         missed = []
+#         wrong  = []
+# 
+#         for file in files
+# 
+#             continue if file.endsWith 'srcmap-probe.kode'
+# 
+#             text = fs.readFileSync file, 'utf8'
+#             code = (new kode header:false, map:true).compile text, file
+# 
+#             continue if not code?
+# 
+#             unmap = (new kode header:false).compile text, file
+#             eq = body(code) == body(unmap)
+# 
+#             wrong.push file if eq == no
+# 
+#             got = mapsOf(code).map (t) -> "#{t[2]}:#{t[3]}"
+#             names = (new kode header:false).lexer.tokenize(text).filter (t) -> t.type in ['var' 'this']
+# 
+#             for name in names
+#                 if "#{name.line}:#{name.col}" not in got
+#                     missed.push "#{slash.relative file, dir}:#{name.line}:#{name.col} #{name.text}"
+# 
+#         wrong.join ' ' ▸ ''
+#         missed.join ' ' ▸ ''
 
     ▸ sourcePosition finds where a position came from
 

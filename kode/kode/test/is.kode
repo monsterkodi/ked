@@ -8,59 +8,9 @@
 
 use ./utils ▪ kc ke
 
-▸ is    
+▸ is
     
-    # ██     ██  ███   ███████   ███████  
-    # ███   ███  ███  ███       ███       
-    # █████████  ███  ███████   ███       
-    # ███ █ ███  ███       ███  ███       
-    # ███   ███  ███  ███████    ███████  
-    
-    ▸ misc
-        
-        ke '1 is "number"'              ▸   true
-        ke 'a = {} is Object'           ▸   true
-        ke 'a = {} is "object"'         ▸   true
-        ke '(->) is "function"'         ▸   true
-        ke '[] is "object"'             ▸   true
-        ke '[] is Array'                ▸   true
-        ke '"" is "string"'             ▸   true
-        ke '(new String "") is String'  ▸   true
-        ke '(new Number 0) is Number'   ▸   true
-        
-        ke  """
-            class A
-            class B extends A
-            a = new B
-            a is B and a is A and a is 'object'
-            """ ▸ true
-            
-        ke '"" is String'               ▸   false
-        ke '1 is Number'                ▸   false
-        
-        kc 'log new Object()'           ▸ 'console.log(new Object())'
-        
-        kc  "if d is 'function' and not o?" ▸ 
-            """
-            if (typeof(d) === 'function' && !(o != null))
-            {
-            }
-            """
-            
-        kc  "if not a is Array and not a is 'object'" ▸ 
-            """
-            if (!(a instanceof Array) && !(typeof(a) === 'object'))
-            {
-            }
-            """
-        
-    # ███████    ███       ███████    ███████  ███   ███  
-    # ███   ███  ███      ███   ███  ███       ███  ███   
-    # ███████    ███      ███   ███  ███       ███████    
-    # ███   ███  ███      ███   ███  ███       ███  ███   
-    # ███████    ███████   ███████    ███████  ███   ███  
-    
-    ▸ in if block
+  ▸ in if block
     
         kc  """
             if
@@ -96,13 +46,7 @@ use ./utils ▪ kc ke
             }
             """
             
-    #  ███████  █████████  ████████   
-    # ███          ███     ███   ███  
-    # ███████      ███     ███████    
-    #      ███     ███     ███   ███  
-    # ███████      ███     ███   ███  
-    
-    ▸ str
+  ▸ str
     
         ke  'a = "" is str'                         ▸ true
         ke  'a = "abc" is str'                      ▸ true
@@ -116,13 +60,7 @@ use ./utils ▪ kc ke
         ke  'a = null is str'                       ▸ false
         ke  'a = undefined is str'                  ▸ false
 
-    #  ███████   ███████          ███  
-    # ███   ███  ███   ███        ███  
-    # ███   ███  ███████          ███  
-    # ███   ███  ███   ███  ███   ███  
-    #  ███████   ███████     ███████   
-    
-    ▸ obj
+  ▸ obj
     
         ke  'a = {} is obj'                         ▸ true
         ke  'a = {a:1} is obj'                      ▸ true
@@ -141,13 +79,7 @@ use ./utils ▪ kc ke
         ke  'a = new Map() is obj'                  ▸ false
         ke  'a = new Set() is obj'                  ▸ false
 
-    #  ███████   ████████   ████████   
-    # ███   ███  ███   ███  ███   ███  
-    # █████████  ███████    ███████    
-    # ███   ███  ███   ███  ███   ███  
-    # ███   ███  ███   ███  ███   ███  
-    
-    ▸ arr
+  ▸ arr
     
         ke  'a = [] is arr'                         ▸ true
         ke  'a = [1 2] is arr'                      ▸ true
@@ -166,13 +98,7 @@ use ./utils ▪ kc ke
         ke  'a = new Map() is arr'                  ▸ false
         ke  'a = new Set() is arr'                  ▸ false
 
-    # ████████  ███   ███  ███   ███   ███████  
-    # ███       ███   ███  ████  ███  ███       
-    # ██████    ███   ███  ███ █ ███  ███       
-    # ███       ███   ███  ███  ████  ███       
-    # ███        ███████   ███   ███   ███████  
-    
-    ▸ func
+  ▸ func
     
         ke  'a = ->\na is func'                     ▸ true
         ke  'a = ()->\na is func'                   ▸ true
@@ -186,13 +112,7 @@ use ./utils ▪ kc ke
         ke  'a = new Array() is func'               ▸ false
         ke  'a = new Set() is func'                 ▸ false
         
-    # ███   ███  ███   ███  ██     ██  
-    # ████  ███  ███   ███  ███   ███  
-    # ███ █ ███  ███   ███  █████████  
-    # ███  ████  ███   ███  ███ █ ███  
-    # ███   ███   ███████   ███   ███  
-    
-    ▸ num
+  ▸ num
         # https://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric/174921#174921
         # with the modification that Infinity is a number
             
@@ -232,4 +152,42 @@ use ./utils ▪ kc ke
         ke  'a = (new Date(2009, 1, 1)) is num'     ▸ false
         ke  'a = (new Object()) is num'             ▸ false
         ke  'a = (->) is num'                       ▸ false
+        
+  ▸ misc
+        
+        ke '1 is "number"'              ▸   true
+        ke 'a = {} is Object'           ▸   true
+        ke 'a = {} is "object"'         ▸   true
+        ke '(->) is "function"'         ▸   true
+        ke '[] is "object"'             ▸   true
+        ke '[] is Array'                ▸   true
+        ke '"" is "string"'             ▸   true
+        ke '(new String "") is String'  ▸   true
+        ke '(new Number 0) is Number'   ▸   true
+        
+        ke  """
+            class A
+            class B extends A
+            a = new B
+            a is B and a is A and a is 'object'
+            """ ▸ true
+            
+        ke '"" is String'               ▸   false
+        ke '1 is Number'                ▸   false
+        
+        kc 'log new Object()'           ▸ 'console.log(new Object())'
+        
+        kc  "if d is 'function' and not o?" ▸ 
+            """
+            if (typeof(d) === 'function' && !(o != null))
+            {
+            }
+            """
+            
+        kc  "if not a is Array and not a is 'object'" ▸ 
+            """
+            if (!(a instanceof Array) && !(typeof(a) === 'object'))
+            {
+            }
+            """
         
