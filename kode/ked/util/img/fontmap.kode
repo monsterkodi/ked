@@ -1,50 +1,24 @@
-###
-    fontmap
 
-    renders the characters that salter can draw, plus uppercase,
-    with the JetBrainsMono Nerd Font into small grayscale glyph maps
-
-    every map is a coverage bitmap: one byte per pixel, 0 is empty,
-    255 is fully covered, in between is antialiased
-
-    the sizes are the pixel sizes a map line of a given scale occupies
-    in the mapview: 2 pixels wide and 4 pixels high per scale step
-
-    writes kode/ked/util/img/fontmap.noon with one entry per size,
-    and white on black previews to img/fontmap-<w>x<h>.png
-
-    the character set is not stored, it is the same for every size
-
-    requires pango-view and imagemagick at generation time only
-
-    to regenerate:
-
-        node js/ked/util/img/fontmap.js
-        ./kk -k kode/ked/util/img/fontmap.noon
-###
-
+use fs os
 use child_process ▪ spawnSync
-use fs
-use os
-use ../../../kxk    ▪ noon slash
+use ../../../kxk  ▪ noon slash
 
 function fontmap
+    ###
+        node js/ked/util/img/fontmap.js
+    ###
+    
+    @extra:   " !?-+_=/><^[](){}\"'#*$@%&:;.,◆●■◇◯□△▸▴◂➜✔✘"
+    @chars:   Array.from("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" + fontmap.extra)
 
-    @font:   'JetBrainsMono NFM'
-    @sizes:  [[4 8] [6 12] [8 16] [10 20] [12 24] [14 28]]
-    @chars:  Array.from("0123456789!?-+_=/><^[](){}" + "\"'#*$@%&:;., " + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-    @out:    slash.path(◆dir, '../../../../img')
-    @mapFile: slash.path(◆dir, '../../../../kode/ked/util/img/fontmap.noon')
+    @font:    'JetBrainsMono NFM ExtraBold'
+
+    @sizes:   [[8 16] [10 20] [12 24] [14 28]]
+
+    @out:     slash.path(◆dir '../../../../img')
+    @mapFile: slash.path(◆dir '../../../../kode/ked/util/img/fontmap.noon')
 
     @tmp: name -> slash.path(os.tmpdir(), "ked-fontmap-#{name}.png")
-
-    @fontFile: ->
-
-        result = @exec 'fc-match' ['-f' '%{file}' @font]
-        ⮐  '' if not result
-
-        slash.file(String(result.stdout).trim())
-
 
     @exec: cmd args ->
         
@@ -53,60 +27,36 @@ function fontmap
         if result.status != 0
             error "fontmap: #{cmd} failed with #{result.status}"
             error String(result.stderr)
-            ⮐  null
+            ⮐ null
         
         result
-
-    @identify: file ->
-
-        result = @exec 'magick' ['identify' '-format' '%wx%h' file]
-        ⮐  null if not result
-
-        [w h] = String(result.stdout).trim().split 'x'
-        [int(w) int(h)]
 
     @render: text px file ->
 
         @exec 'pango-view' ['-q' '--pixels' "--font=#{@font} #{px}" '--background=black' '--foreground=white' '--margin=0' "--text=#{text}" '-o' file]
         
-        @identify file
+        result = @exec 'magick' ['identify' '-format' '%wx%h' file]
+        ⮐ if not result
+
+        [w h] = String(result.stdout).trim().split 'x'
+        [int(w) int(h)]
 
     @grayscale: file w h ->
 
         result = @exec 'magick' [file '-filter' 'Triangle' '-resize' "#{w}x#{h}!" '-depth' '8' 'gray:-']
-        ⮐  null if not result
+        ⮐ if not result
 
         result.stdout
 
-
-    @pxFor: height ->
-        
-        best = null
-        
-        for px in 3..44
-            
-            m = @render('MMMMMMMMMM', px, @tmp('probe'))
-            ⮐  null if not m
-            
-            d = abs m[1]-height
-            
-            if not best or d < best.d
-                best = d:d px:px
-            
-            break if m[1] > height+4
-            
-        best.px
-
-
-    @buildMap: w h px ->
+    @buildMap: w h ->
         
         sequence = @chars.join(' ')
-        result = @render(sequence, px, @tmp('glyphs'))
-        ⮐  null if not result
+        result = @render(sequence, h, @tmp('glyphs'))
+        ⮐ if not result
         
         total = w * (@chars.length*2 - 1)
         data  = @grayscale(@tmp('glyphs'), total, h)
-        ⮐  null if not data
+        ⮐ if not data
         
         glyphs = {}
         
@@ -147,7 +97,6 @@ function fontmap
 
         noon.stringify(data, {indent:4 maxalign:8}) + '\n'
 
-
     @savePNG: file image ->
 
         result = child_process.spawnSync 'magick' ['-size' "#{image.w}x#{image.h}" '-depth' '8' 'rgba:-' '-strip' file] input:image.rgba maxBuffer:0x10000000
@@ -185,32 +134,28 @@ function fontmap
         
         w:pw h:ph rgba:pixels
 
-
     @generate: ->
 
         fs.mkdirSync @out recursive:true
 
-        log "font #{@fontFile()}"
+        log "#{@font}"
 
         maps = {}
 
         for [w h] in @sizes
             
-            px = @pxFor h
-            ⮐  if not px
+            glyphs = @buildMap w h
+            ⮐ if not glyphs
+
+            size = "#{w}x#{h}"
+            log size
             
-            glyphs = @buildMap w h px
-            ⮐  if not glyphs
+            maps[size] = width:w height:h font:@font glyphs:glyphs
 
-            maps["#{w}x#{h}"] = width:w height:h font:@font file:@fontFile() glyphs:glyphs
-
-            pngFile = slash.path @out "fontmap-#{w}x#{h}.png"
-            @savePNG pngFile (@preview(glyphs, w, h))
+            pngFile = slash.path @out "fontmap-#{size}.png"
+            @savePNG pngFile @preview(glyphs w h)
             
-            log "glyphs #{w}x#{h} px=#{px}"
-
-        fs.writeFileSync(@mapFile, @noonFor(maps))
-        log "map #{@mapFile}"
+        fs.writeFileSync(@mapFile @noonFor(maps))
 
 ◆main
 

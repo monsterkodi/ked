@@ -30,13 +30,13 @@ cursor
 scale
     enabled   true
     md
-        h1        5
-        h2        4
-        h3        3
-        h4        2
+        h1        7
+        h2        6
+        h3        5
+        h4        4
         li1       2
     kode
-        class     3
+        class     7
         section   2
         
 novim

@@ -2,9 +2,9 @@
 
 **kode** is a programming language that transpiles to JavaScript.
 
-# control flow
+#control flow
 
-### if
+###if
 
 ```kode
 if  
@@ -20,7 +20,7 @@ else if b then Y
           else Z
 ```
 
-### switch
+###switch
 
 ```kode
 switch x
@@ -38,7 +38,7 @@ switch x
     else            Z
 ```
 
-### for
+###for
 
 ```kode
 x = null
@@ -48,7 +48,7 @@ for a in x
 
 **kode** generates code that doesn't fail if x is not an array.
 
-### each
+###each
 
 ```kode
 obj each (k,v) -> [k,v]
@@ -69,7 +69,7 @@ A new object, array or string is build from the results and returned:
 If the function takes only one argument, 
 it is the value/item/character and a single return value is expected.
 
-### list comprehension
+###list comprehension
 
 ```kode
 l = [1,2,3]
@@ -79,9 +79,9 @@ a = (x for x in l)                                                  ▸ [1,2,3]
 
 **kode** doesn't distinguish between round and square brackets around list comprehensions.
 
-# classes
+#classes
 
-### constructor
+###constructor
 
 ```kode
 class C
@@ -95,11 +95,11 @@ class C
     constructor: ->
 ```
 
-### old school classes
+###old school classes
 
 **kode** gives you two choices for class definitions:
 
-#### function
+####function
 
 ```kode
 function ES5
@@ -120,7 +120,7 @@ ES5 = (function ()
 })()
 ```
 
-#### class
+####class
 
 ```kode
 class ES2015
@@ -142,9 +142,9 @@ class ES2015
 
 Both forms can be used in the same module, but not in the same class hierarchy. 
 
-# modules
+#modules
 
-### use
+###use
 
 ```kode
 use ./utils ▪ kc ke        ▸ import utils from "./utils.js"
@@ -174,7 +174,7 @@ log ◆dir                   ▸ [source directory]
 
 The body only runs when the module is the one node was started with.
 
-# optional commata
+#commata
 
 In **kode**, commata are optional almost anywhere.
 Those are all valid expressions:
@@ -238,16 +238,16 @@ They are `not`, `delete`, `new`, `noon`, `copy`, `clone`, `empty`,
 `valid`, `first` and `last`.
 
 
-# misc
+#misc
 
-### ranges
+###ranges
 
 ```kode
 for i in 0..2                                                       ▸ i : [0,1,2]
     a = 1...3                                                       ▸ a = [1,2]
 ```
 
-### empty
+###empty
 
 ```kode
 empty [] and empty {} and empty '' and empty null and empty NaN     ▸ true
@@ -256,27 +256,27 @@ empty 0 or empty 'a' or empty [null] or empty Infinity              ▸ false
 
 Returns true for null, undefined, NaN and empty array, object or string.
 
-### valid
+###valid
 
 ```kode
 valid 0 and valid 'a' and valid [null] and valid Infinity           ▸ true
 valid [] or valid {} or valid '' or valid null or valid NaN         ▸ false
 ```
 
-### first & last
+###first & last
 
 ```kode
 a = first [1 2 3]   ▸ 1
 b = last [1 2 3]    ▸ 3
 ```
-### negative indexing
+###negative indexing
 
 ```kode
 "abc"[-2]       ▸ 'b'
 [1,2,3][-2]     ▸ 2
 ```
 
-### ternary
+###ternary
 
 ```kode
 false ? 1 : 2                                                       ▸ 2
@@ -290,7 +290,7 @@ a = clone b                             # deep copy of b
 
 Only plain Objects, Arrays and Strings are copied. Functions, Maps, Sets, etc. are not copied.
 ```
-### eql
+###eql
 
 ```
 a eql b                                 # deep comparison
@@ -299,7 +299,7 @@ a eql b                                 # deep comparison
 Does a deep comparison of its operands. 
 Only plain Objects, Arrays and Strings are compared.
 
-### is
+###is
 
 ```kode
 1 is 'number' and '' is 'string' and {} is Object and [] is Array   ▸ true
@@ -334,9 +334,9 @@ null is obj or new Map() is obj or [] is obj                        ▸  false
 
 `is obj` evaluates to true for plain Objects only.
 
-# output
+#output
 
-### console
+###console
 
 ```kode
 log 'hello'     ▸ hello
@@ -345,7 +345,7 @@ error 'world!'  ▸ world!
 
 Simple shortcuts for `log`, `warn` and `error` methods of `console`.
 
-### noon
+###noon
 
 ```kode
 s = noon a:1 b:2
@@ -356,7 +356,7 @@ log s                                   ▸ a   1
 Operator that converts argument into string in [noon](https://github.com/monsterkodi/noon) notation.
 Handles recursion, unlike `JSON.stringify`.
 
-### ansi colors
+###ansi colors
 
 ```kode
 log Y5(r2('warning!')) ▸ output in dark red on bright yellow
@@ -366,9 +366,9 @@ log Y5(r2('warning!')) ▸ output in dark red on bright yellow
 Color functions: 'r' 'g' 'b' 'c' 'm' 'y' 'w' for foreground (uppercase for background) and a number between 1 and 8.
 
 
-# debugging
+#debugging
 
-### dbg
+###dbg
 
 ```kode
 myObj = a:1 b:2 c:d:3
@@ -395,7 +395,7 @@ f = (a) -> ▴ a ; a                      ▸ file.kode:1:11 ▴ assert failed! 
 Logs file position, message and condition code if condition isn't truthy. 
 If message is omitted, 'assert failed!' will be used.
 
-# profile
+#profile
 
 ```kode
 ●▸ sunny times
@@ -413,7 +413,7 @@ Logs time difference between matching `●▸` `●▪` pairs.
 
 `●` is a shortcut that can be used in functions: `●▪` is inserted automatically before the function returns.
 
-# tests 
+#tests 
 
 **kode** comes with its own testing framework
 

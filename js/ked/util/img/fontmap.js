@@ -2,12 +2,11 @@ var _k_ = {dir: function () { let url = import.meta.url.substring(7); let si = u
 
 var fontmap
 
+import fs from "fs"
+import os from "os"
+
 import child_process from "child_process"
 let spawnSync = child_process.spawnSync
-
-import fs from "fs"
-
-import os from "os"
 
 import kxk from "../../../kxk.js"
 let noon = kxk.noon
@@ -19,26 +18,15 @@ fontmap = (function ()
     function fontmap ()
     {}
 
-    fontmap["font"] = 'JetBrainsMono NFM'
-    fontmap["sizes"] = [[4,8],[6,12],[8,16],[10,20],[12,24],[14,28]]
-    fontmap["chars"] = Array.from("0123456789!?-+_=/><^[](){}" + "\"'#*$@%&:;., " + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    fontmap["extra"] = " !?-+_=/><^[](){}\"'#*$@%&:;.,◆●■◇◯□△▸▴◂➜✔✘"
+    fontmap["chars"] = Array.from("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" + fontmap.extra)
+    fontmap["font"] = 'JetBrainsMono NFM ExtraBold'
+    fontmap["sizes"] = [[8,16],[10,20],[12,24],[14,28]]
     fontmap["out"] = slash.path(_k_.dir(),'../../../../img')
     fontmap["mapFile"] = slash.path(_k_.dir(),'../../../../kode/ked/util/img/fontmap.noon')
     fontmap["tmp"] = function (name)
     {
         return slash.path(os.tmpdir(),`ked-fontmap-${name}.png`)
-    }
-
-    fontmap["fontFile"] = function ()
-    {
-        var result
-
-        result = this.exec('fc-match',['-f','%{file}',this.font])
-        if (!result)
-        {
-            return ''
-        }
-        return slash.file(String(result.stdout).trim())
     }
 
     fontmap["exec"] = function (cmd, args)
@@ -55,24 +43,19 @@ fontmap = (function ()
         return result
     }
 
-    fontmap["identify"] = function (file)
+    fontmap["render"] = function (text, px, file)
     {
         var h, result, w
 
+        this.exec('pango-view',['-q','--pixels',`--font=${this.font} ${px}`,'--background=black','--foreground=white','--margin=0',`--text=${text}`,'-o',file])
         result = this.exec('magick',['identify','-format','%wx%h',file])
         if (!result)
         {
-            return null
+            return
         }
         var _a_ = String(result.stdout).trim().split('x'); w = _a_[0]; h = _a_[1]
 
         return [parseInt(w),parseInt(h)]
-    }
-
-    fontmap["render"] = function (text, px, file)
-    {
-        this.exec('pango-view',['-q','--pixels',`--font=${this.font} ${px}`,'--background=black','--foreground=white','--margin=0',`--text=${text}`,'-o',file])
-        return this.identify(file)
     }
 
     fontmap["grayscale"] = function (file, w, h)
@@ -82,51 +65,26 @@ fontmap = (function ()
         result = this.exec('magick',[file,'-filter','Triangle','-resize',`${w}x${h}!`,'-depth','8','gray:-'])
         if (!result)
         {
-            return null
+            return
         }
         return result.stdout
     }
 
-    fontmap["pxFor"] = function (height)
-    {
-        var best, d, m, px
-
-        best = null
-        for (px = 3; px <= 44; px++)
-        {
-            m = this.render('MMMMMMMMMM',px,this.tmp('probe'))
-            if (!m)
-            {
-                return null
-            }
-            d = Math.abs(m[1] - height)
-            if (!best || d < best.d)
-            {
-                best = {d:d,px:px}
-            }
-            if (m[1] > height + 4)
-            {
-                break
-            }
-        }
-        return best.px
-    }
-
-    fontmap["buildMap"] = function (w, h, px)
+    fontmap["buildMap"] = function (w, h)
     {
         var ch, cov, data, glyphs, i, result, sequence, total, x, y
 
         sequence = this.chars.join(' ')
-        result = this.render(sequence,px,this.tmp('glyphs'))
+        result = this.render(sequence,h,this.tmp('glyphs'))
         if (!result)
         {
-            return null
+            return
         }
         total = w * (this.chars.length * 2 - 1)
         data = this.grayscale(this.tmp('glyphs'),total,h)
         if (!data)
         {
-            return null
+            return
         }
         glyphs = {}
         var list = _k_.list(this.chars)
@@ -235,33 +193,28 @@ fontmap = (function ()
 
     fontmap["generate"] = function ()
     {
-        var glyphs, h, maps, pngFile, px, w
+        var glyphs, h, maps, pngFile, size, w
 
         fs.mkdirSync(this.out,{recursive:true})
-        console.log(`font ${this.fontFile()}`)
+        console.log(`${this.font}`)
         maps = {}
         var list = _k_.list(this.sizes)
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             w = list[_a_][0]
             h = list[_a_][1]
-            px = this.pxFor(h)
-            if (!px)
-            {
-                return
-            }
-            glyphs = this.buildMap(w,h,px)
+            glyphs = this.buildMap(w,h)
             if (!glyphs)
             {
                 return
             }
-            maps[`${w}x${h}`] = {width:w,height:h,font:this.font,file:this.fontFile(),glyphs:glyphs}
-            pngFile = slash.path(this.out,`fontmap-${w}x${h}.png`)
-            this.savePNG(pngFile,(this.preview(glyphs,w,h)))
-            console.log(`glyphs ${w}x${h} px=${px}`)
+            size = `${w}x${h}`
+            console.log(size)
+            maps[size] = {width:w,height:h,font:this.font,glyphs:glyphs}
+            pngFile = slash.path(this.out,`fontmap-${size}.png`)
+            this.savePNG(pngFile,this.preview(glyphs,w,h))
         }
-        fs.writeFileSync(this.mapFile,this.noonFor(maps))
-        console.log(`map ${this.mapFile}`)
+        return fs.writeFileSync(this.mapFile,this.noonFor(maps))
     }
 
     return fontmap
@@ -273,5 +226,5 @@ if (((globalThis.process != null ? globalThis.process.argv : undefined) != null)
 }
 export default fontmap;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZm9udG1hcC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdXRpbC9pbWcvZm9udG1hcC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BeUJJLG9CQUFBO0lBQWdCOztPQUNoQixTQUFBOztPQUNBLFNBQUE7O09BQ1MsVUFBQTtJQUFTO0lBQUs7OztBQUVsQixXQUFUOzs7OztJQUVJLFNBQUMsU0FBUTtJQUNULFNBQUMsWUFBVSxFQUFFLElBQUksRUFBRSxLQUFLLEVBQUUsS0FBSyxHQUFHLEtBQUssR0FBRyxLQUFLLEdBQUc7SUFDbEQsU0FBQyxVQUFRLE1BQU0sS0FBSywrQkFBK0IsbUJBQW1CLCtCQUErQjtJQUNyRyxTQUFDLFFBQVEsTUFBTSxLQUFNLFVBQUs7SUFDMUIsU0FBQyxZQUFTLE1BQU0sS0FBTSxVQUFLO0lBRTNCLFNBQUMsa0JBQUs7O2VBQVEsTUFBTSxLQUFLLEdBQUcsd0JBQXlCOzs7SUFFckQsU0FBQzs7OztRQUVHLFNBQVMsS0FBQyxLQUFLLFlBQVksS0FBSyxVQUFVLEtBQUM7YUFDOUI7O21CQUFWOztlQUVILE1BQU0sS0FBSyxPQUFPLE9BQU8sUUFBUTs7O0lBR3JDLFNBQUMsbUJBQU0sS0FBSTs7OztRQUVQLFNBQVMsY0FBYyxVQUFVLElBQUksTUFBSyxVQUFVO1lBRWpELE9BQU8sV0FBVTs7WUFDaEIsMEJBQWtCLG1CQUFtQixPQUFPO1lBQzVDLGNBQU0sT0FBTyxPQUFPO21CQUNqQjs7ZUFFUDs7O0lBRUosU0FBQyx1QkFBVTs7OztRQUVQLFNBQVMsS0FBQyxLQUFLLFVBQVUsV0FBVyxVQUFVLFFBQVE7YUFDdkM7O21CQUFaOztrQkFFSyxPQUFPLE9BQU8sUUFBUSxPQUFPLE1BQU0sTUFBMUMsWUFBRTs7eUJBQ0UsWUFBTzs7O0lBRWhCLFNBQUMscUJBQVEsTUFBSyxJQUFHOztRQUViLEtBQUMsS0FBSyxjQUFjLEtBQUsscUJBQXFCLEtBQUMsUUFBUSxLQUFLLHFCQUFxQixxQkFBcUIsdUJBQXVCLE9BQU8sS0FBSztl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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZm9udG1hcC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdXRpbC9pbWcvZm9udG1hcC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ0ksU0FBQTtPQUFHLFNBQUE7O09BQ0gsb0JBQUE7SUFBZ0I7O09BQ1AsVUFBQTtJQUFPO0lBQUs7OztBQUVoQixXQUFUOzs7OztJQUtJLFNBQUMsVUFBUztJQUNWLFNBQUMsVUFBUyxNQUFNLEtBQUssbUVBQW1FLFFBQVE7SUFFaEcsU0FBQyxTQUFTO0lBRVYsU0FBQyxZQUFXLEVBQUUsS0FBSyxHQUFHLEtBQUssR0FBRyxLQUFLLEdBQUc7SUFFdEMsU0FBQyxRQUFTLE1BQU0sS0FBTSxVQUFJO0lBQzFCLFNBQUMsWUFBUyxNQUFNLEtBQU0sVUFBSTtJQUUxQixTQUFDLGtCQUFLOztlQUFRLE1BQU0sS0FBSyxHQUFHLHdCQUF5Qjs7O0lBRXJELFNBQUMsbUJBQU0sS0FBSTs7OztRQUVQLFNBQVMsY0FBYyxVQUFVLElBQUksTUFBSyxVQUFVO1lBRWpELE9BQU8sV0FBVTs7WUFDaEIsMEJBQWtCLG1CQUFtQixPQUFPO1lBQzVDLGNBQU0sT0FBTyxPQUFPO21CQUNsQjs7ZUFFTjs7O0lBRUosU0FBQyxxQkFBUSxNQUFLLElBQUc7Ozs7UUFFYixLQUFDLEtBQUssY0FBYyxLQUFLLHFCQUFxQixLQUFDLFFBQVEsS0FBSyxxQkFBcUIscUJBQXFCLHVCQUF1QixPQUFPLEtBQUs7UUFFekksU0FBUyxLQUFDLEtBQUssVUFBVSxXQUFXLFVBQVUsUUFBUTthQUM3Qzs7OztrQkFFRCxPQUFPLE9BQU8sUUFBUSxPQUFPLE1BQU0sTUFBMUMsWUFBRTs7eUJBQ0UsWUFBTzs7O0lBRWhCLFNBQUMsd0JBQVcsTUFBSyxHQUFFOzs7O1FBRWYsU0FBUyxLQUFDLEtBQUssVUFBVSxLQUFLLFVBQVUsV0FBVyxhQUFhLEtBQUssS0FBSyxTQUFTLElBQUk7YUFDOUU7Ozs7ZUFFVCxPQUFPOzs7SUFFWCxTQUFDLHVCQUFVLEdBQUU7Ozs7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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/util/img/fontmap.kode

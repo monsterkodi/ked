@@ -43,9 +43,6 @@ function glyphs
 
     @hasScale: scale ->
 
-        w = scale*2
-        h = scale*4
-
-        fontmap["#{w}x#{h}"]?
+        fontmap["#{scale*2}x#{scale*4}"]?
 
 export glyphs

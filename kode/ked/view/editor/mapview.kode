@@ -10,13 +10,12 @@
     also used for browse and quicky previews
 ###
 
-use ../../../kxk ▪ kstr post
-use ../../util   ◆ prof syntax 
-use ../../util/img ◆ glyphs
-use ../../theme  ◆ color theme
+use ../../../kxk    ▪ kstr post
+use ../../util      ◆ prof syntax 
+use ../../util/img  ◆ glyphs
+use ../../theme     ◆ color theme
 use ../../edit/tool ◆ colorspans
-use ../base      ◆ view
-
+use ../base         ◆ view
 function mapview extends view
 
     @: screen @state ->
@@ -34,7 +33,7 @@ function mapview extends view
         @csz          = []
         @pixelsPerRow = 4
         @pixelsPerCol = 2
-        @textScale    = 2 # 4x8 is mushy, but still rendered for now
+        @textScale    = 4 
             
     #  ███████  ███   ███   ███████   ███   ███  
     # ███       ███   ███  ███   ███  ███ █ ███  
@@ -202,12 +201,12 @@ function mapview extends view
             
     imageForLine: data line y h ->
     
-        scale  = @lineRows y
-        stride = @pixelsPerCol * scale
-        hgt    = h ? @imageHeight(y)
-        w      = int(data.length/(3*hgt))
-        maxX   = int(w/stride)
-        syntax = @getSyntax()
+        scale   = @lineRows y
+        stride  = @pixelsPerCol * scale
+        hgt     = h ? @imageHeight(y)
+        w       = int(data.length/(3*hgt))
+        maxX    = int(w/stride)
+        syntax  = @getSyntax()
         classes = syntax.getClasses y
 
         fgSpans = []
@@ -247,7 +246,8 @@ function mapview extends view
 
             continue if not valid ch or ch == ' '
 
-            f = 0.7
+            f = 0.7  # darken character blocks
+            f = 1 if scale >= @textScale # no darkening for lines that are rendered via fontmap
             clss = classes[x]
             clss ?= 'text'
             if ch in '0█'
