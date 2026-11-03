@@ -1,24 +1,16 @@
-###
-     ███████   ███████  ████████   ████████  ████████  ███   ███
-    ███       ███       ███   ███  ███       ███       ████  ███
-    ███████   ███       ███████    ███████   ███████   ███ █ ███
-         ███  ███       ███   ███  ███       ███       ███  ████
-    ███████    ███████  ███   ███  ████████  ████████  ███   ███
-
-    an array of cells (background|foreground colors and character)
-###
 
 use ../../../kxk    ▪ kseg
 use ../../theme     ◆ color
 use ../../edit/tool ◆ belt
 
-function screen
-
-    @MAIN_MARK: '\x1b[4:1m'
-    @MULTI_MARK: '\x1b[4:5m'
+■screen
+    # an array of cells (background|foreground colors and character)
+    
+    @MAIN_MARK:   '\x1b[4:1m'
+    @MULTI_MARK:  '\x1b[4:5m'
     @SELECT_MARK: '\x1b[7;4:3m'
     @HILGHT_MARK: '\x1b[7;4:4m'
-    @END_MARK: '\x1b[0m'
+    @END_MARK:    '\x1b[0m'
 
     @: @t -> 
     
@@ -30,17 +22,10 @@ function screen
         @cols = @t.cols()
         
         @c = belt.cells @cols @rows
-        # @meta_clear()
 
         @frameRuns   = []
         @frameBlocks = []
         @eraseRects  = []
-        
-    #  ███████  ████████  █████████  
-    # ███       ███          ███     
-    # ███████   ███████      ███     
-    #      ███  ███          ███     
-    # ███████   ████████     ███     
     
     add: x y char fg bg =>
         
@@ -54,9 +39,6 @@ function screen
         else
             @set x y char fg bg
             1
-
-    #  the blocks of a scaled line form a run of adjacent cells. 
-    #  a run is remembered so the next frame can erase its whole rectangle.
 
     addRun: x y scale w =>
 
@@ -139,27 +121,6 @@ function screen
             for cell in row
                 cell.bg = bg
             
-    # ██     ██  ████████  █████████   ███████ 
-    # ███   ███  ███          ███     ███   ███
-    # █████████  ███████      ███     █████████
-    # ███ █ ███  ███          ███     ███   ███
-    # ███   ███  ████████     ███     ███   ███
-            
-    # meta_set: x y m =>
-    #     
-    #     if 0 <= x < @cols and 0 <= y < @rows
-    #         @m[y][x] = m
-            
-    # meta_clear: =>
-    #     
-    #     @m = belt.metas @cols @rows
-            
-    #  ███████   ████████  █████████  
-    # ███        ███          ███     
-    # ███  ████  ███████      ███     
-    # ███   ███  ███          ███     
-    #  ███████   ████████     ███     
-    
     get_char: x y =>
 
         if 0 <= x < @cols and 0 <= y < @rows
@@ -178,8 +139,6 @@ function screen
             ⮐ @c[y][x].bg
         []
         
-    #  the buffer as text, one line per row
-    
     text: =>
         
         lines = []
@@ -277,17 +236,9 @@ function screen
         if 0 <= x < @cols and 0 <= y < @rows
             @c[y][x].mark = kind
         
-    # ████████   ████████  ███   ███  ███████    ████████  ████████   
-    # ███   ███  ███       ████  ███  ███   ███  ███       ███   ███  
-    # ███████    ███████   ███ █ ███  ███   ███  ███████   ███████    
-    # ███   ███  ███       ███  ████  ███   ███  ███       ███   ███  
-    # ███   ███  ████████  ███   ███  ███████    ████████  ███   ███  
-    
     render: =>
         
         @t.write @renderString()
-
-    #  erase a rectangle of cells, including any scaled text drawn there
 
     erase_scaled: x1 y1 x2 y2 bg=null =>
 
@@ -351,13 +302,7 @@ function screen
                     s += fg
                     pfg = fg
                 
-                # for mp in @m[y][x].pre
-                #     s += mp 
-                    
                 s += char
-                
-                # for mp in @m[y][x].pst
-                #     s += mp 
                 
             s += '\n' if y != @rows-1
 

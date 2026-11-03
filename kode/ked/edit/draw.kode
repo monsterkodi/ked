@@ -137,7 +137,6 @@ use              ◆ mode
                 else if ch in '0█'
                     if clss.endsWith('header') ➜ headerClass = clss
 
-                # @cells.meta_clone px row # ϵ⌶⟙ℍϵℜ 𝛋𝚒⟅⟅ 𝚒𝜏 ⊚ℜ ⫐◯ 𝚒𝜏!
                 @cells.add_scaled px row ch fg bg scale
 
                 if clss == 'invert_bg'

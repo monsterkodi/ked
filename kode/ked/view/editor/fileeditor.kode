@@ -48,7 +48,6 @@ use                 ◆ mapscr
         
     setCurrentFile: @currentFile =>
         
-        @cells.meta_clear()
         @gutter.clearChanges()
         
     onFuntreeLoaded: =>
