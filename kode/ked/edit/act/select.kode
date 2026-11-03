@@ -326,7 +326,7 @@ export
         
         ▴ selections.length == @s.cursors.length
                     
-        @setSelections selections
+        @setSelections selections true
         
     selectAllLines: ->
         

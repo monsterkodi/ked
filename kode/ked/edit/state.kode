@@ -72,7 +72,7 @@ use           ◆ keys mode
         @swapState()
         @
 
-    setSelections: selections => @set 'selections' belt.mergeLineRanges(@s.lines selections)
+    setSelections: (selections keepEmpty) => @set 'selections' belt.mergeLineRanges(@s.lines selections keepEmpty)
     setHighlights: highlights => @set 'highlights' belt.normalizeSpans(highlights)
 
     setColorsForRanges: (ranges fg bg voided=[]) =>
