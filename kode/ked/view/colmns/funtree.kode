@@ -62,7 +62,7 @@ SYMBOL =
         
     getChar: x y char => char
 
-■funtree extends choices
+■funtree□choices
 
     @: @editor @name features ->
         

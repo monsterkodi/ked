@@ -120,6 +120,10 @@ ES5 = (function ()
 })()
 ```
 
+```kode
+■ Supr □ Base  # Supr extends Base
+```
+
 ####class
 
 ```kode
