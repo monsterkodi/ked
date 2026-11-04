@@ -42,6 +42,8 @@ scale
         bang!     7
         bang      7
     noon
+        bang!     7
+        bang      7
         obj       2
         
 novim

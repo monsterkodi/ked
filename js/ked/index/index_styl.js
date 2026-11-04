@@ -1,12 +1,18 @@
 var _k_ = {in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, trim: function (s,c=' ') {return _k_.ltrim(_k_.rtrim(s,c),c)}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, ltrim: function (s,c=' ') { while (_k_.in(s[0],c)) { s = s.slice(1) } return s}, rtrim: function (s,c=' ') {while (_k_.in(s.slice(-1)[0],c)) { s = s.slice(0, s.length - 1) } return s}}
 
+var index_styl
+
 import kxk from "../../kxk.js"
 let kermit = kxk.kermit
 let kstr = kxk.kstr
 
-class index_styl
+
+index_styl = (function ()
 {
-    parseLine (index, line)
+    function index_styl ()
+    {}
+
+    index_styl.prototype["parseLine"] = function (index, line)
     {
         if (line.startsWith(' '))
         {
@@ -21,7 +27,7 @@ class index_styl
         }
     }
 
-    parse (text)
+    index_styl.prototype["parse"] = function (text)
     {
         var index, line, lines
 
@@ -35,9 +41,11 @@ class index_styl
         }
         return this.result
     }
-}
+
+    return index_styl
+})()
 
 export default index_styl;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhfc3R5bC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhfc3R5bC5rb2RlIl0sIm1hcHBpbmdzIjoiOztPQVFVLFVBQUE7SUFBTTtJQUFPOztBQUV2QixNQUFNOztJQVFGLFdBQVcsT0FBTTs7WUFFUCxLQUFLLFdBQVc7Ozs7bUJBRW5CLEtBQUssR0FBTTs7eUJBQ0YsV0FBSyxJQUFNLE1BQU0sWUFBWSxXQUFVOzt1QkFDM0MsS0FBQyxPQUFPLFFBQVEsTUFBSyxLQUFLLFdBQUssR0FBSyxLQUFLOzs7OztJQVFyRCxPQUFPOzs7O1FBRUgsUUFBUSxLQUFLLE1BQU07UUFFbkIsS0FBQyxVQUFTLFdBQVcsU0FBUyxNQUFNLE1BQU07NEJBRXhCO2FBQVQ7O1lBQUw7WUFDQSxLQUFDLFVBQVUsTUFBTTs7ZUFFckIsS0FBQzs7OztlQUVGIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhfc3R5bC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhfc3R5bC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNO0lBQU87OztBQUV0QixjQUFEOzs7OzswQkFFSSx3QkFBVyxPQUFNOztZQUVQLEtBQUssV0FBVzs7OzttQkFFbkIsS0FBSyxHQUFNOzt5QkFDRixXQUFLLElBQU0sTUFBTSxZQUFZLFdBQVU7O3VCQUMzQyxLQUFDLE9BQU8sUUFBUSxNQUFLLEtBQUssV0FBSyxHQUFLLEtBQUs7Ozs7OzBCQUVyRCxvQkFBTzs7OztRQUVILFFBQVEsS0FBSyxNQUFNO1FBRW5CLEtBQUMsVUFBUyxXQUFXLFNBQVMsTUFBTSxNQUFNOzRCQUV4QjthQUFUOztZQUFMO1lBQ0EsS0FBQyxVQUFVLE1BQU07O2VBRXJCLEtBQUM7OztXQW5CUjs7O2VBcUJNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/index/index_styl.kode

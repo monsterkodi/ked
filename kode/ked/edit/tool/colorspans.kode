@@ -1,3 +1,6 @@
+
+use ../../../kxk ▪ kseg
+■colorspans
 ###
     colorspans
 
@@ -5,10 +8,6 @@
     a span is [x1 y x2 color]
     x2 is exclusive
 ###
-
-use ../../../kxk ▪ kseg
-
-function colorspans
 
     @normalize: spans ->
 

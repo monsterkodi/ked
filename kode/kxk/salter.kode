@@ -442,4 +442,72 @@ salter.font = font
 
 salter.hasChar = c -> valid font[c]
 
+salter.desalt = text ->
+    
+    lines = if text is arr then text else text.split '\n'
+    
+    ⮐  '' if empty lines
+    
+    width = 0
+    for line in lines
+        width = max width line.length
+    
+    ⮐  '' if width == 0
+    
+    rows = lines.map (line) -> line + ' '.repeat(width - line.length)
+    
+    glyphs = Object.keys font
+    
+    out = ''
+    x = 0
+    
+    while x < width
+        
+        remaining = false
+        for row in rows
+            if not empty trim row[x..]
+                remaining = true
+                break
+        break if not remaining
+        
+        best = null
+        
+        for ch in glyphs
+            
+            gr = font[ch]
+            w = gr[0].length
+            
+            continue if x + w > width
+            
+            ok = true
+            for r in 0...5
+                if rows[r][x...x+w] != gr[r]
+                    ok = false
+                    break
+            continue if not ok
+            
+            if x + w < width
+                for r in 0...5
+                    if rows[r][x+w...x+w+2] != '  '
+                        ok = false
+                        break
+            
+            if ok and (not best or w > best[1])
+                best = [ch w]
+        
+        break if not best
+        
+        out += best[0]
+        x += best[1]
+        
+        if x + 2 <= width
+            separated = true
+            for r in 0...5
+                if rows[r][x...x+2] != '  '
+                    separated = false
+                    break
+            x += 2 if separated
+    
+    out
+
 export salter

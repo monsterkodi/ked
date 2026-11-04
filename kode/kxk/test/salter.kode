@@ -1,0 +1,16 @@
+use .. ◆ salter
+
+▸ salter
+
+    ▸ desalt reverses salted text
+
+        salter.desalt(salter('hello'))          ▸ 'hello'
+        salter.desalt(salter('test header'))    ▸ 'test header'
+        salter.desalt(salter('a b c'))          ▸ 'a b c'
+        salter.desalt(salter('1234567890'))     ▸ '1234567890'
+        salter.desalt(salter('foo-bar_baz'))    ▸ 'foo-bar_baz'
+
+    ▸ desalt accepts lines
+
+        text = salter 'hello'
+        salter.desalt(text.split('\n')) ▸ 'hello'

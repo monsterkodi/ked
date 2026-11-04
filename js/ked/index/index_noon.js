@@ -1,11 +1,17 @@
 var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
+var index_noon
+
 import kxk from "../../kxk.js"
 let kstr = kxk.kstr
 
-class index_noon
+
+index_noon = (function ()
 {
-    parseLine (index, line)
+    function index_noon ()
+    {}
+
+    index_noon.prototype["parseLine"] = function (index, line)
     {
         var name, words
 
@@ -30,7 +36,7 @@ class index_noon
         return this.result.funcs.push({name:name,line:index})
     }
 
-    parse (text)
+    index_noon.prototype["parse"] = function (text)
     {
         var index, line, lines
 
@@ -44,9 +50,11 @@ class index_noon
         }
         return this.result
     }
-}
+
+    return index_noon
+})()
 
 export default index_noon;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhfbm9vbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhfbm9vbi5rb2RlIl0sIm1hcHBpbmdzIjoiOztPQUNVLFVBQUE7SUFBTTs7QUFFaEIsTUFBTTs7SUFFRixXQUFXLE9BQU07Ozs7c0JBRUQ7Ozs7bUJBQ04sS0FBSyxJQUFPLElBQUk7Ozs7WUFDaEIsS0FBSyxPQUFNOzs7O1FBRWpCLFFBQVEsS0FBSyxNQUFNO1FBQ25CLE9BQU8sTUFBTTtzQkFDRDs7OztlQUVaLEtBQUMsT0FBTyxNQUFNLE1BQUssS0FBSyxLQUFLLEtBQUs7OztJQUV0QyxPQUFPOzs7O1FBRUgsUUFBUSxLQUFLLE1BQU07UUFFbkIsS0FBQyxVQUFTLFdBQVcsU0FBUyxNQUFNLE1BQU07NEJBRXhCO2FBQVQ7O1lBQUw7WUFDQSxLQUFDLFVBQVUsTUFBTTs7ZUFFckIsS0FBQzs7OztlQUVGIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhfbm9vbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhfbm9vbi5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNOzs7QUFFZixjQUFEOzs7OzswQkFFSSx3QkFBVyxPQUFNOzs7O3NCQUVEOzs7O21CQUNOLEtBQUssSUFBTyxJQUFJOzs7O1lBQ2hCLEtBQUssT0FBTTs7OztRQUVqQixRQUFRLEtBQUssTUFBTTtRQUNuQixPQUFPLE1BQU07c0JBQ0Q7Ozs7ZUFFWixLQUFDLE9BQU8sTUFBTSxNQUFLLEtBQUssS0FBSyxLQUFLOzs7MEJBRXRDLG9CQUFPOzs7O1FBRUgsUUFBUSxLQUFLLE1BQU07UUFFbkIsS0FBQyxVQUFTLFdBQVcsU0FBUyxNQUFNLE1BQU07NEJBRXhCO2FBQVQ7O1lBQUw7WUFDQSxLQUFDLFVBQVUsTUFBTTs7ZUFFckIsS0FBQzs7O1dBdkJSOzs7ZUF5Qk0ifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/index/index_noon.kode

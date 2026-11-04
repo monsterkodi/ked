@@ -2,7 +2,7 @@
 use ../../kxk ▪ post slash nfs
 use ../util   ◆ walker config
 
-class prjcts
+■prjcts
         
     @queue:    []
     @projects: {}

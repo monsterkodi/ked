@@ -1,11 +1,17 @@
 var _k_ = {in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
+var index_json
+
 import kxk from "../../kxk.js"
 let kstr = kxk.kstr
 
-class index_json
+
+index_json = (function ()
 {
-    parseLine (index, line)
+    function index_json ()
+    {}
+
+    index_json.prototype["parseLine"] = function (index, line)
     {
         var ch, escaped, i, inString, j, name, stringStart
 
@@ -64,7 +70,7 @@ class index_json
         }
     }
 
-    parse (text)
+    index_json.prototype["parse"] = function (text)
     {
         var index, line, lines
 
@@ -79,9 +85,11 @@ class index_json
         }
         return this.result
     }
-}
+
+    return index_json
+})()
 
 export default index_json;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhfanNvbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhfanNvbi5rb2RlIl0sIm1hcHBpbmdzIjoiOztPQUNVLFVBQUE7SUFBTTs7QUFFaEIsTUFBTTs7SUFFRixXQUFXLE9BQU07Ozs7UUFFYixXQUFXO1FBQ1gsVUFBVTtRQUNWLGNBQWM7UUFDZCxJQUFJO2VBRUUsSUFBSSxLQUFLOztZQUVYLEtBQUssS0FBSztnQkFFUDs7b0JBRUk7O29CQUNDLFVBQVU7O3lCQUNOLE9BQU07O29CQUNWLFVBQVU7O3lCQUNOLE9BQU07O29CQUVWLFdBQVc7b0JBRVgsSUFBSSxJQUFFOzJCQUNBLElBQUksS0FBSyxpQkFBVyxLQUFLLElBQU8sSUFBSTs7d0JBQ3RDOzt3QkFFRCxLQUFDLFVBQVMsS0FBTSxLQUFLLE9BQU07O3dCQUMxQixPQUFPLFdBQUssb0JBQWMsaUJBQUE7dUNBQ2I7OzRCQUNULEtBQUMsT0FBTyxNQUFNLE1BQUssS0FBSyxLQUFLLEtBQUs7Ozs7Ozs7b0JBRzNDLE9BQU07O29CQUNMLFdBQVc7b0JBQ1gsY0FBYyxJQUFFOztnQ0FDWixJQUFPLElBQUk7O29CQUNmLEtBQUM7O2dDQUNHLElBQU8sSUFBSTs7b0JBQ2YsS0FBQzs7O1lBRVQ7Ozs7SUFFUixPQUFPOzs7O1FBRUgsUUFBUSxLQUFLLE1BQU07UUFFbkIsS0FBQyxRQUFRO1FBQ1QsS0FBQyxVQUFTLFdBQVcsU0FBUyxNQUFNLE1BQU07NEJBRXhCO2FBQVQ7O1lBQUw7WUFDQSxLQUFDLFVBQVUsTUFBTTs7ZUFFckIsS0FBQzs7OztlQUVGIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhfanNvbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhfanNvbi5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNOzs7QUFFZixjQUFEOzs7OzswQkFFSSx3QkFBVyxPQUFNOzs7O1FBRWIsV0FBVztRQUNYLFVBQVU7UUFDVixjQUFjO1FBQ2QsSUFBSTtlQUVFLElBQUksS0FBSzs7WUFFWCxLQUFLLEtBQUs7Z0JBRVA7O29CQUVJOztvQkFDQyxVQUFVOzt5QkFDTixPQUFNOztvQkFDVixVQUFVOzt5QkFDTixPQUFNOztvQkFFVixXQUFXO29CQUVYLElBQUksSUFBRTsyQkFDQSxJQUFJLEtBQUssaUJBQVcsS0FBSyxJQUFPLElBQUk7O3dCQUN0Qzs7d0JBRUQsS0FBQyxVQUFTLEtBQU0sS0FBSyxPQUFNOzt3QkFDMUIsT0FBTyxXQUFLLG9CQUFjLGlCQUFBO3VDQUNiOzs0QkFDVCxLQUFDLE9BQU8sTUFBTSxNQUFLLEtBQUssS0FBSyxLQUFLOzs7Ozs7O29CQUczQyxPQUFNOztvQkFDTCxXQUFXO29CQUNYLGNBQWMsSUFBRTs7Z0NBQ1osSUFBTyxJQUFJOztvQkFDZixLQUFDOztnQ0FDRyxJQUFPLElBQUk7O29CQUNmLEtBQUM7OztZQUVUOzs7OzBCQUVSLG9CQUFPOzs7O1FBRUgsUUFBUSxLQUFLLE1BQU07UUFFbkIsS0FBQyxRQUFRO1FBQ1QsS0FBQyxVQUFTLFdBQVcsU0FBUyxNQUFNLE1BQU07NEJBRXhCO2FBQVQ7O1lBQUw7WUFDQSxLQUFDLFVBQVUsTUFBTTs7ZUFFckIsS0FBQzs7O1dBckRSOzs7ZUF1RE0ifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/index/index_json.kode

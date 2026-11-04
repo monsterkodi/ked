@@ -1,6 +1,9 @@
-###
-    motions
 
+use ../../../kxk ▪ kseg
+use              ◆ belt
+
+■motion
+###
     a motion is a plain value like {kind:'word', count:3}
 
     range turns one into a line range [startX startY endX endY]
@@ -28,11 +31,6 @@
         lineUp          count lines above and the current one
         textObject      an inner or around word, quoted string or bracket pair
 ###
-
-use ../../../kxk ▪ kseg
-use              ◆ belt
-
-function motion
 
     @isLinewise: spec -> spec.kind in ['line' 'lineDown' 'lineUp' 'lineFirst' 'lineFirstDown' 'lineFirstUp']
 

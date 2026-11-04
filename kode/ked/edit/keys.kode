@@ -1,17 +1,11 @@
-###
-    ███   ███  ████████  ███   ███   ███████  
-    ███  ███   ███        ███ ███   ███       
-    ███████    ███████     █████    ███████   
-    ███  ███   ███          ███          ███  
-    ███   ███  ████████     ███     ███████   
-
-    maps keyboard input to text manipulation
-    functions of edit▸state
-###
 
 use ../util ◆ config
 use ◆ mode
-
+#!keys
+###
+    maps keyboard input to text manipulation
+    functions of edit▸state
+###
 handleKey = key event -> # will be bound to state
 
     # log 'edit.handleKey' key event

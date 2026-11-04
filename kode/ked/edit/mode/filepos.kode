@@ -1,20 +1,14 @@
-###
-████████  ███  ███      ████████  ████████    ███████    ███████
-███       ███  ███      ███       ███   ███  ███   ███  ███     
-██████    ███  ███      ███████   ████████   ███   ███  ███████ 
-███       ███  ███      ███       ███        ███   ███       ███
-███       ███  ███████  ████████  ███         ███████   ███████ 
 
+use ../../../kxk ▪ post kutil slash
+
+■filepos
+
+###
 ◆ on cursors change ➜ stores main cursor and view in session 
 ◆ on file loaded    ➜ restores main cursor and view from session
 ◆ on key event      ➜ provides file edits navigation via shortcuts
 ◆ on post insert    ➜ tracks insertion points for file edits navigation
 ###
-
-use ../../../kxk ▪ post kutil slash
-
-function filepos
-
     @autoStart: true
     
     @fileposl: []
@@ -38,12 +32,6 @@ function filepos
         
         post.emit 'redraw'
         
-    #  ███████  ███   ███  ████████    ███████   ███████   ████████    ███████
-    # ███       ███   ███  ███   ███  ███       ███   ███  ███   ███  ███     
-    # ███       ███   ███  ███████    ███████   ███   ███  ███████    ███████ 
-    # ███       ███   ███  ███   ███       ███  ███   ███  ███   ███       ███
-    #  ███████   ███████   ███   ███  ███████    ███████   ███   ███  ███████ 
-
     cursorsSet: ->
         
         #  restoring a position must not overwrite the position that is the source of it
@@ -70,12 +58,6 @@ function filepos
             post.emit 'title.filepos' fposl filepos.offset
             ked_session.set "editor▸filepos▸#{file}" curview
             
-    # ███       ███████    ███████   ███████    ████████  ███████  
-    # ███      ███   ███  ███   ███  ███   ███  ███       ███   ███
-    # ███      ███   ███  █████████  ███   ███  ███████   ███   ███
-    # ███      ███   ███  ███   ███  ███   ███  ███       ███   ███
-    # ███████   ███████   ███   ███  ███████    ████████  ███████  
-
     fileLoaded: file row col view ->
         
         if row?
@@ -115,12 +97,6 @@ function filepos
 
         post.emit 'title.filepos' fposl filepos.offset
 
-    #  ███████  ███   ███   ███████   ████████ 
-    # ███       ███ █ ███  ███   ███  ███   ███
-    # ███████   █████████  █████████  ████████ 
-    #      ███  ███   ███  ███   ███  ███      
-    # ███████   ██     ██  ███   ███  ███      
-
     swapPrevious: =>
     
         ⮐  if filepos.fileposl.length < 2
@@ -135,12 +111,6 @@ function filepos
         
         @emitOpen()
                     
-    #  ███████    ███████ 
-    # ███        ███   ███
-    # ███  ████  ███   ███
-    # ███   ███  ███   ███
-    #  ███████    ███████ 
-
     goBackward: =>
     
         ⮐  if filepos.fileposl.length < 2
@@ -158,12 +128,6 @@ function filepos
         filepos.offset -= 1
 
         @emitOpen()
-
-    # ████████  ██     ██  ███  █████████         ███████   ████████   ████████  ███   ███
-    # ███       ███   ███  ███     ███           ███   ███  ███   ███  ███       ████  ███
-    # ███████   █████████  ███     ███           ███   ███  ████████   ███████   ███ █ ███
-    # ███       ███ █ ███  ███     ███           ███   ███  ███        ███       ███  ████
-    # ████████  ███   ███  ███     ███            ███████   ███        ████████  ███   ███
 
     emitOpen: ->
     

@@ -60,11 +60,7 @@ use           ◆ keys mode
         @h = [@s] # undo states (history)
         @r = []   # redo states
 
-    #  ███████  ████████  █████████
-    # ███       ███          ███
-    # ███████   ███████      ███
-    #      ███  ███          ███
-    # ███████   ████████     ███
+#!set
 
     set: item arg =>
 
@@ -157,11 +153,7 @@ use           ◆ keys mode
         @clearHistory()
         @emit 'colors.changed'
 
-    #  ███████  ███   ███  ████████    ███████   ███████   ████████    ███████
-    # ███       ███   ███  ███   ███  ███       ███   ███  ███   ███  ███
-    # ███       ███   ███  ███████    ███████   ███   ███  ███████    ███████
-    # ███       ███   ███  ███   ███       ███  ███   ███  ███   ███       ███
-    #  ███████   ███████   ███   ███  ███████    ███████   ███   ███  ███████
+#!cursors
 
     setCursors: cursors opt =>
         
@@ -211,11 +203,7 @@ use           ◆ keys mode
         else
             ⮐  @wordAtCursor()
 
-    # ███      ███  ███   ███  ████████   ███████
-    # ███      ███  ████  ███  ███       ███
-    # ███      ███  ███ █ ███  ███████   ███████
-    # ███      ███  ███  ████  ███            ███
-    # ███████  ███  ███   ███  ████████  ███████
+#!lines
 
     setText: text => 
     
@@ -300,11 +288,7 @@ use           ◆ keys mode
 
         @changeLinesSegls()
         
-    #  ███████  ███   ███   ███████   ███   ███   ███████   ████████        ███      ███  ███   ███  ████████   ███████
-    # ███       ███   ███  ███   ███  ████  ███  ███        ███             ███      ███  ████  ███  ███       ███     
-    # ███       █████████  █████████  ███ █ ███  ███  ████  ███████         ███      ███  ███ █ ███  ███████   ███████ 
-    # ███       ███   ███  ███   ███  ███  ████  ███   ███  ███             ███      ███  ███  ████  ███            ███
-    #  ███████  ███   ███  ███   ███  ███   ███   ███████   ████████        ███████  ███  ███   ███  ████████  ███████ 
+#!change lines
 
     changeLinesSegls: ->
     
@@ -333,18 +317,6 @@ use           ◆ keys mode
 
     linesInView: => @s.lines[@lineAtRow(0)...@lineAtRow(@cells.rows-1)+1]
 
-    #  ████████    ███████   ███   ███        ██     ██   ███████   ████████ 
-    #  ███   ███  ███   ███  ███ █ ███        ███   ███  ███   ███  ███   ███
-    #  ███████    ███   ███  █████████        █████████  █████████  ████████ 
-    #  ███   ███  ███   ███  ███   ███        ███ █ ███  ███   ███  ███      
-    #  ███   ███   ███████   ██     ██        ███   ███  ███   ███  ███      
-
-    #  the height of a line in rows. most lines are one row high,
-    #  a markdown heading is drawn in a block of 2 or 3 rows.
-
-    #  the config controls how markdown headings are scaled, or disables
-    #  scaling altogether
-
     applyScales: conf =>
 
         @scaling = conf?.enabled != false
@@ -363,8 +335,6 @@ use           ◆ keys mode
         1
 
     lineHeight: li => @scaleOfLine li
-
-    #  the height of the whole buffer in display rows
 
     rowPrefix: =>
 
@@ -386,16 +356,12 @@ use           ◆ keys mode
 
         @rowPrefix()[@s.lines.length]
 
-    #  the display row at which a line starts, relative to the buffer top
-
     rowsBeforeLine: li =>
 
         n = @s.lines.length
         li = clamp 0 n li
 
         @rowPrefix()[li]
-
-    #  the line containing an absolute display row
 
     lineAtAbsoluteRow: row =>
 
@@ -417,21 +383,13 @@ use           ◆ keys mode
 
         lo
 
-    #  the display row of the first line in the view, relative to the buffer top
-
     viewTopRow: => @rowsBeforeLine(@s.view[1]) + @s.scrollOffset
 
-    #  the display row of a line, relative to the top of the view
-
     rowOfLine: li => @rowsBeforeLine(li) - @viewTopRow()
-
-    #  the line at a display row of the view
 
     lineAtRow: row =>
 
         @lineAtAbsoluteRow (@viewTopRow() + row)
-
-    #  the line to show at the top so that line li starts at row target
 
     startForRow: li target =>
 
@@ -446,8 +404,6 @@ use           ◆ keys mode
 
         start
 
-    #  the largest line index that can be the top line
-
     maxViewLine: =>
 
         h  = 0
@@ -459,11 +415,7 @@ use           ◆ keys mode
 
         li+1
 
-    #  the largest display row that can sit at the top of the view
-
     maxTopRow: => @rowsBeforeLine @maxViewLine()
-
-    #  a cursor margin from the config: a row count or a screen percentage
 
     marginValue: val fallback =>
 
@@ -484,8 +436,6 @@ use           ◆ keys mode
 
         @marginValue (conf[name]) fallback
 
-    #  the logical position of a cell in the editor
-
     posForCell: x row =>
 
         li = @lineAtRow row
@@ -501,11 +451,7 @@ use           ◆ keys mode
     isValidLineIndex:   li => 0 <= li < @s.lines.length
     isInvalidLineIndex: li => not @isValidLineIndex li
 
-    # ███   ███  ███   ███  ███████     ███████
-    # ███   ███  ████  ███  ███   ███  ███   ███
-    # ███   ███  ███ █ ███  ███   ███  ███   ███
-    # ███   ███  ███  ████  ███   ███  ███   ███
-    #  ███████   ███   ███  ███████     ███████
+#!undo
 
     undo: =>
 
@@ -542,11 +488,7 @@ use           ◆ keys mode
 
     gutterWidth: => max 4 2 + ceil(Math.log10(@s.lines.length+1))
 
-    #  ███████  ███   ███  █████████
-    # ███       ███   ███     ███
-    # ███       ███   ███     ███
-    # ███       ███   ███     ███
-    #  ███████   ███████      ███
+#!cut
 
     cut: opt =>
 
@@ -558,12 +500,6 @@ use           ◆ keys mode
             @selectCursorLines()
         @deleteSelection()
 
-    #  ███████   ███████   ████████   ███   ███
-    # ███       ███   ███  ███   ███   ███ ███
-    # ███       ███   ███  ████████     █████
-    # ███       ███   ███  ███           ███
-    #  ███████   ███████   ███           ███
-
     copy: opt =>
 
         opt ?= {}
@@ -572,21 +508,11 @@ use           ◆ keys mode
 
         @deselect() if opt.deselect != false
 
-    # ████████    ███████    ███████  █████████  ████████
-    # ███   ███  ███   ███  ███          ███     ███
-    # ████████   █████████  ███████      ███     ███████
-    # ███        ███   ███       ███     ███     ███
-    # ███        ███   ███  ███████      ███     ████████
-
     paste: opt =>
 
         @insert clip.paste()
 
-    #  ███████   ███████  ████████    ███████   ███      ███          ███   ███  ███  ████████  ███   ███  
-    # ███       ███       ███   ███  ███   ███  ███      ███          ███   ███  ███  ███       ███ █ ███  
-    # ███████   ███       ███████    ███   ███  ███      ███           ███ ███   ███  ███████   █████████  
-    #      ███  ███       ███   ███  ███   ███  ███      ███             ███     ███  ███       ███   ███  
-    # ███████    ███████  ███   ███   ███████   ███████  ███████          █      ███  ████████  ██     ██  
+#!scroll
 
     scrollView: dir steps=1 =>
 
@@ -620,11 +546,7 @@ use           ◆ keys mode
 
         @setView view scrollOffset
 
-    #  ███████   ███████          ███  ███   ███   ███████  █████████       ███   ███  ███  ████████  ███   ███  
-    # ███   ███  ███   ███        ███  ███   ███  ███          ███          ███   ███  ███  ███       ███ █ ███  
-    # █████████  ███   ███        ███  ███   ███  ███████      ███           ███ ███   ███  ███████   █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███       ███     ███             ███     ███  ███       ███   ███  
-    # ███   ███  ███████     ███████    ███████   ███████      ███              █      ███  ████████  ██     ██  
+#!adjust
     
     adjustViewForMainCursor: opt =>
         
@@ -693,9 +615,6 @@ use           ◆ keys mode
 
         topRow = clamp 0 @maxTopRow() topRow
 
-        # soft margins: never let the cursor block leave the viewport,
-        # but do not jump the whole line when it can stay visible
-
         blockTop   = @rowsBeforeLine y
         visibleTop = blockTop + height - @cells.rows
 
@@ -734,8 +653,6 @@ use           ◆ keys mode
         @swapState()
         @emit 'view.changed' @s.view
         @
-
-    #  put an absolute display row at the top of the view
 
     setScrollTop: row =>
 

@@ -1,21 +1,8 @@
-###
-      ███   ███████   ███████   ███   ███
-      ███  ███       ███   ███  ████  ███
-      ███  ███████   ███   ███  ███ █ ███
-███   ███       ███  ███   ███  ███  ████
- ███████   ███████    ███████   ███   ███
-###
 
 use ./util ▪ ranges inc lang
 
 lang 'json'
         
-#       ███   ███████   ███████   ███   ███  
-#       ███  ███       ███   ███  ████  ███  
-#       ███  ███████   ███   ███  ███ █ ███  
-# ███   ███       ███  ███   ███  ███  ████  
-#  ███████   ███████    ███████   ███   ███  
-
 ▸ json
     
     rgs = ranges """{ "A Z": 1 }"""
@@ -44,10 +31,6 @@ lang 'json'
     inc rgs, 15 'com'           ▸ 'url tld'
     inc rgs, 18 '/'             ▸ 'punct dir'
      
-    #  a file name inside a string is string content. the file classes
-    #  are for file names the highlighter is looking at, not for the ones
-    #  a string happens to spell out.
-    
     rgs = ranges '"file.coffee"'
     inc rgs, 1 'file'           ▸ 'string double'
     inc rgs, 5 '.'              ▸ 'string double'

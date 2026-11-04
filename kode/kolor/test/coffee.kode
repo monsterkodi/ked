@@ -1,12 +1,4 @@
 
-###
- ███████   ███████   ████████  ████████  ████████  ████████  
-███       ███   ███  ███       ███       ███       ███       
-███       ███   ███  ██████    ██████    ███████   ███████   
-███       ███   ███  ███       ███       ███       ███       
- ███████   ███████   ███       ███       ████████  ████████  
-###
-
 use ./util ▪ inc ranges dissect lang
 
 lang 'coffee'
@@ -101,21 +93,12 @@ lang 'coffee'
         inc rgs, 1 'height'     ▸ 'text this'
         inc rgs, 8 "2"          ▸ 'number'
                 
-    # ████████  ███   ███  ███   ███   ███████  █████████  ███   ███████   ███   ███  
-    # ███       ███   ███  ████  ███  ███          ███     ███  ███   ███  ████  ███  
-    # ██████    ███   ███  ███ █ ███  ███          ███     ███  ███   ███  ███ █ ███  
-    # ███       ███   ███  ███  ████  ███          ███     ███  ███   ███  ███  ████  
-    # ███        ███████   ███   ███   ███████     ███     ███   ███████   ███   ███  
-
     ▸ function
 
         rgs = ranges "obj.prop.call 1"
         inc rgs, 0 'obj'        ▸ 'obj'
         inc rgs, 4 'prop'       ▸ 'property'
         inc rgs, 9 'call'       ▸ 'function call'
-        
-        #  the arrow is a single chunk. the highlighter does not split
-        #  it into a tail and a head, so the two are one match.
         
         rgs = ranges "dolater =>"
         inc rgs, 8 '=>'         ▸ 'punct function bound'
@@ -213,12 +196,6 @@ lang 'coffee'
         rgs = ranges "i == 3"
         inc rgs, 0 'i'              ▸ 'text'
 
-    # █████████  ████████   ███  ████████   ███      ████████  
-    #    ███     ███   ███  ███  ███   ███  ███      ███       
-    #    ███     ███████    ███  ████████   ███      ███████   
-    #    ███     ███   ███  ███  ███        ███      ███       
-    #    ███     ███   ███  ███  ███        ███████  ████████  
-    
     ▸ triple regexp
         
         rgs = ranges "///a///,b"
@@ -264,12 +241,6 @@ lang 'coffee'
             """
         inc dss[1], 8 'key'     ▸ 'dictionary key'
     
-    # ███   ███  ████████   ███████   ███████    ████████  ████████   
-    # ███   ███  ███       ███   ███  ███   ███  ███       ███   ███  
-    # █████████  ███████   █████████  ███   ███  ███████   ███████    
-    # ███   ███  ███       ███   ███  ███   ███  ███       ███   ███  
-    # ███   ███  ████████  ███   ███  ███████    ████████  ███   ███  
-    
     ▸ comment header
     
         rgs = ranges "# 0 00 0000" 
@@ -284,9 +255,6 @@ lang 'coffee'
         rgs = ranges "# 0 * 0.2"
         inc rgs, 2 '0'      ▸ 'comment'
         inc rgs, 6 '0'      ▸ 'comment'
-        
-        #  a triple comment is a comment, but the numbers in it are
-        #  still numbers - only a header makes the whole line one.
         
         dss = dissect "###\n 0 1 0 \n###"
         inc dss[1], 1 "0"   ▸ 'number'

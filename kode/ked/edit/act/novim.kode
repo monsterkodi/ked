@@ -1,14 +1,9 @@
-# ███   ███   ███████   ███   ███  ███  ██     ██  
-# ████  ███  ███   ███  ███   ███  ███  ███   ███  
-# ███ █ ███  ███   ███   ███ ███   ███  █████████  
-# ███  ████  ███   ███     ███     ███  ███ █ ███  
-# ███   ███   ███████       █      ███  ███   ███  
 
 use ../../../kxk ▪ kseg clip post
 use ../mode      ◆ novim
 use ../tool      ◆ belt motion
 use ../../util   ◆ config
-
+#!novim
 export
 
     executeNovim: cmd ->

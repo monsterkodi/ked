@@ -17,11 +17,7 @@ use ..           ◆ mode
         
         @start()
         
-    #  ███████  ███   ███  ████████    ███████   ███████   ████████    ███████  
-    # ███       ███   ███  ███   ███  ███       ███   ███  ███   ███  ███       
-    # ███       ███   ███  ███████    ███████   ███   ███  ███████    ███████   
-    # ███       ███   ███  ███   ███       ███  ███   ███  ███   ███       ███  
-    #  ███████   ███████   ███   ███  ███████    ███████   ███   ███  ███████   
+##cursors
     
     @checkCursorsSet: state ->
     
@@ -33,11 +29,7 @@ use ..           ◆ mode
         if valid cursors                # start the salter mode if the main
             mode.start state 'salter'   # cursor moved inside a salted line 
 
-    # ███      ███  ███   ███  ████████
-    # ███      ███  ████  ███  ███     
-    # ███      ███  ███ █ ███  ███████ 
-    # ███      ███  ███  ████  ███     
-    # ███████  ███  ███   ███  ████████
+##line
     
     start: -> 
     
@@ -83,11 +75,7 @@ use ..           ◆ mode
         else
             mode.stop @state 'salter'
             
-    # ███████    ████████  ███      ████████  █████████  ████████  
-    # ███   ███  ███       ███      ███          ███     ███       
-    # ███   ███  ███████   ███      ███████      ███     ███████   
-    # ███   ███  ███       ███      ███          ███     ███       
-    # ███████    ████████  ███████  ████████     ███     ████████  
+##delete
     
     deleteSelection: ->
     
@@ -102,23 +90,56 @@ use ..           ◆ mode
         @state.setCursors lineids.map((idx) -> [0 idx])
         
         @state.deselect()
-        mode.start @state 'salter' # 𝜏𝖍𝚒𝖘 𝚒𝖘 ϝ𝓊⊂𝛋ϵ𝒹 𝓊𝔭 𝖘⊚⫙ϵ𝖍⊚⟒, 𝔟𝓊𝜏 𝚒𝜏 𝓢ϵξ⫙𝖘 𝜏⊚ ⟒◯ɼ𝛋 ϝ⊚ɼ ∩⊚⟒
+        # mode.start @state 'salter' # 𝜏𝖍𝚒𝖘 𝚒𝖘 ϝ𝓊⊂𝛋ϵ𝒹 𝓊𝔭 𝖘⊚⫙ϵ𝖍⊚⟒, 𝔟𝓊𝜏 𝚒𝜏 𝓢ϵξ⫙𝖘 𝜏⊚ ⟒◯ɼ𝛋 ϝ⊚ɼ ∩⊚⟒
         true
         
+    indentOfLine: txt ->
+        
+        i = 0
+        while i < txt.length and txt[i] in [' ' '\t']
+            i++
+        
+        txt[0...i]
+
+    uncommentedLine: txt ->
+        
+        i = 0
+        while i < txt.length and txt[i] in [' ' '\t']
+            i++
+        
+        ⮐  txt if txt[i] != '#'
+        
+        i++
+        i++ if txt[i] == ' '
+        
+        txt[i..]
+
     desalt: ->
         
         lines = @state.s.lines
         selections = belt.lineRangesForPositions lines @state.s.cursors
-        # text       = belt.textForLineRanges @state.s.lines selections
+        
+        ⮐  if empty selections
+        
         texts = selections each (rng) -> belt.textForLineRange lines rng
-        texts = texts each (txt) -> txt.replace /\s*\#/ ''
-        log "desalt\n" texts
+        indt = @indentOfLine texts[0]
+        
+        stripped = []
+        for txt in texts
+            stripped.push @uncommentedLine(txt)
+        
+        bang = '#!' + salter.desalt(stripped)
+        first = selections[0][1]
+        
+        newLines = lines.map (l) -> l
+        newLines.splice first, selections.length, bang
+        
+        @state.setLines newLines
+        @state.setCursors [[2 first]]
+        @state.deselect()
+        true
     
-    # ███   ███  ████████  ███   ███
-    # ███  ███   ███        ███ ███ 
-    # ███████    ███████     █████  
-    # ███  ███   ███          ███   
-    # ███   ███  ████████     ███   
+##key
 
     handleKey: key event ->
     
@@ -153,11 +174,7 @@ use ..           ◆ mode
         
         'unhandled'
         
-    #  ███████   ███████   ███       ███████   ████████   
-    # ███       ███   ███  ███      ███   ███  ███   ███  
-    # ███       ███   ███  ███      ███   ███  ███████    
-    # ███       ███   ███  ███      ███   ███  ███   ███  
-    #  ███████   ███████   ███████   ███████   ███   ███  
+##color
     
     themeColor: colorName defaultColor ->
         

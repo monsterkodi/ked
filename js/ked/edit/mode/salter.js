@@ -1,4 +1,4 @@
-var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, eql: function (a,b,s) { var i, k, v; s = (s != null ? s : []); if (Object.is(a,b)) { return true }; if (typeof(a) !== typeof(b)) { return false }; if (!(Array.isArray(a)) && !(typeof(a) === 'object')) { return false }; if (Array.isArray(a)) { if (a.length !== b.length) { return false }; var list = _k_.list(a); for (i = 0; i < list.length; i++) { v = list[i]; s.push(i); if (!_k_.eql(v,b[i],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } } else if (_k_.isStr(a)) { return a === b } else { if (!_k_.eql(Object.keys(a),Object.keys(b))) { return false }; for (k in a) { v = a[k]; s.push(k); if (!_k_.eql(v,b[k],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } }; return true }, profile: function (id) {_k_.hrtime ??= {}; _k_.hrtime[id] = performance.now(); }, profilend: function (id) { var b = performance.now()-_k_.hrtime[id]; let f=0.001; for (let u of ['s','ms','μs','ns']) { if (u=='ns' || (b*f)>=1) { return console.log(id+' '+Number.parseFloat(b*f).toFixed(1)+' '+u); } f*=1000; }}, each_r: function (o) {return Array.isArray(o) ? [] : typeof o == 'string' ? o.split('') : {}}, isStr: function (o) {return typeof o === 'string' || o instanceof String}}
+var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, eql: function (a,b,s) { var i, k, v; s = (s != null ? s : []); if (Object.is(a,b)) { return true }; if (typeof(a) !== typeof(b)) { return false }; if (!(Array.isArray(a)) && !(typeof(a) === 'object')) { return false }; if (Array.isArray(a)) { if (a.length !== b.length) { return false }; var list = _k_.list(a); for (i = 0; i < list.length; i++) { v = list[i]; s.push(i); if (!_k_.eql(v,b[i],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } } else if (_k_.isStr(a)) { return a === b } else { if (!_k_.eql(Object.keys(a),Object.keys(b))) { return false }; for (k in a) { v = a[k]; s.push(k); if (!_k_.eql(v,b[k],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } }; return true }, profile: function (id) {_k_.hrtime ??= {}; _k_.hrtime[id] = performance.now(); }, profilend: function (id) { var b = performance.now()-_k_.hrtime[id]; let f=0.001; for (let u of ['s','ms','μs','ns']) { if (u=='ns' || (b*f)>=1) { return console.log(id+' '+Number.parseFloat(b*f).toFixed(1)+' '+u); } f*=1000; }}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, each_r: function (o) {return Array.isArray(o) ? [] : typeof o == 'string' ? o.split('') : {}}, isStr: function (o) {return typeof o === 'string' || o instanceof String}}
 
 var salterMode
 
@@ -29,7 +29,7 @@ salterMode = (function ()
 
     salterMode["checkCursorsSet"] = function (state)
     {
-        var cursors, _28_36_
+        var cursors, _24_36_
 
         if (!(state.allowedModes != null ? state.allowedModes.salter : undefined))
         {
@@ -157,16 +157,52 @@ salterMode = (function ()
             return [0,idx]
         }))
         this.state.deselect()
-        mode.start(this.state,'salter')
         return true
+    }
+
+    salterMode.prototype["indentOfLine"] = function (txt)
+    {
+        var i
+
+        i = 0
+        while (i < txt.length && _k_.in(txt[i],[' ','\t']))
+        {
+            i++
+        }
+        return txt.slice(0, typeof i === 'number' ? i : -1)
+    }
+
+    salterMode.prototype["uncommentedLine"] = function (txt)
+    {
+        var i
+
+        i = 0
+        while (i < txt.length && _k_.in(txt[i],[' ','\t']))
+        {
+            i++
+        }
+        if (txt[i] !== '#')
+        {
+            return txt
+        }
+        i++
+        if (txt[i] === ' ')
+        {
+            i++
+        }
+        return txt.slice(i)
     }
 
     salterMode.prototype["desalt"] = function ()
     {
-        var lines, selections, texts
+        var bang, first, indt, lines, newLines, selections, stripped, texts, txt
 
         lines = this.state.s.lines
         selections = belt.lineRangesForPositions(lines,this.state.s.cursors)
+        if (_k_.empty(selections))
+        {
+            return
+        }
         texts = (function (o) {
             var r_a_ = _k_.each_r(o)
             for (var k in o)
@@ -182,22 +218,25 @@ salterMode = (function ()
             }
             return typeof o == 'string' ? r_a_.join('') : r_a_
         })(selections)
-        texts = (function (o) {
-            var r_b_ = _k_.each_r(o)
-            for (var k in o)
-            {   
-                var m = (function (txt)
-            {
-                return txt.replace(/\s*\#/,'')
-            })(o[k])
-                if (m != null)
-                {
-                    r_b_[k] = m
-                }
-            }
-            return typeof o == 'string' ? r_b_.join('') : r_b_
-        })(texts)
-        console.log("desalt\n",texts)
+        indt = this.indentOfLine(texts[0])
+        stripped = []
+        var list = _k_.list(texts)
+        for (var _b_ = 0; _b_ < list.length; _b_++)
+        {
+            txt = list[_b_]
+            stripped.push(this.uncommentedLine(txt))
+        }
+        bang = '#!' + salter.desalt(stripped)
+        first = selections[0][1]
+        newLines = lines.map(function (l)
+        {
+            return l
+        })
+        newLines.splice(first,selections.length,bang)
+        this.state.setLines(newLines)
+        this.state.setCursors([[2,first]])
+        this.state.deselect()
+        return true
     }
 
     salterMode.prototype["handleKey"] = function (key, event)
@@ -269,5 +308,5 @@ salterMode = (function ()
 
 export default salterMode;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2FsdGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L21vZGUvc2FsdGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsYUFBTjs7T0FDTSxZQUFUO09BQWUsWUFBZjs7T0FDUyxXQUFaOztPQUNZLFdBQUE7OztBQUVsQixjQUFEOztJQUVJLFlBQUM7YUFFRCxZQUFJOztRQUFEOztRQUVDLEtBQUMsT0FBTztzQkFFQyxXQUFXOztZQUNoQixXQUFXLE9BQU8sT0FBTyxLQUFLLE9BQU87O1FBRXpDLEtBQUM7OztJQVFMLFlBQUMsOEJBQWlCOzs7O2NBRUosTUFBTSx1QkFBTixNQUFNLGFBQWM7Ozs7WUFDeEIsTUFBTSxFQUFFLFFBQVEsV0FBVTs7OztZQUMxQixNQUFNLEVBQUUsV0FBVzs7OztZQUNuQixLQUFLLFNBQVMsTUFBTTs7OztRQUMxQixVQUFVLEtBQUssMkJBQTJCLE1BQU0sRUFBRSxNQUFNLE1BQU07dUJBQ3JEOzttQkFDTCxLQUFLLE1BQU0sTUFBTTs7OzswQkFRekI7Ozs7UUFFSSxVQUFVLEtBQUM7dUJBRUY7O1lBQ0wsS0FBSyxLQUFDLE1BQU07WUFDWixLQUFDLE1BQU0sSUFBSSxLQUFDLE1BQU0sRUFBRSxJQUFJLFVBQVU7Z0NBQ2xCO2lCQUFSOztnQkFBSjs0QkFDUyxLQUFROztvQkFBakI7OztZQUNKLEtBQUMsTUFBTSxJQUFJLEtBQUMsTUFBTSxFQUFFLElBQUksT0FBTzs7WUFDaEMsS0FBQyxNQUFNLEVBQUUsUUFBUSxXQUFVLEtBQU0sS0FBSyxnQkFBZ0IsS0FBQyxNQUFNLEVBQUUsU0FBUyxXQUFVOzttQkFDakY7Ozs7WUFFQTtZQUNBLEtBQUMsTUFBTTtZQUNQLEtBQUMsTUFBTSxZQUFZO1lBQ25CLEtBQUMsTUFBTTtpQkFDSCxJQUFLLE9BQUk7O2dCQUNULEtBQUMsTUFBTSxPQUFPOztZQUNsQixLQUFDLE1BQU0sWUFBWTtZQUNuQixLQUFDLE1BQU0sWUFBWTtZQUNuQixLQUFDLE1BQU0sWUFBWTtp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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2FsdGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L21vZGUvc2FsdGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsYUFBTjs7T0FDTSxZQUFUO09BQWUsWUFBZjs7T0FDUyxXQUFaOztPQUNZLFdBQUE7OztBQUVsQixjQUFEOztJQUVJLFlBQUM7YUFFRCxZQUFJOztRQUFEOztRQUVDLEtBQUMsT0FBTztzQkFFQyxXQUFXOztZQUNoQixXQUFXLE9BQU8sT0FBTyxLQUFLLE9BQU87O1FBRXpDLEtBQUM7OztJQUlMLFlBQUMsOEJBQWlCOzs7O2NBRUosTUFBTSx1QkFBTixNQUFNLGFBQWM7Ozs7WUFDeEIsTUFBTSxFQUFFLFFBQVEsV0FBVTs7OztZQUMxQixNQUFNLEVBQUUsV0FBVzs7OztZQUNuQixLQUFLLFNBQVMsTUFBTTs7OztRQUMxQixVQUFVLEtBQUssMkJBQTJCLE1BQU0sRUFBRSxNQUFNLE1BQU07dUJBQ3JEOzttQkFDTCxLQUFLLE1BQU0sTUFBTTs7OzswQkFJekI7Ozs7UUFFSSxVQUFVLEtBQUM7dUJBRUY7O1lBQ0wsS0FBSyxLQUFDLE1BQU07WUFDWixLQUFDLE1BQU0sSUFBSSxLQUFDLE1BQU0sRUFBRSxJQUFJLFVBQVU7Z0NBQ2xCO2lCQUFSOztnQkFBSjs0QkFDUyxLQUFROztvQkFBakI7OztZQUNKLEtBQUMsTUFBTSxJQUFJLEtBQUMsTUFBTSxFQUFFLElBQUksT0FBTzs7WUFDaEMsS0FBQyxNQUFNLEVBQUUsUUFBUSxXQUFVLEtBQU0sS0FBSyxnQkFBZ0IsS0FBQyxNQUFNLEVBQUUsU0FBUyxXQUFVOzttQkFDakY7Ozs7WUFFQTtZQUNBLEtBQUMsTUFBTTtZQUNQLEtBQUMsTUFBTSxZQUFZO1lBQ25CLEtBQUMsTUFBTTtpQkFDSCxJQUFLLE9BQUk7O2dCQUNULEtBQUMsTUFBTSxPQUFPOztZQUNsQixLQUFDLE1BQU0sWUFBWTtZQUNuQixLQUFDLE1BQU0sWUFBWTtZQUNuQixLQUFDLE1BQU0sWUFBWTtp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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/mode/salter.kode

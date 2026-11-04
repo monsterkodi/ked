@@ -1,17 +1,9 @@
-###
-███   ███   ███████   ███   ███  ███  ██     ██
-████  ███  ███   ███  ███   ███  ███  ███   ███
-███ █ ███  ███   ███   ███ ███   ███  █████████
-███  ████  ███   ███     ███     ███  ███ █ ███
-███   ███   ███████       █      ███  ███   ███
-
-maps keys to actions which are executed by edit▸act▸novim
-###
 
 use ../../../kxk ◆ post keyinfo
 use ../../theme  ◆ theme
 
-function novim
+■novim
+# maps keys to actions which are executed by edit▸act▸novim
 
     @operators:
         c: 'change'
@@ -264,12 +256,6 @@ function novim
 
         true
 
-    # ███   ███  ████████  ███   ███
-    # ███  ███   ███        ███ ███
-    # ███████    ███████     █████
-    # ███  ███   ███          ███
-    # ███   ███  ████████     ███
-
     handleKey: key event ->
 
         combo = event.combo ? key
@@ -445,12 +431,6 @@ function novim
                     ⮐ @logPending()
                 
         'unhandled'
-
-    #  ███████   ███████   ███       ███████   ████████
-    # ███       ███   ███  ███      ███   ███  ███   ███
-    # ███       ███   ███  ███      ███   ███  ███████
-    # ███       ███   ███  ███      ███   ███  ███   ███
-    #  ███████   ███████   ███████   ███████   ███   ███
 
     themeColor: colorName defaultColor ->
 

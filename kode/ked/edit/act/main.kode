@@ -1,16 +1,9 @@
-###
-██     ██   ███████   ███  ███   ███  
-███   ███  ███   ███  ███  ████  ███  
-█████████  █████████  ███  ███ █ ███  
-███ █ ███  ███   ███  ███  ███  ████  
-███   ███  ███   ███  ███  ███   ███  
-###
 
 use ../../../kxk ▪ kseg post
 use ../tool      ◆ belt
-
+#!main
 export
-
+    
     setMain: m -> 
         mc = @mainCursor()
         @s = @s.set 'main' clamp(0 @s.cursors.length-1 m)
@@ -18,12 +11,6 @@ export
         
     mainCursor: -> @s.cursors[@s.main].asMutable()
     
-    #  ███████  ████████  █████████
-    # ███       ███          ███   
-    # ███████   ███████      ███   
-    #      ███  ███          ███   
-    # ███████   ████████     ███   
-
     setMainCursor: x y ->
         
         [x y] = belt.pos x y
@@ -33,12 +20,6 @@ export
                         
         @setCursors [[x y]]
         
-    # ██     ██   ███████   ███   ███  ████████
-    # ███   ███  ███   ███  ███   ███  ███     
-    # █████████  ███   ███   ███ ███   ███████ 
-    # ███ █ ███  ███   ███     ███     ███     
-    # ███   ███   ███████       █      ████████
-
     moveMainCursorInDirection: dir opt={} ->
         
         mc = belt.positionInDirection @mainCursor() dir
@@ -70,12 +51,6 @@ export
         
         @setCursors cursors main:main
                 
-    # ████████   ███████    ███    
-    # ███       ███   ███   ███    
-    # ███████   ███   ███   ███    
-    # ███       ███   ███   ███    
-    # ████████   ███████    ███████
-
     singleCursorAtEndOfLine: ->
         
         rng = belt.lineRangeAtPos @s.lines @mainCursor()
@@ -84,12 +59,6 @@ export
         @deselect()
         @setCursors [mc]
         
-    # ███  ███   ███  ███████            ███████     ███████   ███      
-    # ███  ████  ███  ███   ███          ███   ███  ███   ███  ███      
-    # ███  ███ █ ███  ███   ███          ███████    ███   ███  ███      
-    # ███  ███  ████  ███   ███          ███   ███  ███   ███  ███      
-    # ███  ███   ███  ███████    ██████  ███████     ███████   ███████  
-
     singleCursorAtIndentOrStartOfLine: ->
         
         lines = @s.lines

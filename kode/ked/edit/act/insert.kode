@@ -1,24 +1,10 @@
-###
-███  ███   ███   ███████  ████████  ████████   █████████    
-███  ████  ███  ███       ███       ███   ███     ███       
-███  ███ █ ███  ███████   ███████   ███████       ███       
-███  ███  ████       ███  ███       ███   ███     ███       
-███  ███   ███  ███████   ████████  ███   ███     ███       
-###
 
 use ../../../kxk ▪ kstr
 use ../../util   ◆ prof
 use ../tool      ◆ belt
 use ..           ◆ mode
-
+#!insert
 export
-    
-    # █████████  ████████  ███   ███  █████████
-    #    ███     ███        ███ ███      ███   
-    #    ███     ███████     █████       ███   
-    #    ███     ███        ███ ███      ███   
-    #    ███     ████████  ███   ███     ███   
-
     insert: text ->
 
         text = mode.insert @ text
@@ -37,12 +23,6 @@ export
         
         mode.postInsert @
 
-    # ███   ███  ████████   ███████   ███████    ████████  ████████ 
-    # ███   ███  ███       ███   ███  ███   ███  ███       ███   ███
-    # █████████  ███████   █████████  ███   ███  ███████   ███████  
-    # ███   ███  ███       ███   ███  ███   ███  ███       ███   ███
-    # ███   ███  ████████  ███   ███  ███████    ████████  ███   ███
-
     insertAsciiHeaderForSelectionOrWordAtCursor: ->
 
         [lines cursors selections] = belt.insertAsciiHeaderForPositionsAndRanges @s.lines @s.cursors @s.selections
@@ -52,12 +32,6 @@ export
         @setSelections selections
         @setCursors    cursors
         
-    #  ███████  ███   ███  ████████   ████████    ███████   ███   ███  ███   ███  ███████  
-    # ███       ███   ███  ███   ███  ███   ███  ███   ███  ███   ███  ████  ███  ███   ███
-    # ███████   ███   ███  ███████    ███████    ███   ███  ███   ███  ███ █ ███  ███   ███
-    #      ███  ███   ███  ███   ███  ███   ███  ███   ███  ███   ███  ███  ████  ███   ███
-    # ███████    ███████   ███   ███  ███   ███   ███████    ███████   ███   ███  ███████  
-
     surroundSelection: trigger pair ->
         
         [lines posl] = belt.insertSurroundAtRanges @s.lines @s.selections trigger pair

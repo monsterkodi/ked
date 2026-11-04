@@ -1,9 +1,8 @@
+■specs
 ###
     provides support for quick insertion of certain 
     unicode symbols: (spe)cial (c)haracter(s)
 ###
-
-■specs
     
     @replex: # auto replacements by replex mode 
                      

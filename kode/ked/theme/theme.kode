@@ -1,16 +1,9 @@
-###
-█████████  ███   ███  ████████  ██     ██  ████████  
-   ███     ███   ███  ███       ███   ███  ███       
-   ███     █████████  ███████   █████████  ███████   
-   ███     ███   ███  ███       ███ █ ███  ███       
-   ███     ███   ███  ████████  ███   ███  ████████  
-###
 
 use ../../kxk ▪ post
 use ◆ color
 
 import theme from './theme.json' with { type: "json" }
-
+#!theme
 convert = dict ->
     for key,val of dict # convert all colors into rgb triplets
         if val is str
@@ -26,12 +19,6 @@ for key,value of theme.syntax # generate colors for file ext and punct
         theme.syntax['file_icon_'+ext]  = color.darken value 0.6
         theme.syntax['file_punct_'+ext] = color.darken value 0.3
         
-# ███   ███  ███  ███████    ████████    ███████   ███   ███  █████████
-# ███   ███  ███  ███   ███  ███   ███  ███   ███  ████  ███     ███   
-#  ███ ███   ███  ███████    ███████    █████████  ███ █ ███     ███   
-#    ███     ███  ███   ███  ███   ███  ███   ███  ███  ████     ███   
-#     █      ███  ███████    ███   ███  ███   ███  ███   ███     ███   
-
 full_vibrant = clone theme
 
 setVibrant = vf lf=1.0 -> 

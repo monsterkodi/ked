@@ -1,7 +1,7 @@
 
 use ../../kxk ▪ kstr
 
-class index_json
+■index_json
 
     parseLine: index line ->
         

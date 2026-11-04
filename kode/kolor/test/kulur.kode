@@ -1,10 +1,3 @@
-###
-███   ███  ███   ███  ███      ███   ███  ████████     
-███  ███   ███   ███  ███      ███   ███  ███   ███    
-███████    ███   ███  ███      ███   ███  ███████      
-███  ███   ███   ███  ███      ███   ███  ███   ███    
-███   ███   ███████   ███████   ███████   ███   ███    
-###
 
 use ../../kxk ▪ kstr kseg
 use ./util    ▪ inc 
@@ -18,13 +11,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
 
 ▸ kulur
 
-    # ███   ███  ███   ███  ███   ███████   ███████   ███████    ████████  
-    # ███   ███  ████  ███  ███  ███       ███   ███  ███   ███  ███       
-    # ███   ███  ███ █ ███  ███  ███       ███   ███  ███   ███  ███████   
-    # ███   ███  ███  ████  ███  ███       ███   ███  ███   ███  ███       
-    #  ███████   ███   ███  ███   ███████   ███████   ███████    ████████  
-    
-    ▸ unicode
+  ▸ unicode
         
         rgs = ranges "🌈"
         inc rgs 0 '🌈' ▸  'text unicode'
@@ -63,13 +50,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         rgs = ranges "icon: '🔧' bla:1"
         inc rgs 11 'bla' ▸ 'dictionary key'
         
-    # ███   ███   ███████   ███████    ████████  
-    # ███  ███   ███   ███  ███   ███  ███       
-    # ███████    ███   ███  ███   ███  ███████   
-    # ███  ███   ███   ███  ███   ███  ███       
-    # ███   ███   ███████   ███████    ████████  
-    
-    ▸ kode
+  ▸ kode
     
         lang 'kode'
         
@@ -91,13 +72,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         dss = dissect "    => true"
         inc dss[0] 4 "=>"  ▸ 'punct function bound'
         
-    # ███   ███   ███████    ███████   ███   ███
-    # ████  ███  ███   ███  ███   ███  ████  ███
-    # ███ █ ███  ███   ███  ███   ███  ███ █ ███
-    # ███  ████  ███   ███  ███   ███  ███  ████
-    # ███   ███   ███████    ███████   ███   ███
-
-    ▸ noon
+  ▸ noon
     
         lang 'noon'
             
@@ -195,20 +170,14 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 4 "#"   ▸ 'punct'
         inc rgs 5 'abcdef' ▸ 'number hex'
     
-        ▸ comments
+    ▸ comments
         
             rgs = ranges "   # bla blub"
             inc rgs 3 "#"      ▸ 'punct comment'
             inc rgs 5 "bla"    ▸ 'comment'
             inc rgs 9 "blub"   ▸ 'comment'
         
-    # ████████   ███████   ███      ███      ███████     ███████    ███████  ███   ███  
-    # ███       ███   ███  ███      ███      ███   ███  ███   ███  ███       ███  ███   
-    # ██████    █████████  ███      ███      ███████    █████████  ███       ███████    
-    # ███       ███   ███  ███      ███      ███   ███  ███   ███  ███       ███  ███   
-    # ███       ███   ███  ███████  ███████  ███████    ███   ███   ███████  ███   ███  
-    
-    ▸ fallback
+  ▸ fallback
     
         lang 'kode'
             
@@ -224,19 +193,13 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         rgs = ranges '###' '.coffee'
         inc rgs 0 '###' ▸ 'punct comment triple'
                 
-    #  ███████   ███████   ██     ██  ██     ██  ████████  ███   ███  █████████   ███████  
-    # ███       ███   ███  ███   ███  ███   ███  ███       ████  ███     ███     ███       
-    # ███       ███   ███  █████████  █████████  ███████   ███ █ ███     ███     ███████   
-    # ███       ███   ███  ███ █ ███  ███ █ ███  ███       ███  ████     ███          ███  
-    #  ███████   ███████   ███   ███  ███   ███  ████████  ███   ███     ███     ███████   
-    
-    ▸ comments
+  ▸ comments
         
         rgs = ranges "hello # world"
         inc rgs 6 "#"      ▸ 'punct comment'
         inc rgs 8 "world"  ▸ 'comment'
                 
-    ▸ triple comment
+  ▸ triple comment
                 
         rgs = ranges "###a###"
         inc rgs 0 '###'  ▸ 'punct comment triple'
@@ -256,7 +219,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc dss[2], 0 "*"   ▸ 'punct comment triple'
         inc dss[2], 1 "/"   ▸ 'punct comment triple'
 
-    ▸ comment header
+  ▸ comment header
     
         lang 'kode'
     
@@ -304,7 +267,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         dss = dissect "/*\n 0 0 0 \n*/"
         inc dss[1] 1 "0"   ▸ 'comment triple header'
 
-    ▸ bang comments
+  ▸ bang comments
 
         lang 'kode'
 
@@ -316,14 +279,8 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 0  "##"     ▸ 'punct comment bang'
         inc rgs 3  "title"  ▸ 'comment bang'
 
-        
-    # ███   ███  ███   ███  ██     ██  ███████    ████████  ████████    ███████  
-    # ████  ███  ███   ███  ███   ███  ███   ███  ███       ███   ███  ███       
-    # ███ █ ███  ███   ███  █████████  ███████    ███████   ███████    ███████   
-    # ███  ████  ███   ███  ███ █ ███  ███   ███  ███       ███   ███       ███  
-    # ███   ███   ███████   ███   ███  ███████    ████████  ███   ███  ███████   
-    
-    ▸ numbers
+      
+  ▸ numbers
         
         lang 'styl'
                         
@@ -364,13 +321,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 1 "#"      ▸ 'string single'
         inc rgs 2 '808'    ▸ 'string single'
          
-    #  ███████  ████████  ██     ██  ███   ███  ████████  ████████   
-    # ███       ███       ███   ███  ███   ███  ███       ███   ███  
-    # ███████   ███████   █████████   ███ ███   ███████   ███████    
-    #      ███  ███       ███ █ ███     ███     ███       ███   ███  
-    # ███████   ████████  ███   ███      █      ████████  ███   ███  
-    
-    ▸ semver    
+  ▸ semver    
         
         lang 'coffee'
         
@@ -403,13 +354,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 5 "."      ▸ 'punct semver'
         inc rgs 6 "9"      ▸ 'semver'        
                 
-    #       ███   ███████  
-    #       ███  ███       
-    #       ███  ███████   
-    # ███   ███       ███  
-    #  ███████   ███████   
-    
-    ▸ js
+  ▸ js
         
         lang 'js'
         
@@ -437,14 +382,8 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 1 "/"          ▸ 'punct comment'
         inc rgs 2 "#"          ▸ 'comment'
         
-    #       ███   ███████   ███████   ███   ███
-    #       ███  ███       ███   ███  ████  ███
-    #       ███  ███████   ███   ███  ███ █ ███
-    # ███   ███       ███  ███   ███  ███  ████
-    #  ███████   ███████    ███████   ███   ███
-
-    ▸ json
-    
+  ▸ json
+  
         lang 'json'
         
         dss = dissect """
@@ -457,13 +396,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
             
         inc dss[2] 5 'func'   ▸ 'string double'
                               
-    # █████████  ███   ███  █████████  
-    #    ███      ███ ███      ███     
-    #    ███       █████       ███     
-    #    ███      ███ ███      ███     
-    #    ███     ███   ███     ███     
-    
-    ▸ txt
+  ▸ txt
         
         lang 'txt'
         
@@ -488,13 +421,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 5  "'"         ▸ 'punct string single'
         inc rgs 8  "'"         ▸ 'punct string single'
                     
-    # ███   ███  █████████  ██     ██  ███    
-    # ███   ███     ███     ███   ███  ███    
-    # █████████     ███     █████████  ███    
-    # ███   ███     ███     ███ █ ███  ███    
-    # ███   ███     ███     ███   ███  ███████
-    
-    ▸ html
+  ▸ html
         
         lang 'html'
         
@@ -509,13 +436,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 1 "div"  ▸ 'keyword'
         inc rgs 4 ">"    ▸ 'punct keyword'  
         
-    #  ███████   ███████   ███████  
-    # ███       ███       ███       
-    # ███       ███████   ███████   
-    # ███            ███       ███  
-    #  ███████  ███████   ███████   
-    
-    ▸ css
+  ▸ css
         
         lang 'css'
         
@@ -524,7 +445,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 1 "."      ▸ 'punct number float'
         inc rgs 2 "5"      ▸ 'number float'
 
-    ▸ styl
+  ▸ styl
         
         lang 'styl'
         
@@ -537,13 +458,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 30 '"'      ▸ 'punct string double'
         # log rgs
         
-    #  ███████  ████████   ████████ 
-    # ███       ███   ███  ███   ███
-    # ███       ████████   ████████ 
-    # ███       ███        ███      
-    #  ███████  ███        ███      
-    
-    ▸ cpp
+  ▸ cpp
         
         lang 'cpp'
         
@@ -593,13 +508,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 18 '>'             ▸ 'punct template'
         
     
-    # ██     ██  ██     ██  
-    # ███   ███  ███   ███  
-    # █████████  █████████  
-    # ███ █ ███  ███ █ ███  
-    # ███   ███  ███   ███  
-    
-    ▸ mm
+  ▸ mm
              
         lang 'mm'
              
@@ -623,7 +532,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 0 "@"              ▸ 'punct'
         inc rgs 1 "property"       ▸ 'define'
     
-        ▸ NSString
+    ▸ NSString
                  
             rgs = ranges '@"X"'            
             inc rgs 0 "@"        ▸ 'punct'
@@ -638,13 +547,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
             inc rgs 3 '@'        ▸ 'string double'
             inc rgs 4 '"'        ▸ 'punct string double'
         
-    #  ███████  ███   ███  
-    # ███       ███   ███  
-    # ███████   █████████  
-    #      ███  ███   ███  
-    # ███████   ███   ███  
-    
-    ▸ sh
+  ▸ sh
      
         lang 'sh'
          
@@ -669,13 +572,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 1 '/'          ▸ 'punct dir'
         inc rgs 2 'home'       ▸ 'text file'
          
-    # ███       ███████    ███████   
-    # ███      ███   ███  ███        
-    # ███      ███   ███  ███  ████  
-    # ███      ███   ███  ███   ███  
-    # ███████   ███████    ███████   
-     
-    ▸ log
+  ▸ log
      
         lang 'log'
          
@@ -701,13 +598,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 0 'key'            ▸ 'dictionary key'
         inc rgs 3 ':'              ▸ 'punct dictionary'
         
-    # ██     ██  ███████    
-    # ███   ███  ███   ███  
-    # █████████  ███   ███  
-    # ███ █ ███  ███   ███  
-    # ███   ███  ███████    
-    
-    ▸ md
+  ▸ md
         
         lang 'md'
         
@@ -765,7 +656,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 0 '`'      ▸ 'punct code triple'
         inc rgs 3 'coffeescript' ▸ 'comment'
             
-    ▸ md2
+  ▸ md2
         
         rgs = ranges "- li"
         inc rgs 0 '-'      ▸ 'punct li1 marker'
@@ -843,13 +734,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
                 """
         inc dss[1] 6 '-' ▸ 'punct li2 marker'
 
-    # ███       ███████   ███   ███   ███████   ███      ███  ███   ███  ████████   ███████
-    # ███      ███   ███  ████  ███  ███        ███      ███  ████  ███  ███       ███     
-    # ███      ███   ███  ███ █ ███  ███  ████  ███      ███  ███ █ ███  ███████   ███████ 
-    # ███      ███   ███  ███  ████  ███   ███  ███      ███  ███  ████  ███            ███
-    # ███████   ███████   ███   ███   ███████   ███████  ███  ███   ███  ████████  ███████ 
-
-    ▸ contraction quote
+  ▸ contraction quote
 
         lang 'kode'
 
@@ -900,7 +785,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 8 "'" ▸ 'punct string single'
         inc rgs 9 't'  ▸ 'string single'
 
-    ▸ combining mark delimiter
+  ▸ combining mark delimiter
 
         lang 'json'
 
@@ -925,7 +810,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
 
         kulur.ranges('"\u0336"' 'json')[0].text ▸ '"\u0336'
 
-    ▸ parse dissect match
+  ▸ parse dissect match
 
         lang 'json'
 
@@ -935,7 +820,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         compare prs[0].chunks[7].start, dss[0][7].start
         compare prs[0].chunks[7].start, 8
 
-    ▸ punct list
+  ▸ punct list
 
         lang 'kode'
 
@@ -953,7 +838,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         rgs = ranges "DH    Ð"
         inc rgs 6 'Ð' ▸ 'text'
 
-    ▸ longlines
+  ▸ longlines
 
         lang 'js'
 
@@ -973,7 +858,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc dss[0] 0 'const' ▸ 'keyword'
         compare (segWidthCalls < 20 * line.length), true
         
-    ▸ parse
+  ▸ parse
         
         lang 'coffee'
         
@@ -1043,14 +928,14 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         b[0].chunks[1].start ▸ 6
         b[0].chunks[2].start ▸ 9
         
-    ▸ globalize
+  ▸ globalize
         
-        ▸ enable
+    ▸ enable
             kulur.klor.globalize()
             global['red'] ▸ kulur.klor.red
             global['red']('txt') ▸ kulur.klor.red 'txt'
     
-        ▸ disable  
+    ▸ disable  
             kulur.klor.globalize false
             global['red']('txt') ▸ 'txt'
             kulur.klor.globalize()

@@ -3,7 +3,7 @@ use ../../kxk ▪ pickBy pullIf deleteBy kstr sds matchr slash post nfs
 use ../util   ◆ fileutil
 use           ◆ prjcts index_utils index_kode index_noon index_json index_styl index_js index_hpp index_mm index_nim index_kim index_lua index_kua
 
-class indexer
+■indexer
     
     @: ->
         
@@ -132,10 +132,7 @@ class indexer
         if fileExt in fileutil.imageExtensions
             @files[file] = {}
             ⮐ 
-            
-        if empty fileExt
-            log "EMPTY EXT #{file}"
-                    
+                                
         text =○ nfs.read file
         
         ⮐  if empty text

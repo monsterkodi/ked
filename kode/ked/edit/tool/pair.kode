@@ -1,10 +1,3 @@
-###
-█████████  ████████  ███   ███  █████████
-   ███     ███        ███ ███      ███   
-   ███     ███████     █████       ███   
-   ███     ███        ███ ███      ███   
-   ███     ████████  ███   ███     ███   
-###
 
 use ../../../kxk ▪ kseg pepe
 use              ◆ belt
@@ -13,13 +6,7 @@ brckts = new Set(['(' ')' '[' ']' '{' '}'])
 opns   = new Set(['(' '[' '{'])
 clos   = new Set([')' ']' '}'])
 
-function pair
-
-    # ███   ███  ███   ███  ███████     ███████   ███       ███████   ███   ███   ███████  ████████  ███████  
-    # ███   ███  ████  ███  ███   ███  ███   ███  ███      ███   ███  ████  ███  ███       ███       ███   ███
-    # ███   ███  ███ █ ███  ███████    █████████  ███      █████████  ███ █ ███  ███       ███████   ███   ███
-    # ███   ███  ███  ████  ███   ███  ███   ███  ███      ███   ███  ███  ████  ███       ███       ███   ███
-    #  ███████   ███   ███  ███████    ███   ███  ███████  ███   ███  ███   ███   ███████  ████████  ███████  
+■pair
 
     @isUnbalancedPosition: lines pos char ->
     
@@ -34,12 +21,6 @@ function pair
         start = p.unbalanced?[1..].map (s) -> s.start
         valid start and revs[char] in start
         
-    #  ███████  █████████  ████████   ███  ███   ███   ███████   
-    # ███          ███     ███   ███  ███  ████  ███  ███        
-    # ███████      ███     ███████    ███  ███ █ ███  ███  ████  
-    #      ███     ███     ███   ███  ███  ███  ████  ███   ███  
-    # ███████      ███     ███   ███  ███  ███   ███   ███████   
-    
     @isRangeInString: lines rng -> @rangeOfStringSurroundingRange(lines rng)?
 
     @rangeOfStringSurroundingRange: lines rng ->
@@ -73,12 +54,6 @@ function pair
                     ss = -1
         rngs
         
-    #  ███████   ███   ███  █████████   ███████  ███  ███████    ████████      ███████  █████████  ████████   
-    # ███   ███  ███   ███     ███     ███       ███  ███   ███  ███          ███          ███     ███   ███  
-    # ███   ███  ███   ███     ███     ███████   ███  ███   ███  ███████      ███████      ███     ███████    
-    # ███   ███  ███   ███     ███          ███  ███  ███   ███  ███               ███     ███     ███   ███  
-    #  ███████    ███████      ███     ███████   ███  ███████    ████████     ███████      ███     ███   ███  
-    
     @positionsAndRangesOutsideStrings: lines rngs posl ->
         
         found = []
@@ -92,15 +67,6 @@ function pair
                 found.push pos
         found
         
-    # ████████    ███████   ███  ████████    ███████         ███████  ███   ███  ████████   ████████   ███████     ███████   
-    # ███   ███  ███   ███  ███  ███   ███  ███             ███       ███   ███  ███   ███  ███   ███  ███   ███  ███        
-    # ████████   █████████  ███  ███████    ███████         ███████   ███   ███  ███████    ███████    ███   ███  ███  ████  
-    # ███        ███   ███  ███  ███   ███       ███             ███  ███   ███  ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███        ███   ███  ███  ███   ███  ███████         ███████    ███████   ███   ███  ███   ███  ███████     ███████   
-    
-    #  positions are display columns but pepe works on string indices, so
-    #  convert between the two before and after asking pepe about a line
-
     @codeunitIndexForColumn: line col ->
         
         segi = kseg.segiAtWidth line col
@@ -214,12 +180,6 @@ function pair
 
         lo
 
-    #  ███████   ████████   ████████  ███   ███         ███████  ███       ███████    ███████  ████████
-    # ███   ███  ███   ███  ███       ████  ███        ███       ███      ███   ███  ███       ███     
-    # ███   ███  ████████   ███████   ███ █ ███        ███       ███      ███   ███  ███████   ███████ 
-    # ███   ███  ███        ███       ███  ████        ███       ███      ███   ███       ███  ███     
-    #  ███████   ███        ████████  ███   ███         ███████  ███████   ███████   ███████   ████████
-
     @openCloseSpansForPositions: lines posl ->
 
         idx = @bracketIndex lines
@@ -327,9 +287,6 @@ function pair
         
         if not lastOpen? or not firstClose?
             
-            #  a cursor sitting just after a closing bracket should still
-            #  highlight that pair - retry from one grapheme to the left
-            
             if si-1 >= 0 and isClose(line[si-1]) and revs[line[si-1]] in openEncounters
                 ⮐  @openCloseSpansForPosition lines idx [kseg.widthAtSegi(line si-1) pos[1]] kind
             ⮐
@@ -340,11 +297,7 @@ function pair
             oc = kseg.widthAtSegi oline lastOpenIndex
             cc = kseg.widthAtSegi cline firstCloseIndex
             ⮐  [[oc lastOpenLine oc+1] [cc firstCloseLine cc+1]]
-        
-    # the innermost pair of one bracket kind around or at a position,
-    # the same line pairs know about strings, the bracket scan finds
-    # pairs across lines
-        
+                
     @pairSpansAtPosition: lines pos kind ->
         
         chosen = null
@@ -360,7 +313,6 @@ function pair
             c1 = @columnForCodeunitIndex line pair.rng[1]
             ⮐  [[c0 li c0+1] [c1 li c1+1]]
         
-        # a bracket inside a string does not open a pair
         ⮐  null if @isRangeInString lines [pos[0] pos[1] pos[0]+1 pos[1]]
         
         idx = @bracketIndex lines

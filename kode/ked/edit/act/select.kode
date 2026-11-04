@@ -1,21 +1,8 @@
-###
- ███████  ████████  ███      ████████   ███████  █████████    
-███       ███       ███      ███       ███          ███       
-███████   ███████   ███      ███████   ███          ███       
-     ███  ███       ███      ███       ███          ███       
-███████   ████████  ███████  ████████   ███████     ███       
-###
 
 use ../../../kxk ▪ kstr kseg
 use ../tool      ◆ belt
-
+#!select
 export
-    
-    #  ███████  ████████  ███      ████████   ███████  █████████  
-    # ███       ███       ███      ███       ███          ███     
-    # ███████   ███████   ███      ███████   ███          ███     
-    #      ███  ███       ███      ███       ███          ███     
-    # ███████   ████████  ███████  ████████   ███████     ███     
     
     select: from to ->
         
@@ -39,12 +26,6 @@ export
     allSelections: -> @s.selections.asMutable()
     allHighlights: -> @s.highlights.asMutable()
         
-    # ███   ███  ███   ███████   ███   ███  ███      ███   ███████   ███   ███  █████████  
-    # ███   ███  ███  ███        ███   ███  ███      ███  ███        ███   ███     ███     
-    # █████████  ███  ███  ████  █████████  ███      ███  ███  ████  █████████     ███     
-    # ███   ███  ███  ███   ███  ███   ███  ███      ███  ███   ███  ███   ███     ███     
-    # ███   ███  ███   ███████   ███   ███  ███████  ███   ███████   ███   ███     ███     
-    
     selectWordAtCursor_highlightSelection_selectAllHighlights: ->
         # alt+cmd+d alt+ctrl+d
         if valid @s.highlights 
@@ -273,36 +254,18 @@ export
                     
     addSpanToSelection: span -> @addRangeToSelection belt.rangeForSpan(span)
                 
-    #  ███████  ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███       ███   ███  ███   ███  ████  ███  ███  ███   
-    # ███       █████████  ███   ███  ███ █ ███  ███████    
-    # ███       ███   ███  ███   ███  ███  ████  ███  ███   
-    #  ███████  ███   ███   ███████   ███   ███  ███   ███  
-    
     selectChunk: x y ->
         
         if rng = belt.rangeOfClosestChunkToPos @s.lines belt.pos(x y)
             @addRangeToSelectionWithMainCursorAtEnd rng
         @
 
-    # ███   ███   ███████   ████████   ███████    
-    # ███ █ ███  ███   ███  ███   ███  ███   ███  
-    # █████████  ███   ███  ███████    ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ██     ██   ███████   ███   ███  ███████    
-    
     selectWord: x y ->
         
         if range = belt.rangeOfClosestWordToPos @s.lines belt.pos(x y)
             @addRangeToSelectionWithMainCursorAtEnd range
         @
                 
-    # ███      ███  ███   ███  ████████  
-    # ███      ███  ████  ███  ███       
-    # ███      ███  ███ █ ███  ███████   
-    # ███      ███  ███  ████  ███       
-    # ███████  ███  ███   ███  ████████  
-    
     selectLine: y ->
         
         y ?= @mainCursor()[1]
@@ -337,12 +300,6 @@ export
         else
             @setSelections allsel
         
-    # ██     ██   ███████   ████████   ████████  
-    # ███   ███  ███   ███  ███   ███  ███       
-    # █████████  ███   ███  ███████    ███████   
-    # ███ █ ███  ███   ███  ███   ███  ███       
-    # ███   ███   ███████   ███   ███  ████████  
-    
     selectMoreLines: ->
         
         [cursors selections] = belt.addLinesBelowPositionsToRanges @s.lines @s.cursors @s.selections
@@ -350,12 +307,6 @@ export
         @setSelections selections
         @setCursors cursors main:-1
 
-    # ███      ████████   ███████   ███████  
-    # ███      ███       ███       ███       
-    # ███      ███████   ███████   ███████   
-    # ███      ███            ███       ███  
-    # ███████  ████████  ███████   ███████   
-    
     selectLessLines: ->
         
         [cursors selections] = belt.removeLinesAtPositionsFromRanges @s.lines @s.cursors @s.selections
@@ -363,12 +314,6 @@ export
         @setSelections selections
         @setCursors cursors main:-1
                 
-    # █████████  ████████  ███   ███  █████████  
-    #    ███     ███        ███ ███      ███     
-    #    ███     ███████     █████       ███     
-    #    ███     ███        ███ ███      ███     
-    #    ███     ████████  ███   ███     ███     
-    
     textOfSelection: -> belt.textForLineRanges @s.lines @s.selections
     selectedText:    -> belt.textForLineRanges @s.lines @s.selections
     
@@ -421,12 +366,6 @@ export
                 
         false
         
-    # ███████    ████████   ███████  ████████  ███      ████████   ███████  █████████  
-    # ███   ███  ███       ███       ███       ███      ███       ███          ███     
-    # ███   ███  ███████   ███████   ███████   ███      ███████   ███          ███     
-    # ███   ███  ███            ███  ███       ███      ███       ███          ███     
-    # ███████    ████████  ███████   ████████  ███████  ████████   ███████     ███     
-    
     deselect: ->
         
         if valid @s.selections

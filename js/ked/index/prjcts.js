@@ -1,5 +1,7 @@
 var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, isStr: function (o) {return typeof o === 'string' || o instanceof String}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
+var prjcts
+
 import kxk from "../../kxk.js"
 let post = kxk.post
 let slash = kxk.slash
@@ -8,24 +10,24 @@ let nfs = kxk.nfs
 import walker from "../util/walker.js"
 import config from "../util/config.js"
 
-class prjcts
+
+prjcts = (function ()
 {
-    static queue = []
+    function prjcts ()
+    {}
 
-    static projects = {}
-
-    static allFiles = {}
-
-    static indexing = null
-
-    static files (path)
+    prjcts["queue"] = []
+    prjcts["projects"] = {}
+    prjcts["allFiles"] = {}
+    prjcts["indexing"] = null
+    prjcts["files"] = function (path)
     {
         var _12_49_
 
         return ((_12_49_=(this.projects[this.dir(path)] != null ? this.projects[this.dir(path)].files : undefined)) != null ? _12_49_ : [])
     }
 
-    static dir (path)
+    prjcts["dir"] = function (path)
     {
         var prjPath, project
 
@@ -53,7 +55,7 @@ class prjcts
         return null
     }
 
-    static async index (file)
+    prjcts["index"] = async function (file)
     {
         var exists, prjPath, result, walk, _58_19_
 
@@ -115,9 +117,11 @@ class prjcts
             return await this.index(this.queue.shift())
         }
     }
-}
+
+    return prjcts
+})()
 
 export default prjcts;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJqY3RzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC9pbmRleC9wcmpjdHMua29kZSJdLCJtYXBwaW5ncyI6Ijs7T0FDVSxVQUFBO0lBQU07SUFBSztJQUFNOztPQUNYLGFBQVQ7T0FBZ0IsYUFBaEI7O0FBRVAsTUFBTTs7SUFFRixPQUFDOztJQUNELE9BQUM7O0lBQ0QsT0FBQzs7SUFDRCxPQUFDLFdBQVU7O0lBRVgsT0FBQyxPQUFPOzs7OzBCQUFRLEtBQUMsU0FBUyxLQUFDLElBQUksaUJBQWYsS0FBQyxTQUFTLEtBQUMsSUFBSSxPQUFROzs7SUFFdkMsT0FBQyxLQUFLOzs7O3VCQUVPOztZQUVMLE9BQU8sTUFBTSxTQUFTLEtBQUssUUFBUTtnQkFFaEMsVUFBVSxLQUFDLFNBQVM7O3VCQUNoQjs7Z0JBQ0osT0FBTyxTQUFTOzt1QkFDWixLQUFDLFNBQVMsTUFBTTs7aUJBQ25CLFdBQW1CLE9BQU87O2dCQUFsQixVQUFXLE9BQU87b0JBQ3ZCLEtBQUssV0FBVzs7MkJBQ1o7Ozs7UUFDZixZQUFJLGVBQWU7ZUFDbkI7OztJQUVKLGFBQUMsT0FBTzs7OztjQUVXLFVBQVI7O1lBQ0gsY0FBTSx3Q0FBd0M7OztZQUc1QyxLQUFLLFdBQVc7Ozs7UUFFdEIsT0FBTyxNQUFNLFNBQVMsS0FBSyxRQUFRO1FBSW5DLGVBQVUsSUFBSSxPQUFPO2FBRVg7Ozs7UUFFVixnQkFBVyxJQUFJLElBQUk7WUFJRCxZQUFXOztZQUE3QixVQUFVOztRQUVWLFdBQUEsa0JBQUEsVUFBVyxNQUFNLElBQUk7WUFJbEIsS0FBQzs7Z0JBQ00sS0FBQyxhQUFZOzs7O1lBQ25CLEtBQUMsa0JBQUQsS0FBQzt5QkFDRSxRQUFlLEtBQUM7O2dCQUNmLEtBQUMsTUFBTSxLQUFLOzs7O3VCQUdSLEtBQUMsU0FBUzs7OztRQUV0QixLQUFDLFdBQVc7UUFFWixXQUFXLFFBQ1AsS0FBWSxRQUNaLFNBQVksT0FBTyxLQUFLLFFBQVEsU0FDaEMsT0FBWSxPQUFPLEtBQUssUUFBUSxPQUNoQyxXQUFZLE9BQU8sS0FBSyxxQkFDeEIsU0FBWTtRQUloQixlQUFVLEtBQUs7WUFFWjs7WUFDQyxLQUFDLFNBQVMsWUFBVyxJQUFJLFFBQVEsTUFBTSxPQUFPO2dDQUNsQyxPQUFPOzs7Z0JBQWY7Z0JBQ0EsS0FBQyxTQUFTLFFBQVE7O1lBSXRCLEtBQUssS0FBSyxrQkFBa0I7O2VBRXpCLEtBQUM7dUJBRUMsS0FBQzs7eUJBRUosS0FBQyxNQUFNLEtBQUMsTUFBTTs7Ozs7ZUFFckIifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJqY3RzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC9pbmRleC9wcmpjdHMua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUNVLFVBQUE7SUFBTTtJQUFLO0lBQU07O09BQ1gsYUFBVDtPQUFnQixhQUFoQjs7O0FBRU4sVUFBRDs7Ozs7SUFFSSxRQUFDO0lBQ0QsUUFBQztJQUNELFFBQUM7SUFDRCxRQUFDLGFBQVU7SUFFWCxRQUFDLG9CQUFPOzs7OzBCQUFRLEtBQUMsU0FBUyxLQUFDLElBQUksaUJBQWYsS0FBQyxTQUFTLEtBQUMsSUFBSSxPQUFROzs7SUFFdkMsUUFBQyxrQkFBSzs7Ozt1QkFFTzs7WUFFTCxPQUFPLE1BQU0sU0FBUyxLQUFLLFFBQVE7Z0JBRWhDLFVBQVUsS0FBQyxTQUFTOzt1QkFDaEI7O2dCQUNKLE9BQU8sU0FBUzs7dUJBQ1osS0FBQyxTQUFTLE1BQU07O2lCQUNuQixXQUFtQixPQUFPOztnQkFBbEIsVUFBVyxPQUFPO29CQUN2QixLQUFLLFdBQVc7OzJCQUNaOzs7O1FBQ2YsWUFBSSxlQUFlO2VBQ25COzs7SUFFSixRQUFDLDBCQUFPOzs7O2NBRVcsVUFBUjs7WUFDSCxjQUFNLHdDQUF3Qzs7O1lBRzVDLEtBQUssV0FBVzs7OztRQUV0QixPQUFPLE1BQU0sU0FBUyxLQUFLLFFBQVE7UUFJbkMsZUFBVSxJQUFJLE9BQU87YUFFWDs7OztRQUVWLGdCQUFXLElBQUksSUFBSTtZQUlELFlBQVc7O1lBQTdCLFVBQVU7O1FBRVYsV0FBQSxrQkFBQSxVQUFXLE1BQU0sSUFBSTtZQUlsQixLQUFDOztnQkFDTSxLQUFDLGFBQVk7Ozs7WUFDbkIsS0FBQyxrQkFBRCxLQUFDO3lCQUNFLFFBQWUsS0FBQzs7Z0JBQ2YsS0FBQyxNQUFNLEtBQUs7Ozs7dUJBR1IsS0FBQyxTQUFTOzs7O1FBRXRCLEtBQUMsV0FBVztRQUVaLFdBQVcsUUFDUCxLQUFZLFFBQ1osU0FBWSxPQUFPLEtBQUssUUFBUSxTQUNoQyxPQUFZLE9BQU8sS0FBSyxRQUFRLE9BQ2hDLFdBQVksT0FBTyxLQUFLLHFCQUN4QixTQUFZO1FBSWhCLGVBQVUsS0FBSztZQUVaOztZQUNDLEtBQUMsU0FBUyxZQUFXLElBQUksUUFBUSxNQUFNLE9BQU87Z0NBQ2xDLE9BQU87OztnQkFBZjtnQkFDQSxLQUFDLFNBQVMsUUFBUTs7WUFJdEIsS0FBSyxLQUFLLGtCQUFrQjs7ZUFFekIsS0FBQzt1QkFFQyxLQUFDOzt5QkFFSixLQUFDLE1BQU0sS0FBQyxNQUFNOzs7O1dBdEYzQjs7O2VBd0ZNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/index/prjcts.kode
