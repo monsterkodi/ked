@@ -1,0 +1,30 @@
+###
+    scaled line heights
+
+    shared by the editor state and the quicky map preview
+    both render lines from a syntax with a scale config
+###
+
+■scaling
+
+    @scaleOfLine: syntax scales scaling li ->
+
+        ⮐ 1 if not scaling or empty scales or not syntax
+        ⮐ 1 if syntax.ext not in Object.keys scales
+
+        for clss,scale of scales[syntax.ext]
+            s = clamp 1 7 scale
+            if s > 1 and syntax.hasPureClass li clss
+                ⮐ s
+        1
+
+    @rowPrefix: lines lineHeight ->
+
+        rows = [0]
+
+        for li in 0...lines.length
+            rows.push (rows[li] + lineHeight(li))
+
+        rows
+
+export scaling
