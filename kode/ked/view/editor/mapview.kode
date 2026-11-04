@@ -5,7 +5,7 @@ use ../../util/img  ◆ glyphs
 use ../../theme     ◆ color theme
 use ../../edit/tool ◆ colorspans
 use ../base         ◆ view
-■mapview extends view
+■mapview□view
     ###
         the base of fileditor's mapscr 
         also used for browse and quicky previews

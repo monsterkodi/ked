@@ -2,7 +2,7 @@
 use ../../../kxk    ▪ post
 use ../../theme     ◆ theme
 use ../base         ◆ view input
-■vinder extends view
+■vinder□view
     # incremental search input for the novim mode
     
     @: @screen @editor @name='vinder' ->

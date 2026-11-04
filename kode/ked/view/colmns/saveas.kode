@@ -1,7 +1,7 @@
 
 use ../../../kxk ▪ slash post
 use              ◆ browse
-■saveas extends browse
+■saveas□browse
     @: @screen @name='saveas' ->
         
         @autoHideInput = false

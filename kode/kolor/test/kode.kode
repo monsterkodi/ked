@@ -18,6 +18,12 @@ lang 'kode'
         inc rgs, 2  'Func'      ▸ 'class'
         inc rgs, 7  'extends'   ▸ 'keyword'
         inc rgs, 15 'Base'      ▸ 'class'
+
+        rgs = ranges "■ Func □ Base"
+        inc rgs, 0  '■'         ▸ 'punct function class'
+        inc rgs, 2  'Func'      ▸ 'class'
+        inc rgs, 7  '□'         ▸ 'punct keyword extends'
+        inc rgs, 9  'Base'      ▸ 'class'
     
     ▸ property
         

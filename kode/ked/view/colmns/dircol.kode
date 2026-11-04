@@ -5,7 +5,7 @@ use ../../theme     ◆ color theme icons
 use ../base         ◆ view knob crumbs input
 use ../menu         ◆ context
 use                 ◆ dirtree
-■dircol extends view
+■dircol□view
     @: screen @editor features ->
         
         super screen 'dircol' features

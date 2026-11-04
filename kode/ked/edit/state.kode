@@ -6,7 +6,7 @@ use ./act     ◆ del insert select join indent multi main novim
 use ./tool    ◆ belt colorspans
 use           ◆ keys mode
 
-■state extends events
+■state□events
     ###
         handles basic text editing for the editor
         wraps text and editor state like cursors and selections 

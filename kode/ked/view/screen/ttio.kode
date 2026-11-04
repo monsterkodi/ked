@@ -2,7 +2,7 @@
 use ../../../kxk   ▪ events post kstr nfs
 use ../../util     ◆ keyscript
 use ../../util/img ◆ rounded
-■TTIO extends events
+■TTIO□events
 ###
     interfaces with the terminal
     handles mouse and keyboard input and

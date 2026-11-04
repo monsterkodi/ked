@@ -3,7 +3,7 @@ use ../../../kxk    ▪ post kseg kutil
 use ../../theme     ◆ theme
 use ../../edit/tool ◆ belt
 use                 ◆ inputchoice
-■finder extends inputchoice
+■finder□inputchoice
     # searches and highlights in the current fileeditor file 
     @: @screen @editor name='finder' ->
     

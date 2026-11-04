@@ -5,7 +5,7 @@ use ../../index     ◆ prjcts
 use ../../util      ◆ git fileutil
 use ../base         ◆ view
 use                 ◆ searcher searcherfile
-■differ extends searcher
+■differ□searcher
     # displays git status, history and diffs
     
     @: @screen @editor ->

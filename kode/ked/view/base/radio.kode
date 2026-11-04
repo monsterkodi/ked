@@ -1,7 +1,7 @@
 
 use ../../theme ◆ color theme
 use             ◆ view
-■radio extends view
+■radio□view
     @: screen name ->
 
         super screen name

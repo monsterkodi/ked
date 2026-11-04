@@ -5,7 +5,7 @@ use ../../theme     ◆ color theme
 use ../../util/img  ◆ rounded
 use ../menu         ◆ inputchoice
 use                 ◆ quicky diritem
-■droop extends quicky
+■droop□quicky
     @: @screen @editor ->
 
         super @screen 'droop' 

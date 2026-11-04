@@ -2,7 +2,7 @@
 use ../../../kxk ▪ slash post
 use ../../theme  ◆ color theme
 use              ◆ view
-■crumbs extends view
+■crumbs□view
 ###
     clickable sequence of path segments with half-circles inbetween 
     used in the status, dircol, browse and searcher file headings

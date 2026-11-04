@@ -2,7 +2,7 @@
 use ../../../kxk ▪ post
 use ../../theme  ◆ theme
 use              ◆ view
-■knob extends view
+■knob□view
 ###
     handles view resizing
     used by dircol and funcol

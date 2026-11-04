@@ -7,7 +7,7 @@ use ../../edit     ◆ mode
 use ../../theme    ◆ color theme 
 use ../base        ◆ view
 
-■gutter extends view
+■gutter□view
 
 ###
     displays line numbers to the left of an editor

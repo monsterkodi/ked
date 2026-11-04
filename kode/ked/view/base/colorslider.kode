@@ -2,7 +2,7 @@
 use ../../../kxk ▪ post
 use ../../theme ◆ color theme
 use             ◆ view
-■colorslider extends view
+■colorslider□view
     @: @screen @name @max @gradient ->
 
         super @screen @name

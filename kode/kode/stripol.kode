@@ -1,7 +1,7 @@
 
 use ./print
 
-class Stripol
+■Stripol
     # walks through an abstract syntax tree and parses string interpolations
 
     @: @kode ->

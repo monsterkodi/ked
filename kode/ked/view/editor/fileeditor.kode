@@ -8,7 +8,7 @@ use ../../index     ◆ indexer
 use ../base         ◆ view 
 use ../menu         ◆ context
 use                 ◆ mapscr 
-■fileeditor extends editor
+■fileeditor□editor
 
     @: screen name ->
         

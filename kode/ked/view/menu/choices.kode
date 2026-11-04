@@ -3,7 +3,7 @@ use ../../../kxk    ▪ kstr kseg slash krzl post
 use ../../theme     ◆ color theme 
 use ../../edit/tool ◆ belt
 use ../../edit      ◆ editor
-■choices extends editor
+■choices□editor
 ###
     an editor that can't edit ;)
     

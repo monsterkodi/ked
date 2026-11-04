@@ -5,7 +5,7 @@ use ../../util      ◆ config
 use ../../util/img  ◆ squares
 use ../../edit/tool ◆ belt
 use                 ◆ mapview
-■mapscr extends mapview
+■mapscr□mapview
     # scrollable source map to the right of the fileeditor
     
     @: @editor ->

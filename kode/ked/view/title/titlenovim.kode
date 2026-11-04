@@ -4,7 +4,7 @@ use ../../theme  ◆ color theme
 use ../../edit   ◆ mode
 use ../base      ◆ view
 
-■titlenovim extends view
+■titlenovim□view
     # used by title to display the novim status
     
     @: screen name ->

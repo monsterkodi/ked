@@ -4,7 +4,7 @@ use ../../edit/tool ◆ belt
 use ../../theme     ◆ theme 
 use                 ◆ inputchoice
 
-■context extends inputchoice
+■context□inputchoice
     # quick and dirty context menu for the fileeditor
     
     @menu: null

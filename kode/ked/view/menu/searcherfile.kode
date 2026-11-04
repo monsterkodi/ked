@@ -2,7 +2,7 @@
 use ../../../kxk ▪ slash kseg
 use ../../theme  ◆ theme
 use ../base      ◆ view crumbs bubble
-■searcherfile extends view
+■searcherfile□view
     # clickable file headings used by searcher
     
     @: @screen @name ->

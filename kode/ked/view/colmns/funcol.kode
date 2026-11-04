@@ -4,7 +4,7 @@ use ../../theme     ◆ color theme
 use ../../edit/tool ◆ belt
 use ../base         ◆ view knob
 use                 ◆ funtree colorpicker uniko
-■funcol extends view
+■funcol□view
     @: screen @editor features ->
         
         super screen 'funcol' features

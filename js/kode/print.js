@@ -1,12 +1,18 @@
 var _k_ = {k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}, rpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s+=c} return s}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, lpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s=c+s} return s}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, trim: function (s,c=' ') {return _k_.ltrim(_k_.rtrim(s,c),c)}, ltrim: function (s,c=' ') { while (_k_.in(s[0],c)) { s = s.slice(1) } return s}, rtrim: function (s,c=' ') {while (_k_.in(s.slice(-1)[0],c)) { s = s.slice(0, s.length - 1) } return s}};_k_.r1=_k_.k.F256(_k_.k.r(1));_k_.R1=_k_.k.B256(_k_.k.R(1));_k_.R3=_k_.k.B256(_k_.k.R(3));_k_.g1=_k_.k.F256(_k_.k.g(1));_k_.G1=_k_.k.B256(_k_.k.G(1));_k_.G3=_k_.k.B256(_k_.k.G(3));_k_.g6=_k_.k.F256(_k_.k.g(6));_k_.B2=_k_.k.B256(_k_.k.B(2));_k_.B5=_k_.k.B256(_k_.k.B(5));_k_.b6=_k_.k.F256(_k_.k.b(6));_k_.b8=_k_.k.F256(_k_.k.b(8));_k_.Y2=_k_.k.B256(_k_.k.Y(2));_k_.Y4=_k_.k.B256(_k_.k.Y(4));_k_.y5=_k_.k.F256(_k_.k.y(5));_k_.w2=_k_.k.F256(_k_.k.w(2));_k_.W2=_k_.k.B256(_k_.k.W(2));_k_.w3=_k_.k.F256(_k_.k.w(3));_k_.W4=_k_.k.B256(_k_.k.W(4))
 
+var Print
+
 import kstr from "../kxk/kstr.js"
 import slash from "../kxk/slash.js"
 import noon from "../kxk/noon.js"
 
-class Print
+
+Print = (function ()
 {
-    static tokens (header, tokens)
+    function Print ()
+    {}
+
+    Print["tokens"] = function (header, tokens)
     {
         var idx, s, tok
 
@@ -22,7 +28,7 @@ class Print
         console.log(s)
     }
 
-    static token (tok, idx = '')
+    Print["token"] = function (tok, idx = '')
     {
         var indent, toktext
 
@@ -66,12 +72,12 @@ class Print
         return _k_.b6(_k_.lpad(4,tok.line)) + ' ' + blue(_k_.lpad(3,tok.col)) + ' ' + _k_.w2(_k_.lpad(4,idx)) + ' ' + gray(_k_.rpad(10,tok.type)) + ' ' + bold(yellow(indent + toktext(tok)) + '\n')
     }
 
-    static stack (stack, node, color = W4)
+    Print["stack"] = function (stack, node, color = W4)
     {
         console.log(_k_.W2(stack.join(' ') + ' ') + color((node != null ? node : '')))
     }
 
-    static sheap (sheap, popped)
+    Print["sheap"] = function (sheap, popped)
     {
         var c, r, s
 
@@ -121,14 +127,14 @@ class Print
         console.log(s)
     }
 
-    static block (header, block, legend = false)
+    Print["block"] = function (header, block, legend = false)
     {
         var printBlock
 
         console.log(_k_.R3(_k_.y5(`\n ${header}`)))
         printBlock = function (b)
         {
-            var c, ci, cn, s, _89_27_, _96_44_
+            var c, ci, cn, s, _64_27_, _71_44_
 
             if (legend)
             {
@@ -156,7 +162,7 @@ class Print
                 {
                     ci = parseInt(b.indent.length / 4)
                     cn = ['g5','r5','m5','g3','r3','m3','g1','r1','m1'][ci % 8]
-                    s += global[cn]((((_96_44_=c.text) != null ? _96_44_ : '')) + ' ')
+                    s += global[cn]((((_71_44_=c.text) != null ? _71_44_ : '')) + ' ')
                 }
             }
             if (_k_.in(b.type,['{}','()','[]']))
@@ -168,7 +174,7 @@ class Print
         console.log(printBlock(block))
     }
 
-    static ast (header, ast)
+    Print["ast"] = function (header, ast)
     {
         var lp, node, printNode
 
@@ -176,7 +182,7 @@ class Print
         lp = _k_.lpad(19)
         printNode = function (node, indent = '', visited = [])
         {
-            var name, s, value, _120_41_, _120_77_
+            var name, s, value, _89_41_, _89_77_
 
             s = ''
             if (!node)
@@ -185,7 +191,7 @@ class Print
             }
             if (node.type)
             {
-                s += _k_.b6(_k_.lpad(4,((_120_41_=node.line) != null ? _120_41_ : ''))) + ' ' + blue(_k_.lpad(3,((_120_77_=node.col) != null ? _120_77_ : ''))) + ' ' + gray(_k_.rpad(10,node.type)) + ' ' + bold(yellow(indent + node.text)) + '\n'
+                s += _k_.b6(_k_.lpad(4,((_89_41_=node.line) != null ? _89_41_ : ''))) + ' ' + blue(_k_.lpad(3,((_89_77_=node.col) != null ? _89_77_ : ''))) + ' ' + gray(_k_.rpad(10,node.type)) + ' ' + bold(yellow(indent + node.text)) + '\n'
             }
             else if (node instanceof Array)
             {
@@ -243,13 +249,13 @@ class Print
         }
     }
 
-    static astr (ast, scopes)
+    Print["astr"] = function (ast, scopes)
     {
         var node, printNode, s
 
         printNode = function (node, indent = '', visited = [])
         {
-            var name, s, value, _177_28_, _177_43_
+            var name, s, value, _140_28_, _140_43_
 
             s = ''
             if (!node)
@@ -312,7 +318,7 @@ class Print
         return _k_.trim(s,' \n')
     }
 
-    static noon (msg, arg)
+    Print["noon"] = function (msg, arg)
     {
         if (!arg)
         {
@@ -325,9 +331,11 @@ class Print
         }
         console.log(noon.stringify(arg,{colors:true}))
     }
-}
+
+    return Print
+})()
 
 export default Print;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJpbnQuanMiLCJzb3VyY2VzIjpbIi4uLy4uL2tvZGUva29kZS9wcmludC5rb2RlIl0sIm1hcHBpbmdzIjoiOztPQVFhLFdBQU47T0FBVyxZQUFYO09BQWlCLFdBQWpCOztBQUVQLE1BQU07O0lBUUYsT0FBQyxRQUFRLFFBQU87Ozs7UUFFWixZQUFJLE9BQUcsYUFBUztRQUNoQixZQUFJLGdCQUFRO1FBQ1osSUFBSTs0QkFDVzthQUFQOztZQUFKO1lBQ0EsS0FBSyxLQUFDLE1BQU0sSUFBSzs7UUFDckIsWUFBSTs7O0lBRVIsT0FBQyxPQUFPLEtBQUksTUFBSTs7OztRQUVaLGtCQUFjLElBQUk7WUFDRSxJQUFJLFNBQVE7O21CQUF6QixJQUFJOzttQkFDRSxJQUFJLE1BQVMsS0FBSTs7bUJBQXZCOztRQUNQLHFCQUFXOzs7O2dCQUNKLElBQUksU0FBUTs7dUJBQVEsT0FBSzs7cUJBQ3BCLElBQUk7O3VCQUFVLElBQUk7O3FCQUNsQixJQUFJOztnQkFDUixJQUFJO29DQUNLLElBQUk7OztvQkFBVDtvQkFDQSxLQUFLLEtBQUMsTUFBTTs7dUJBQ2hCLE9BQU87Ozs7dUJBRVA7OztlQUNSLGdCQUFRLEVBQUUsSUFBSSxTQUFTLE1BQU0sY0FBVSxFQUFFLElBQUksUUFBUSxNQUFNLGdCQUFRLEVBQUUsUUFBUSxNQUFNLGNBQVUsR0FBRyxJQUFJLFNBQVMsTUFBTSxLQUFLLE9BQU8sU0FBUyxRQUFRLFFBQVE7OztJQVE1SixPQUFDLE9BQU8sT0FBTSxNQUFLLFFBQU07O1FBRXJCLFlBQUksT0FBRyxNQUFNLEtBQUssT0FBTyxPQUFPLE9BQU0sZUFBQSxPQUFPOzs7SUFFakQsT0FBQyxPQUFPLE9BQU07Ozs7UUFFVixJQUFJLE9BQUc7NEJBQ0U7OztZQUFMO29CQUNPLEVBQUU7O3FCQUNBO29CQUFhLEtBQUssT0FBRyxFQUFFLFFBQVEsT0FBRzs7cUJBQ2xDO29CQUFhLEtBQUssT0FBRyxFQUFFLFFBQVEsT0FBRzs7cUJBQ2xDO29CQUFhLEtBQUssT0FBRyxPQUFHLEVB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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJpbnQuanMiLCJzb3VyY2VzIjpbIi4uLy4uL2tvZGUva29kZS9wcmludC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsV0FBTjtPQUFXLFlBQVg7T0FBaUIsV0FBakI7OztBQUVOLFNBQUQ7Ozs7O0lBRUksT0FBQyxxQkFBUSxRQUFPOzs7O1FBRVosWUFBSSxPQUFHLGFBQVM7UUFDaEIsWUFBSSxnQkFBUTtRQUNaLElBQUk7NEJBQ1c7YUFBUDs7WUFBSjtZQUNBLEtBQUssS0FBQyxNQUFNLElBQUs7O1FBQ3JCLFlBQUk7OztJQUVSLE9BQUMsb0JBQU8sS0FBSSxNQUFJOzs7O1FBRVosa0JBQWMsSUFBSTtZQUNFLElBQUksU0FBUTs7bUJBQXpCLElBQUk7O21CQUNFLElBQUksTUFBUyxLQUFJOzttQkFBdkI7O1FBQ1AscUJBQVc7Ozs7Z0JBQ0osSUFBSSxTQUFROzt1QkFBUSxPQUFLOztxQkFDcEIsSUFBSTs7dUJBQVUsSUFBSTs7cUJBQ2xCLElBQUk7O2dCQUNSLElBQUk7b0NBQ0ssSUFBSTs7O29CQUFUO29CQUNBLEtBQUssS0FBQyxNQUFNOzt1QkFDaEIsT0FBTzs7Ozt1QkFFUDs7O2VBQ1IsZ0JBQVEsRUFBRSxJQUFJLFNBQVMsTUFBTSxjQUFVLEVBQUUsSUFBSSxRQUFRLE1BQU0sZ0JBQVEsRUFBRSxRQUFRLE1BQU0sY0FBVSxHQUFHLElBQUksU0FBUyxNQUFNLEtBQUssT0FBTyxTQUFTLFFBQVEsUUFBUTs7O0lBRTVKLE9BQUMsb0JBQU8sT0FBTSxNQUFLLFFBQU07O1FBRXJCLFlBQUksT0FBRyxNQUFNLEtBQUssT0FBTyxPQUFPLE9BQU0sZUFBQSxPQUFPOzs7SUFFakQsT0FBQyxvQkFBTyxPQUFNOzs7O1FBRVYsSUFBSSxPQUFHOzRCQUNFOzs7WUFBTDtvQkFDTyxFQUFFOztxQkFDQTtvQkFBYSxLQUFLLE9BQUcsRUFBRSxRQUFRLE9BQUc7O3FCQUNsQztvQkFBYSxLQUFLLE9BQUcsRUFBRSxRQUFRLE9BQUc7O3FCQUNsQztvQkFBYSxLQUFLLE9B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
 //# sourceURL=file:///home/kodi/s/ked/kode/kode/print.kode

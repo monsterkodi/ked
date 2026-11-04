@@ -1,16 +1,9 @@
-###
-███   ███   ███████   ███████    ████████
-███  ███   ███   ███  ███   ███  ███
-███████    ███   ███  ███   ███  ███████
-███  ███   ███   ███  ███   ███  ███
-███   ███   ███████   ███████    ████████
-###
 
 use ../kxk ◆ slash karg ansi nfs
 use ◆ lexer print parser scoper stripol returner operator renderer
 use ../kolor ◆ kulur
 
-class Kode
+■Kode
 
     @: @args ->
         
@@ -28,11 +21,7 @@ class Kode
         @operator = new operator @
         @renderer = new renderer @
         
-    # ████████  ████████   ████████    ███████   ████████   
-    # ███       ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████   ███████    ███████    ███   ███  ███████    
-    # ███       ███   ███  ███   ███  ███   ███  ███   ███  
-    # ████████  ███   ███  ███   ███   ███████   ███   ███  
+##error
     
     onError: msg info =>
 
@@ -83,11 +72,7 @@ class Kode
 
         hi
 
-    # ████████  ███   ███   ███████   ███
-    # ███       ███   ███  ███   ███  ███
-    # ███████    ███ ███   █████████  ███
-    # ███          ███     ███   ███  ███
-    # ████████      █      ███   ███  ███████
+##eval
 
     eval: text file glob ->
 
@@ -95,14 +80,9 @@ class Kode
         
         js = @compile text file
         eval js
-        
+
+#!compile        
     ###
-     ███████   ███████   ██     ██  ████████   ███  ███      ████████
-    ███       ███   ███  ███   ███  ███   ███  ███  ███      ███
-    ███       ███   ███  █████████  ████████   ███  ███      ███████
-    ███       ███   ███  ███ █ ███  ███        ███  ███      ███
-     ███████   ███████   ███   ███  ███        ███  ███████  ████████
-     
     converts a string of kode into a string of javascript
     
     throws on syntax errors and internal lexer, parser or renderer errors
@@ -133,11 +113,7 @@ class Kode
                 msg += "\n"
             throw msg
         
-    #  ███████    ███████  █████████  
-    # ███   ███  ███          ███     
-    # █████████  ███████      ███     
-    # ███   ███       ███     ███     
-    # ███   ███  ███████      ███     
+##ast
     
     # converts a string of kode into an abstract syntax tree
     
@@ -154,11 +130,7 @@ class Kode
 
     astr: text scopes -> print.astr @ast(text) scopes
 
-    # ████████   ███   ███  ███   ███  
-    # ███   ███  ███   ███  ████  ███  
-    # ███████    ███   ███  ███ █ ███  
-    # ███   ███  ███   ███  ███  ████  
-    # ███   ███   ███████   ███   ███  
+##run
 
     @commonDir: files =>
 

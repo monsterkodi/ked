@@ -6,7 +6,7 @@ use ../../theme     ◆ theme
 use ../screen       ◆ cells 
 use                 ◆ greet inputchoice
 
-■menu extends inputchoice
+■menu□inputchoice
     # simple list of actions with optional greet
     
     @: @screen @name='menu' ->

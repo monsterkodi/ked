@@ -8,7 +8,7 @@ use              ◆ diritem
 
 import rgxs from './quicky.json' with { type: "json" }
 
-■dirtree extends choices
+■dirtree□choices
 
     @: screen name features ->
         

@@ -65,7 +65,7 @@ needsPair =
 
 closers = '(':')' '[':']' '{':'}'
 
-function Parse extends parseutils
+■Parse□parseutils
 
     @: @kode ->
 
@@ -81,12 +81,6 @@ function Parse extends parseutils
 
         true
 
-    # ████████    ███████   ████████    ███████  ████████
-    # ███   ███  ███   ███  ███   ███  ███       ███
-    # ████████   █████████  ███████    ███████   ███████
-    # ███        ███   ███  ███   ███       ███  ███
-    # ███        ███   ███  ███   ███  ███████   ████████
-
     parse: block -> # convert block tree to abstract syntax tree
 
         @stack = []
@@ -95,11 +89,7 @@ function Parse extends parseutils
         vars: [] 
         exps: @exps('tl' block.tokens)
 
-    # ████████  ███   ███  ████████    ███████
-    # ███        ███ ███   ███   ███  ███
-    # ███████     █████    ████████   ███████
-    # ███        ███ ███   ███             ███
-    # ████████  ███   ███  ███        ███████
+#!exps
 
     # consumes tokens and returns a list of expressions
     #
@@ -280,11 +270,7 @@ function Parse extends parseutils
         
         es
 
-    # ████████  ███   ███  ████████
-    # ███        ███ ███   ███   ███
-    # ███████     █████    ████████
-    # ███        ███ ███   ███
-    # ████████  ███   ███  ███
+#!exp
 
     # consumes tokens and returns a single expression
     #
@@ -457,11 +443,7 @@ function Parse extends parseutils
         @sheapPop 'exp' tok.text ? tok.type
         e        
 
-    # ████████   ███   ███   ███████  
-    # ███   ███  ███   ███  ███       
-    # ███████    █████████  ███████   
-    # ███   ███  ███   ███       ███  
-    # ███   ███  ███   ███  ███████   
+#!rhs
     
     # recursively build up stuff that can be identified by looking at the next token only:
     #
@@ -566,11 +548,7 @@ function Parse extends parseutils
         @sheapPop 'rhs' 'rhs'
         e
         
-    # ███      ███   ███   ███████  
-    # ███      ███   ███  ███       
-    # ███      █████████  ███████   
-    # ███      ███   ███       ███  
-    # ███████  ███   ███  ███████   
+#!lhs
     
     # recursively build up stuff that can be identified by looking at the next token *and* what was just parsed
     #

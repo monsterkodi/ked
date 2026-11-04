@@ -7,7 +7,7 @@ use                 ◆ quicky brocol diritem dirlist
 
 import rgxs from './quicky.json' with { type: "json" }
 
-■browse extends quicky
+■browse□quicky
 
     @: @screen @name='browse' ->
 

@@ -5,7 +5,7 @@ use ../../theme     ◆ theme
 use ../../edit/tool ◆ belt
 use ../../edit      ◆ editor
 use ../base         ◆ view
-■greet extends view
+■greet□view
     # the fancy glowing animated ascii art thingy
     
     @: screen ->

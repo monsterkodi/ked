@@ -6,7 +6,7 @@ use              ◆ diritem
 
 import rgxs from './quicky.json' with { type: "json" }
 
-■brocol extends choices
+■brocol□choices
 
     @: screen name ->
         

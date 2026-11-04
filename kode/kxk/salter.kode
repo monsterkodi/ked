@@ -446,7 +446,8 @@ salter.desalt = text ->
     
     lines = if text is arr then text else text.split '\n'
     
-    ⮐  '' if empty lines
+    ⮐ '' if empty lines
+    ⮐ '' if lines.length != 5
     
     width = 0
     for line in lines

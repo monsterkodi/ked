@@ -98,7 +98,7 @@ chunked = segls ext ->
                 
                 isUniko = ch cc -> 
                     isu = cc >= 2000
-                    if isu ➜ ⮐ false if ch in '■▪◆●○▸➜⮐'
+                    if isu ➜ ⮐ false if ch in '■□▪◆●○▸➜⮐'
                     isu
                 
                 b = base s
@@ -189,8 +189,6 @@ fillBangComment = ->
     
     if chunk.match == "#"
     
-        # if ext in ['kode']
-
         if chunk.turd?.startsWith '#!'
             ⮐  bangComment 2 'bang!'
 
@@ -395,6 +393,9 @@ kodePunct = ->
     if chunk.match in '■'
         ⮐  addValue 0 'function class'
 
+    if chunk.match in '□'
+        ⮐  addValue 0 'keyword extends'
+
     if next = getChunk 1
         
         if chunk.match in '○' and next.match not in '-='
@@ -464,7 +465,7 @@ kodeWord = ->
                     c.clss = 'section'
                 ⮐ line.chunks.length - chunkIndex
                 
-        if prev.match in ['class' 'extends' 'function' '■']
+        if prev.match in ['class' 'extends' 'function' '■' '□']
             setValue 0 'class'
             ⮐  1
             

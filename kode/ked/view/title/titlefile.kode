@@ -4,7 +4,7 @@ use ../../theme  ◆ color theme
 use ../../util   ◆ syntax
 use ../base      ◆ view
 
-■titlefile extends view
+■titlefile□view
     # used by title to display the currently edited file in the fileeditor
     
     @: screen name ->

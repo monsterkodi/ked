@@ -237,7 +237,7 @@ NodeSourceMap = module.SourceMap
     
         BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
         BASE64_CHARS[value]
-class LineMap
+■LineMap
 # keeps track of source positions for a single line of js code
     
     @: (@line) ->

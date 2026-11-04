@@ -3,7 +3,7 @@ use ../../../kxk    ▪ post
 use ../../edit/tool ◆ belt
 use ../../theme     ◆ theme 
 use                 ◆ inputchoice
-■macro extends inputchoice
+■macro□inputchoice
     # menu for actions that don't have keyboard shortcuts
     
     @: @screen ->

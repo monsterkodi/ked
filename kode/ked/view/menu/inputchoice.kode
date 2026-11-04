@@ -3,7 +3,7 @@ use ../../../kxk ▪ post
 use ../../theme  ◆ color theme
 use ../base      ◆ view input
 use ../menu      ◆ choices
-■inputchoice extends view
+■inputchoice□view
 ###
     a combination of input and choices
     the input is usually hidden and only shown when user types text to filter the choices

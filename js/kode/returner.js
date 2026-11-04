@@ -1,10 +1,13 @@
 var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}}
 
+var Returner
+
 import print from "./print.js"
 
-class Returner
+
+Returner = (function ()
 {
-    constructor (kode)
+    function Returner (kode)
     {
         this.kode = kode
     
@@ -12,16 +15,16 @@ class Returner
         this.debug = this.kode.args.debug
     }
 
-    collect (tl)
+    Returner.prototype["collect"] = function (tl)
     {
         return this.scope(tl)
     }
 
-    scope (body)
+    Returner.prototype["scope"] = function (body)
     {
-        var e, _36_21_
+        var e, _18_21_
 
-        if ((body != null ? (_36_21_=body.exps) != null ? _36_21_.length : undefined : undefined))
+        if ((body != null ? (_18_21_=body.exps) != null ? _18_21_.length : undefined : undefined))
         {
             var list = _k_.list(body.exps)
             for (var _a_ = 0; _a_ < list.length; _a_++)
@@ -33,15 +36,15 @@ class Returner
         return body
     }
 
-    func (f)
+    Returner.prototype["func"] = function (f)
     {
-        var e, lst, _50_17_, _50_23_, _52_21_
+        var e, lst, _26_17_, _26_23_, _28_21_
 
         if (f.args)
         {
             this.exp(f.args)
         }
-        if (((_50_17_=f.body) != null ? (_50_23_=_50_17_.exps) != null ? _50_23_.length : undefined : undefined))
+        if (((_26_17_=f.body) != null ? (_26_23_=_26_17_.exps) != null ? _26_23_.length : undefined : undefined))
         {
             if (!(_k_.in((f.name != null ? f.name.text : undefined),['@','constructor'])))
             {
@@ -63,7 +66,7 @@ class Returner
         }
     }
 
-    if (e)
+    Returner.prototype["if"] = function (e)
     {
         var ei
 
@@ -84,9 +87,9 @@ class Returner
         }
     }
 
-    try (e)
+    Returner.prototype["try"] = function (e)
     {
-        var _94_23_
+        var _58_23_
 
         if (!_k_.empty(e.exps))
         {
@@ -99,7 +102,7 @@ class Returner
         }
     }
 
-    switch (e)
+    Returner.prototype["switch"] = function (e)
     {
         var w
 
@@ -118,9 +121,9 @@ class Returner
         }
     }
 
-    insert (e)
+    Returner.prototype["insert"] = function (e)
     {
-        var lst, _132_28_, _132_36_
+        var lst, _84_28_, _84_36_
 
         if (e instanceof Array)
         {
@@ -153,7 +156,7 @@ class Returner
             {
                 return this.switch(lst.switch)
             }
-            if (!(_k_.in(((_132_28_=lst.call) != null ? (_132_36_=_132_28_.callee) != null ? _132_36_.text : undefined : undefined),['log','warn','error','throw'])))
+            if (!(_k_.in(((_84_28_=lst.call) != null ? (_84_36_=_84_28_.callee) != null ? _84_36_.text : undefined : undefined),['log','warn','error','throw'])))
             {
                 e.push({return:{ret:{type:'keyword',text:'return'},val:e.pop()}})
                 return this.profilend(e,-1)
@@ -165,7 +168,7 @@ class Returner
         }
     }
 
-    profilend (e, offset = 0)
+    Returner.prototype["profilend"] = function (e, offset = 0)
     {
         var c
 
@@ -183,7 +186,7 @@ class Returner
         }
     }
 
-    exp (e)
+    Returner.prototype["exp"] = function (e)
     {
         var k, key, v, val
 
@@ -238,16 +241,18 @@ class Returner
         }
     }
 
-    verb ()
+    Returner.prototype["verb"] = function ()
     {
         if (this.debug)
         {
             return console.log.apply(console.log,arguments)
         }
     }
-}
+
+    return Returner
+})()
 
 export default Returner;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmV0dXJuZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uL2tvZGUva29kZS9yZXR1cm5lci5rb2RlIl0sIm1hcHBpbmdzIjoiOztPQVVNLFlBQUE7O0FBRU4sTUFBTTs7SUFFRixhQUFJOztRQUFEOztRQUVDLEtBQUMsVUFBVSxLQUFDLEtBQUssS0FBSztRQUN0QixLQUFDLFFBQVUsS0FBQyxLQUFLLEtBQUs7OztJQVExQixTQUFTOztlQUFNLEtBQUMsTUFBTTs7O0lBUXRCLE9BQU87Ozs7YUFFQSx3QkFBQSxLQUFNLHdCQUFNOztnQ0FDSyxLQUFLOzs7Z0JBQVY7Z0JBQVgsS0FBQyxJQUFJOzs7ZUFDVDs7O0lBUUosTUFBTTs7OztZQUVhLEVBQUU7O1lBQWpCLEtBQUMsSUFBSSxFQUFFOztzQkFFSixFQUFFLGlDQUFNLHdCQUFNOzswQkFFVixFQUFFLGVBQUYsRUFBRSxLQUFNLG1CQUFhLElBQUk7O2dCQUV4QixNQUFNLEVBQUUsS0FBSztvQ0FFSixFQUFFLEtBQUs7OztvQkFBWjt3QkFDRyxFQUFFLFNBQVE7O3dCQUNULEtBQUMsVUFBVTt3QkFDWDs7O2dCQUVSLEtBQUMsT0FBTyxFQUFFLEtBQUs7dUJBRVIsS0FBQzs7bUJBRVosS0FBQyxNQUFNLEVBQUU7Ozs7SUFRakIsSUFBSTs7OztRQUVBLEVBQUUsVUFBVTtRQUNaLEtBQUMsT0FBTyxFQUFFOzRCQUNBLEVBQUU7OztZQUFSO2dCQUN3QixHQUFHLEtBQUs7O2dCQUFoQyxLQUFDLE9BQU8sR0FBRyxLQUFLOzs7WUFFRixFQUFFOzttQkFBcEIsS0FBQyxPQUFPLEVBQUU7Ozs7SUFRZCxLQUFLOzs7O3VCQUswQixFQUFFOztZQUE3QixLQUFDLE9BQU8sRUFBRTs7UUFDVixLQUFDLFFBQU8sRUFBRSxnQkFBRixFQUFFLE1BQU87dUJBQ2EsRUFBRTs7bUJBQWhDLEtBQUMsT0FBTyxFQUFFOzs7O0lBUWQsUUFBUTs7Ozs0QkFFSyxFQUFFOzs7WUFBUDsyQkFDNkIsRUFBRSxLQUFLOztnQkFBcEMsS0FBQyxPQUFPLEVBQUUsS0FBSzs7O3VCQUVLLEVBQUU7O21CQUExQixLQUFDLE9BQU8sRUFBRTs7OztJQVFkLFFBQVE7Ozs7WUFFRCxhQUFLOzswQkFHTzs7OztZQUVYLE1BQU07Z0JBRUYsSUFBSTs7dUJBQVksS0FBQyxVQUFVLEVBQUc7O3FCQUM5QixJQUFJOzt1QkFBWSxLQUFDLFVBQVU7O3FCQUMzQixJQUFJOzt1QkFBWSxLQUFDLFVBQVU7O3FCQUMzQixJQUFJOzt1QkFBWSxLQUFDLEdBQUcsSUFBSTs7cUJBQ3hCLElBQUk7O3VCQUFZLEtBQUMsSUFBSSxJQUFJOztxQkFDekIsSUFBSTs7dUJBQVksS0FBQyxPQUFPLElBQUk7O29DQUV4QixJQUFJLG1DQUFNLDJCQUFRLCtCQUFTLE1BQU0sT0FBTyxRQUFROztnQkFDcEQsRUFBRSxNQUNFLFFBQ0ksS0FBSyxLQUFLLFVBQVUsS0FBSyxVQUN6QixJQUFLLEVBQUU7dUJBQ2YsS0FBQyxVQUFVLEVBQUc7Ozs7dUJBRWQsS0FBQyxVQUFVOzs7OztJQUV2QixXQUFXLEdBQUUsU0FBTzs7OztZQUViLEtBQUM7O1lBRUEsS0FBSSxLQUFNLFlBQ04sS0FBTSxLQUNOLEdBQU0sS0FBQyxRQUFRO2dCQUVoQjs7dUJBQ0MsRUFBRSxPQUFPLE9BQVEsRUFBRTs7Ozt1QkFFbkIsRUFBRSxLQUFLOzs7OztJQVFuQixLQUFLOzs7O2FBRVE7Ozs7WUFHTCxFQUFFOzs7O2lCQUNGLGFBQUs7O2dCQUE4QixFQUFFOztvQ0FBUDs7O29CQUFMO29CQUFYLEtBQUMsSUFBSTs7OztpQkFDbkIsYUFBSzs7Z0JBRUUsRUFBRTs7dUJBQ0QsS0FBQyxLQUFLLEVBQUU7Ozs7cUJBRUosT0FBVzs7b0JBQVAsTUFBTzt3QkFDUjs7NEJBQ0ksSUFBSTs7NEJBQ0gsS0FBQyxJQUFJOzs7O2lDQUVNLEtBQU87O2dDQUFMLElBQUs7Z0NBQWxCLEtBQUMsSUFBSTs7Ozs7Ozs7O0lBRWpDOztZQUFZLEtBQUM7O21CQUFRLFFBQVEsSUFBSSxNQUFNLFFBQVEsSUFBSzs7Ozs7ZUFFakQifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmV0dXJuZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uL2tvZGUva29kZS9yZXR1cm5lci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ00sWUFBQTs7O0FBRUwsWUFBRDs7YUFLSSxVQUFJOztRQUFEOztRQUVDLEtBQUMsVUFBVSxLQUFDLEtBQUssS0FBSztRQUN0QixLQUFDLFFBQVUsS0FBQyxLQUFLLEtBQUs7Ozt3QkFFMUIsc0JBQVM7O2VBQU0sS0FBQyxNQUFNOzs7d0JBRXRCLG9CQUFPOzs7O2FBRUEsd0JBQUEsS0FBTSx3QkFBTTs7Z0NBQ0ssS0FBSzs7O2dCQUFWO2dCQUFYLEtBQUMsSUFBSTs7O2VBQ1Q7OztpQ0FFSixVQUFNOzs7O1lBRWEsRUFBRTs7WUFBakIsS0FBQyxJQUFJLEVBQUU7O3NCQUVKLEVBQUUsaUNBQU0sd0JBQU07OzBCQUVWLEVBQUUsZUFBRixFQUFFLEtBQU0sbUJBQWEsSUFBSTs7Z0JBRXhCLE1BQU0sRUFBRSxLQUFLO29DQUVKLEVBQUUsS0FBSzs7O29CQUFaO3dCQUNHLEVBQUUsU0FBUTs7d0JBQ1QsS0FBQyxVQUFVO3dCQUNYOzs7Z0JBRVIsS0FBQyxPQUFPLEVBQUUsS0FBSzt1QkFFUixLQUFDOzttQkFFWixLQUFDLE1BQU0sRUFBRTs7Ozt3QkFFakIsaUJBQUk7Ozs7UUFFQSxFQUFFLFVBQVU7UUFDWixLQUFDLE9BQU8sRUFBRTs0QkFDQSxFQUFFOzs7WUFBUjtnQkFDd0IsR0FBRyxLQUFLOztnQkFBaEMsS0FBQyxPQUFPLEdBQUcsS0FBSzs7O1lBRUYsRUFBRTs7bUJBQXBCLEtBQUMsT0FBTyxFQUFFOzs7O3dCQUVkLGtCQUFLOzs7O3VCQUswQixFQUFFOztZQUE3QixLQUFDLE9BQU8sRUFBRTs7UUFDVixLQUFDLFFBQU8sRUFBRSxnQkFBRixFQUFFLE1BQU87dUJBQ2EsRUFBRTs7bUJBQWhDLEtBQUMsT0FBTyxFQUFFOzs7O3dCQUVkLHFCQUFROzs7OzRCQUVLLEVBQUU7OztZQUFQOzJCQUM2QixFQUFFLEtBQUs7O2dCQUFwQyxLQUFDLE9BQU8sRUFBRSxLQUFLOzs7dUJBRUssRUFBRTs7bUJBQTFCLEtBQUMsT0FBTyxFQUFFOzs7O3dCQUVkLHFCQUFROzs7O1lBRUQsYUFBSzs7MEJBR087Ozs7WUFFWCxNQUFNO2dCQUVGLElBQUk7O3VCQUFZLEtBQUMsVUFBVSxFQUFHOztxQkFDOUIsSUFBSTs7dUJBQVksS0FBQyxVQUFVOztxQkFDM0IsSUFBSTs7dUJBQVksS0FBQyxVQUFVOztxQkFDM0IsSUFBSTs7dUJBQVksS0FBQyxHQUFHLElBQUk7O3FCQUN4QixJQUFJOzt1QkFBWSxLQUFDLElBQUksSUFBSTs7cUJBQ3pCLElBQUk7O3VCQUFZLEtBQUMsT0FBTyxJQUFJOzttQ0FFeEIsSUFBSSxpQ0FBTSwwQkFBUSwrQkFBUyxNQUFNLE9BQU8sUUFBUTs7Z0JBQ3BELEVBQUUsTUFDRSxRQUNJLEtBQUssS0FBSyxVQUFVLEtBQUssVUFDekIsSUFBSyxFQUFFO3VCQUNmLEtBQUMsVUFBVSxFQUFHOzs7O3VCQUVkLEtBQUMsVUFBVTs7Ozs7d0JBRXZCLHdCQUFXLEdBQUUsU0FBTzs7OztZQUViLEtBQUM7O1lBRUEsS0FBSSxLQUFNLFlBQ04sS0FBTSxLQUNOLEdBQU0sS0FBQyxRQUFRO2dCQUVoQjs7dUJBQ0MsRUFBRSxPQUFPLE9BQVEsRUFBRTs7Ozt1QkFFbkIsRUFBRSxLQUFLOzs7Ozt3QkFFbkIsa0JBQUs7Ozs7YUFFUTs7OztZQUdMLEVBQUU7Ozs7aUJBQ0YsYUFBSzs7Z0JBQThCLEVBQUU7O29DQUFQOzs7b0JBQUw7b0JBQVgsS0FBQyxJQUFJOzs7O2lCQUNuQixhQUFLOztnQkFFRSxFQUFFOzt1QkFDRCxLQUFDLEtBQUssRUFBRTs7OztxQkFFSixPQUFXOztvQkFBUCxNQUFPO3dCQUNSOzs0QkFDSSxJQUFJOzs0QkFDSCxLQUFDLElBQUk7Ozs7aUNBRU0sS0FBTzs7Z0NBQUwsSUFBSztnQ0FBbEIsS0FBQyxJQUFJOzs7Ozs7Ozs7d0JBRWpDOztZQUFZLEtBQUM7O21CQUFRLFFBQVEsSUFBSSxNQUFNLFFBQVEsSUFBSzs7OztXQXpIdkQ7OztlQTJITSJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/kode/returner.kode

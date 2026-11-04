@@ -1,10 +1,3 @@
-###
-    ███   ███  ███   ███    
-    ███  ███   ███  ███     
-    ███████    ███████      
-    ███  ███   ███  ███     
-    ███   ███  ███   ███    
-###
 
 use ../kxk  ▪ sleep karg watch nfs util slash os
 use ../kode ◆ tester kode
@@ -30,20 +23,16 @@ args = karg """
         version    log version                    = false
     """
 
-class kk
+■kk
     
-    # ████████   ███   ███  ███   ███  
-    # ███   ███  ███   ███  ████  ███  
-    # ███████    ███   ███  ███ █ ███  
-    # ███   ███  ███   ███  ███  ████  
-    # ███   ███   ███████   ███   ███  
+#!run
     
     @run: ○->
     
         files = args.files    
         if args.version ➜ ○ log w4(○ knrd.fingerprint()) g7(slash.name(slash.path(◆dir '../../'))) b7(process.cwd())
-        if args.info    ➜ ○ knrd         [] util.defaults(args dryrun:true)
-        if args.knrd    ➜ ○ knrd         files args 
+        if args.info    ➜ ○ knrd [] util.defaults(args dryrun:true)
+        if args.knrd    ➜ ○ knrd files args 
         if args.build   ➜ ○ child_process.exec "pnpm build" {shell:true} (err stdout stderr) -> log stdout
         if args.test
             ok = ○ kk.test files
@@ -55,11 +44,7 @@ class kk
         if valid args.__ignored
             log 'ignored options' args.__ignored
                                                 
-    # ███   ███   ███████   █████████   ███████  ███   ███  
-    # ███ █ ███  ███   ███     ███     ███       ███   ███  
-    # █████████  █████████     ███     ███       █████████  
-    # ███   ███  ███   ███     ███     ███       ███   ███  
-    # ██     ██  ███   ███     ███      ███████  ███   ███  
+#!watch
     
     @watch: ○->
         
@@ -75,16 +60,13 @@ class kk
                     ○ knrd info.path
                     ○ kk.test args.files silent:true
     
-    # █████████  ████████   ███████  █████████  
-    #    ███     ███       ███          ███     
-    #    ███     ███████   ███████      ███     
-    #    ███     ███            ███     ███     
-    #    ███     ████████  ███████      ███     
+#!test
     
     @test: files opt ○->
         
         if ○ knrd.stale()
-            log y5('⚠ ') r5('the tree is older than the compiler - run kk -k')
+            log y5('⚠ ') r5('kk -k')
+            ○ knrd [] 
         
         ok = true
         

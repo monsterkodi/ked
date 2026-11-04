@@ -5,7 +5,7 @@ use ../../util/img ◆ squares sircels
 use                ◆ view
 
 {pow} = Math
-■scroll extends view
+■scroll□view
 ###
     scrolls a view
     used by any multiline editor

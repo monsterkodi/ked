@@ -2,7 +2,7 @@
 use ../../../kxk    ▪ post
 use ../../util/img  ◆ squares sircels
 use                 ◆ view
-■matrix extends view
+■matrix□view
     # a grid of characters
     
     @: screen name ->

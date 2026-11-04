@@ -10,7 +10,7 @@ use                 ◆ diritem
                
 import rgxs from './quicky.json' with { type: "json" }
 
-■quicky extends inputchoice
+■quicky□inputchoice
 
     @: @screen @name='quicky'->
 

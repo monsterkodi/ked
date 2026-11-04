@@ -6,7 +6,7 @@ use ../theme     ◆ color theme
 use ../view/base ◆ view
 use ./tool       ◆ belt colorspans
 use              ◆ mode
-■draw extends view
+■draw□view
 
     @: screen name features ->
         

@@ -2,7 +2,7 @@
 use ../../../kxk ▪ kseg
 use ../../theme  ◆ theme
 use ../../edit   ◆ editor
-■input extends editor
+■input□editor
 ###
     simple text input field
     used in inputchoice to filter choices

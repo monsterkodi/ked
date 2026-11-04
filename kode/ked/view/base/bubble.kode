@@ -3,7 +3,7 @@ use ../../../kxk ▪ slash kseg
 use ../../theme  ◆ theme 
 use ../../util   ◆ syntax
 use ../base      ◆ view
-■bubble extends view
+■bubble□view
 ###
     displays some clickable text in a rounded 'bubble'
     used by 

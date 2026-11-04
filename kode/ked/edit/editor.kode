@@ -6,7 +6,7 @@ use ../util        ◆ config
 use ./tool         ◆ belt
 use                ◆ state draw complete mode
 
-■editor extends draw
+■editor□draw
 ###
     configurable text editor
     used by fileeditor, input and choices

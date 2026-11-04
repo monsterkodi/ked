@@ -19,7 +19,7 @@ use                 ◆ titlefile titlenovim
             '' ➜ @color.symbol
                 ➜ @color.number
 
-■title extends view
+■title□view
 ###
     the row above the fileeditor
     displays currently edited file and editor state information 
