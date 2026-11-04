@@ -1,12 +1,3 @@
-###
-     ███████  ████████   ███████   ████████    ███████  ███   ███  ████████  ████████ 
-    ███       ███       ███   ███  ███   ███  ███       ███   ███  ███       ███   ███
-    ███████   ███████   █████████  ███████    ███       █████████  ███████   ███████  
-         ███  ███       ███   ███  ███   ███  ███       ███   ███  ███       ███   ███
-    ███████   ████████  ███   ███  ███   ███   ███████  ███   ███  ████████  ███   ███
-
-    searches in multiple files provided by index▸prjcts
-###
 
 use ../../../kxk    ▪ post kseg slash
 use ../../../kxk    ◆ nfs
@@ -14,9 +5,9 @@ use ../../edit/tool ◆ belt
 use ../../index     ◆ prjcts
 use ../base         ◆ view
 use                 ◆ finder searcherfile
-
-function searcher extends finder
-
+■searcher extends finder
+    # searches in multiple files provided by index▸prjcts
+    
     @: @screen @editor name='searcher' ->
 
         super @screen @editor name
@@ -27,12 +18,6 @@ function searcher extends finder
         
         @sfils = []
         
-    #  ███████   ████████   ████████    ███████   ███   ███   ███████   ████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  ████  ███  ███        ███       
-    # █████████  ███████    ███████    █████████  ███ █ ███  ███  ████  ███████   
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███  ████  ███   ███  ███       
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███   ███   ███████   ████████  
-
     arrangeRect: ->
     
         [
@@ -50,12 +35,6 @@ function searcher extends finder
             y = @choices.cells.y - @choices.state.s.view[1] + sfil.lineIndex
             sfil.layout @choices.cells.x y @choices.cells.cols 1
             
-    # ███████    ████████    ███████   ███   ███
-    # ███   ███  ███   ███  ███   ███  ███ █ ███
-    # ███   ███  ███████    █████████  █████████
-    # ███   ███  ███   ███  ███   ███  ███   ███
-    # ███████    ███   ███  ███   ███  ██     ██
-
     draw: ->
 
         ⮐  if @hidden()
@@ -66,12 +45,6 @@ function searcher extends finder
             if @choices.state.s.view[1] <= sfil.lineIndex < @choices.state.s.view[1]+@choices.cells.rows
                 sfil.draw()
             
-    # ██     ██   ███████   ███   ███   ███████  ████████
-    # ███   ███  ███   ███  ███   ███  ███       ███     
-    # █████████  ███   ███  ███   ███  ███████   ███████ 
-    # ███ █ ███  ███   ███  ███   ███       ███  ███     
-    # ███   ███   ███████    ███████   ███████   ████████
-
     onMouse: event =>
 
         ⮐  if @hidden()
@@ -81,12 +54,6 @@ function searcher extends finder
         
         super event
         
-    # ███       ███████    ███████   ███████    ████████  ███████  
-    # ███      ███   ███  ███   ███  ███   ███  ███       ███   ███
-    # ███      ███   ███  █████████  ███   ███  ███████   ███   ███
-    # ███      ███   ███  ███   ███  ███   ███  ███       ███   ███
-    # ███████   ███████   ███   ███  ███████    ████████  ███████  
-
     onFileLoaded: file =>
     
         ⮐  if @hidden()
@@ -102,12 +69,6 @@ function searcher extends finder
         delete @fileToHighlight
         delete @textToHighlight
         
-    # ████████  ██     ██  ███  █████████        ████████  ███  ███      ████████         ███████   ████████   ████████  ███   ███
-    # ███       ███   ███  ███     ███           ███       ███  ███      ███             ███   ███  ███   ███  ███       ████  ███
-    # ███████   █████████  ███     ███           ██████    ███  ███      ███████         ███   ███  ████████   ███████   ███ █ ███
-    # ███       ███ █ ███  ███     ███           ███       ███  ███      ███             ███   ███  ███        ███       ███  ████
-    # ████████  ███   ███  ███     ███           ███       ███  ███████  ████████         ███████   ███        ████████  ███   ███
-
     emitFileOpen: choice ->
     
         # log 'emit file.open'
@@ -122,12 +83,6 @@ function searcher extends finder
         @choices.state.highlightText text
         post.emit 'redraw'
     
-    #  ███████   ███████   ████████   █████████
-    # ███       ███   ███  ███   ███     ███   
-    # ███████   ███   ███  ███████       ███   
-    #      ███  ███   ███  ███   ███     ███   
-    # ███████    ███████   ███   ███     ███   
-
     sortFiles: files ->
     
         files.sort (a b) ->
@@ -143,12 +98,6 @@ function searcher extends finder
             weight(b) - weight(a)
         files
         
-    #  ███████  ███   ███   ███████   ███   ███  
-    # ███       ███   ███  ███   ███  ███ █ ███  
-    # ███████   █████████  ███   ███  █████████  
-    #      ███  ███   ███  ███   ███  ███   ███  
-    # ███████   ███   ███   ███████   ██     ██  
-    
     show: text files ○=>
     
         # log "searcher show |#{text}|"
@@ -223,24 +172,12 @@ function searcher extends finder
             if idx == files.length-1
                 @highlightTextAndEmitRedraw text
                 
-    #  ███████   ████████   ████████   ███      ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███       ███ ███   
-    # █████████  ████████   ████████   ███        █████    
-    # ███   ███  ███        ███        ███         ███     
-    # ███   ███  ███        ███        ███████     ███     
-        
     apply: choice ->
         
         ⮐  @emitFileOpen(choice) if choice?.path
         
         super choice
                                     
-    # ███  ███   ███  ████████   ███   ███  █████████       ███████    ███████  █████████  ███   ███████   ███   ███
-    # ███  ████  ███  ███   ███  ███   ███     ███         ███   ███  ███          ███     ███  ███   ███  ████  ███
-    # ███  ███ █ ███  ████████   ███   ███     ███         █████████  ███          ███     ███  ███   ███  ███ █ ███
-    # ███  ███  ████  ███        ███   ███     ███         ███   ███  ███          ███     ███  ███   ███  ███  ████
-    # ███  ███   ███  ███         ███████      ███         ███   ███   ███████     ███     ███   ███████   ███   ███
-
     onInputAction: action text ->
     
         # log "searcher.onInputAction #{action} #{text}"

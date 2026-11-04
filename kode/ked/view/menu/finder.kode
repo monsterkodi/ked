@@ -137,8 +137,14 @@ function finder extends inputchoice
         # log "finder.searchText #{@name} #{text}"
         
         if empty text 
-            # log "finder.searchText #{@name} take text of selection or word at cursor"
             text = @state.textOfSelectionOrWordAtCursor()
+            if '\n' in text
+                lines = belt.linesForText text
+                text = lines[0]
+                for i in 1...lines.length
+                    if text != lines[i]
+                        text = @state.wordAtCursor()
+                        break
             
         text ?= ''
 
