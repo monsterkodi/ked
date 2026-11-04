@@ -1,20 +1,10 @@
-###
-    ████████  ███  ███   ███  ███████    ████████  ████████   
-    ███       ███  ████  ███  ███   ███  ███       ███   ███  
-    ██████    ███  ███ █ ███  ███   ███  ███████   ███████    
-    ███       ███  ███  ████  ███   ███  ███       ███   ███  
-    ███       ███  ███   ███  ███████    ████████  ███   ███  
-
-    searches and highlights in the current fileeditor file 
-###
 
 use ../../../kxk    ▪ post kseg kutil
 use ../../theme     ◆ theme
 use ../../edit/tool ◆ belt
 use                 ◆ inputchoice
-
-function finder extends inputchoice
-
+■finder extends inputchoice
+    # searches and highlights in the current fileeditor file 
     @: @screen @editor name='finder' ->
     
         @state = @editor.state
@@ -34,12 +24,6 @@ function finder extends inputchoice
         @choices.gutter.setColor 'highlight'         theme.gutter.fg 
         @choices.gutter.setColor 'bg_fully_selected' theme.finder.bg
 
-    # ███      ███  ███   ███  ████████  ███   ███   ███████ 
-    # ███      ███  ████  ███  ███       ████  ███  ███   ███
-    # ███      ███  ███ █ ███  ███████   ███ █ ███  ███   ███
-    # ███      ███  ███  ████  ███       ███  ████  ███   ███
-    # ███████  ███  ███   ███  ████████  ███   ███   ███████ 
-
     lineno: y =>
      
         pad = @choices.gutter.cells.cols-1
@@ -53,12 +37,6 @@ function finder extends inputchoice
                 ⮐  lpad(pad @choices.fuzzied[y].row+1) + ' '
         lpad pad+1
     
-    #  ███████   ████████   ████████    ███████   ███   ███   ███████   ████████
-    # ███   ███  ███   ███  ███   ███  ███   ███  ████  ███  ███        ███     
-    # █████████  ███████    ███████    █████████  ███ █ ███  ███  ████  ███████ 
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███  ████  ███   ███  ███     
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███   ███   ███████   ████████
-
     arrangeRect: ->
     
         [
@@ -78,12 +56,6 @@ function finder extends inputchoice
         @choices.layout  x+1   y+3  w-2  cs
         @cells.layout    x     y    w    cs+4
         
-    #  ███████  ███   ███   ███████   ███   ███  
-    # ███       ███   ███  ███   ███  ███ █ ███  
-    # ███████   █████████  ███   ███  █████████  
-    #      ███  ███   ███  ███   ███  ███   ███  
-    # ███████   ███   ███   ███████   ██     ██  
-    
     show: text =>
         
         # log "finder.show #{@name} #{text}"
@@ -126,12 +98,6 @@ function finder extends inputchoice
         super()            # this might set focus to choices
         @input.grabFocus() # but in finder and searcher input should always be focused
         
-    #  ███████  ████████   ███████   ████████    ███████  ███   ███        █████████  ████████  ███   ███  █████████  
-    # ███       ███       ███   ███  ███   ███  ███       ███   ███           ███     ███        ███ ███      ███     
-    # ███████   ███████   █████████  ███████    ███       █████████           ███     ███████     █████       ███     
-    #      ███  ███       ███   ███  ███   ███  ███       ███   ███           ███     ███        ███ ███      ███     
-    # ███████   ████████  ███   ███  ███   ███   ███████  ███   ███           ███     ████████  ███   ███     ███     
-    
     searchText: text ->
     
         # log "finder.searchText #{@name} #{text}"
@@ -155,12 +121,6 @@ function finder extends inputchoice
                 
         text
                 
-    #  ███████   ████████   ████████   ███      ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███       ███ ███   
-    # █████████  ████████   ████████   ███        █████    
-    # ███   ███  ███        ███        ███         ███     
-    # ███   ███  ███        ███        ███████     ███     
-        
     apply: choice ->
         
         if valid choice
@@ -174,12 +134,6 @@ function finder extends inputchoice
         
     applyChoice: choice -> @apply choice
     
-    #  ███████  ███   ███   ███████   ███   ███████  ████████   ███████         ███████    ███████  █████████  ███   ███████   ███   ███
-    # ███       ███   ███  ███   ███  ███  ███       ███       ███             ███   ███  ███          ███     ███  ███   ███  ████  ███
-    # ███       █████████  ███   ███  ███  ███       ███████   ███████         █████████  ███          ███     ███  ███   ███  ███ █ ███
-    # ███       ███   ███  ███   ███  ███  ███       ███            ███        ███   ███  ███          ███     ███  ███   ███  ███  ████
-    #  ███████  ███   ███   ███████   ███   ███████  ████████  ███████         ███   ███   ███████     ███     ███   ███████   ███   ███
-
     onChoicesAction: action choice ->
     
         # log "finder.onChoicesAction #{action}"
@@ -195,12 +149,6 @@ function finder extends inputchoice
     
         super action choice
         
-    # ███  ███   ███  ████████   ███   ███  █████████         ███████    ███████  █████████  ███   ███████   ███   ███
-    # ███  ████  ███  ███   ███  ███   ███     ███           ███   ███  ███          ███     ███  ███   ███  ████  ███
-    # ███  ███ █ ███  ████████   ███   ███     ███           █████████  ███          ███     ███  ███   ███  ███ █ ███
-    # ███  ███  ████  ███        ███   ███     ███           ███   ███  ███          ███     ███  ███   ███  ███  ████
-    # ███  ███   ███  ███         ███████      ███           ███   ███   ███████     ███     ███   ███████   ███   ███
-
     onInputAction: action text ->
     
         switch action

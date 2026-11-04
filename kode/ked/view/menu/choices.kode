@@ -1,10 +1,10 @@
-###
-     ███████  ███   ███   ███████   ███   ███████  ████████   ███████  
-    ███       ███   ███  ███   ███  ███  ███       ███       ███       
-    ███       █████████  ███   ███  ███  ███       ███████   ███████   
-    ███       ███   ███  ███   ███  ███  ███       ███            ███  
-     ███████  ███   ███   ███████   ███   ███████  ████████  ███████   
 
+use ../../../kxk    ▪ kstr kseg slash krzl post
+use ../../theme     ◆ color theme 
+use ../../edit/tool ◆ belt
+use ../../edit      ◆ editor
+■choices extends editor
+###
     an editor that can't edit ;)
     
     displays selections with nice rounded edges and is used almost 
@@ -14,13 +14,6 @@
     takes list of items as input and extracts text to display from them    
     supports filtering of the items
 ###
-
-use ../../../kxk    ▪ kstr kseg slash krzl post
-use ../../theme     ◆ color theme 
-use ../../edit/tool ◆ belt
-use ../../edit      ◆ editor
-
-function choices extends editor
 
     @: screen name features=[] ->
 
@@ -58,12 +51,6 @@ function choices extends editor
         @fuzzied = @items
         @state.clearEmpty()
         
-    #  ███████  ████████  █████████  
-    # ███       ███          ███     
-    # ███████   ███████      ███     
-    #      ███  ███          ███     
-    # ███████   ████████     ███     
-    
     set: @items @key ->
         
         @items ?= []
@@ -85,12 +72,6 @@ function choices extends editor
         @fuzzied = @items # 𝜏𝖍𝚒𝖘 𝚒𝖘 ⟒ɼ⊚∩𝚐! 𝚒𝜏ϵ⫙𝖘 𝖘𝖍⊚𝓊⟅𝒹 𝔟ϵ ɼϵϝ𝓊𝓏𝓏𝚒ϵ𝒹 𝚒∩𝖘𝜏ϵ𝕒𝒹
         @state.appendLines items.map((i) -> i[key]) ext
                 
-    # ███████    ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  
-    # ███   ███  ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███   ███  ███   ███  ██     ██  
-    
     drawCursors: ->
         
     drawSelections: ->
@@ -138,12 +119,6 @@ function choices extends editor
         
     choiceAtRow: row -> @fuzzied[row]
     
-    # ███   ███  ████████  ███   ███  █████████        ████████   ████████   ████████  ███   ███  
-    # ████  ███  ███        ███ ███      ███           ███   ███  ███   ███  ███       ███   ███  
-    # ███ █ ███  ███████     █████       ███           ████████   ███████    ███████    ███ ███   
-    # ███  ████  ███        ███ ███      ███           ███        ███   ███  ███          ███     
-    # ███   ███  ████████  ███   ███     ███           ███        ███   ███  ████████      █      
-
     hasNext: -> @nextRow()?
     hasPrev: -> @prevRow()?
 
@@ -185,12 +160,6 @@ function choices extends editor
             y -= 1
         y
         
-    #  ███████  ████████  ███      ████████   ███████  █████████  
-    # ███       ███       ███      ███       ███          ███     
-    # ███████   ███████   ███      ███████   ███          ███     
-    #      ███  ███       ███      ███       ███          ███     
-    # ███████   ████████  ███████  ████████   ███████     ███     
-    
     select: row -> 
     
         ⮐  if not row is num
@@ -223,12 +192,6 @@ function choices extends editor
         else
             @select row
                     
-    # ███   ███  ████████  ███   ███████   ███   ███  █████████  
-    # ███ █ ███  ███       ███  ███        ███   ███     ███     
-    # █████████  ███████   ███  ███  ████  █████████     ███     
-    # ███   ███  ███       ███  ███   ███  ███   ███     ███     
-    # ██     ██  ████████  ███   ███████   ███   ███     ███     
-        
     weight: item text =>
 
         itemText = @extract item
@@ -246,12 +209,6 @@ function choices extends editor
         w += valid p.ext ? (0.1 * matchOrLevenshtein(p.ext)) : 4 # low weight for extensions
         w                                                        # has the side-effect of moving directories down
 
-    # ████████  ███  ███      █████████  ████████  ████████   
-    # ███       ███  ███         ███     ███       ███   ███  
-    # ██████    ███  ███         ███     ███████   ███████    
-    # ███       ███  ███         ███     ███       ███   ███  
-    # ███       ███  ███████     ███     ████████  ███   ███  
-    
     filter: text =>
         
         ⮐  if empty @items
@@ -274,12 +231,6 @@ function choices extends editor
         
         @state.loadLines lines
 
-    # ███   ███   ███████   ███   ███  ████████  ████████ 
-    # ███   ███  ███   ███  ███   ███  ███       ███   ███
-    # █████████  ███   ███   ███ ███   ███████   ███████  
-    # ███   ███  ███   ███     ███     ███       ███   ███
-    # ███   ███   ███████       █      ████████  ███   ███
-
     hoverChoiceAtIndex: index event => 
     
         ⮐  true if @hoverIndex == index
@@ -298,12 +249,6 @@ function choices extends editor
         post.emit 'pointer' 'default'
         redraw:true
 
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
-    
     dragChoiceAtIndex: index event =>
         
         @hoverChoiceAtIndex index event
@@ -360,22 +305,10 @@ function choices extends editor
                             delete @dragStart
         @hover
         
-    #  ███████    ███████  █████████  ███   ███████   ███   ███  
-    # ███   ███  ███          ███     ███  ███   ███  ████  ███  
-    # █████████  ███          ███     ███  ███   ███  ███ █ ███  
-    # ███   ███  ███          ███     ███  ███   ███  ███  ████  
-    # ███   ███   ███████     ███     ███   ███████   ███   ███  
-    
     emitAction: action choice event =>
         
         @emit 'action' action choice event
                     
-    # ███   ███  ████████  ███   ███  
-    # ███  ███   ███        ███ ███   
-    # ███████    ███████     █████    
-    # ███  ███   ███          ███     
-    # ███   ███  ████████     ███     
-    
     onKey: key event =>
     
         # log "#{@name} onKey #{key} combo #{event.combo}"
