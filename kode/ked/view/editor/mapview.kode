@@ -37,7 +37,7 @@ use ../base         ◆ view
             
 ##show    
     reload: => 
-    
+
         @createImages()
         @drawImages()
     
@@ -57,11 +57,7 @@ use ../base         ◆ view
         
         ⮐  if empty @images
 
-        if process.env.TERM == 'xterm-kitty'
-            @cells.screen.t.deleteImagesInRange @images[0] @images[-1]
-        else
-            for id in @images
-                @cells.screen.t.deleteImage id
+        @cells.screen.t.deleteImagesInRange @images[0] @images[-1]
 
         @images = []
         
