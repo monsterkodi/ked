@@ -2,7 +2,7 @@
 use ../../../kxk ▪ events post
 use ../../theme  ◆ color
 use ../screen    ◆ cells 
-■view□event
+■view□events
 ###
     keeps track of
         ▪ screen cells
