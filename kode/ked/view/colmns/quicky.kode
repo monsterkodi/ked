@@ -1,14 +1,7 @@
-###
- ███████   ███   ███  ███   ███████  ███   ███  ███   ███
-███   ███  ███   ███  ███  ███       ███  ███    ███ ███
-███ ██ ██  ███   ███  ███  ███       ███████      █████
-███ ████   ███   ███  ███  ███       ███  ███      ███
- █████ ██   ███████   ███   ███████  ███   ███     ███
-###
 
 use ../../../kxk    ▪ kstr slash post kutil nfs
 use ../../index     ◆ prjcts
-use ../../util      ◆ fileutil frecent filecolors
+use ../../util      ◆ fileutil frecent filecolors config
 use ../../edit/tool ◆ belt
 use ../../theme     ◆ icons
 use ../base         ◆ crumbs 
@@ -17,7 +10,7 @@ use                 ◆ diritem
                
 import rgxs from './quicky.json' with { type: "json" }
 
-function quicky extends inputchoice
+■quicky extends inputchoice
 
     @: @screen @name='quicky'->
 
@@ -38,12 +31,6 @@ function quicky extends inputchoice
 
         post.on 'quicky.files' @showFiles if @name == 'quicky'
 
-    #  ███████   ████████   ████████    ███████   ███   ███   ███████   ████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  ████  ███  ███        ███       
-    # █████████  ███████    ███████    █████████  ███ █ ███  ███  ████  ███████   
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███  ████  ███   ███  ███       
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███   ███   ███████   ████████  
-    
     arrange: =>
         
         scx = int @screen.cols/2
@@ -68,12 +55,6 @@ function quicky extends inputchoice
         @choices.layout  x+1      y+1+ih+cr  cw    ch
         @cells.layout    x        y          w     h
 
-    # ███████    ████████    ███████   ███   ███
-    # ███   ███  ███   ███  ███   ███  ███ █ ███
-    # ███   ███  ███████    █████████  █████████
-    # ███   ███  ███   ███  ███   ███  ███   ███
-    # ███████    ███   ███  ███   ███  ██     ██
-
     draw: =>
 
         ⮐  if @hidden()
@@ -84,12 +65,6 @@ function quicky extends inputchoice
         @crumbs.draw()
         @drawChoices()
                 
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
-    
     onMouse: event =>
 
         ⮐  if @hidden()
@@ -97,12 +72,6 @@ function quicky extends inputchoice
         ret = super event           ; ⮐  ret if ret?.redraw
         @hover
                 
-    #  ███████  ███   ███   ███████   ███   ███        ████████  ███  ███      ████████   ███████  
-    # ███       ███   ███  ███   ███  ███ █ ███        ███       ███  ███      ███       ███       
-    # ███████   █████████  ███   ███  █████████        ██████    ███  ███      ███████   ███████   
-    #      ███  ███   ███  ███   ███  ███   ███        ███       ███  ███      ███            ███  
-    # ███████   ███   ███   ███████   ██     ██        ███       ███  ███████  ████████  ███████   
-    
     showFiles: files =>
     
         items = files.map (path) -> path:path type:'file' 
@@ -115,12 +84,6 @@ function quicky extends inputchoice
     
         @showFiles frecent.list('file')
         
-    # ████████   ████████    ███████         ███  ████████   ███████  █████████  ████████  ███  ███      ████████   ███████  
-    # ███   ███  ███   ███  ███   ███        ███  ███       ███          ███     ███       ███  ███      ███       ███       
-    # ████████   ███████    ███   ███        ███  ███████   ███          ███     ██████    ███  ███      ███████   ███████   
-    # ███        ███   ███  ███   ███  ███   ███  ███       ███          ███     ███       ███  ███      ███            ███  
-    # ███        ███   ███   ███████    ███████   ████████   ███████     ███     ███       ███  ███████  ████████  ███████   
-    
     gotoDirOrOpenFile: =>
     
     showProjectFiles: @currentFile =>
@@ -175,12 +138,6 @@ function quicky extends inputchoice
     
         @showPathItems items
         
-    # ████████    ███████   █████████  ███   ███        ███  █████████  ████████  ██     ██   ███████  
-    # ███   ███  ███   ███     ███     ███   ███        ███     ███     ███       ███   ███  ███       
-    # ████████   █████████     ███     █████████        ███     ███     ███████   █████████  ███████   
-    # ███        ███   ███     ███     ███   ███        ███     ███     ███       ███ █ ███       ███  
-    # ███        ███   ███     ███     ███   ███        ███     ███     ████████  ███   ███  ███████   
-    
     showPathItems: items select =>
 
         if @autoHideInput
@@ -207,12 +164,6 @@ function quicky extends inputchoice
         @show()
         @choices.grabFocus()
         
-    #  ███████   ████████   ████████  ███   ███     ███  ███   ███     ████████  ███████    ███  █████████   ███████   ████████   
-    # ███   ███  ███   ███  ███       ████  ███     ███  ████  ███     ███       ███   ███  ███     ███     ███   ███  ███   ███  
-    # ███   ███  ████████   ███████   ███ █ ███     ███  ███ █ ███     ███████   ███   ███  ███     ███     ███   ███  ███████    
-    # ███   ███  ███        ███       ███  ████     ███  ███  ████     ███       ███   ███  ███     ███     ███   ███  ███   ███  
-    #  ███████   ███        ████████  ███   ███     ███  ███   ███     ████████  ███████    ███     ███      ███████   ███   ███  
-    
     openFileInEditor: file =>
         
         @hide()
@@ -220,12 +171,6 @@ function quicky extends inputchoice
         post.emit 'focus' 'editor'
         redraw:true
                              
-    #  ███████  ████████  ███      ████████   ███████  █████████
-    # ███       ███       ███      ███       ███          ███
-    # ███████   ███████   ███      ███████   ███          ███
-    #      ███  ███       ███      ███       ███          ███
-    # ███████   ████████  ███████  ████████   ███████     ███
-
     moveSelection: dir =>
         
         switch dir
@@ -236,12 +181,6 @@ function quicky extends inputchoice
 
         @choices.moveSelection dir
         
-    # ████████   ████████   ████████  ███   ███  ███  ████████  ███   ███  
-    # ███   ███  ███   ███  ███       ███   ███  ███  ███       ███ █ ███  
-    # ████████   ███████    ███████    ███ ███   ███  ███████   █████████  
-    # ███        ███   ███  ███          ███     ███  ███       ███   ███  
-    # ███        ███   ███  ████████      █      ███  ████████  ██     ██  
-    
     choicesFiltered: =>
         
         @preview @choices.current()
@@ -250,7 +189,8 @@ function quicky extends inputchoice
         
         ⮐  @hideMap() if empty item?.path
         
-        if item.type == 'file' and slash.ext(item.path) in fileutil.sourceFileExtensions
+        # if item.type == 'file' and slash.ext(item.path) in fileutil.sourceFileExtensions
+        if item.type == 'file' and slash.ext(item.path) in config.data.sourceFileExtensions
             text =○ nfs.read item.path
             fileColorData = filecolors.split item.path text
             text = fileColorData.text
@@ -263,12 +203,6 @@ function quicky extends inputchoice
             
         post.emit 'redraw'
 
-    # ███████    ████████    ███████   ███   ███   ███████  ████████  ███████    ███  ████████ 
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  ███       ███       ███   ███  ███  ███   ███
-    # ███████    ███████    ███   ███  █████████  ███████   ███████   ███   ███  ███  ███████  
-    # ███   ███  ███   ███  ███   ███  ███   ███       ███  ███       ███   ███  ███  ███   ███
-    # ███████    ███   ███   ███████   ██     ██  ███████   ████████  ███████    ███  ███   ███
-
     browseDir: dir select ○=>
     
         log "#{@name} browseDir #{dir}"
@@ -278,12 +212,6 @@ function quicky extends inputchoice
     hideMap: => 
     
         @choices.mapscr.hide()
-    
-    #  ███████   ████████   ████████   ███      ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███       ███ ███   
-    # █████████  ████████   ████████   ███        █████    
-    # ███   ███  ███        ███        ███         ███     
-    # ███   ███  ███        ███        ███████     ███     
     
     applyChoice: choice =>
         
@@ -307,12 +235,6 @@ function quicky extends inputchoice
             @openFileInEditor choice.path 
         redraw:true
                 
-    #  ███████    ███████  █████████  ███   ███████   ███   ███  
-    # ███   ███  ███          ███     ███  ███   ███  ████  ███  
-    # █████████  ███          ███     ███  ███   ███  ███ █ ███  
-    # ███   ███  ███          ███     ███  ███   ███  ███  ████  
-    # ███   ███   ███████     ███     ███   ███████   ███   ███  
-    
     onCrumbsAction: action path =>
 
         switch action

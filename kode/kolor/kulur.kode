@@ -183,15 +183,19 @@ hashComment = ->
     if stackTop and stackTop.lineno == line.number
         ⮐ # comments inside triple regexp only valid on internal lines?
 
+    fillBangComment()
+
+fillBangComment = ->
+    
     if chunk.match == "#"
     
-        if ext == 'kode'
+        # if ext in ['kode']
 
-            if chunk.turd?.startsWith '#!'
-                ⮐  bangComment 2 'bang!'
+        if chunk.turd?.startsWith '#!'
+            ⮐  bangComment 2 'bang!'
 
-            if chunk.turd?.startsWith '##' 
-                ⮐  bangComment 2 'bang'
+        if chunk.turd?.startsWith '##' 
+            ⮐  bangComment 2 'bang'
     
         fillComment 1
 
@@ -199,8 +203,8 @@ noonComment = ->
 
     ⮐  if stackTop
 
-    if chunk.match == "#" and chunkIndex == 0
-        fillComment 1
+    if chunkIndex == 0
+        fillBangComment()
 
 slashComment = ->
 

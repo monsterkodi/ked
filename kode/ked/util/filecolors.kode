@@ -2,7 +2,6 @@
 use ../../kxk    ▪ kstr slash
 use ../../kolor  ◆ kulur
 use ../edit/tool ◆ colorspans
-
 ■filecolors
 ###
     serialize editor color spans into one trailing comment line

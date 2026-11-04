@@ -1,8 +1,6 @@
 
 use ../edit ◆ mode
-
 ■dumpstate
-
     @tags: (state file) ->
         
         tags = []

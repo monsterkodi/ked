@@ -864,8 +864,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         
         parse "##" ▸ [{
                         chunks: [
-                            {start:0 length:1 match:"#" text:"#" turd:"##" clss:'punct comment'}
-                            {start:1 length:1 match:"#" text:"#" turd:"#" clss:'comment'}
+                            {start:0 length:2 match:"##" text:"##" turd:"##" clss:'punct comment bang'}
                         ], chars:2 index:0 number:1 ext:'coffee'
                     }]
         
