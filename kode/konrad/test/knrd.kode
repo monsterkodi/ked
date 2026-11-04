@@ -1,10 +1,3 @@
-###
-    ███   ███  ███   ███  ████████   ███████    
-    ███  ███   ████  ███  ███   ███  ███   ███  
-    ███████    ███ █ ███  ███████    ███   ███  
-    ███  ███   ███  ████  ███   ███  ███   ███  
-    ███   ███  ███   ███  ███   ███  ███████    
-###
 
 use ../knrd
 use ../../kxk ◆ nfs slash
@@ -43,10 +36,6 @@ write = src text -> nfs.write jp(src) text
 opt  = {srcDir:kdir quiet:true}
 dirs = [jdir]
 
-# the js directory, from scratch: a file whose source is still there, one
-# whose source is gone, one that nobody generated, and one whose source is
-# gone and is not kode
-
 setup = ○->
     
     ○ nfs.remove root
@@ -74,10 +63,6 @@ setup = ○->
         knrd.stampSource hereText, jdir  ▸ kp('here.kode')
 
     ▸ an absolute sourceURL is taken as it stands
-
-        # kode writes the path of the file itself into the sourceURL, so
-        # there is nothing to resolve it against, and nothing to get
-        # wrong by resolving it
 
         knrd.stampSource(stamped(kp('here.kode')), jdir)  ▸ kp('here.kode')
 
@@ -108,9 +93,6 @@ setup = ○->
         gone.length  ▸ 2
 
     ▸ and a file stamped with an absolute path goes too
-
-        # the sourceURL is written as the path of the file itself, so this
-        # is the shape reconcile actually meets
 
         ○ setup()
         ○ nfs.write(jp('abs.js'), stamped(kp('gone.kode')))
@@ -174,20 +156,10 @@ setup = ○->
 
         isFile jp('dirish.js') ○▸ true
 
-
-# ███   ███  ███   ███   ███████    ███████  ███   ███  ████████  
-# ███  ███   ███  ███   ███   ███  ███       ███   ███  ███       
-# ███████    ███████    █████████  ███       █████████  ███████   
-# ███  ███   ███  ███   ███   ███  ███       ███   ███  ███       
-# ███   ███  ███   ███  ███   ███   ███████  ███   ███  ████████  
-
 cache = slash.path root, 'cache'
 
 ckfile = slash.path cache, 'x.kode'
 cjfile = slash.path cache, 'x.js'
-
-# a second file, because the interesting cases are about the ones a build
-# did not compile. one file cannot show that
 
 ckfile2 = slash.path cache, 'y.kode'
 cjfile2 = slash.path cache, 'y.js'
@@ -213,17 +185,11 @@ cktgt[knrd.rel cjfile2] = knrd.hash cjtext2
 more = {}
 more[knrd.rel ckfile] = 'cccccccccccccccccccccccccccccccccccccccc'
 
-# the entry for one file only, because the interesting cases are about the
-# ones a build did not compile
-
 oneSrc = {}
 oneSrc[knrd.rel ckfile] = cksrc[knrd.rel ckfile]
 
 oneTgt = {}
 oneTgt[knrd.rel cjfile] = cktgt[knrd.rel cjfile]
-
-# the cache directory, from scratch: the two files with their sources and
-# their targets, and no cache file
 
 setupCache = ○->
     
@@ -235,19 +201,12 @@ setupCache = ○->
     ○ nfs.write  cjfile2 cjtext2
     ○ nfs.remove ckache
 
-# a build with the given fingerprint, over the cache that is already there.
-# a whole build may write over a cache from another compiler; a partial one
-# may not, because it cannot vouch for the files it never looked at
-
 built = fp srcs tgts whole ○->
     
     back = ○ knrd.loadCache ckache
     ok = ○ knrd.saveCache ckache, back, fp, true, srcs, tgts, whole
     
     ⮐ {ok: ok, cache: ○ knrd.loadCache(ckache)}
-
-# the two files and a cache for them, from scratch, and what came back off
-# the disk
 
 cached = fp ○->
     
@@ -275,10 +234,6 @@ cached = fp ○->
         knrd.loadCache slash.path(cache,'nowhere')  ○▸ null
 
     ▸ rubbish that still parses is not a cache either
-
-        # noon is forgiving. these two are the ways a cache can be rubbish
-        # without failing to parse, and neither may be allowed to wedge the
-        # build.
 
         ○ setupCache()
         
@@ -386,13 +341,6 @@ cached = fp ○->
     ▸ files it did not compile lose their entry and the next build has to
     ▸ rebuild the tree to write them back
 
-        # the shape that made every other build after it recompile the tree.
-        # a build records only what it compiled, so replacing the cache with
-        # that leaves the files it did not compile - which were not rebuilt
-        # because they were already right, which is what the cache had said -
-        # with no entry at all. the next build then finds 213 misses and
-        # recompiles everything to write them back
-
         first = ○ built fpA, cksrc, cktgt, no
         merged = ○ built fpA, more, cktgt, no
         whole = ○ built fpB, cksrc, cktgt, yes
@@ -406,9 +354,6 @@ cached = fp ○->
         kept.cache.target[knrd.rel cjfile2] ▸ cktgt[knrd.rel cjfile2]
 
     ▸ but rubbish is replaced, or it would wedge the build for good
-
-        # rubbish in the cache has to be replaced rather than respected, or
-        # it sits there refusing every write and nothing is ever cached again
 
         ○ setupCache()
         ○ nfs.write ckache, '- not a cache at all\n'
@@ -427,10 +372,6 @@ cached = fp ○->
 
         fpOne == fpTwo  ▸ true
         fpOne.length  ▸ 40
-        
-        # the hash of nothing is what a tree without a compiler in it gets,
-        # and it is the same for every version of the compiler - which would
-        # leave a side project building with a compiler it never saw change
         
         fpOne != knrd.hash('')  ▸ true
 

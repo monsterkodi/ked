@@ -1,19 +1,10 @@
-###
- ███████  █████████   ███████    ███████  ███   ███  
-███          ███     ███   ███  ███       ███   ███  
-███████      ███     █████████  ███████   █████████  
-     ███     ███     ███   ███       ███  ███   ███  
-███████      ███     ███   ███  ███████   ███   ███  
-###
-
-# simple key value store with delayed saving to .app/.stash folder
-# stores state in separate files per window 
-# does not sync between windows
  
 use        ◆ noon post slash sds kstr nfs
 use ./util ▪ defaults isEqual
-
-function Stash
+■Stash
+# simple key value store with delayed saving to .app/.stash folder
+# stores state in separate files per window 
+# does not sync between windows
     
     @: @name opt ->
 
@@ -31,24 +22,12 @@ function Stash
 
     keypath: key -> key.split @sep
     
-    #  ███████   ████████  █████████
-    # ███        ███          ███   
-    # ███  ████  ███████      ███   
-    # ███   ███  ███          ███   
-    #  ███████   ████████     ███   
-        
     get: key value ->
         
         error 'stash.get -- invalid key' key if not key is str
         ⮐ value if not key is str
         sds.get @data, @keypath(key), value
          
-    #  ███████  ████████  █████████  
-    # ███       ███          ███     
-    # ███████   ███████      ███     
-    #      ███  ███          ███     
-    # ███████   ████████     ███     
-    
     set: key value ->
         
         ⮐ error 'stash.set -- invalid key' key if not key is str
@@ -74,12 +53,6 @@ function Stash
         @timer = null
         nfs.remove @file
         
-    # ███       ███████    ███████   ███████    
-    # ███      ███   ███  ███   ███  ███   ███  
-    # ███      ███   ███  █████████  ███   ███  
-    # ███      ███   ███  ███   ███  ███   ███  
-    # ███████   ███████   ███   ███  ███████    
-    
     load: file ○->
         
         file ?= @file
@@ -93,12 +66,6 @@ function Stash
             
         @data
             
-    #  ███████   ███████   ███   ███  ████████
-    # ███       ███   ███  ███   ███  ███     
-    # ███████   █████████   ███ ███   ███████ 
-    #      ███  ███   ███     ███     ███     
-    # ███████   ███   ███      █      ████████
-
     save: =>
         
         clearTimeout @timer

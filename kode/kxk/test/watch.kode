@@ -1,19 +1,11 @@
-###
-███   ███   ███████   █████████   ███████  ███   ███
-███ █ ███  ███   ███     ███     ███       ███   ███
-█████████  █████████     ███     ███       █████████
-███   ███  ███   ███     ███     ███       ███   ███
-██     ██  ███   ███   ███      ███████  ███   ███
-###
 
 use .. ◆ slash watch
 
-# never created on purpose: a Watch built on it opens no real fs.watch
 gone = ◆dir + '/.watch-test-nonexistent'
 
 ▸ watch
 
-    ▸ stat
+  ▸ stat
 
         stat = watch.stat ◆file
         (stat?) ▸ true
@@ -33,7 +25,7 @@ gone = ◆dir + '/.watch-test-nonexistent'
         stat = watch.stat(◆file + ':12')
         (stat?) ▸ true
 
-    ▸ ignore
+  ▸ ignore
 
         w = watch.dir gone
         r = w.ignore '/a/b'
@@ -45,7 +37,7 @@ gone = ◆dir + '/.watch-test-nonexistent'
         r = w.ignore '/a/b.js'
         (r?) ▸ false
 
-    ▸ dirAndFile
+  ▸ dirAndFile
 
         w = watch.dir gone
         w.dir ▸ slash.path gone
@@ -55,7 +47,7 @@ gone = ◆dir + '/.watch-test-nonexistent'
         w.file ▸ p
         w.dir  ▸ slash.path gone
 
-    ▸ onChange
+  ▸ onChange
 
         # a vanished path takes the remove branch.
         # @emit passes one info object, which is what kk's watcher reads as info.path

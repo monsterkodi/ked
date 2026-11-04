@@ -2,7 +2,7 @@
 use ../../kxk    ▪ kstr randRange
 use ../edit/tool ◆ belt
 
-class color
+■color
 
     @readabilityCache: {}
 

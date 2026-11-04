@@ -1,13 +1,17 @@
-class OS
+var OS
+
+
+OS = (function ()
 {
-    static loaded = false
+    function OS ()
+    {}
 
-    static platform = 'Darwin'
-
-    static isMac = true
-
-    static homedir = null
-}
+    OS["loaded"] = false
+    OS["platform"] = 'Darwin'
+    OS["isMac"] = true
+    OS["homedir"] = null
+    return OS
+})()
 
 try
 {
@@ -41,5 +45,5 @@ catch (err)
 }
 export default OS;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3MuanMiLCJzb3VyY2VzIjpbIi4uLy4uL2tvZGUva3hrL29zLmtvZGUiXSwibWFwcGluZ3MiOiJBQVFBLE1BQU07O0lBRUYsT0FBQyxTQUFVOztJQUNYLE9BQUMsV0FBVTs7SUFDWCxPQUFDLFFBQVU7O0lBQ1gsT0FBQyxVQUFVOzs7Ozs7O1FBS1AsT0FBTztRQUFLO1FBQUMsZ0JBQU87WUFBTSxlQUFNOztnQkFDekI7O2dCQUNDLEdBQUcsVUFBVyxHQUFHO2dCQUNqQixHQUFHLFdBQVcsR0FBRztnQkFDakIsR0FBRyxRQUFXLEdBQUcsYUFBWTt1QkFDN0IsR0FBRyxTQUFXOzs7O3VCQUVkLEdBQUcsU0FBVzs7O2VBRXRCOzs7T0FFRjs7SUFDRixjQUFNO0lBQ04sR0FBRyxTQUFTO0lBQWlCOztlQUUxQiJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3MuanMiLCJzb3VyY2VzIjpbIi4uLy4uL2tvZGUva3hrL29zLmtvZGUiXSwibWFwcGluZ3MiOiI7OztBQUNDLE1BQUQ7Ozs7O0lBRUksSUFBQyxXQUFVO0lBQ1gsSUFBQyxhQUFVO0lBQ1gsSUFBQyxVQUFVO0lBQ1gsSUFBQyxZQUFVO1dBTGQ7Ozs7Ozs7UUFVTyxPQUFPO1FBQUs7UUFBQyxnQkFBTztZQUFNLGVBQU07O2dCQUN6Qjs7Z0JBQ0MsR0FBRyxVQUFXLEdBQUc7Z0JBQ2pCLEdBQUcsV0FBVyxHQUFHO2dCQUNqQixHQUFHLFFBQVcsR0FBRyxhQUFZO3VCQUM3QixHQUFHLFNBQVc7Ozs7dUJBRWQsR0FBRyxTQUFXOzs7ZUFFdEI7OztPQUVGOztJQUNGLGNBQU07SUFDTixHQUFHLFNBQVM7SUFBaUI7O2VBRTFCIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/kxk/os.kode

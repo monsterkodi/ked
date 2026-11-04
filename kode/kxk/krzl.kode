@@ -1,17 +1,9 @@
+■Krzl
 ###
-    ███   ███  ████████   ███████  ███    
-    ███  ███   ███   ███     ███   ███    
-    ███████    ███████      ███    ███    
-    ███  ███   ███   ███   ███     ███    
-    ███   ███  ███   ███  ███████  ███████
-    
     filters values by an abbreviation.
     the abbreviation matches if each character
     is contained in the (extracted) string.
 ###
-
-function Krzl
-
     @: @values opt ->
         
         if @values is obj and empty opt
@@ -23,12 +15,6 @@ function Krzl
         @weight  = opt.weight             # customize result order, can be undefined
         @extract = opt.extract ? (i) -> i # only works on strings if @extract isn't provided
         @sortByLength = opt.sortByLength ? true # by default, results are sorted by length
-    
-    # ██     ██   ███████   █████████   ███████  ███   ███  
-    # ███   ███  ███   ███     ███     ███       ███   ███  
-    # █████████  █████████     ███     ███       █████████  
-    # ███ █ ███  ███   ███     ███     ███       ███   ███  
-    # ███   ███  ███   ███     ███      ███████  ███   ███  
     
     match: (abbrv, exstr) ->
         
@@ -56,12 +42,6 @@ function Krzl
                     indices:indices
         null
         
-    #  ███████   ███████   ████████   █████████  
-    # ███       ███   ███  ███   ███     ███     
-    # ███████   ███   ███  ███████       ███     
-    #      ███  ███   ███  ███   ███     ███     
-    # ███████    ███████   ███   ███     ███     
-    
     sort: (pairs) -> pairs.sort (a,b) => @calcWeight(a) - @calcWeight(b)
 
     calcWeight: (pair) ->
@@ -78,12 +58,6 @@ function Krzl
         
         (1/w) * (info.indices[0] + lengthOffset)
         
-    # ████████  ███  ███      █████████  ████████  ████████   
-    # ███       ███  ███         ███     ███       ███   ███  
-    # ██████    ███  ███         ███     ███████   ███████    
-    # ███       ███  ███         ███     ███       ███   ███  
-    # ███       ███  ███████     ███     ████████  ███   ███  
-    
     filter: (abbrv) -> # subset of values that match abbreviation
     
         # if empty abbrv        ➜ warn 'krzl.filter without abbreviation?'      ; ⮐ []

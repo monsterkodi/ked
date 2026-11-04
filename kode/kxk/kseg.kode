@@ -1,15 +1,8 @@
-###
-███   ███   ███████  ████████   ███████ 
-███  ███   ███       ███       ███      
-███████    ███████   ███████   ███  ████
-███  ███        ███  ███       ███   ███
-███   ███  ███████   ████████   ███████ 
-###
 
 use ◆ kstr util
 
 segmenter = new Intl.Segmenter "en-US" granularity:'grapheme'
-
+#!kseg
 ###
     converts string s into array of strings
     each sub-string contains the bytes of exactly one grapheme
@@ -23,12 +16,6 @@ kseg = s ->
     Array.from(segmenter.segment(s)).map (r) -> r.segment
     
 ###
-    ███      ███  ███   ███  ████████   ███████  
-    ███      ███  ████  ███  ███       ███       
-    ███      ███  ███ █ ███  ███████   ███████   
-    ███      ███  ███  ████  ███            ███  
-    ███████  ███  ███   ███  ████████  ███████   
-
     converts string s into an object with two properties:
         
         lines: list of strings         # s split into lines
@@ -45,12 +32,6 @@ kseg.lines = s ->
     segls: segls
     
 ###
-     ███████  ████████   ███████   ███      
-    ███       ███       ███        ███      
-    ███████   ███████   ███  ████  ███      
-         ███  ███       ███   ███  ███      
-    ███████   ████████   ███████   ███████ 
-    
     converts any into a list of strings
     
     any can be:
@@ -76,12 +57,6 @@ kseg.segl = any ->
         segls
     
 ###
-     ███████  ████████   ███████   ███       ███████  
-    ███       ███       ███        ███      ███       
-    ███████   ███████   ███  ████  ███      ███████   
-         ███  ███       ███   ███  ███           ███  
-    ███████   ████████   ███████   ███████  ███████   
-    
     converts any into a list of list of strings
     
     any can be:
@@ -101,12 +76,6 @@ kseg.segls = any ->
                 any[0] is arr ➜ any
     
 ###
-     ███████  █████████  ████████   
-    ███          ███     ███   ███  
-    ███████      ███     ███████    
-         ███     ███     ███   ███  
-    ███████      ███     ███   ███  
-    
     converts any into a string
     
     any can be:
@@ -126,12 +95,6 @@ kseg.str = any ->
         any.map(kseg.str).join('\n')
 
 ###
-          ███   ███████   ███  ███   ███  
-          ███  ███   ███  ███  ████  ███  
-          ███  ███   ███  ███  ███ █ ███  
-    ███   ███  ███   ███  ███  ███  ████  
-     ███████    ███████   ███  ███   ███  
-     
     returns list of graphemes for all arguments
         
     args can be strings and/or grapheme lists
@@ -145,12 +108,6 @@ kseg.join = args... ->
     r
     
 ###
-    ███████    ████████  █████████   ███████   ███████    
-    ███   ███  ███          ███     ███   ███  ███   ███  
-    ███   ███  ███████      ███     █████████  ███████    
-    ███   ███  ███          ███     ███   ███  ███   ███  
-    ███████    ████████     ███     ███   ███  ███████    
-    
     replaces tabs with up to 4 spaces in list of graphemes a
 ###
 
@@ -169,12 +126,6 @@ kseg.detab = a tw=4 ->
     a
     
 ###
-     ███████  ███   ███  ███   ███  ███   ███  ███   ███   ███████  
-    ███       ███   ███  ███   ███  ████  ███  ███  ███   ███       
-    ███       █████████  ███   ███  ███ █ ███  ███████    ███████   
-    ███       ███   ███  ███   ███  ███  ████  ███  ███        ███  
-     ███████  ███   ███   ███████   ███   ███  ███   ███  ███████   
-     
     returns chunks for any
 
     chunk:
@@ -188,12 +139,6 @@ kseg.chunks = any ->
     kseg.infos any 'chunk' (s) -> s not in ' \t\r\n'
     
 ###
-    ███   ███   ███████   ████████   ███████     ███████  
-    ███ █ ███  ███   ███  ███   ███  ███   ███  ███       
-    █████████  ███   ███  ███████    ███   ███  ███████   
-    ███   ███  ███   ███  ███   ███  ███   ███       ███  
-    ██     ██   ███████   ███   ███  ███████    ███████   
-    
     returns words for any
 
     word:
@@ -207,12 +152,6 @@ kseg.words = any ->
     kseg.infos any 'word' (s) -> /^\w+$/.test(s)
     
 ###
-    ███  ███   ███  ████████   ███████    ███████  
-    ███  ████  ███  ███       ███   ███  ███       
-    ███  ███ █ ███  ██████    ███   ███  ███████   
-    ███  ███  ████  ███       ███   ███       ███  
-    ███  ███   ███  ███        ███████   ███████   
-    
     list of infos for any, key and a test function
 
     each info has these properties:
@@ -256,12 +195,6 @@ kseg.infos = any key test ->
     infos
     
 ###
-     ███████  █████████   ███████   ████████   █████████   ███████        ███   ███  ███  █████████  ███   ███  
-    ███          ███     ███   ███  ███   ███     ███     ███             ███ █ ███  ███     ███     ███   ███  
-    ███████      ███     █████████  ███████       ███     ███████         █████████  ███     ███     █████████  
-         ███     ███     ███   ███  ███   ███     ███          ███        ███   ███  ███     ███     ███   ███  
-    ███████      ███     ███   ███  ███   ███     ███     ███████         ██     ██  ███     ███     ███   ███  
-    
     check if a list of graphemes starts with prefix
         
     prefix can be string or grapheme list
@@ -277,12 +210,6 @@ kseg.startsWith = a prefix ->
     a[0...segs.length] eql segs
 
 ###
-    ████████  ███   ███  ███████     ███████        ███   ███  ███  █████████  ███   ███  
-    ███       ████  ███  ███   ███  ███             ███ █ ███  ███     ███     ███   ███  
-    ███████   ███ █ ███  ███   ███  ███████         █████████  ███     ███     █████████  
-    ███       ███  ████  ███   ███       ███        ███   ███  ███     ███     ███   ███  
-    ████████  ███   ███  ███████    ███████         ██     ██  ███     ███     ███   ███  
-    
     check if a list of graphemes ends with postfix
         
     postfix can be string or grapheme list
@@ -298,12 +225,6 @@ kseg.endsWith = a postfix ->
     a[a.length-segs.length..] eql segs
     
 ###
-     ███████   ███████   ███   ███  ███   ███  █████████  
-    ███       ███   ███  ███   ███  ████  ███     ███     
-    ███       ███   ███  ███   ███  ███ █ ███     ███     
-    ███       ███   ███  ███   ███  ███  ████     ███     
-     ███████   ███████    ███████   ███   ███     ███     
-    
     number of graphemes at the start or end of a grapheme list
     
     head|tailCount:      number of graphemes contained in c
@@ -360,12 +281,6 @@ kseg.tailCountChunk = a ->
         ⮐  i if /[\s]+/.test a[a.length-1-i]
     i
     
-#  ███████   ███████   ███      ███      ████████   ███████  █████████  
-# ███       ███   ███  ███      ███      ███       ███          ███     
-# ███       ███   ███  ███      ███      ███████   ███          ███     
-# ███       ███   ███  ███      ███      ███       ███          ███     
-#  ███████   ███████   ███████  ███████  ████████   ███████     ███     
-
 kseg.collectGraphemes = a ->
     
     gs = new Set
@@ -374,12 +289,6 @@ kseg.collectGraphemes = a ->
     Array.from gs
     
 ###
-    ███   ███   ███████   ████████   ███████    
-    ███ █ ███  ███   ███  ███   ███  ███   ███  
-    █████████  ███   ███  ███████    ███   ███  
-    ███   ███  ███   ███  ███   ███  ███   ███  
-    ██     ██   ███████   ███   ███  ███████    
-    
     start and end position of word
     closest to index c in a grapheme list
 ###
@@ -412,12 +321,6 @@ kseg.spanForClosestWordAtColumn = a c ->
         
     s
         
-# ███  ███   ███  ███████    ████████  ███   ███  █████████  
-# ███  ████  ███  ███   ███  ███       ████  ███     ███     
-# ███  ███ █ ███  ███   ███  ███████   ███ █ ███     ███     
-# ███  ███  ████  ███   ███  ███       ███  ████     ███     
-# ███  ███   ███  ███████    ████████  ███   ███     ███     
-
 kseg.numIndent = a -> kseg.headCount a ' '
         
 kseg.splitAtIndent = a ->
@@ -425,12 +328,6 @@ kseg.splitAtIndent = a ->
     i = kseg.numIndent a
     [a[0...i] a[i..]]
     
-# ████████   ████████  ████████   ████████   ███████   █████████  
-# ███   ███  ███       ███   ███  ███       ███   ███     ███     
-# ███████    ███████   ████████   ███████   █████████     ███     
-# ███   ███  ███       ███        ███       ███   ███     ███     
-# ███   ███  ████████  ███        ████████  ███   ███     ███     
-
 kseg.repeat = n s=' ' ->
     
     ⮐  [] if n <= 0
@@ -440,12 +337,6 @@ kseg.repeat = n s=' ' ->
         a = a.concat s
     a
     
-# █████████  ████████   ███  ██     ██  
-#    ███     ███   ███  ███  ███   ███  
-#    ███     ███████    ███  █████████  
-#    ███     ███   ███  ███  ███ █ ███  
-#    ███     ███   ███  ███  ███   ███  
-
 kseg.trim = s c=' ' ->
     
     ⮐  [] if empty s
@@ -455,12 +346,6 @@ kseg.trim = s c=' ' ->
     s[hc..s.length-tc]
 
 ### 
-     ███████  ████████   ███████   ███  
-    ███       ███       ███        ███  
-    ███████   ███████   ███  ████  ███  
-         ███  ███       ███   ███  ███  
-    ███████   ████████   ███████   ███  
-    
     segment index at column w 
     
     ⮐  start of segment if column is inside
@@ -483,12 +368,6 @@ kseg.widthAtSegi = segs segi ->
     kseg.width segs[0...segi]
     
 ###
-    ███   ███  ███  ███████    █████████  ███   ███  
-    ███ █ ███  ███  ███   ███     ███     ███   ███  
-    █████████  ███  ███   ███     ███     █████████  
-    ███   ███  ███  ███   ███     ███     ███   ███  
-    ██     ██  ███  ███████       ███     ███   ███  
-    
     number of columns occupied by string or segment list s
 ###
 kseg.width = s ->
@@ -518,12 +397,6 @@ kseg.indexAtWidth = segs w ->
         i += 1    
     i
     
-# ███   ███   ███████    ███████  ███   ███  
-# ███   ███  ███   ███  ███       ███   ███  
-# █████████  █████████  ███████   █████████  
-# ███   ███  ███   ███       ███  ███   ███  
-# ███   ███  ███   ███  ███████   ███   ███  
-
 kseg.hash = s ->
 
     ⮐  0 if empty s

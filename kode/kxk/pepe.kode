@@ -1,10 +1,5 @@
+#!pepe
 ###
-    ████████   ████████  ████████   ████████
-    ███   ███  ███       ███   ███  ███     
-    ████████   ███████   ████████   ███████ 
-    ███        ███       ███        ███     
-    ███        ████████  ███        ████████
-    
     takes a string and a list of delimiter pairs
     dissects the string into substrings:
         
@@ -105,12 +100,6 @@ pepe = str opt ->
     last(stack).content
     
 ###
-    ███████    ████████  ████████   ████████  ████████   ████████  
-    ███   ███  ███       ███   ███  ███       ███   ███  ███       
-    ███   ███  ███████   ████████   ███████   ████████   ███████   
-    ███   ███  ███       ███        ███       ███        ███       
-    ███████    ████████  ███        ████████  ███        ████████  
-    
     traverses the output of pepe and calls a callback for each substring
     returns the joined substrings with the delimiter pairs reinserted
 ###
@@ -129,12 +118,6 @@ pepe.depepe = pep cb ->
     r
     
 ###
-    ████████  ███       ███████   █████████  █████████  ████████  ███   ███
-    ███       ███      ███   ███     ███        ███     ███       ████  ███
-    ██████    ███      █████████     ███        ███     ███████   ███ █ ███
-    ███       ███      ███   ███     ███        ███     ███       ███  ████
-    ███       ███████  ███   ███     ███        ███     ████████  ███   ███
-
     converts pepe hierarchy to list of pairs
     
     pepe.flatten pepe("some ( nested [ stuff ] )" index:true)
@@ -158,19 +141,7 @@ pepe.flatten = pep ->
                 f = f.concat pepe.flatten(p.content)
     f
     
-# ████████    ███████   ███  ████████    ███████
-# ███   ███  ███   ███  ███  ███   ███  ███     
-# ████████   █████████  ███  ███████    ███████ 
-# ███        ███   ███  ███  ███   ███       ███
-# ███        ███   ███  ███  ███   ███  ███████ 
-
 pepe.pairs = s -> pepe.flatten pepe(s index:true)
-
-#  ███████   █████████       ███████   ███████   ███    
-# ███   ███     ███         ███       ███   ███  ███    
-# █████████     ███         ███       ███   ███  ███    
-# ███   ███     ███         ███       ███   ███  ███    
-# ███   ███     ███          ███████   ███████   ███████
 
 pepe.pairsAtCol = s col -> 
 

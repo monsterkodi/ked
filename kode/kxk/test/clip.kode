@@ -1,10 +1,4 @@
 ###
-   ███████  ███      ███  ████████ 
-  ███       ███      ███  ███   ███
-  ███       ███      ███  ████████ 
-  ███       ███      ███  ███      
-   ███████  ███████  ███  ███      
-  
   tests the clipboard fallback path, never the system clipboard
 ###
 

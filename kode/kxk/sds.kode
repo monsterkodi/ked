@@ -1,10 +1,4 @@
-###
-     ███████  ███████     ███████
-    ███       ███   ███  ███     
-    ███████   ███   ███  ███████ 
-         ███  ███   ███       ███
-    ███████   ███████    ███████ 
-###
+#!sds
 
 regexp = (s) ->
     s = String s
@@ -17,12 +11,6 @@ regexp = (s) ->
     s = s.replace /####/g, '.*'
     new RegExp "^"+s+"$"
 
-
-#  ███████   ███████   ███      ███      ████████   ███████  █████████
-# ███       ███   ███  ███      ███      ███       ███          ███   
-# ███       ███   ███  ███      ███      ███████   ███          ███   
-# ███       ███   ███  ███      ███      ███       ███          ███   
-#  ███████   ███████   ███████  ███████  ████████   ███████     ███   
 
 # accepts an object
 #         a filter (keypath, key, value) -> true        # false to exclude
@@ -67,13 +55,7 @@ collect = (object, filter, map, count=-1, keyPath=[], result=[]) ->
                 keyPath.pop()
     result
 
-# ████████  ███  ███   ███  ███████    
-# ███       ███  ████  ███  ███   ███  
-# ██████    ███  ███ █ ███  ███   ███  
-# ███       ███  ███  ████  ███   ███  
-# ███       ███  ███   ███  ███████    
-
-function find
+■find
 
     # accept an object and a (key, path or value)
     # return a list of keypaths for matching (key, path or value)
@@ -105,12 +87,6 @@ function find
         
     @traverse: (object, func) -> collect object, func, (p,v) -> p
     
-    # ██     ██   ███████   █████████   ███████  ███   ███
-    # ███   ███  ███   ███     ███     ███       ███   ███
-    # █████████  █████████     ███     ███       █████████
-    # ███ █ ███  ███   ███     ███     ███       ███   ███
-    # ███   ███  ███   ███     ███      ███████  ███   ███
-    
     @matchPath: (a, r) -> @match a.join('.'), r
         
     @match: (a,r) ->
@@ -121,12 +97,6 @@ function find
 
     @reg: (s) -> regexp s
     
-#  ███████   ████████  █████████
-# ███        ███          ███
-# ███  ████  ███████      ███
-# ███   ███  ███          ███
-#  ███████   ████████     ███
-
 # accepts an object and a keypath as a list or string and a value
 # returns the value at keypath or undefined
 
@@ -145,12 +115,6 @@ get = object keypath defaultValue ->
 
     object
     
-#  ███████  ████████  █████████
-# ███       ███          ███   
-# ███████   ███████      ███   
-#      ███  ███          ███   
-# ███████   ████████     ███   
-
 # accepts an object, a keypath as an array or string and a value
 # returns the object with value set at keypath
 
@@ -183,14 +147,6 @@ set = object keypath value ->
     else
         log 'no keypath?' kp, keypath
     object
-
-###
-███████    ████████  ███      
-███   ███  ███       ███      
-███   ███  ███████   ███      
-███   ███  ███       ███      
-███████    ████████  ███████  
-###
 
 # accepts an object and a keypath as an array or string
 # returns the object with value removed at keypath
