@@ -4,10 +4,10 @@ use ./print
 
 klor.globalize()
 
-comps = 0
-succs = 0
-fails = []
-stack = []
+comps    = 0
+succs    = 0
+fails    = []
+stack    = []
 allfails = []
 allsuccs = 0
 columns  = 60

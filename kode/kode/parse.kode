@@ -28,13 +28,13 @@ wantsOperand = ['else' 'catch' 'finally' 'throw' 'super' 'extends' 'when' 'in' '
 # javascript's reserved words
 
 reserved = [
-    'await'  'break'    'case'      'catch'     'class'      'const'
-    'continue' 'debugger' 'default' 'delete'    'do'         'else'
-    'enum'   'export'   'extends'   'finally'   'for'        'function'
-    'if'     'implements' 'import'  'in'        'instanceof' 'interface'
-    'let'    'new'      'package'   'private'   'protected'  'public'
-    'return' 'static'   'super'     'switch'    'throw'      'try'
-    'typeof' 'var'      'void'      'while'     'with'       'yield'
+    'await'     'break'         'case'      'catch'     'class'      'const'
+    'continue'  'debugger'      'default'   'delete'    'do'         'else'
+    'enum'      'export'        'extends'   'finally'   'for'        'function'
+    'if'        'implements'    'import'    'in'        'instanceof' 'interface'
+    'let'       'new'           'package'   'private'   'protected'  'public'
+    'return'    'static'        'super'     'switch'    'throw'      'try'
+    'typeof'    'var'           'void'      'while'     'with'       'yield'
     ]
 
 # the reserved words that javascript will still have as a property name.
@@ -326,8 +326,8 @@ closers = '(':')' '[':']' '{':'}'
                                 switch tok.text
                                     'return'   ➜ ⮐ @return   tok tokens
                                     'switch'   ➜ ⮐ @switch   tok tokens
-                                    'class'    ➜ ⮐ @class    tok tokens
-                                    'function' ➜ ⮐ @function tok tokens                        
+                                    'class'    ➜ ⮐ @class(   tok tokens)
+                                    'function' ➜ ⮐ @function(tok tokens)
                                     'await'    ➜ ⮐ @await    tok tokens
                                     'import'   ➜ ⮐ @import   tok tokens
                                     'export'   ➜ ⮐ @export   tok tokens

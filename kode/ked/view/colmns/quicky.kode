@@ -98,7 +98,6 @@ import rgxs from './quicky.json' with { type: "json" }
         items = kutil.uniq items
         
         @currentDir = slash.dir @currentFile
-        
         @currentDir = process.cwd() if empty @currentDir
         
         @crumbs.hide()
@@ -189,8 +188,10 @@ import rgxs from './quicky.json' with { type: "json" }
         
         ⮐  @hideMap() if empty item?.path
         
-        # if item.type == 'file' and slash.ext(item.path) in fileutil.sourceFileExtensions
-        if item.type == 'file' and slash.ext(item.path) in config.data.sourceFileExtensions
+        ext = config.data.filetypes[slash.file(item.path)]
+        ext ?= slash.ext item.path
+        
+        if item.type == 'file' and ext in config.data.sourceFileExtensions
             text =○ nfs.read item.path
             fileColorData = filecolors.split item.path text
             text = fileColorData.text
