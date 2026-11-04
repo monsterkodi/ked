@@ -106,10 +106,13 @@ use ..           ◆ mode
         true
         
     desalt: ->
-    
-        selections = belt.lineRangesForPositions @state.s.lines @state.s.cursors
-        text       = belt.textForLineRanges @state.s.lines selections
-        log "desalt" selections text
+        
+        lines = @state.s.lines
+        selections = belt.lineRangesForPositions lines @state.s.cursors
+        # text       = belt.textForLineRanges @state.s.lines selections
+        texts = selections each (rng) -> belt.textForLineRange lines rng
+        texts = texts each (txt) -> txt.replace /\s*\#/ ''
+        log "desalt\n" texts
     
     # ███   ███  ████████  ███   ███
     # ███  ███   ███        ███ ███ 

@@ -1,4 +1,4 @@
-var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, eql: function (a,b,s) { var i, k, v; s = (s != null ? s : []); if (Object.is(a,b)) { return true }; if (typeof(a) !== typeof(b)) { return false }; if (!(Array.isArray(a)) && !(typeof(a) === 'object')) { return false }; if (Array.isArray(a)) { if (a.length !== b.length) { return false }; var list = _k_.list(a); for (i = 0; i < list.length; i++) { v = list[i]; s.push(i); if (!_k_.eql(v,b[i],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } } else if (_k_.isStr(a)) { return a === b } else { if (!_k_.eql(Object.keys(a),Object.keys(b))) { return false }; for (k in a) { v = a[k]; s.push(k); if (!_k_.eql(v,b[k],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } }; return true }, profile: function (id) {_k_.hrtime ??= {}; _k_.hrtime[id] = performance.now(); }, profilend: function (id) { var b = performance.now()-_k_.hrtime[id]; let f=0.001; for (let u of ['s','ms','μs','ns']) { if (u=='ns' || (b*f)>=1) { return console.log(id+' '+Number.parseFloat(b*f).toFixed(1)+' '+u); } f*=1000; }}, isStr: function (o) {return typeof o === 'string' || o instanceof String}}
+var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, eql: function (a,b,s) { var i, k, v; s = (s != null ? s : []); if (Object.is(a,b)) { return true }; if (typeof(a) !== typeof(b)) { return false }; if (!(Array.isArray(a)) && !(typeof(a) === 'object')) { return false }; if (Array.isArray(a)) { if (a.length !== b.length) { return false }; var list = _k_.list(a); for (i = 0; i < list.length; i++) { v = list[i]; s.push(i); if (!_k_.eql(v,b[i],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } } else if (_k_.isStr(a)) { return a === b } else { if (!_k_.eql(Object.keys(a),Object.keys(b))) { return false }; for (k in a) { v = a[k]; s.push(k); if (!_k_.eql(v,b[k],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } }; return true }, profile: function (id) {_k_.hrtime ??= {}; _k_.hrtime[id] = performance.now(); }, profilend: function (id) { var b = performance.now()-_k_.hrtime[id]; let f=0.001; for (let u of ['s','ms','μs','ns']) { if (u=='ns' || (b*f)>=1) { return console.log(id+' '+Number.parseFloat(b*f).toFixed(1)+' '+u); } f*=1000; }}, each_r: function (o) {return Array.isArray(o) ? [] : typeof o == 'string' ? o.split('') : {}}, isStr: function (o) {return typeof o === 'string' || o instanceof String}}
 
 var salterMode
 
@@ -163,11 +163,41 @@ salterMode = (function ()
 
     salterMode.prototype["desalt"] = function ()
     {
-        var selections, text
+        var lines, selections, texts
 
-        selections = belt.lineRangesForPositions(this.state.s.lines,this.state.s.cursors)
-        text = belt.textForLineRanges(this.state.s.lines,selections)
-        console.log("desalt",selections,text)
+        lines = this.state.s.lines
+        selections = belt.lineRangesForPositions(lines,this.state.s.cursors)
+        texts = (function (o) {
+            var r_a_ = _k_.each_r(o)
+            for (var k in o)
+            {   
+                var m = (function (rng)
+            {
+                return belt.textForLineRange(lines,rng)
+            })(o[k])
+                if (m != null)
+                {
+                    r_a_[k] = m
+                }
+            }
+            return typeof o == 'string' ? r_a_.join('') : r_a_
+        })(selections)
+        texts = (function (o) {
+            var r_b_ = _k_.each_r(o)
+            for (var k in o)
+            {   
+                var m = (function (txt)
+            {
+                return txt.replace(/\s*\#/,'')
+            })(o[k])
+                if (m != null)
+                {
+                    r_b_[k] = m
+                }
+            }
+            return typeof o == 'string' ? r_b_.join('') : r_b_
+        })(texts)
+        console.log("desalt\n",texts)
     }
 
     salterMode.prototype["handleKey"] = function (key, event)
@@ -239,5 +269,5 @@ salterMode = (function ()
 
 export default salterMode;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2FsdGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L21vZGUvc2FsdGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsYUFBTjs7T0FDTSxZQUFUO09BQWUsWUFBZjs7T0FDUyxXQUFaOztPQUNZLFdBQUE7OztBQUVsQixjQUFEOztJQUVJLFlBQUM7YUFFRCxZQUFJOztRQUFEOztRQUVDLEtBQUMsT0FBTztzQkFFQyxXQUFXOztZQUNoQixXQUFXLE9BQU8sT0FBTyxLQUFLLE9BQU87O1FBRXpDLEtBQUM7OztJQVFMLFlBQUMsOEJBQWlCOzs7O2NBRUosTUFBTSx1QkFBTixNQUFNLGFBQWM7Ozs7WUFDeEIsTUFBTSxFQUFFLFFBQVEsV0FBVTs7OztZQUMxQixNQUFNLEVBQUUsV0FBVzs7OztZQUNuQixLQUFLLFNBQVMsTUFBTTs7OztRQUMxQixVQUFVLEtBQUssMkJBQTJCLE1BQU0sRUFBRSxNQUFNLE1BQU07dUJBQ3JEOzttQkFDTCxLQUFLLE1BQU0sTUFBTTs7OzswQkFRekI7Ozs7UUFFSSxVQUFVLEtBQUM7dUJBRUY7O1lBQ0wsS0FBSyxLQUFDLE1BQU07WUFDWixLQUFDLE1BQU0sSUFBSSxLQUFDLE1BQU0sRUFBRSxJQUFJLFVBQVU7Z0NBQ2xCO2lCQUFSOztnQkFBSjs0QkFDUyxLQUFROztvQkFBakI7OztZQUNKLEtBQUMsTUFBTSxJQUFJLEtBQUMsTUFBTSxFQUFFLElBQUksT0FBTzs7WUFDaEMsS0FBQyxNQUFNLEVBQUUsUUFBUSxXQUFVLEtBQU0sS0FBSyxnQkFBZ0IsS0FBQyxNQUFNLEVBQUUsU0FBUyxXQUFVOzttQkFDakY7Ozs7WUFFQTtZQUNBLEtBQUMsTUFBTTtZQUNQLEtBQUMsTUFBTSxZQUFZO1lBQ25CLEtBQUMsTUFBTTtpQkFDSCxJQUFLLE9BQUk7O2dCQUNULEtBQUMsTUFBTSxPQUFPOztZQUNsQixLQUFDLE1BQU0sWUFBWTtZQUNuQixLQUFDLE1BQU0sWUFBWTtZQUNuQixLQUFDLE1BQU0sWUFBWTtpQkFDZixJQUFLLE9BQUk7O2dCQUNULEtBQUMsTUFBTSxjQUFjOztZQUN6QixLQUFDLE1BQU07bUJBQ1A7Ozs7MEJBRVI7OzswQkFFQTs7ZUFBbUIsS0FBSywyQkFBMkIsS0FBQyxNQUFNLEVBQUUsTUFBTSxLQUFDLE1BQU07OzswQkFDekUsMkJBQWM7O2VBQUssS0FBSyxhQUFhLEtBQUMsTUFBTSxFQUFFLE1BQU07OzswQkFFcEQ7Ozs7UUFFSSxVQUFVLEtBQUM7dUJBRUY7O3dCQUNGLEtBQUMsTUFBTSxFQUFFLFNBQVk7O3VCQUNwQjs7Ozt1QkFFQSxLQUFDLE1BQU0sV0FBVzs7Ozs7bUJBRXRCLEtBQUssS0FBSyxLQUFDLE1BQU07Ozs7MEJBUXpCOzs7O1FBRUksVUFBVSxLQUFDLE1BQU07UUFDakIsVUFBVSxLQUFLLHdCQUF3Qjs0QkFFNUI7OztZQUFQO2lCQUNVLEtBQUMsTUFBTSxvQkFBb0I7Ozs7O1FBRXpDLEtBQUMsTUFBTSxZQUFZO1FBQ25CLEtBQUMsTUFBTSxPQUFPO1FBQ2QsS0FBQyxNQUFNLFdBQVcsUUFBUSxjQUFLOztvQkFBUyxFQUFFOztRQUUxQyxLQUFDLE1BQU07UUFDUCxLQUFLLE1BQU0sS0FBQyxNQUFNO2VBQ2xCOzs7MEJBRUo7Ozs7UUFFSSxhQUFhLEtBQUssdUJBQXVCLEtBQUMsTUFBTSxFQUFFLE1BQU0sS0FBQyxNQUFNLEVBQUU7UUFDakUsT0FBYSxLQUFLLGtCQUFrQixLQUFDLE1BQU0sRUFBRSxNQUFNO1FBQ25ELFlBQUksU0FBUyxXQUFXOzs7MEJBUTVCLHdCQUFXLEtBQUk7Ozs7Z0JBRUosTUFBTTs7aUJBRVQ7b0JBQ08sS0FBQyxNQUFNLEVBQUUsT0FBTzs7b0JBQ2YsS0FBQyxNQUFNLFFBQVEsS0FBQyxNQUFNLEVBQUUsT0FBSzs7O3FCQUUxQixLQUFDLGFBQWEsS0FBQyxNQUFNLGFBQWEsS0FBRzs7b0JBQ3hDLEtBQUMsTUFBTSxJQUFJLEtBQUMsTUFBTSxFQUFFLElBQUksV0FBVyxLQUFDLE1BQU07b0JBQzFDLEtBQUMsTUFBTSxJQUFJLEtBQUMsTUFBTSxFQUFFLElBQUksT0FBTzsyQkFDNUI7OztpQkFDWDtvQkFDTyxLQUFDLE1BQU0sRUFBRSxPQUFPOztvQkFDZixLQUFDLE1BQU0sUUFBUSxLQUFDLE1BQU0sRUFBRSxPQUFLOzs7cUJBRTFCLEtBQUMsYUFBYSxLQUFDLE1BQU0sYUFBYSxLQUFHOztvQkFDeEMsS0FBQyxNQUFNLElBQUksS0FBQyxNQUFNLEVBQUUsSUFBSSxXQUFXLEtBQUMsTUFBTTtvQkFDMUMsS0FBQyxNQUFNLElBQUksS0FBQyxNQUFNLEVBQUUsSUFBSSxPQUFPOzJCQUM1Qjs7O2lCQUVYO29CQUNPLEtBQUMsYUFBYSxLQUFDLE1BQU0sYUFBYTs7MkJBQy9CLEtBQUM7Ozs7O1FBRWYsb0JBQWEsTUFBTSxTQUFRLE1BQU0sT0FBTztZQUVyQyxPQUFPLFFBQVE7O1lBQ2QsS0FBQyxNQUFNLE9BQU8sT0FBTyxNQUFLLEtBQUssSUFBSSxRQUFROzs7ZUFHL0M7OzswQkFRSix5QkFBWSxXQUFVOztnQkFFWDs7aUJBQ0g7dUJBQW9CLE1BQU0sU0FBUyxNQUFNLE9BQU8seUJBQXlCOztpQkFDekU7dUJBQW9CLE1BQU0sU0FBUyxNQUFNLE9BQU8seUJBQXlCOzs7O2VBRTdFOzs7V0E5SlA7OztlQWdLTSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2FsdGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L21vZGUvc2FsdGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsYUFBTjs7T0FDTSxZQUFUO09BQWUsWUFBZjs7T0FDUyxXQUFaOztPQUNZLFdBQUE7OztBQUVsQixjQUFEOztJQUVJLFlBQUM7YUFFRCxZQUFJOztRQUFEOztRQUVDLEtBQUMsT0FBTztzQkFFQyxXQUFXOztZQUNoQixXQUFXLE9BQU8sT0FBTyxLQUFLLE9BQU87O1FBRXpDLEtBQUM7OztJQVFMLFlBQUMsOEJBQWlCOzs7O2NBRUosTUFBTSx1QkFBTixNQUFNLGFBQWM7Ozs7WUFDeEIsTUFBTSxFQUFFLFFBQVEsV0FBVTs7OztZQUMxQixNQUFNLEVBQUUsV0FBVzs7OztZQUNuQixLQUFLLFNBQVMsTUFBTTs7OztRQUMxQixVQUFVLEtBQUssMkJBQTJCLE1BQU0sRUFBRSxNQUFNLE1BQU07dUJBQ3JEOzttQkFDTCxLQUFLLE1BQU0sTUFBTTs7OzswQkFRekI7Ozs7UUFFSSxVQUFVLEtBQUM7dUJBRUY7O1lBQ0wsS0FBSyxLQUFDLE1BQU07WUFDWixLQUFDLE1BQU0sSUFBSSxLQUFDLE1BQU0sRUFBRSxJQUFJLFVBQVU7Z0NBQ2xCO2lCQUFSOztnQkFBSjs0QkFDUyxLQUFROztvQkFBakI7OztZQUNKLEtBQUMsTUFBTSxJQUFJLEtBQUMsTUFBTSxFQUFFLElBQUksT0FBTzs7WUFDaEMsS0FBQyxNQUFNLEVBQUUsUUFBUSxXQUFVLEtBQU0sS0FBSyxnQkFBZ0IsS0FBQyxNQUFNLEVBQUUsU0FBUyxXQUFVOzttQkFDakY7Ozs7WUFFQTtZQUNBLEtBQUMsTUFBTTtZQUNQLEtBQUMsTUFBTSxZQUFZO1lBQ25CLEtBQUMsTUFBTTtpQkFDSCxJQUFLLE9BQUk7O2dCQUNULEtBQUMsTUFBTSxPQUFPOztZQUNsQixLQUFDLE1BQU0sWUFBWTtZQUNuQixLQUFDLE1BQU0sWUFBWTtZQUNuQixLQUFDLE1BQU0sWUFBWTtp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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/mode/salter.kode
