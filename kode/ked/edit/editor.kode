@@ -122,7 +122,7 @@ use                ◆ state draw complete mode
                 
         v = @state.s.view
 
-        scale = @state.scaleOfLine cursor[1]
+        scale = @state.lineHeight cursor[1]
         row   = @state.rowOfLine cursor[1]
         x     = cursor[0]*scale - v[0]
 

@@ -28,19 +28,19 @@ hed = cols rows ext='md' feats=[]->
         s = tstt()
         s.loadLines ['# One' '## Two' '### Three' '#### Four' 'text']
 
-        s.scaleOfLine 0 ▸ 3
-        s.scaleOfLine 1 ▸ 2
-        s.scaleOfLine 2 ▸ 1
-        s.scaleOfLine 3 ▸ 1
-        s.scaleOfLine 4 ▸ 1
+        s.lineHeight 0 ▸ 3
+        s.lineHeight 1 ▸ 2
+        s.lineHeight 2 ▸ 1
+        s.lineHeight 3 ▸ 1
+        s.lineHeight 4 ▸ 1
 
   ▸ headings in other files keep their size
 
         s = tstt 'kode'
         s.loadLines ['# One' '## Two']
 
-        s.scaleOfLine 0 ▸ 1
-        s.scaleOfLine 1 ▸ 1
+        s.lineHeight 0 ▸ 1
+        s.lineHeight 1 ▸ 1
 
   ▸ the configured scales change or disable the scaling
 
@@ -49,25 +49,25 @@ hed = cols rows ext='md' feats=[]->
 
         s.applyScales {enabled:true md:{h1:6 h2:5 h3:4 h4:3 h5:2}}
 
-        s.scaleOfLine 0 ▸ 6
-        s.scaleOfLine 1 ▸ 5
-        s.scaleOfLine 2 ▸ 4
-        s.scaleOfLine 3 ▸ 3
-        s.scaleOfLine 4 ▸ 2
+        s.lineHeight 0 ▸ 6
+        s.lineHeight 1 ▸ 5
+        s.lineHeight 2 ▸ 4
+        s.lineHeight 3 ▸ 3
+        s.lineHeight 4 ▸ 2
 
         s.applyScales {enabled:false}
 
-        s.scaleOfLine 0 ▸ 1
-        s.scaleOfLine 1 ▸ 1
+        s.lineHeight 0 ▸ 1
+        s.lineHeight 1 ▸ 1
 
         s.applyScales {}
 
-        s.scaleOfLine 0 ▸ 1
-        s.scaleOfLine 1 ▸ 1
+        s.lineHeight 0 ▸ 1
+        s.lineHeight 1 ▸ 1
 
         s.applyScales {enabled:true md:{h1:9}}
 
-        s.scaleOfLine 0 ▸ 7
+        s.lineHeight 0 ▸ 7
 
   ▸ the row map counts the scaled row of every line
 
@@ -343,7 +343,7 @@ hed = cols rows ext='md' feats=[]->
         h.screen.init()
         e.draw()
 
-        e.state.scaleOfLine(0) ▸ 3
+        e.state.lineHeight(0) ▸ 3
 
         h.row(1) ▸ ''
         h.row(2) ▸ ''

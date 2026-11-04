@@ -53,7 +53,7 @@ use           ◆ specs
     posForCursor: cursor =>
 
         state = @editor.state
-        scale = state.scaleOfLine cursor[1]
+        scale = state.lineHeight cursor[1]
 
         [cursor[0]*scale - state.s.view[0], state.rowOfLine(cursor[1])]
 #!word
@@ -84,7 +84,7 @@ use           ◆ specs
         head = @words[0]
         
         [cx cy] = @posForCursor mc
-        scale   = @editor.state.scaleOfLine mc[1]
+        scale   = @editor.state.lineHeight mc[1]
         
         if @words.length <= 1
             @choices.clear()                    
@@ -197,7 +197,7 @@ use           ◆ specs
         for pos in @editor.state.s.cursors # highlight the insertions
             
             [cx cy] = @posForCursor pos
-            scale = @editor.state.scaleOfLine pos[1]
+            scale = @editor.state.lineHeight pos[1]
 
             continue if cy < 0
             continue if cy + scale > @editor.cells.rows
@@ -215,7 +215,7 @@ use           ◆ specs
         mc = @editor.state.mainCursor()  
          
         [cx cy] = @posForCursor mc
-        scale   = @editor.state.scaleOfLine mc[1]
+        scale   = @editor.state.lineHeight mc[1]
         
         w  = @choices.cells.cols+1
         h  = @choices.cells.rows

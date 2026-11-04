@@ -200,7 +200,7 @@ function gutter extends view
 
         while row < @cells.rows and li < @state.s.lines.length
 
-            scale = @state.scaleOfLine li
+            scale = @state.lineHeight li
 
             if row < 0
                 row += scale

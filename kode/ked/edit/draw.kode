@@ -36,7 +36,7 @@ use              ◆ mode
 
         while y < lines.length and row < @cells.rows
             
-            scale = @state.scaleOfLine y
+            scale = @state.lineHeight y
 
             if row < 0 # a line cut by the top edge is left out, but its rows stay
                 blankRows = min @cells.rows (row+scale)
@@ -74,7 +74,7 @@ use              ◆ mode
     drawLine: line y row scale=1, classes=null ->
     
         row   ?= @state.rowOfLine y
-        scale ?= @state.scaleOfLine y
+        scale ?= @state.lineHeight y
         bg = @color.bg
         
         checkColor = false
@@ -179,7 +179,7 @@ use              ◆ mode
 
             li    = highlight[1]
             row   = @state.rowOfLine li
-            scale = @state.scaleOfLine li
+            scale = @state.lineHeight li
             
             break if row >= @cells.rows
             continue if row < 0
@@ -239,7 +239,7 @@ use              ◆ mode
 
             for li in start..selection[3]
                 
-                scale = @state.scaleOfLine li
+                scale = @state.lineHeight li
                 vx    = @state.s.view[0]
 
                 if row < 0
@@ -297,7 +297,7 @@ use              ◆ mode
 
             for li in start..rng[3]
 
-                scale = @state.scaleOfLine li
+                scale = @state.lineHeight li
 
                 if row < 0
                     row += scale
@@ -353,7 +353,7 @@ use              ◆ mode
             
             if @isCursorVisible cursor
              
-                scale = @state.scaleOfLine cursor[1]
+                scale = @state.lineHeight cursor[1]
                 cx = cursor[0]*scale - s.view[0]
                 @cells.draw_rounded_multi_cursor cx @state.rowOfLine(cursor[1]) bg scale
                         
@@ -365,7 +365,7 @@ use              ◆ mode
 
             if not @hasFocus() ➜ bg = color.darken bg 
              
-            scale = @state.scaleOfLine mainCursor[1]
+            scale = @state.lineHeight mainCursor[1]
             [x y] = [ mainCursor[0]*scale - s.view[0], @state.rowOfLine(mainCursor[1]) ]
              
             if s.cursors.length <= 1

@@ -323,11 +323,7 @@ use           ◆ keys mode
         @scales  = conf ? {}
         @rowCache = null
 
-    scaleOfLine: li =>
-
-        scaling.scaleOfLine @syntax @scales @scaling li
-
-    lineHeight: li => @scaleOfLine li
+    lineHeight: li => scaling.scaleOfLine @syntax @scales @scaling li
 
     rowPrefix: =>
 
