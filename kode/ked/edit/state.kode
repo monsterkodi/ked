@@ -446,6 +446,8 @@ use           ◆ keys mode
         ⮐  if @h.length <= 1
         @r.push @h.pop()
         @s = @h[-1]
+        @segls = @s.lines.slice()
+        @rowCache = null
         @syntax.setSegls @s.lines
         @emit 'colors.changed'
 
@@ -454,6 +456,8 @@ use           ◆ keys mode
         ⮐  if empty @r
         @h.push @r.pop()
         @s = @h[-1]
+        @segls = @s.lines.slice()
+        @rowCache = null
         @syntax.setSegls @s.lines
         @emit 'colors.changed'
 

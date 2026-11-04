@@ -519,6 +519,23 @@ hed = cols rows ext='md' feats=[]->
         m.lineOffset(6) ▸ 32
         (m.lineOffset(6) - m.lineOffset(5)) ▸ 12
 
+  ▸ the map reloads lines restored by undo
+
+        [h e] = hed  cols:40 rows:10
+        e.state.loadLines ['aaa' 'bbb' 'ccc']
+        e.state.setLines ['aaa' 'XXX' 'bbb' 'ccc']
+        e.state.undo()
+
+        m = new mapscr e
+        m.cells.layout 30 0 12 10
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+
+        m.reload()
+
+        m.images.length ▸ 3
+        kseg.str(m.getSegls()[1]) ▸ 'bbb'
+
   ▸ a scaled line gets a taller stripe in the map
 
         [h e] = hed 40 10

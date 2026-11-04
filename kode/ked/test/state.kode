@@ -454,4 +454,33 @@ sel = r... -> s.allSelections() ▸ r
             line 3
             """
             
-        
+  ▸ undo keeps the cached lines in sync
+
+        s.syntax.ext = 'kode'
+        s.loadLines ['aaa' 'bbb' 'ccc']
+
+        s.setMainCursor 1 1
+        s.insert 'x'
+        s.undo()
+
+        txt 'aaa\nbbb\nccc'
+        kseg.str(s.segls) ▸ 'aaa\nbbb\nccc'
+
+        s.redo()
+
+        txt 'aaa\nbxbb\nccc'
+        kseg.str(s.segls) ▸ 'aaa\nbxbb\nccc'
+
+  ▸ undo invalidates the display row cache
+
+        s.syntax.ext = 'md'
+        s.applyScales {enabled:true md:{h1:3}}
+        s.loadLines ['# h1' 'text']
+
+        s.totalRows() ▸ 4
+
+        s.setLines ['# h1' '# h1' 'text']
+        s.totalRows() ▸ 7
+
+        s.undo()
+        s.totalRows() ▸ 4
