@@ -1,12 +1,10 @@
+■scaling
 ###
     scaled line heights
 
     shared by the editor state and the quicky map preview
     both render lines from a syntax with a scale config
 ###
-
-■scaling
-
     @scaleOfLine: syntax scales scaling li ->
 
         ⮐ 1 if not scaling or empty scales or not syntax

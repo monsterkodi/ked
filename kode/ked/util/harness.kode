@@ -1,18 +1,9 @@
-###
-    ███   ███   ███████   ████████   ███   ███  ████████   ███████   ███████  
-    ███   ███  ███   ███  ███   ███  ████  ███  ███       ███       ███       
-    █████████  █████████  ███████    ███ █ ███  ███████   ███████   ███████   
-    ███   ███  ███   ███  ███   ███  ███  ████  ███            ███       ███  
-    ███   ███  ███   ███  ███   ███  ███   ███  ████████  ███████   ███████   
-    
-    an editor without a terminal
-###
 
 use ../../kxk       ▪ post
 use ../view/screen ◆ screen ttio
-
-function harness
-
+■harness
+    # an editor without a terminal
+    
     @: opt ->
         
         opt ?= {}
@@ -24,10 +15,6 @@ function harness
         
         @screen = new screen @t
         
-    #  the event of a key, the way a terminal sends it
-    #  
-    #  a printable key carries the character, the other keys carry nothing
-    
     event: combo char =>
         
         key:    combo
@@ -35,15 +22,11 @@ function harness
         combo:  combo
         char:   char ? ''
         
-    #  send a key to a view
-    
     key: view combo char =>
         
         event = @event combo char
         view.onKey combo event
         
-    #  type a text into a view, one character at a time
-    
     type: view text =>
         
         for ch in text.split ''
@@ -53,27 +36,15 @@ function harness
         
         post.emit 'focus' view.name
         
-    #  the screen as text, one line per row
-    
     text: => @screen.text()
-    
-    #  a line of the screen
     
     row: y => @screen.text()[y]
     
-    #  the screen as text, with the cursors marked
-    
     textMarked: => @screen.textMarked()
-    
-    #  a line of the screen, with the cursors marked
     
     rowMarked: y => @screen.textMarked()[y]
     
-    #  the character at a position
-    
     at: x y => @screen.get_char x y
-    
-    #  what would have been written to the terminal
     
     written: => @t.written()
 

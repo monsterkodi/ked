@@ -1,5 +1,7 @@
 var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, isFunc: function (o) {return typeof o === 'function'}}
 
+var walker
+
 import kxk from "../../kxk.js"
 let slash = kxk.slash
 let nfs = kxk.nfs
@@ -7,29 +9,30 @@ let nfs = kxk.nfs
 import fileutil from "./fileutil.js"
 import config from "./config.js"
 
-class walker
+
+walker = (function ()
 {
-    constructor (cfg)
+    function walker (cfg)
     {
         this.cfg = cfg
     
-        var _17_25_, _18_25_, _19_25_, _20_25_, _21_25_, _22_25_, _23_25_
+        var _10_25_, _11_25_, _12_25_, _13_25_, _14_25_, _15_25_, _16_25_
 
-        this.stop = this.stop.bind(this)
-        this.start = this.start.bind(this)
+        this["stop"] = this["stop"].bind(this)
+        this["start"] = this["start"].bind(this)
         this.cfg.files = []
-        this.cfg.maxDepth = ((_17_25_=this.cfg.maxDepth) != null ? _17_25_ : 3)
-        this.cfg.dotFiles = ((_18_25_=this.cfg.dotFiles) != null ? _18_25_ : false)
-        this.cfg.maxFiles = ((_19_25_=this.cfg.maxFiles) != null ? _19_25_ : 15000)
-        this.cfg.ignore = ((_20_25_=this.cfg.ignore) != null ? _20_25_ : ['node_modules'])
-        this.cfg.include = ((_21_25_=this.cfg.include) != null ? _21_25_ : ['.gitignore','.npmignore'])
-        this.cfg.ignoreExt = ((_22_25_=this.cfg.ignoreExt) != null ? _22_25_ : ['asar'])
-        this.cfg.includeExt = ((_23_25_=this.cfg.includeExt) != null ? _23_25_ : [])
+        this.cfg.maxDepth = ((_10_25_=this.cfg.maxDepth) != null ? _10_25_ : 3)
+        this.cfg.dotFiles = ((_11_25_=this.cfg.dotFiles) != null ? _11_25_ : false)
+        this.cfg.maxFiles = ((_12_25_=this.cfg.maxFiles) != null ? _12_25_ : 15000)
+        this.cfg.ignore = ((_13_25_=this.cfg.ignore) != null ? _13_25_ : ['node_modules'])
+        this.cfg.include = ((_14_25_=this.cfg.include) != null ? _14_25_ : ['.gitignore','.npmignore'])
+        this.cfg.ignoreExt = ((_15_25_=this.cfg.ignoreExt) != null ? _15_25_ : ['asar'])
+        this.cfg.includeExt = ((_16_25_=this.cfg.includeExt) != null ? _16_25_ : [])
     }
 
-    async start ()
+    walker.prototype["start"] = async function ()
     {
-        var depth, dir, ext, file, item, items, listDir, p, toWalk, _57_31_, _85_17_
+        var depth, dir, ext, file, item, items, listDir, p, toWalk, _44_31_, _72_17_
 
         dir = this.cfg.root
         this.running = true
@@ -126,17 +129,19 @@ class walker
         return this.cfg
     }
 
-    stop ()
+    walker.prototype["stop"] = function ()
     {
         this.running = false
         return this.walker = null
     }
 
-    ignore (p)
+    walker.prototype["ignore"] = function (p)
     {}
-}
+
+    return walker
+})()
 
 export default walker;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoid2Fsa2VyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL3dhbGtlci5rb2RlIl0sIm1hcHBpbmdzIjoiOztPQVFVLFVBQUE7SUFBTTtJQUFNOztPQUNOLGVBQUE7T0FBUyxhQUFBOztBQUV6QixNQUFNOztJQUVGLGFBQUk7O1FBQUQ7Ozs7OztRQUVDLEtBQUMsSUFBSTtRQUNMLEtBQUMsSUFBSSxxQkFBTCxLQUFDLElBQUksOEJBQWU7UUFDcEIsS0FBQyxJQUFJLHFCQUFMLEtBQUMsSUFBSSw4QkFBZTtRQUNwQixLQUFDLElBQUkscUJBQUwsS0FBQyxJQUFJLDhCQUFlO1FBQ3BCLEtBQUMsSUFBSSxtQkFBTCxLQUFDLElBQUksNkJBQWdCO1FBQ3JCLEtBQUMsSUFBSSxvQkFBTCxLQUFDLElBQUksOEJBQWdCLGFBQWE7UUFDbEMsS0FBQyxJQUFJLHNCQUFMLEtBQUMsSUFBSSxnQ0FBZ0I7UUFDckIsS0FBQyxJQUFJLHVCQUFMLEtBQUMsSUFBSTs7O1VBUVQ7Ozs7UUFFSSxNQUFNLEtBQUMsSUFBSTtRQUlYLEtBQUMsVUFBVTtRQUVYLFdBQVcsSUFBSTswQkFFSDs7c0JBRVUsT0FBTyxTQUF4QixrQkFBUTs7WUFJVCxjQUFVLElBQUksS0FBSyxTQUFRLFVBQVU7Z0NBR3pCOzs7Z0JBQVI7Z0JBRUEsT0FBTyxLQUFLO2dCQUNaLE1BQU0sTUFBTSxJQUFJO2dCQUNoQixJQUFJLEtBQUs7NEJBR0wsS0FBQyxJQUFJLHdCQUFMLEtBQUMsSUFBSSxPQUFROztvQkFBSyxLQUFDLE9BQU87b0JBQUc7O2dDQUM3QixNQUFTLFlBQVkscUJBQWEsS0FBUTs7b0JBQVMsS0FBQyxPQUFPO29CQUFHOztnQ0FDOUQsS0FBUSxLQUFDLElBQUk7O29CQUFTLEtBQUMsT0FBTztvQkFBRzs7Z0NBQ2pDLEtBQVEsS0FBQyxJQUFJOztvQkFBVSxLQUFDLElBQUksTUFBTSxLQUFLLEtBQUs7O3lCQUM1QyxLQUFLLFdBQVc7O3dCQUNULEtBQUMsSUFBSTs7d0JBQ0osS0FBQyxJQUFJLE1BQU0sS0FBSyxLQUFLOzs7O3dCQUVyQixLQUFDLE9BQU87d0JBQUc7OztnQ0FDbkIsSUFBTyxLQUFDLElBQUk7O29CQUFZLEtBQUMsT0FBTztvQkFBRzs7Z0NBQ25DLElBQU8sS0FBQyxJQUFJLGVBQWMsS0FBQyxJQUFJLFdBQVcsUUFBUSxPQUFPOztvQkFDckQsS0FBQyxJQUFJLE1BQU0sS0FBSyxLQUFLOztvQkFFTyxXQUFiLEtBQUMsSUFBSTs7b0JBQTVCLEtBQUMsSUFBSSxLQUFLLEtBQUs7O29CQUVaLEtBQUssU0FBUTs7d0JBQ0csV0FBWixLQUFDLElBQUk7OzZCQUNZLEtBQUMsSUFBSSxJQUFJLEtBQUs7OzRCQUE5Qjs7O3dCQUMrQixRQUFRLEtBQUMsSUFBSTs7d0JBQWhELE9BQU8sTUFBTSxLQUFLLEtBQUssUUFBTTs7Ozs7K0JBRTFCLElBQU8sS0FBQyxJQUFJLHNCQUFjLE1BQU0sS0FBSyxLQUFLLE1BQVMsS0FBQyxJQUFJLFlBQVcsS0FBQyxJQUFJLFdBQVcsUUFBUSxPQUFPOzs0QkFDN0QsV0FBYixLQUFDLElBQUk7OzRCQUE1QixLQUFDLElBQUksS0FBSyxLQUFLOzs7O29CQUVwQixLQUFDLElBQUksTUFBTSxTQUFTLEtBQUMsSUFBSTs7b0JBQ3hCLFlBQUk7b0JBQ0o7Ozs7UUFFWixLQUFDLFVBQVU7aUJBQ1gsS0FBQyxJQUFJLHNCQUFMLEtBQUMsSUFBSSxLQUFNO2VBQ1gsS0FBQzs7O0lBUUw7O1FBRUksS0FBQyxVQUFVO2VBQ1gsS0FBQyxTQUFTOzs7SUFFZCxRQUFROzs7O2VBRUwifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoid2Fsa2VyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL3dhbGtlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNO0lBQU07O09BQ04sZUFBQTtPQUFTLGFBQUE7OztBQUV4QixVQUFEOzthQUVJLFFBQUk7O1FBQUQ7Ozs7OztRQUVDLEtBQUMsSUFBSTtRQUNMLEtBQUMsSUFBSSxxQkFBTCxLQUFDLElBQUksOEJBQWU7UUFDcEIsS0FBQyxJQUFJLHFCQUFMLEtBQUMsSUFBSSw4QkFBZTtRQUNwQixLQUFDLElBQUkscUJBQUwsS0FBQyxJQUFJLDhCQUFlO1FBQ3BCLEtBQUMsSUFBSSxtQkFBTCxLQUFDLElBQUksNkJBQWdCO1FBQ3JCLEtBQUMsSUFBSSxvQkFBTCxLQUFDLElBQUksOEJBQWdCLGFBQWE7UUFDbEMsS0FBQyxJQUFJLHNCQUFMLEtBQUMsSUFBSSxnQ0FBZ0I7UUFDckIsS0FBQyxJQUFJLHVCQUFMLEtBQUMsSUFBSTs7O3NCQUVUOzs7O1FBRUksTUFBTSxLQUFDLElBQUk7UUFJWCxLQUFDLFVBQVU7UUFFWCxXQUFXLElBQUk7MEJBRUg7O3NCQUVVLE9BQU8sU0FBeEIsa0JBQVE7O1lBSVQsY0FBVSxJQUFJLEtBQUssU0FBUSxVQUFVO2dDQUd6Qjs7O2dCQUFSO2dCQUVBLE9BQU8sS0FBSztnQkFDWixNQUFNLE1BQU0sSUFBSTtnQkFDaEIsSUFBSSxLQUFLOzRCQUdMLEtBQUMsSUFBSSx3QkFBTCxLQUFDLElBQUksT0FBUTs7b0JBQUssS0FBQyxPQUFPO29CQUFHOztnQ0FDN0IsTUFBUyxZQUFZLHFCQUFhLEtBQVE7O29CQUFTLEtBQUMsT0FBTztvQkFBRzs7Z0NBQzlELEtBQVEsS0FBQyxJQUFJOztvQkFBUyxLQUFDLE9BQU87b0JBQUc7O2dDQUNqQyxLQUFRLEtBQUMsSUFBSTs7b0JBQVUsS0FBQyxJQUFJLE1BQU0sS0FBSyxLQUFLOzt5QkFDNUMsS0FBSyxXQUFXOzt3QkFDVCxLQUFDLElBQUk7O3dCQUNKLEtBQUMsSUFBSSxNQUFNLEtBQUssS0FBSzs7Ozt3QkFFckIsS0FBQyxPQUFPO3dCQUFHOzs7Z0NBQ25CLElBQU8sS0FBQyxJQUFJOztvQkFBWSxLQUFDLE9BQU87b0JBQUc7O2dDQUNuQyxJQUFPLEtBQUMsSUFBSSxlQUFjLEtBQUMsSUFBSSxXQUFXLFFBQVEsT0FBTzs7b0JBQ3JELEtBQUMsSUFBSSxNQUFNLEtBQUssS0FBSzs7b0JBRU8sV0FBYixLQUFDLElBQUk7O29CQUE1QixLQUFDLElBQUksS0FBSyxLQUFLOztvQkFFWixLQUFLLFNBQVE7O3dCQUNHLFdBQVosS0FBQyxJQUFJOzs2QkFDWSxLQUFDLElBQUksSUFBSSxLQUFLOzs0QkFBOUI7Ozt3QkFDK0IsUUFBUSxLQUFDLElBQUk7O3dCQUFoRCxPQUFPLE1BQU0sS0FBSyxLQUFLLFFBQU07Ozs7OytCQUUxQixJQUFPLEtBQUMsSUFBSSxzQkFBYyxNQUFNLEtBQUssS0FBSyxNQUFTLEtBQUMsSUFBSSxZQUFXLEtBQUMsSUFBSSxXQUFXLFFBQVEsT0FBTzs7NEJBQzdELFdBQWIsS0FBQyxJQUFJOzs0QkFBNUIsS0FBQyxJQUFJLEtBQUssS0FBSzs7OztvQkFFcEIsS0FBQyxJQUFJLE1BQU0sU0FBUyxLQUFDLElBQUk7O29CQUN4QixZQUFJO29CQUNKOzs7O1FBRVosS0FBQyxVQUFVO2lCQUNYLEtBQUMsSUFBSSxzQkFBTCxLQUFDLElBQUksS0FBTTtlQUNYLEtBQUM7OztzQkFFTDs7UUFFSSxLQUFDLFVBQVU7ZUFDWCxLQUFDLFNBQVM7OztzQkFFZCxxQkFBUTs7O1dBM0VYOzs7ZUE2RU0ifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/util/walker.kode

@@ -1,17 +1,9 @@
-###
- ███████   ███  █████████
-███        ███     ███   
-███  ████  ███     ███   
-███   ███  ███     ███   
- ███████   ███     ███   
-###
 
 use ../../kxk ▪ slash post kermit nfs
 use           ◆ watcher
 
 use child_process
-
-function git
+■git
 
     @statusRequests: {}
     @statusCache: {}
@@ -30,12 +22,6 @@ function git
         if valid gitDir and gitDir not in @gitDirs
             @gitDirs.push slash.path(gitDir '.git')
                 
-    # ████████  ███  ███      ████████         ███████  ███   ███   ███████   ███   ███   ███████   ████████
-    # ███       ███  ███      ███             ███       ███   ███  ███   ███  ████  ███  ███        ███     
-    # ██████    ███  ███      ███████         ███       █████████  █████████  ███ █ ███  ███  ████  ███████ 
-    # ███       ███  ███      ███             ███       ███   ███  ███   ███  ███  ████  ███   ███  ███     
-    # ███       ███  ███████  ████████         ███████  ███   ███  ███   ███  ███   ███   ███████   ████████
-
     # triggers a git status update if files in .git/refs/heads change to reflect repository changes made externally
 
     onFileChange: info =>
@@ -50,12 +36,6 @@ function git
                         ⮐ 
 
     @dir: path ○-> ○ nfs.git path
-    
-    # ████████  ███   ███  ████████   ███████  
-    # ███        ███ ███   ███       ███       
-    # ███████     █████    ███████   ███       
-    # ███        ███ ███   ███       ███       
-    # ████████  ███   ███  ████████   ███████  
     
     @exec: args opt ○->
 
@@ -77,11 +57,7 @@ function git
                 error 'reject2' err
                 # reject err
         
-    #  ███████  █████████   ███████   █████████  ███   ███   ███████  
-    # ███          ███     ███   ███     ███     ███   ███  ███       
-    # ███████      ███     █████████     ███     ███   ███  ███████   
-    #      ███     ███     ███   ███     ███     ███   ███       ███  
-    # ███████      ███     ███   ███     ███      ███████   ███████   
+#!status
     ###
         checks for changes in the git repository at path
         posts 'git.status' with modified files in repository
@@ -137,11 +113,7 @@ function git
                 
         status
 
-    # ███████    ███  ████████  ████████  
-    # ███   ███  ███  ███       ███       
-    # ███   ███  ███  ██████    ██████    
-    # ███   ███  ███  ███       ███       
-    # ███████    ███  ███       ███       
+#!diff
     
     # parses the output of git diff for file
     # posts 'git.diff'
@@ -200,11 +172,7 @@ function git
         post.emit 'git.diff' status 
         status
         
-    # ████████    ███████   █████████   ███████  ███   ███  
-    # ███   ███  ███   ███     ███     ███       ███   ███  
-    # ████████   █████████     ███     ███       █████████  
-    # ███        ███   ███     ███     ███       ███   ███  
-    # ███        ███   ███     ███      ███████  ███   ███  
+#!patch
     
     @patch: rev ○->
         
@@ -234,11 +202,7 @@ function git
 
         patches
 
-    # ███   ███  ███   ███████  █████████   ███████   ████████   ███   ███  
-    # ███   ███  ███  ███          ███     ███   ███  ███   ███   ███ ███   
-    # █████████  ███  ███████      ███     ███   ███  ███████      █████    
-    # ███   ███  ███       ███     ███     ███   ███  ███   ███     ███     
-    # ███   ███  ███  ███████      ███      ███████   ███   ███     ███     
+#!history
     
     @history: path ○->
         

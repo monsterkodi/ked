@@ -1,15 +1,7 @@
-###
-    ███   ███  ████████  ███      ████████ 
-    ███   ███  ███       ███      ███   ███
-    █████████  ███████   ███      ████████ 
-    ███   ███  ███       ███      ███      
-    ███   ███  ████████  ███████  ███      
-###
 
 use ../theme     ◆ color
 use ../edit/tool ◆ belt
-
-function help
+■help
 
     @header: -> '\n' + color.linesForCells(@headerCells()).join('\n') + '\n'
         

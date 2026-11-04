@@ -1,10 +1,9 @@
-###
-     ███████  ████████   ███████   ███████  ███   ███████   ███   ███    
-    ███       ███       ███       ███       ███  ███   ███  ████  ███    
-    ███████   ███████   ███████   ███████   ███  ███   ███  ███ █ ███    
-         ███  ███            ███       ███  ███  ███   ███  ███  ████    
-    ███████   ████████  ███████   ███████   ███   ███████   ███   ███    
 
+use ../../kxk ◆ noon events slash post nfs sds
+use ../../kxk/util ▪ isEqual defaults sessionId
+use ◆ frecent
+■session extends events
+###
     key value store with delayed saving to disk  
     
     is coupled to the process: doesn't care about other instances
@@ -17,13 +16,6 @@
         - main cursor position and view offset per file
         - recent file history
 ###
-
-use ../../kxk ◆ noon events slash post nfs sds
-use ../../kxk/util ▪ isEqual defaults sessionId
-use ◆ frecent
-
-function session extends events
-
     @: opt ->
 
         @name = sessionId()
@@ -51,23 +43,11 @@ function session extends events
         
     keypath: key => key.split @sep
     
-    #  ███████   ████████  █████████
-    # ███        ███          ███   
-    # ███  ████  ███████      ███   
-    # ███   ███  ███          ███   
-    #  ███████   ████████     ███   
-        
     get: key value =>
         
         ⮐  clone(value) if not key?.split?
         clone sds.get @data @keypath(key) value
          
-    #  ███████  ████████  █████████  
-    # ███       ███          ███     
-    # ███████   ███████      ███     
-    #      ███  ███          ███     
-    # ███████   ████████     ███     
-    
     set: key value =>
         
         ⮐  if not key is str
@@ -98,12 +78,6 @@ function session extends events
         
     recentFiles: => Object.keys @get('files▸recent' {}) 
         
-    # ███       ███████    ███████   ███████    
-    # ███      ███   ███  ███   ███  ███   ███  
-    # ███      ███   ███  █████████  ███   ███  
-    # ███      ███   ███  ███   ███  ███   ███  
-    # ███████   ███████   ███   ███  ███████    
-    
     reload: => @load()
     
     load: ○=>
@@ -114,12 +88,6 @@ function session extends events
             error "session -- can't load '#{@file}':" err
             {}
         
-    #  ███████   ███████   ███   ███  ████████
-    # ███       ███   ███  ███   ███  ███     
-    # ███████   █████████   ███ ███   ███████ 
-    #      ███  ███   ███     ███     ███     
-    # ███████   ███   ███      █      ████████
-
     save: ○=>
         
         ⮐  if not @file
@@ -140,12 +108,6 @@ function session extends events
         catch err
             log "session -- can't save to '#{@file}':" err
     
-    # ███       ███████    ███████   ███████     ████     ██     ██  ████████  ████████    ███████   ████████
-    # ███      ███   ███  ███   ███  ███   ███  ██  ██    ███   ███  ███       ███   ███  ███        ███     
-    # ███      ███   ███  █████████  ███   ███   ████ ██  █████████  ███████   ███████    ███  ████  ███████ 
-    # ███      ███   ███  ███   ███  ███   ███  ██  ███   ███ █ ███  ███       ███   ███  ███   ███  ███     
-    # ███████   ███████   ███   ███  ███████     █████ █  ███   ███  ████████  ███   ███   ███████   ████████
-
     loadAndMerge: ○=>
         
         file =○ @newestSessionFile()
@@ -162,12 +124,6 @@ function session extends events
         @emit 'loaded'
         @resolveLoaded()
     
-    # ████████  ███  ███      ████████   ███████  
-    # ███       ███  ███      ███       ███       
-    # ██████    ███  ███      ███████   ███████   
-    # ███       ███  ███      ███            ███  
-    # ███       ███  ███████  ████████  ███████   
-
     newestSessionFile: ○=>
         
         files =○ @listSessions()
