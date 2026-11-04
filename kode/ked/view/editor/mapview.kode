@@ -1,6 +1,6 @@
 
 use ../../../kxk    ▪ kstr post
-use ../../util      ◆ prof syntax 
+use ../../util      ◆ prof syntax config
 use ../../util/img  ◆ glyphs
 use ../../theme     ◆ color theme
 use ../../edit/tool ◆ colorspans
@@ -27,6 +27,13 @@ use ../base         ◆ view
         @pixelsPerRow = 4
         @pixelsPerCol = 2
         @textScale    = 4 
+        
+        @rowCache     = null
+        @rowCacheExt  = null
+        
+        @setScales config.data?.scale
+        
+        post.on 'config.loaded' (data) => @setScales data?.scale
             
 ##show    
     reload: => 
@@ -84,9 +91,17 @@ use ../base         ◆ view
         @syntax = new syntax 
         @syntax.setExt ext 
         @syntax.setSegls @segls
+        @rowCache = null
         
         @redraw = true        
-    
+
+    setScales: conf =>
+
+        @scaling = conf?.enabled != false
+        @scales  = conf ? {}
+        @rowCache = null
+        @redraw = true
+        
 ##images
     
     maxLinesToLoad: => (@cells.rows-@rowOffset) * @csz[1] / @pixelsPerRow
@@ -137,13 +152,44 @@ use ../base         ◆ view
         
         Buffer.alloc bytes
     
-    lineRows: y -> 1
+    lineRows: y -> @scaleOfLine y
+
+    scaleOfLine: li =>
+
+        ⮐ 1 if not @scaling or empty @scales or not @syntax
+        ⮐ 1 if @syntax.ext not in Object.keys @scales
+
+        for clss,scale of @scales[@syntax.ext]
+            s = clamp 1 7 scale
+            if s > 1 and @syntax.hasPureClass li clss
+                ⮐ s
+        1
+
+    rowPrefix: =>
+
+        ⮐ @rowCache if @rowCache and @rowCacheExt == @syntax?.ext
+
+        lines = @getSegls() ? []
+        rows = [0]
+
+        for li in 0...lines.length
+            rows.push (rows[li] + @lineRows(li))
+
+        @rowCacheExt = @syntax?.ext
+        @rowCache    = rows
+
+    rowOfLine: li =>
+
+        n = (@getSegls() ? []).length
+        li = clamp 0 n li
+
+        @rowPrefix()[li]
 
     textLine: y -> @lineRows(y) >= @textScale and glyphs.hasScale(@lineRows(y))
 
     imageHeight: y -> @textLine(y) ? @lineRows(y)*@pixelsPerRow : 1
 
-    lineOffsetPixels: y -> y*@pixelsPerRow
+    lineOffsetPixels: y -> @rowOfLine(y)*@pixelsPerRow
 
     updateLine: y data => 
     
@@ -270,11 +316,24 @@ use ../base         ◆ view
         t = @cells.screen.t
         
         ⮐  if empty t.pixels or @hidden() or @collapsed()
+        ⮐  if empty @csz
         
         # @csz = t.cellsz # should have been set in createImages 
         
+        w     = @cells.cols * @csz[0]
+        mapH  = @cells.rows * @csz[1]
+        
         for id,y in @images
-            t.placeLineImage id @cells.x @cells.y+@rowOffset (@lineOffsetPixels(y)) (@lineRows(y)*@pixelsPerRow)
+            
+            py = @lineOffsetPixels y
+            rh = @lineRows(y) * @pixelsPerRow
+            
+            continue if py >= mapH or py+rh <= 0
+            
+            if @textLine(y)
+                t.placeImageSlice id @cells.x @cells.y+@rowOffset py 0 rh w
+            else
+                t.placeLineImage id @cells.x @cells.y+@rowOffset py rh
         @
         
     draw: =>

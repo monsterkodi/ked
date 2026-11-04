@@ -1,18 +1,7 @@
-###
-    ███   ███  █████████  ███  ███    
-    ███   ███     ███     ███  ███    
-    ███   ███     ███     ███  ███    
-    ███   ███     ███     ███  ███    
-     ███████      ███     ███  ███████
-###
-    
+#!util
 util =
 
-    # ███   ███████        ████████   ███████   ███   ███   ███████   ███      
-    # ███  ███             ███       ███   ███  ███   ███  ███   ███  ███      
-    # ███  ███████         ███████   ███ ██ ██  ███   ███  █████████  ███      
-    # ███       ███        ███       ███ ████   ███   ███  ███   ███  ███      
-    # ███  ███████         ████████   █████ ██   ███████   ███   ███  ███████  
+##isEqual
     
     isEqual: a b ->
         
@@ -31,11 +20,7 @@ util =
             
         a == b
         
-    #  ███████   ████████   ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███   ███   ███ ███   
-    # █████████  ███████    ███████    █████████    █████    
-    # ███   ███  ███   ███  ███   ███  ███   ███     ███     
-    # ███   ███  ███   ███  ███   ███  ███   ███     ███     
+##array
     
     zip: args... ->
         
@@ -157,16 +142,11 @@ util =
                 
     replace: array index numToRemove arrayToInsert ->
         
-        array.splice.apply array [index numToRemove].concat(arrayToInsert)
+        if array is arr
+            array.splice.apply array [index numToRemove].concat(arrayToInsert)
         
     insert: array index arrayToInsert -> util.replace array index 0 arrayToInsert
         
-    #  ███████   ███████          ███  ████████   ███████  █████████  
-    # ███   ███  ███   ███        ███  ███       ███          ███     
-    # ███   ███  ███████          ███  ███████   ███          ███     
-    # ███   ███  ███   ███  ███   ███  ███       ███          ███     
-    #  ███████   ███████     ███████   ████████   ███████     ███     
-    
     defaults: obj def ->
         
         for key,val of def
@@ -206,12 +186,6 @@ util =
             result[pair[0]] = pair[1]
         result
     
-    #  ███████  ███      ████████  ████████  ████████   
-    # ███       ███      ███       ███       ███   ███  
-    # ███████   ███      ███████   ███████   ████████   
-    #      ███  ███      ███       ███       ███        
-    # ███████   ███████  ████████  ████████  ███        
-    
     sleep: ms ○-> ○ new Promise((r) => setTimeout(r ms)); true
     
     uuid: -> crypto.randomUUID()
@@ -224,11 +198,7 @@ util =
         seconds   = Math.floor((now.getTime() - yearStart.getTime()) / 522).toString(36)
         (year-2025).toString(36) + lpad(5 seconds '0')
         
-    # ██     ██   ███████   █████████  ███   ███    
-    # ███   ███  ███   ███     ███     ███   ███    
-    # █████████  █████████     ███     █████████    
-    # ███ █ ███  ███   ███     ███     ███   ███    
-    # ███   ███  ███   ███     ███     ███   ███    
+##math
     
     rad2deg:        r -> 180 * r / Math.PI
     deg2rad:        d -> Math.PI * d / 180

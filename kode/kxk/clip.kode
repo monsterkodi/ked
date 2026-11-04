@@ -1,19 +1,11 @@
-###
-     ███████  ███      ███  ████████   
-    ███       ███      ███  ███   ███  
-    ███       ███      ███  ████████   
-    ███       ███      ███  ███        
-     ███████  ███████  ███  ███        
-
-  system clipboard with an internal buffer fallback
-###
 
 use ◆ slash
 use fs
 use child_process
 
-function Clip
-
+■Clip
+    # system clipboard with an internal buffer fallback
+    
     @text: ''      # ked's own buffer, always written, never depends on a tool
     @tool: undefined
 
@@ -26,12 +18,6 @@ function Clip
             ⮐ true if fs.existsSync slash.path(dir, cmd)
 
         false
-
-    # ███████    ████████  █████████  ████████   ███████  █████████
-    # ███   ███  ███          ███     ███       ███          ███   
-    # ███   ███  ███████      ███     ███████   ███          ███   
-    # ███   ███  ███          ███     ███       ███          ███   
-    # ███████    ████████     ███     ████████   ███████     ███   
 
     @detect: ->
 
@@ -49,12 +35,6 @@ function Clip
             Clip.tool = 'none'
 
         Clip.tool
-
-    # ███   ███  ████████   ███  █████████  ████████
-    # ███ █ ███  ███   ███  ███     ███     ███     
-    # █████████  ███████    ███     ███     ███████ 
-    # ███   ███  ███   ███  ███     ███     ███     
-    # ██     ██  ███   ███  ███     ███     ████████
 
     @write: text ->
 
@@ -84,12 +64,6 @@ function Clip
         proc.stdin.write text
         proc.stdin.end()
 
-    # ████████   ████████   ███████   ███████  
-    # ███   ███  ███       ███   ███  ███   ███
-    # ███████    ███████   █████████  ███   ███
-    # ███   ███  ███       ███   ███  ███   ███
-    # ███   ███  ████████  ███   ███  ███████  
-
     @read: ->
 
         tool = Clip.detect()
@@ -116,12 +90,6 @@ function Clip
             # empty. only report a tool that could not be run at all.
             error "clip.paste -- #{cmd}: #{err}" if err.status == null
             ''
-
-    #  ███████   ███████   ████████   ███   ███
-    # ███       ███   ███  ███   ███   ███ ███ 
-    # ███       ███   ███  ████████     █████  
-    # ███       ███   ███  ███           ███   
-    #  ███████   ███████   ███           ███   
 
     @copy: text  ->
 

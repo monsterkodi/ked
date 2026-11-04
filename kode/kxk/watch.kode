@@ -1,17 +1,10 @@
-###
-███   ███   ███████   █████████   ███████  ███   ███
-███ █ ███  ███   ███     ███     ███       ███   ███
-█████████  █████████     ███     ███       █████████
-███   ███  ███   ███     ███     ███       ███   ███
-██     ██  ███   ███     ███      ███████  ███   ███
-###
 
 # use events # this is run in node
 
 use ◆ slash nfs events
 use fs
 
-function Watch extends events
+■Watch extends events
 
     @: (path, opt) ->
         
@@ -46,12 +39,6 @@ function Watch extends events
         w.file = slash.path path
         w
         
-    # ███████    ███  ████████   
-    # ███   ███  ███  ███   ███  
-    # ███   ███  ███  ███████    
-    # ███   ███  ███  ███   ███  
-    # ███████    ███  ███   ███  
-    
     watchDir: ○->
         
         return if not @dir
@@ -80,12 +67,6 @@ function Watch extends events
                     watch.on 'error' (err) -> error "watch subdir:'#{item.path}' error: #{err}"
                     watch.on 'change' change(item.path)
                     
-    # ███   ███████   ███   ███   ███████   ████████   ████████  
-    # ███  ███        ████  ███  ███   ███  ███   ███  ███       
-    # ███  ███  ████  ███ █ ███  ███   ███  ███████    ███████   
-    # ███  ███   ███  ███  ████  ███   ███  ███   ███  ███       
-    # ███   ███████   ███   ███   ███████   ███   ███  ████████  
-    
     ignore: (path) ->
         
         if @opt.ignore
@@ -93,12 +74,6 @@ function Watch extends events
                 if new RegExp(regex).test path
                     return true
        
-    #  ███████  ███       ███████    ███████  ████████  
-    # ███       ███      ███   ███  ███       ███       
-    # ███       ███      ███   ███  ███████   ███████   
-    # ███       ███      ███   ███       ███  ███       
-    #  ███████  ███████   ███████   ███████   ████████  
-    
     close: ->
         
         @watch?.close()
@@ -109,12 +84,6 @@ function Watch extends events
                 watch.close()
             delete @watchers
                     
-    #  ███████   ███   ███   ███████  ███   ███   ███████   ███   ███   ███████   ████████  
-    # ███   ███  ████  ███  ███       ███   ███  ███   ███  ████  ███  ███        ███       
-    # ███   ███  ███ █ ███  ███       █████████  █████████  ███ █ ███  ███  ████  ███████   
-    # ███   ███  ███  ████  ███       ███   ███  ███   ███  ███  ████  ███   ███  ███       
-    #  ███████   ███   ███   ███████  ███   ███  ███   ███  ███   ███   ███████   ████████  
-    
     # sync stat for the change handler: nfs is promise based, so use node's sync call
     @stat: p ->
         

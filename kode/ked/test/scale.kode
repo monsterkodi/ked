@@ -3,7 +3,7 @@ use ../edit        ◆ state editor
 use ../theme       ◆ theme
 use ../util        ◆ harness config
 use ../view/menu   ◆ choices context
-use ../view/editor ◆ mapscr
+use ../view/editor ◆ mapscr mapview
 use ../view/base   ◆ scroll
 
 cells = cols:40 rows:20
@@ -574,6 +574,52 @@ hed = cols rows ext='md' feats=[]->
         data[18] ▸ bg[0]
         data[19] ▸ bg[1]
         data[20] ▸ bg[2]
+
+  ▸ the quicky map shows scaled lines with their real height
+
+        [h e] = hed  cols:40 rows:10
+        e.state.loadLines ['a' 'b' 'c' 'd' 'e' '# h1' 'f' 'g']
+
+        m = new mapview h.screen e.state
+        m.setSyntaxSegls 'md' e.state.s.lines
+        m.setScales {enabled:true md:{h1:3}}
+
+        m.cells.layout 30 0 12 10
+        m.csz = [10 20]
+
+        m.lineRows(5) ▸ 3
+        m.lineOffsetPixels(5) ▸ 20
+        m.lineOffsetPixels(6) ▸ 32
+        m.lineOffsetPixels(7) ▸ 36
+
+        m.setScales {enabled:false md:{h1:3}}
+
+        m.lineRows(5) ▸ 1
+        m.lineOffsetPixels(6) ▸ 24
+
+  ▸ the quicky map draws a scaled line with the font map
+
+        [h e] = hed  cols:40 rows:10
+        e.state.loadLines ['# h1' 'text']
+
+        m = new mapview h.screen e.state
+        m.setSyntaxSegls 'md' e.state.s.lines
+        m.setScales {enabled:true md:{h1:7}}
+
+        m.cells.layout 30 0 12 10
+        m.csz = [10 20]
+        m.images = [100 101]
+
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+        h.screen.t.out = []
+
+        m.drawImages()
+
+        out = h.screen.t.written()
+
+        (out.split('i=100,').length - 1) ▸ 1
+        out.includes('w=120,h=28') ▸ true
 
   ▸ clicking a cut line in the map keeps the row offset
 

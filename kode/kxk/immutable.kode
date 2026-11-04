@@ -1,10 +1,5 @@
+#!immutable
 ###
-    ███  ██     ██  ██     ██  ███   ███  █████████   ███████   ███████    ███      ████████  
-    ███  ███   ███  ███   ███  ███   ███     ███     ███   ███  ███   ███  ███      ███       
-    ███  █████████  █████████  ███   ███     ███     █████████  ███████    ███      ███████   
-    ███  ███ █ ███  ███ █ ███  ███   ███     ███     ███   ███  ███   ███  ███      ███       
-    ███  ███   ███  ███   ███   ███████      ███     ███   ███  ███████    ███████  ████████  
-    
     Copyright (c) 2016, Richard Feldman
     https://github.com/rtfeldman/seamless-immutable 
 ###
@@ -102,9 +97,9 @@ makeImmutableArray = array ->
     #    'reduceRight'
     #]
     #
-    ## Don't change their implementations, but wrap these functions to make sure
-    ## they always return an immutable value.
-    #for methodName in nonMutatingArrayMethods
+    # Don't change their implementations, but wrap these functions to make sure
+    # they always return an immutable value.
+    # for methodName in nonMutatingArrayMethods
     #    makeMethodReturnImmutable array methodName
   
     addPropertyTo array "flatMap"   flatMap
@@ -308,14 +303,8 @@ quickCopy = src dest ->
         if Object.getOwnPropertyDescriptor src, key
             dest[key] = src[key]
     dest
-
+#!merge
 ###
-    ██     ██  ████████  ████████    ███████   ████████  
-    ███   ███  ███       ███   ███  ███        ███       
-    █████████  ███████   ███████    ███  ████  ███████   
-    ███ █ ███  ███       ███   ███  ███   ███  ███       
-    ███   ███  ████████  ███   ███   ███████   ████████  
-
     Returns an Immutable Object containing the properties and values of both
     this object and the provided object, prioritizing the provided object's
     values whenever the same key is present in both objects.

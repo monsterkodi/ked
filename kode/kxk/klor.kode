@@ -1,11 +1,4 @@
-###
-    ███   ███  ███       ███████   ████████ 
-    ███  ███   ███      ███   ███  ███   ███
-    ███████    ███      ███   ███  ███████  
-    ███  ███   ███      ███   ███  ███   ███
-    ███   ███  ███████   ███████   ███   ███
-###
-
+#!klor
 f = (r, g, b) -> '\x1b[38;5;' + (16 + 36*r + 6*g + b) + 'm'
 F = (r, g, b) -> '\x1b[48;5;' + (16 + 36*r + 6*g + b) + 'm'
 
@@ -72,11 +65,7 @@ for fg in FG_COLORS
         exports[fg+i] = F256 exports[fg](i)
         exports.FG_NAMES.push fg+i
 
-#  ███████   ███       ███████   ███████     ███████   ███      ███  ███████  ████████  
-# ███        ███      ███   ███  ███   ███  ███   ███  ███      ███     ███   ███       
-# ███  ████  ███      ███   ███  ███████    █████████  ███      ███    ███    ███████   
-# ███   ███  ███      ███   ███  ███   ███  ███   ███  ███      ███   ███     ███       
-#  ███████   ███████   ███████   ███████    ███   ███  ███████  ███  ███████  ████████  
+##globalize
 
 exports.globalize = (enabled=true) ->
     
@@ -102,31 +91,20 @@ exports.globalize = (enabled=true) ->
         for n in ['underline''bold''dim''italic''inverse''reset''strip' 'black''red''green''yellow''blue''magenta''cyan''white''gray']
             glob[n] = exp n
         
-#  ███████  █████████  ████████   ███  ████████   
-# ███          ███     ███   ███  ███  ███   ███  
-# ███████      ███     ███████    ███  ████████   
-#      ███     ███     ███   ███  ███  ███        
-# ███████      ███     ███   ███  ███  ███        
+##strip
 
 STRIPANSI = /\x1B[[(?);]{0,2}(;?\d)*./g
 exports.strip = (s) -> String(s).replace STRIPANSI, ''
                 
-# ██     ██   ███████   ███  ███   ███  
-# ███   ███  ███   ███  ███  ████  ███  
-# █████████  █████████  ███  ███ █ ███  
-# ███ █ ███  ███   ███  ███  ███  ████  
-# ███   ███  ███   ███  ███  ███   ███  
+#!main
+# node js/lib/kxk/kolor.js
 
-◆main
-    
-    # print a color table to the console
-    # if file is executed directly: 
-    # node js/lib/kxk/kolor.js
+◆main 
     
     reset = '\x1b[0m'
     bold  = '\x1b[1m'
                 
-    for bg in BG_COLORS
+    for bg in BG_COLORS # print a color table
         for i in [1..8]
             s  = reset
             fg = bg.toLowerCase()
