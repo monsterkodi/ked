@@ -536,6 +536,33 @@ hed = cols rows ext='md' feats=[]->
         m.images.length ▸ 3
         kseg.str(m.getSegls()[1]) ▸ 'bbb'
 
+  ▸ a reload after inserting lines clears the old map images
+
+        [h e] = hed  cols:40 rows:10
+        e.state.loadLines ['aaa' 'bbb' 'ccc']
+
+        m = new mapscr e
+        m.cells.layout 30 0 12 10
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+        m.reload()
+
+        e.state.setLines ['aaa' 'bbb' 'foo' 'bar' 'ccc']
+
+        m.images.length ▸ 5
+
+        h.screen.t.out = []
+        e.state.loadLines ['aaa' 'bbb' 'ccc']
+
+        out = h.screen.t.written()
+
+        m.images.length ▸ 3
+        out.includes("a=d,d=R,x=#{m.imgId},y=#{m.imgId+4}") ▸ true
+
+        e.state.setLines ['aaa' 'bbb' 'NEW' 'NEW' 'ccc']
+
+        m.images.length ▸ 5
+
   ▸ a scaled line gets a taller stripe in the map
 
         [h e] = hed 40 10

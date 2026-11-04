@@ -25,6 +25,7 @@ use                 ◆ mapview
         @mapWidth   = 0 # width of the map in pixels
         @mapHeight  = 0 # height of the map in pixels
         @linesInMap = 0 # number of display rows that fit into map
+        @linesCount = 0 # number of lines at the last change
         
         @setColor 'bg'        theme.editor.mapscr
         @setColor 'highlight' theme.highlight.map
@@ -44,19 +45,24 @@ use                 ◆ mapview
         @editor.state.on 'colors.changed' (=> @reload())
         
         @calcView()
+        @linesCount = @state.s.lines.length
         
     onLinesChanged: diff =>
         
+        sameCount = @state.s.lines.length == @linesCount
+        @linesCount = @state.s.lines.length
+
         if diff.del.length == 0 == diff.chg.length
             @reload()
         else
-            if diff.chg.length and diff.del.length == 0 == diff.ins.length
+            if diff.chg.length and diff.del.length == 0 == diff.ins.length and sameCount
                 for cli in diff.chg
                     @updateLine cli
             else
                 minLine = @state.s.lines.length
                 minLine = min minLine diff.ins[0] if diff.ins.length
                 minLine = min minLine diff.del[0] if diff.del.length
+                minLine = min minLine diff.chg[0] if diff.chg.length
                 for cli in diff.chg
                     break if cli >= minLine
                     @updateLine cli

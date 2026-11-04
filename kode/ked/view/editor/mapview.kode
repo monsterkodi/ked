@@ -188,6 +188,7 @@ use ../base         ◆ view
         t  = @cells.screen.t
         t.deleteImage id
         t.sendImageData data id w h
+        @images[y] = id
 
         py = @lineOffsetPixels y
         rh = @lineRows(y) * @pixelsPerRow
