@@ -1,21 +1,13 @@
-###
-    █████████  █████████  ███   ███████   
-       ███        ███     ███  ███   ███  
-       ███        ███     ███  ███   ███  
-       ███        ███     ███  ███   ███  
-       ███        ███     ███   ███████   
-
-    interfaces with the terminal
-    handles mouse and keyboard input and
-    kitty image display
-###
 
 use ../../../kxk   ▪ events post kstr nfs
 use ../../util     ◆ keyscript
 use ../../util/img ◆ rounded
-
-function TTIO extends events
-
+■TTIO extends events
+###
+    interfaces with the terminal
+    handles mouse and keyboard input and
+    kitty image display
+###
     @: opt ->
         
         opt ?= {}
@@ -165,12 +157,6 @@ function TTIO extends events
     
     setTitle: t -> @write "\x1b]2;#{t}\x1b\\"
     
-    # ████████   ███       ███████    ███████  ████████     ███  ██     ██   ███████    ███████   ████████
-    # ███   ███  ███      ███   ███  ███       ███          ███  ███   ███  ███   ███  ███        ███     
-    # ████████   ███      █████████  ███       ███████      ███  █████████  █████████  ███  ████  ███████ 
-    # ███        ███      ███   ███  ███       ███          ███  ███ █ ███  ███   ███  ███   ███  ███     
-    # ███        ███████  ███   ███   ███████  ████████     ███  ███   ███  ███   ███   ███████   ████████
-
     placeLineImage: id cx y py ry=1 ->
         
         for placement in 0...ry
@@ -192,12 +178,6 @@ function TTIO extends events
 
         @write "\x1b_Gq=1,a=p,i=#{id},p=1,X=0,Y=#{oy},x=0,y=#{srcY},w=#{iw},h=#{srcH},C=1\x1b\\"
 
-    #  ███████   ███   ███  ████████  ████████   ███       ███████   ███   ███  
-    # ███   ███  ███   ███  ███       ███   ███  ███      ███   ███   ███ ███   
-    # ███   ███   ███ ███   ███████   ███████    ███      █████████    █████    
-    # ███   ███     ███     ███       ███   ███  ███      ███   ███     ███     
-    #  ███████       █      ████████  ███   ███  ███████  ███   ███     ███     
-    
     placeImageOverlay: id x y py pw ph ->
         
         if not @overlayID
@@ -213,12 +193,6 @@ function TTIO extends events
     
         @write "\x1b_Gq=1,a=d,d=i,i=#{@overlayID},p=#{id}\x1b\\"
         
-    # ███  ██     ██   ███████ 
-    # ███  ███   ███  ███      
-    # ███  █████████  ███  ████
-    # ███  ███ █ ███  ███   ███
-    # ███  ███   ███   ███████ 
-
     sendImg: img id ->
     
         if empty id
@@ -278,12 +252,6 @@ function TTIO extends events
         @lastplImgs = @placedImgs
         @placedImgs = {}
 
-    # ███   ███  ███  ███████    ████████  
-    # ███   ███  ███  ███   ███  ███       
-    # █████████  ███  ███   ███  ███████   
-    # ███   ███  ███  ███   ███  ███       
-    # ███   ███  ███  ███████    ████████  
-    
     hideImage: id ->
         
         @write "\x1b_Gq=1,a=d,d=i,i=#{id}\x1b\\"
@@ -302,12 +270,6 @@ function TTIO extends events
         ⮐  log "range end '#{end}' not a number" if not end is num
         @write "\x1b_Gq=2,a=d,d=R,x=#{start},y=#{end}\x1b\\"
     
-    #  ███████  ████████  ███   ███  ███████    
-    # ███       ███       ████  ███  ███   ███  
-    # ███████   ███████   ███ █ ███  ███   ███  
-    #      ███  ███       ███  ████  ███   ███  
-    # ███████   ████████  ███   ███  ███████    
-            
     sendImageData: data id w h bytesperpixel=3 ->
         
         ###
@@ -333,12 +295,6 @@ function TTIO extends events
         else            
             @write "\x1b_Gq=1,i=#{id},p=#{id},f=#{8*bytesperpixel},s=#{w},v=#{h};#{base64}\x1b\\"
     
-    #  ███████  ███   ███  ████████    ███████   ███████   ████████   
-    # ███       ███   ███  ███   ███  ███       ███   ███  ███   ███  
-    # ███       ███   ███  ███████    ███████   ███   ███  ███████    
-    # ███       ███   ███  ███   ███       ███  ███   ███  ███   ███  
-    #  ███████   ███████   ███   ███  ███████    ███████   ███   ███  
-    
     setCursor: x y => @write "\x1b[#{y+1};#{x+1}H"
     requestCursor: => @write "\x1b[6n"
     hideCursor: => @write '\x1b[?25l'
@@ -356,12 +312,8 @@ function TTIO extends events
         @emit 'preResize'
         @write '\x1b[14t' # request screen size in pixels
                 
-    # ███   ███  ███  █████████  █████████  ███   ███  
-    # ███  ███   ███     ███        ███      ███ ███   
-    # ███████    ███     ███        ███       █████    
-    # ███  ███   ███     ███        ███        ███     
-    # ███   ███  ███     ███        ███        ███     
-    #
+#!kitty
+    
     # https://sw.kovidgoyal.net/kitty/keyboard-protocol/
     # doesn't work in terminal.app
     
@@ -454,11 +406,7 @@ function TTIO extends events
             
         event
         
-    #  ███████   ███████  ███  
-    # ███       ███       ███  
-    # ███       ███████   ███  
-    # ███            ███  ███  
-    #  ███████  ███████   ███  
+#!csi
     
     parseCsi: csi =>
         
@@ -476,12 +424,6 @@ function TTIO extends events
             
         null
         
-    # ████████   ███████   ███████  
-    # ███       ███       ███       
-    # ███████   ███████   ███       
-    # ███            ███  ███       
-    # ████████  ███████    ███████  
-    
     parseEsc: esc =>
         
         if esc.length == 1
@@ -506,12 +448,6 @@ function TTIO extends events
         log '---- esc' esc 
         null
         
-    # ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███ █ ███  
-    # ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  
-    # ███   ███  ███   ███  ██     ██  
-    
     parseRaw: raw =>
         
         # log '---- raw' '0x'+Number(raw[0]).toString(16) #'a'.charCodeAt(0)
@@ -553,11 +489,7 @@ function TTIO extends events
         combo:  combo
         char:   char
             
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
+#!mouse
     
     onPointer: style =>
         
@@ -656,11 +588,7 @@ function TTIO extends events
         
         @emit 'mouse' event
                 
-    # ████████    ███████   ████████    ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # ████████   █████████  ███████    ███████   ███████   
-    # ███        ███   ███  ███   ███       ███  ███       
-    # ███        ███   ███  ███   ███  ███████   ████████  
+#!parse
     
     parseData: data =>
         
@@ -705,11 +633,7 @@ function TTIO extends events
         log "multiseq #{seq.length}" if seq.length > 1
         seqs
     
-    # ███████     ███████   █████████   ███████   
-    # ███   ███  ███   ███     ███     ███   ███  
-    # ███   ███  █████████     ███     █████████  
-    # ███   ███  ███   ███     ███     ███   ███  
-    # ███████    ███   ███     ███     ███   ███  
+#!data
     
     onData: data =>
     

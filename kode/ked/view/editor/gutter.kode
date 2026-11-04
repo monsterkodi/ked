@@ -1,14 +1,3 @@
-###
-     ███████   ███   ███  █████████  █████████  ████████  ████████   
-    ███        ███   ███     ███        ███     ███       ███   ███  
-    ███  ████  ███   ███     ███        ███     ███████   ███████    
-    ███   ███  ███   ███     ███        ███     ███       ███   ███  
-     ███████    ███████      ███        ███     ████████  ███   ███  
-
-    displays line numbers to the left of an editor
-    used in fileeditor and searcher/finder 
-    searcher/finder replaces lineno to display source line numbers 
-###
 
 use ../../../kxk   ▪ post kseg
 use ../../../kolor ◆ kulur
@@ -18,8 +7,13 @@ use ../../edit     ◆ mode
 use ../../theme    ◆ color theme 
 use ../base        ◆ view
 
-function gutter extends view
+■gutter extends view
 
+###
+    displays line numbers to the left of an editor
+    used in fileeditor and searcher/finder 
+    searcher/finder replaces lineno to display source line numbers 
+###
     @: @editor ->
     
         @state = @editor.state
@@ -58,12 +52,6 @@ function gutter extends view
             @setColor 'cursor_main'     theme.cursor.main
             @setColor 'cursor_multi'    theme.cursor.multi
         
-    # ██     ██   ███████   ███   ███   ███████  ████████
-    # ███   ███  ███   ███  ███   ███  ███       ███     
-    # █████████  ███   ███  ███   ███  ███████   ███████ 
-    # ███ █ ███  ███   ███  ███   ███       ███  ███     
-    # ███   ███   ███████    ███████   ███████   ████████
-
     onMouse: event =>
 
         if @cells.isOutsideEvent event
@@ -116,12 +104,6 @@ function gutter extends view
         @gitChanges = {}
         @gitBlocks  = []
         
-    #  ███████   ███  █████████     ███████    ███  ████████  ████████
-    # ███        ███     ███        ███   ███  ███  ███       ███     
-    # ███  ████  ███     ███        ███   ███  ███  ██████    ██████  
-    # ███   ███  ███     ███        ███   ███  ███  ███       ███     
-    #  ███████   ███     ███        ███████    ███  ███       ███     
-
     onGitDiff: diff ->
         
         @clearChanges()
@@ -148,12 +130,6 @@ function gutter extends view
             # log 'gutter.onGitDiff' @gitChanges
             post.emit 'redraw'
             
-    #  ███████   ███  █████████         ███████   ███████  ████████    ███████   ███      ███            
-    # ███        ███     ███           ███       ███       ███   ███  ███   ███  ███      ███            
-    # ███  ████  ███     ███           ███████   ███       ███████    ███   ███  ███      ███            
-    # ███   ███  ███     ███                ███  ███       ███   ███  ███   ███  ███      ███            
-    #  ███████   ███     ███           ███████    ███████  ███   ███   ███████   ███████  ███████        
-
     drawGitScroll: ->
     
         ⮐  if empty @gitBlocks
@@ -185,12 +161,6 @@ function gutter extends view
             else
                 squares.place sx sy sw sh fg
         
-    # ███████    ████████    ███████   ███   ███
-    # ███   ███  ███   ███  ███   ███  ███ █ ███
-    # ███   ███  ███████    █████████  █████████
-    # ███   ███  ███   ███  ███   ███  ███   ███
-    # ███████    ███   ███  ███   ███  ██     ██
-
     draw: ->
         
         mainCursor = @state.mainCursor()

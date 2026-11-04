@@ -1,21 +1,13 @@
-###
-    ███  ███   ███  ████████   ███   ███  █████████   ███████  ███   ███   ███████   ███   ███████  ████████  
-    ███  ████  ███  ███   ███  ███   ███     ███     ███       ███   ███  ███   ███  ███  ███       ███       
-    ███  ███ █ ███  ████████   ███   ███     ███     ███       █████████  ███   ███  ███  ███       ███████   
-    ███  ███  ████  ███        ███   ███     ███     ███       ███   ███  ███   ███  ███  ███       ███       
-    ███  ███   ███  ███         ███████      ███      ███████  ███   ███   ███████   ███   ███████  ████████  
-
-    a combination of input and choices
-    the input is usually hidden and only shown when user types text to filter the choices
-###
 
 use ../../../kxk ▪ post
 use ../../theme  ◆ color theme
 use ../base      ◆ view input
 use ../menu      ◆ choices
-
-function inputchoice extends view
-
+■inputchoice extends view
+###
+    a combination of input and choices
+    the input is usually hidden and only shown when user types text to filter the choices
+###
     @: @screen @name features ->
 
         super @screen @name features
@@ -55,12 +47,6 @@ function inputchoice extends view
         
     inputIsActive: -> @input.hasFocus() or @input.current().length
         
-    #  ███████   ████████   ████████    ███████   ███   ███   ███████   ████████
-    # ███   ███  ███   ███  ███   ███  ███   ███  ████  ███  ███        ███     
-    # █████████  ███████    ███████    █████████  ███ █ ███  ███  ████  ███████ 
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███  ████  ███   ███  ███     
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███   ███   ███████   ████████
-
     arrange: =>
 
         x = int @screen.cols/4
@@ -74,12 +60,6 @@ function inputchoice extends view
         @choices.layout  x+2   y+3  w-3  cs
         @cells.layout    x     y    w    cs+4
         
-    #  ███████  ███   ███   ███████   ███   ███
-    # ███       ███   ███  ███   ███  ███ █ ███
-    # ███████   █████████  ███   ███  █████████
-    #      ███  ███   ███  ███   ███  ███   ███
-    # ███████   ███   ███   ███████   ██     ██
-
     show: =>
 
         super()
@@ -96,12 +76,6 @@ function inputchoice extends view
         @choices.mapscr?.hide()     
         super()
                             
-    # ███  ███   ███  ████████   ███   ███  █████████  
-    # ███  ████  ███  ███   ███  ███   ███     ███     
-    # ███  ███ █ ███  ████████   ███   ███     ███     
-    # ███  ███  ████  ███        ███   ███     ███     
-    # ███  ███   ███  ███         ███████      ███     
-    
     onInputChange: text =>
         
         ⮐ if text == @choices.filterText
@@ -123,12 +97,6 @@ function inputchoice extends view
     
     autoHide: => @input.hide() if @autoHideInput and not @inputIsActive()
         
-    #  ███████  ███   ███   ███████   ███   ███████  ████████   ███████  
-    # ███       ███   ███  ███   ███  ███  ███       ███       ███       
-    # ███       █████████  ███   ███  ███  ███       ███████   ███████   
-    # ███       ███   ███  ███   ███  ███  ███       ███            ███  
-    #  ███████  ███   ███   ███████   ███   ███████  ████████  ███████   
-    
     onChoicesAction: action choice =>
     
         switch action
@@ -152,12 +120,6 @@ function inputchoice extends view
         choice = @choices.current() ? @input.current()
         choice = trim choice if choice is str
             
-    # ███████    ████████    ███████   ███   ███
-    # ███   ███  ███   ███  ███   ███  ███ █ ███
-    # ███   ███  ███████    █████████  █████████
-    # ███   ███  ███   ███  ███   ███  ███   ███
-    # ███████    ███   ███  ███   ███  ██     ██
-
     draw: ->
 
         ⮐ if @hidden()
@@ -205,12 +167,6 @@ function inputchoice extends view
         post.emit 'focus' 'editor'
         @hide()
 
-    # ███   ███  ████████  ███   ███
-    # ███  ███   ███        ███ ███
-    # ███████    ███████     █████
-    # ███  ███   ███          ███
-    # ███   ███  ████████     ███
-
     onKey: key event =>
 
         ⮐ if @hidden()
@@ -244,12 +200,6 @@ function inputchoice extends view
                 ⮐ result
         true
         
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
-    
     onMouse: event =>
 
         ⮐ if @hidden()
@@ -265,12 +215,6 @@ function inputchoice extends view
             
         @hover
 
-    # ███   ███  ███   ███  ████████  ████████  ███      
-    # ███ █ ███  ███   ███  ███       ███       ███      
-    # █████████  █████████  ███████   ███████   ███      
-    # ███   ███  ███   ███  ███       ███       ███      
-    # ██     ██  ███   ███  ████████  ████████  ███████  
-    
     onWheel: event =>
 
         ⮐ if @hidden()

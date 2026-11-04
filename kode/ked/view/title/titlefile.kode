@@ -1,20 +1,12 @@
-###
-    █████████  ███  █████████  ███      ████████  ████████  ███  ███      ████████  
-       ███     ███     ███     ███      ███       ███       ███  ███      ███       
-       ███     ███     ███     ███      ███████   ██████    ███  ███      ███████   
-       ███     ███     ███     ███      ███       ███       ███  ███      ███       
-       ███     ███     ███     ███████  ████████  ███       ███  ███████  ████████  
-
-    used by title to display the currently edited file in the fileeditor
-###
 
 use ../../../kxk ▪ slash post
 use ../../theme  ◆ color theme 
 use ../../util   ◆ syntax
 use ../base      ◆ view
 
-function titlefile extends view
-
+■titlefile extends view
+    # used by title to display the currently edited file in the fileeditor
+    
     @: screen name ->
 
         super screen name
@@ -29,12 +21,6 @@ function titlefile extends view
         
         @rounded = ''
         
-    # ███████    ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  
-    # ███   ███  ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███   ███  ███   ███  ██     ██  
-    
     draw: -> 
         
         ⮐  if @hidden()
@@ -51,12 +37,6 @@ function titlefile extends view
                 @cells.set x 0 ch fg bg 
                 @cells.adjustContrastForHighlight x 0 bg if @hover
                 
-    #  ███████   ███████          ███  ███   ███   ███████  █████████  
-    # ███   ███  ███   ███        ███  ███   ███  ███          ███     
-    # █████████  ███   ███        ███  ███   ███  ███████      ███     
-    # ███   ███  ███   ███  ███   ███  ███   ███       ███     ███     
-    # ███   ███  ███████     ███████    ███████   ███████      ███     
-    
     adjustText: ->
     
         @file ?= ''
@@ -73,12 +53,6 @@ function titlefile extends view
         @adjustText()
         
     show: file => @set file; @cells.rows = 1
-    
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
     
     onMouse: event =>
         

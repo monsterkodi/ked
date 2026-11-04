@@ -1,20 +1,12 @@
-###
-    ███   ███  ███   ███   ███████   ███████  
-    ███  ███   ████  ███  ███   ███  ███   ███
-    ███████    ███ █ ███  ███   ███  ███████  
-    ███  ███   ███  ████  ███   ███  ███   ███
-    ███   ███  ███   ███   ███████   ███████  
-
-    handles view resizing
-    used by dircol and funcol
-###
 
 use ../../../kxk ▪ post
 use ../../theme  ◆ theme
 use              ◆ view
-
-function knob extends view
-
+■knob extends view
+###
+    handles view resizing
+    used by dircol and funcol
+###
     @: screen name ->
         
         super screen name
@@ -27,12 +19,6 @@ function knob extends view
         @maxWidth    = 68
         @pointerType = 'ew-resize'
         
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
-    
     onMouse: event =>
         
         super event
@@ -73,12 +59,6 @@ function knob extends view
                     ⮐  redraw:true
         @hover
             
-    # ███████    ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  
-    # ███   ███  ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███   ███  ███   ███  ██     ██  
-    
     draw: =>
     
         ⮐  if not @hover

@@ -1,19 +1,11 @@
-###
-    ████████    ███████   ███████    ███  ███   ███  ████████   ███   ███  █████████  
-    ███   ███  ███        ███   ███  ███  ████  ███  ███   ███  ███   ███     ███     
-    ███████    ███  ████  ███████    ███  ███ █ ███  ████████   ███   ███     ███     
-    ███   ███  ███   ███  ███   ███  ███  ███  ████  ███        ███   ███     ███     
-    ███   ███   ███████   ███████    ███  ███   ███  ███         ███████      ███     
-
-    a three digit rgb input for the colorpicker
-###
 
 use ../../../kxk ▪ post
 use ../../theme  ◆ theme
 use              ◆ input
 
-function rgbinput extends input
-
+■rgbinput extends input
+    # a three digit rgb input for the colorpicker
+    
     @: screen name ->
 
         super screen name

@@ -1,12 +1,3 @@
-###
-     ███████   ████████   ████████  ████████  █████████  
-    ███        ███   ███  ███       ███          ███     
-    ███  ████  ███████    ███████   ███████      ███     
-    ███   ███  ███   ███  ███       ███          ███     
-     ███████   ███   ███  ████████  ████████     ███     
-
-    the fancy glowing animated ascii art thingy
-###
 
 use ../../../kxk    ▪ kstr post
 use ../../util      ◆ help
@@ -14,9 +5,9 @@ use ../../theme     ◆ theme
 use ../../edit/tool ◆ belt
 use ../../edit      ◆ editor
 use ../base         ◆ view
-
-function greet extends view
-
+■greet extends view
+    # the fancy glowing animated ascii art thingy
+    
     @: screen ->
         
         super screen 'greet'
@@ -28,12 +19,6 @@ function greet extends view
         @a       = 120
         
         @cells.rows = 0
-
-    #  ███████  ███   ███   ███████   ███   ███  
-    # ███       ███   ███  ███   ███  ███ █ ███  
-    # ███████   █████████  ███   ███  █████████  
-    #      ███  ███   ███  ███   ███  ███   ███  
-    # ███████   ███   ███   ███████   ██     ██  
 
     hide: => 
     
@@ -50,12 +35,6 @@ function greet extends view
         [w h] = belt.cellSize @header
         
         @cells.layout x y w h
-
-    # ███████    ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  
-    # ███   ███  ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███   ███  ███   ███  ██     ██  
 
     draw: =>
         

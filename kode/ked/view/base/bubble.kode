@@ -1,23 +1,15 @@
-###
-    ███████    ███   ███  ███████    ███████    ███      ████████  
-    ███   ███  ███   ███  ███   ███  ███   ███  ███      ███       
-    ███████    ███   ███  ███████    ███████    ███      ███████   
-    ███   ███  ███   ███  ███   ███  ███   ███  ███      ███       
-    ███████     ███████   ███████    ███████    ███████  ████████  
-
-    displays some clickable text in a rounded 'bubble'
-    used by 
-        ◆ searcher to display file headings
-        ◆ status to display filepos status
-###
 
 use ../../../kxk ▪ slash kseg
 use ../../theme  ◆ theme 
 use ../../util   ◆ syntax
 use ../base      ◆ view
-
-function bubble extends view
-
+■bubble extends view
+###
+    displays some clickable text in a rounded 'bubble'
+    used by 
+        ◆ searcher to display file headings
+        ◆ status to display filepos status
+###
     @: screen name ->
 
         super screen name
@@ -32,12 +24,6 @@ function bubble extends view
         @setColor 'hover' theme.hover.bg 
         @setColor 'empty' theme.editor.bg
         
-    # ███████    ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  
-    # ███   ███  ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███   ███  ███   ███  ██     ██  
-    
     draw: ->
         
         ⮐  if @hidden()
@@ -62,12 +48,6 @@ function bubble extends view
             @syntax.setSegls? @item.segls ? [kseg(item.tilde)]
             @rounded = '' + @item.tilde + ''
         
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
-    
     onMouseEnter: event => 
     
         @emit 'action' 'enter'

@@ -1,20 +1,12 @@
-###
-     ███████   ███████   ███   ███  █████████  ████████  ███   ███  █████████  
-    ███       ███   ███  ████  ███     ███     ███        ███ ███      ███     
-    ███       ███   ███  ███ █ ███     ███     ███████     █████       ███     
-    ███       ███   ███  ███  ████     ███     ███        ███ ███      ███     
-     ███████   ███████   ███   ███     ███     ████████  ███   ███     ███     
-
-    quick and dirty context menu for the fileeditor
-###
 
 use ../../../kxk    ▪ kstr slash post noon
 use ../../edit/tool ◆ belt
 use ../../theme     ◆ theme 
 use                 ◆ inputchoice
 
-function context extends inputchoice
-
+■context extends inputchoice
+    # quick and dirty context menu for the fileeditor
+    
     @menu: null
 
     @: @screen ->
@@ -24,12 +16,6 @@ function context extends inputchoice
         @setColor 'bg' theme.context.bg
                 
         context.menu = @
-
-    #  ███████   ████████   ████████    ███████   ███   ███   ███████   ████████
-    # ███   ███  ███   ███  ███   ███  ███   ███  ████  ███  ███        ███     
-    # █████████  ███████    ███████    █████████  ███ █ ███  ███  ████  ███████ 
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███  ████  ███   ███  ███     
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███   ███   ███████   ████████
 
     arrange: =>
 
@@ -46,12 +32,6 @@ function context extends inputchoice
         @choices.layout  x+1   y+1+ih   w-2  c
         @cells.layout    x     y        w    h
 
-    #  ███████  ███   ███   ███████   ███   ███
-    # ███       ███   ███  ███   ███  ███ █ ███
-    # ███████   █████████  ███   ███  █████████
-    #      ███  ███   ███  ███   ███  ███   ███
-    # ███████   ███   ███   ███████   ██     ██
-    
     @show: pos cb items -> context.menu.show pos cb items
 
     show: @pos @cb @items ->
@@ -70,12 +50,6 @@ function context extends inputchoice
                 
         super()
                 
-    #  ███████   ████████   ████████   ███      ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███       ███ ███   
-    # █████████  ████████   ████████   ███        █████    
-    # ███   ███  ███        ███        ███         ███     
-    # ███   ███  ███        ███        ███████     ███     
-    
     applyChoice: choice ->
         # log 'context applyChoice' choice
         @cb choice
@@ -83,12 +57,6 @@ function context extends inputchoice
         
     onWheel: ->
                             
-    # ███████    ████████    ███████   ███   ███
-    # ███   ███  ███   ███  ███   ███  ███ █ ███
-    # ███   ███  ███████    █████████  █████████
-    # ███   ███  ███   ███  ███   ███  ███   ███
-    # ███████    ███   ███  ███   ███  ██     ██
-
     draw: =>
 
         ⮐  if @hidden()

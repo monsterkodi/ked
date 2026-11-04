@@ -1,24 +1,9 @@
-###
-    ███  ███   ███████   ████████   ███   ███  █████████   ███████  
-    ███  ███  ███   ███  ███   ███  ███ █ ███        ███    ███ ███  
-    ███████   ███████   ████████   ███████      █████    █████    
-    ███  ███  ███   ███  ███   ███  ███   ███        ███    ███ ███  
-    ███   ███ ███████   ████████   ███   ███  █████████   ███████  
-    
-    the items of a directory, for the dialogs that browse one
-###
 
-use ../../../kxk ▪ kstr slash
-use ../../../kxk ◆ nfs
+use ../../../kxk ▪ kstr slash nfs
 use ../../theme  ◆ icons
 use              ◆ diritem
 
-function dirlist
-
-    #  the items of a directory: the files and the directories in it, and
-    #  the parent of the directory first
-    #  
-    #  the parent is not there when the directory is the root
+■dirlist
     
     @items: dir ○=>
         
@@ -38,9 +23,6 @@ function dirlist
             tilde: parent ? (icons.dir + '\u00A0..') : ''
         
         items
-    
-    #  the weight of an item: the files first, the dot directories last,
-    #  the name decides among them
     
     @weight: item =>
         

@@ -1,10 +1,3 @@
-###
-███████    ███  ████████   █████████  ████████   ████████  ████████
-███   ███  ███  ███   ███     ███     ███   ███  ███       ███     
-███   ███  ███  ███████       ███     ███████    ███████   ███████ 
-███   ███  ███  ███   ███     ███     ███   ███  ███       ███     
-███████    ███  ███   ███     ███     ███   ███  ████████  ████████
-###
 
 use ../../../kxk ▪ kutil kseg kstr slash post nfs
 use ../../index  ◆ prjcts 
@@ -15,7 +8,7 @@ use              ◆ diritem
 
 import rgxs from './quicky.json' with { type: "json" }
 
-function dirtree extends choices
+■dirtree extends choices
 
     @: screen name features ->
         
@@ -29,12 +22,6 @@ function dirtree extends choices
         
         @frontRoundOffset = 0
         
-    #  ███████   ███  █████████         ███████  █████████   ███████   █████████  ███   ███   ███████
-    # ███        ███     ███           ███          ███     ███   ███     ███     ███   ███  ███     
-    # ███  ████  ███     ███           ███████      ███     █████████     ███     ███   ███  ███████ 
-    # ███   ███  ███     ███                ███     ███     ███   ███     ███     ███   ███       ███
-    #  ███████   ███     ███           ███████      ███     ███   ███     ███      ███████   ███████ 
-
     tilde: item -> item.tilde = lpad(item.depth*2+1) + diritem.symbolName(item)
 
     onGitStatus: status =>
@@ -86,12 +73,6 @@ function dirtree extends choices
             @set @items @currentIndex()        
             post.emit 'redraw' 
                 
-    # ████████  ███  ███      ████████         ███████  ███   ███   ███████   ███   ███   ███████   ████████
-    # ███       ███  ███      ███             ███       ███   ███  ███   ███  ████  ███  ███        ███     
-    # ██████    ███  ███      ███████         ███       █████████  █████████  ███ █ ███  ███  ████  ███████ 
-    # ███       ███  ███      ███             ███       ███   ███  ███   ███  ███  ████  ███   ███  ███     
-    # ███       ███  ███████  ████████         ███████  ███   ███  ███   ███  ███   ███   ███████   ████████
-
     onFileChange: info =>
         
         if info.path.startsWith @currentRoot
@@ -107,12 +88,6 @@ function dirtree extends choices
                         @setRoot @currentRoot redraw:true index:@currentIndex()
                         ⮐  
                     
-    # ████████    ███████    ███████   █████████  
-    # ███   ███  ███   ███  ███   ███     ███     
-    # ███████    ███   ███  ███   ███     ███     
-    # ███   ███  ███   ███  ███   ███     ███     
-    # ███   ███   ███████    ███████      ███     
-    
     setRoot: path opt ○=>
         
         opt ?= {}
@@ -139,12 +114,6 @@ function dirtree extends choices
         
         post.emit 'redraw' if opt.redraw
         
-    # ████████   ████████   ███████  █████████   ███████   ████████   ████████  
-    # ███   ███  ███       ███          ███     ███   ███  ███   ███  ███       
-    # ███████    ███████   ███████      ███     ███   ███  ███████    ███████   
-    # ███   ███  ███            ███     ███     ███   ███  ███   ███  ███       
-    # ███   ███  ████████  ███████      ███      ███████   ███   ███  ████████  
-        
     restoreSessionState: opt ->
         
         opt ?= {}
@@ -159,12 +128,6 @@ function dirtree extends choices
             if key.startsWith @currentRoot
                 @openDir @itemForPath(key) opt
         
-    #  ███████  █████████   ███████   █████████  ████████  
-    # ███          ███     ███   ███     ███     ███       
-    # ███████      ███     █████████     ███     ███████   
-    #      ███     ███     ███   ███     ███     ███       
-    # ███████      ███     ███   ███     ███     ████████  
-    
     onSessionMerge: recent => @setState recent[@name]    
         
     setState: state =>
@@ -176,12 +139,6 @@ function dirtree extends choices
         
         ked_session.set @name state
                     
-    #  ███████    ███████  █████████  ███   ███████   ███   ███  
-    # ███   ███  ███          ███     ███  ███   ███  ████  ███  
-    # █████████  ███          ███     ███  ███   ███  ███ █ ███  
-    # ███   ███  ███          ███     ███  ███   ███  ███  ████  
-    # ███   ███   ███████     ███     ███   ███████   ███   ███  
-    
     emitAction: action choice event  ->
     
         # log "emitAction #{action}" choice
@@ -254,12 +211,6 @@ function dirtree extends choices
         
         super action choice event
         
-    #  ███████   ████████   ████████  ███   ███  ███████    ███  ████████   
-    # ███   ███  ███   ███  ███       ████  ███  ███   ███  ███  ███   ███  
-    # ███   ███  ████████   ███████   ███ █ ███  ███   ███  ███  ███████    
-    # ███   ███  ███        ███       ███  ████  ███   ███  ███  ███   ███  
-    #  ███████   ███        ████████  ███   ███  ███████    ███  ███   ███  
-    
     openDir: dirItem opt ○->
         
         ⮐  if empty dirItem
@@ -304,12 +255,6 @@ function dirtree extends choices
         
         post.emit 'redraw' if opt.redraw
         
-    #  ███████  ███       ███████    ███████  ████████  ███████    ███  ████████   
-    # ███       ███      ███   ███  ███       ███       ███   ███  ███  ███   ███  
-    # ███       ███      ███   ███  ███████   ███████   ███   ███  ███  ███████    
-    # ███       ███      ███   ███       ███  ███       ███   ███  ███  ███   ███  
-    #  ███████  ███████   ███████   ███████   ████████  ███████    ███  ███   ███  
-    
     closeDir: dirItem opt ->
         
         ⮐  if empty dirItem
@@ -334,12 +279,6 @@ function dirtree extends choices
         
         post.emit 'redraw' if opt.redraw
                 
-    # ███  █████████  ████████  ██     ██   ███████  
-    # ███     ███     ███       ███   ███  ███       
-    # ███     ███     ███████   █████████  ███████   
-    # ███     ███     ███       ███ █ ███       ███  
-    # ███     ███     ████████  ███   ███  ███████   
-    
     dirItems: dir info ○=>
         
         try
@@ -348,12 +287,6 @@ function dirtree extends choices
             error "list error -- #{info}" err
             ⮐ 
 
-    #  ███████  ████████  █████████  
-    # ███       ███          ███     
-    # ███████   ███████      ███     
-    #      ███  ███          ███     
-    # ███████   ████████     ███     
-    
     set: items index=0 -> 
         
         oldTop = @state.s.view[1]
@@ -362,12 +295,6 @@ function dirtree extends choices
         @state.selectLine index
         @state.setMainCursor 0 index
         
-    #  ███████  ████████  ███      ████████   ███████  █████████  
-    # ███       ███       ███      ███       ███          ███     
-    # ███████   ███████   ███      ███████   ███          ███     
-    #      ███  ███       ███      ███       ███          ███     
-    # ███████   ████████  ███████  ████████   ███████     ███     
-    
     selectPrevKeepOffset: ->
         
         @selectPrev()
@@ -434,12 +361,6 @@ function dirtree extends choices
         for item,idx in @items
             ⮐  idx if slash.samePath item.path p
             
-    # ███   ███  ████████  ███   ███████   ███   ███  █████████  
-    # ███ █ ███  ███       ███  ███        ███   ███     ███     
-    # █████████  ███████   ███  ███  ████  █████████     ███     
-    # ███   ███  ███       ███  ███   ███  ███   ███     ███     
-    # ██     ██  ████████  ███   ███████   ███   ███     ███     
-    
     weight: item ->
 
         p = slash.parse item.path

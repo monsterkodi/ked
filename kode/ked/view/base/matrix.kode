@@ -1,19 +1,10 @@
-###
-    ██     ██   ███████   █████████  ████████   ███  ███   ███  
-    ███   ███  ███   ███     ███     ███   ███  ███   ███ ███   
-    █████████  █████████     ███     ███████    ███    █████    
-    ███ █ ███  ███   ███     ███     ███   ███  ███   ███ ███   
-    ███   ███  ███   ███     ███     ███   ███  ███  ███   ███  
-
-    a grid of characters
-###
 
 use ../../../kxk    ▪ post
 use ../../util/img  ◆ squares sircels
 use                 ◆ view
-
-function matrix extends view
-
+■matrix extends view
+    # a grid of characters
+    
     @: screen name ->
 
         super screen name
@@ -89,12 +80,6 @@ function matrix extends view
         cols = @columns()
         [@selectedIndex % cols int(@selectedIndex / cols)]
 
-    # ███████  ████████  ███      ████████   ███████  █████████  
-    # ███      ███       ███      ███       ███          ███     
-    # ███████  ███████   ███      ███████   ███          ███     
-    #      ███ ███       ███      ███       ███          ███     
-    # ███████  ████████  ███████  ████████   ███████     ███     
-
     selectFirst: =>
 
         @selectedIndex = 0
@@ -161,12 +146,6 @@ function matrix extends view
                 @emit 'submit'
                 
             ⮐ redraw:true
-
-    # ████████   ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  
-    # ███   ███  ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███   ███  ███   ███  ██     ██  
 
     draw: =>
 

@@ -1,13 +1,3 @@
-###
-     ███████   ███████  ████████    ███████   ███      ███      
-    ███       ███       ███   ███  ███   ███  ███      ███      
-    ███████   ███       ███████    ███   ███  ███      ███      
-         ███  ███       ███   ███  ███   ███  ███      ███      
-    ███████    ███████  ███   ███   ███████   ███████  ███████  
-
-    scrolls a view
-    used by any multiline editor
-###
 
 use ../../../kxk   ▪ post
 use ../../theme    ◆ theme
@@ -15,9 +5,11 @@ use ../../util/img ◆ squares sircels
 use                ◆ view
 
 {pow} = Math
-
-function scroll extends view
-
+■scroll extends view
+###
+    scrolls a view
+    used by any multiline editor
+###
     @: screen @state @side='left' -> 
     
         super screen @state.owner() + '_scroll'
@@ -29,12 +21,6 @@ function scroll extends view
         @setColor 'knob'  theme.scroll.knob
         @setColor 'hover' theme.scroll.hover
             
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
-    
     onMouse: event =>
         
         [col row] = @eventPos event
@@ -95,12 +81,6 @@ function scroll extends view
 
         clamp 0 track offset
         
-    #  ███████   ███████  ████████    ███████   ███      ███      █████████   ███████   
-    # ███       ███       ███   ███  ███   ███  ███      ███         ███     ███   ███  
-    # ███████   ███       ███████    ███   ███  ███      ███         ███     ███   ███  
-    #      ███  ███       ███   ███  ███   ███  ███      ███         ███     ███   ███  
-    # ███████    ███████  ███   ███   ███████   ███████  ███████     ███      ███████   
-    
     scrollToPixel: pixel =>
     
         ⮐  if empty (csz = @screen.t.cellsz)
@@ -121,12 +101,6 @@ function scroll extends view
 
         redraw:true
         
-    # ███████    ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  
-    # ███   ███  ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███   ███  ███   ███  ██     ██  
-    
     draw: =>
 
         ⮐  if empty (csz = @screen.t.cellsz)

@@ -2,7 +2,6 @@
 use ../../edit/tool ◆ belt
 use ../../theme     ◆ color theme
 use ../../util/img  ◆ rounded
-
 ■cells
 ###
     represents a rectangular subset of screen cells

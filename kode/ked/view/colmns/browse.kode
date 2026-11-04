@@ -1,10 +1,3 @@
-###
-    ███████    ████████    ███████   ███   ███   ███████  ████████
-    ███   ███  ███   ███  ███   ███  ███ █ ███  ███       ███     
-    ███████    ███████    ███   ███  █████████  ███████   ███████ 
-    ███   ███  ███   ███  ███   ███  ███   ███       ███  ███     
-    ███████    ███   ███   ███████   ██     ██  ███████   ████████
-###
 
 use ../../../kxk    ▪ kstr slash post nfs
 use ../../util      ◆ config filecolors
@@ -14,7 +7,7 @@ use                 ◆ quicky brocol diritem dirlist
 
 import rgxs from './quicky.json' with { type: "json" }
 
-function browse extends quicky
+■browse extends quicky
 
     @: @screen @name='browse' ->
 
@@ -34,12 +27,6 @@ function browse extends quicky
 
         if @name == 'browse'
             post.on 'browse.dir' @gotoDir
-
-    #  ███████   ████████   ████████    ███████   ███   ███   ███████   ████████
-    # ███   ███  ███   ███  ███   ███  ███   ███  ████  ███  ███        ███     
-    # █████████  ███████    ███████    █████████  ███ █ ███  ███  ████  ███████ 
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███  ████  ███   ███  ███     
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███   ███   ███████   ████████
 
     arrange: =>
         
@@ -69,12 +56,6 @@ function browse extends quicky
         @choices.layout  x+1      y+1+ih+cr  cw    ch
         @brocol.layout   x+1+cw   y+1+ih+cr  bw    fh
         @cells.layout    x        y           w     h
-
-    # ███████    ████████    ███████   ███   ███
-    # ███   ███  ███   ███  ███   ███  ███ █ ███
-    # ███   ███  ███████    █████████  █████████
-    # ███   ███  ███   ███  ███   ███  ███   ███
-    # ███████    ███   ███  ███   ███  ██     ██
 
     draw: =>
 
@@ -107,12 +88,6 @@ function browse extends quicky
                 @choices.cells.fill_row     y choice.tilde.length x-1 ' ' bg cc
                 @choices.cells.set          x y '' cc bg 
         
-    #  ███████    ███████   █████████   ███████   ███████    ███  ████████   
-    # ███        ███   ███     ███     ███   ███  ███   ███  ███  ███   ███  
-    # ███  ████  ███   ███     ███     ███   ███  ███   ███  ███  ███████    
-    # ███   ███  ███   ███     ███     ███   ███  ███   ███  ███  ███   ███  
-    #  ███████    ███████      ███      ███████   ███████    ███  ███   ███  
-    
     gotoDir: dir select ○=>
         
         dir = process.cwd() if empty dir
@@ -131,12 +106,6 @@ function browse extends quicky
                
         @showPathItems items select
             
-    # ████████  ███  ███      ████████       ███████   ████████       ███████    ███  ████████   
-    # ███       ███  ███      ███           ███   ███  ███   ███      ███   ███  ███  ███   ███  
-    # ██████    ███  ███      ███████       ███   ███  ███████        ███   ███  ███  ███████    
-    # ███       ███  ███      ███           ███   ███  ███   ███      ███   ███  ███  ███   ███  
-    # ███       ███  ███████  ████████       ███████   ███   ███      ███████    ███  ███   ███  
-    
     gotoDirOrOpenFile: path ○=>
         
         isDir =○ nfs.dirExists path
@@ -148,12 +117,6 @@ function browse extends quicky
             if isFile
                 @openFileInEditor path
                                     
-    # ████████   ████████   ████████  ███   ███  ███  ████████  ███   ███  
-    # ███   ███  ███   ███  ███       ███   ███  ███  ███       ███ █ ███  
-    # ████████   ███████    ███████    ███ ███   ███  ███████   █████████  
-    # ███        ███   ███  ███          ███     ███  ███       ███   ███  
-    # ███        ███   ███  ████████      █      ███  ████████  ██     ██  
-        
     preview: item ○=>
         
         ⮐  @hideMap() if empty item?.path
@@ -188,12 +151,6 @@ function browse extends quicky
         @arrange()    
         post.emit 'redraw'
             
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
-    
     onMouse: event =>
 
         ⮐  if @hidden()
@@ -206,12 +163,6 @@ function browse extends quicky
         ret = @brocol.onWheel event ; ⮐  ret if ret?.redraw
         super event
                 
-    #  ███████   ████████   ████████   ███      ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███       ███ ███   
-    # █████████  ████████   ████████   ███        █████    
-    # ███   ███  ███        ███        ███         ███     
-    # ███   ███  ███        ███        ███████     ███     
-    
     applyChoice: choice =>
         
         switch @input.current()
@@ -235,12 +186,6 @@ function browse extends quicky
         
         @preview @choices.current()
         
-    #  ███████    ███████  █████████  ███   ███████   ███   ███  
-    # ███   ███  ███          ███     ███  ███   ███  ████  ███  
-    # █████████  ███          ███     ███  ███   ███  ███ █ ███  
-    # ███   ███  ███          ███     ███  ███   ███  ███  ████  
-    # ███   ███   ███████     ███     ███   ███████   ███   ███  
-    
     onBrocolAction: action choice =>
         
         switch action

@@ -1,20 +1,12 @@
-###
-     ███████  ████████   ███   ███  ██     ██  ███████     ███████  
-    ███       ███   ███  ███   ███  ███   ███  ███   ███  ███       
-    ███       ███████    ███   ███  █████████  ███████    ███████   
-    ███       ███   ███  ███   ███  ███ █ ███  ███   ███       ███  
-     ███████  ███   ███   ███████   ███   ███  ███████    ███████   
-
-    clickable sequence of path segments with half-circles inbetween 
-    used in the status, dircol, browse and searcher file headings
-###
 
 use ../../../kxk ▪ slash post
 use ../../theme  ◆ color theme
 use              ◆ view
-
-function crumbs extends view
-
+■crumbs extends view
+###
+    clickable sequence of path segments with half-circles inbetween 
+    used in the status, dircol, browse and searcher file headings
+###
     @: screen name ->
 
         super screen name
@@ -42,12 +34,6 @@ function crumbs extends view
         
         @adjustText()
         
-    # ███████    ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  
-    # ███   ███  ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███   ███  ███   ███  ██     ██  
-    
     draw: ->
         
         ⮐  if @hidden()
@@ -81,12 +67,6 @@ function crumbs extends view
                 
                 @cells.set x 0 ch fg bg 
                 
-    #  ███████  ████████   ███      ███  █████████  ███  ███   ███  ███████    ████████  ███   ███  
-    # ███       ███   ███  ███      ███     ███     ███  ████  ███  ███   ███  ███        ███ ███   
-    # ███████   ████████   ███      ███     ███     ███  ███ █ ███  ███   ███  ███████     █████    
-    #      ███  ███        ███      ███     ███     ███  ███  ████  ███   ███  ███        ███ ███   
-    # ███████   ███        ███████  ███     ███     ███  ███   ███  ███████    ████████  ███   ███  
-    
     splitIndexAtCol: col ->
 
         sl = 0
@@ -114,12 +94,6 @@ function crumbs extends view
         path = '/' + path if not path[0] in '~/'
         path
         
-    #  ███████   ███████          ███  ███   ███   ███████  █████████  
-    # ███   ███  ███   ███        ███  ███   ███  ███          ███     
-    # █████████  ███   ███        ███  ███   ███  ███████      ███     
-    # ███   ███  ███   ███  ███   ███  ███   ███       ███     ███     
-    # ███   ███  ███████     ███████    ███████   ███████      ███     
-    
     adjustText: ->
         
         ⮐  if @hidden()
@@ -158,12 +132,6 @@ function crumbs extends view
     show: path => @set slash.tilde(path)
     visible: -> @cells.rows > 0 
         
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
-
     onMouseLeave: event =>
      
         index = @hoverIndex

@@ -1,16 +1,7 @@
-###
-     ███████   ███████   ███   ███  ████████   ███████    ███████  
-    ███       ███   ███  ███   ███  ███       ███   ███  ███       
-    ███████   █████████   ███ ███   ███████   █████████  ███████   
-         ███  ███   ███     ███     ███       ███   ███       ███  
-    ███████   ███   ███      █      ████████  ███   ███  ███████   
-###
 
 use ../../../kxk ▪ slash post
 use              ◆ browse
-
-function saveas extends browse
-
+■saveas extends browse
     @: @screen @name='saveas' ->
         
         @autoHideInput = false

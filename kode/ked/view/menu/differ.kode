@@ -1,12 +1,3 @@
-###
-    ███████    ███  ████████  ████████  ████████  ████████   
-    ███   ███  ███  ███       ███       ███       ███   ███  
-    ███   ███  ███  ██████    ██████    ███████   ███████    
-    ███   ███  ███  ███       ███       ███       ███   ███  
-    ███████    ███  ███       ███       ████████  ███   ███  
-
-    displays git status, history and diffs
-###
 
 use ../../../kxk    ▪ post kseg slash nfs
 use ../../edit/tool ◆ belt
@@ -14,9 +5,9 @@ use ../../index     ◆ prjcts
 use ../../util      ◆ git fileutil
 use ../base         ◆ view
 use                 ◆ searcher searcherfile
-
-function differ extends searcher
-
+■differ extends searcher
+    # displays git status, history and diffs
+    
     @: @screen @editor ->
     
         super @screen @editor 'differ'
@@ -45,12 +36,6 @@ function differ extends searcher
                 
     onFileLoaded: file =>
     
-    #  ███████  ███   ███   ███████   ███   ███  
-    # ███       ███   ███  ███   ███  ███ █ ███  
-    # ███████   █████████  ███   ███  █████████  
-    #      ███  ███   ███  ███   ███  ███   ███  
-    # ███████   ███   ███   ███████   ██     ██  
-    
     show: =>
         
         view.prototype.show.call @
@@ -60,12 +45,6 @@ function differ extends searcher
         @sfils = []
         redraw:true
                 
-    # ███████    ███  ████████  ████████
-    # ███   ███  ███  ███       ███     
-    # ███   ███  ███  ██████    ██████  
-    # ███   ███  ███  ███       ███     
-    # ███████    ███  ███       ███     
-
     diff: diff =>
     
         file = diff.file
@@ -108,12 +87,6 @@ function differ extends searcher
         @input.grabFocus()
         post.emit 'redraw'
 
-    # ████████  ███  ███      ████████
-    # ███       ███  ███      ███     
-    # ██████    ███  ███      ███████ 
-    # ███       ███  ███      ███     
-    # ███       ███  ███████  ████████
-
     file: ○=>
     
         currentFile = ked_session.get 'editor▸file'
@@ -123,12 +96,6 @@ function differ extends searcher
             @show()
             @diff diff
             
-    #  ███████  █████████   ███████   █████████  ███   ███   ███████
-    # ███          ███     ███   ███     ███     ███   ███  ███     
-    # ███████      ███     █████████     ███     ███   ███  ███████ 
-    #      ███     ███     ███   ███     ███     ███   ███       ███
-    # ███████      ███     ███   ███     ███      ███████   ███████ 
-
     status: ○=> 
     
         currentFile = ked_session.get 'editor▸file'
@@ -207,12 +174,6 @@ function differ extends searcher
                 
                 @diff diff if valid diff
 
-    #  ███████   ███████   ██     ██  ██     ██  ███  █████████
-    # ███       ███   ███  ███   ███  ███   ███  ███     ███   
-    # ███       ███   ███  █████████  █████████  ███     ███   
-    # ███       ███   ███  ███ █ ███  ███ █ ███  ███     ███   
-    #  ███████   ███████   ███   ███  ███   ███  ███     ███   
-
     commit: msg ○=>
     
         currentFile = ked_session.get 'editor▸file'
@@ -232,12 +193,6 @@ function differ extends searcher
         post.emit 'git.commit'
         post.emit 'redraw'
                         
-    # ███   ███  ███   ███████  █████████   ███████   ████████   ███   ███
-    # ███   ███  ███  ███          ███     ███   ███  ███   ███   ███ ███ 
-    # █████████  ███  ███████      ███     ███   ███  ███████      █████  
-    # ███   ███  ███       ███     ███     ███   ███  ███   ███     ███   
-    # ███   ███  ███  ███████      ███      ███████   ███   ███     ███   
-
     history: ○=>
         
         history =○ git.history()
@@ -272,12 +227,6 @@ function differ extends searcher
         @choices.append items
         post.emit 'redraw'
         
-    # ████████    ███████   █████████   ███████  ███   ███
-    # ███   ███  ███   ███     ███     ███       ███   ███
-    # ████████   █████████     ███     ███       █████████
-    # ███        ███   ███     ███     ███       ███   ███
-    # ███        ███   ███     ███      ███████  ███   ███
-
     patch: rev ○=>
     
         patch =○ git.patch rev
@@ -311,25 +260,12 @@ function differ extends searcher
         @choices.set items 'line'
         post.emit 'redraw'
     
-    # ████████  ██     ██  ███  █████████        ████████  ███  ███      ████████         ███████   ████████   ████████  ███   ███
-    # ███       ███   ███  ███     ███           ███       ███  ███      ███             ███   ███  ███   ███  ███       ████  ███
-    # ███████   █████████  ███     ███           ██████    ███  ███      ███████         ███   ███  ████████   ███████   ███ █ ███
-    # ███       ███ █ ███  ███     ███           ███       ███  ███      ███             ███   ███  ███        ███       ███  ████
-    # ████████  ███   ███  ███     ███           ███       ███  ███████  ████████         ███████   ███        ████████  ███   ███
-
-
     emitFileOpen: choice ->
     
         post.emit 'file.open' choice.path choice.row choice.col
         
         @hide()
     
-    #  ███████   ████████   ████████   ███      ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███       ███ ███   
-    # █████████  ████████   ████████   ███        █████    
-    # ███   ███  ███        ███        ███         ███     
-    # ███   ███  ███        ███        ███████     ███     
-        
     apply: choice ->
     
         if valid choice
@@ -341,12 +277,6 @@ function differ extends searcher
         
         super choice
                                             
-    # ███  ███   ███  ████████   ███   ███  █████████       ███████    ███████  █████████  ███   ███████   ███   ███
-    # ███  ████  ███  ███   ███  ███   ███     ███         ███   ███  ███          ███     ███  ███   ███  ████  ███
-    # ███  ███ █ ███  ████████   ███   ███     ███         █████████  ███          ███     ███  ███   ███  ███ █ ███
-    # ███  ███  ████  ███        ███   ███     ███         ███   ███  ███          ███     ███  ███   ███  ███  ████
-    # ███  ███   ███  ███         ███████      ███         ███   ███   ███████     ███     ███   ███████   ███   ███
-
     onInputAction: action text ->
     
         switch action

@@ -1,23 +1,13 @@
-###
-    ███   ███  ███   ███  ███  ███  ███   ███████
-    ███   ███  ████  ███  ███  ███ ███   ███   ███
-    ███   ███  ███ █ ███  ███  █████     ███   ███
-    ███   ███  ███  ████  ███  ███ ███   ███   ███
-     ███████   ███   ███  ███  ███  ███   ███████
 
-    a unicode character picker
-###
-
-use ../../../kxk ▪ kseg post
-use ../../../kxk ◆ clip
+use ../../../kxk ◆ clip kseg post
 use ../../theme  ◆ theme
 use ../../edit   ◆ specs
 use ../base      ◆ view input matrix
 
 import julia from '../../util/julia.json' with { type: "json" }
-
-function uniko extends view
-
+■uniko extends view
+    # a unicode character picker
+    
     @: @screen @editor @name ->
 
         super @screen @name

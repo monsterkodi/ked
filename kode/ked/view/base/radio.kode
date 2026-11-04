@@ -1,16 +1,7 @@
-###
-    ████████    ███████   ███████    ███   ███████ 
-    ███   ███  ███   ███  ███   ███  ███  ███   ███
-    ███████    █████████  ███   ███  ███  ███   ███
-    ███   ███  ███   ███  ███   ███  ███  ███   ███
-    ███   ███  ███   ███  ███████    ███   ███████ 
-###
 
 use ../../theme ◆ color theme
 use             ◆ view
-
-function radio extends view
-
+■radio extends view
     @: screen name ->
 
         super screen name

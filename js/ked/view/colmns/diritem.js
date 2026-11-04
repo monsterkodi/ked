@@ -13,7 +13,7 @@ diritem = (function ()
 
     diritem["symbol"] = function (item)
     {
-        var _24_51_
+        var _9_51_
 
         switch (item.type)
         {
@@ -21,7 +21,7 @@ diritem = (function ()
                 return (item.open ? icons.dir_open : icons.dir_close)
 
             default:
-                return ((_24_51_=icons[slash.ext(item.path)]) != null ? _24_51_ : icons.file)
+                return ((_9_51_=icons[slash.ext(item.path)]) != null ? _9_51_ : icons.file)
         }
 
     }
@@ -66,5 +66,5 @@ diritem = (function ()
 
 export default diritem;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGlyaXRlbS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy9jb2xtbnMvZGlyaXRlbS5rb2RlIl0sIm1hcHBpbmdzIjoiOztPQVFtQixZQUFUOztPQUNHLFVBQUE7SUFBTTs7O0FBRVYsV0FBVDs7Ozs7SUFRSSxTQUFDLHFCQUFROzs7O2dCQUVFLEtBQUs7O2lCQUNSO3dCQUFXLEtBQUssT0FBTyxNQUFNLFdBQVcsTUFBTTs7O2lDQUNuQyxNQUFNLE1BQU0sSUFBSSxLQUFLLDRCQUFTLE1BQU07Ozs7O0lBRXZELFNBQUMseUJBQVk7Ozs7Z0JBRUYsTUFBTSxJQUFJLEtBQUs7O2lCQUNsQjtpQkFDQTtpQkFDQTtpQkFDQTtpQkFDQTtpQkFDQTtpQkFDQTtpQkFDQTtpQkFDQTtpQkFDQTtpQkFDQTtpQkFDQTtnQkFDSSxPQUFPLE1BQU0sS0FBSyxLQUFLOzs7Z0JBRXZCLE9BQU8sTUFBTSxLQUFLLEtBQUs7OztZQUVmLEtBQUs7O1lBQXJCLFFBQVE7O1lBQ1EsS0FBSzs7WUFBckIsUUFBUTs7ZUFHUixLQUFDLE9BQU8sUUFBUSxXQUFXOzs7V0FyQzFCOzs7ZUF1Q0YifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGlyaXRlbS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy9jb2xtbnMvZGlyaXRlbS5rb2RlIl0sIm1hcHBpbmdzIjoiOztPQUNtQixZQUFUOztPQUNHLFVBQUE7SUFBTTs7O0FBQ2xCLFdBQUQ7Ozs7O0lBQ0ksU0FBQyxxQkFBUTs7OztnQkFFRSxLQUFLOztpQkFDUjt3QkFBVyxLQUFLLE9BQU8sTUFBTSxXQUFXLE1BQU07OztnQ0FDbkMsTUFBTSxNQUFNLElBQUksS0FBSywyQkFBUyxNQUFNOzs7OztJQUV2RCxTQUFDLHlCQUFZOzs7O2dCQUVGLE1BQU0sSUFBSSxLQUFLOztpQkFDbEI7aUJBQ0E7aUJBQ0E7aUJBQ0E7aUJBQ0E7aUJBQ0E7aUJBQ0E7aUJBQ0E7aUJBQ0E7aUJBQ0E7aUJBQ0E7aUJBQ0E7Z0JBQ0ksT0FBTyxNQUFNLEtBQUssS0FBSzs7O2dCQUV2QixPQUFPLE1BQU0sS0FBSyxLQUFLOzs7WUFFZixLQUFLOztZQUFyQixRQUFROztZQUNRLEtBQUs7O1lBQXJCLFFBQVE7O2VBR1IsS0FBQyxPQUFPLFFBQVEsV0FBVzs7O1dBOUJsQzs7O2VBZ0NNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/diritem.kode

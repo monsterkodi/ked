@@ -1,19 +1,10 @@
-###
-     ███████  ████████   ███████   ████████    ███████  ███   ███  ████████  ████████   ████████  ███  ███      ████████  
-    ███       ███       ███   ███  ███   ███  ███       ███   ███  ███       ███   ███  ███       ███  ███      ███       
-    ███████   ███████   █████████  ███████    ███       █████████  ███████   ███████    ██████    ███  ███      ███████   
-         ███  ███       ███   ███  ███   ███  ███       ███   ███  ███       ███   ███  ███       ███  ███      ███       
-    ███████   ████████  ███   ███  ███   ███   ███████  ███   ███  ████████  ███   ███  ███       ███  ███████  ████████  
-
-    clickable file headings used by searcher
-###
 
 use ../../../kxk ▪ slash kseg
 use ../../theme  ◆ theme
 use ../base      ◆ view crumbs bubble
-
-function searcherfile extends view
-
+■searcherfile extends view
+    # clickable file headings used by searcher
+    
     @: @screen @name ->
 
         super @screen @name
@@ -30,12 +21,6 @@ function searcherfile extends view
         @crumbs.dotlessRelative = true
         @crumbs.on 'action'  @onCrumbsAction
 
-    #  ███████  ████████  █████████
-    # ███       ███          ███   
-    # ███████   ███████      ███   
-    #      ███  ███          ███   
-    # ███████   ████████     ███   
-
     set: file ->
         
         @crumbs.set slash.dir(file)
@@ -44,12 +29,6 @@ function searcherfile extends view
         
         @bubble.set tilde:name path:file segls:kseg.segls('/'+name)
         
-    # ███       ███████   ███   ███   ███████   ███   ███  █████████
-    # ███      ███   ███   ███ ███   ███   ███  ███   ███     ███   
-    # ███      █████████    █████    ███   ███  ███   ███     ███   
-    # ███      ███   ███     ███     ███   ███  ███   ███     ███   
-    # ███████  ███   ███     ███      ███████    ███████      ███   
-
     layout: x y w h ->
     
         cw = @crumbs.rounded.length
@@ -64,12 +43,6 @@ function searcherfile extends view
             
         @cells.layout  x    y w  1
         
-    # ███████    ████████    ███████   ███   ███
-    # ███   ███  ███   ███  ███   ███  ███ █ ███
-    # ███   ███  ███████    █████████  █████████
-    # ███   ███  ███   ███  ███   ███  ███   ███
-    # ███████    ███   ███  ███   ███  ██     ██
-
     draw: ->
 
         ⮐  if @hidden()
@@ -86,12 +59,6 @@ function searcherfile extends view
             xe = @cells.x + @cells.cols
             @cells.fill_row 0 xs xe '─' @color.frame @color.bg
             
-    # ██     ██   ███████   ███   ███   ███████  ████████
-    # ███   ███  ███   ███  ███   ███  ███       ███     
-    # █████████  ███   ███  ███   ███  ███████   ███████ 
-    # ███ █ ███  ███   ███  ███   ███       ███  ███     
-    # ███   ███   ███████    ███████   ███████   ████████
-
     onMouse: event =>
 
         ⮐  if @hidden()
@@ -101,12 +68,6 @@ function searcherfile extends view
         
         super event
                 
-    #  ███████  ████████   ███   ███  ██     ██  ███████     ███████      ███████    ███████  █████████  ███   ███████   ███   ███
-    # ███       ███   ███  ███   ███  ███   ███  ███   ███  ███          ███   ███  ███          ███     ███  ███   ███  ████  ███
-    # ███       ███████    ███   ███  █████████  ███████    ███████      █████████  ███          ███     ███  ███   ███  ███ █ ███
-    # ███       ███   ███  ███   ███  ███ █ ███  ███   ███       ███     ███   ███  ███          ███     ███  ███   ███  ███  ████
-    #  ███████  ███   ███   ███████   ███   ███  ███████    ███████      ███   ███   ███████     ███     ███   ███████   ███   ███
-
     onCrumbsAction: action path =>
         
         log "onCrumbsAction #{action} #{path}" 

@@ -29,12 +29,6 @@ use ../screen    ◆ cells
                                 
     setColor: key clr => @color[key] = color.values(clr)
         
-    # ███   ███  ███   ███████  ███  ███████    ███  ███      ███  █████████  ███   ███  
-    # ███   ███  ███  ███       ███  ███   ███  ███  ███      ███     ███      ███ ███   
-    #  ███ ███   ███  ███████   ███  ███████    ███  ███      ███     ███       █████    
-    #    ███     ███       ███  ███  ███   ███  ███  ███      ███     ███        ███     
-    #     █      ███  ███████   ███  ███████    ███  ███████  ███     ███        ███     
-  
     show: -> 
     
         @isVisible = true
@@ -71,12 +65,6 @@ use ../screen    ◆ cells
     collapsed: -> @cells.rows <= 0 or @cells.cols <= 0
     
     eventPos: event -> @cells.posForEvent event
-    
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
     
     onMouse: event => @handleHover event
     onWheel: event => #log "view.onWheel #{@name}"
@@ -123,12 +111,6 @@ use ../screen    ◆ cells
         
     onKey: key event => log "view.onKey #{@name}"
         
-    # ███████    ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  
-    # ███   ███  ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███   ███  ███   ███  ██     ██  
-    
     layout: x y w h -> @cells.layout x y w h 
     
     erase: => @cells.erase_scaled 0 0 -1 -1

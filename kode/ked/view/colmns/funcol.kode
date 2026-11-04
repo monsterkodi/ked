@@ -4,9 +4,7 @@ use ../../theme     ◆ color theme
 use ../../edit/tool ◆ belt
 use ../base         ◆ view knob
 use                 ◆ funtree colorpicker uniko
-
 ■funcol extends view
-
     @: screen @editor features ->
         
         super screen 'funcol' features
@@ -70,12 +68,6 @@ use                 ◆ funtree colorpicker uniko
         ked_session.set 'funcol▸active' @active
         post.emit 'redraw'
         
-    # ███       ███████   ███   ███   ███████   ███   ███  █████████
-    # ███      ███   ███   ███ ███   ███   ███  ███   ███     ███   
-    # ███      █████████    █████    ███   ███  ███   ███     ███   
-    # ███      ███   ███     ███     ███   ███  ███   ███     ███   
-    # ███████  ███   ███     ███      ███████    ███████      ███   
-
     layout: x y w h ->
         
         ph = @colorpicker.visible() ? min(@colorpicker.height h-1) : 0
@@ -91,12 +83,6 @@ use                 ◆ funtree colorpicker uniko
                 
         super x y w h
         
-    # ███████    ████████    ███████   ███   ███
-    # ███   ███  ███   ███  ███   ███  ███ █ ███
-    # ███   ███  ███████    █████████  █████████
-    # ███   ███  ███   ███  ███   ███  ███   ███
-    # ███████    ███   ███  ███   ███  ██     ██
-
     draw: ->
         
         ⮐ if @hidden() or @collapsed() or not @active
@@ -111,24 +97,12 @@ use                 ◆ funtree colorpicker uniko
     
         super()
         
-    #  ███████   ███████   ███   ███  █████████  ████████  ███   ███  █████████
-    # ███       ███   ███  ████  ███     ███     ███        ███ ███      ███   
-    # ███       ███   ███  ███ █ ███     ███     ███████     █████       ███   
-    # ███       ███   ███  ███  ████     ███     ███        ███ ███      ███   
-    #  ███████   ███████   ███   ███     ███     ████████  ███   ███     ███   
-
     onContext: event =>
     
         ⮐ if not @hover
     
         log "funcol.onContext: #{@hover}" event
         
-    # █████████   ███████    ███████    ███████   ███      ████████
-    #    ███     ███   ███  ███        ███        ███      ███     
-    #    ███     ███   ███  ███  ████  ███  ████  ███      ███████ 
-    #    ███     ███   ███  ███   ███  ███   ███  ███      ███     
-    #    ███      ███████    ███████    ███████   ███████  ████████
-    
     onFuncolResize: => @knob.doDrag = true
     onFuncolToggle: => 
     
@@ -138,12 +112,6 @@ use                 ◆ funtree colorpicker uniko
         cols = max 16 int(@cells.screen.cols / 6)
         post.emit 'view.size' @name 'left' (@hidden() ? -@cells.cols : cols-@cells.cols)
         
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
-  
     onMouse: event =>
     
         ⮐ if @hidden() or @collapsed() or not @active
@@ -154,12 +122,6 @@ use                 ◆ funtree colorpicker uniko
         ret = @colorpicker.onMouse event ; ⮐ ret if ret?.redraw
         ret = @funtree.onMouse event     ; ⮐ ret if ret?.redraw
         
-    # ███   ███  ███   ███  ████████  ████████  ███      
-    # ███ █ ███  ███   ███  ███       ███       ███      
-    # █████████  █████████  ███████   ███████   ███      
-    # ███   ███  ███   ███  ███       ███       ███      
-    # ██     ██  ███   ███  ████████  ████████  ███████  
-    
     onWheel: event =>
         
         ⮐ if @hidden() or @collapsed() or not @active
@@ -174,12 +136,6 @@ use                 ◆ funtree colorpicker uniko
 
         @funtree.onWheel event
         
-    # ███   ███  ████████  ███   ███  
-    # ███  ███   ███        ███ ███   
-    # ███████    ███████     █████    
-    # ███  ███   ███          ███     
-    # ███   ███  ████████     ███     
-    
     onKey: key event =>
         
         ⮐ if @hidden() or @collapsed() or not @active

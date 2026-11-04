@@ -1,19 +1,10 @@
-###
-    ███   ███  ███  ███   ███  ███████    ████████  ████████   
-    ███   ███  ███  ████  ███  ███   ███  ███       ███   ███  
-     ███ ███   ███  ███ █ ███  ███   ███  ███████   ███████    
-       ███     ███  ███  ████  ███   ███  ███       ███   ███  
-        █      ███  ███   ███  ███████    ████████  ███   ███  
-
-    incremental search input for the novim mode
-###
 
 use ../../../kxk    ▪ post
 use ../../theme     ◆ theme
 use ../base         ◆ view input
-
-function vinder extends view
-
+■vinder extends view
+    # incremental search input for the novim mode
+    
     @: @screen @editor @name='vinder' ->
     
         @state        = @editor.state

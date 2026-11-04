@@ -1,20 +1,12 @@
-###
-    █████████  ███  █████████  ███      ████████  ███   ███   ███████   ███   ███  ███  ██     ██  
-       ███     ███     ███     ███      ███       ████  ███  ███   ███  ███   ███  ███  ███   ███  
-       ███     ███     ███     ███      ███████   ███ █ ███  ███   ███   ███ ███   ███  █████████  
-       ███     ███     ███     ███      ███       ███  ████  ███   ███     ███     ███  ███ █ ███  
-       ███     ███     ███     ███████  ████████  ███   ███   ███████       █      ███  ███   ███  
-
-    used by title to display the novim status
-###
 
 use ../../../kxk ▪ slash post
 use ../../theme  ◆ color theme 
 use ../../edit   ◆ mode
 use ../base      ◆ view
 
-function titlenovim extends view
-
+■titlenovim extends view
+    # used by title to display the novim status
+    
     @: screen name ->
         
         super screen name
@@ -62,12 +54,6 @@ function titlenovim extends view
         @setColor 'fg' theme.novim.error.fg
         @novimText = err
 
-    # ███████    ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  
-    # ███   ███  ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███   ███  ███   ███  ██     ██  
-    
     draw: x w -> 
         
         ⮐ if @hidden()

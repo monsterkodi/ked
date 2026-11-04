@@ -1,12 +1,3 @@
-###
-    ██     ██  ████████  ███   ███  ███   ███  
-    ███   ███  ███       ████  ███  ███   ███  
-    █████████  ███████   ███ █ ███  ███   ███  
-    ███ █ ███  ███       ███  ████  ███   ███  
-    ███   ███  ████████  ███   ███   ███████   
-
-    simple list of actions with optional greet
-###
 
 use ../../../kxk    ▪ kstr slash post noon
 use ../../util      ◆ frecent
@@ -15,20 +6,15 @@ use ../../theme     ◆ theme
 use ../screen       ◆ cells 
 use                 ◆ greet inputchoice
 
-function menu extends inputchoice
-
+■menu extends inputchoice
+    # simple list of actions with optional greet
+    
     @: @screen @name='menu' ->
         
         super @screen @name
         
         @greet = new greet @screen
         
-    #  ███████   ████████   ████████    ███████   ███   ███   ███████   ████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  ████  ███  ███        ███       
-    # █████████  ███████    ███████    █████████  ███ █ ███  ███  ████  ███████   
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███  ████  ███   ███  ███       
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███   ███   ███████   ████████  
-    
     arrange: =>
 
         w = @width+2+1 # 2 for frame, 1 for right 
@@ -67,12 +53,6 @@ function menu extends inputchoice
         @choices.layout  x+1   y+1+ih   w-2  c
         @cells.layout    x     y        w    h
 
-    #  ███████  ███   ███   ███████   ███   ███
-    # ███       ███   ███  ███   ███  ███ █ ███
-    # ███████   █████████  ███   ███  █████████
-    #      ███  ███   ███  ███   ███  ███   ███
-    # ███████   ███   ███   ███████   ██     ██
-
     show: greet=false ->
         
         if greet
@@ -105,12 +85,6 @@ function menu extends inputchoice
         
         super()
         
-    # ████████   ████████   ███████  ████████  ███   ███  █████████  
-    # ███   ███  ███       ███       ███       ████  ███     ███     
-    # ███████    ███████   ███       ███████   ███ █ ███     ███     
-    # ███   ███  ███       ███       ███       ███  ████     ███     
-    # ███   ███  ████████   ███████  ████████  ███   ███     ███     
-    
     showRecent: ->
                 
         recent = frecent.list 'file'
@@ -137,12 +111,6 @@ function menu extends inputchoice
         @hide()
         post.emit 'file.new'       
     
-    #  ███████   ████████   ████████   ███      ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███       ███ ███   
-    # █████████  ████████   ████████   ███        █████    
-    # ███   ███  ███        ███        ███         ███     
-    # ███   ███  ███        ███        ███████     ███     
-    
     applyChoice: choice ->
         
         # log "applyChoice ▸#{choice}◂"
@@ -159,12 +127,6 @@ function menu extends inputchoice
         
     onWheel: ->
                             
-    # ███████    ████████    ███████   ███   ███
-    # ███   ███  ███   ███  ███   ███  ███ █ ███
-    # ███   ███  ███████    █████████  █████████
-    # ███   ███  ███   ███  ███   ███  ███   ███
-    # ███████    ███   ███  ███   ███  ██     ██
-
     draw: ->
 
         ⮐  if @hidden()

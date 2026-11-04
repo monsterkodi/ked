@@ -1,13 +1,3 @@
-###
-    █████████  ███  █████████  ███      ████████  
-       ███     ███     ███     ███      ███       
-       ███     ███     ███     ███      ███████   
-       ███     ███     ███     ███      ███       
-       ███     ███     ███     ███████  ████████  
-
-    the row above the fileeditor
-    displays currently edited file and editor state information 
-###
 
 use ../../../kxk    ▪ post slash kstr kseg nfs
 use ../../edit/tool ◆ belt
@@ -16,9 +6,7 @@ use ../../edit      ◆ mode
 use ../../theme     ◆ color theme
 use ../base         ◆ view crumbs bubble 
 use                 ◆ titlefile titlenovim
-
-function fileposSyntax
-
+■fileposSyntax
     @: ->
     
         @color = {}
@@ -31,8 +19,11 @@ function fileposSyntax
             '' ➜ @color.symbol
                 ➜ @color.number
 
-function title extends view
-
+■title extends view
+###
+    the row above the fileeditor
+    displays currently edited file and editor state information 
+###
     @: @screen @editor ->
         
         super @screen 'title'
@@ -127,12 +118,6 @@ function title extends view
         switch action
             'click' ➜ post.emit 'browse.dir' slash.dir(file) file
             
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
-    
     onMouse: event =>
 
         cret = @crumbs    .onMouse event
@@ -162,24 +147,12 @@ function title extends view
                     
         @hover
         
-    #  ███████  ████████  █████████        ████████  ███  ███      ████████  
-    # ███       ███          ███           ███       ███  ███      ███       
-    # ███████   ███████      ███           ██████    ███  ███      ███████   
-    #      ███  ███          ███           ███       ███  ███      ███       
-    # ███████   ████████     ███           ███       ███  ███████  ████████  
-    
     setFile: @file => 
         
         ⮐  if empty @file
         @crumbs.set slash.dir(@file)
         @titlefile.set @file
         
-    # ███       ███████   ███   ███   ███████   ███   ███  █████████
-    # ███      ███   ███   ███ ███   ███   ███  ███   ███     ███   
-    # ███      █████████    █████    ███   ███  ███   ███     ███   
-    # ███      ███   ███     ███     ███   ███  ███   ███     ███   
-    # ███████  ███   ███     ███      ███████    ███████      ███   
-
     layout: x y w h =>
         
         super x y w h
@@ -203,12 +176,6 @@ function title extends view
         x += 12
         @titlenovim.layout x y w-x 1
                 
-    # ███████    ████████    ███████   ███   ███  
-    # ███   ███  ███   ███  ███   ███  ███ █ ███  
-    # ███   ███  ███████    █████████  █████████  
-    # ███   ███  ███   ███  ███   ███  ███   ███  
-    # ███████    ███   ███  ███   ███  ██     ██  
-    
     draw: =>
         
         ⮐  if @hidden() or empty @file
