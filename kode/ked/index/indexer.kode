@@ -1,7 +1,7 @@
 
 use ../../kxk ▪ pickBy pullIf deleteBy kstr sds matchr slash post nfs
 use ../util   ◆ fileutil
-use           ◆ prjcts index_utils index_kode index_noon index_json index_styl index_js index_hpp index_mm index_nim index_kim index_lua index_kua
+use           ◆ prjcts index_utils index_kode index_noon index_json index_styl index_js index_hpp index_mm index_md index_nim index_kim index_lua index_kua
 
 ■indexer
     
@@ -168,6 +168,7 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
             isHpp or isCpp    ➜ ⮐  @applyIndexer file fileInfo text index_hpp
             isJS              ➜ ⮐  @applyIndexer file fileInfo text index_js
             fileExt == 'mm'   ➜ ⮐  @applyIndexer file fileInfo text index_mm
+            fileExt == 'md'   ➜ ⮐  @applyIndexer file fileInfo text index_md
             fileExt == 'styl' ➜ ⮐  @applyIndexer file fileInfo text index_styl
             fileExt == 'kode' ➜ ⮐  @applyIndexer file fileInfo text index_kode
             fileExt == 'noon' ➜ ⮐  @applyIndexer file fileInfo text index_noon

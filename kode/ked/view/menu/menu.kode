@@ -132,6 +132,7 @@ use                 ◆ greet inputchoice
         ⮐  if @hidden()
         
         @arrange()
+        @erase()
         @greet.draw()
         @drawFrame()
         @drawChoices()

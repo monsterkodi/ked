@@ -1,0 +1,24 @@
+
+use ../../kxk ▪ kstr
+■index_md
+    parseLine: index line ->
+        
+        ⮐ if empty line
+        # ⮐ if line[0] in [' ' '\t'] # only top level lines
+        if line[0] == '#' # headings
+            m = line.match /^(\#+)(.+)/
+            if m?[0]?
+                @result.funcs.push name:m[2] line:index md:"h#{m[1].length}"
+
+    parse: text ->
+        
+        lines = kstr.lines text
+
+        @result = classes:[] funcs:[] lines:lines.length
+        
+        for line,index in lines
+            @parseLine index line
+
+        @result
+
+export index_md

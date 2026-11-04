@@ -196,7 +196,7 @@ test 'something' ->
 on 'event' @myCallback
 ```
 
-#### function calls without parens
+####calls without parens
 
 ```kode
 f a b     ▸ f(a, b)
@@ -209,38 +209,28 @@ f(a(b))   ▸ f(a(b))
 
 only in top-level function calls can the parens be omitted. 
 
-#### what a call without parens takes
-
-The arguments are expressions, and expressions separated by spaces are the
-arguments. An operator inside an expression belongs to the expression, so
-it does not end the argument list:
+An operator inside an argument list does not end the argument list:
 
 ```kode
 f a b         ▸ f(a, b)
 f a and b     ▸ f(a && b)
-f a, b and c  ▸ f(a, b && c)
+f a b and c   ▸ f(a, b && c)
 ```
-
-A call that wants two arguments needs the parens or the comma. Without
-them the second one is part of the first:
 
 ```kode
 f('op') and b != 'op='   ▸ f('op') && b !== 'op='
 ```
+####operators
 
-#### the operators in front of a value
-
-These are not calls. They take one operand, and the operand is an
-expression, so an operator after it stays outside - the other way round
-from a call:
+Operators - unlike calls - take only one argument:
 
 ```kode
-not a and b   ▸ !a && b
+not a and not b     ▸ !a && !b
+empty x and valid y ▸ empty(x) && valid(y)
 ```
 
-They are `not`, `delete`, `new`, `noon`, `copy`, `clone`, `empty`,
-`valid`, `first` and `last`.
-
+They are `not` `delete` `new` `noon` `copy` `clone` `empty`
+`valid` `first` and `last`.
 
 #misc
 
@@ -313,7 +303,7 @@ Only plain Objects, Arrays and Strings are compared.
 `is` is a shortcut for `typeof` and `instanceof`. 
 The first is used, when the right hand side is a string.
 
-#### is num 
+####is num 
 
 ```kode
 "0xFF" is num and "-4.536" is num and 42 is num                     ▸  true
@@ -321,7 +311,7 @@ The first is used, when the right hand side is a string.
 
 `is num` does a string coercion via `parseFloat` in the test.
 
-#### is str
+####is str
 
 ```kode
 '' is str and "a" is str and new String("abc") is str               ▸  true
@@ -329,7 +319,7 @@ The first is used, when the right hand side is a string.
 
 `is str` checks both, type == 'string' or instanceof String.
 
-#### is obj
+####is obj
 
 ```kode
 {} is obj and new Object() is obj                                   ▸  true
@@ -337,6 +327,13 @@ null is obj or new Map() is obj or [] is obj                        ▸  false
 ```
 
 `is obj` evaluates to true for plain Objects only.
+
+####is arr
+
+```kode
+[] is arr and new Array() is arr                                    ▸  true
+null is arr or new Set() is arr or {} is arr                        ▸  false
+```
 
 #output
 
@@ -388,7 +385,7 @@ dbg '1st' 0 '2nd' myObj.c               ▸ file.kode:7:0
 Logs file and position followed by arguments in [noon](https://github.com/monsterkodi/noon) notation.
 If first argument is an identifier, appends its name to the file position.
 
-### assert
+###assert
 
 ```kode
 f = (a) -> ▴ a ; a                      ▸ file.kode:1:11 ▴ assert failed! a

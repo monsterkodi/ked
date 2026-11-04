@@ -1,12 +1,6 @@
 #!/usr/bin/env node
 
 /*
-     ███████   ███████   ███      █████████  ████████  ████████
-    ███       ███   ███  ███         ███     ███       ███   ███
-    ███████   █████████  ███         ███     ███████   ███████
-         ███  ███   ███  ███         ███     ███       ███   ███
-    ███████   ███   ███  ███████     ███     ████████  ███   ███
-
     renders a five row ascii-art header for a string, using the same generator that ked uses.
 */
 

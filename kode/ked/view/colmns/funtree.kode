@@ -26,6 +26,11 @@ SYMBOL =
             test1:          theme.funtree.test1
             test2:          theme.funtree.test2
             test3:          theme.funtree.test3
+            h1:             theme.syntax['text h1']
+            h2:             theme.syntax['text h2']
+            h3:             theme.syntax['text h3']
+            h4:             theme.syntax['text h4']
+            h5:             theme.syntax['text h5']
         
     clear: =>
 
@@ -43,6 +48,7 @@ SYMBOL =
 
         if 
             item.clss       ➜ clr = @color.class
+            item.md         ➜ clr = @color[item.md] 
             item.test       ➜ clr = @color['test' + int(belt.numIndent(item.name)/2)] 
             item.async      ➜ clr = item.bound ? @color.bound_async : @color.func_async
             item.bound      ➜ clr = @color.bound
@@ -52,6 +58,7 @@ SYMBOL =
             char == '@' and empty name[x+1]
                               clr = @color.class
         if 
+            char == "#"            ➜ clr = color.darken clr 0.5
             char == '▸'            ➜ clr = color.darken clr 0.5
             char == '@'            ➜ clr = color.darken clr (clr == @color.class ? 0.75 : 0.5)
             char == SYMBOL.clss    ➜ clr = color.darken clr 0.2
@@ -132,7 +139,10 @@ SYMBOL =
                     if func.bound
                         symbol = SYMBOL.bound
                     else
-                        symbol = SYMBOL.unbound
+                        if func.md
+                            symbol = "#"
+                        else
+                            symbol = SYMBOL.unbound
                         
                 name = func.name
                 name = '@' + name if func.static
