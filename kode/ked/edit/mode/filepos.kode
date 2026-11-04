@@ -1,13 +1,11 @@
 
 use ../../../kxk ▪ post kutil slash
-
 ■filepos
-
 ###
-◆ on cursors change ➜ stores main cursor and view in session 
-◆ on file loaded    ➜ restores main cursor and view from session
-◆ on key event      ➜ provides file edits navigation via shortcuts
-◆ on post insert    ➜ tracks insertion points for file edits navigation
+    ◆ on cursors change ➜ stores main cursor and view in session 
+    ◆ on file loaded    ➜ restores main cursor and view from session
+    ◆ on key event      ➜ provides file edits navigation via shortcuts
+    ◆ on post insert    ➜ tracks insertion points for file edits navigation
 ###
     @autoStart: true
     

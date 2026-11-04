@@ -1,14 +1,13 @@
 
 use ../../../kxk ◆ post keyinfo
 use ../../theme  ◆ theme
-
 ■novim
 # maps keys to actions which are executed by edit▸act▸novim
 
     @operators:
-        c: 'change'
-        d: 'delete'
-        y: 'yank'
+        'c': 'change'
+        'd': 'delete'
+        'y': 'yank'
         '>': 'indent'
         '<': 'deindent'
 

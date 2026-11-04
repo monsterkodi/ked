@@ -98,6 +98,10 @@ use                 ◆ finder searcherfile
             weight(b) - weight(a)
         files
         
+    filterFiles: files exts ->
+    
+        files.filter (f) -> slash.ext(f) in exts
+        
     show: text files ○=>
     
         # log "searcher show |#{text}|"
@@ -111,10 +115,12 @@ use                 ◆ finder searcherfile
             ⮐  super()
         
         editorFile = ked_session.get 'editor▸file'
+        editorExt  = slash.ext editorFile 
         
         dir    = prjcts.dir   editorFile
         files ?= prjcts.files editorFile
 
+        files = @filterFiles files [editorExt]
         files = @sortFiles files
 
         log "searcher - search #{files.length} files in #{dir} for |#{text}|" #files

@@ -76,7 +76,7 @@ use ..           ◆ mode
             mode.stop @state 'salter'
             
 ##delete
-    
+
     deleteSelection: ->
     
         cursors = @state.allCursors()

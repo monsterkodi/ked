@@ -2,9 +2,7 @@
 use ../../../kxk ▪ kseg kutil
 use ../tool      ◆ belt
 use ..           ◆ mode specs
-
 ■replex
-        
     @autoStart: true
         
     @: @state ->
