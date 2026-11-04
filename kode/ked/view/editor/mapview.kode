@@ -11,9 +11,9 @@ use ../base         ◆ view
         also used for browse and quicky previews
     ###
 
-    @: screen @state ->
+    @: @screen @state ->
         
-        super screen @state.owner() + '.mapview'
+        super @screen @state.owner() + '.mapview'
         
         @setColor 'bg' theme.quicky.bg
         
