@@ -28,3 +28,103 @@ use .. ◆ nfs slash
 
         lines.length ▸ 0
         items.length ▸ 0
+
+    ▸ duplicating a file inserts a copy suffix before the extension
+
+        root = '/tmp/opencode/kxk-nfs-duplicate'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        file = slash.path root 'test.txt'
+        fs.writeFileSync file 'hello'
+
+        dupe =○ nfs.duplicate file
+        text = fs.readFileSync dupe 'utf8'
+
+        fs.rmSync root recursive:true force:true
+
+        slash.file(dupe) ▸ 'test-copy.txt'
+        text ▸ 'hello'
+
+    ▸ duplicating again continues the copy number and ignores gaps
+
+        root = '/tmp/opencode/kxk-nfs-duplicate'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        file = slash.path root 'test.txt'
+        fs.writeFileSync file 'hello'
+
+        first  =○ nfs.duplicate file
+        second =○ nfs.duplicate file
+        third  =○ nfs.duplicate file
+
+        fs.rmSync root recursive:true force:true
+
+        slash.file(first)  ▸ 'test-copy.txt'
+        slash.file(second) ▸ 'test-copy2.txt'
+        slash.file(third)  ▸ 'test-copy3.txt'
+
+        root = '/tmp/opencode/kxk-nfs-duplicate-gap'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        file = slash.path root 'test.txt'
+        fs.writeFileSync file 'hello'
+        fs.writeFileSync slash.path(root 'test-copy666.txt') 'old'
+
+        dupe =○ nfs.duplicate file
+
+        fs.rmSync root recursive:true force:true
+
+        slash.file(dupe) ▸ 'test-copy667.txt'
+
+    ▸ duplicating a copy continues the chain of the original
+
+        root = '/tmp/opencode/kxk-nfs-duplicate-copy'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        file    = slash.path root 'test.txt'
+        copy666 = slash.path root 'test-copy666.txt'
+        fs.writeFileSync file 'hello'
+        fs.writeFileSync copy666 'old'
+
+        dupe =○ nfs.duplicate copy666
+
+        fs.rmSync root recursive:true force:true
+
+        slash.file(dupe) ▸ 'test-copy667.txt'
+
+    ▸ duplicating a folder copies its contents
+
+        root = '/tmp/opencode/kxk-nfs-duplicate-dir'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        folder = slash.path root 'folder'
+        fs.mkdirSync folder
+        fs.writeFileSync slash.path(folder 'inside.txt') 'inside'
+
+        dupe =○ nfs.duplicate folder
+        text = fs.readFileSync slash.path(dupe 'inside.txt') 'utf8'
+
+        fs.rmSync root recursive:true force:true
+
+        slash.file(dupe) ▸ 'folder-copy'
+        text ▸ 'inside'
+
+    ▸ duplicating a file without an extension appends a copy suffix
+
+        root = '/tmp/opencode/kxk-nfs-duplicate-noext'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        file = slash.path root 'README'
+        fs.writeFileSync file 'docs'
+
+        dupe =○ nfs.duplicate file
+
+        fs.rmSync root recursive:true force:true
+
+        slash.file(dupe) ▸ 'README-copy'

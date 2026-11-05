@@ -111,6 +111,7 @@ use                 ◆ dirtree
     
         context.show event.cell @onContextChoice [
             " " 
+            " " 
             icons.dir_open + " "
             " " 
             ]
@@ -123,6 +124,9 @@ use                 ◆ dirtree
             
                 ''
                     @rename()
+                    
+                ''
+                    post.emit 'file.duplicate' current.path
                     
                 icons.dir_open
                     dir = current.path

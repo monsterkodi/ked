@@ -879,7 +879,7 @@ ked [file...]
 
             case 'cmd+m':
             case 'cmd+;':
-            case 'ctrl+;':
+            case 'cmd+space':
                 return this.macro.show()
 
             case 'cmd+.':

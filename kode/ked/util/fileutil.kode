@@ -102,10 +102,17 @@ use ../../kxk ◆ salter
         res =○ nfs.move oldPath newPath
         if res != newPath
             error "rename failed! #{res}"
+    
+    @duplicate: path ○->
+        
+        res =○ nfs.duplicate path
+        if res
+            post.emit 'redraw'
         
 post.on 'file.trash'      fileutil.trash
 post.on 'file.class'      fileutil.class
 post.on 'file.rename'     fileutil.rename
+post.on 'file.duplicate'  fileutil.duplicate
 post.on 'file.new_folder' fileutil.newFolder
 
 export fileutil

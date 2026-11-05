@@ -668,7 +668,7 @@ use child_process ▪ spawn exec
             'alt+o'                      ➜ ⮐ @editor.jumpToCounterpart()
             'alt+,'                      ➜ ⮐ @goToPrevFunc()
             'alt+.'                      ➜ ⮐ @goToNextFunc()
-            'cmd+m' 'cmd+;' 'ctrl+;'     ➜ ⮐ @macro.show()
+            'cmd+m' 'cmd+;' 'cmd+space'  ➜ ⮐ @macro.show()
             'cmd+.' 'ctrl+.'             ➜ ⮐ @browse.gotoDir slash.dir(@currentFile)
             'cmd+o' 'ctrl+o'             ➜ ⮐ post.emit 'browse.dir' process.cwd()
             'cmd+i'                      ➜ ⮐ post.emit 'differ.status'

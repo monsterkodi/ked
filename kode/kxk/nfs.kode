@@ -180,6 +180,65 @@ import fsp from 'fs/promises'
         
         if ○ NFS.exists from
             ○ fsp.rename from, to
+    
+    @duplicate: p ○->
+        
+        ⮐ if empty p
+        
+        p = slash.path p
+        
+        ⮐ if not ○ NFS.exists p
+        
+        target =○ NFS.copyPath p
+        ⮐ if empty target
+        
+        ○ NFS.copy p target
+        
+        target
+    
+    @copyPath: p ○->
+
+        parsed = slash.parse p
+        dir    = parsed.dir
+        name   = parsed.name
+        ext    = parsed.ext
+        
+        if empty name # dot file
+            name = parsed.file
+            ext  = ''
+        
+        base    = name.replace /-copy\d*$/, ''
+        prefix  = "#{base}-copy"
+        suffix  = ext ? ".#{ext}" : ''
+        highest = 0
+        
+        try
+            entries =○ fsp.readdir dir
+        catch err
+            entries = []
+            
+        for entry in entries
+            
+            stem = entry
+            if suffix
+                continue if not entry.endsWith suffix
+                stem = entry[..entry.length-suffix.length]
+            
+            continue if not stem.startsWith prefix
+            
+            rest = stem[prefix.length..]
+            number = 1
+            if rest
+                continue if not /^\d+$/.test rest
+                number = parseInt rest
+            
+            if number > highest
+                highest = number
+        
+        if highest
+            slash.path dir "#{prefix}#{highest+1}#{suffix}"
+        else
+            slash.path dir "#{prefix}#{suffix}"
      
     @git: p ○->
         
