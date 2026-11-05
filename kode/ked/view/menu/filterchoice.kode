@@ -50,11 +50,6 @@ use ../menu         ◆ choices
         
     hasFocus: => super() or (@input and @input.hasFocus())
     
-    isPlainAlphanumeric: event =>
-        
-        ⮐ false if empty event.char
-        not empty event.char.match /^[a-zA-Z0-9]$/
-        
     layout: x y w h =>
         
         if @filterVisible()
@@ -111,7 +106,7 @@ use ../menu         ◆ choices
                 
             ⮐ super key event
             
-        if @isPlainAlphanumeric event
+        if event.char
             
             @showFilter()
             @input.onKey key event
