@@ -1,5 +1,5 @@
 
-use ../kxk  ▪ sleep karg watch nfs util slash os
+use ../kxk  ▪ sleep karg watcher post nfs util slash os
 use ../kode ◆ tester kode
 use         ◆ knrd
 use           child_process
@@ -50,15 +50,17 @@ args = karg """
         
         log '👁 ' w5(kk.bundleDir())
         
-        watch.watch kk.bundleDir() recursive:true cb: (watcher) ->
-            watcher.on 'change' (info) ○-> 
-
-                ⮐  if slash.contains info.path '.stash'
-                
-                if slash.ext(info.path) in ['kode' 'pug' 'styl' 'noon']
-                    log b5('🔧') w3(info.path)
-                    ○ knrd info.path
-                    ○ kk.test args.files silent:true
+        ○ watcher.watch kk.bundleDir()
+        
+        post.on 'file.change' (info) ○-> 
+            
+            ⮐  if slash.contains info.path '.stash'
+            ⮐  if info.change == 'delete'
+            
+            if slash.ext(info.path) in ['kode' 'pug' 'styl' 'noon']
+                log b5('🔧') w3(info.path)
+                ○ knrd info.path
+                ○ kk.test args.files silent:true
     
 #!test
     
