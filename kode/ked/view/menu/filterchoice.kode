@@ -4,6 +4,7 @@ use ../../theme     ◆ color theme
 use ../base         ◆ input
 use ../screen       ◆ cells
 use ../menu         ◆ choices
+use ../../edit/tool ◆ belt
 ■filterchoice□choices
 ###
     a choices view with an internal filter input
@@ -17,104 +18,64 @@ use ../menu         ◆ choices
         @input       = new input @screen "#{@name}_input"
         @filterCells = new cells @screen
         
-        @filterSelections = true # enables normal selection display below the rounded selection
-        
         @input.on 'action' @onInputAction
         
         @input.hide()
         
-    setColor: key clr =>
+    # setColor: key clr =>
+    #     
+    #     super key clr
+    #     
+    #     if key == 'bg' and @input
+    #         @input.setColor 'bg_blur' @color.bg
         
-        super key clr
-        
-        if key == 'bg' and @input
-            @input.setColor 'bg_blur' @color.bg
-        
-    filterVisible: => @input.visible()
-    
     showFilter: =>
         
-        ⮐  if @filterVisible()
+        ⮐  if @input.visible()
         
         @input.show()
         @input.grabFocus()
         
     hideFilter: =>
         
-        ⮐  if not @filterVisible()
+        @state.clearHighlights()
         
+        ⮐ if not @input.visible()
         @input.set ''
         @input.hide()
         @grabFocus()
-        
-    matchIndices: text =>
-        
-        indices = []
-        
-        ⮐ indices if empty @items
-        
-        if empty text
-            for item,idx in @items
-                indices.push idx
-            ⮐ indices
-            
-        fuzz    = new krzl values:@items extract:@extract
-        matches = fuzz.filter text
-        
-        for item in matches
-            indices.push @items.indexOf(item)
-            
-        indices.sort (a b) -> a - b
-        indices
-        
-    selectIndex: index =>
-        
-        ⮐  if not (0 <= index < @state.s.lines.length)
-        
-        @state.selectLine index
-        @state.setMainCursor 0 index
-        
-    selectFirstMatch: text =>
-        
-        indices = @matchIndices text
-        
-        ⮐  if empty indices
-        @selectIndex indices[0]
-        
-    selectMatch: direction =>
-        
-        indices = @matchIndices @input.current()
-        
-        ⮐  if empty indices
-        
-        current = @currentIndex()
-        
-        if direction < 0
-            for index in indices.reverse()
-                if index < current
-                    @selectIndex index
-                    ⮐  
-        else
-            for index in indices
-                if index > current
-                    @selectIndex index
-                    ⮐  
-                    
+                
     onInputAction: action text =>
         
-        if action == 'change'
-            @selectFirstMatch text
+        switch action
+            'change'
+                if empty text 
+                    @state.clearHighlights()
+                    @state.setSelections []
+                else
+                    @state.highlightText text
+                    if @state.s.highlights.length
+                        @selectLineAndAdjust @state.s.highlights[0][1]
+            'submit'
+                log "INPUT ACTION" action
+                @hideFilter()
+                @emitAction 'return' @current()
+                    
+    selectLineAndAdjust: li =>
+        
+        @state.setSelections [belt.rangeOfLine(@state.s.lines li)]
+        @state.setCursors [[0 li]] main:'ind' adjust:'topBotDelta'
         
     toggleFilter: =>
         
-        if @filterVisible() ➜ @hideFilter()
-                             ➜ @showFilter()
+        if @input.visible() ➜ @hideFilter()
+                            ➜ @showFilter()
         
     hasFocus: => super() or (@input and @input.hasFocus())
     
     layout: x y w h =>
         
-        if @filterVisible()
+        if @input.visible()
             
             fh = min 3 h
             
@@ -133,29 +94,27 @@ use ../menu         ◆ choices
         
         super()
         
-        @drawFilter() if @filterVisible()
+        if @input.visible()
         
-    drawFilter: =>
-        
-        cells = @filterCells
-        
-        ⮐  if cells.rows < 1 or cells.cols < 1
-        
-        cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
-        
-        outer = @input.hasFocus() ? color.brighten(@color.bg) : @color.bg
-        inner = @input.hasFocus() ? @input.color.bg_focus : @input.color.bg_blur
-        
-        cells.draw_rounded_border 0 0 -1 2 fg:outer
-        
-        cells.draw_vertical_padding 1 1 outer inner
-        cells.draw_vertical_padding cells.cols-2 1 inner outer
-        
-        @input.draw()
+            cells = @filterCells
+            
+            ⮐  if cells.rows < 1 or cells.cols < 1
+            
+            cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
+            
+            outer = @input.hasFocus() ? color.brighten(@color.bg) : @color.bg
+            inner = @input.hasFocus() ? @input.color.bg_focus : @input.color.bg_blur
+            
+            cells.draw_rounded_border 0 0 -1 2 fg:outer
+            
+            cells.draw_vertical_padding 1 1 outer inner
+            cells.draw_vertical_padding cells.cols-2 1 inner outer
+            
+            @input.draw()
         
     onKey: key event =>
-        
-        if @filterVisible()
+        # dbg event    
+        if @input.visible()
             
             if event.combo == 'esc'
                 @hideFilter()
@@ -171,11 +130,14 @@ use ../menu         ◆ choices
             if @input.hasFocus()
                 
                 if event.combo == 'up'
-                    @selectMatch(-1)
+                    @state.selectPrevHighlight()
+                    @selectLineAndAdjust @state.s.selections[0][1]
                     ⮐ true
                     
                 if event.combo == 'down'
-                    @selectMatch(1)
+                    @state.selectNextHighlight()
+                    @state.selectNextHighlight()
+                    @selectLineAndAdjust @state.s.selections[0][1]
                     ⮐ true
                     
                 if @input.onKey key event
@@ -192,16 +154,17 @@ use ../menu         ◆ choices
             
         if event.char
             
-            if event.combo not in ['tab']
+            if event.combo not in ['tab''return''space']
                 @showFilter()
+                # dbg event
                 @input.onKey key event
                 ⮐ true
-            
+        
         super key event
         
     onMouse: event =>
         
-        if @filterVisible() and @filterCells.isInsideEvent(event)
+        if @input.visible() and @filterCells.isInsideEvent(event)
             
             @input.grabFocus() if event.type == 'press'
             

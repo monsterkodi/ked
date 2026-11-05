@@ -49,7 +49,7 @@ SYMBOL =
         if char == ' ' ➜ ⮐  [0 0 0]
 
         if 
-            item.divider    ➜ clr = color.darken @color.class 0.4
+            item.divider    ➜ clr = color.darken @color.class,0.4
             item.clss       ➜ clr = @color.class
             item.md         ➜ clr = @color[item.md] 
             item.test       ➜ clr = @color['test' + int(belt.numIndent(item.name)/2)] 

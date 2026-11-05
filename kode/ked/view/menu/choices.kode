@@ -80,8 +80,6 @@ use ../../edit      ◆ editor
         
         ⮐ super() if not @roundedSelections
         
-        super() if @filterSelections
-        
         fg = @hasFocus() ? @color.hover.bg : @color.hover.blur
         
         if not @cells.screen.t.hasFocus
