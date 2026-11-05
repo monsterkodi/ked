@@ -41,6 +41,7 @@ use           ◆ keys mode
         @rowCache    = null
         @rowCacheExt = null
         @maxWidthCache = 0
+        @gutterWidthOverride = null
 
         @clearSingle()
 
@@ -478,7 +479,9 @@ use           ◆ keys mode
     isDirty: => @h.length > 1
     hasRedo: => @r.length > 0
 
-    gutterWidth: => max 4 2 + ceil(Math.log10(@s.lines.length+1))
+    gutterWidth: => 
+        ⮐ @gutterWidthOverride if @gutterWidthOverride?
+        max 4 2 + ceil(Math.log10(@s.lines.length+1))
 
 #!cut
 

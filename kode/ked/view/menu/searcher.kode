@@ -20,6 +20,9 @@ use                 ◆ finder searcherfile
 
     show: text files ○=>
     
+        @choices.state.gutterWidthOverride = null
+        @gutterMaxLine = 0
+        
         # log "searcher show |#{text}|"
         
         text = @searchText text # to use selection or cursor word if text is empty
@@ -126,6 +129,7 @@ use                 ◆ finder searcherfile
             
     arrange: =>
 
+        @updateGutterWidth()
         super()    
     
         for sfil in @sfils
@@ -176,6 +180,19 @@ use                 ◆ finder searcherfile
         delete @textToHighlight
 
     maxResultRows: -> max 1 int(@editor.cells.rows)
+
+    updateGutterWidth: ->
+    
+        view = @choices.state.s.view
+        lo   = view[1]
+        hi   = min(@choices.items.length lo + @maxResultRows())
+        
+        for idx in lo...hi
+            item = @choices.items[idx]
+            if item.row is num
+                @gutterMaxLine = max @gutterMaxLine item.row+1
+                
+        @choices.state.gutterWidthOverride = max 4 2 + ceil(Math.log10(@gutterMaxLine+1))
         
     emitFileOpen: choice ->
     

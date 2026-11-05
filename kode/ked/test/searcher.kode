@@ -110,3 +110,58 @@ use ../view/menu ◆ searcher
         config.data = savedConfig
         delete global.ked_session
         fs.rmSync root recursive:true force:true
+
+  ▸ the gutter width follows the displayed line numbers
+
+        root = '/tmp/opencode/ked-searcher-gutter'
+        files = []
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+
+        for i in 0...5
+            file  = slash.path root "file#{i}.kode"
+            lines = []
+            for j in 0...99 ➜ lines.push 'x'
+            lines.push 'if a'
+            fs.writeFileSync file lines.join('\n')
+            files.push file
+
+        main = files[0]
+
+        delete prjcts.projects[root]
+        for file in files ➜ delete prjcts.allFiles[file]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index main
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 0 0 80 10
+        s = new searcher h.screen e
+
+        widths = []
+        highlight = s.highlightTextAndEmitRedraw.bind s
+        s.highlightTextAndEmitRedraw = (text) ->
+            highlight text
+            s.arrange()
+            widths.push s.choices.gutter.cells.cols
+
+        ○ s.show 'if'
+
+        widths ▸ [5 5]
+        s.choices.gutter.cells.cols ▸ 5
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true

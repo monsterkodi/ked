@@ -37,7 +37,7 @@ use                 ◆ inputchoice
                 ⮐ lpad(pad @choices.fuzzied[y].row+1) + ' '
         lpad pad+1
     
-    arrangeRect: ->
+    arrangeRect: =>
     
         [
             int(@editor.cells.x-@editor.gutter.cells.cols-1)
