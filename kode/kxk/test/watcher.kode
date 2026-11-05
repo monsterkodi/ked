@@ -1,7 +1,7 @@
 
 use fs
-use ../../kxk ▪ slash sleep post nfs
-use ../util   ◆ watcher
+use .. ◆ slash post nfs watcher
+use ../util ▪ sleep
 
 events = []
 post.on 'file.change' (info) =>

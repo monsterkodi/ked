@@ -6,8 +6,7 @@ import kxk from "../../kxk.js"
 let noon = kxk.noon
 let slash = kxk.slash
 let post = kxk.post
-
-import watcher from "./watcher.js"
+let watcher = kxk.watcher
 
 
 config = (function ()
@@ -21,13 +20,13 @@ config = (function ()
     config["reloadTimer"] = null
     config["load"] = async function ()
     {
-        var _14_14_
+        var _13_14_
 
         this.loaded = new Promise((function (resolve)
         {
             return this.resolveLoaded = resolve
         }).bind(this))
-        this.file = ((_14_14_=this.file) != null ? _14_14_ : slash.path(_k_.dir(),'../../../config'))
+        this.file = ((_13_14_=this.file) != null ? _13_14_ : slash.path(_k_.dir(),'../../../config'))
         await watcher.watch(this.file,{recursive:false})
         await this.read()
         post.emit('config.loaded',config.data)
@@ -87,5 +86,5 @@ post.on('file.change',(function (event)
 }).bind(this))
 export default config;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uZmlnLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL2NvbmZpZy5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNO0lBQUs7SUFBTTs7T0FDWCxjQUFBOzs7QUFDZixVQUFEOzs7Ozs7OztJQUtJLFFBQUMsZ0JBQWE7SUFFZCxRQUFDOzs7O1FBRUcsS0FBQyxhQUFhLG1CQUFTOzttQkFBWSxLQUFDLGdCQUFnQjs7UUFDcEQsS0FBQyxpQkFBRCxLQUFDLDBCQUFRLE1BQU0sS0FBTSxVQUFJO2NBSXZCLFFBQVEsTUFBTSxLQUFDLE1BQUssVUFBVTtjQUM5QixLQUFDO1FBR0gsS0FBSyxLQUFLLGdCQUFnQixPQUFPO2VBRWpDLEtBQUM7OztJQUtMLFFBQUM7O2NBRUssUUFBUSxTQUFTLEtBQUM7ZUFDcEIsS0FBQyxhQUFRLEtBQUssS0FBSyxLQUFDOzs7SUFFeEIsUUFBQywyQkFBYzs7WUFFTixNQUFNLFNBQVEsS0FBQzs7OztxQkFDZixNQUFNLFFBQWUsU0FBUzs7OztZQUVOLEtBQUM7O1lBQTlCLGFBQWEsS0FBQzs7ZUFDZCxLQUFDLGNBQWM7O21CQUFlLEtBQUM7dUJBQVU7OztJQUU3QyxRQUFDOztRQUlHLEtBQUMsYUFBYSxtQkFBUzs7bUJBQVksS0FBQyxnQkFBZ0I7Ozs7a0JBRzlDLEtBQUM7WUFDSCxLQUFLLEtBQUssZ0JBQWdCLE9BQU87O2VBQy9COztZQUNGLFlBQUksdUJBQXVCOztlQUUvQixLQUFDOzs7V0FsRFI7OztBQW9ERCxLQUFLLEdBQUcseUJBQWU7O1dBQVUsT0FBTyxhQUFhOztlQUU5QyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uZmlnLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL2NvbmZpZy5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNO0lBQUs7SUFBTTtJQUFLOzs7QUFDL0IsVUFBRDs7Ozs7Ozs7SUFLSSxRQUFDLGdCQUFhO0lBRWQsUUFBQzs7OztRQUVHLEtBQUMsYUFBYSxtQkFBUzs7bUJBQVksS0FBQyxnQkFBZ0I7O1FBQ3BELEtBQUMsaUJBQUQsS0FBQywwQkFBUSxNQUFNLEtBQU0sVUFBSTtjQUl2QixRQUFRLE1BQU0sS0FBQyxNQUFLLFVBQVU7Y0FDOUIsS0FBQztRQUdILEtBQUssS0FBSyxnQkFBZ0IsT0FBTztlQUVqQyxLQUFDOzs7SUFLTCxRQUFDOztjQUVLLFFBQVEsU0FBUyxLQUFDO2VBQ3BCLEtBQUMsYUFBUSxLQUFLLEtBQUssS0FBQzs7O0lBRXhCLFFBQUMsMkJBQWM7O1lBRU4sTUFBTSxTQUFRLEtBQUM7Ozs7cUJBQ2YsTUFBTSxRQUFlLFNBQVM7Ozs7WUFFTixLQUFDOztZQUE5QixhQUFhLEtBQUM7O2VBQ2QsS0FBQyxjQUFjOzttQkFBZSxLQUFDO3VCQUFVOzs7SUFFN0MsUUFBQzs7UUFJRyxLQUFDLGFBQWEsbUJBQVM7O21CQUFZLEtBQUMsZ0JBQWdCOzs7O2tCQUc5QyxLQUFDO1lBQ0gsS0FBSyxLQUFLLGdCQUFnQixPQUFPOztlQUMvQjs7WUFDRixZQUFJLHVCQUF1Qjs7ZUFFL0IsS0FBQzs7O1dBbERSOzs7QUFvREQsS0FBSyxHQUFHLHlCQUFlOztXQUFVLE9BQU8sYUFBYTs7ZUFFOUMifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/util/config.kode

@@ -1,7 +1,7 @@
 
-use ../kxk        ▪ karg kstr kseg slash post nfs sleep
+use ../kxk        ▪ karg kstr kseg slash post nfs sleep watcher
 use ./index       ◆ prjcts indexer
-use ./util        ◆ logfile session help frecent watcher git config dumpstate filecolors leak fileutil
+use ./util        ◆ logfile session help frecent git config dumpstate filecolors leak fileutil
 use ./util/img    ◆ rounded squares sircels
 use ./edit/tool   ◆ belt
 use ./edit        ◆ mode

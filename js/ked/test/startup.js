@@ -6,6 +6,9 @@ import mode from "../edit/mode.js"
 import config from "../util/config.js"
 import session from "../util/session.js"
 
+import kxk from "../../kxk.js"
+let watcher = kxk.watcher
+
 toExport["startup"] = async function ()
 {
     await section("the modes announce when they are loaded", async function ()
@@ -22,6 +25,7 @@ toExport["startup"] = async function ()
         await loading
         await config.loaded
         compare((config.data !== null),true)
+        watcher.close()
     })
     await section("the session announces when it is loaded", async function ()
     {
@@ -35,5 +39,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RhcnR1cC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC9zdGFydHVwLmtvZGUiXSwibWFwcGluZ3MiOiI7OztPQUNjLFdBQVA7O09BQ08sYUFBUDtPQUFjLGNBQWQ7Ozs7OztpQkFNRSxLQUFLLGtCQUFrQixTQUFXO2NBRWpDLEtBQUs7Z0JBRVAsS0FBSyxRQUFRLFNBQVMsU0FBVztnQkFDakMsS0FBSyxRQUFRLE9BQVM7Ozs7UUFJdEIsVUFBVSxPQUFPO2lCQUVoQixPQUFPLGtCQUFrQixTQUFXO2NBRW5DO2NBQ0EsT0FBTztpQkFFUixPQUFPLFNBQVEsTUFBUTs7OztRQUl4QixRQUFRLFNBQVEsTUFBTTtpQkFFckIsRUFBRSxrQkFBa0IsU0FBVztjQUU5QixFQUFFIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RhcnR1cC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC9zdGFydHVwLmtvZGUiXSwibWFwcGluZ3MiOiI7OztPQUNjLFdBQVA7O09BQ08sYUFBUDtPQUFjLGNBQWQ7O09BQ0csVUFBQTtJQUFNOzs7Ozs7aUJBTVAsS0FBSyxrQkFBa0IsU0FBVztjQUVqQyxLQUFLO2dCQUVQLEtBQUssUUFBUSxTQUFTLFNBQVc7Z0JBQ2pDLEtBQUssUUFBUSxPQUFTOzs7O1FBSXRCLFVBQVUsT0FBTztpQkFFaEIsT0FBTyxrQkFBa0IsU0FBVztjQUVuQztjQUNBLE9BQU87aUJBRVIsT0FBTyxTQUFRLE1BQVE7UUFFeEIsUUFBUTs7OztRQUlSLFFBQVEsU0FBUSxNQUFNO2lCQUVyQixFQUFFLGtCQUFrQixTQUFXO2NBRTlCLEVBQUUifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/test/startup.kode

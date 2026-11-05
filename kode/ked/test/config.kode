@@ -1,7 +1,7 @@
 
 use fs
-use ../../kxk ▪ slash sleep post
-use ../util   ◆ config watcher
+use ../../kxk ▪ slash sleep post watcher
+use ../util   ◆ config
 
 ▸ config
 

@@ -1,6 +1,7 @@
 
 use ../edit ◆ mode
 use ../util ◆ config session
+use ../../kxk ▪ watcher
 
 ▸ startup
 
@@ -23,6 +24,8 @@ use ../util ◆ config session
         ○ config.loaded
 
         (config.data != null) ▸ true
+
+        watcher.close()
 
   ▸ the session announces when it is loaded
 
