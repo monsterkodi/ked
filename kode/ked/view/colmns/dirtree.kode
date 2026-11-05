@@ -1,5 +1,5 @@
 
-use ../../../kxk ▪ kutil kseg kstr slash post nfs
+use ../../../kxk ▪ kutil kseg kstr slash post nfs watcher
 use ../../index  ◆ prjcts 
 use ../../theme  ◆ theme icons
 use ../../util   ◆ git
@@ -95,6 +95,8 @@ import rgxs from './quicky.json' with { type: "json" }
         opt ?= {}
         
         dir = slash.untilde path
+        
+        watcher.watch dir recursive:false
         
         items =○ @dirItems dir 'dirtree.setRoot'
         
@@ -228,6 +230,8 @@ import rgxs from './quicky.json' with { type: "json" }
         opt ?= {}
         
         dirItem.open = true
+        
+        watcher.watch dirItem.path recursive:false
         
         items =○ @dirItems dirItem.path 'dirtree.openDir'
         
