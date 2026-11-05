@@ -38,6 +38,7 @@ use ../view/menu ◆ searcher
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 0 0 80 30
         s = new searcher h.screen e
 
         appendCount = 0
@@ -52,6 +53,59 @@ use ../view/menu ◆ searcher
         s.sfils.length ▸ 2
         s.sfils.map((f) -> f.lineIndex).sort((a b) -> a-b) ▸ [1 5]
         s.choices.items.length ▸ 8
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true
+
+  ▸ results are appended as soon as the visible rows are filled
+
+        root = '/tmp/opencode/ked-searcher-threshold'
+        files = []
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+
+        for i in 0...5
+            file = slash.path root "file#{i}.kode"
+            fs.writeFileSync file 'if a\n'
+            files.push file
+
+        main = files[0]
+
+        delete prjcts.projects[root]
+        for file in files ➜ delete prjcts.allFiles[file]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index main
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 0 0 80 10
+        s = new searcher h.screen e
+
+        appends = []
+        append = s.choices.append.bind s.choices
+        s.choices.append = (items ext) ->
+            appends.push items.length
+            append items ext
+
+        ○ s.show 'if'
+
+        appends ▸ [12 8]
+        s.sfils.length ▸ 5
+        s.sfils.map((f) -> f.lineIndex).sort((a b) -> a-b) ▸ [1 5 9 13 17]
+        s.choices.items.length ▸ 20
 
         config.data = savedConfig
         delete global.ked_session

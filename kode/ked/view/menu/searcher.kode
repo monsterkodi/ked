@@ -16,6 +16,7 @@ use                 ◆ finder searcherfile
             post.on 'file.loaded'   @onFileLoaded
         
         @sfils = []
+        @searchId = 0
 
     show: text files ○=>
     
@@ -49,11 +50,19 @@ use                 ◆ finder searcherfile
         ●▸ searcher
         
         items = []
+        appended = 0
+        flushed = false
         ext = editorExt
+        maxRows = @maxResultRows()
+        
+        @searchId += 1
+        searchId = @searchId
         
         for file,idx in files
                     
             filet =○ kacher.getText file
+            
+            ⮐ if searchId != @searchId
             
             segls = kseg.segls filet
             spans = belt.lineSpansForText segls text
@@ -63,7 +72,7 @@ use                 ◆ finder searcherfile
             front = belt.frontmostSpans spans
             
             sfil = new searcherfile @screen "#{@name}_sfil_#{idx}"
-            sfil.lineIndex = items.length+1
+            sfil.lineIndex = appended + items.length + 1
             sfil.set slash.relative(file dir)            
             @sfils.push sfil
 
@@ -84,18 +93,37 @@ use                 ◆ finder searcherfile
                     path:  file
                     row:   span[1]
                     col:   span[2]
+
+            if not flushed and appended + items.length >= maxRows
+                @choices.append items ext
+                appended += items.length
+                items = []
+                flushed = true
+                @highlightTextAndEmitRedraw text
+                ○ new Promise (resolve) -> setImmediate resolve
+                ⮐ if searchId != @searchId
+            else if flushed and (idx+1) % 8 == 0
+                ○ new Promise (resolve) -> setImmediate resolve
+                ⮐ if searchId != @searchId
             
             break if @hidden()
 
-        @choices.append items ext if items.length
+        ⮐ if searchId != @searchId
+
+        finalAppend = false
+
+        if items.length
+            @choices.append items ext
+            finalAppend = true
+            items = []
 
         ⮐ if @hidden()
 
         log y6('▸▸▸ searcher done')
-        @highlightTextAndEmitRedraw text
+        @highlightTextAndEmitRedraw text if finalAppend or not flushed
                 
         ●▪ searcher
-        
+            
     arrange: =>
 
         super()    
@@ -146,6 +174,8 @@ use                 ◆ finder searcherfile
         
         delete @fileToHighlight
         delete @textToHighlight
+
+    maxResultRows: -> max 1 int(@editor.cells.rows)
         
     emitFileOpen: choice ->
     
