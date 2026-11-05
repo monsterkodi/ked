@@ -1,0 +1,58 @@
+
+use fs
+use ../../kxk    ▪ slash
+use ../edit      ◆ editor
+use ../util      ◆ harness config
+use ../index     ◆ prjcts
+use ../view/menu ◆ searcher
+
+▸ searcher
+
+  ▸ a multi file search appends its results once
+
+        root  = '/tmp/opencode/ked-searcher-append'
+        main  = slash.path root 'main.kode'
+        other = slash.path root 'other.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync main  'if a\n'
+        fs.writeFileSync other 'if b\n'
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[main]
+        delete prjcts.allFiles[other]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index main
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        s = new searcher h.screen e
+
+        appendCount = 0
+        append = s.choices.append.bind s.choices
+        s.choices.append = (items ext) ->
+            appendCount += 1
+            append items ext
+
+        ○ s.show 'if'
+
+        appendCount ▸ 1
+        s.sfils.length ▸ 2
+        s.sfils.map((f) -> f.lineIndex).sort((a b) -> a-b) ▸ [1 5]
+        s.choices.items.length ▸ 8
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true

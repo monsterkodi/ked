@@ -48,6 +48,9 @@ use                 ◆ finder searcherfile
         
         ●▸ searcher
         
+        items = []
+        ext = editorExt
+        
         for file,idx in files
                     
             filet =○ kacher.getText file
@@ -55,22 +58,16 @@ use                 ◆ finder searcherfile
             segls = kseg.segls filet
             spans = belt.lineSpansForText segls text
             
-            if idx == files.length-1
-                log y6('▸▸▸ searcher done')
-                @highlightTextAndEmitRedraw text
-            
             continue if empty spans
             
             front = belt.frontmostSpans spans
-            ext = slash.ext file
             
-            items = []
-            items.push line:'' 
-
             sfil = new searcherfile @screen "#{@name}_sfil_#{idx}"
-            sfil.lineIndex = @choices.items.length+1
+            sfil.lineIndex = items.length+1
             sfil.set slash.relative(file dir)            
             @sfils.push sfil
+
+            items.push line:'' 
 
             items.push
                 line:  '●'
@@ -88,12 +85,14 @@ use                 ◆ finder searcherfile
                     row:   span[1]
                     col:   span[2]
             
-            @choices.append items ext # this is quite expensive, maybe need to queue this with a delay?
-            
-            ⮐ if @hidden()
-            
-            if idx == files.length-1
-                @highlightTextAndEmitRedraw text
+            break if @hidden()
+
+        @choices.append items ext if items.length
+
+        ⮐ if @hidden()
+
+        log y6('▸▸▸ searcher done')
+        @highlightTextAndEmitRedraw text
                 
         ●▪ searcher
         
