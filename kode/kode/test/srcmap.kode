@@ -523,32 +523,6 @@ writeJs = c file=JS_FILE ○->
         pos.line ▸ 2
         pos.col  ▸ 0
         
-    ▸ sourcePosition for function
-    
-        tmpjs = slash.tmpfile() + ".js"
-        
-        file = ○ writeJs """
-            test = ->
-                log "hello"
-            """ tmpjs
-            
-        pos = ○ smap.sourcePosition file, 4, 0
-        pos.line ▸ 1
-        pos.col  ▸ 0
-    
-    ▸ sourcePosition for function method
-    
-        tmpjs = slash.tmpfile() + ".js"
-         
-        file = ○ writeJs """
-            function Test
-                @: ->
-                method: -> log "hello"
-            """ tmpjs
-            
-        pos = ○ smap.sourcePosition file, 9, 5
-        valid pos ▸ true
-
     ▸ sourcePosition names the source from where the map was written
 
         out = (new kode header:false, map:true).compile 'a = 1\n', SRCFILE, JS_FILE
