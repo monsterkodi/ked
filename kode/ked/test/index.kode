@@ -1,6 +1,15 @@
 use fs
-use ../../kxk ▪ slash
+use ../../kxk ▪ slash sleep post
 use ../index ◆ index_kode index_noon index_json index_utils indexer
+
+waitFor = (cond) ○->
+
+    n = 0
+    while n < 100
+        ⮐ true if cond()
+        ○ sleep 10
+        n += 1
+    false
 
 ▸ index
 
@@ -233,3 +242,116 @@ use ../index ◆ index_kode index_noon index_json index_utils indexer
         idx.methodsOfClass('Nope').length ▸ 0
 
         idx.baseClassesOf('Child').map((c) -> c.name) ▸ ['Child' 'Base' 'Root']
+
+  ▸ deleted files leave the index
+
+        root = '/tmp/opencode/ked-index-delete'
+        file = slash.path root 'gone.kode'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file '■Gone\n    zebraword: -> 1\n'
+
+        idx = new indexer
+        ○ idx.index file
+
+        hadword = idx.words['zebraword']?.has(file)
+
+        fs.rmSync file
+        post.emit 'file.change' path:file change:'delete'
+        ○ waitFor -> not idx.files[file]?
+
+        fs.rmSync root recursive:true force:true
+
+        hadword ▸ true
+        (idx.files[file]?) ▸ false
+        (idx.funcs['zebraword']?) ▸ false
+        (idx.classes['Gone']?) ▸ false
+        (idx.words['zebraword']?) ▸ false
+
+  ▸ renamed files move their index entries
+
+        root = '/tmp/opencode/ked-index-rename'
+        oldFile = slash.path root 'old.kode'
+        newFile = slash.path root 'new.kode'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync oldFile '■Old\n    zebraword: -> 1\n'
+
+        idx = new indexer
+        ○ idx.index oldFile
+
+        fs.renameSync oldFile newFile
+        post.emit 'file.change' path:newFile oldPath:oldFile change:'rename'
+        ○ waitFor -> idx.files[newFile]? and not idx.files[oldFile]?
+
+        fs.rmSync root recursive:true force:true
+
+        (idx.files[oldFile]?) ▸ false
+        (idx.files[newFile]?) ▸ true
+        (idx.funcs['zebraword']?) ▸ true
+        idx.funcs['zebraword'][0].file ▸ newFile
+        (idx.words['zebraword']?.has(newFile)) ▸ true
+        (idx.words['zebraword']?.has(oldFile)) ▸ false
+
+  ▸ deleted folders remove their indexed files
+
+        root = '/tmp/opencode/ked-index-folder-delete'
+        dir = slash.path root 'folder'
+        one = slash.path dir 'one.kode'
+        two = slash.path dir 'two.kode'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync dir recursive:true
+        fs.writeFileSync one 'oneword = 1\n'
+        fs.writeFileSync two 'twoword = 2\n'
+
+        idx = new indexer
+        ○ idx.index one
+        ○ idx.index two
+
+        fs.rmSync dir recursive:true force:true
+        post.emit 'file.change' path:dir change:'delete'
+        ○ waitFor -> not idx.files[one]? and not idx.files[two]?
+
+        fs.rmSync root recursive:true force:true
+
+        (idx.files[one]?) ▸ false
+        (idx.files[two]?) ▸ false
+
+  ▸ renamed folders move their indexed files
+
+        root = '/tmp/opencode/ked-index-folder-rename'
+        oldDir = slash.path root 'old'
+        newDir = slash.path root 'new'
+        oldFile = slash.path oldDir 'one.kode'
+        newFile = slash.path newDir 'one.kode'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync oldDir recursive:true
+        fs.writeFileSync oldFile 'oneword = 1\n'
+
+        idx = new indexer
+        ○ idx.index oldFile
+
+        fs.renameSync oldDir newDir
+        post.emit 'file.change' path:newDir oldPath:oldDir change:'rename'
+        ○ waitFor -> idx.files[newFile]? and not idx.files[oldFile]?
+
+        fs.rmSync root recursive:true force:true
+
+        (idx.files[oldFile]?) ▸ false
+        (idx.files[newFile]?) ▸ true
+
+  ▸ created files enter the index
+
+        root = '/tmp/opencode/ked-index-create'
+        file = slash.path root 'new.kode'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        idx = new indexer
+        fs.writeFileSync file 'newword = 1\n'
+        post.emit 'file.change' path:file change:'create'
+        ○ waitFor -> idx.files[file]?
+
+        fs.rmSync root recursive:true force:true
+
+        (idx.files[file]?) ▸ true

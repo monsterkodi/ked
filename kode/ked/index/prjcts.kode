@@ -1,5 +1,5 @@
 
-use ../../kxk ▪ post slash nfs
+use ../../kxk ▪ post slash nfs pullIf
 use ../util   ◆ walker config
 
 ■prjcts
@@ -26,6 +26,65 @@ use ../util   ◆ walker config
                     ⮐ prjPath
         log 'missing prj?' path
         null
+        
+    @addFile: file ○->
+        
+        file = slash.absolute file process.cwd()
+        
+        extensions = config.data?.sourceFileExtensions
+        ⮐ if extensions and slash.ext(file) not in extensions
+        
+        prjPath =○ nfs.prj file
+        prjPath = null if prjPath == '/'
+        prjPath ?= slash.dir file
+        
+        project = @projects[prjPath]
+        ⮐ if not project
+        ⮐ if file in project.files
+        
+        project.files.push file
+        @allFiles[file] = prjPath
+        
+    @removeFile: file ->
+        
+        prjPath = @allFiles[file]
+        ⮐ if not prjPath
+        
+        delete @allFiles[file]
+        
+        files = @projects[prjPath]?.files
+        if files
+            pullIf files (f) -> f == file
+        
+    @removePath: path ->
+        
+        if @allFiles[path]
+            @removeFile path
+            ⮐ 
+        
+        prefix = path + '/'
+        
+        for file in Object.keys(@allFiles)
+            if file.startsWith prefix
+                @removeFile file
+        
+    @renamePath: oldPath newPath ○->
+        
+        if @allFiles[oldPath]
+            @removeFile oldPath
+            ○ @addFile newPath
+            ⮐ 
+        
+        prefix = oldPath + '/'
+        moved  = []
+        
+        for file in Object.keys(@allFiles)
+            if file.startsWith prefix
+                moved.push [file, "#{newPath}#{file.slice(oldPath.length)}"]
+        
+        for pair in moved
+            @removeFile pair[0]
+            ○ @addFile pair[1]
         
     @index: file ○=>
         
@@ -89,6 +148,16 @@ use ../util   ◆ walker config
         if valid @queue
             # log 'dequeue' @queue[0]
             ○ @index @queue.shift()
+
+post.on 'file.change' (info) ○=>
+    
+    switch info.change
+        'create'
+            ○ prjcts.addFile info.path
+        'delete'
+            prjcts.removePath info.path
+        'rename'
+            ○ prjcts.renamePath info.oldPath info.path
             
 export prjcts
 

@@ -1,4 +1,4 @@
-var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, isArr: function (o) {return Array.isArray(o)}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
+var _k_ = {in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, isArr: function (o) {return Array.isArray(o)}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
 var indexer
 
@@ -37,24 +37,45 @@ indexer = (function ()
     {
         this["index"] = this["index"].bind(this)
         this["onProjectIndexed"] = this["onProjectIndexed"].bind(this)
+        this["onFileChange"] = this["onFileChange"].bind(this)
         indexer.singleton = this
-        post.on('project.indexed',this.onProjectIndexed)
-        post.on('index',(function (file)
-        {
-            return this.index(file)
-        }).bind(this))
-        post.on('file.change',(function (info)
-        {
-            if (this.files[info.path])
-            {
-                return this.index(info.path,{refresh:true})
-            }
-        }).bind(this))
         this.dirs = Object.create(null)
         this.files = Object.create(null)
         this.classes = Object.create(null)
         this.funcs = Object.create(null)
         this.words = Object.create(null)
+        post.on('project.indexed',this.onProjectIndexed)
+        post.on('index',(function (file)
+        {
+            return this.index(file)
+        }).bind(this))
+        post.on('file.change',this.onFileChange)
+    }
+
+    indexer.prototype["onFileChange"] = async function (info)
+    {
+        switch (info.change)
+        {
+            case 'create':
+                if (_k_.in(slash.ext(info.path),fileutil.sourceFileExtensions))
+                {
+                    return await this.index(info.path)
+                }
+                break
+            case 'delete':
+                return this.removePath(info.path)
+
+            case 'rename':
+                return await this.renamePath(info.oldPath,info.path)
+
+            case 'modify':
+                if (this.files[info.path])
+                {
+                    return await this.index(info.path,{refresh:true})
+                }
+                break
+        }
+
     }
 
     indexer["file"] = function (file)
@@ -106,7 +127,7 @@ indexer = (function ()
 
     indexer.prototype["addFuncInfo"] = function (funcName, funcInfo)
     {
-        var funcInfos, _61_37_
+        var funcInfos, _73_37_
 
         if (!funcName)
         {
@@ -118,7 +139,7 @@ indexer = (function ()
             funcInfo.static = true
         }
         funcInfo.name = funcName
-        funcInfos = ((_61_37_=this.funcs[funcName]) != null ? _61_37_ : [])
+        funcInfos = ((_73_37_=this.funcs[funcName]) != null ? _73_37_ : [])
         if (!(_k_.isArr(funcInfos)))
         {
             funcInfos = []
@@ -139,7 +160,7 @@ indexer = (function ()
 
     indexer.prototype["removeFile"] = function (file)
     {
-        var infos, name
+        var files, infos, name, word
 
         if (!(this.files[file] != null))
         {
@@ -161,12 +182,78 @@ indexer = (function ()
         {
             return v.file === file
         })
+        for (word in this.words)
+        {
+            files = this.words[word]
+            files.delete(file)
+            if (!files.size)
+            {
+                delete this.words[word]
+            }
+        }
         return delete this.files[file]
+    }
+
+    indexer.prototype["removePath"] = function (path)
+    {
+        var file, prefix
+
+        if ((this.files[path] != null))
+        {
+            this.removeFile(path)
+            return
+        }
+        prefix = path + '/'
+        var list = _k_.list(Object.keys(this.files))
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            file = list[_a_]
+            if (file.startsWith(prefix))
+            {
+                this.removeFile(file)
+            }
+        }
+    }
+
+    indexer.prototype["renamePath"] = async function (oldPath, newPath)
+    {
+        var file, moved, pair, prefix
+
+        if ((this.files[oldPath] != null))
+        {
+            this.removeFile(oldPath)
+            if (_k_.in(slash.ext(newPath),fileutil.sourceFileExtensions))
+            {
+                await this.index(newPath)
+            }
+            return
+        }
+        prefix = oldPath + '/'
+        moved = []
+        var list = _k_.list(Object.keys(this.files))
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            file = list[_a_]
+            if (file.startsWith(prefix))
+            {
+                moved.push([file,`${newPath}${file.slice(oldPath.length)}`])
+            }
+        }
+        var list1 = _k_.list(moved)
+        for (var _b_ = 0; _b_ < list1.length; _b_++)
+        {
+            pair = list1[_b_]
+            this.removeFile(pair[0])
+            if (_k_.in(slash.ext(pair[1]),fileutil.sourceFileExtensions))
+            {
+                await this.index(pair[1])
+            }
+        }
     }
 
     indexer.prototype["applyIndexer"] = function (file, fileInfo, text, indexerClass)
     {
-        var clss, func, funcAdded, funcInfo, indexr, parsed, word, _133_29_
+        var clss, func, funcAdded, funcInfo, indexr, parsed, word, _181_29_
 
         indexr = new indexerClass
         parsed = indexr.parse(text)
@@ -208,7 +295,7 @@ indexer = (function ()
             for (var _c_ = 0; _c_ < list2.length; _c_++)
             {
                 word = list2[_c_]
-                this.words[word] = ((_133_29_=this.words[word]) != null ? _133_29_ : new Set())
+                this.words[word] = ((_181_29_=this.words[word]) != null ? _181_29_ : new Set())
                 this.words[word].add(file)
             }
         }
@@ -231,7 +318,7 @@ indexer = (function ()
 
     indexer.prototype["index"] = async function (file, opt)
     {
-        var currentClass, fileExt, fileInfo, funcAdded, funcStack, hash, isCpp, isHpp, isJS, lines, text, _160_27_
+        var currentClass, fileExt, fileInfo, funcAdded, funcStack, hash, isCpp, isHpp, isJS, lines, text, _208_27_
 
         await new Promise(function (resolve)
         {
@@ -242,7 +329,7 @@ indexer = (function ()
             post.emit('file.indexed',file,this.files[file])
             return
         }
-        fileExt = ((_160_27_=(opt != null ? opt.ext : undefined)) != null ? _160_27_ : slash.ext(file))
+        fileExt = ((_208_27_=(opt != null ? opt.ext : undefined)) != null ? _208_27_ : slash.ext(file))
         if (_k_.in(fileExt,fileutil.imageExtensions))
         {
             this.files[file] = {}
@@ -323,5 +410,5 @@ indexer = (function ()
 
 export default indexer;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhlci5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNO0lBQU87SUFBTztJQUFTO0lBQUs7SUFBSTtJQUFPO0lBQU07SUFBSzs7T0FDbEQsZUFBVDs7T0FDUyxhQUFBO09BQU8sa0JBQUE7T0FBWSxpQkFBQTtPQUFXLGlCQUFBO09BQVcsaUJBQUE7T0FBVyxpQkFBQTtPQUFXLGVBQUE7T0FBUyxnQkFBQTtPQUFVLGVBQUE7T0FBUyxlQUFBO09BQVMsZ0JBQUE7T0FBVSxnQkFBQTtPQUFVLGdCQUFBO09BQVUsZ0JBQUE7OztBQUVqSixXQUFEOzthQUVJOzs7O1FBRUksUUFBUSxZQUFZO1FBRXBCLEtBQUssR0FBRyxrQkFBa0IsS0FBQztRQUMzQixLQUFLLEdBQUcsbUJBQWU7O21CQUFTLEtBQUMsTUFBTTs7UUFDdkMsS0FBSyxHQUFHLHlCQUFlOztnQkFDaEIsS0FBQyxNQUFNLEtBQUs7O3VCQUNYLEtBQUMsTUFBTSxLQUFLLE1BQUssUUFBUTs7O1FBRWpDLEtBQUMsT0FBVSxPQUFPLE9BQU87UUFDekIsS0FBQyxRQUFVLE9BQU8sT0FBTztRQUN6QixLQUFDLFVBQVUsT0FBTyxPQUFPO1FBQ3pCLEtBQUMsUUFBVSxPQUFPLE9BQU87UUFDekIsS0FBQyxRQUFVLE9BQU8sT0FBTzs7O0lBRTdCLFNBQUMsbUJBQU07O2VBQVEsS0FBQyxVQUFVLE1BQU07Ozt1QkFFaEMsd0JBQVc7O2VBQWEsS0FBQyxRQUFROzs7dUJBRWpDLDZCQUFnQjs7OztRQUVaLE9BQU8sS0FBQyxVQUFVO3VCQUNKLGVBQUEsS0FBTTs7OztRQUVwQixVQUFVLE9BQU8sT0FBTyxLQUFLO1FBQzdCLFFBQVEsZUFBTSxHQUFFOzttQkFBTSxFQUFFLE9BQU8sRUFBRTs7ZUFDakM7Ozt1QkFFSiw0QkFBZTs7OztRQUVYO1FBQ0E7ZUFFTSxjQUFrQixLQUFLOztZQUN6QixLQUFLLGFBQWE7WUFD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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXhlci5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvaW5kZXgvaW5kZXhlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ1UsVUFBQTtJQUFNO0lBQU87SUFBTztJQUFTO0lBQUs7SUFBSTtJQUFPO0lBQU07SUFBSzs7T0FDbEQsZUFBVDs7T0FDUyxhQUFBO09BQU8sa0JBQUE7T0FBWSxpQkFBQTtPQUFXLGlCQUFBO09BQVcsaUJBQUE7T0FBVyxpQkFBQTtPQUFXLGVBQUE7T0FBUyxnQkFBQTtPQUFVLGVBQUE7T0FBUyxlQUFBO09BQVMsZ0JBQUE7T0FBVSxnQkFBQTtPQUFVLGdCQUFBO09BQVUsZ0JBQUE7OztBQUVqSixXQUFEOzthQUVJOzs7OztRQUVJLFFBQVEsWUFBWTtRQUVwQixLQUFDLE9BQVUsT0FBTyxPQUFPO1FBQ3pCLEtBQUMsUUFBVSxPQUFPLE9BQU87UUFDekIsS0FBQyxVQUFVLE9BQU8sT0FBTztRQUN6QixLQUFDLFFBQVUsT0FBTyxPQUFPO1FBQ3pCLEtBQUMsUUFBVSxPQUFPLE9BQU87UUFFekIsS0FBSyxHQUFHLGtCQUFrQixLQUFDO1FBQzNCLEtBQUssR0FBRyxtQkFBZTs7bUJBQVMsS0FBQyxNQUFNOztRQUN2QyxLQUFLLEdBQUcsY0FBYyxLQUFDOzs7dUJBRTNCLGlDQUFjOztnQkFFSCxLQUFLOztpQkFDUjsyQkFDTyxNQUFNLElBQUksS0FBSyxNQUFTLFNBQVM7O2lDQUM5QixLQUFDLE1BQU0sS0FBSzs7O2lCQUN0Qjt1QkFDSSxLQUFDLFdBQVcsS0FBSzs7aUJBQ3JCOzZCQUNNLEtBQUMsV0FBVyxLQUFLLFFBQVEsS0FBSzs7aUJBQ3BDO29CQUNPLEtBQUMsTUFBTSxLQUFLOztpQ0FDVCxLQUFDLE1BQU0sS0FBSyxNQUFLLFFBQVE7Ozs7Ozs7SUFFM0MsU0FBQyxtQkFBTTs7ZUFBUSxLQUFDLFVBQVUsTUFBTTs7O3VCQUVoQyx3QkFBVzs7ZUFBYSxLQUFDLFFBQVE7Ozt1QkFFakMsNkJBQWdCOzs7O1FBRVosT0FBTyxLQUFDLFVBQVU7dUJBQ0osZUFBQSxLQUFNOzs7O1FBRXBCLFVBQVUsT0FBTyxPQUFPLEtBQUs7UUFDN0IsUUFBUSxlQUFNLEdBQUU7O21CQUFNLEVBQUUsT0FBTyxFQUFFOztlQUNqQzs7O3VCQUVKLDRCQUFlOzs7O1FBRVg7UUFDQTtlQUVNLGNBQWtCLEtBQUs7O1lBQ3pCLEtBQUssYUFBYTtZQUNsQixPQUFPLEtBQUMsVUFBVTswQkFDQzs7dUJBQWpCOztZQUNGLFFBQVEsS0FBSztZQUNiLFlBQVksS0FBSzs7ZUFFckI7Ozt1QkFFSiwwQkFBYSxVQUFTOzs7O2FBRVI7Ozs7WUFFUCxTQUFTLFNBQVMsS0FBTSxTQUFTLFdBQVc7O1lBQzNDLFdBQVcsU0FBUyxNQUFNO1lBQzFCLFNBQVMsU0FBUzs7UUFFdEIsU0FBUyxPQUFPO1FBRWhCLHNCQUFZLEtBQUMsTUFBTTtjQUNnQixVQUFiOztZQUF0Qjs7UUFDQSxVQUFVLEtBQUs7UUFDZixLQUFDLE1BQU0sWUFBWTtlQUVuQjs7O3VCQUVKLHdCQUFXLFdBQVUsVUFBUyxNQUFLLElBQUcsT0FBTSxPQUFNLFNBQU87Ozs7UUFFckQsV0FBVyxLQUFDLFlBQVksVUFDcEIsS0FBUSxLQUFHLEVBQ1gsS0FBUSxLQUNSLE1BQVEsVUFDUixNQUFRLE1BQ1IsTUFBUSxNQUNSLE9BQVE7UUFFWixJQUFJLElBQUksS0FBQyxXQUFXLHFCQUFxQixTQUFTLE9BQU87ZUFFekQ7Ozt1QkFFSix5QkFBWTs7OztjQUVFLEtBQUMsTUFBTTs7OzthQUViLFFBQWMsS0FBQzs7WUFBVixRQUFTLEtBQUM7WUFDZixPQUFPLGdCQUFPOzt1QkFBTSxFQUFFLFNBQVE7O2lCQUNILE1BQU07O3VCQUExQixLQUFDLE1BQU07OztRQUVsQixTQUFTLEtBQUMsa0JBQVMsR0FBRTs7bUJBQU0sRUFBRSxTQUFROzthQUVqQyxRQUFjLEtBQUM7O1lBQVYsUUFBUyxLQUFDO1lBQ2YsTUFBTSxPQUFPO2lCQUNjLE1BQU07O3VCQUExQixLQUFDLE1BQU07OztzQkFFWCxLQUFDLE1BQU07Ozt1QkFFbEIseUJBQVk7Ozs7YUFFTCxLQUFDLE1BQU07O1lBQ04sS0FBQyxXQUFXOzs7UUFHaEIsU0FBUyxPQUFPOzRCQUVKLE9BQU8sS0FBSyxLQUFDOzs7WUFBckI7Z0JBQ0csS0FBSyxXQUFXOztnQkFDZixLQUFDLFdBQVc7Ozs7O3VCQUV4QiwrQkFBWSxTQUFROzs7O2FBRWIsS0FBQyxNQUFNOztZQUNOLEtBQUMsV0FBVzt1QkFDVCxNQUFNLElBQUksU0FBWSxTQUFTOztzQkFDNUIsS0FBQyxNQUFNOzs7O1FBR2pCLFNBQVMsVUFBVTtRQUNuQjs0QkFFWSxPQUFPLEtBQUssS0FBQzs7O1lBQXJCO2dCQUNHLEtBQUssV0FBVzs7Z0JBQ2YsTUFBTSxNQUFNLFFBQVMsVUFBVSxLQUFLLE1BQU0sUUFBUTs7OzZCQUU5Qzs7O1lBQVI7WUFDQSxLQUFDLFdBQVcsS0FBSzt1QkFDZCxNQUFNLElBQUksS0FBSyxJQUFPLFNBQVM7O3NCQUM1QixLQUFDLE1BQU0sS0FBSzs7Ozs7dUJBRTFCLDJCQUFjLE1BQUssVUFBUyxNQUFLOzs7O1FBRTdCLGFBQWE7UUFDYixTQUFTLE9BQU8sTUFBTTtRQUl0Qix3QkFBc0IsT0FBTyx5QkFBc0IsT0FBTzs0QkFFOUMsT0FBTzs7O1lBQWY7WUFFQSxJQUFJLElBQUksS0FBQyxXQUFXLEtBQUssWUFBWSxLQUFLO1lBQzFDLElBQUksSUFBSSxLQUFDLFdBQVcsS0FBSyxZQUFZO1lBQ3JDLElBQUksSUFBSSxLQUFDLFdBQVcsS0FBSyxZQUFZLEtBQUssT0FBSztZQUMvQyxJQUFJLElBQUksS0FBQyxXQUFXLEtBQUssWUFBWSxLQUFLO1lBRTFDLFNBQVMsUUFBUSxNQUNiLEtBQU0sS0FDTixLQUFNLEtBQUssS0FDWCxLQUFNLEtBQUssT0FBSztnQkFFakIsS0FBSzs7Z0JBQ0osU0FBUyxxQkFBWSxPQUFPLEtBQUs7Ozs2QkFFN0IsT0FBTzs7O1lBQWY7Z0JBRUcsS0FBSzs7Z0JBQ0osV0FBVyxLQUFDLFVBQVUsS0FBSyxNQUFNLEtBQUssT0FBTyxLQUFLLEtBQUssS0FBSyxLQUFLLE1BQU0sS0FBSyxNQUFNLEtBQUs7Ozs7Z0JBRXZGLEtBQUssT0FBTyxLQUFLLE9BQUs7Z0JBQ3RCLEtBQUssT0FBTztnQkFDWixXQUFXLEtBQUMsWUFBWSxLQUFLLEtBQUs7O1lBRXRDLFNBQVMsTUFBTSxLQUFLOzt1QkFFZixPQUFPOztZQUNaLFNBQVMsUUFBUSxPQUFPO2lDQUVaLE9BQU87OztnQkFBZjtnQkFDQSxLQUFDLE1BQU0sbUJBQVAsS0FBQyxNQUFNLGdDQUFhO2dCQUNwQixLQUFDLE1BQU0sTUFBTSxJQUFJOzs7UUFFekIsS0FBQyxNQUFNLFFBQVE7ZUFDZixLQUFLLEtBQUssZUFBZSxLQUFLOzs7dUJBRWxDLHFDQUFrQjs7OztRQUVkLFFBQVEsT0FBTyxTQUFTLFFBQVE7NEJBQ3BCOzs7WUFBUjtrQkFDRSxLQUFDLE1BQU07Ozs7dUJBRWpCLDBCQUFPLE1BQUs7Ozs7a0JBSUYsa0JBQVM7O21CQUFZLGFBQWE7O2FBSXJDLEtBQUMsTUFBTSxvQkFBZSxjQUFBLElBQUs7O1lBRTFCLEtBQUssS0FBSyxlQUFlLEtBQUssS0FBQyxNQUFNOzs7UUFLekMsc0JBQVUsY0FBQSxJQUFLLHVDQUFNLE1BQU0sSUFBSTttQkFFNUIsUUFBVyxTQUFTOztZQUNuQixLQUFDLE1BQU07OztRQUdYLGFBQVEsSUFBSSxLQUFLO3NCQUVMOzs7O1FBR1osT0FBTyxLQUFLLEtBQUs7YUFHZCxLQUFDLE1BQU0sZ0JBQVAsS0FBQyxNQUFNLE1BQU8sc0JBQVE7O1lBRXJCLEtBQUssS0FBSyxlQUFlLEtBQUssS0FBQyxNQUFNOzs7UUFJekMsUUFBUSxLQUFLLE1BQU07UUFFbkIsWUFDSSxNQUFTLE1BQU0sT0FDZixTQUNBLFdBQ0EsS0FBUztRQUViLFlBQVk7UUFDWjtRQUNBLGVBQWU7UUFFZixlQUFRLFNBQVksTUFBTSxLQUFLLElBQUksT0FBTztRQUMxQyxlQUFRLFNBQVksTUFBTTtRQUMxQixjQUFRLFNBQVksS0FBSztZQUlyQixTQUFTOzttQkFBYyxLQUFDLGFBQWEsS0FBSyxTQUFTLEtBQUs7O2lCQUN4RDs7bUJBQXVCLEtBQUMsYUFBYSxLQUFLLFNBQVMsS0FBSzs7aUJBQ3hELFlBQVc7O21CQUFZLEtBQUMsYUFBYSxLQUFLLFNBQVMsS0FBSzs7aUJBQ3hELFlBQVc7O21CQUFZLEtBQUMsYUFBYSxLQUFLLFNBQVMsS0FBSzs7aUJBQ3hELFlBQVc7O21CQUFZLEtBQUMsYUFBYSxLQUFLLFNBQVMsS0FBSzs7aUJBQ3hELFlBQVc7O21CQUFZLEtBQUMsYUFBYSxLQUFLLFNBQVMsS0FBSzs7aUJBQ3hELFlBQVc7O21CQUFZLEtBQUMsYUFBYSxLQUFLLFNBQVMsS0FBSzs7aUJBQ3hELFlBQVc7O21CQUFZLEtBQUMsYUFBYSxLQUFLLFNBQVMsS0FBSzs7aUJBQ3hELFlBQVc7O21CQUFZLEtBQUMsYUFBYSxLQUFLLFNBQVMsS0FBSzs7aUJBQ3hELFlBQVc7O21CQUFZLEtBQUMsYUFBYSxLQUFLLFNBQVMsS0FBSzs7aUJBQ3hELFlBQVc7O21CQUFZLEtBQUMsYUFBYSxLQUFLLFNBQVMsS0FBSzs7aUJBQ3hELFlBQVc7O21CQUFZLEtBQUMsYUFBYSxLQUFLLFNBQVMsS0FBSzs7ZUFHNUQ7OztXQTlQUDs7O2VBZ1FNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/index/indexer.kode

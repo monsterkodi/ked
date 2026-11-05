@@ -9,17 +9,29 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
         
         indexer.singleton = @
         
-        post.on 'project.indexed' @onProjectIndexed
-        post.on 'index'       (file) => @index file
-        post.on 'file.change' (info) => 
-            if @files[info.path]
-                @index info.path refresh:true
-        
         @dirs    = Object.create null
         @files   = Object.create null
         @classes = Object.create null
         @funcs   = Object.create null
         @words   = Object.create null
+        
+        post.on 'project.indexed' @onProjectIndexed
+        post.on 'index'       (file) => @index file
+        post.on 'file.change' @onFileChange
+    
+    onFileChange: info ○=>
+        
+        switch info.change
+            'create'
+                if slash.ext(info.path) in fileutil.sourceFileExtensions
+                    ○ @index info.path
+            'delete'
+                @removePath info.path
+            'rename'
+                ○ @renamePath info.oldPath info.path
+            'modify'
+                if @files[info.path]
+                    ○ @index info.path refresh:true
                 
     @file: file -> @singleton.files[file]
     
@@ -89,7 +101,43 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
                     
         deleteBy @classes (k v) -> v.file == file
         
+        for word,files of @words
+            files.delete file
+            delete @words[word] if not files.size
+        
         delete @files[file]
+    
+    removePath: path ->
+        
+        if @files[path]?
+            @removeFile path
+            ⮐ 
+        
+        prefix = path + '/'
+        
+        for file in Object.keys(@files)
+            if file.startsWith prefix
+                @removeFile file
+    
+    renamePath: oldPath newPath ○->
+        
+        if @files[oldPath]?
+            @removeFile oldPath
+            if slash.ext(newPath) in fileutil.sourceFileExtensions
+                ○ @index newPath
+            ⮐ 
+        
+        prefix = oldPath + '/'
+        moved  = []
+        
+        for file in Object.keys(@files)
+            if file.startsWith prefix
+                moved.push [file, "#{newPath}#{file.slice(oldPath.length)}"]
+        
+        for pair in moved
+            @removeFile pair[0]
+            if slash.ext(pair[1]) in fileutil.sourceFileExtensions
+                ○ @index pair[1]
         
     applyIndexer: file fileInfo text indexerClass ->
                 
