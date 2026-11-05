@@ -20,6 +20,9 @@ use ../../edit/tool ◆ belt
         
         @input.on 'action' @onInputAction
         
+        @setColor 'frame_focus' theme.filter.frame.focus
+        @setColor 'frame_blur'  theme.filter.frame.blur
+        
         @input.hide()
         
     # setColor: key clr =>
@@ -105,7 +108,7 @@ use ../../edit/tool ◆ belt
             
             cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
             
-            outer = @input.hasFocus() ? color.brighten(@color.bg) : @color.bg
+            outer = @input.hasFocus() ? @color.frame_focus    : @color.frame_blur
             inner = @input.hasFocus() ? @input.color.bg_focus : @input.color.bg_blur
             
             cells.draw_rounded_border 0 0 -1 2 fg:outer

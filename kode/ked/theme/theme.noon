@@ -123,6 +123,11 @@ vinder
 quicky
     bg                                      #111   
     frame                                   #000   
+    
+filter
+    frame
+        focus                               #226   
+        blur                                #222   
 
 droop    
     bg                                      #222   
