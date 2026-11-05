@@ -666,8 +666,8 @@ use child_process ▪ spawn exec
             'cmd+f' 'ctrl+f'             ➜ ⮐ @showFinderOrSearcher()
             'shift+cmd+f' 'shift+ctrl+f' ➜ ⮐ @searcher.show()
             'alt+o'                      ➜ ⮐ @editor.jumpToCounterpart()
-            'alt+,'                      ➜ ⮐ @editor.singleCursorAtLine @funcol.funtree.lineIndexOfPrevFunc()
-            'alt+.'                      ➜ ⮐ @editor.singleCursorAtLine @funcol.funtree.lineIndexOfNextFunc()
+            'alt+,'                      ➜ ⮐ @goToPrevFunc()
+            'alt+.'                      ➜ ⮐ @goToNextFunc()
             'cmd+m' 'cmd+;' 'ctrl+;'     ➜ ⮐ @macro.show()
             'cmd+.' 'ctrl+.'             ➜ ⮐ @browse.gotoDir slash.dir(@currentFile)
             'cmd+o' 'ctrl+o'             ➜ ⮐ post.emit 'browse.dir' process.cwd()
@@ -688,6 +688,20 @@ use child_process ▪ spawn exec
             # ●▪ on key
                 
         @redraw() if result?.redraw != false
+        
+    goToPrevFunc: =>
+    
+        if @searcher.visible()
+            ⮐ @searcher.selectPrevFileHeader()
+            
+        @editor.singleCursorAtLine @funcol.funtree.lineIndexOfPrevFunc()
+        
+    goToNextFunc: =>
+    
+        if @searcher.visible()
+            ⮐ @searcher.selectNextFileHeader()
+            
+        @editor.singleCursorAtLine @funcol.funtree.lineIndexOfNextFunc()
         
     onViewSize: name side delta =>
         

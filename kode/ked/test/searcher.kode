@@ -165,3 +165,63 @@ use ../view/menu ◆ searcher
         config.data = savedConfig
         delete global.ked_session
         fs.rmSync root recursive:true force:true
+
+  ▸ next and previous file headers jump and scroll to the top
+
+        root = '/tmp/opencode/ked-searcher-headers'
+        files = []
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+
+        for i in 0...4
+            file = slash.path root "file#{i}.kode"
+            fs.writeFileSync file 'if a\n'
+            files.push file
+
+        main = files[0]
+
+        delete prjcts.projects[root]
+        for file in files ➜ delete prjcts.allFiles[file]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index main
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 0 0 80 30
+        s = new searcher h.screen e
+
+        ○ s.show 'if'
+
+        s.choices.currentIndex() ▸ 0
+
+        s.selectNextFileHeader() ▸ true
+        s.choices.currentIndex() ▸ 1
+        s.choices.state.s.view[1] ▸ 1
+
+        s.selectNextFileHeader() ▸ true
+        s.choices.currentIndex() ▸ 5
+        s.choices.state.s.view[1] ▸ 5
+
+        s.selectPrevFileHeader() ▸ true
+        s.choices.currentIndex() ▸ 1
+        s.choices.state.s.view[1] ▸ 1
+
+        s.selectPrevFileHeader() ▸ false
+        s.choices.currentIndex() ▸ 1
+        s.choices.state.s.view[1] ▸ 1
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true

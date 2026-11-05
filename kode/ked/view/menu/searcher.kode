@@ -194,6 +194,33 @@ use                 ◆ finder searcherfile
                 
         @choices.state.gutterWidthOverride = max 4 2 + ceil(Math.log10(@gutterMaxLine+1))
         
+    fileHeaderIndex: dir ->
+    
+        current = @choices.currentIndex()
+        found   = null
+        
+        for item,idx in @choices.items
+            continue if item.type != 'file'
+            if dir > 0
+                ⮐ idx if idx > current
+            else if idx < current
+                found = idx
+                
+        found
+        
+    selectFileHeader: idx ->
+    
+        ⮐ false if not idx?
+        
+        hadInputFocus = @input.hasFocus()
+        @choices.select idx
+        @input.grabFocus() if hadInputFocus
+        @choices.state.setView [0 idx]
+        true
+        
+    selectNextFileHeader: -> @selectFileHeader(@fileHeaderIndex(1))
+    selectPrevFileHeader: -> @selectFileHeader(@fileHeaderIndex(-1))
+        
     emitFileOpen: choice ->
     
         # log 'emit file.open'
