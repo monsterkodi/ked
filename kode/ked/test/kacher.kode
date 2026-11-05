@@ -37,9 +37,80 @@ use ../index ◆ kacher
         text ▸ 'alpha'
 
         fs.writeFileSync file 'beta'
-        post.emit 'file.change' path:file change:'change'
+        post.emit 'file.change' path:file change:'modify'
 
         text =○ kacher.getText file
         text ▸ 'beta'
 
         fs.rmSync root recursive:true force:true
+
+  ▸ renames invalidate the old path
+
+        root = '/tmp/opencode/ked-kacher-rename'
+        oldFile = slash.path root 'old.kode'
+        newFile = slash.path root 'new.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync oldFile 'alpha'
+
+        text =○ kacher.getText oldFile
+        text ▸ 'alpha'
+
+        fs.renameSync oldFile newFile
+        post.emit 'file.change' path:newFile oldPath:oldFile change:'rename'
+
+        fs.writeFileSync oldFile 'beta'
+        text =○ kacher.getText oldFile
+
+        fs.rmSync root recursive:true force:true
+
+        text ▸ 'beta'
+
+  ▸ deletes invalidate the old path
+
+        root = '/tmp/opencode/ked-kacher-delete'
+        file = slash.path root 'a.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file 'alpha'
+
+        text =○ kacher.getText file
+        text ▸ 'alpha'
+
+        fs.rmSync file
+        post.emit 'file.change' path:file change:'delete'
+
+        fs.writeFileSync file 'beta'
+        text =○ kacher.getText file
+
+        fs.rmSync root recursive:true force:true
+
+        text ▸ 'beta'
+
+  ▸ folder renames invalidate cached paths below the folder
+
+        root = '/tmp/opencode/ked-kacher-folder-rename'
+        oldDir = slash.path root 'old'
+        newDir = slash.path root 'new'
+        oldFile = slash.path oldDir 'a.kode'
+        newFile = slash.path newDir 'a.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync oldDir recursive:true
+        fs.writeFileSync oldFile 'alpha'
+
+        text =○ kacher.getText oldFile
+        text ▸ 'alpha'
+
+        fs.renameSync oldDir newDir
+        post.emit 'file.change' path:newDir oldPath:oldDir change:'rename'
+
+        fs.mkdirSync oldDir recursive:true
+        fs.writeFileSync oldFile 'beta'
+        text =○ kacher.getText oldFile
+
+        fs.rmSync root recursive:true force:true
+
+        text ▸ 'beta'

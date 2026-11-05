@@ -18,11 +18,32 @@ use ../../kxk ▪ post nfs
     @invalidate: file ->
 
         delete @cache[file]
+    
+    @invalidatePath: path ->
+        
+        @invalidate path
+        
+        prefix = path + '/'
+        
+        for file in Object.keys(@cache)
+            if file.startsWith prefix
+                delete @cache[file]
 
     @clear: ->
 
         @cache = Object.create null
 
-post.on 'file.change' (info) => kacher.invalidate info.path
+post.on 'file.change' (info) =>
+    
+    switch info.change
+        'create'
+        'modify'
+            kacher.invalidate info.path
+        'delete'
+            kacher.invalidatePath info.path
+        'rename'
+            if info.oldPath?
+                kacher.invalidatePath info.oldPath
+            kacher.invalidatePath info.path
 
 export kacher
