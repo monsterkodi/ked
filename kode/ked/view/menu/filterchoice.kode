@@ -192,9 +192,10 @@ use ../menu         ◆ choices
             
         if event.char
             
-            @showFilter()
-            @input.onKey key event
-            ⮐ true
+            if event.combo not in ['tab']
+                @showFilter()
+                @input.onKey key event
+                ⮐ true
             
         super key event
         
