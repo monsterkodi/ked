@@ -6,7 +6,6 @@ kxk = {}
 import post from "./kxk/post.js"
 import slash from "./kxk/slash.js"
 import stash from "./kxk/stash.js"
-import watch from "./kxk/watch.js"
 import watcher from "./kxk/watcher.js"
 import matchr from "./kxk/matchr.js"
 import immutable from "./kxk/immutable.js"
@@ -31,7 +30,7 @@ import nfs from "./kxk/nfs.js"
 import walkdir from "./kxk/walkdir.js"
 import noon from "./kxk/noon.js"
 
-var list = _k_.list("post slash stash watch watcher matchr immutable linediff karg krzl pretty profile keyinfo clip events kstr kseg kermit scooter pepe kpos util sds os nfs walkdir noon".split(' '))
+var list = _k_.list("post slash stash watcher matchr immutable linediff karg krzl pretty profile keyinfo clip events kstr kseg kermit scooter pepe kpos util sds os nfs walkdir noon".split(' '))
 for (var _a_ = 0; _a_ < list.length; _a_++)
 {
     exp = list[_a_]
@@ -45,5 +44,5 @@ for (exp in util)
 kxk.kutil = util
 export default kxk;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia3hrLmpzIiwic291cmNlcyI6WyIuLi9rb2RlL2t4ay5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O0FBS0E7T0FFWSxXQUFOO09BQVcsWUFBWDtPQUFpQixZQUFqQjtPQUF1QixZQUF2QjtPQUE2QixjQUE3QjtPQUFxQyxhQUFyQztPQUE0QyxnQkFBNUM7T0FBc0QsZUFBdEQ7T0FBK0QsV0FBL0Q7T0FBb0UsV0FBcEU7T0FBeUUsYUFBekU7T0FBZ0YsY0FBaEY7T0FBd0YsY0FBeEY7T0FBZ0csV0FBaEc7T0FBcUcsYUFBckc7T0FBNEcsV0FBNUc7T0FBaUgsV0FBakg7T0FBc0gsYUFBdEg7T0FBNkgsY0FBN0g7T0FBcUksV0FBckk7T0FBMEksV0FBMUk7T0FBK0ksV0FBL0k7T0FBb0osVUFBcEo7T0FBd0osU0FBeEo7T0FBMkosVUFBM0o7T0FBK0osY0FBL0o7T0FBdUssV0FBdks7O29CQUNLLHdLQUF3SyxNQUFNOzs7SUFBckw7SUFBNEwsSUFBSSxPQUFPLEtBQUs7O0tBRTVNLE9BQVc7O0lBQVAsTUFBTztJQUFPLElBQUksT0FBTzs7QUFFakMsSUFBSSxRQUFRO2VBRUwifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia3hrLmpzIiwic291cmNlcyI6WyIuLi9rb2RlL2t4ay5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O0FBS0E7T0FFWSxXQUFOO09BQVcsWUFBWDtPQUFpQixZQUFqQjtPQUF1QixjQUF2QjtPQUErQixhQUEvQjtPQUFzQyxnQkFBdEM7T0FBZ0QsZUFBaEQ7T0FBeUQsV0FBekQ7T0FBOEQsV0FBOUQ7T0FBbUUsYUFBbkU7T0FBMEUsY0FBMUU7T0FBa0YsY0FBbEY7T0FBMEYsV0FBMUY7T0FBK0YsYUFBL0Y7T0FBc0csV0FBdEc7T0FBMkcsV0FBM0c7T0FBZ0gsYUFBaEg7T0FBdUgsY0FBdkg7T0FBK0gsV0FBL0g7T0FBb0ksV0FBcEk7T0FBeUksV0FBekk7T0FBOEksVUFBOUk7T0FBa0osU0FBbEo7T0FBcUosVUFBcko7T0FBeUosY0FBeko7T0FBaUssV0FBaks7O29CQUNLLGtLQUFrSyxNQUFNOzs7SUFBL0s7SUFBc0wsSUFBSSxPQUFPLEtBQUs7O0tBRXRNLE9BQVc7O0lBQVAsTUFBTztJQUFPLElBQUksT0FBTzs7QUFFakMsSUFBSSxRQUFRO2VBRUwifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/kxk.kode
