@@ -7,6 +7,7 @@ use ../menu         ◆ choices
 
 SYMBOL = 
     clss:          '■'  
+    extends:       '□'
     unbound:       '->'
     bound:         '=>'
     async_unbound: '○→'
@@ -48,6 +49,7 @@ SYMBOL =
         if char == ' ' ➜ ⮐  [0 0 0]
 
         if 
+            item.divider    ➜ clr = color.darken @color.class 0.4
             item.clss       ➜ clr = @color.class
             item.md         ➜ clr = @color[item.md] 
             item.test       ➜ clr = @color['test' + int(belt.numIndent(item.name)/2)] 
@@ -78,6 +80,10 @@ SYMBOL =
         
         @state.syntax = new funSyntax @
         
+        @showBases  = true
+        @baseItems  = []
+        @dividerItem = null
+        
         @editor.state.on 'cursorsSet' @onCursorsSet
         
         post.on 'file.loaded'  @clear
@@ -87,7 +93,7 @@ SYMBOL =
     
         @selectItemForLineIndex @editor.state.mainCursor()[1]
         
-    localItems: => @items.filter (item) -> not item.inherited
+    localItems: => @items.filter (item) -> not (item.inherited or item.divider)
     
     selectItemForLineIndex: li =>
     
@@ -167,7 +173,18 @@ SYMBOL =
         items = clssl.concat funcs
         items.sort (a b) -> a.line - b.line
         
-        items = items.concat @itemsForBaseClass(clssl[-1])
+        supr = clssl[-1]
+        @baseItems = @itemsForBaseClass supr
+        @dividerItem = null
+        
+        if not empty @baseItems
+            @dividerItem = 
+                divider: true
+                name:    @baseDividerName(@baseItems)
+                line:    (supr?.line ? 1)
+                
+            items.push @dividerItem
+            items = items.concat @baseItems if @showBases
         
         @set items 'name'
         post.emit 'funtree.loaded'
@@ -222,6 +239,29 @@ SYMBOL =
                 
         items
         
+    baseDividerName: baseItems =>
+        
+        name = ' ' + SYMBOL.extends
+        if not @showBases
+            numClasses = baseItems.filter((item) -> item.clss).length
+            name += ' ' + numClasses
+        name
+        
+    toggleBases: =>
+        
+        ⮐  if empty @dividerItem
+        
+        @showBases = not @showBases
+        @dividerItem.name = @baseDividerName @baseItems
+        
+        items = @localItems()
+        items.push @dividerItem
+        items = items.concat @baseItems if @showBases
+        
+        @set items 'name'
+        @select items.indexOf(@dividerItem)
+        post.emit 'redraw'
+        
     jumpTo: choice =>
         
         if choice.inherited and not slash.samePath(choice.file @editor.currentFile)
@@ -239,14 +279,20 @@ SYMBOL =
         switch action
         
             'space'
-                @jumpTo choice
-                @grabFocus()
+            
+                if choice.divider
+                    @toggleBases()
+                else
+                    @jumpTo choice
+                    @grabFocus()
                 ⮐  
         
             'right'
             
+                ⮐ if choice.divider
                 @selectNext()
                 choice = @choiceAtRow @currentIndex()
+                ⮐ if choice.divider
                 @jumpTo choice
                 @grabFocus()
                 ⮐  
@@ -260,14 +306,27 @@ SYMBOL =
                 ⮐  
                 
             'click'
+            
+                if choice.divider
+                    @toggleBases()
+                else
+                    @jumpTo choice
+                    post.emit 'focus' 'editor'
+                ⮐  
+                
             'return'
             
-                @jumpTo choice
-                post.emit 'focus' 'editor'
+                if choice.divider
+                    @toggleBases()
+                else
+                    @jumpTo choice
+                    post.emit 'focus' 'editor'
                 ⮐  
                 
             'drag'
             
+                ⮐  if choice.divider or choice.inherited
+                
                 @jumpTo choice
                 ⮐  
                  

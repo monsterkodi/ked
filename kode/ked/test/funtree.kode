@@ -39,20 +39,44 @@ use ../view/colmns ◆ funtree
 
         fs.rmSync root recursive:true force:true
 
-        f.items.map((i) -> i.name) ▸ [' ■ Child' ' ■ Base' '   -> alpha' '   => beta' ' ■ Root' '   -> gamma']
+        f.showBases ▸ true
+        f.items.map((i) -> i.name) ▸ [' ■ Child' ' □' ' ■ Base' '   -> alpha' '   => beta' ' ■ Root' '   -> gamma']
 
-        f.items[1].inherited ▸ true
-        f.items[1].file ▸ baseFile
-        f.items[1].line ▸ 1
+        f.items[1].divider ▸ true
 
         f.items[2].inherited ▸ true
         f.items[2].file ▸ baseFile
-        f.items[2].line ▸ 2
-        f.items[2].class ▸ 'Base'
+        f.items[2].line ▸ 1
+
+        f.items[3].inherited ▸ true
+        f.items[3].file ▸ baseFile
+        f.items[3].line ▸ 2
+        f.items[3].class ▸ 'Base'
 
         f.selectItemForLineIndex 3
         f.currentIndex() ▸ 0
         f.lineIndexOfNextFunc() ▸ undefined
+
+        f.emitAction 'space' f.items[1]
+
+        f.showBases ▸ false
+        f.items.map((i) -> i.name) ▸ [' ■ Child' ' □ 2']
+
+        f.emitAction 'return' f.items[1]
+
+        f.showBases ▸ true
+        f.items.map((i) -> i.name) ▸ [' ■ Child' ' □' ' ■ Base' '   -> alpha' '   => beta' ' ■ Root' '   -> gamma']
+
+        emitted = []
+        originalEmit = post.emit
+        post.emit = (event args...) -> emitted.push [event].concat(args)
+
+        f.emitAction 'right' f.items[1]
+        f.emitAction 'drag' f.items[1]
+
+        post.emit = originalEmit
+
+        emitted.length ▸ 0
 
         supr = clss:true name:' ■ Child' line:1
         f.itemsForBaseClass(supr).length ▸ 0
@@ -89,7 +113,7 @@ use ../view/colmns ◆ funtree
         post.emit = (event args...) -> emitted.push [event].concat(args)
 
         f.emitAction 'return' f.items[0]
-        f.emitAction 'return' f.items[2]
+        f.emitAction 'return' f.items[3]
 
         post.emit = originalEmit
 
