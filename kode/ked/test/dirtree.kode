@@ -34,8 +34,17 @@ makeCol = ○->
     d = new dircol h.screen e []
     d.layout 0 0 100 30
 
-    ○ sleep 400
+    ○ waitForRoot d process.cwd()
     d
+
+waitForRoot = (d root) ○->
+    parent = slash.dir root
+    n = 0
+    while n < 100
+        items = d.dirtree.items
+        ⮐ if not empty items and items[0].path == parent
+        ○ sleep 10
+        n += 1
 
 ▸ dirtree
 
@@ -47,12 +56,12 @@ makeCol = ○->
 
         d =○ makeCol()
         d.setRoot root
-        ○ sleep 200
+        ○ waitForRoot d root
 
         file = slash.path root 'a.txt'
         fs.writeFileSync file 'hello'
         post.emit 'file.change' path:file change:'create'
-        ○ sleep 200
+        ○ sleep 120
 
         names = d.dirtree.items.map (i) -> i.path
 
@@ -70,11 +79,11 @@ makeCol = ○->
 
         d =○ makeCol()
         d.setRoot root
-        ○ sleep 200
+        ○ waitForRoot d root
 
         fs.rmSync file
         post.emit 'file.change' path:file change:'delete'
-        ○ sleep 200
+        ○ sleep 120
 
         names = d.dirtree.items.map (i) -> i.path
 
@@ -93,11 +102,11 @@ makeCol = ○->
 
         d =○ makeCol()
         d.setRoot root
-        ○ sleep 200
+        ○ waitForRoot d root
 
         fs.renameSync oldFile newFile
         post.emit 'file.change' path:newFile oldPath:oldFile change:'rename'
-        ○ sleep 200
+        ○ sleep 120
 
         names = d.dirtree.items.map (i) -> i.path
 
@@ -117,15 +126,14 @@ makeCol = ○->
 
         d =○ makeCol()
         d.setRoot root
-        ○ sleep 200
+        ○ waitForRoot d root
 
         ○ d.dirtree.openDir d.dirtree.itemForPath(sub) redraw:true
-        ○ sleep 200
 
         file = slash.path sub 'new.txt'
         fs.writeFileSync file 'hello'
         post.emit 'file.change' path:file change:'create'
-        ○ sleep 200
+        ○ sleep 120
 
         names = d.dirtree.items.map (i) -> i.path
         open  = d.dirtree.itemForPath(sub)?.open
@@ -145,13 +153,13 @@ makeCol = ○->
 
         d =○ makeCol()
         d.setRoot root
-        ○ sleep 200
+        ○ waitForRoot d root
 
         count = d.dirtree.items.length
 
         fs.writeFileSync file 'changed'
         post.emit 'file.change' path:file change:'modify'
-        ○ sleep 200
+        ○ sleep 120
 
         after = d.dirtree.items.length
 

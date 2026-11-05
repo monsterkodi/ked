@@ -7,6 +7,10 @@ events = []
 post.on 'file.change' (info) =>
     events.push info if events
 
+# tests do not need to wait for the production debounce
+watcher.debounce = 10
+watcher.maxDelay = 40
+
 ▸ watcher
 
   ▸ no read error logs
@@ -32,7 +36,7 @@ post.on 'file.change' (info) =>
 
         try
             ○ watcher.watch root
-            ○ sleep 100
+            ○ sleep 20
         catch err
             thrown = err
 
@@ -61,10 +65,10 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch root
-        ○ sleep 100
+        ○ sleep 20
 
         fs.writeFileSync slash.path(root 'a.txt') 'hello'
-        ○ sleep 400
+        ○ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -83,10 +87,10 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch root
-        ○ sleep 100
+        ○ sleep 20
 
         fs.writeFileSync file 'hello world'
-        ○ sleep 400
+        ○ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -105,10 +109,10 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch root
-        ○ sleep 100
+        ○ sleep 20
 
         fs.rmSync file
-        ○ sleep 400
+        ○ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -128,10 +132,10 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch root
-        ○ sleep 100
+        ○ sleep 20
 
         fs.renameSync oldFile newFile
-        ○ sleep 400
+        ○ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -152,10 +156,10 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch root
-        ○ sleep 100
+        ○ sleep 20
 
         fs.copyFileSync oldFile newFile
-        ○ sleep 400
+        ○ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -175,11 +179,11 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch root
-        ○ sleep 100
+        ○ sleep 20
 
         fs.writeFileSync tmp 'new'
         fs.renameSync tmp file
-        ○ sleep 400
+        ○ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -198,10 +202,10 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch root
-        ○ sleep 100
+        ○ sleep 20
 
         ○ nfs.write file 'new'
-        ○ sleep 400
+        ○ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -219,11 +223,11 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch root
-        ○ sleep 100
+        ○ sleep 20
 
         fs.mkdirSync dir
         fs.writeFileSync slash.path(dir 'inside.txt') 'hello'
-        ○ sleep 400
+        ○ sleep 80
 
         created = events.length
         createdChange = events[0]?.change
@@ -231,7 +235,7 @@ post.on 'file.change' (info) =>
 
         events = []
         fs.rmSync dir recursive:true force:true
-        ○ sleep 400
+        ○ sleep 80
 
         deleted = events.length
         deletedChange = events[0]?.change
@@ -259,10 +263,10 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch root
-        ○ sleep 100
+        ○ sleep 20
 
         fs.renameSync oldDir newDir
-        ○ sleep 400
+        ○ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -280,15 +284,15 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch root
-        ○ sleep 100
+        ○ sleep 20
 
         dir = slash.path root 'folder'
         fs.mkdirSync dir
-        ○ sleep 400
+        ○ sleep 80
 
         events = []
         fs.writeFileSync slash.path(dir 'inside.txt') 'hello'
-        ○ sleep 400
+        ○ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -305,12 +309,12 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch root
-        ○ sleep 100
+        ○ sleep 20
 
         dir = slash.path root 'node_modules'
         fs.mkdirSync dir
         fs.writeFileSync slash.path(dir 'inside.txt') 'hello'
-        ○ sleep 400
+        ○ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -330,18 +334,18 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch slash.path(root 'a.txt') recursive:false
-        ○ sleep 100
+        ○ sleep 20
 
         fs.writeFileSync nested 'changed'
-        ○ sleep 400
+        ○ sleep 80
 
         beforeUpgrade = events.length
 
         ○ watcher.watch nested
-        ○ sleep 100
+        ○ sleep 20
 
         fs.writeFileSync nested 'changed again'
-        ○ sleep 400
+        ○ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -363,15 +367,15 @@ post.on 'file.change' (info) =>
 
         events = []
         ○ watcher.watch file
-        ○ sleep 100
+        ○ sleep 20
 
         fs.writeFileSync sibling 'changed'
-        ○ sleep 400
+        ○ sleep 80
 
         siblingEvents = events.length
 
         fs.writeFileSync file 'changed'
-        ○ sleep 400
+        ○ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -380,3 +384,6 @@ post.on 'file.change' (info) =>
         events.length ▸ 1
         events[0].change ▸ 'modify'
         events[0].path ▸ file
+
+        watcher.debounce = 75
+        watcher.maxDelay = 250
