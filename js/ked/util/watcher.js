@@ -1,9 +1,8 @@
-var _k_ = {in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}};_k_.r6=_k_.k.F256(_k_.k.r(6))
+var _k_ = {in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, isStr: function (o) {return typeof o === 'string' || o instanceof String}}
 
 var watcher
 
 import kxk from "../../kxk.js"
-let watch = kxk.watch
 let slash = kxk.slash
 let post = kxk.post
 let nfs = kxk.nfs
@@ -17,29 +16,57 @@ watcher = (function ()
     {}
 
     watcher["watchers"] = {}
-    watcher["renameTimer"] = {}
-    watcher["fileStats"] = {}
-    watcher["ignoredWatchErrors"] = ['EACCES','EPERM','ENOENT']
+    watcher["recurse"] = {}
+    watcher["filters"] = {}
+    watcher["known"] = {}
+    watcher["pending"] = {}
+    watcher["rescans"] = {}
+    watcher["quietTimer"] = null
+    watcher["maxTimer"] = null
+    watcher["debounce"] = 75
+    watcher["maxDelay"] = 250
+    watcher["ignoreDirs"] = ['node_modules','.git']
+    watcher["ignoreFiles"] = ['.DS_Store','.localized','ked.log']
+    watcher["ignoredWatchErrors"] = ['EACCES','EPERM','ENOENT','ENOSPC']
     watcher["snapshot"] = async function (file)
     {
-        var stat
+        var info
 
-        if (stat = await nfs.fileExists(file))
+        if (info = this.statPath(file))
         {
-            return this.fileStats[file] = stat
+            return this.known[file] = info
+        }
+        else
+        {
+            return delete this.known[file]
         }
     }
 
     watcher["close"] = function ()
     {
-        var path, wtch
+        var dir, wtch
 
-        for (path in watcher.watchers)
+        for (dir in this.watchers)
         {
-            wtch = watcher.watchers[path]
+            wtch = this.watchers[dir]
             wtch.close()
         }
-        return watcher.watchers = {}
+        this.watchers = {}
+        this.recurse = {}
+        this.filters = {}
+        this.known = {}
+        this.pending = {}
+        this.rescans = {}
+        if (this.quietTimer)
+        {
+            clearTimeout(this.quietTimer)
+        }
+        if (this.maxTimer)
+        {
+            clearTimeout(this.maxTimer)
+        }
+        delete this.quietTimer
+        return delete this.maxTimer
     }
 
     watcher["openWatch"] = function (path)
@@ -50,7 +77,7 @@ watcher = (function ()
         }
         catch (err)
         {
-            if (_k_.in(err.code,watcher.ignoredWatchErrors))
+            if (_k_.in(err.code,this.ignoredWatchErrors))
             {
                 return null
             }
@@ -61,7 +88,7 @@ watcher = (function ()
 
     watcher["onWatchError"] = function (path, err)
     {
-        if (_k_.in(err.code,watcher.ignoredWatchErrors))
+        if (_k_.in(err.code,this.ignoredWatchErrors))
         {
             return
         }
@@ -70,7 +97,7 @@ watcher = (function ()
 
     watcher["watch"] = async function (path, opt)
     {
-        var dir, isDir, item, items, prjPath, w, _54_22_
+        var isDir, prjPath, _74_22_
 
         if (_k_.empty(path))
         {
@@ -78,147 +105,541 @@ watcher = (function ()
             return
         }
         path = slash.untilde(path)
-        isDir = await nfs.isDir(path)
         opt = (opt != null ? opt : {})
-        opt.recursive = ((_54_22_=opt.recursive) != null ? _54_22_ : true)
+        opt.recursive = ((_74_22_=opt.recursive) != null ? _74_22_ : true)
+        isDir = await nfs.isDir(path)
         if (isDir)
         {
-            dir = path
+            this.watchDir(path,opt.recursive)
+            return
+        }
+        prjPath = await nfs.prj(path)
+        if (prjPath && !(_k_.in(prjPath,['/',slash.untilde('~')])))
+        {
+            return this.watchDir(prjPath,opt.recursive)
         }
         else
         {
-            prjPath = await nfs.prj(path)
-            if (_k_.empty(watcher.watchers[path]))
+            return this.watchFileDir(path)
+        }
+    }
+
+    watcher["watchFileDir"] = function (path)
+    {
+        var dir
+
+        dir = slash.dir(path)
+        if (this.filters[dir])
+        {
+            if (!(_k_.in(path,this.filters[dir])))
             {
-                w = watcher.openWatch(path)
-                if (!_k_.empty(w))
-                {
-                    w.on('error',(function (err)
-                    {
-                        return watcher.onWatchError(path,err)
-                    }).bind(this))
-                    w.on('change',((function (dir)
-                    {
-                        return (function (change, path)
-                        {
-                            return this.onChange(change,path,dir)
-                        }).bind(this)
-                    }).bind(this))(slash.dir(path)))
-                    watcher.watchers[path] = w
-                }
+                return this.filters[dir].push(path)
             }
-            if (_k_.empty(prjPath))
+        }
+        else if (_k_.empty(this.watchers[dir]))
+        {
+            this.watchDir(dir,false)
+            return this.filters[dir] = [path]
+        }
+    }
+
+    watcher["watchDir"] = function (dir, recursive)
+    {
+        var w
+
+        if (_k_.empty(dir))
+        {
+            return
+        }
+        if (_k_.in(slash.file(dir),this.ignoreDirs))
+        {
+            return
+        }
+        if (this.watchers[dir])
+        {
+            if (recursive && !this.recurse[dir])
             {
-                console.log(`✘ ${_k_.r6(path)}`)
+                this.recurse[dir] = true
+                this.watchChildren(dir)
+            }
+            return
+        }
+        w = this.openWatch(dir)
+        if (!w)
+        {
+            return
+        }
+        this.watchers[dir] = w
+        this.recurse[dir] = recursive
+        w.on('error',(function (err)
+        {
+            return this.onWatchError(dir,err)
+        }).bind(this))
+        w.on('change',((function (d)
+        {
+            return (function (change, name)
+            {
+                return this.onRaw(d,change,name)
+            }).bind(this)
+        }).bind(this))(dir))
+        this.seedDir(dir)
+        if (recursive)
+        {
+            return this.watchChildren(dir)
+        }
+    }
+
+    watcher["watchChildren"] = function (dir)
+    {
+        var dirent
+
+        var list = _k_.list(this.readdir(dir))
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            dirent = list[_a_]
+            if (!dirent.isDirectory())
+            {
+                continue
+            }
+            if (_k_.in(dirent.name,this.ignoreDirs))
+            {
+                continue
+            }
+            this.watchDir(slash.path(dir,dirent.name),true)
+        }
+    }
+
+    watcher["readdir"] = function (dir)
+    {
+        try
+        {
+            return fs.readdirSync(dir,{withFileTypes:true})
+        }
+        catch (err)
+        {
+            return []
+        }
+    }
+
+    watcher["statPath"] = function (p)
+    {
+        var stat
+
+        try
+        {
+            stat = fs.statSync(p)
+            return {dev:stat.dev,ino:stat.ino,type:(stat.isDirectory() ? 'dir' : 'file'),size:stat.size,mtimeMs:stat.mtimeMs,ctimeMs:stat.ctimeMs}
+        }
+        catch (err)
+        {
+            return null
+        }
+    }
+
+    watcher["seedDir"] = function (dir)
+    {
+        var dirent, info, p
+
+        var list = _k_.list(this.readdir(dir))
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            dirent = list[_a_]
+            if (_k_.in(dirent.name,this.ignoreFiles))
+            {
+                continue
+            }
+            if (_k_.in(dirent.name,this.ignoreDirs))
+            {
+                continue
+            }
+            p = slash.path(dir,dirent.name)
+            if (info = this.statPath(p))
+            {
+                this.known[p] = info
+            }
+        }
+    }
+
+    watcher["ignoredPath"] = function (p)
+    {
+        var file
+
+        file = slash.file(p)
+        return _k_.in(file,this.ignoreFiles) || _k_.in(file,this.ignoreDirs)
+    }
+
+    watcher["onRaw"] = function (dir, change, name)
+    {
+        var filters, path
+
+        if (_k_.empty(name) || !(_k_.isStr(name)))
+        {
+            this.rescans[dir] = true
+            this.scheduleFlush()
+            return
+        }
+        path = slash.path(dir,name)
+        if (this.ignoredPath(path))
+        {
+            return
+        }
+        if (filters = this.filters[dir])
+        {
+            if (!(_k_.in(path,filters)))
+            {
                 return
             }
-            if (prjPath !== '/')
+        }
+        return this.markPending(path)
+    }
+
+    watcher["markPending"] = function (path)
+    {
+        var now
+
+        now = Date.now()
+        if (this.pending[path])
+        {
+            this.pending[path].last = now
+        }
+        else
+        {
+            this.pending[path] = {first:now,last:now}
+        }
+        return this.scheduleFlush()
+    }
+
+    watcher["scheduleFlush"] = function ()
+    {
+        if (this.quietTimer)
+        {
+            clearTimeout(this.quietTimer)
+        }
+        delete this.quietTimer
+        this.quietTimer = setTimeout(((function ()
+        {
+            return this.flush()
+        }).bind(this)),this.debounce)
+        if (!this.maxTimer)
+        {
+            return this.maxTimer = setTimeout(((function ()
             {
-                dir = prjPath
+                return this.flush()
+            }).bind(this)),this.maxDelay)
+        }
+    }
+
+    watcher["flush"] = function ()
+    {
+        var cre, creates, del, deleted, deletes, dir, info, modifies, parent, path, pending, prev, ren, renamedNew, renamedOld, renames
+
+        if (this.quietTimer)
+        {
+            clearTimeout(this.quietTimer)
+        }
+        if (this.maxTimer)
+        {
+            clearTimeout(this.maxTimer)
+        }
+        delete this.quietTimer
+        delete this.maxTimer
+        pending = this.pending
+        this.pending = {}
+        if (!_k_.empty(this.rescans))
+        {
+            for (dir in this.rescans)
+            {
+                this.collectPaths(dir,pending)
+            }
+            this.rescans = {}
+        }
+        if (_k_.empty(pending))
+        {
+            return
+        }
+        deletes = []
+        creates = []
+        modifies = []
+        for (path in pending)
+        {
+            if (this.ignoredPath(path))
+            {
+                continue
+            }
+            info = this.statPath(path)
+            prev = this.known[path]
+            if (info)
+            {
+                if (!prev)
+                {
+                    creates.push({path:path,stat:info})
+                    this.known[path] = info
+                }
+                else if (info.dev !== prev.dev || info.ino !== prev.ino)
+                {
+                    modifies.push(path)
+                    this.known[path] = info
+                }
+                else if (info.size !== prev.size || info.mtimeMs !== prev.mtimeMs || info.ctimeMs !== prev.ctimeMs)
+                {
+                    modifies.push(path)
+                    this.known[path] = info
+                }
+            }
+            else if (prev)
+            {
+                deletes.push({path:path,stat:prev})
+            }
+        }
+        renames = []
+        var list = _k_.list(deletes)
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            del = list[_a_]
+            var list1 = _k_.list(creates)
+            for (var _b_ = 0; _b_ < list1.length; _b_++)
+            {
+                cre = list1[_b_]
+                if (del.used || cre.used)
+                {
+                    continue
+                }
+                if (del.stat.dev === cre.stat.dev && del.stat.ino === cre.stat.ino)
+                {
+                    del.used = true
+                    cre.used = true
+                    renames.push({old:del.path,new:cre.path,stat:del.stat})
+                    break
+                }
+            }
+        }
+        renamedOld = []
+        renamedNew = []
+        var list2 = _k_.list(renames)
+        for (var _c_ = 0; _c_ < list2.length; _c_++)
+        {
+            ren = list2[_c_]
+            renamedOld.push(ren.old)
+            renamedNew.push(ren.new)
+            if (ren.stat.type === 'dir')
+            {
+                parent = slash.dir(ren.old)
+                this.closeWatchedUnder(ren.old)
+                this.pruneKnownUnder(ren.old)
+                if (this.recurse[parent])
+                {
+                    this.watchDir(ren.new,true)
+                }
             }
             else
             {
-                dir = slash.dir(path)
+                delete this.known[ren.old]
+                this.known[ren.new] = this.statPath(ren.new)
+            }
+            this.emitChange('rename',ren.new,{oldPath:ren.old})
+        }
+        deleted = []
+        deletes.sort(function (a, b)
+        {
+            return a.path.length - b.path.length
+        })
+        var list3 = _k_.list(deletes)
+        for (var _d_ = 0; _d_ < list3.length; _d_++)
+        {
+            del = list3[_d_]
+            if (del.used)
+            {
+                continue
+            }
+            if (this.underAny(del.path,renamedOld))
+            {
+                continue
+            }
+            if (this.underAny(del.path,deleted))
+            {
+                continue
+            }
+            info = this.known[del.path]
+            this.emitChange('delete',del.path)
+            deleted.push(del.path)
+            if ((info != null ? info.type : undefined) === 'dir')
+            {
+                this.closeWatchedUnder(del.path)
+                this.pruneKnownUnder(del.path)
+            }
+            else
+            {
+                delete this.known[del.path]
             }
         }
-        if (_k_.empty(watcher.watchers[dir]))
+        creates.sort(function (a, b)
         {
-            if (dir === '/' || dir === slash.untilde('~'))
+            return a.path.length - b.path.length
+        })
+        var list4 = _k_.list(creates)
+        for (var _e_ = 0; _e_ < list4.length; _e_++)
+        {
+            cre = list4[_e_]
+            if (cre.used)
             {
-                opt.recursive = false
+                continue
             }
-            w = watcher.openWatch(dir)
-            if (!w)
+            if (this.underAny(cre.path,renamedNew))
             {
-                return
+                continue
             }
-            w.on('error',(function (err)
+            if (this.underAny(cre.path,deleted))
             {
-                return watcher.onWatchError(dir,err)
-            }).bind(this))
-            w.on('change',((function (dir)
+                continue
+            }
+            if (cre.stat.type === 'dir')
             {
-                return (function (change, path)
+                if (this.recurse[slash.dir(cre.path)])
                 {
-                    return this.onChange(change,path,dir)
-                }).bind(this)
-            }).bind(this))(dir))
-            watcher.watchers[dir] = w
-            if (!opt.recursive)
-            {
-                return
-            }
-            items = await nfs.list(dir,{recursive:false})
-            var list = _k_.list(items)
-            for (var _a_ = 0; _a_ < list.length; _a_++)
-            {
-                item = list[_a_]
-                if (item.type === 'dir')
-                {
-                    if (_k_.in(item.file,['node_modules','.git']))
-                    {
-                        continue
-                    }
-                    watcher.watch(item.path)
+                    this.watchDir(cre.path,true)
                 }
+            }
+            this.emitChange('create',cre.path)
+        }
+        var list5 = _k_.list(modifies)
+        for (var _f_ = 0; _f_ < list5.length; _f_++)
+        {
+            path = list5[_f_]
+            if (this.underAny(path,renamedOld))
+            {
+                continue
+            }
+            if (this.underAny(path,renamedNew))
+            {
+                continue
+            }
+            if (this.underAny(path,deleted))
+            {
+                continue
+            }
+            if (_k_.in(path,renamedNew))
+            {
+                continue
+            }
+            info = this.known[path]
+            if ((info != null ? info.type : undefined) !== 'file')
+            {
+                continue
+            }
+            this.emitChange('modify',path)
+        }
+    }
+
+    watcher["underAny"] = function (path, roots)
+    {
+        var root
+
+        var list = _k_.list(roots)
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            root = list[_a_]
+            if (path === root || path.startsWith(root + '/'))
+            {
+                return true
+            }
+        }
+        return false
+    }
+
+    watcher["closeWatchedUnder"] = function (path)
+    {
+        var dir
+
+        var list = _k_.list(Object.keys(this.watchers))
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            dir = list[_a_]
+            if (dir === path || dir.startsWith(path + '/'))
+            {
+                this.watchers[dir].close()
+                delete this.watchers[dir]
+                delete this.recurse[dir]
             }
         }
     }
 
-    watcher["onChange"] = async function (change, path, dir)
+    watcher["pruneKnownUnder"] = function (path)
     {
-        var exists
+        var p
 
-        path = slash.path(dir,path)
-        exists = await nfs.exists(path)
-        if (exists)
+        for (p in Object.keys(this.known))
         {
-            if (change === 'rename')
+            if (p === path || p.startsWith(path + '/'))
             {
-                if (this.renameTimer[path])
-                {
-                    clearTimeout(this.renameTimer[path])
-                    delete this.renameTimer[path]
-                }
-                else
-                {
-                    this.renameTimer[path] = setTimeout(((function (p)
-                    {
-                        return (function ()
-                        {
-                            return this.postRename(p)
-                        }).bind(this)
-                    }).bind(this))(path),100)
-                    return
-                }
+                delete this.known[p]
             }
-            if (change === 'change')
-            {
-                if ((this.fileStats[path] != null))
-                {
-                    if (this.fileStats[path].size === exists.size && this.fileStats[path].mtimeMs === exists.mtimeMs)
-                    {
-                        return
-                    }
-                }
-            }
-            if (slash.file(path) === 'ked.log')
-            {
-                return
-            }
-            return post.emit('file.change',{path:path,change:change,watcher:this})
-        }
-        else
-        {
-            return post.emit('file.change',{path:path,change:'remove',watcher:this})
         }
     }
 
-    watcher["postRename"] = function (path)
+    watcher["collectPaths"] = function (dir, into)
     {
-        clearTimeout(this.renameTimer[path])
-        delete this.renameTimer[path]
-        return post.emit('file.change',{path:path,change:'rename',watcher:this})
+        var p, _351_43_
+
+        for (p in this.known)
+        {
+            if (p === dir || p.startsWith(dir + '/'))
+            {
+                into[p] = {first:0,last:0}
+            }
+        }
+        return this.walkPaths(dir,into,(((_351_43_=this.recurse[dir]) != null ? _351_43_ : true)))
+    }
+
+    watcher["walkPaths"] = function (dir, into, recursive)
+    {
+        var dirent, p
+
+        var list = _k_.list(this.readdir(dir))
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            dirent = list[_a_]
+            if (_k_.in(dirent.name,this.ignoreFiles))
+            {
+                continue
+            }
+            if (_k_.in(dirent.name,this.ignoreDirs))
+            {
+                continue
+            }
+            p = slash.path(dir,dirent.name)
+            into[p] = {first:0,last:0}
+            if (recursive && dirent.isDirectory())
+            {
+                this.walkPaths(p,into,true)
+            }
+        }
+    }
+
+    watcher["emitChange"] = function (type, path, opt)
+    {
+        var change, info, _376_49_
+
+        opt = (opt != null ? opt : {})
+        change = 'change'
+        if (type === 'create')
+        {
+            change = 'create'
+        }
+        if (type === 'delete')
+        {
+            change = 'remove'
+        }
+        if (type === 'rename')
+        {
+            change = 'rename'
+        }
+        info = {path:path,change:change,type:type,watcher:this}
+        if ((opt.oldPath != null))
+        {
+            info.oldPath = opt.oldPath
+        }
+        console.log(`file.change ${change} ${type} ${path}`)
+        return post.emit('file.change',info)
     }
 
     return watcher
@@ -226,5 +647,5 @@ watcher = (function ()
 
 export default watcher;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoid2F0Y2hlci5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdXRpbC93YXRjaGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDVSxVQUFBO0lBQU07SUFBTTtJQUFNO0lBQUs7O09BQzdCLFNBQUE7OztBQUVILFdBQUQ7Ozs7O0lBSUksU0FBQztJQUNELFNBQUM7SUFDRCxTQUFDO0lBQ0QsU0FBQyx3QkFBcUIsU0FBUyxRQUFRO0lBRXZDLFNBQUMsNkJBQVU7Ozs7WUFFSixhQUFRLElBQUksV0FBVzs7bUJBQ3RCLEtBQUMsVUFBVSxRQUFROzs7O0lBRTNCLFNBQUM7Ozs7YUFFTyxRQUFhLFFBQVE7O1lBQWhCLE9BQVEsUUFBUTtZQUNyQixLQUFLOztlQUNULFFBQVE7OztJQUVaLFNBQUMsd0JBQVc7Ozs7bUJBR0YsR0FBRyxNQUFNOztlQUNUOzt1QkFDQyxJQUFJLEtBQVEsUUFBUTs7dUJBQ2pCOztZQUNOLHdCQUFnQixnQkFBZ0I7bUJBQzlCOzs7O0lBRVYsU0FBQywyQkFBYyxNQUFLOzttQkFFYixJQUFJLEtBQVEsUUFBUTs7OztRQUV2Qix3QkFBZ0IsZ0JBQWdCOzs7SUFFcEMsU0FBQywwQkFBTyxNQUFLOzs7O3NCQUVBOztZQUNMLGNBQU07OztRQUtWLE9BQU8sTUFBTSxRQUFRO1FBRXJCLGNBQVMsSUFBSSxNQUFNO1FBRW5CLE9BQUEsY0FBQTtRQUNBLElBQUksc0JBQUosSUFBSSwrQkFBYTtZQUVkOztZQUNDLE1BQU07Ozs7WUFFTixnQkFBVyxJQUFJLElBQUk7MEJBRVYsUUFBUSxTQUFTOztnQkFFdEIsSUFBSSxRQUFRLFVBQVU7K0JBQ2I7O29CQUNMLEVBQUUsR0FBRyxtQkFBUzs7K0JBQVEsUUFBUSxhQUFhLEtBQUs7O29CQUNoRCxFQUFFLEdBQUcscUJBQVc7OzBDQUFTLFFBQU87O21DQUFTLEtBQUMsU0FBUyxPQUFPLEtBQUs7O21DQUFNLE1BQU0sSUFBSTtvQkFDL0UsUUFBUSxTQUFTLFFBQVE7OzswQkFFeEI7O2dCQUNMLGlCQUFTLE9BQUc7OztnQkFHYixZQUFXOztnQkFDVixNQUFNOzs7O2dCQUVOLE1BQU0sTUFBTSxJQUFJOzs7c0JBRWYsUUFBUSxTQUFTOztnQkFFRyxRQUFPLE9BQU8sUUFBTyxNQUFNLFFBQVE7O2dCQUE1RCxJQUFJLFlBQVk7O1lBSWhCLElBQUksUUFBUSxVQUFVO2lCQUNiOzs7O1lBQ1QsRUFBRSxHQUFHLG1CQUFTOzt1QkFBUSxRQUFRLGFBQWEsSUFBSTs7WUFDL0MsRUFBRSxHQUFHLHFCQUFXOztrQ0FBUyxRQUFPOzsyQkFBUyxLQUFDLFNBQVMsT0FBTyxLQUFLOzsyQkFBTTtZQUNyRSxRQUFRLFNBQVMsT0FBTztpQkFFZCxJQUFJOzs7O1lBRWQsY0FBUyxJQUFJLEtBQUssS0FBSSxVQUFVO2dDQUNwQjs7O2dCQUFSO29CQUNHLEtBQUssU0FBUTs7K0JBQ1QsS0FBSyxNQUFTLGVBQWU7O3dCQUM1Qjs7b0JBQ0osUUFBUSxNQUFNLEtBQUs7Ozs7OztJQUVuQyxTQUFDLDZCQUFVLFFBQU8sTUFBSzs7OztRQUluQixPQUFPLE1BQU0sS0FBSyxJQUFJO1FBRXRCLGVBQVUsSUFBSSxPQUFPO1lBRWxCOztnQkFDSSxXQUFVOztvQkFFTixLQUFDLFlBQVk7O29CQUNaLGFBQWEsS0FBQyxZQUFZOzJCQUNuQixLQUFDLFlBQVk7Ozs7b0JBRXBCLEtBQUMsWUFBWSxRQUFRLHVCQUFhOzs7O21DQUFTLEtBQUMsV0FBVzs7bUNBQUcsTUFBTTs7OztnQkFHckUsV0FBVTs7cUJBQ04sS0FBQyxVQUFVOzt3QkFDUCxLQUFDLFVBQVUsTUFBTSxTQUFRLE9BQU8sUUFBUyxLQUFDLFVBQVUsTUFBTSxZQUFXLE9BQU87Ozs7OztnQkFFbEYsTUFBTSxLQUFLLFVBQVM7Ozs7bUJBQ3pCLEtBQUssS0FBSyxlQUFjLEtBQUssS0FBSyxPQUFPLE9BQVMsUUFBUTs7OzttQkFFMUQsS0FBSyxLQUFLLGVBQWMsS0FBSyxLQUFLLE9BQU8sU0FBUyxRQUFROzs7O0lBRWxFLFNBQUMseUJBQVk7O1FBRVQsYUFBYSxLQUFDLFlBQVk7ZUFDbkIsS0FBQyxZQUFZO2VBQ3BCLEtBQUssS0FBSyxlQUFjLEtBQUssS0FBSyxPQUFPLFNBQVMsUUFBUTs7O1dBN0hqRTs7O2VBK0hNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoid2F0Y2hlci5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdXRpbC93YXRjaGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDVSxVQUFBO0lBQU07SUFBTTtJQUFLOztPQUN2QixTQUFBOzs7QUFFSCxXQUFEOzs7OztJQUtJLFNBQUM7SUFDRCxTQUFDO0lBQ0QsU0FBQztJQUNELFNBQUM7SUFDRCxTQUFDO0lBQ0QsU0FBQztJQUNELFNBQUMsZUFBWTtJQUNiLFNBQUMsYUFBVTtJQUNYLFNBQUMsYUFBVTtJQUNYLFNBQUMsYUFBVTtJQUNYLFNBQUMsZ0JBQWEsZUFBZTtJQUM3QixTQUFDLGlCQUFjLFlBQVksYUFBYTtJQUN4QyxTQUFDLHdCQUFxQixTQUFTLFFBQVEsU0FBUztJQUdoRCxTQUFDLDZCQUFVOzs7O1lBRUosT0FBTyxLQUFDLFNBQVM7O21CQUNoQixLQUFDLE1BQU0sUUFBUTs7OzswQkFFUixLQUFDLE1BQU07Ozs7SUFFdEIsU0FBQzs7OzthQUVPLE9BQVksS0FBQzs7WUFBVCxPQUFRLEtBQUM7WUFDYixLQUFLOztRQUVULEtBQUM7UUFDRCxLQUFDO1FBQ0QsS0FBQztRQUNELEtBQUM7UUFDRCxLQUFDO1FBQ0QsS0FBQztZQUUyQixLQUFDOztZQUE3QixhQUFhLEtBQUM7O1lBQ2MsS0FBQzs7WUFBN0IsYUFBYSxLQUFDOztlQUNQLEtBQUM7c0JBQ0QsS0FBQzs7O0lBRVosU0FBQyx3QkFBVzs7OzttQkFHRixHQUFHLE1BQU07O2VBQ1Q7O3VCQUNDLElBQUksS0FBUSxLQUFDOzt1QkFDVjs7WUFDTix3QkFBZ0IsZ0JBQWdCO21CQUM5Qjs7OztJQUVWLFNBQUMsMkJBQWMsTUFBSzs7bUJBRWIsSUFBSSxLQUFRLEtBQUM7Ozs7UUFFaEIsd0JBQWdCLGdCQUFnQjs7O0lBRXBDLFNBQUMsMEJBQU8sTUFBSzs7OztzQkFFQTs7WUFDTCxjQUFNOzs7UUFHVixPQUFPLE1BQU0sUUFBUTtRQUVyQixPQUFBLGNBQUE7UUFDQSxJQUFJLHNCQUFKLElB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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/util/watcher.kode

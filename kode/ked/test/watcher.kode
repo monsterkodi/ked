@@ -1,7 +1,11 @@
 
 use fs
-use ../../kxk ▪ slash sleep
+use ../../kxk ▪ slash sleep post nfs
 use ../util   ◆ watcher
+
+events = []
+post.on 'file.change' (info) =>
+    events.push info if events
 
 ▸ watcher
 
@@ -48,3 +52,335 @@ use ../util   ◆ watcher
         lines.length ▸ 0
         parentWatched ▸ true
         secretWatched ▸ false
+
+  ▸ creates emit one create event
+
+        root = '/tmp/opencode/ked-watcher-create'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        events = []
+        ○ watcher.watch root
+        ○ sleep 100
+
+        fs.writeFileSync slash.path(root 'a.txt') 'hello'
+        ○ sleep 400
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        events.length ▸ 1
+        events[0].type ▸ 'create'
+        events[0].change ▸ 'create'
+        events[0].path ▸ slash.path root 'a.txt'
+
+  ▸ modifications emit one modify event
+
+        root = '/tmp/opencode/ked-watcher-modify'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        file = slash.path root 'a.txt'
+        fs.writeFileSync file 'hello'
+
+        events = []
+        ○ watcher.watch root
+        ○ sleep 100
+
+        fs.writeFileSync file 'hello world'
+        ○ sleep 400
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        events.length ▸ 1
+        events[0].type ▸ 'modify'
+        events[0].change ▸ 'change'
+        events[0].path ▸ file
+
+  ▸ deletions emit one delete event
+
+        root = '/tmp/opencode/ked-watcher-delete'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        file = slash.path root 'a.txt'
+        fs.writeFileSync file 'hello'
+
+        events = []
+        ○ watcher.watch root
+        ○ sleep 100
+
+        fs.rmSync file
+        ○ sleep 400
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        events.length ▸ 1
+        events[0].type ▸ 'delete'
+        events[0].change ▸ 'remove'
+        events[0].path ▸ file
+
+  ▸ renames emit one rename event
+
+        root = '/tmp/opencode/ked-watcher-rename'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        oldFile = slash.path root 'a.txt'
+        newFile = slash.path root 'b.txt'
+        fs.writeFileSync oldFile 'hello'
+
+        events = []
+        ○ watcher.watch root
+        ○ sleep 100
+
+        fs.renameSync oldFile newFile
+        ○ sleep 400
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        events.length ▸ 1
+        events[0].type ▸ 'rename'
+        events[0].change ▸ 'rename'
+        events[0].path ▸ newFile
+        events[0].oldPath ▸ oldFile
+
+  ▸ copies emit one create event
+
+        root = '/tmp/opencode/ked-watcher-copy'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        oldFile = slash.path root 'a.txt'
+        newFile = slash.path root 'b.txt'
+        fs.writeFileSync oldFile 'hello'
+
+        events = []
+        ○ watcher.watch root
+        ○ sleep 100
+
+        fs.copyFileSync oldFile newFile
+        ○ sleep 400
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        events.length ▸ 1
+        events[0].type ▸ 'create'
+        events[0].path ▸ newFile
+
+  ▸ atomic saves emit one modify event and no temp events
+
+        root = '/tmp/opencode/ked-watcher-atomic'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        file = slash.path root 'a.txt'
+        tmp  = slash.path root '.a.txt.tmp'
+        fs.writeFileSync file 'old'
+
+        events = []
+        ○ watcher.watch root
+        ○ sleep 100
+
+        fs.writeFileSync tmp 'new'
+        fs.renameSync tmp file
+        ○ sleep 400
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        events.length ▸ 1
+        events[0].type ▸ 'modify'
+        events[0].path ▸ file
+
+  ▸ nfs.write emits one modify event
+
+        root = '/tmp/opencode/ked-watcher-nfswrite'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        file = slash.path root 'a.txt'
+        fs.writeFileSync file 'old'
+
+        events = []
+        ○ watcher.watch root
+        ○ sleep 100
+
+        ○ nfs.write file 'new'
+        ○ sleep 400
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        events.length ▸ 1
+        events[0].type ▸ 'modify'
+        events[0].path ▸ file
+
+  ▸ directories emit one create and one delete event
+
+        root = '/tmp/opencode/ked-watcher-dirs'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        dir = slash.path root 'folder'
+
+        events = []
+        ○ watcher.watch root
+        ○ sleep 100
+
+        fs.mkdirSync dir
+        fs.writeFileSync slash.path(dir 'inside.txt') 'hello'
+        ○ sleep 400
+
+        created = events.length
+        createdType = events[0]?.type
+        path = events[0]?.path
+
+        events = []
+        fs.rmSync dir recursive:true force:true
+        ○ sleep 400
+
+        deleted = events.length
+        deletedType = events[0]?.type
+        deletedPath = events[0]?.path
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        created ▸ 1
+        createdType ▸ 'create'
+        path ▸ dir
+        deleted ▸ 1
+        deletedType ▸ 'delete'
+        deletedPath ▸ dir
+
+  ▸ directory renames emit one rename event
+
+        root = '/tmp/opencode/ked-watcher-dirrename'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        oldDir = slash.path root 'old'
+        newDir = slash.path root 'new'
+        fs.mkdirSync oldDir
+        fs.writeFileSync slash.path(oldDir 'inside.txt') 'hello'
+
+        events = []
+        ○ watcher.watch root
+        ○ sleep 100
+
+        fs.renameSync oldDir newDir
+        ○ sleep 400
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        events.length ▸ 1
+        events[0].type ▸ 'rename'
+        events[0].path ▸ newDir
+        events[0].oldPath ▸ oldDir
+
+  ▸ directories created after watching are watched
+
+        root = '/tmp/opencode/ked-watcher-newdir'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        events = []
+        ○ watcher.watch root
+        ○ sleep 100
+
+        dir = slash.path root 'folder'
+        fs.mkdirSync dir
+        ○ sleep 400
+
+        events = []
+        fs.writeFileSync slash.path(dir 'inside.txt') 'hello'
+        ○ sleep 400
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        events.length ▸ 1
+        events[0].type ▸ 'create'
+        events[0].path ▸ slash.path dir 'inside.txt'
+
+  ▸ ignored directories are not watched
+
+        root = '/tmp/opencode/ked-watcher-ignored'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        events = []
+        ○ watcher.watch root
+        ○ sleep 100
+
+        dir = slash.path root 'node_modules'
+        fs.mkdirSync dir
+        fs.writeFileSync slash.path(dir 'inside.txt') 'hello'
+        ○ sleep 400
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        events.length ▸ 0
+
+  ▸ non-recursive watches are upgraded to recursive
+
+        root = '/tmp/opencode/ked-watcher-upgrade'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.mkdirSync slash.path(root 'sub')
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync slash.path(root 'a.txt') 'hello'
+        nested = slash.path root 'sub/b.txt'
+        fs.writeFileSync nested 'hello'
+
+        events = []
+        ○ watcher.watch slash.path(root 'a.txt') recursive:false
+        ○ sleep 100
+
+        fs.writeFileSync nested 'changed'
+        ○ sleep 400
+
+        beforeUpgrade = events.length
+
+        ○ watcher.watch nested
+        ○ sleep 100
+
+        fs.writeFileSync nested 'changed again'
+        ○ sleep 400
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        beforeUpgrade ▸ 0
+        events.length ▸ 1
+        events[0].type ▸ 'modify'
+        events[0].path ▸ nested
+
+  ▸ watching a file filters out sibling changes
+
+        root = '/tmp/opencode/ked-watcher-file'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        file    = slash.path root 'a.txt'
+        sibling = slash.path root 'b.txt'
+        fs.writeFileSync file 'hello'
+        fs.writeFileSync sibling 'hello'
+
+        events = []
+        ○ watcher.watch file
+        ○ sleep 100
+
+        fs.writeFileSync sibling 'changed'
+        ○ sleep 400
+
+        siblingEvents = events.length
+
+        fs.writeFileSync file 'changed'
+        ○ sleep 400
+
+        watcher.close()
+        fs.rmSync root recursive:true force:true
+
+        siblingEvents ▸ 0
+        events.length ▸ 1
+        events[0].type ▸ 'modify'
+        events[0].path ▸ file

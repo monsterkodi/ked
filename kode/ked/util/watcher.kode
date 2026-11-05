@@ -1,132 +1,382 @@
 
-use ../../kxk ▪ watch slash post nfs
+use ../../kxk ▪ slash post nfs
 use fs
 
 ■watcher
 
-    # watches for file system changes and posts notifications when changes occur
+    # watches for file system changes and posts normalized notifications
+    # one event per operation: create, delete, rename, modify
 
     @watchers: {}
-    @renameTimer: {}
-    @fileStats: {}
-    @ignoredWatchErrors: ['EACCES' 'EPERM' 'ENOENT']
-    
+    @recurse: {}
+    @filters: {}
+    @known: {}
+    @pending: {}
+    @rescans: {}
+    @quietTimer: null
+    @maxTimer: null
+    @debounce: 75
+    @maxDelay: 250
+    @ignoreDirs: ['node_modules' '.git']
+    @ignoreFiles: ['.DS_Store' '.localized' 'ked.log']
+    @ignoredWatchErrors: ['EACCES' 'EPERM' 'ENOENT' 'ENOSPC']
+
+    # remember the state of a file, so reading it does not look like a change
     @snapshot: file ○->
-    
-        if stat =○ nfs.fileExists file
-            @fileStats[file] = stat
+
+        if info = @statPath file
+            @known[file] = info
+        else
+            delete @known[file]
 
     @close: ->
-    
-        for path,wtch of watcher.watchers
+
+        for dir,wtch of @watchers
             wtch.close()
-        watcher.watchers = {}
+
+        @watchers = {}
+        @recurse  = {}
+        @filters  = {}
+        @known    = {}
+        @pending  = {}
+        @rescans  = {}
+
+        clearTimeout @quietTimer if @quietTimer
+        clearTimeout @maxTimer   if @maxTimer
+        delete @quietTimer
+        delete @maxTimer
 
     @openWatch: path ->
 
         try
             ⮐ fs.watch path
         catch err
-            if err.code in watcher.ignoredWatchErrors
+            if err.code in @ignoredWatchErrors
                 ⮐ null
             error "watch:'#{path}' error: #{err}"
             ⮐ null
 
     @onWatchError: path err ->
 
-        if err.code in watcher.ignoredWatchErrors
+        if err.code in @ignoredWatchErrors
             ⮐
         error "watch:'#{path}' error: #{err}"
 
     @watch: path opt ○->
-    
+
         if empty path
             error "watcher.watch - can't watch empty path!"
-            ⮐  
-        
-        # log "watcher ○○ #{y6 path}"
-        
+            ⮐
+
         path = slash.untilde path
-                
-        isDir =○ nfs.isDir path
-        
+
         opt ?= {}
         opt.recursive ?= true
-        
-        if isDir 
-            dir = path
+
+        isDir =○ nfs.isDir path
+
+        if isDir
+            @watchDir path opt.recursive
+            ⮐
+
+        prjPath =○ nfs.prj path
+
+        if prjPath and prjPath not in ['/' slash.untilde('~')]
+            @watchDir prjPath opt.recursive
         else
-            prjPath =○ nfs.prj path
-            
-            if empty watcher.watchers[path]
-                # log "watcher ● #{g4 path}"
-                w = watcher.openWatch path
-                if valid w
-                    w.on 'error' (err) => watcher.onWatchError path err
-                    w.on 'change' ((dir) => (change path) => @onChange(change path dir))(slash.dir(path))
-                    watcher.watchers[path] = w
-            
-            if empty prjPath
-                log "✘ #{r6 path}"
-                ⮐ 
-                
-            if prjPath != '/'
-                dir = prjPath
+            @watchFileDir path
+
+    @watchFileDir: path ->
+
+        dir = slash.dir path
+
+        if @filters[dir]
+            @filters[dir].push path if path not in @filters[dir]
+        else if empty @watchers[dir]
+            @watchDir dir false
+            @filters[dir] = [path]
+
+    @watchDir: dir recursive ->
+
+        ⮐ if empty dir
+        ⮐ if slash.file(dir) in @ignoreDirs
+
+        if @watchers[dir]
+            if recursive and not @recurse[dir]
+                @recurse[dir] = true
+                @watchChildren dir
+            ⮐
+
+        w = @openWatch dir
+        ⮐ if not w
+
+        @watchers[dir] = w
+        @recurse[dir]  = recursive
+
+        w.on 'error'  (err) => @onWatchError dir err
+        w.on 'change' ((d) => (change name) => @onRaw d change name)(dir)
+
+        @seedDir dir
+        @watchChildren dir if recursive
+
+    @watchChildren: dir ->
+
+        for dirent in @readdir dir
+            continue if not dirent.isDirectory()
+            continue if dirent.name in @ignoreDirs
+            @watchDir slash.path(dir dirent.name) true
+
+    @readdir: dir ->
+
+        try
+            ⮐ fs.readdirSync dir withFileTypes:true
+        catch err
+            ⮐ []
+
+    @statPath: p ->
+
+        try
+            stat = fs.statSync p
+            dev:     stat.dev
+            ino:     stat.ino
+            type:    stat.isDirectory() ? 'dir' : 'file'
+            size:    stat.size
+            mtimeMs: stat.mtimeMs
+            ctimeMs: stat.ctimeMs
+        catch err
+            null
+
+    @seedDir: dir ->
+
+        for dirent in @readdir dir
+            continue if dirent.name in @ignoreFiles
+            continue if dirent.name in @ignoreDirs
+            p = slash.path dir dirent.name
+            if info = @statPath p
+                @known[p] = info
+
+    @ignoredPath: p ->
+
+        file = slash.file p
+        file in @ignoreFiles or file in @ignoreDirs
+
+    @onRaw: dir change name =>
+
+        if empty name or not name is str
+            @rescans[dir] = true
+            @scheduleFlush()
+            ⮐
+
+        path = slash.path dir name
+
+        ⮐ if @ignoredPath path
+
+        if filters = @filters[dir]
+            ⮐ if path not in filters
+
+        @markPending path
+
+    @markPending: path ->
+
+        now = Date.now()
+
+        if @pending[path]
+            @pending[path].last = now
+        else
+            @pending[path] = first:now last:now
+
+        @scheduleFlush()
+
+    @scheduleFlush: ->
+
+        clearTimeout @quietTimer if @quietTimer
+        delete @quietTimer
+
+        @quietTimer = setTimeout (=> @flush()) @debounce
+
+        if not @maxTimer
+            @maxTimer = setTimeout (=> @flush()) @maxDelay
+
+    @flush: ->
+
+        clearTimeout @quietTimer if @quietTimer
+        clearTimeout @maxTimer   if @maxTimer
+        delete @quietTimer
+        delete @maxTimer
+
+        pending = @pending
+        @pending = {}
+
+        if not empty @rescans
+            for dir of @rescans
+                @collectPaths dir pending
+            @rescans = {}
+
+        ⮐ if empty pending
+
+        deletes  = []
+        creates  = []
+        modifies = []
+
+        for path of pending
+
+            continue if @ignoredPath path
+
+            info = @statPath path
+            prev = @known[path]
+
+            if info
+
+                if not prev
+                    creates.push path:path stat:info
+                    @known[path] = info
+
+                else if info.dev != prev.dev or info.ino != prev.ino
+                    modifies.push path
+                    @known[path] = info
+
+                else if info.size != prev.size or info.mtimeMs != prev.mtimeMs or info.ctimeMs != prev.ctimeMs
+                    modifies.push path
+                    @known[path] = info
+
+            else if prev
+                deletes.push path:path stat:prev
+
+        renames = []
+
+        for del in deletes
+            for cre in creates
+                continue if del.used or cre.used
+                if del.stat.dev == cre.stat.dev and del.stat.ino == cre.stat.ino
+                    del.used = true
+                    cre.used = true
+                    renames.push old:del.path new:cre.path stat:del.stat
+                    break
+
+        renamedOld = []
+        renamedNew = []
+
+        for ren in renames
+
+            renamedOld.push ren.old
+            renamedNew.push ren.new
+
+            if ren.stat.type == 'dir'
+                parent = slash.dir ren.old
+                @closeWatchedUnder ren.old
+                @pruneKnownUnder   ren.old
+                if @recurse[parent]
+                    @watchDir ren.new true
             else
-                dir = slash.dir path
-            
-        if empty watcher.watchers[dir]
-            
-            opt.recursive = false if dir == '/' or dir == slash.untilde '~'
-            
-            # log "watcher ○ #{y6 dir}"
-            
-            w = watcher.openWatch dir
-            ⮐ if not w
-            w.on 'error' (err) => watcher.onWatchError dir err
-            w.on 'change' ((dir) => (change path) => @onChange(change path dir))(dir)
-            watcher.watchers[dir] = w
-        
-            ⮐  if not opt.recursive
-            
-            items =○ nfs.list dir recursive:false
-            for item in items
-                if item.type == 'dir'
-                    if item.file in ['node_modules' '.git']
-                        continue
-                    watcher.watch item.path
-        
-    @onChange: change path dir ○=>
-    
-        # log "watcher.onChange ○ #{y6(dir)} #{b5(path)}" if path != "ked.log"
-    
-        path = slash.path dir path
+                delete @known[ren.old]
+                @known[ren.new] = @statPath ren.new
 
-        exists =○ nfs.exists path
-        
-        if exists
-            if change == 'rename'      # when saving files, two 'rename' changes happen
-                                       # try to post only the last one
-                if @renameTimer[path]               # this seems to be the second one
-                    clearTimeout @renameTimer[path] # clear the timeout for the 1st one
-                    delete @renameTimer[path]
-                else
-                    @renameTimer[path] = setTimeout ((p) => => @postRename p)(path) 100
-                    ⮐ 
-                    
-            if change == 'change'      # workaround for a node quirk: when a file is read, 
-                if @fileStats[path]?   # node reports a change because the atimeMs changes :(
-                    if @fileStats[path].size == exists.size and @fileStats[path].mtimeMs == exists.mtimeMs
-                        ⮐  # assume the file didn't change when the size and modification time is unchanged
-            ⮐ if slash.file(path) == 'ked.log'
-            post.emit 'file.change' path:path change:change   watcher:@
-        else
-            post.emit 'file.change' path:path change:'remove' watcher:@
-            
-    @postRename: path =>
+            @emitChange 'rename' ren.new oldPath:ren.old
 
-        clearTimeout @renameTimer[path]
-        delete @renameTimer[path]
-        post.emit 'file.change' path:path change:'rename' watcher:@
-                
+        deleted = []
+
+        deletes.sort (a b) -> a.path.length - b.path.length
+
+        for del in deletes
+
+            continue if del.used
+            continue if @underAny del.path renamedOld
+            continue if @underAny del.path deleted
+
+            info = @known[del.path]
+
+            @emitChange 'delete' del.path
+
+            deleted.push del.path
+
+            if info?.type == 'dir'
+                @closeWatchedUnder del.path
+                @pruneKnownUnder   del.path
+            else
+                delete @known[del.path]
+
+        creates.sort (a b) -> a.path.length - b.path.length
+
+        for cre in creates
+
+            continue if cre.used
+            continue if @underAny cre.path renamedNew
+            continue if @underAny cre.path deleted
+
+            if cre.stat.type == 'dir'
+                if @recurse[slash.dir(cre.path)]
+                    @watchDir cre.path true
+
+            @emitChange 'create' cre.path
+
+        for path in modifies
+
+            continue if @underAny path renamedOld
+            continue if @underAny path renamedNew
+            continue if @underAny path deleted
+            continue if path in renamedNew
+
+            info = @known[path]
+
+            continue if info?.type != 'file'
+
+            @emitChange 'modify' path
+
+    @underAny: path roots ->
+
+        for root in roots
+            ⮐ true if path == root or path.startsWith(root + '/')
+        false
+
+    @closeWatchedUnder: path ->
+
+        for dir in Object.keys(@watchers)
+            if dir == path or dir.startsWith(path + '/')
+                @watchers[dir].close()
+                delete @watchers[dir]
+                delete @recurse[dir]
+
+    @pruneKnownUnder: path ->
+
+        for p of Object.keys(@known)
+            if p == path or p.startsWith(path + '/')
+                delete @known[p]
+
+    @collectPaths: dir into ->
+
+        for p of @known
+            if p == dir or p.startsWith(dir + '/')
+                into[p] = first:0 last:0
+
+        @walkPaths dir into (@recurse[dir] ? true)
+
+    @walkPaths: dir into recursive ->
+
+        for dirent in @readdir dir
+
+            continue if dirent.name in @ignoreFiles
+            continue if dirent.name in @ignoreDirs
+
+            p = slash.path dir dirent.name
+            into[p] = first:0 last:0
+
+            if recursive and dirent.isDirectory()
+                @walkPaths p into true
+
+    @emitChange: type path opt ->
+
+        opt ?= {}
+
+        change = 'change'
+        change = 'create' if type == 'create'
+        change = 'remove' if type == 'delete'
+        change = 'rename' if type == 'rename'
+
+        info = path:path change:change type:type watcher:@
+        info.oldPath = opt.oldPath if opt.oldPath?
+        
+        log "file.change #{change} #{type} #{path}"
+        
+        post.emit 'file.change' info
+
 export watcher
