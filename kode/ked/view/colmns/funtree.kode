@@ -3,7 +3,7 @@ use ../../../kxk    ▪ post slash nfs
 use ../../theme     ◆ color theme icons
 use ../../edit/tool ◆ belt
 use ../../index     ◆ indexer
-use ../menu         ◆ choices 
+use ../menu         ◆ filterchoice
 
 SYMBOL = 
     clss:          '■'  
@@ -72,7 +72,7 @@ SYMBOL =
         
     getChar: x y char => char
 
-■funtree□choices
+■funtree□filterchoice
 
     @: @editor @name features ->
         

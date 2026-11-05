@@ -3,12 +3,12 @@ use ../../../kxk ▪ kutil kseg kstr slash post nfs
 use ../../index  ◆ prjcts 
 use ../../theme  ◆ theme icons
 use ../../util   ◆ git
-use ../menu      ◆ choices 
+use ../menu      ◆ filterchoice
 use              ◆ diritem
 
 import rgxs from './quicky.json' with { type: "json" }
 
-■dirtree□choices
+■dirtree□filterchoice
 
     @: screen name features ->
         
