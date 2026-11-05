@@ -1,0 +1,45 @@
+
+use fs
+use ../../kxk ▪ slash post
+use ../index ◆ kacher
+
+▸ kacher
+
+  ▸ caches the text of a file
+
+        root = '/tmp/opencode/ked-kacher-cache'
+        file = slash.path root 'a.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file 'alpha'
+
+        text =○ kacher.getText file
+        text ▸ 'alpha'
+
+        fs.writeFileSync file 'beta'
+
+        text =○ kacher.getText file
+        text ▸ 'alpha'
+
+        fs.rmSync root recursive:true force:true
+
+  ▸ invalidates cached text on file change
+
+        root = '/tmp/opencode/ked-kacher-change'
+        file = slash.path root 'a.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file 'alpha'
+
+        text =○ kacher.getText file
+        text ▸ 'alpha'
+
+        fs.writeFileSync file 'beta'
+        post.emit 'file.change' path:file change:'change'
+
+        text =○ kacher.getText file
+        text ▸ 'beta'
+
+        fs.rmSync root recursive:true force:true

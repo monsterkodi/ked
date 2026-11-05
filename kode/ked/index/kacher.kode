@@ -1,0 +1,28 @@
+
+use ../../kxk ▪ post nfs
+
+■kacher
+
+    @cache: Object.create(null)
+
+    @getText: file ○->
+
+        ⮐ @cache[file] if @cache[file]?
+
+        text =○ nfs.readText file
+
+        @cache[file] = text if text?
+
+        text
+
+    @invalidate: file ->
+
+        delete @cache[file]
+
+    @clear: ->
+
+        @cache = Object.create null
+
+post.on 'file.change' (info) => kacher.invalidate info.path
+
+export kacher

@@ -1,8 +1,7 @@
 
 use ../../../kxk    ▪ post kseg slash
-use ../../../kxk    ◆ nfs
 use ../../edit/tool ◆ belt
-use ../../index     ◆ prjcts
+use ../../index     ◆ prjcts kacher
 use ../base         ◆ view
 use                 ◆ finder searcherfile
 ■searcher□finder
@@ -17,16 +16,87 @@ use                 ◆ finder searcherfile
             post.on 'file.loaded'   @onFileLoaded
         
         @sfils = []
-        
-    arrangeRect: ->
-    
-        [
-            int(@editor.cells.x-@editor.gutter.cells.cols-1)
-            int(@editor.cells.y)
-            int(@editor.cells.cols+@editor.gutter.cells.cols+1)
-            int(@editor.cells.rows-3)
-        ]
 
+    show: text files ○=>
+    
+        # log "searcher show |#{text}|"
+        
+        text = @searchText text # to use selection or cursor word if text is empty
+        
+        # log g4("#{r6 'searcher'} '#{text}'")
+        
+        if empty text
+            @input.grabFocus()
+            ⮐ super()
+        
+        editorFile = ked_session.get 'editor▸file'
+        editorExt  = slash.ext editorFile 
+        
+        dir    = prjcts.dir   editorFile
+        files ?= prjcts.files editorFile
+
+        files = @filterFiles files [editorExt]
+        files = @sortFiles files
+
+        log "searcher - search #{files.length} files in #{dir} for |#{text}|" #files
+        
+        view.prototype.show.call @ # bypass finder to avoid reading selection or cursor word again
+        
+        @input.grabFocus()
+        @choices.clearEmpty()        
+        @sfils = []
+        
+        ●▸ searcher
+        
+        for file,idx in files
+                    
+            filet =○ kacher.getText file
+            
+            segls = kseg.segls filet
+            spans = belt.lineSpansForText segls text
+            
+            if idx == files.length-1
+                log y6('▸▸▸ searcher done')
+                @highlightTextAndEmitRedraw text
+            
+            continue if empty spans
+            
+            front = belt.frontmostSpans spans
+            ext = slash.ext file
+            
+            items = []
+            items.push line:'' 
+
+            sfil = new searcherfile @screen "#{@name}_sfil_#{idx}"
+            sfil.lineIndex = @choices.items.length+1
+            sfil.set slash.relative(file dir)            
+            @sfils.push sfil
+
+            items.push
+                line:  '●'
+                type:  'file'
+                path:  file
+                row:   0
+                col:   0
+                
+            for span in front
+                if items[-1].row != span[1]-1
+                    items.push line:''
+                items.push
+                    line:  ' ' + kseg.str(segls[span[1]])
+                    path:  file
+                    row:   span[1]
+                    col:   span[2]
+            
+            @choices.append items ext # this is quite expensive, maybe need to queue this with a delay?
+            
+            ⮐ if @hidden()
+            
+            if idx == files.length-1
+                @highlightTextAndEmitRedraw text
+                
+        ●▪ searcher
+        
     arrange: =>
 
         super()    
@@ -34,8 +104,17 @@ use                 ◆ finder searcherfile
         for sfil in @sfils
             y = @choices.cells.y - @choices.state.s.view[1] + sfil.lineIndex
             sfil.layout @choices.cells.x y @choices.cells.cols 1
+
+    arrangeRect: =>
+    
+        [
+            int(@editor.cells.x-@editor.gutter.cells.cols-1)
+            int(@editor.cells.y)
+            int(@editor.cells.cols+@editor.gutter.cells.cols+1)
+            int(@editor.cells.rows-3)
+        ]
             
-    draw: ->
+    draw: =>
 
         ⮐ if @hidden()
 
@@ -101,82 +180,6 @@ use                 ◆ finder searcherfile
     filterFiles: files exts ->
     
         files.filter (f) -> slash.ext(f) in exts
-        
-    show: text files ○=>
-    
-        # log "searcher show |#{text}|"
-        
-        text = @searchText text # to use selection or cursor word if text is empty
-        
-        # log g4("#{r6 'searcher'} '#{text}'")
-        
-        if empty text
-            @input.grabFocus()
-            ⮐ super()
-        
-        editorFile = ked_session.get 'editor▸file'
-        editorExt  = slash.ext editorFile 
-        
-        dir    = prjcts.dir   editorFile
-        files ?= prjcts.files editorFile
-
-        files = @filterFiles files [editorExt]
-        files = @sortFiles files
-
-        log "searcher - search #{files.length} files in #{dir} for |#{text}|" #files
-        
-        view.prototype.show.call @ # bypass finder to avoid reading selection or cursor word again
-        
-        @input.grabFocus()
-        @choices.clearEmpty()        
-        @sfils = []
-        
-        for file,idx in files
-                    
-            filet =○ nfs.readText file
-            
-            segls = kseg.segls filet
-            spans = belt.lineSpansForText segls text
-            
-            if idx == files.length-1
-                log y6('▸▸▸ searcher done')
-                @highlightTextAndEmitRedraw text
-            
-            continue if empty spans
-            
-            front = belt.frontmostSpans spans
-            ext = slash.ext file
-            
-            items = []
-            items.push line:'' 
-
-            sfil = new searcherfile @screen "#{@name}_sfil_#{idx}"
-            sfil.lineIndex = @choices.items.length+1
-            sfil.set slash.relative(file dir)            
-            @sfils.push sfil
-
-            items.push
-                line:  '●'
-                type:  'file'
-                path:  file
-                row:   0
-                col:   0
-                
-            for span in front
-                if items[-1].row != span[1]-1
-                    items.push line:''
-                items.push
-                    line:  ' ' + kseg.str(segls[span[1]])
-                    path:  file
-                    row:   span[1]
-                    col:   span[2]
-            
-            @choices.append items ext # this is quite expensive, maybe need to queue this with a delay?
-            
-            ⮐ if @hidden()
-            
-            if idx == files.length-1
-                @highlightTextAndEmitRedraw text
                 
     apply: choice ->
         
