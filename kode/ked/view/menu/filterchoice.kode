@@ -17,6 +17,8 @@ use ../menu         ◆ choices
         @input       = new input @screen "#{@name}_input"
         @filterCells = new cells @screen
         
+        @filterSelections = true # enables normal selection display below the rounded selection
+        
         @input.on 'action' @onInputAction
         
         @input.hide()

@@ -76,9 +76,11 @@ use ../../edit      ◆ editor
         
     drawSelections: ->
         
-        ⮐  if empty @state.s.selections
+        ⮐ if empty @state.s.selections
         
-        ⮐  super() if not @roundedSelections
+        ⮐ super() if not @roundedSelections
+        
+        super() if @filterSelections
         
         fg = @hasFocus() ? @color.hover.bg : @color.hover.blur
         
