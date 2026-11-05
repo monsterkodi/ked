@@ -9,7 +9,6 @@ use fs
 
     @watchers: {}
     @recurse: {}
-    @filters: {}
     @known: {}
     @pending: {}
     @rescans: {}
@@ -20,6 +19,30 @@ use fs
     @ignoreDirs: ['node_modules' '.git']
     @ignoreFiles: ['.DS_Store' '.localized' 'ked.log']
     @ignoredWatchErrors: ['EACCES' 'EPERM' 'ENOENT' 'ENOSPC']
+    
+    @watch: path opt ○->
+
+        if empty path
+            error "watcher.watch - can't watch empty path!"
+            ⮐
+
+        path = slash.untilde path
+
+        opt ?= {}
+        opt.recursive ?= true
+
+        isDir =○ nfs.isDir path
+
+        if isDir
+            @watchDir path opt.recursive
+            ⮐
+
+        prjPath =○ nfs.prj path
+
+        if prjPath and prjPath not in ['/' slash.untilde('~')]
+            @watchDir prjPath opt.recursive
+        else
+            @watchDir slash.dir(path) false
 
     # remember the state of a file, so reading it does not look like a change
     @snapshot: file ○->
@@ -29,6 +52,19 @@ use fs
         else
             delete @known[file]
 
+    @onRaw: dir change name =>
+
+        if empty name or not name is str
+            @rescans[dir] = true
+            @scheduleFlush()
+            ⮐
+
+        path = slash.path dir name
+
+        ⮐ if @ignoredPath path
+
+        @markPending path
+
     @close: ->
 
         for dir,wtch of @watchers
@@ -36,7 +72,6 @@ use fs
 
         @watchers = {}
         @recurse  = {}
-        @filters  = {}
         @known    = {}
         @pending  = {}
         @rescans  = {}
@@ -61,40 +96,6 @@ use fs
         if err.code in @ignoredWatchErrors
             ⮐
         error "watch:'#{path}' error: #{err}"
-
-    @watch: path opt ○->
-
-        if empty path
-            error "watcher.watch - can't watch empty path!"
-            ⮐
-
-        path = slash.untilde path
-
-        opt ?= {}
-        opt.recursive ?= true
-
-        isDir =○ nfs.isDir path
-
-        if isDir
-            @watchDir path opt.recursive
-            ⮐
-
-        prjPath =○ nfs.prj path
-
-        if prjPath and prjPath not in ['/' slash.untilde('~')]
-            @watchDir prjPath opt.recursive
-        else
-            @watchFileDir path
-
-    @watchFileDir: path ->
-
-        dir = slash.dir path
-
-        if @filters[dir]
-            @filters[dir].push path if path not in @filters[dir]
-        else if empty @watchers[dir]
-            @watchDir dir false
-            @filters[dir] = [path]
 
     @watchDir: dir recursive ->
 
@@ -159,22 +160,6 @@ use fs
 
         file = slash.file p
         file in @ignoreFiles or file in @ignoreDirs
-
-    @onRaw: dir change name =>
-
-        if empty name or not name is str
-            @rescans[dir] = true
-            @scheduleFlush()
-            ⮐
-
-        path = slash.path dir name
-
-        ⮐ if @ignoredPath path
-
-        if filters = @filters[dir]
-            ⮐ if path not in filters
-
-        @markPending path
 
     @markPending: path ->
 
