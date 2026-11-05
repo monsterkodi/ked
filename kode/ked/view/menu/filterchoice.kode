@@ -17,6 +17,8 @@ use ../menu         ◆ choices
         @input       = new input @screen "#{@name}_input"
         @filterCells = new cells @screen
         
+        @input.on 'action' @onInputAction
+        
         @input.hide()
         
     setColor: key clr =>
@@ -41,7 +43,19 @@ use ../menu         ◆ choices
         
         @input.set ''
         @input.hide()
+        
+        @filter ''
+        @state.selectLine 0
+        @state.setMainCursor 0 0
+        
         @grabFocus()
+        
+    onInputAction: action text =>
+        
+        if action == 'change'
+            @filter text
+            @state.selectLine 0
+            @state.setMainCursor 0 0
         
     toggleFilter: =>
         
