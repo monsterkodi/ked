@@ -218,11 +218,11 @@ use                 ◆ searcher searcherfile
                     'R' ➜ @symbol.renamed
                     'M' ➜ @symbol.changed
                         ➜ '◆'
-            
-                items.push
-                    line:  '      ' + symbol + ' ' + f.path
-                    path:   slash.path(gitDir f.path)
-                    commit: h.commit
+                if symbol != '◆'
+                    items.push
+                        line:  '      ' + symbol + ' ' + f.path
+                        path:   slash.path(gitDir f.path)
+                        commit: h.commit
         
         @choices.append items
         post.emit 'redraw'

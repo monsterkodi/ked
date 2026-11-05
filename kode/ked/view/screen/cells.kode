@@ -43,7 +43,8 @@ use ../../util/img  ◆ rounded
     
     isInsideEvent:   evt => @isInsidePos  @posForEvent(evt)
     isOutsideEvent:  evt => @isOutsidePos @posForEvent(evt)
-        
+    
+    rectForScreen:   rct => p1 = @posForScreen(rct[0] rct[1]) ; p2 = @posForScreen(rct[2] rct[3]) ; [p1[0] p1[1] p2[0] p2[1]]
     posForScreen:    x y => [x y] = belt.pos(x y); [x-@x y-@y]
     screenForPos:    x y => [x y] = belt.pos(x y); [x+@x y+@y]
     posForEvent:     evt => @posForScreen evt.cell
