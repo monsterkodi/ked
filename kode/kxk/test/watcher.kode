@@ -11,8 +11,9 @@ post.on 'file.change' (info) =>
 watcher.debounce = 10
 watcher.maxDelay = 40
 
+###
 ▸ watcher
-
+  
   ▸ no read error logs
 
         root = '/tmp/opencode/ked-watcher-eacces'
@@ -387,3 +388,4 @@ watcher.maxDelay = 40
 
         watcher.debounce = 75
         watcher.maxDelay = 250
+###

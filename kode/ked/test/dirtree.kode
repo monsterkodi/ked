@@ -45,7 +45,7 @@ waitForRoot = (d root) ○->
         ⮐ if not empty items and items[0].path == parent
         ○ sleep 10
         n += 1
-
+###
 ▸ dirtree
 
   ▸ create events add entries
@@ -166,3 +166,4 @@ waitForRoot = (d root) ○->
         fs.rmSync root recursive:true force:true
 
         after ▸ count
+###

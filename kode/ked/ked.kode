@@ -38,8 +38,6 @@ use child_process ▪ spawn exec
         
         log w2("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #{b8 @session.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
         
-        leak.start @args
-        
         config.load()
 
         global.ked_session = @session
@@ -175,7 +173,7 @@ use child_process ▪ spawn exec
             @t.play step[1]
             
             ○ @currentLoad if @currentLoad
-            ○ sleep 50
+            ○ sleep 15
             
             @dump step[0]
         
@@ -199,6 +197,8 @@ use child_process ▪ spawn exec
         
         ○ config.loaded if config.loaded
         ○ @session.loaded
+        
+        leak.start @args if config.data?.log?.memory
         
         ⮐ if @args.fresh
         ⮐ if @args.new

@@ -40,6 +40,9 @@ project
         node_modules
         .kkache
         ked.log
+        
+log
+    memory      true
 
 filetypes
     config       noon

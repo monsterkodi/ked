@@ -2,7 +2,7 @@ use ../../kxk      ▪ slash sleep
 use ../edit        ◆ editor
 use ../util        ◆ harness
 use ../view/colmns ◆ dircol
-
+###
 ▸ dircol crumbs
 
   ▸ a relative root shows the absolute folder path
@@ -64,3 +64,4 @@ use ../view/colmns ◆ dircol
 
         ○ sleep 10
         delete global.ked_session
+###

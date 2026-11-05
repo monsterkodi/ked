@@ -3,7 +3,7 @@ use ./utils ▪ kc ke
 use ../../kxk ▪ sleep
     
 delayed = value ○->
-    ○ sleep 10
+    ○ sleep 1
     value
 
 ▸ await

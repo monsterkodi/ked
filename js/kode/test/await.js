@@ -11,7 +11,7 @@ let sleep = kxk.sleep
 
 delayed = async function (value)
 {
-    await sleep(10)
+    await sleep(1)
     return value
 }
 toExport["await"] = async function ()

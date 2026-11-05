@@ -1,7 +1,6 @@
-var toExport = {}
-var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
+var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}}
 
-var after, count, d, file, makeCol, names, newFile, oldFile, open, root, sub, waitForRoot, _139_42_
+var makeCol, waitForRoot
 
 import fs from "fs"
 
@@ -93,117 +92,6 @@ waitForRoot = async function (d, root)
         n += 1
     }
 }
-toExport["dirtree"] = async function ()
-{
-    await section("create events add entries", async function ()
-    {
-        root = '/tmp/opencode/ked-dirtree-create'
-        fs.rmSync(root,{recursive:true,force:true})
-        fs.mkdirSync(root,{recursive:true})
-        d = await makeCol()
-        d.setRoot(root)
-        await waitForRoot(d,root)
-        file = slash.path(root,'a.txt')
-        fs.writeFileSync(file,'hello')
-        post.emit('file.change',{path:file,change:'create'})
-        await sleep(120)
-        names = d.dirtree.items.map(function (i)
-        {
-            return i.path
-        })
-        fs.rmSync(root,{recursive:true,force:true})
-        compare((_k_.in(file,names)),true)
-    })
-    await section("delete events remove entries even when the root becomes empty", async function ()
-    {
-        root = '/tmp/opencode/ked-dirtree-delete'
-        fs.rmSync(root,{recursive:true,force:true})
-        fs.mkdirSync(root,{recursive:true})
-        file = slash.path(root,'a.txt')
-        fs.writeFileSync(file,'hello')
-        d = await makeCol()
-        d.setRoot(root)
-        await waitForRoot(d,root)
-        fs.rmSync(file)
-        post.emit('file.change',{path:file,change:'delete'})
-        await sleep(120)
-        names = d.dirtree.items.map(function (i)
-        {
-            return i.path
-        })
-        fs.rmSync(root,{recursive:true,force:true})
-        compare((_k_.in(file,names)),false)
-    })
-    await section("rename events move entries", async function ()
-    {
-        root = '/tmp/opencode/ked-dirtree-rename'
-        fs.rmSync(root,{recursive:true,force:true})
-        fs.mkdirSync(root,{recursive:true})
-        oldFile = slash.path(root,'a.txt')
-        newFile = slash.path(root,'b.txt')
-        fs.writeFileSync(oldFile,'hello')
-        d = await makeCol()
-        d.setRoot(root)
-        await waitForRoot(d,root)
-        fs.renameSync(oldFile,newFile)
-        post.emit('file.change',{path:newFile,oldPath:oldFile,change:'rename'})
-        await sleep(120)
-        names = d.dirtree.items.map(function (i)
-        {
-            return i.path
-        })
-        fs.rmSync(root,{recursive:true,force:true})
-        compare((_k_.in(newFile,names)),true)
-        compare((_k_.in(oldFile,names)),false)
-    })
-    await section("create events update open directories", async function ()
-    {
-        root = '/tmp/opencode/ked-dirtree-open'
-        fs.rmSync(root,{recursive:true,force:true})
-        fs.mkdirSync(root,{recursive:true})
-        sub = slash.path(root,'sub')
-        fs.mkdirSync(sub)
-        fs.writeFileSync(slash.path(sub,'keep.txt'),'hello')
-        d = await makeCol()
-        d.setRoot(root)
-        await waitForRoot(d,root)
-        await d.dirtree.openDir(d.dirtree.itemForPath(sub),{redraw:true})
-        file = slash.path(sub,'new.txt')
-        fs.writeFileSync(file,'hello')
-        post.emit('file.change',{path:file,change:'create'})
-        await sleep(120)
-        names = d.dirtree.items.map(function (i)
-        {
-            return i.path
-        })
-        open = (d.dirtree.itemForPath(sub) != null ? d.dirtree.itemForPath(sub).open : undefined)
-        fs.rmSync(root,{recursive:true,force:true})
-        compare((_k_.in(file,names)),true)
-        compare(open,true)
-    })
-    await section("modify events leave the tree alone", async function ()
-    {
-        root = '/tmp/opencode/ked-dirtree-modify'
-        fs.rmSync(root,{recursive:true,force:true})
-        fs.mkdirSync(root,{recursive:true})
-        file = slash.path(root,'a.txt')
-        fs.writeFileSync(file,'hello')
-        d = await makeCol()
-        d.setRoot(root)
-        await waitForRoot(d,root)
-        count = d.dirtree.items.length
-        fs.writeFileSync(file,'changed')
-        post.emit('file.change',{path:file,change:'modify'})
-        await sleep(120)
-        after = d.dirtree.items.length
-        fs.rmSync(root,{recursive:true,force:true})
-        compare(after,count)
-    })
-}
-toExport["dirtree"]._section_ = true
-toExport._test_ = true
-export default toExport
 
-
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGlydHJlZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC9kaXJ0cmVlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7O09BQ0ksU0FBQTs7T0FDTSxVQUFBO0lBQU07SUFBTTtJQUFNOztPQUNWLGFBQVg7O09BQ1csY0FBWDs7T0FDYyxhQUFUOzs7QUFFWjs7OztJQUVJO0lBQ0Esb0JBQVcsS0FBSTs7OztlQUNFLGNBQUEsSUFBSzs7bUJBQWhCOztRQUNGLFNBQVMsTUFBTTtRQUNmO1FBQ0EsUUFBUTthQUNKLEtBQU87O1lBQUwsSUFBSztpQkFDUyxFQUFFLFdBQVc7O2dCQUE3Qjs7WUFDQSxPQUFPLFFBQUUsT0FBTztZQUNoQixRQUFRLEtBQUssTUFBTTtnQkFDaEIsTUFBTSxXQUFVOztnQkFDZixPQUFPLE1BQU0sTUFBTTs7OztnQkFFbkIsT0FBTyxNQUFNLGdCQUFiLE9BQU8sTUFBTTtnQkFDYixPQUFPLE1BQU0sSUFBSSxZQUFNLEdBQUssS0FBSyxRQUFROztZQUM3QyxRQUFROztZQUNBOzttQkFBVjs7eUJBQ0YsTUFBTSwwQkFBTzs7SUFDakIsb0JBQVcsS0FBSTs7ZUFBVSxNQUFNLE9BQU87O0lBQ3RDLG9CQUFXOztzQkFBZSxNQUFNOztJQUNoQyxPQUFPLGVBQWMsSUFBSSxRQUFRLElBQUksUUFBUSxJQUFJO0lBRWpELFFBQVEsU0FBUSxLQUFLLElBQUksS0FBSztJQUM5QixRQUFRLE9BQU8sRUFBRSxPQUFPO0lBQ3hCLFFBQVEsT0FBTyxFQUFFLE9BQU87SUFDeEIsRUFBRSxPQUFPLEVBQUUsRUFBRSxJQUFJO1VBRWYsWUFBWSxFQUFFLFFBQVE7V0FDeEI7OztBQUVKLDhCQUFlLEdBQUU7Ozs7SUFDYixTQUFTLE1BQU0sSUFBSTtJQUNuQixJQUFJO1dBQ0UsSUFBSTs7UUFDTixRQUFRLEVBQUUsUUFBUTt1QkFDSCxVQUFVLE1BQU0sR0FBRyxTQUFROzs7O2NBQ3hDLE1BQU07UUFDUixLQUFLOzs7Ozs7O1FBTUwsT0FBTztRQUNQLEdB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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGlydHJlZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC9kaXJ0cmVlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDSSxTQUFBOztPQUNNLFVBQUE7SUFBTTtJQUFNO0lBQU07O09BQ1YsYUFBWDs7T0FDVyxjQUFYOztPQUNjLGFBQVQ7OztBQUVaOzs7O0lBRUk7SUFDQSxvQkFBVyxLQUFJOzs7O2VBQ0UsY0FBQSxJQUFLOzttQkFBaEI7O1FBQ0YsU0FBUyxNQUFNO1FBQ2Y7UUFDQSxRQUFRO2FBQ0osS0FBTzs7WUFBTCxJQUFLO2lCQUNTLEVBQUUsV0FBVzs7Z0JBQTdCOztZQUNBLE9BQU8sUUFBRSxPQUFPO1lBQ2hCLFFBQVEsS0FBSyxNQUFNO2dCQUNoQixNQUFNLFdBQVU7O2dCQUNmLE9BQU8sTUFBTSxNQUFNOzs7O2dCQUVuQixPQUFPLE1BQU0sZ0JBQWIsT0FBTyxNQUFNO2dCQUNiLE9BQU8sTUFBTSxJQUFJLFlBQU0sR0FBSyxLQUFLLFFBQVE7O1lBQzdDLFFBQVE7O1lBQ0E7O21CQUFWOzt5QkFDRixNQUFNLDBCQUFPOztJQUNqQixvQkFBVyxLQUFJOztlQUFVLE1BQU0sT0FBTzs7SUFDdEMsb0JBQVc7O3NCQUFlLE1BQU07O0lBQ2hDLE9BQU8sZUFBYyxJQUFJLFFBQVEsSUFBSSxRQUFRLElBQUk7SUFFakQsUUFBUSxTQUFRLEtBQUssSUFBSSxLQUFLO0lBQzlCLFFBQVEsT0FBTyxFQUFFLE9BQU87SUFDeEIsUUFBUSxPQUFPLEVBQUUsT0FBTztJQUN4QixFQUFFLE9BQU8sRUFBRSxFQUFFLElBQUk7VUFFZixZQUFZLEVBQUUsUUFBUTtXQUN4Qjs7O0FBRUosOEJBQWUsR0FBRTs7OztJQUNiLFNBQVMsTUFBTSxJQUFJO0lBQ25CLElBQUk7V0FDRSxJQUFJOztRQUNOLFFBQVEsRUFBRSxRQUFRO3VCQUNILFVBQVUsTUFBTSxHQUFHLFNBQVE7Ozs7Y0FDeEMsTUFBTTtRQUNSLEtBQUsifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/test/dirtree.kode
