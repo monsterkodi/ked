@@ -16,7 +16,7 @@ use ../edit/tool ◆ colorspans
 
         result = []
 
-        ⮐  result if not (spans is arr)
+        ⮐ result if not (spans is arr)
 
         for span in spans
 
@@ -37,10 +37,10 @@ use ../edit/tool ◆ colorspans
 
         style = @commentStyle path
 
-        ⮐  {text: text colors: @empty()} if not style?
+        ⮐ {text: text colors: @empty()} if not style?
 
         end = text.endsWith('\n') ? text.length-1 : text.length
-        ⮐  {text: text colors: @empty()} if end <= 0
+        ⮐ {text: text colors: @empty()} if end <= 0
 
         start = text.lastIndexOf '\n' end-1
         start += 1
@@ -48,17 +48,17 @@ use ../edit/tool ◆ colorspans
         trailer = text[start...end]
         trailer = trailer[0...trailer.length-1] if trailer.endsWith '\r'
 
-        ⮐  {text: text colors: @empty()} if empty trailer
-        ⮐  {text: text colors: @empty()} if not trailer.startsWith(style.start)
+        ⮐ {text: text colors: @empty()} if empty trailer
+        ⮐ {text: text colors: @empty()} if not trailer.startsWith(style.start)
 
         innerEnd = trailer.length
         innerEnd -= style.end.length if not empty style.end
 
-        ⮐  {text: text colors: @empty()} if not empty style.end and not trailer.endsWith(style.end)
+        ⮐ {text: text colors: @empty()} if not empty style.end and not trailer.endsWith(style.end)
 
         body = trailer[style.start.length...innerEnd].trim()
 
-        ⮐  {text: text colors: @empty()} if not body.startsWith 'ked-colors'
+        ⮐ {text: text colors: @empty()} if not body.startsWith 'ked-colors'
 
         payload = body['ked-colors'.length..].trim()
 
@@ -89,14 +89,14 @@ use ../edit/tool ◆ colorspans
 
         style = @commentStyle path
 
-        ⮐  text if not style?
+        ⮐ text if not style?
 
         colors ?= @empty()
 
         fg = colors.fg ? []
         bg = colors.bg ? []
 
-        ⮐  text if empty fg and empty bg
+        ⮐ text if empty fg and empty bg
 
         data =
             v:    1

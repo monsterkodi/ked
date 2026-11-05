@@ -103,7 +103,7 @@ export
 
         text = @wordAtCursor()
 
-        ⮐  if empty text
+        ⮐ if empty text
 
         novim.lastVind = text
 
@@ -113,7 +113,7 @@ export
 
         rng = belt.rangeOfClosestWordToPos @s.lines @mainCursor()
 
-        ⮐  if not rng
+        ⮐ if not rng
 
         start = [rng[0] rng[1]]
         end   = [rng[2] rng[3]]
@@ -197,7 +197,7 @@ export
     startVisual: kind ->
 
         if @visual == kind
-            ⮐  @stopVisual()
+            ⮐ @stopVisual()
 
         if not @visual
             @visualAnchors = @allCursors().map (c) -> [c[0] c[1]]
@@ -300,7 +300,7 @@ export
 
     updateVisual: ->
 
-        ⮐  if not @visual
+        ⮐ if not @visual
 
         pairs   = @visualPairs()
         cursors = pairs.map (p) -> [p[1][0] p[1][1]]
@@ -330,7 +330,7 @@ export
 
         rngs = @s.selections.asMutable()
 
-        ⮐  if empty rngs
+        ⮐ if empty rngs
 
         linewise = @visual == 'line'
 
@@ -378,7 +378,7 @@ export
 
         rngs = @s.selections.asMutable()
 
-        ⮐  if empty rngs
+        ⮐ if empty rngs
 
         @startNovimInsert { kind: 'visual', linewise: @visual == 'line', shapes: @visualRepeatShapes() }
 
@@ -391,7 +391,7 @@ export
 
         rngs = @s.selections
 
-        ⮐  if empty rngs
+        ⮐ if empty rngs
 
         cursors = rngs.map (r) -> [after ? r[2] : r[0] r[1]]
 
@@ -442,7 +442,7 @@ export
 
     visualSwap: ->
 
-        ⮐  if not @visual
+        ⮐ if not @visual
 
         cursors = @allCursors()
         anchors = @visualAnchors
@@ -463,7 +463,7 @@ export
 
     visualTextObject: spec ->
 
-        ⮐  if not @visual
+        ⮐ if not @visual
 
         rngs = []
 
@@ -476,7 +476,7 @@ export
 
             rngs.push rng
 
-        ⮐  if empty rngs
+        ⮐ if empty rngs
 
         @visualAnchors = rngs.map (r) -> [r[0] r[1]]
 
@@ -498,7 +498,7 @@ export
 
             indices = indices.concat belt.lineIndicesForRange(rng)
 
-        ⮐  if empty indices
+        ⮐ if empty indices
 
         @indentAtIndices indices deindent
 
@@ -508,7 +508,7 @@ export
 
         indices = belt.lineIndicesForRanges @s.selections
 
-        ⮐  if empty indices
+        ⮐ if empty indices
 
         indices = Array.from new Set(indices)
         indents = {}
@@ -542,7 +542,7 @@ export
 
         indices.sort (a b) -> a - b
 
-        ⮐  if empty indices
+        ⮐ if empty indices
 
         n = max 1 (times ? 1)
 
@@ -582,13 +582,13 @@ export
 
     recordNovimInsert: text ->
 
-        ⮐  if not @novimInsert or @novimReplaying
+        ⮐ if not @novimInsert or @novimReplaying
 
         @novimInsert.text += text
 
     recordNovimBackspace: ->
 
-        ⮐  if not @novimInsert or @novimReplaying
+        ⮐ if not @novimInsert or @novimReplaying
 
         text = @novimInsert.text
 
@@ -596,7 +596,7 @@ export
 
     finishNovimInsert: ->
 
-        ⮐  if not @novimInsert
+        ⮐ if not @novimInsert
 
         insert = @novimInsert
 
@@ -606,7 +606,7 @@ export
 
     repeatChange: count ->
 
-        ⮐  if not @lastChange
+        ⮐ if not @lastChange
 
         switch @lastChange.operator
             'replace'     ➜ @replaceChars     @lastChange.char     (count > 1 ? count : @lastChange.count)
@@ -668,7 +668,7 @@ export
 
         rngs = @selectByMotion spec
 
-        ⮐  if empty rngs
+        ⮐ if empty rngs
 
         @setCursors belt.endPositionsOfRanges(rngs) main:@s.main
 
@@ -689,11 +689,11 @@ export
 
         shape = insert.shapes[0]
 
-        ⮐  if not shape
+        ⮐ if not shape
 
         rngs = @blockRangesForShape shape @mainCursor()
 
-        ⮐  if empty rngs
+        ⮐ if empty rngs
 
         cursors = rngs.map (r) -> [after ? r[2] : r[0] r[1]]
 
@@ -742,7 +742,7 @@ export
 
             rngs.push rng
 
-        ⮐  if empty rngs
+        ⮐ if empty rngs
 
         if action == 'delete'
 
@@ -766,14 +766,14 @@ export
 
         lines = @s.lines
 
-        ⮐  if empty lines
+        ⮐ if empty lines
 
         if shape.linewise
 
             y1 = min cursor[1] lines.length-1
             y2 = min cursor[1]+shape.count-1 lines.length-1
 
-            ⮐  [0 y1 kseg.width(lines[y2]) y2]
+            ⮐ [0 y1 kseg.width(lines[y2]) y2]
 
         y1 = min cursor[1] lines.length-1
         y2 = min cursor[1]+shape.y2 lines.length-1
@@ -804,7 +804,7 @@ export
 
         text = clip.detect() == 'none' ? clip.text : clip.paste()
 
-        ⮐  null if empty text
+        ⮐ null if empty text
 
         linewise = text.endsWith '\n'
         lines    = text.split '\n'
@@ -827,7 +827,7 @@ export
 
             rngs.push rng
 
-        ⮐  if empty rngs
+        ⮐ if empty rngs
 
         rngs = motion.mergeRanges rngs
 
@@ -850,7 +850,7 @@ export
 
         rngs = @selectByMotion spec
 
-        ⮐  if empty rngs
+        ⮐ if empty rngs
 
         linewise = motion.isLinewise spec
 
@@ -866,7 +866,7 @@ export
 
         rngs = @selectByMotion spec
 
-        ⮐  if empty rngs
+        ⮐ if empty rngs
 
         @setCursors belt.endPositionsOfRanges(rngs)
 
@@ -896,7 +896,7 @@ export
 
     flashYank: rngs ->
 
-        ⮐  if empty rngs
+        ⮐ if empty rngs
 
         clearTimeout @yankFlashTimer if @yankFlashTimer
 
@@ -910,7 +910,7 @@ export
 
         @yankFlashTimer = null
 
-        ⮐  if not @yankFlash
+        ⮐ if not @yankFlash
 
         @yankFlash = null
 
@@ -922,7 +922,7 @@ export
 
         reg = @registerFromClipboard() if @usesClipboard(register)
 
-        ⮐  if not reg or empty reg.lines
+        ⮐ if not reg or empty reg.lines
 
         n = max 1 (count ? 1)
 
@@ -1028,7 +1028,7 @@ export
             c[0]        = kseg.width newLine[0...segi+n]
             changed     = true
 
-        ⮐  if not changed
+        ⮐ if not changed
 
         @begin()
 
@@ -1066,7 +1066,7 @@ export
             c[0]        = kseg.width line[0...min(lasti+1, line.length-1)]
             changed     = true
 
-        ⮐  if not changed
+        ⮐ if not changed
 
         @begin()
 
@@ -1087,7 +1087,7 @@ export
         for c in cursors
             starts.push c[1] if c[1] < lines.length-1 and c[1] not in starts
 
-        ⮐  if empty starts
+        ⮐ if empty starts
 
         starts.sort (a b) -> a - b
 

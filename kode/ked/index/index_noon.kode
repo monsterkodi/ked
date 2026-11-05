@@ -5,13 +5,13 @@ use ../../kxk ▪ kstr
 
     parseLine: index line ->
         
-        ⮐  if empty line
-        ⮐  if line[0] in [' ' '\t'] # only top level lines
-        ⮐  if line[0] == '#'      # comments
+        ⮐ if empty line
+        ⮐ if line[0] in [' ' '\t'] # only top level lines
+        ⮐ if line[0] == '#'      # comments
         
         words = line.split(/\s+/)
         name = words[0]
-        ⮐  if empty name
+        ⮐ if empty name
         
         @result.funcs.push name:name line:index
 

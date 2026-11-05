@@ -57,7 +57,7 @@ import rgxs from './quicky.json' with { type: "json" }
 
     draw: =>
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
          
         @arrange()
         @erase()
@@ -67,9 +67,9 @@ import rgxs from './quicky.json' with { type: "json" }
                 
     onMouse: event =>
 
-        ⮐  if @hidden()
-        ret = @crumbs.onMouse event ; ⮐  ret if ret?.redraw
-        ret = super event           ; ⮐  ret if ret?.redraw
+        ⮐ if @hidden()
+        ret = @crumbs.onMouse event ; ⮐ ret if ret?.redraw
+        ret = super event           ; ⮐ ret if ret?.redraw
         @hover
                 
     showFiles: files =>
@@ -173,8 +173,8 @@ import rgxs from './quicky.json' with { type: "json" }
     moveSelection: dir =>
         
         switch dir
-            'down' ➜ ⮐  if not @choices.hasNext()
-            'up'   ➜ ⮐  if not @choices.hasPrev()
+            'down' ➜ ⮐ if not @choices.hasNext()
+            'up'   ➜ ⮐ if not @choices.hasPrev()
         
         @hideMap()
 
@@ -186,7 +186,7 @@ import rgxs from './quicky.json' with { type: "json" }
     
     preview: item ○=>
         
-        ⮐  @hideMap() if empty item?.path
+        ⮐ @hideMap() if empty item?.path
         
         ext = config.data.filetypes[slash.file(item.path)]
         ext ?= slash.ext item.path
@@ -218,16 +218,16 @@ import rgxs from './quicky.json' with { type: "json" }
         
         switch @input.current()
             
-            '/'  ➜ ⮐  @browseDir '/'
-            '~'  ➜ ⮐  @browseDir '~'
-            '.'  ➜ ⮐  @browseDir @currentDir
-            '..' ➜ ⮐  @browseDir slash.dir(@currentDir)
+            '/'  ➜ ⮐ @browseDir '/'
+            '~'  ➜ ⮐ @browseDir '~'
+            '.'  ➜ ⮐ @browseDir @currentDir
+            '..' ➜ ⮐ @browseDir slash.dir(@currentDir)
             
         # if empty choice and valid @input.current()
         #     @gotoDirOrOpenFile @input.current()
         #     ⮐ redraw:true
             
-        if empty choice      ➜ ⮐  redraw:false 
+        if empty choice      ➜ ⮐ redraw:false 
         # if empty choice.path ➜ ⮐ redraw:false 
 
         if choice.type == 'dir'
@@ -240,7 +240,7 @@ import rgxs from './quicky.json' with { type: "json" }
 
         switch action
             
-            'click' ➜ ⮐  @applyChoice tilde:path path:slash.untilde(path)
+            'click' ➜ ⮐ @applyChoice tilde:path path:slash.untilde(path)
     
     onInputAction: action text =>
         
@@ -254,12 +254,12 @@ import rgxs from './quicky.json' with { type: "json" }
                 
                 if choice?.path
                     if choice.tilde == ' ..'
-                        ⮐  @moveSelection 'down'
+                        ⮐ @moveSelection 'down'
                     if choice.type == 'file'
-                        ⮐  post.emit 'quicky' choice.path
+                        ⮐ post.emit 'quicky' choice.path
                     else
                         @hideMap()
-                        ⮐  @gotoDirOrOpenFile choice.link ? choice.path
+                        ⮐ @gotoDirOrOpenFile choice.link ? choice.path
                         
             'left' 
                 
@@ -268,19 +268,19 @@ import rgxs from './quicky.json' with { type: "json" }
                         @input.grabFocus()
                 else
                     @choices.select 0
-                ⮐  
+                ⮐ 
                 
             'delete'
                 
                 if choice?.path
                     upDir = slash.dir @currentDir
-                    ⮐  if empty upDir
+                    ⮐ if empty upDir
                     @hideMap()
-                    ⮐  @gotoDir upDir @currentDir
+                    ⮐ @gotoDir upDir @currentDir
             'space'            
                 
                 if choice?.path and choice.type == 'file'
-                    ⮐  post.emit 'quicky' choice.path
+                    ⮐ post.emit 'quicky' choice.path
                     
         super action choice
 

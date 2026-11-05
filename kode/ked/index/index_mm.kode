@@ -5,7 +5,7 @@ use ../../kxk ▪ kermit
 
     parseLine: index line ->
                 
-        ⮐  if line.startsWith ' '
+        ⮐ if line.startsWith ' '
             
         if match = kermit.lineMatch line '@implementation ●name' or\
            match = kermit.lineMatch line '@interface ●name'

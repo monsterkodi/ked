@@ -5,7 +5,7 @@ export
     
     indentSelectedLines: ->
         
-        ⮐  if empty @s.selections
+        ⮐ if empty @s.selections
         
         indices = belt.lineIndicesForRangesOrPositions @s.selections @s.cursors
         

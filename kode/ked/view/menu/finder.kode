@@ -30,11 +30,11 @@ use                 ◆ inputchoice
         if 0 <= y < @choices.fuzzied.length
             if @choices.fuzzied[y].type == 'file'
                 if @choices.fuzzied[y].line?
-                    ⮐  lpad(pad @choices.fuzzied[y].line) + ' '
+                    ⮐ lpad(pad @choices.fuzzied[y].line) + ' '
                 else
-                    ⮐  lpad(pad '●') + ' '
+                    ⮐ lpad(pad '●') + ' '
             if @choices.fuzzied[y].row is num
-                ⮐  lpad(pad @choices.fuzzied[y].row+1) + ' '
+                ⮐ lpad(pad @choices.fuzzied[y].row+1) + ' '
         lpad pad+1
     
     arrangeRect: ->
@@ -70,7 +70,7 @@ use                 ◆ inputchoice
         if empty text
             @choices.clear()
             @input.show()
-            ⮐  super()
+            ⮐ super()
                     
         @state.highlightText text
         
@@ -145,7 +145,7 @@ use                 ◆ inputchoice
                 ⮐ 
             'left' 
                 @input.grabFocus()
-                ⮐  true
+                ⮐ true
     
         super action choice
         
@@ -153,12 +153,12 @@ use                 ◆ inputchoice
     
         switch action
             
-            'submit' ➜ ⮐  @apply @choices.current()
+            'submit' ➜ ⮐ @apply @choices.current()
             'change'
                 if valid text
-                    ⮐  @show text
+                    ⮐ @show text
                 else   
-                    ⮐  @choices.clear()
+                    ⮐ @choices.clear()
             
         super action text
 

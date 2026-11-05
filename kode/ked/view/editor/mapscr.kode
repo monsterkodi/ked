@@ -83,13 +83,13 @@ use                 ◆ mapview
                 if @hover
                     @doDrag = true
                     post.emit 'pointer''grabbing'
-                    ⮐  @scrollToPixel event.pixel
+                    ⮐ @scrollToPixel event.pixel
                     
             'drag'
             
                 if @doDrag
                     post.emit 'pointer''grab'
-                    ⮐  @scrollToPixel event.pixel
+                    ⮐ @scrollToPixel event.pixel
                     
                 @hover = false
                 
@@ -98,14 +98,14 @@ use                 ◆ mapview
                 if @doDrag
                     delete @doDrag 
                     post.emit 'pointer''pointer' if @hover
-                    ⮐  true
+                    ⮐ true
         @hover
     
     onResize: =>
         
         csz = @cells.screen.t.cellsz
         
-        ⮐  if empty csz
+        ⮐ if empty csz
         
         @csz = csz
         
@@ -131,8 +131,8 @@ use                 ◆ mapview
         if view eql @state.s.view and scrollOffset == @state.s.scrollOffset
             if cli != mc[1]
                 @state.setCursors [[mc[0] cli]] main:0 adjust:false
-                ⮐  redraw:true
-            ⮐  
+                ⮐ redraw:true
+            ⮐ 
         
         @state.setView view scrollOffset
         @state.setCursors [[mc[0] cli]] main:0 adjust:false
@@ -192,7 +192,7 @@ use                 ◆ mapview
     
     draw: =>
     
-        ⮐  if @hidden() or @collapsed()
+        ⮐ if @hidden() or @collapsed()
         
         super()
         
@@ -205,7 +205,7 @@ use                 ◆ mapview
         
         t = @cells.screen.t
         
-        ⮐  if empty t.pixels or @hidden() or @collapsed()
+        ⮐ if empty t.pixels or @hidden() or @collapsed()
 
         @calcView()
 
@@ -234,11 +234,11 @@ use                 ◆ mapview
                 
     drawKnob: =>
     
-        ⮐  if empty @csz
+        ⮐ if empty @csz
         
         @calcView()
                 
-        ⮐  if @hidden() or @collapsed()
+        ⮐ if @hidden() or @collapsed()
         
         maxKy = max 0 @mapHeight-@knobHeight
         offsetRow = (@state.viewTopRow() - @topRow) * @pixelsPerRow
@@ -248,7 +248,7 @@ use                 ◆ mapview
 
     hide: =>
     
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         @cells.screen.t.hideImageOverlay @knobId
         

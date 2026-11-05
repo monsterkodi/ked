@@ -36,7 +36,7 @@ use              ◆ belt
 
     @mergeRanges: rngs ->
 
-        ⮐  [] if empty rngs
+        ⮐ [] if empty rngs
 
         rngs.sort (a b) -> if a[1] == b[1] then a[0]-b[0] else a[1]-b[1]
 
@@ -65,7 +65,7 @@ use              ◆ belt
 
     @range: lines pos spec ->
     
-        ⮐  null if empty lines
+        ⮐ null if empty lines
 
         [x y] = pos
 
@@ -141,11 +141,11 @@ use              ◆ belt
     @sentenceClosers: [')' ']' '"' "'"]
 
     @isSentenceEnd: segs i ->
-        ⮐  false if segs[i] not in ['.' '!' '?']
+        ⮐ false if segs[i] not in ['.' '!' '?']
         j = i+1
         while j < segs.length and segs[j] in @sentenceClosers
             j += 1
-        ⮐  true if j >= segs.length
+        ⮐ true if j >= segs.length
         @isSpaceSeg segs[j]
 
     @uniqueStarts: starts ->
@@ -197,7 +197,7 @@ use              ◆ belt
 
     @startAfter: starts pos ->
         for start, i in starts
-            ⮐  i if start[1] > pos[1] or (start[1] == pos[1] and start[0] > pos[0])
+            ⮐ i if start[1] > pos[1] or (start[1] == pos[1] and start[0] > pos[0])
         -1
 
     @startBefore: starts pos ->
@@ -210,13 +210,13 @@ use              ◆ belt
     @sentencePositionAfter: lines pos count ->
         starts = @sentenceStarts lines
         idx    = @startAfter starts pos
-        ⮐  @eofPosition(lines) if idx < 0
+        ⮐ @eofPosition(lines) if idx < 0
         starts[min(starts.length-1, idx+count-1)]
 
     @sentencePositionBefore: lines pos count ->
         starts = @sentenceStarts lines
         idx    = @startBefore starts pos
-        ⮐  [0 0] if idx < 0
+        ⮐ [0 0] if idx < 0
         starts[max(0, idx-count+1)]
 
     @rangeForSentence: lines x y count ->
@@ -235,15 +235,15 @@ use              ◆ belt
             while yy < lines.length and empty lines[yy]
                 yy += 1
 
-            ⮐  @eofPosition(lines) if yy >= lines.length
+            ⮐ @eofPosition(lines) if yy >= lines.length
 
             for z in yy...lines.length
-                ⮐  [0 z] if empty lines[z]
+                ⮐ [0 z] if empty lines[z]
 
-            ⮐  @eofPosition lines
+            ⮐ @eofPosition lines
 
         for z in (y+1)...lines.length
-            ⮐  [0 z] if empty lines[z]
+            ⮐ [0 z] if empty lines[z]
 
         @eofPosition lines
 
@@ -263,19 +263,19 @@ use              ◆ belt
             while yy >= 0 and empty lines[yy]
                 yy -= 1
 
-            ⮐  [0 0] if yy < 0
+            ⮐ [0 0] if yy < 0
 
             z = yy
             while z > 0 and not empty lines[z-1]
                 z -= 1
 
-            ⮐  [0 z]
+            ⮐ [0 z]
 
         z = y-1
         while z >= 0 and not empty lines[z]
             z -= 1
 
-        ⮐  [0 0] if z < 0
+        ⮐ [0 0] if z < 0
 
         [0 z]
 
@@ -290,7 +290,7 @@ use              ◆ belt
     @rangeForParagraph: lines x y count ->
         target = @paragraphPositionAfter lines [x y] count
         if x > 0 and target[1] > 0 and empty lines[target[1]]
-            ⮐  [x y kseg.width(lines[target[1]-1]) target[1]-1]
+            ⮐ [x y kseg.width(lines[target[1]-1]) target[1]-1]
         [x y target[0] target[1]]
 
     @rangeForParagraphBack: lines x y count ->
@@ -341,13 +341,13 @@ use              ◆ belt
 
         [x y] = pos
 
-        ⮐  [x y] if not till
+        ⮐ [x y] if not till
 
         segs = lines[y]
         i    = kseg.indexAtWidth segs x
 
         if forward
-            ⮐  null if i <= 0
+            ⮐ null if i <= 0
             [kseg.widthAtSegi(segs, i-1) y]
         else
             [kseg.widthAtSegi(segs, i+1) y]
@@ -379,7 +379,7 @@ use              ◆ belt
 
             found.push(p) if p
 
-        ⮐  null if found.length < count
+        ⮐ null if found.length < count
 
         if forward
             found[count-1]
@@ -395,7 +395,7 @@ use              ◆ belt
 
         pos = @charFindPosition lines [x y] target count till forward
 
-        ⮐  null if pos == null
+        ⮐ null if pos == null
 
         msegs = lines[pos[1]]
         mi    = kseg.indexAtWidth msegs pos[0]
@@ -416,10 +416,10 @@ use              ◆ belt
 
     @wordCategory: seg big ->
 
-        ⮐  'empty' if empty seg
-        ⮐  'ws'    if /\s+/.test seg
-        ⮐  'word'  if big
-        ⮐  'word'  if /\w+/.test seg
+        ⮐ 'empty' if empty seg
+        ⮐ 'ws'    if /\s+/.test seg
+        ⮐ 'word'  if big
+        ⮐ 'word'  if /\w+/.test seg
         'punct'
 
     @widthAt: segs i -> kseg.widthAtSegi segs i
@@ -442,9 +442,9 @@ use              ◆ belt
             while i < segs.length and @wordCategory(segs[i], big) == 'ws'
                 i += 1
 
-            ⮐  [@widthAt(segs i) y] if i < segs.length
+            ⮐ [@widthAt(segs i) y] if i < segs.length
 
-        ⮐  [kseg.width(segs) y] if eol
+        ⮐ [kseg.width(segs) y] if eol
 
         for yy in (y+1)...lines.length
 
@@ -454,7 +454,7 @@ use              ◆ belt
             while j < line.length and @wordCategory(line[j], big) == 'ws'
                 j += 1
 
-            ⮐  [@widthAt(line j) yy] if j < line.length
+            ⮐ [@widthAt(line j) yy] if j < line.length
 
         [kseg.width(segs) y]
 
@@ -469,7 +469,7 @@ use              ◆ belt
 
             if i >= segs.length
                 if y+1 >= lines.length
-                    ⮐  [kseg.width(segs) y]
+                    ⮐ [kseg.width(segs) y]
                 y   += 1
                 segs = lines[y]
                 i    = 0
@@ -486,7 +486,7 @@ use              ◆ belt
             while j+1 < segs.length and @wordCategory(segs[j+1], big) == cat
                 j += 1
 
-            ⮐  [@widthAt(segs j+1) y] if j > i
+            ⮐ [@widthAt(segs j+1) y] if j > i
 
             i = j+1
 
@@ -500,7 +500,7 @@ use              ◆ belt
         while true
 
             if i <= 0
-                ⮐  [0 0] if y <= 0
+                ⮐ [0 0] if y <= 0
                 y   -= 1
                 segs = lines[y]
                 i    = segs.length
@@ -515,18 +515,18 @@ use              ◆ belt
             while i > 0 and @wordCategory(segs[i-1], big) == cat
                 i -= 1
 
-            ⮐  [@widthAt(segs i) y]
+            ⮐ [@widthAt(segs i) y]
 
     @objectX: lines y x ->
         segs  = lines[y]
         width = kseg.width segs
         if width > 0 and x >= width
-            ⮐  @widthAt(segs segs.length-1)
+            ⮐ @widthAt(segs segs.length-1)
         clamp 0 width x
 
     @widthAtOrEnd: segs i ->
         if i >= segs.length
-            ⮐  kseg.width segs
+            ⮐ kseg.width segs
         @widthAt(segs i)
 
     @isEscaped: segs i ->
@@ -585,10 +585,10 @@ use              ◆ belt
 
             if i < segs.length
                 [s e] = @wordBoundsAt segs i big
-                ⮐  [y s e]
+                ⮐ [y s e]
 
             if y+1 >= lines.length
-                ⮐  null
+                ⮐ null
 
             y += 1
             i  = 0
@@ -597,7 +597,7 @@ use              ◆ belt
 
         segs = lines[y]
 
-        ⮐  if empty segs
+        ⮐ if empty segs
 
         i = kseg.indexAtWidth segs x
         i = segs.length-1 if i >= segs.length
@@ -607,17 +607,17 @@ use              ◆ belt
             if inner
                 s = @leadingWsStart segs i
                 e = @trailingWsEnd segs i
-                ⮐  [@widthAt(segs s) y @widthAtOrEnd(segs e) y]
+                ⮐ [@widthAt(segs s) y @widthAtOrEnd(segs e) y]
 
             next = @nextWordAfterIndex lines y i big
 
             if not next
                 s = @leadingWsStart segs i
                 e = @trailingWsEnd segs i
-                ⮐  [@widthAt(segs s) y @widthAtOrEnd(segs e) y]
+                ⮐ [@widthAt(segs s) y @widthAtOrEnd(segs e) y]
 
             [wy ws we] = next
-            ⮐  @rangeForWords lines wy ws we count true big
+            ⮐ @rangeForWords lines wy ws we count true big
 
         [s e] = @wordBoundsAt segs i big
 
@@ -638,13 +638,13 @@ use              ◆ belt
             lastEnd  = ne
 
         if not around
-            ⮐  [@widthAt(lines[firstLine] firstStart) firstLine @widthAt(lines[lastLine] lastEnd) lastLine]
+            ⮐ [@widthAt(lines[firstLine] firstStart) firstLine @widthAt(lines[lastLine] lastEnd) lastLine]
 
         lastSegs = lines[lastLine]
         tEnd     = @trailingWsEnd lastSegs lastEnd
 
         if tEnd > lastEnd
-            ⮐  [@widthAt(lines[firstLine] firstStart) firstLine @widthAtOrEnd(lastSegs tEnd) lastLine]
+            ⮐ [@widthAt(lines[firstLine] firstStart) firstLine @widthAtOrEnd(lastSegs tEnd) lastLine]
 
         firstSegs = lines[firstLine]
         lStart    = @leadingWsStart firstSegs firstStart
@@ -668,9 +668,9 @@ use              ◆ belt
         open  = opens[target] ? target
 
         if open == '"' or open == "'"
-            ⮐  @rangeForQuoteObject lines x y open inner
+            ⮐ @rangeForQuoteObject lines x y open inner
 
-        ⮐  null if not closes[open]
+        ⮐ null if not closes[open]
 
         @rangeForBracketObject lines x y open inner
 
@@ -678,7 +678,7 @@ use              ◆ belt
 
         segs = lines[y]
 
-        ⮐  null if empty segs
+        ⮐ null if empty segs
 
         xi = kseg.indexAtWidth segs x
         xi = segs.length-1 if xi >= segs.length
@@ -697,7 +697,7 @@ use              ◆ belt
                 pairs.push [open i]
                 open = -1
 
-        ⮐  null if empty pairs
+        ⮐ null if empty pairs
 
         chosen = null
 
@@ -712,17 +712,17 @@ use              ◆ belt
                     chosen = pair
                     break
 
-        ⮐  null if not chosen
+        ⮐ null if not chosen
 
         [o c] = chosen
 
         if inner
-            ⮐  [@widthAt(segs o+1) y @widthAt(segs c) y]
+            ⮐ [@widthAt(segs o+1) y @widthAt(segs c) y]
 
         tEnd = @trailingWsEnd segs c+1
 
         if tEnd > c+1
-            ⮐  [@widthAt(segs o) y @widthAtOrEnd(segs tEnd) y]
+            ⮐ [@widthAt(segs o) y @widthAtOrEnd(segs tEnd) y]
 
         lStart = @leadingWsStart segs o
 
@@ -744,7 +744,7 @@ use              ◆ belt
 
         spans = belt.pairSpansAtPosition lines [x y] open
 
-        ⮐  spans if spans
+        ⮐ spans if spans
 
         for ch in @flatChars lines
             [c li w] = ch
@@ -756,7 +756,7 @@ use              ◆ belt
             spans = belt.pairSpansAtPosition lines [w li] open
 
             if spans and spans[0][0] == w and spans[0][1] == li
-                ⮐  spans
+                ⮐ spans
 
         null
 
@@ -764,7 +764,7 @@ use              ◆ belt
 
         spans = @pairSpansForPosition lines x y open
 
-        ⮐  null if not spans
+        ⮐ null if not spans
 
         [osp csp] = spans
 

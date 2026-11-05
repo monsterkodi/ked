@@ -6,7 +6,7 @@ stringOrComment = /###[\s\S]*?###|#.*|"""[\s\S]*?"""|"(?:\\.|\#\{[^\}]*}|[^\n\\"
 
 maskStrings = (text) ->
     text.replace stringOrComment, (m) ->
-        ⮐  m if m[0] == '#'
+        ⮐ m if m[0] == '#'
         m.replace /[^\n]/g, ' '
 
 ■index_kode
@@ -30,7 +30,7 @@ maskStrings = (text) ->
         
         addFuncInfo = funcName funcInfo ->
             
-            ⮐  if not funcName
+            ⮐ if not funcName
             
             if funcName.length > 1 and funcName.startsWith '@'
                 funcName = funcName.slice 1

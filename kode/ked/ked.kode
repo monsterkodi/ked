@@ -200,8 +200,8 @@ use child_process ▪ spawn exec
         ○ config.loaded if config.loaded
         ○ @session.loaded
         
-        ⮐  if @args.fresh
-        ⮐  if @args.new
+        ⮐ if @args.fresh
+        ⮐ if @args.new
         
         if empty @currentFile and empty @loadingFile
             if file = ked_session.get "editor▸file"
@@ -324,14 +324,14 @@ use child_process ▪ spawn exec
         
     onQuicky: path ○=>
         
-        ⮐  if valid @loadingFile
+        ⮐ if valid @loadingFile
         
         if slash.isAbsolute path
             file = path
         else
             file = slash.absolute path slash.dir(@currentFile)
         
-        ⮐  if slash.samePath(file @currentFile)
+        ⮐ if slash.samePath(file @currentFile)
         
         ○ @loadFile file
 
@@ -375,7 +375,7 @@ use child_process ▪ spawn exec
             reloadCursor = @editor.state.mainCursor()
             reloadView   = @editor.state.s.view.asMutable()
 
-        ⮐  if slash.samePath absFile @loadingFile
+        ⮐ if slash.samePath absFile @loadingFile
         
         # log "ked.loadFile absFile #{absFile}"
         
@@ -397,7 +397,7 @@ use child_process ▪ spawn exec
         
         if empty @loadingFile
             warn "ked.loadFile - #{absFile} resolved to empty!"
-            ⮐  
+            ⮐ 
         
         ▴ 'loadingFile' @loadingFile
         
@@ -407,7 +407,7 @@ use child_process ▪ spawn exec
         
         if @loadingFile != readingFile
             # warn 'another file started loading, skip editor update'
-            ⮐  
+            ⮐ 
         
         @currentFile = @loadingFile
         
@@ -515,7 +515,7 @@ use child_process ▪ spawn exec
         
         if empty path
             post.emit 'novim.error' 'no file name'
-            ⮐  false
+            ⮐ false
 
         text = filecolors.join path text @editor.state.s.colors
 
@@ -523,7 +523,7 @@ use child_process ▪ spawn exec
         
         if result?.error
             post.emit 'novim.error' "can't open file for writing: #{path}"
-            ⮐  false
+            ⮐ false
         
         if path == @currentFile
             @editor.state.clearHistory() # lazy way to 'undirty' :> no undo after save :(
@@ -536,7 +536,7 @@ use child_process ▪ spawn exec
         
         saved = ○ @saveFile file
         
-        ⮐  if not saved
+        ⮐ if not saved
         
         @quit()
             
@@ -651,35 +651,35 @@ use child_process ▪ spawn exec
             
         switch key
             
-            'alt+1'                      ➜ ⮐  post.emit 'filepos.goBackward'  
-            'alt+2'                      ➜ ⮐  post.emit 'filepos.goForward'   
-            'cmd+1' 'ctrl+1'             ➜ ⮐  post.emit 'filepos.swapPrevious'
-            'alt+h'                      ➜ ⮐  @showFileposHistory()
-            'alt+q' 'ctrl+q' 'cmd+q'     ➜ ⮐  @quit()
-            'ctrl+r' 'cmd+r'             ➜ ⮐  @reloadFile()
-            'ctrl+s' 'cmd+s'             ➜ ⮐  @saveFile()
-            'shift+cmd+s' 'shift+ctrl+s' ➜ ⮐  @saveAs()
-            'cmd+n' 'ctrl+n'             ➜ ⮐  @newFile()
-            'alt+m'                      ➜ ⮐  @menu.show()
-            'cmd+p' 'ctrl+p'             ➜ ⮐  @quicky.showProjectFiles @currentFile
-            'shift+cmd+p' 'shift+ctrl+p' ➜ ⮐  @quicky.showRecentFiles @currentFile
-            'cmd+f' 'ctrl+f'             ➜ ⮐  @showFinderOrSearcher()
-            'shift+cmd+f' 'shift+ctrl+f' ➜ ⮐  @searcher.show()
-            'alt+o'                      ➜ ⮐  @editor.jumpToCounterpart()
-            'alt+,'                      ➜ ⮐  @editor.singleCursorAtLine @funcol.funtree.lineIndexOfPrevFunc()
-            'alt+.'                      ➜ ⮐  @editor.singleCursorAtLine @funcol.funtree.lineIndexOfNextFunc()
-            'cmd+m' 'cmd+;' 'ctrl+;'     ➜ ⮐  @macro.show()
-            'cmd+.' 'ctrl+.'             ➜ ⮐  @browse.gotoDir slash.dir(@currentFile)
-            'cmd+o' 'ctrl+o'             ➜ ⮐  post.emit 'browse.dir' process.cwd()
-            'cmd+i'                      ➜ ⮐  post.emit 'differ.status'
-            "cmd+["                      ➜ ⮐  post.emit 'dircol.show'
-            "alt+cmd+["                  ➜ ⮐  post.emit 'dircol.toggle'
-            'shift+cmd+['                ➜ ⮐  post.emit 'dircol.reveal' @currentFile
-            "cmd+]"                      ➜ ⮐  post.emit 'funcol.show'
-            "alt+cmd+]"                  ➜ ⮐  post.emit 'funcol.toggle'
-            'alt+c'                      ➜ ⮐  post.emit 'colorpicker.show'
-            'alt+u'                      ➜ ⮐  post.emit 'uniko.show'
-            'alt+shift+c' 'shift+alt+c'  ➜ ⮐  @editor.state.clearColorsAtCursorOrSelection()
+            'alt+1'                      ➜ ⮐ post.emit 'filepos.goBackward'  
+            'alt+2'                      ➜ ⮐ post.emit 'filepos.goForward'   
+            'cmd+1' 'ctrl+1'             ➜ ⮐ post.emit 'filepos.swapPrevious'
+            'alt+h'                      ➜ ⮐ @showFileposHistory()
+            'alt+q' 'ctrl+q' 'cmd+q'     ➜ ⮐ @quit()
+            'ctrl+r' 'cmd+r'             ➜ ⮐ @reloadFile()
+            'ctrl+s' 'cmd+s'             ➜ ⮐ @saveFile()
+            'shift+cmd+s' 'shift+ctrl+s' ➜ ⮐ @saveAs()
+            'cmd+n' 'ctrl+n'             ➜ ⮐ @newFile()
+            'alt+m'                      ➜ ⮐ @menu.show()
+            'cmd+p' 'ctrl+p'             ➜ ⮐ @quicky.showProjectFiles @currentFile
+            'shift+cmd+p' 'shift+ctrl+p' ➜ ⮐ @quicky.showRecentFiles @currentFile
+            'cmd+f' 'ctrl+f'             ➜ ⮐ @showFinderOrSearcher()
+            'shift+cmd+f' 'shift+ctrl+f' ➜ ⮐ @searcher.show()
+            'alt+o'                      ➜ ⮐ @editor.jumpToCounterpart()
+            'alt+,'                      ➜ ⮐ @editor.singleCursorAtLine @funcol.funtree.lineIndexOfPrevFunc()
+            'alt+.'                      ➜ ⮐ @editor.singleCursorAtLine @funcol.funtree.lineIndexOfNextFunc()
+            'cmd+m' 'cmd+;' 'ctrl+;'     ➜ ⮐ @macro.show()
+            'cmd+.' 'ctrl+.'             ➜ ⮐ @browse.gotoDir slash.dir(@currentFile)
+            'cmd+o' 'ctrl+o'             ➜ ⮐ post.emit 'browse.dir' process.cwd()
+            'cmd+i'                      ➜ ⮐ post.emit 'differ.status'
+            "cmd+["                      ➜ ⮐ post.emit 'dircol.show'
+            "alt+cmd+["                  ➜ ⮐ post.emit 'dircol.toggle'
+            'shift+cmd+['                ➜ ⮐ post.emit 'dircol.reveal' @currentFile
+            "cmd+]"                      ➜ ⮐ post.emit 'funcol.show'
+            "alt+cmd+]"                  ➜ ⮐ post.emit 'funcol.toggle'
+            'alt+c'                      ➜ ⮐ post.emit 'colorpicker.show'
+            'alt+u'                      ➜ ⮐ post.emit 'uniko.show'
+            'alt+shift+c' 'shift+alt+c'  ➜ ⮐ @editor.state.clearColorsAtCursorOrSelection()
             
         for handler in @keyHandlers
             # ●▸ on key
@@ -739,14 +739,14 @@ use child_process ▪ spawn exec
     
     redraw: =>    
         
-        ⮐  if @quitting
+        ⮐ if @quitting
 
         clearImmediate @redrawId
         @redrawId = setImmediate @draw
                                       
     draw: =>
             
-        ⮐  if @quitting
+        ⮐ if @quitting
         
         # ● sum
         

@@ -93,7 +93,7 @@ use           ◆ keys mode
             fg: fgSpans
             bg: bgSpans
 
-        ⮐  if @s.colors? and @s.colors eql next
+        ⮐ if @s.colors? and @s.colors eql next
 
         @s = @s.set 'colors' next
         @r = []
@@ -103,7 +103,7 @@ use           ◆ keys mode
     clearColorsForRanges: ranges =>
 
         colors = @s.colors
-        ⮐  if not colors?
+        ⮐ if not colors?
 
         fgSpans = colorspans.clear (colors.fg ? []) ranges
         bgSpans = colorspans.clear (colors.bg ? []) ranges
@@ -112,7 +112,7 @@ use           ◆ keys mode
             fg: fgSpans
             bg: bgSpans
 
-        ⮐  if colors eql next
+        ⮐ if colors eql next
 
         @s = @s.set 'colors' next
         @r = []
@@ -132,7 +132,7 @@ use           ◆ keys mode
     colorAtPos: (pos layer) =>
 
         colors = @s.colors
-        ⮐  null if not colors?
+        ⮐ null if not colors?
 
         colorspans.colorAtPos (colors[layer] ? []) pos
 
@@ -199,9 +199,9 @@ use           ◆ keys mode
     textOfSelectionOrWordAtCursor: => 
         
         if @s.selections.length
-            ⮐  @textOfSelection()
+            ⮐ @textOfSelection()
         else
-            ⮐  @wordAtCursor()
+            ⮐ @wordAtCursor()
 
 #!lines
 
@@ -443,7 +443,7 @@ use           ◆ keys mode
 
     undo: =>
 
-        ⮐  if @h.length <= 1
+        ⮐ if @h.length <= 1
         @r.push @h.pop()
         @s = @h[-1]
         @segls = @s.lines.slice()
@@ -453,7 +453,7 @@ use           ◆ keys mode
 
     redo: =>
 
-        ⮐  if empty @r
+        ⮐ if empty @r
         @h.push @r.pop()
         @s = @h[-1]
         @segls = @s.lines.slice()
@@ -534,7 +534,7 @@ use           ◆ keys mode
         maxOffsetX = max maxOffsetX cursorRight-@cells.cols+2
         view[0] = clamp 0 maxOffsetX view[0]
         
-        ⮐  if view eql @s.view and scrollOffset == @s.scrollOffset
+        ⮐ if view eql @s.view and scrollOffset == @s.scrollOffset
 
         @setView view scrollOffset
 
@@ -544,9 +544,9 @@ use           ◆ keys mode
         
         opt ?= {}
         
-        ⮐  if @cells.cols <= 0 or @cells.rows <= 0
+        ⮐ if @cells.cols <= 0 or @cells.rows <= 0
         
-        ⮐  if opt.adjust == false
+        ⮐ if opt.adjust == false
 
         [x y] = @mainCursor()
 
@@ -620,7 +620,7 @@ use           ◆ keys mode
         if not @skipAdjustViewForMainCursor
             view[0] = max 0 x*height + height + 1 - @cells.cols
         
-        ⮐  if view eql @s.view and scrollOffset == @s.scrollOffset
+        ⮐ if view eql @s.view and scrollOffset == @s.scrollOffset
         
         @setView view scrollOffset
 
@@ -638,7 +638,7 @@ use           ◆ keys mode
 
         scrollOffset ?= 0
 
-        ⮐  if @s.view eql view and @s.scrollOffset == scrollOffset
+        ⮐ if @s.view eql view and @s.scrollOffset == scrollOffset
 
         @s = @s.set 'view' view
         @s = @s.set 'scrollOffset' scrollOffset

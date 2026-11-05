@@ -37,7 +37,7 @@ use                 ◆ finder searcherfile
             
     draw: ->
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
 
         super()
         
@@ -47,7 +47,7 @@ use                 ◆ finder searcherfile
             
     onMouse: event =>
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         for sfil in @sfils
             ret = sfil.onMouse event ; ⮐ ret if ret?.redraw
@@ -56,13 +56,13 @@ use                 ◆ finder searcherfile
         
     onFileLoaded: file =>
     
-        ⮐  if @hidden()
+        ⮐ if @hidden()
     
         @hide()
         
-        ⮐  if empty @fileToHighlight
-        ⮐  if empty @textToHighlight
-        ⮐  if empty file
+        ⮐ if empty @fileToHighlight
+        ⮐ if empty @textToHighlight
+        ⮐ if empty file
     
         post.emit 'editor.highlight' @textToHighlight
         
@@ -112,7 +112,7 @@ use                 ◆ finder searcherfile
         
         if empty text
             @input.grabFocus()
-            ⮐  super()
+            ⮐ super()
         
         editorFile = ked_session.get 'editor▸file'
         editorExt  = slash.ext editorFile 
@@ -173,14 +173,14 @@ use                 ◆ finder searcherfile
             
             @choices.append items ext # this is quite expensive, maybe need to queue this with a delay?
             
-            ⮐  if @hidden()
+            ⮐ if @hidden()
             
             if idx == files.length-1
                 @highlightTextAndEmitRedraw text
                 
     apply: choice ->
         
-        ⮐  @emitFileOpen(choice) if choice?.path
+        ⮐ @emitFileOpen(choice) if choice?.path
         
         super choice
                                     
@@ -190,9 +190,9 @@ use                 ◆ finder searcherfile
     
         switch action
             
-            'submit' ➜ ⮐  @show text
-            'right'  ➜ ⮐  
-            'change' ➜ ⮐  
+            'submit' ➜ ⮐ @show text
+            'right'  ➜ ⮐ 
+            'change' ➜ ⮐ 
             
         super action text
 

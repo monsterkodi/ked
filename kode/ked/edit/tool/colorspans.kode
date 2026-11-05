@@ -56,7 +56,7 @@ use ../../../kxk ▪ kseg
 
         for span in spans
             if span[1] == y and span[0] <= x < span[2]
-                ⮐  span[3]
+                ⮐ span[3]
 
         null
 
@@ -69,7 +69,7 @@ use ../../../kxk ▪ kseg
         y1 = max 0 y1
         y2 = min lines.length-1 y2
 
-        ⮐  segs if y1 > y2
+        ⮐ segs if y1 > y2
 
         for y in y1..y2
 
@@ -104,7 +104,7 @@ use ../../../kxk ▪ kseg
 
         out = @normalize spans
 
-        ⮐  out if empty color
+        ⮐ out if empty color
 
         for rng in ranges
 
@@ -217,33 +217,33 @@ use ../../../kxk ▪ kseg
         if oldChangeStart == oldChangeEnd
 
             if x1 < preWidth and preWidth <= x2
-                ⮐  [x1 y x2+delta color]
+                ⮐ [x1 y x2+delta color]
 
             if x1 >= preWidth
-                ⮐  [x1+delta y x2+delta color]
+                ⮐ [x1+delta y x2+delta color]
 
-            ⮐  [x1 y x2 color]
+            ⮐ [x1 y x2 color]
 
         if x2 <= oldChangeStart
-            ⮐  [x1 y x2 color]
+            ⮐ [x1 y x2 color]
 
         if x1 >= oldChangeEnd
-            ⮐  [x1+delta y x2+delta color]
+            ⮐ [x1+delta y x2+delta color]
 
         if x1 <= oldChangeStart and x2 >= oldChangeEnd
-            ⮐  [x1 y x2+delta color]
+            ⮐ [x1 y x2+delta color]
 
         if x1 <= oldChangeStart
-            ⮐  [x1 y oldChangeStart color]
+            ⮐ [x1 y oldChangeStart color]
 
         if x2 >= oldChangeEnd
-            ⮐  [newChangeEnd y x2+delta color]
+            ⮐ [newChangeEnd y x2+delta color]
 
         null
 
     @adjust: spans oldLines newLines ->
 
-        ⮐  [] if empty spans
+        ⮐ [] if empty spans
 
         map = @lineMap oldLines newLines
 

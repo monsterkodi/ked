@@ -21,10 +21,10 @@ use ..           ◆ mode
     
     @checkCursorsSet: state ->
     
-        ⮐  if not state.allowedModes?.salter
-        ⮐  if state.s.cursors.length != 1
-        ⮐  if state.s.selections.length
-        ⮐  if mode.isActive state 'novim'
+        ⮐ if not state.allowedModes?.salter
+        ⮐ if state.s.cursors.length != 1
+        ⮐ if state.s.selections.length
+        ⮐ if mode.isActive state 'novim'
         cursors = belt.findPositionsForSaltInsert state.s.lines state.mainCursor()
         if valid cursors                # start the salter mode if the main
             mode.start state 'salter'   # cursor moved inside a salted line 
@@ -83,7 +83,7 @@ use ..           ◆ mode
         lineids = belt.lineIndicesForPositions cursors
         
         for idx in lineids
-            ⮐  if not @state.isFullySelectedLine idx
+            ⮐ if not @state.isFullySelectedLine idx
             
         @state.moveCursors 'bol'
         @state.delete 'eol'
@@ -107,7 +107,7 @@ use ..           ◆ mode
         while i < txt.length and txt[i] in [' ' '\t']
             i++
         
-        ⮐  txt if txt[i] != '#'
+        ⮐ txt if txt[i] != '#'
         
         i++
         i++ if txt[i] == ' '
@@ -119,7 +119,7 @@ use ..           ◆ mode
         lines = @state.s.lines
         selections = belt.lineRangesForPositions lines @state.s.cursors
         
-        ⮐  if empty selections
+        ⮐ if empty selections
         
         texts = selections each (rng) -> belt.textForLineRange lines rng
         indt = @indentOfLine texts[0]
@@ -148,19 +148,19 @@ use ..           ◆ mode
             'up'
                 if @state.s.main > 0
                     @state.setMain @state.s.main-1
-                    ⮐  
+                    ⮐ 
                 if not @isSaltedLine @state.mainCursor()[1]-1
                     @state.s = @state.s.set 'cursors' [@state.mainCursor()]
                     @state.s = @state.s.set 'main' 0
-                    ⮐  'unhandled'
+                    ⮐ 'unhandled'
             'down'
                 if @state.s.main < 4
                     @state.setMain @state.s.main+1
-                    ⮐  
+                    ⮐ 
                 if not @isSaltedLine @state.mainCursor()[1]+1
                     @state.s = @state.s.set 'cursors' [@state.mainCursor()]
                     @state.s = @state.s.set 'main' 0
-                    ⮐  'unhandled'
+                    ⮐ 'unhandled'
                     
             'shift+cmd+b'
                 if @isSaltedLine @state.mainCursor()[1]
@@ -179,8 +179,8 @@ use ..           ◆ mode
     themeColor: colorName defaultColor ->
         
         switch colorName
-            'cursor.multi' ➜ ⮐  color.brighten(theme.syntax['comment triple header'] 0.2)
-            'cursor.main'  ➜ ⮐  color.brighten(theme.syntax['comment triple header'] 0.6)
+            'cursor.multi' ➜ ⮐ color.brighten(theme.syntax['comment triple header'] 0.2)
+            'cursor.main'  ➜ ⮐ color.brighten(theme.syntax['comment triple header'] 0.6)
         
         defaultColor
 

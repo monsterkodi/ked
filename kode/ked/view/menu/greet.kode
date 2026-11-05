@@ -38,7 +38,7 @@ use ../base         ◆ view
 
     draw: =>
         
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         @screen.fill_bg [0 0 0]
         

@@ -59,8 +59,8 @@ export
         if dir is arr
 
             switch dir[0]
-                'bos' ➜ ⮐  if @moveCursorsToStartOfSelections(); dir = dir[1..]
-                'eos' ➜ ⮐  if @moveCursorsToEndOfSelections();   dir = dir[1..]
+                'bos' ➜ ⮐ if @moveCursorsToStartOfSelections(); dir = dir[1..]
+                'eos' ➜ ⮐ if @moveCursorsToEndOfSelections();   dir = dir[1..]
                     
             dir = dir[0]
         
@@ -126,7 +126,7 @@ export
         
         selections = @allSelections()
         
-        ⮐  if empty selections
+        ⮐ if empty selections
         
         rngs = belt.splitLineRanges @s.lines selections false
 
@@ -138,7 +138,7 @@ export
         
         selections = @allSelections()
          
-        ⮐  if empty selections
+        ⮐ if empty selections
          
         rngs = belt.splitLineRanges @s.lines selections false
 
@@ -160,7 +160,7 @@ export
     isAnyCursorInLine: y ->
         
         for c in @allCursors()
-            ⮐  true if c[1] == y
+            ⮐ true if c[1] == y
             
     chunksBeforeCursors: -> @s.cursors.map (c) => belt.chunkBeforePos(@s.lines c)
             

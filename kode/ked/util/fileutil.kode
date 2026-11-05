@@ -97,7 +97,7 @@ use ../../kxk ◆ salter
         
     @rename: oldPath newPath ○->
         
-        ⮐  if oldPath == newPath
+        ⮐ if oldPath == newPath
         
         res =○ nfs.move oldPath newPath
         if res != newPath

@@ -82,7 +82,7 @@ import rgxs from './quicky.json' with { type: "json" }
                 dir = slash.dir info.path
                 for item in @items
                     if item.path == info.path
-                        ⮐  
+                        ⮐ 
                     if item.path == dir
                         log "item #{dir}" item    
                     
@@ -92,7 +92,7 @@ import rgxs from './quicky.json' with { type: "json" }
                 for item in @items
                     if item.path == info.path
                         @setRoot @currentRoot redraw:true index:@currentIndex()
-                        ⮐  
+                        ⮐ 
                     
     setRoot: path opt ○=>
         
@@ -104,7 +104,7 @@ import rgxs from './quicky.json' with { type: "json" }
         
         @currentRoot = dir
                 
-        ⮐  if empty items
+        ⮐ if empty items
                         
         for item in items
             item.depth = 0
@@ -135,7 +135,7 @@ import rgxs from './quicky.json' with { type: "json" }
         
         state = ked_session.get @name {}
 
-        ⮐  if empty state.open
+        ⮐ if empty state.open
         
         for key,value of state.open
             
@@ -146,8 +146,8 @@ import rgxs from './quicky.json' with { type: "json" }
         
     setState: state =>
         
-        ⮐  if empty state
-        ⮐  if not state is obj
+        ⮐ if empty state
+        ⮐ if not state is obj
         
         # log "dirtree.setState" state
         
@@ -166,7 +166,7 @@ import rgxs from './quicky.json' with { type: "json" }
         if action == 'cmd+delete'
             if choice.type == 'file'
                 post.emit 'file.trash' choice.path
-            ⮐  
+            ⮐ 
             
         switch choice.type
             
@@ -178,7 +178,7 @@ import rgxs from './quicky.json' with { type: "json" }
                     'space'
                         ⮐ if event.button == 'right'
                         if action == 'click' and event.mods or choice.tilde.endsWith('..')
-                            ⮐  post.emit 'dircol.root' choice.path
+                            ⮐ post.emit 'dircol.root' choice.path
                         
                         if not choice.open ➜ @openDir(choice redraw:true) 
                         else @closeDir choice
@@ -204,20 +204,20 @@ import rgxs from './quicky.json' with { type: "json" }
                         ⮐ 
                         
                     'doubleclick'
-                    'return' ➜ ⮐  post.emit 'dircol.root' choice.path
+                    'return' ➜ ⮐ post.emit 'dircol.root' choice.path
                 
             'file'
 
                 switch action
                     
-                    'left'   ➜ ⮐  @selectPrevKeepOffset()
-                    'right'  ➜ ⮐  @selectNextKeepOffset()                             
+                    'left'   ➜ ⮐ @selectPrevKeepOffset()
+                    'right'  ➜ ⮐ @selectNextKeepOffset()                             
                     
                     'delete'
-                    'esc'    ➜ ⮐  @selectParent()
+                    'esc'    ➜ ⮐ @selectParent()
                     
                     'drag'
-                    'space'  ➜ ⮐  post.emit 'quicky' choice.path
+                    'space'  ➜ ⮐ post.emit 'quicky' choice.path
                     
                     'click' 
                     'return'
@@ -228,8 +228,8 @@ import rgxs from './quicky.json' with { type: "json" }
         
     openDir: dirItem opt ○->
         
-        ⮐  if empty dirItem
-        ⮐  if dirItem.open
+        ⮐ if empty dirItem
+        ⮐ if dirItem.open
         
         opt ?= {}
         
@@ -272,7 +272,7 @@ import rgxs from './quicky.json' with { type: "json" }
         
     closeDir: dirItem opt ->
         
-        ⮐  if empty dirItem
+        ⮐ if empty dirItem
         
         opt ?= {}
         
@@ -320,7 +320,7 @@ import rgxs from './quicky.json' with { type: "json" }
     
         if @current().type == 'file' and ked_session.get('editor▸file') != @current().path
             post.emit 'quicky' @current().path
-            ⮐  
+            ⮐ 
         
         @selectNext()
         post.emit 'quicky' @current().path if @current().type == 'file'
@@ -361,20 +361,20 @@ import rgxs from './quicky.json' with { type: "json" }
     
         currentFile = ked_session.get 'editor▸file'
         
-        ⮐  if empty currentFile
+        ⮐ if empty currentFile
         
         for item,idx in @fuzzied
-            ⮐  idx if item.path == currentFile
+            ⮐ idx if item.path == currentFile
             
     itemForPath: p ->
         
         for item,idx in @items
-            ⮐  item if slash.samePath item.path p
+            ⮐ item if slash.samePath item.path p
 
     itemIndexForPath: p ->
         
         for item,idx in @items
-            ⮐  idx if slash.samePath item.path p
+            ⮐ idx if slash.samePath item.path p
             
     weight: item ->
 

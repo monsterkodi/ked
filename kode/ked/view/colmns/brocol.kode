@@ -24,14 +24,14 @@ import rgxs from './quicky.json' with { type: "json" }
     
     onMouse: event =>
         
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         [col row] = @eventPos event
         
         ret = super event
         
         if @hoverIndex >= 0 and (not(@hover) or @state.isInvalidLineIndex(row))
-            ⮐  @unhover()
+            ⮐ @unhover()
             
         ret
         

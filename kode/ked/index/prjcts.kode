@@ -18,12 +18,12 @@ use ../util   ◆ walker config
             path = slash.absolute path process.cwd()
             
             if prjPath = @allFiles[path]
-                ⮐  prjPath
+                ⮐ prjPath
             if prjcts.projects[path]
-                ⮐  @projects[path].dir
+                ⮐ @projects[path].dir
             for prjPath,project of prjcts.projects
                 if path.startsWith prjPath
-                    ⮐  prjPath
+                    ⮐ prjPath
         log 'missing prj?' path
         null
         
@@ -31,9 +31,9 @@ use ../util   ◆ walker config
         
         if not file is str
             error "prjcts.index - expected a string, got" file
-            ⮐  
+            ⮐ 
             
-        ⮐  if file.startsWith 'untitled-'
+        ⮐ if file.startsWith 'untitled-'
         
         file = slash.absolute file process.cwd()
         
@@ -41,7 +41,7 @@ use ../util   ◆ walker config
         
         exists =○ nfs.exists file
         
-        ⮐  if not exists
+        ⮐ if not exists
         
         prjPath =○ nfs.prj file
         
@@ -54,13 +54,13 @@ use ../util   ◆ walker config
         # log 'prjcts.index ▸' prjPath
         
         if @indexing
-            ⮐  if @indexing == prjPath
+            ⮐ if @indexing == prjPath
             @queue ?= []
             if prjPath not in @queue
                 @queue.push prjPath
             ⮐ 
         
-        ⮐  if valid @projects[prjPath]
+        ⮐ if valid @projects[prjPath]
             
         @indexing = prjPath
         

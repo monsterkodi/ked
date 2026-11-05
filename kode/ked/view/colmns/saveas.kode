@@ -13,10 +13,10 @@ use              ◆ browse
     autoHide: => 
 
     onInputAction: action text =>
-        log "+++ onInputAction #{action} #{text}"
+        # log "+++ onInputAction #{action} #{text}"
         switch action
             'up'          
-            'down'   ➜ ⮐  @choices.moveSelection action
+            'down'   ➜ ⮐ @choices.moveSelection action
 
     onInputChange: text => log "swallow input change #{text}"
         

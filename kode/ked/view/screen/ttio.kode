@@ -142,7 +142,7 @@ use ../../util/img ◆ rounded
     
     steps: =>
         
-        ⮐  if empty @inputChunks
+        ⮐ if empty @inputChunks
         
         text = Buffer.concat(@inputChunks).toString 'utf8'
         @inputChunks = []
@@ -246,7 +246,7 @@ use ../../util/img ◆ rounded
     hideImg: id pl ->
         
         # log "▪#{id} #{pl}"
-        ⮐  if @hiddenImgs[[id pl]]
+        ⮐ if @hiddenImgs[[id pl]]
         if args = @plargs[[id pl]]
             delete @plargs[[id pl]]
             @hiddenImgs[[id pl]] = args
@@ -255,7 +255,7 @@ use ../../util/img ◆ rounded
     showImg: id pl ->
         
         args = @hiddenImgs[[id pl]]
-        ⮐  if empty args
+        ⮐ if empty args
         
         delete @hiddenImgs[[id pl]]
         @plargs[[id pl]] = args
@@ -290,8 +290,8 @@ use ../../util/img ◆ rounded
         
     deleteImagesInRange: start end ->
         
-        ⮐  log "range start '#{start}' not a number" if not start is num
-        ⮐  log "range end '#{end}' not a number" if not end is num
+        ⮐ log "range start '#{start}' not a number" if not start is num
+        ⮐ log "range end '#{end}' not a number" if not end is num
         @write "\x1b_Gq=2,a=d,d=R,x=#{start},y=#{end}\x1b\\"
     
     sendImageData: data id w h bytesperpixel=3 ->
@@ -376,7 +376,7 @@ use ../../util/img ◆ rounded
         if csi[-1] == 'u'
             code = int csi
 
-            ⮐  if empty code
+            ⮐ if empty code
 
             key = switch code
                 9       ➜ 'tab'
@@ -435,16 +435,16 @@ use ../../util/img ◆ rounded
     parseCsi: csi =>
         
         switch csi
-            'H'      ➜ ⮐  @keyEventForCombo('home')
-            'F'      ➜ ⮐  @keyEventForCombo('end')
-            '3~'     ➜ ⮐  @keyEventForCombo('entf')
-            '5~'     ➜ ⮐  @keyEventForCombo('pageup')
-            '6~'     ➜ ⮐  @keyEventForCombo('pagedown')
-            'Z'      ➜ ⮐  @keyEventForCombo('shift+z' 'Z')
-            'Q'      ➜ ⮐  @keyEventForCombo('f2')
-            'S'      ➜ ⮐  @keyEventForCombo('f4')
-            'I'      ➜ @hasFocus = true;  @activeMods={}; post.emit 'window.focus' ; ⮐  type:'focus'
-            'O'      ➜ @hasFocus = false; @activeMods={}; post.emit 'window.blur'  ; ⮐  type:'focus'
+            'H'      ➜ ⮐ @keyEventForCombo('home')
+            'F'      ➜ ⮐ @keyEventForCombo('end')
+            '3~'     ➜ ⮐ @keyEventForCombo('entf')
+            '5~'     ➜ ⮐ @keyEventForCombo('pageup')
+            '6~'     ➜ ⮐ @keyEventForCombo('pagedown')
+            'Z'      ➜ ⮐ @keyEventForCombo('shift+z' 'Z')
+            'Q'      ➜ ⮐ @keyEventForCombo('f2')
+            'S'      ➜ ⮐ @keyEventForCombo('f4')
+            'I'      ➜ @hasFocus = true;  @activeMods={}; post.emit 'window.focus' ; ⮐ type:'focus'
+            'O'      ➜ @hasFocus = false; @activeMods={}; post.emit 'window.blur'  ; ⮐ type:'focus'
             
         null
         
@@ -454,20 +454,20 @@ use ../../util/img ◆ rounded
             code = esc.charCodeAt 0
             if 1 <= code <= 26
                 key = String.fromCharCode code + 96
-                ⮐  @keyEventForCombo "alt+cmd+#{key}"
-            ⮐  if esc == '\\' # esc\ end of kitty graphics message
+                ⮐ @keyEventForCombo "alt+cmd+#{key}"
+            ⮐ if esc == '\\' # esc\ end of kitty graphics message
         else
-            ⮐  if esc.startsWith '_G' # start of kitty graphics message
+            ⮐ if esc.startsWith '_G' # start of kitty graphics message
         
         switch esc
         
-            'OP' ➜ ⮐  @keyEventForCombo('f1')
-            'OQ' ➜ ⮐  @keyEventForCombo('f2')
-            'OR' ➜ ⮐  @keyEventForCombo('f3')
-            'OS' ➜ ⮐  @keyEventForCombo('f4')   
+            'OP' ➜ ⮐ @keyEventForCombo('f1')
+            'OQ' ➜ ⮐ @keyEventForCombo('f2')
+            'OR' ➜ ⮐ @keyEventForCombo('f3')
+            'OS' ➜ ⮐ @keyEventForCombo('f4')   
                  ➜ log 'esc' esc.charCodeAt(0) esc.length
             
-        ⮐  event if event = @keyEventForChar esc
+        ⮐ event if event = @keyEventForChar esc
             
         log '---- esc' esc 
         null
@@ -479,28 +479,28 @@ use ../../util/img ◆ rounded
         if raw.length == 1
                                 
             switch raw[0]
-                0x9  ➜ ⮐  @keyEventForCombo('tab')
-                0xd  ➜ ⮐  @keyEventForCombo('return' '\n')
-                0x1b ➜ ⮐  @keyEventForCombo('esc')
-                0x7f ➜ ⮐  @keyEventForCombo('delete')
+                0x9  ➜ ⮐ @keyEventForCombo('tab')
+                0xd  ➜ ⮐ @keyEventForCombo('return' '\n')
+                0x1b ➜ ⮐ @keyEventForCombo('esc')
+                0x7f ➜ ⮐ @keyEventForCombo('delete')
 
             if 0x1 <= raw[0] <= 0x1a
-                ⮐  @keyEventForCombo("ctrl+#{String.fromCharCode(raw[0]+96)}")
+                ⮐ @keyEventForCombo("ctrl+#{String.fromCharCode(raw[0]+96)}")
                 
             char = raw.toString 'utf8'
             
             if event = @keyEventForChar char
-                ⮐  event
+                ⮐ event
                 
             if raw[0] > 127 
                 raw[0] -= 128
-                ⮐  parseEsc raw.toString 'utf8'
+                ⮐ parseEsc raw.toString 'utf8'
                 
     keyEventForChar: char =>
         
         if char.length
             key = char.toLowerCase()
-            ⮐  
+            ⮐ 
                 key:    key
                 type:   'press'
                 combo:  key != char ? 'shift' : ''
@@ -530,7 +530,7 @@ use ../../util/img ◆ rounded
                 
         [code px py] = csi[1..-2].split(';').map (s) -> int s
         
-        ⮐  if empty @cellsz
+        ⮐ if empty @cellsz
         
         cx = int px/@cellsz[0]
         cy = int py/@cellsz[1]        

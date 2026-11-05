@@ -88,29 +88,29 @@ use ../base         ◆ view input
 
     onMouse: event =>
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
 
         ret = @input.onMouse event ; ⮐ ret if ret?.redraw
 
         if event.type == 'press' and not @cells.isInsideEvent event
             @onInputAction 'cancel'
-            ⮐  redraw:true
+            ⮐ redraw:true
 
         redraw:true
 
     onKey: key event =>
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         if event.combo in ['esc' 'escape'] or event.combo.startsWith('alt+') or event.combo.startsWith('ctrl+') or event.combo.startsWith('cmd+')
 
             if event.combo in ['esc' 'escape']
                 @onInputAction 'cancel'
-                ⮐  true
-            ⮐  'unhandled'
+                ⮐ true
+            ⮐ 'unhandled'
 
         if result = @input.onKey key event
-            ⮐  result
+            ⮐ result
 
         false
 

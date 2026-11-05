@@ -23,7 +23,7 @@ use ../base      ◆ view
         
     draw: -> 
         
-        ⮐  if @hidden()
+        ⮐ if @hidden()
     
         super()
             
@@ -47,7 +47,7 @@ use ../base      ◆ view
             
     set: file ->
     
-        ⮐  if @file == trim file
+        ⮐ if @file == trim file
         
         @file = trim file
         @adjustText()

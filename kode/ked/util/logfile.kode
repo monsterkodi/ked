@@ -37,7 +37,7 @@ use fs
         
     write: txt ->
         
-        ⮐  if @headless or @stream.closed or not @stream.writable
+        ⮐ if @headless or @stream.closed or not @stream.writable
 
         @stream.write txt + '\n'
         

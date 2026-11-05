@@ -29,10 +29,10 @@ use ..           ◆ mode
         if @state.s.selections.length # don't highlight when selection exists (interferes with cmd+d currently)
             if @allSpans eql @state.s.highlights
                 @state.setHighlights []
-            ⮐  
+            ⮐ 
             
         if @state.s.highlights.length     # don't highlight brackets when other highlights exist and it's different
-            ⮐  if not @allSpans eql @state.s.highlights.asMutable() # from the previous brckts highlight
+            ⮐ if not @allSpans eql @state.s.highlights.asMutable() # from the previous brckts highlight
         
         [spans openClose strings] = belt.spansOfNestedPairsAtPositions(@state.s.lines @state.s.cursors)
 
@@ -66,7 +66,7 @@ use ..           ◆ mode
         
     conditionalSwapStringDelimiters: =>
     
-        ⮐  if not @stringDelimiterSpans
+        ⮐ if not @stringDelimiterSpans
         if belt.textForSpans(@state.s.lines @stringDelimiterSpans).startsWith "'"
             @swapStringDelimiters()
         
@@ -77,19 +77,19 @@ use ..           ◆ mode
             "alt+cmd+'"
                 if valid @stringDelimiterSpans
                     @swapStringDelimiters()
-                    ⮐  
+                    ⮐ 
         
             'alt+cmd+b' 
             
                 if valid @stringDelimiterSpans
                     @state.setSelections belt.rangesForSpans(@stringDelimiterSpans)
                     @state.moveCursorsToEndOfSelections()
-                    ⮐  
+                    ⮐ 
                     
                 if valid @openCloseSpans
                     @state.setSelections belt.rangesForSpans(@openCloseSpans)
                     @state.moveCursorsToEndOfSelections()
-                    ⮐  
+                    ⮐ 
             
             'delete'
         
@@ -101,13 +101,13 @@ use ..           ◆ mode
                         ⮐ 
         
         # novim swallows text input, only the shortcuts above belong to brckts
-        ⮐  'unhandled' if mode.isActive @state 'novim'
+        ⮐ 'unhandled' if mode.isActive @state 'novim'
         
-        ⮐  'unhandled' if empty brckts.surround[event.char]
+        ⮐ 'unhandled' if empty brckts.surround[event.char]
             
         if event.char == '#' # handle string interpolation
 
-            ⮐  'unhandled' if valid belt.positionsAndRangesOutsideStrings(@state.s.lines @state.s.selections @state.s.cursors)
+            ⮐ 'unhandled' if valid belt.positionsAndRangesOutsideStrings(@state.s.lines @state.s.selections @state.s.cursors)
             
             @conditionalSwapStringDelimiters()
             
@@ -130,9 +130,9 @@ use ..           ◆ mode
                 if valid @stringDelimiterSpans
                     delrngs = belt.normalizeRanges belt.rangesForSpans(@stringDelimiterSpans)
                     if delrngs eql @state.s.selections 
-                        ⮐  'unhandled'                 # don't surround selected string delimiters
+                        ⮐ 'unhandled'                 # don't surround selected string delimiters
             
-                ⮐  @state.surroundSelection event.char brckts.surround[event.char]
+                ⮐ @state.surroundSelection event.char brckts.surround[event.char]
             
             nsegl = belt.segsForPositions @state.s.lines @state.s.cursors # collect all graphemes at the cursors
             nsegs = kutil.uniq nsegl                                      # get set of graphemes
@@ -142,18 +142,18 @@ use ..           ◆ mode
                 if brckts.surround[event.char][1] == event.char # if entering closing bracket         # should check if this condition 
                     if seg == event.char                        # and it is already there             # is true for all cursors 
                         @state.moveCursors 'right'              # move cursor over existing bracket   # ϝ𝓊𝜏𝓊ɼϵ ⫙ϵ 𝖍𝕒𝜏ϵ ⟅𝚒𝛋ϵ⟅𝛾 
-                        ⮐                                       # to not disturb manual closing       # 𝔟𝓊𝜏 𝔭ℜϵ𝖘ϵ∩𝜏 ⫙ϵ ⟅⩜𝓏𝛾 ;)
+                        ⮐                                      # to not disturb manual closing       # 𝔟𝓊𝜏 𝔭ℜϵ𝖘ϵ∩𝜏 ⫙ϵ ⟅⩜𝓏𝛾 ;)
                         
                 if seg not in ['' undefined ' ' '}' ']' ')']    # if any cursor is not at a space or eol or on a closing bracket
-                    ⮐  "unhandled"                              # abort the insertion
+                    ⮐ "unhandled"                              # abort the insertion
 
             for pos in @state.s.cursors
                 if belt.isUnbalancedPosition @state.s.lines pos event.char
-                    ⮐  "unhandled"
+                    ⮐ "unhandled"
                     
             @state.insert brckts.surround[event.char][0]+brckts.surround[event.char][1] # insert empty bracket pair
             @state.moveCursors 'left'                                                   # move cursors inside pair
-            ⮐  
+            ⮐ 
 
         'unhandled'
         

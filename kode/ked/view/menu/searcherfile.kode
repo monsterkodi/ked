@@ -45,7 +45,7 @@ use ../base      ◆ view crumbs bubble
         
     draw: ->
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         super()
         
@@ -61,10 +61,10 @@ use ../base      ◆ view crumbs bubble
             
     onMouse: event =>
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
-        ret = @crumbs.onMouse event ; ⮐  ret if ret?.redraw
-        ret = @bubble.onMouse event ; ⮐  ret if ret?.redraw
+        ret = @crumbs.onMouse event ; ⮐ ret if ret?.redraw
+        ret = @bubble.onMouse event ; ⮐ ret if ret?.redraw
         
         super event
                 

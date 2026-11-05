@@ -59,7 +59,7 @@ use                 ◆ inputchoice
                             
     draw: =>
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         @arrange()
         @erase()

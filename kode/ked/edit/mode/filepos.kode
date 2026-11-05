@@ -33,7 +33,7 @@ use ../../../kxk ▪ post kutil slash
     cursorsSet: ->
         
         #  restoring a position must not overwrite the position that is the source of it
-        ⮐  if @restoring
+        ⮐ if @restoring
         
         if file = ked_session.get "editor▸file"
         
@@ -70,7 +70,7 @@ use ../../../kxk ▪ post kutil slash
     # files from the command line that the editor has not opened yet
     @addFiles: files =>
 
-        ⮐  if empty files
+        ⮐ if empty files
 
         files = files[..].reverse()
 
@@ -97,7 +97,7 @@ use ../../../kxk ▪ post kutil slash
 
     swapPrevious: =>
     
-        ⮐  if filepos.fileposl.length < 2
+        ⮐ if filepos.fileposl.length < 2
         
         if filepos.offset
             filepos.offset = 0
@@ -111,8 +111,8 @@ use ../../../kxk ▪ post kutil slash
                     
     goBackward: =>
     
-        ⮐  if filepos.fileposl.length < 2
-        ⮐  if filepos.offset >= filepos.fileposl.length-1
+        ⮐ if filepos.fileposl.length < 2
+        ⮐ if filepos.offset >= filepos.fileposl.length-1
         
         filepos.offset += 1
         
@@ -120,8 +120,8 @@ use ../../../kxk ▪ post kutil slash
     
     goForward: =>
     
-        ⮐  if filepos.fileposl.length < 2
-        ⮐  if filepos.offset <= 0
+        ⮐ if filepos.fileposl.length < 2
+        ⮐ if filepos.offset <= 0
         
         filepos.offset -= 1
 

@@ -10,7 +10,7 @@ use ../../../kxk ◆ pepe
         turd     the part of it that needs completion, usually the last word or the last punctuation character  
         words    list of chunks collected from current file and other sources
     
-    ⮐  list of strings suitable for completion
+    ⮐ list of strings suitable for completion
     
     filters chunks that don't match
     removes trailing crappy punctuation from the matching chunks
@@ -66,7 +66,7 @@ use ../../../kxk ◆ pepe
                             else
                                 balanced = true
                         if not balanced
-                            #⮐  #{before} #{turd} #{lst} < #{w.length} |#{w}|"
+                            #⮐ #{before} #{turd} #{lst} < #{w.length} |#{w}|"
                             continue 
                         
                 #■ #{w} #{before} #{turd}" kseg.words(w)
@@ -104,13 +104,13 @@ use ../../../kxk ◆ pepe
            
         words = kutil.uniq filtered
         
-        ⮐  [] if empty words
+        ⮐ [] if empty words
         
         segls = []
         
         push = s ->
             
-            ⮐  if kseg.str(s) == turd # don't include what we are trying to complete
+            ⮐ if kseg.str(s) == turd # don't include what we are trying to complete
             
             ws = kseg.words s
             ws = ws.filter (w) -> w.index+w.segl.length > turd.length
@@ -166,7 +166,7 @@ use ../../../kxk ◆ pepe
                 
         if valid index and valid posl[index]    
             if posl[exi][ci] == posl[index][ci]  
-                ⮐  index                         
+                ⮐ index                         
         
         exi
 

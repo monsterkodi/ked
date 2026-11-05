@@ -21,7 +21,7 @@ splitWords = (words, splitBy) ->
 lineMatch = (line, pt, splitlist) ->
     
     tln = trim line
-    ⮐  if empty tln
+    ⮐ if empty tln
     
     splt = tln.split /\s+/
     cpt  = trim(pt).split /\s+/
@@ -32,7 +32,7 @@ lineMatch = (line, pt, splitlist) ->
         
     # log "lineMatch", splt, cpt
         
-    ⮐  if empty splt
+    ⮐ if empty splt
     
     strongMatch = false
     weakMatch = false
@@ -67,7 +67,7 @@ lineMatch = (line, pt, splitlist) ->
                 '○' 
                     if ci == cpt.length-1 # last capture pattern ➜ swallow rest of split
                         rslt[varName] = splt[si..].join ' '
-                        ⮐  rslt
+                        ⮐ rslt
                     else
                         if cpt[ci+1] == splt[si] # strong match ➜ advance and continue
                             weakMatch = false
@@ -88,13 +88,13 @@ lineMatch = (line, pt, splitlist) ->
         # log "kermit no match |#{line}| #{cpt}" ci, cp
         ⮐ 
     
-    ⮐  if ci < cpt.length # not all capture patterns matched
+    ⮐ if ci < cpt.length # not all capture patterns matched
     
     if ci == cpt.length and varName and si < splt.length
         rslt[varName] += ' ' + splt[si..].join(' ')
     
     # log rslt, strongMatch, weakMatch
-    ⮐  rslt if strongMatch or weakMatch
+    ⮐ rslt if strongMatch or weakMatch
 
 addMatch = (line, ctx) ->
         

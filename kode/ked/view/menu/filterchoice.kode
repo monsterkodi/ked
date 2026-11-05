@@ -36,7 +36,7 @@ use ../../edit/tool ◆ belt
         
     showFilter: =>
         
-        ⮐  if @input.visible()
+        ⮐ if @input.visible()
         @input.show()
         @input.grabFocus()
         true
@@ -93,7 +93,7 @@ use ../../edit/tool ◆ belt
             
     draw: =>
         
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         super()
         
@@ -101,7 +101,7 @@ use ../../edit/tool ◆ belt
         
             cells = @filterCells
             
-            ⮐  if cells.rows < 1 or cells.cols < 1
+            ⮐ if cells.rows < 1 or cells.cols < 1
             
             cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
             

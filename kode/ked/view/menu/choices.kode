@@ -90,7 +90,7 @@ use ../../edit      ◆ editor
         li = sel[1]
         y  = li-@state.s.view[1]
         
-        ⮐  if y >= @cells.rows
+        ⮐ if y >= @cells.rows
         
         xs = max sel[0] kseg.headCount(@state.s.lines[li] ' ')
         xs += @frontRoundOffset if xs == 0
@@ -127,14 +127,14 @@ use ../../edit      ◆ editor
         y = @state.mainCursor()[1]
         while y < @state.s.lines.length-1
             y += 1
-            ⮐  y if kseg.trim(@state.s.lines[y]).length
+            ⮐ y if kseg.trim(@state.s.lines[y]).length
         
     prevRow: ->
 
         y = @state.mainCursor()[1]
         while y > 0
             y -= 1
-            ⮐  y if kseg.trim(@state.s.lines[y]).length
+            ⮐ y if kseg.trim(@state.s.lines[y]).length
             
     pageUpRow: ->
     
@@ -162,8 +162,8 @@ use ../../edit      ◆ editor
         
     select: row -> 
     
-        ⮐  if not row is num
-        ⮐  if row < 0 or row >= @state.s.lines.length
+        ⮐ if not row is num
+        ⮐ if row < 0 or row >= @state.s.lines.length
     
         @state.setSelections [belt.rangeOfLine(@state.s.lines row)]
         @state.setMainCursor 0 row
@@ -211,11 +211,11 @@ use ../../edit      ◆ editor
 
     filter: text =>
         
-        ⮐  if empty @items
+        ⮐ if empty @items
            
-        ⮐  if text == @filterText
+        ⮐ if text == @filterText
            
-        ⮐  @set(@items @key) if empty text
+        ⮐ @set(@items @key) if empty text
             
         @filterText = text
             
@@ -233,7 +233,7 @@ use ../../edit      ◆ editor
 
     hoverChoiceAtIndex: index event => 
     
-        ⮐  true if @hoverIndex == index
+        ⮐ true if @hoverIndex == index
         
         @hoverIndex = index
         @state.setMainCursor 0 index
@@ -269,9 +269,9 @@ use ../../edit      ◆ editor
         
     onMouse: event =>
         
-        ret = super event; ⮐  ret if ret?.redraw
+        ret = super event; ⮐ ret if ret?.redraw
         
-        ret = @mapscr?.onMouse event; ⮐  ret if ret # mapview doesn't do mouse yet, just to prevent clickthrough to editor
+        ret = @mapscr?.onMouse event; ⮐ ret if ret # mapview doesn't do mouse yet, just to prevent clickthrough to editor
         
         if @hover
         
@@ -282,24 +282,24 @@ use ../../edit      ◆ editor
                 if valid event.delta and @hoverForSubmenu and event.type == 'move' and col > kseg.width(@state.s.lines[row])
                     dx = abs event.delta[0]
                     dy = abs event.delta[1]
-                    ⮐  if dx*2 >= dy
+                    ⮐ if dx*2 >= dy
                 
                 switch event.type
                     
                     'move'  
-                            ⮐  @hoverChoiceAtIndex row + @state.s.view[1] event
+                            ⮐ @hoverChoiceAtIndex row + @state.s.view[1] event
                             
                     'press' 
                     
                         if event.count == 2
-                            ⮐  @doubleClickChoiceAtIndex row + @state.s.view[1] event
+                            ⮐ @doubleClickChoiceAtIndex row + @state.s.view[1] event
                         else
                             @dragStart = [col row]
-                            ⮐  @clickChoiceAtIndex row + @state.s.view[1] event
+                            ⮐ @clickChoiceAtIndex row + @state.s.view[1] event
                             
                     'drag'
                             if @dragStart
-                                ⮐  @dragChoiceAtIndex row + @state.s.view[1] event
+                                ⮐ @dragChoiceAtIndex row + @state.s.view[1] event
                                 
                     'release'
                             delete @dragStart
@@ -319,12 +319,12 @@ use ../../edit      ◆ editor
             'pageup'   
             'pagedown'   
                 @moveSelection event.combo
-                ⮐  true
+                ⮐ true
                 
-            'ctrl+alt+up'   ➜ @moveSelection 'pageup'   ; ⮐  true 
-            'ctrl+alt+down' ➜ @moveSelection 'pagedown' ; ⮐  true 
+            'ctrl+alt+up'   ➜ @moveSelection 'pageup'   ; ⮐ true 
+            'ctrl+alt+down' ➜ @moveSelection 'pagedown' ; ⮐ true 
         
-        ⮐  if not @hasFocus()
+        ⮐ if not @hasFocus()
             
         @emitAction event.combo @current() event
                         

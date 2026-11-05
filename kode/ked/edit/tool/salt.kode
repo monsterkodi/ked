@@ -13,7 +13,7 @@ use ../../../kxk ◆ salter
     @findPositionsForSaltInsert: lines pos ->
     
         y = pos[1]
-        ⮐  if not @isSaltedLine lines[y]
+        ⮐ if not @isSaltedLine lines[y]
         
         sy = y
         while @isSaltedLine lines[sy-1]

@@ -125,7 +125,7 @@ use                 ◆ titlefile titlenovim
         fret = @filepos   .onMouse event
         nret = @titlenovim.onMouse event
 
-        ⮐  sret or cret or fret or nret if sret or cret or fret or nret
+        ⮐ sret or cret or fret or nret if sret or cret or fret or nret
 
         super event
         
@@ -140,16 +140,16 @@ use                 ◆ titlefile titlenovim
                 if @hover 
                     if 0 <= col < 4
                         post.emit 'dircol.toggle'
-                        ⮐  redraw:true
+                        ⮐ redraw:true
                     if @cells.cols-12 <= col < @cells.cols
                         post.emit 'funcol.toggle'
-                        ⮐  redraw:true
+                        ⮐ redraw:true
                     
         @hover
         
     setFile: @file => 
         
-        ⮐  if empty @file
+        ⮐ if empty @file
         @crumbs.set slash.dir(@file)
         @titlefile.set @file
         
@@ -178,7 +178,7 @@ use                 ◆ titlefile titlenovim
                 
     draw: =>
         
-        ⮐  if @hidden() or empty @file
+        ⮐ if @hidden() or empty @file
                 
         x      = 0
         y      = 0

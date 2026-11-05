@@ -22,7 +22,7 @@ use              ◆ mode
         
     draw: =>
         
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         # prof.start 'draw' if @name == 'editor'
         # ● draw
@@ -282,7 +282,7 @@ use              ◆ mode
 
     drawYank: ->
 
-        ⮐  if empty @state.yankFlash
+        ⮐ if empty @state.yankFlash
 
         bg = @color.yank
 
@@ -428,9 +428,9 @@ use              ◆ mode
 
         custom = (x) ->
             for span in fgSpans
-                ⮐  true if span[0] <= x < span[1]
+                ⮐ true if span[0] <= x < span[1]
             for span in bgSpans
-                ⮐  true if span[0] <= x < span[1]
+                ⮐ true if span[0] <= x < span[1]
             false
 
         chunks = kseg.chunks line

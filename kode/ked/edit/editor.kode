@@ -78,27 +78,27 @@ use                ◆ state draw complete mode
         
         super event
         
-        ret = @gutter?.onMouse(event)   ; ⮐  ret if ret?.redraw
-        ret = @mapscr?.onMouse(event)   ; ⮐  ret if ret?.redraw
-        ret = @scroll?.onMouse(event)   ; ⮐  ret if ret?.redraw
-        ret = @complete?.onMouse(event) ; ⮐  ret if ret?.redraw
+        ret = @gutter?.onMouse(event)   ; ⮐ ret if ret?.redraw
+        ret = @mapscr?.onMouse(event)   ; ⮐ ret if ret?.redraw
+        ret = @scroll?.onMouse(event)   ; ⮐ ret if ret?.redraw
+        ret = @complete?.onMouse(event) ; ⮐ ret if ret?.redraw
                         
         false
                 
     onWheel: event =>
         
-        ⮐  if event.cell[1] >= @cells.y + @cells.rows
+        ⮐ if event.cell[1] >= @cells.y + @cells.rows
                 
         inside  = @cells.isInsideEvent(event)
         inside |= @scroll?.cells.isInsideEvent(event)
         inside |= @gutter?.cells.isInsideEvent(event)
         inside |= @mapscr?.cells.isInsideEvent(event)
         
-        ⮐  if not inside
+        ⮐ if not inside
 
         if @complete?
             if res = @complete.onWheel(event)
-                ⮐  res
+                ⮐ res
            
         speedUp = config.data.mouse.wheelSpeedup ? 2     
         steps  = config.data.mouse.wheelSteps ? 1 # should be 4 if not using a mouse pad
@@ -139,7 +139,7 @@ use                ◆ state draw complete mode
         [x y] = state.mainCursor()
         lines = state.s.lines
 
-        ⮐  if y < 0 or y >= lines.length
+        ⮐ if y < 0 or y >= lines.length
 
         line  = lines[y]
         width = kseg.width line
@@ -147,7 +147,7 @@ use                ◆ state draw complete mode
         for cx in [x-1 x]
             if 0 <= cx < width
                 rgb = state.syntax.getColor cx y
-                ⮐  color.hex rgb
+                ⮐ color.hex rgb
         null
 
     grabFocus: =>
@@ -168,19 +168,19 @@ use                ◆ state draw complete mode
                     
     onKey: key event =>
         
-        ⮐  if not @hasFocus()
+        ⮐ if not @hasFocus()
         
         if @complete?
-            ⮐  true if @complete.handleKey(key event) != 'unhandled'
+            ⮐ true if @complete.handleKey(key event) != 'unhandled'
 
         if @state.handleKey(key event) != 'unhandled'
             @complete?.hide()
-            ⮐  true
+            ⮐ true
         
         if valid event.char
             @state.insert event.char
             @complete?.complete()
-            ⮐  true
+            ⮐ true
         else
             if key.split('+')[-1] not in ['shift' 'ctrl' 'alt' 'cmd' 'esc'] 
                 log "editor.onKey? |#{key}|" event 

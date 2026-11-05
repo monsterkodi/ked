@@ -30,12 +30,12 @@ clos   = new Set([')' ']' '}'])
 
     @rangeOfInnerStringSurroundingRange: lines rng ->
         
-        ⮐  if @isInvalidLineIndex lines rng[1]
+        ⮐ if @isInvalidLineIndex lines rng[1]
 
         rgs = @rangesOfStringsInText lines[rng[1]] rng[1] 
         rgs = @rangesShrunkenBy rgs 1
         for r in rgs
-            ⮐  r if @rangeContainsRange r rng
+            ⮐ r if @rangeContainsRange r rng
             
     @rangesOfStringsInText: text li=0 -> # todo: handle #{}
         
@@ -77,7 +77,7 @@ clos   = new Set([')' ']' '}'])
         n = 0
         c = 0
         for g in line
-            ⮐  c if n >= cu
+            ⮐ c if n >= cu
             n += g.length
             c += kseg.segWidth g
         c
@@ -204,7 +204,7 @@ clos   = new Set([')' ']' '}'])
         isOpen  = (c) -> opns.has(c) and (not kind or c == kind)
         isClose = (c) -> clos.has(c) and (not kind or c == open[kind])
 
-        ⮐  if @isInvalidLineIndex lines pos[1]
+        ⮐ if @isInvalidLineIndex lines pos[1]
         
         line = lines[pos[1]]
         
@@ -243,7 +243,7 @@ clos   = new Set([')' ']' '}'])
                             j -= 1
                             continue
                         else
-                            ⮐  # stack mismatch
+                            ⮐ # stack mismatch
                     lastOpen      = prev
                     lastOpenLine  = e[0]
                     lastOpenIndex = e[1]
@@ -274,7 +274,7 @@ clos   = new Set([')' ']' '}'])
                     if open[last(stack)] == next
                         stack.pop()
                     else
-                        ⮐  # stack mismatch
+                        ⮐ # stack mismatch
                 else
                     firstClose      = next
                     firstCloseLine  = e[0]
@@ -288,7 +288,7 @@ clos   = new Set([')' ']' '}'])
         if not lastOpen? or not firstClose?
             
             if si-1 >= 0 and isClose(line[si-1]) and revs[line[si-1]] in openEncounters
-                ⮐  @openCloseSpansForPosition lines idx [kseg.widthAtSegi(line si-1) pos[1]] kind
+                ⮐ @openCloseSpansForPosition lines idx [kseg.widthAtSegi(line si-1) pos[1]] kind
             ⮐
         
         if open[lastOpen] == firstClose
@@ -296,7 +296,7 @@ clos   = new Set([')' ']' '}'])
             cline = lines[firstCloseLine]
             oc = kseg.widthAtSegi oline lastOpenIndex
             cc = kseg.widthAtSegi cline firstCloseIndex
-            ⮐  [[oc lastOpenLine oc+1] [cc firstCloseLine cc+1]]
+            ⮐ [[oc lastOpenLine oc+1] [cc firstCloseLine cc+1]]
                 
     @pairSpansAtPosition: lines pos kind ->
         
@@ -311,9 +311,9 @@ clos   = new Set([')' ']' '}'])
             line = lines[li]
             c0 = @columnForCodeunitIndex line pair.rng[0]
             c1 = @columnForCodeunitIndex line pair.rng[1]
-            ⮐  [[c0 li c0+1] [c1 li c1+1]]
+            ⮐ [[c0 li c0+1] [c1 li c1+1]]
         
-        ⮐  null if @isRangeInString lines [pos[0] pos[1] pos[0]+1 pos[1]]
+        ⮐ null if @isRangeInString lines [pos[0] pos[1] pos[0]+1 pos[1]]
         
         idx = @bracketIndex lines
         

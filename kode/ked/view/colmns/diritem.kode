@@ -5,8 +5,8 @@ use ../../../kxk ▪ slash
     @symbol: item ->
                           
         switch item.type
-            'dir' ➜ ⮐  item.open ? icons.dir_open : icons.dir_close
-                  ➜ ⮐  icons[slash.ext(item.path)] ? icons.file
+            'dir' ➜ ⮐ item.open ? icons.dir_open : icons.dir_close
+                  ➜ ⮐ icons[slash.ext(item.path)] ? icons.file
                 
     @symbolName: item -> 
         

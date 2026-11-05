@@ -47,7 +47,7 @@ use ../base         ◆ view
         
     hide: => 
         
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         @cells.screen.t.hideImagesInRange @images[0] @images[-1]
         
@@ -55,7 +55,7 @@ use ../base         ◆ view
         
     clearImages: =>
         
-        ⮐  if empty @images
+        ⮐ if empty @images
 
         @cells.screen.t.deleteImagesInRange @images[0] @images[-1]
 
@@ -66,7 +66,7 @@ use ../base         ◆ view
         resized = x != @cells.x or y != @cells.y or w != @cells.cols or h != @cells.rows
         super x y w h
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         if @redraw or resized
             @createImages() if @redraw
@@ -105,7 +105,7 @@ use ../base         ◆ view
     createImages: =>
         
         t = @cells.screen.t
-        ⮐  if empty t.cellsz
+        ⮐ if empty t.cellsz
         
         @csz = t.cellsz
         
@@ -115,7 +115,7 @@ use ../base         ◆ view
         
         w = @cells.cols * @csz[0]
         
-        ⮐  if w <= 0
+        ⮐ if w <= 0
         
         lines = @getSegls()
         maxY  = @maxLinesToLoad()
@@ -139,12 +139,12 @@ use ../base         ◆ view
         
         csz = @cells.screen.t.cellsz
         
-        ⮐  if empty csz
+        ⮐ if empty csz
         
         w = @cells.cols * csz[0]
         bytes = w*@imageHeight(y)*3
         
-        ⮐  if bytes <= 0
+        ⮐ if bytes <= 0
         
         Buffer.alloc bytes
     
@@ -175,10 +175,10 @@ use ../base         ◆ view
     updateLine: y data => 
     
         data ?= @lineData(y)        
-        ⮐  if empty data
+        ⮐ if empty data
 
         csz = @cells.screen.t.cellsz
-        ⮐  if empty csz
+        ⮐ if empty csz
         @csz = csz
 
         id = @imgId+y
@@ -228,7 +228,7 @@ use ../base         ◆ view
         customColor = (spans x fallback) ->
             for span in spans
                 if span[0] <= x < span[1]
-                    ⮐  color.values span[2]
+                    ⮐ color.values span[2]
             fallback
 
         base = @color.bg
@@ -297,8 +297,8 @@ use ../base         ◆ view
         
         t = @cells.screen.t
         
-        ⮐  if empty t.pixels or @hidden() or @collapsed()
-        ⮐  if empty @csz
+        ⮐ if empty t.pixels or @hidden() or @collapsed()
+        ⮐ if empty @csz
         
         # @csz = t.cellsz # should have been set in createImages 
         
@@ -320,7 +320,7 @@ use ../base         ◆ view
         
     draw: =>
         
-        ⮐  if @hidden() or @collapsed()
+        ⮐ if @hidden() or @collapsed()
         
         # @csz = @cells.screen.t.cellsz
                      

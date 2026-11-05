@@ -24,7 +24,7 @@ use                 ◆ quicky diritem
     
         @pos = d.pos
         
-        ⮐  if empty d.files
+        ⮐ if empty d.files
         
         if d.files[0] is str
             items = d.files.map (f) -> path:f
