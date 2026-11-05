@@ -401,7 +401,7 @@ ked [file...]
                 case 'delete':
                     this.newFile()
                     break
-                case 'change':
+                case 'modify':
                 case 'rename':
                     this.reloadFile()
                     break

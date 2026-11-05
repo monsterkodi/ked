@@ -34,7 +34,7 @@ use           ◆ watcher
     @onFileChange: event =>
 
         ⮐ if event.path != @file
-        ⮐ if event.change not in ['change' 'rename']
+        ⮐ if event.change not in ['modify' 'rename']
 
         clearTimeout @reloadTimer if @reloadTimer
         @reloadTimer = setTimeout (=> @reload()) 100

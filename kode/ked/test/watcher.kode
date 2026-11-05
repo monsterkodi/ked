@@ -70,7 +70,6 @@ post.on 'file.change' (info) =>
         fs.rmSync root recursive:true force:true
 
         events.length ▸ 1
-        events[0].type ▸ 'create'
         events[0].change ▸ 'create'
         events[0].path ▸ slash.path root 'a.txt'
 
@@ -93,8 +92,7 @@ post.on 'file.change' (info) =>
         fs.rmSync root recursive:true force:true
 
         events.length ▸ 1
-        events[0].type ▸ 'modify'
-        events[0].change ▸ 'change'
+        events[0].change ▸ 'modify'
         events[0].path ▸ file
 
   ▸ deletions emit one delete event
@@ -116,8 +114,7 @@ post.on 'file.change' (info) =>
         fs.rmSync root recursive:true force:true
 
         events.length ▸ 1
-        events[0].type ▸ 'delete'
-        events[0].change ▸ 'remove'
+        events[0].change ▸ 'delete'
         events[0].path ▸ file
 
   ▸ renames emit one rename event
@@ -140,7 +137,6 @@ post.on 'file.change' (info) =>
         fs.rmSync root recursive:true force:true
 
         events.length ▸ 1
-        events[0].type ▸ 'rename'
         events[0].change ▸ 'rename'
         events[0].path ▸ newFile
         events[0].oldPath ▸ oldFile
@@ -165,7 +161,7 @@ post.on 'file.change' (info) =>
         fs.rmSync root recursive:true force:true
 
         events.length ▸ 1
-        events[0].type ▸ 'create'
+        events[0].change ▸ 'create'
         events[0].path ▸ newFile
 
   ▸ atomic saves emit one modify event and no temp events
@@ -189,7 +185,7 @@ post.on 'file.change' (info) =>
         fs.rmSync root recursive:true force:true
 
         events.length ▸ 1
-        events[0].type ▸ 'modify'
+        events[0].change ▸ 'modify'
         events[0].path ▸ file
 
   ▸ nfs.write emits one modify event
@@ -211,7 +207,7 @@ post.on 'file.change' (info) =>
         fs.rmSync root recursive:true force:true
 
         events.length ▸ 1
-        events[0].type ▸ 'modify'
+        events[0].change ▸ 'modify'
         events[0].path ▸ file
 
   ▸ directories emit one create and one delete event
@@ -230,7 +226,7 @@ post.on 'file.change' (info) =>
         ○ sleep 400
 
         created = events.length
-        createdType = events[0]?.type
+        createdChange = events[0]?.change
         path = events[0]?.path
 
         events = []
@@ -238,17 +234,17 @@ post.on 'file.change' (info) =>
         ○ sleep 400
 
         deleted = events.length
-        deletedType = events[0]?.type
+        deletedChange = events[0]?.change
         deletedPath = events[0]?.path
 
         watcher.close()
         fs.rmSync root recursive:true force:true
 
         created ▸ 1
-        createdType ▸ 'create'
+        createdChange ▸ 'create'
         path ▸ dir
         deleted ▸ 1
-        deletedType ▸ 'delete'
+        deletedChange ▸ 'delete'
         deletedPath ▸ dir
 
   ▸ directory renames emit one rename event
@@ -272,7 +268,7 @@ post.on 'file.change' (info) =>
         fs.rmSync root recursive:true force:true
 
         events.length ▸ 1
-        events[0].type ▸ 'rename'
+        events[0].change ▸ 'rename'
         events[0].path ▸ newDir
         events[0].oldPath ▸ oldDir
 
@@ -298,7 +294,7 @@ post.on 'file.change' (info) =>
         fs.rmSync root recursive:true force:true
 
         events.length ▸ 1
-        events[0].type ▸ 'create'
+        events[0].change ▸ 'create'
         events[0].path ▸ slash.path dir 'inside.txt'
 
   ▸ ignored directories are not watched
@@ -352,7 +348,7 @@ post.on 'file.change' (info) =>
 
         beforeUpgrade ▸ 0
         events.length ▸ 1
-        events[0].type ▸ 'modify'
+        events[0].change ▸ 'modify'
         events[0].path ▸ nested
 
   ▸ watching a file filters out sibling changes
@@ -382,5 +378,5 @@ post.on 'file.change' (info) =>
 
         siblingEvents ▸ 0
         events.length ▸ 1
-        events[0].type ▸ 'modify'
+        events[0].change ▸ 'modify'
         events[0].path ▸ file

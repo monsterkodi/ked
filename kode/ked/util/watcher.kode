@@ -363,20 +363,13 @@ use fs
             if recursive and dirent.isDirectory()
                 @walkPaths p into true
 
-    @emitChange: type path opt ->
+    @emitChange: change path opt ->
 
         opt ?= {}
 
-        change = 'change'
-        change = 'create' if type == 'create'
-        change = 'remove' if type == 'delete'
-        change = 'rename' if type == 'rename'
-
-        info = path:path change:change type:type watcher:@
+        info = path:path change:change watcher:@
         info.oldPath = opt.oldPath if opt.oldPath?
-        
-        log "file.change #{change} #{type} #{path}"
-        
+
         post.emit 'file.change' info
 
 export watcher

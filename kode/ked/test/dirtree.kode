@@ -1,0 +1,160 @@
+
+use fs
+use ../../kxk ▪ slash sleep post
+use ../edit     ◆ editor
+use ../util     ◆ harness
+use ../view/colmns ◆ dircol
+
+makeCol = ○->
+
+    store = {}
+    fakeGet = (key def) ->
+        ⮐ def if not key?.split?
+        prefix = key + '▸'
+        result = {}
+        found = false
+        for k,v of store
+            continue if not k.startsWith prefix
+            rest = k[prefix.length..]
+            parts = rest.split '▸'
+            if parts.length == 1
+                result[parts[0]] = v
+            else
+                result[parts[0]] ?= {}
+                result[parts[0]][parts[1..].join('▸')] = v
+            found = true
+        ⮐ result if found
+        store[key] ? def
+    fakeSet = (key value) -> store[key] = value
+    fakeDel = (key) -> delete store[key]
+    global.ked_session = get:fakeGet set:fakeSet del:fakeDel
+
+    h = new harness cols:100 rows:30
+    e = new editor h.screen 'test_editor' []
+    d = new dircol h.screen e []
+    d.layout 0 0 100 30
+
+    ○ sleep 400
+    d
+
+▸ dirtree
+
+  ▸ create events add entries
+
+        root = '/tmp/opencode/ked-dirtree-create'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        d =○ makeCol()
+        d.setRoot root
+        ○ sleep 200
+
+        file = slash.path root 'a.txt'
+        fs.writeFileSync file 'hello'
+        post.emit 'file.change' path:file change:'create'
+        ○ sleep 200
+
+        names = d.dirtree.items.map (i) -> i.path
+
+        fs.rmSync root recursive:true force:true
+
+        (file in names) ▸ true
+
+  ▸ delete events remove entries even when the root becomes empty
+
+        root = '/tmp/opencode/ked-dirtree-delete'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        file = slash.path root 'a.txt'
+        fs.writeFileSync file 'hello'
+
+        d =○ makeCol()
+        d.setRoot root
+        ○ sleep 200
+
+        fs.rmSync file
+        post.emit 'file.change' path:file change:'delete'
+        ○ sleep 200
+
+        names = d.dirtree.items.map (i) -> i.path
+
+        fs.rmSync root recursive:true force:true
+
+        (file in names) ▸ false
+
+  ▸ rename events move entries
+
+        root = '/tmp/opencode/ked-dirtree-rename'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        oldFile = slash.path root 'a.txt'
+        newFile = slash.path root 'b.txt'
+        fs.writeFileSync oldFile 'hello'
+
+        d =○ makeCol()
+        d.setRoot root
+        ○ sleep 200
+
+        fs.renameSync oldFile newFile
+        post.emit 'file.change' path:newFile oldPath:oldFile change:'rename'
+        ○ sleep 200
+
+        names = d.dirtree.items.map (i) -> i.path
+
+        fs.rmSync root recursive:true force:true
+
+        (newFile in names) ▸ true
+        (oldFile in names) ▸ false
+
+  ▸ create events update open directories
+
+        root = '/tmp/opencode/ked-dirtree-open'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        sub = slash.path root 'sub'
+        fs.mkdirSync sub
+        fs.writeFileSync slash.path(sub 'keep.txt') 'hello'
+
+        d =○ makeCol()
+        d.setRoot root
+        ○ sleep 200
+
+        ○ d.dirtree.openDir d.dirtree.itemForPath(sub) redraw:true
+        ○ sleep 200
+
+        file = slash.path sub 'new.txt'
+        fs.writeFileSync file 'hello'
+        post.emit 'file.change' path:file change:'create'
+        ○ sleep 200
+
+        names = d.dirtree.items.map (i) -> i.path
+        open  = d.dirtree.itemForPath(sub)?.open
+
+        fs.rmSync root recursive:true force:true
+
+        (file in names) ▸ true
+        open ▸ true
+
+  ▸ modify events leave the tree alone
+
+        root = '/tmp/opencode/ked-dirtree-modify'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        file = slash.path root 'a.txt'
+        fs.writeFileSync file 'hello'
+
+        d =○ makeCol()
+        d.setRoot root
+        ○ sleep 200
+
+        count = d.dirtree.items.length
+
+        fs.writeFileSync file 'changed'
+        post.emit 'file.change' path:file change:'modify'
+        ○ sleep 200
+
+        after = d.dirtree.items.length
+
+        fs.rmSync root recursive:true force:true
+
+        after ▸ count

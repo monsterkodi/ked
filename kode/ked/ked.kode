@@ -282,7 +282,7 @@ use child_process ▪ spawn exec
         if event.path == @currentFile
             switch event.change
                 'delete' ➜ @newFile() # todo: load current text into new file
-                'change'
+                'modify'
                 'rename' ➜ @reloadFile()
                 
         ⮐ if KED.building

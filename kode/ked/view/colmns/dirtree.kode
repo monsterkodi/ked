@@ -21,6 +21,7 @@ import rgxs from './quicky.json' with { type: "json" }
         post.on 'git.status'    @onGitStatus
         
         @frontRoundOffset = 0
+        @refreshTimer = null
         
     tilde: item -> item.tilde = lpad(item.depth*2+1) + diritem.symbolName(item)
 
@@ -77,22 +78,17 @@ import rgxs from './quicky.json' with { type: "json" }
                 
     onFileChange: info =>
         
-        if info.path.startsWith @currentRoot
-            if info.change == 'rename'
-                dir = slash.dir info.path
-                for item in @items
-                    if item.path == info.path
-                        ⮐ 
-                    if item.path == dir
-                        log "item #{dir}" item    
-                    
-                # @setRoot @currentRoot redraw:true index:@currentIndex()
-                
-            if info.change in ['remove' 'deleted']
-                for item in @items
-                    if item.path == info.path
-                        @setRoot @currentRoot redraw:true index:@currentIndex()
-                        ⮐ 
+        ⮐ if not info.path.startsWith @currentRoot
+        
+        switch info.change
+            'create'
+            'delete'
+            'rename' ➜ @refresh()
+    
+    refresh: =>
+        
+        clearTimeout @refreshTimer if @refreshTimer
+        @refreshTimer = setTimeout (=> @setRoot @currentRoot redraw:true index:@currentIndex()) 50
                     
     setRoot: path opt ○=>
         
@@ -103,8 +99,6 @@ import rgxs from './quicky.json' with { type: "json" }
         items =○ @dirItems dir 'dirtree.setRoot'
         
         @currentRoot = dir
-                
-        ⮐ if empty items
                         
         for item in items
             item.depth = 0

@@ -46,7 +46,7 @@ config = (function ()
         {
             return
         }
-        if (!(_k_.in(event.change,['change','rename'])))
+        if (!(_k_.in(event.change,['modify','rename'])))
         {
             return
         }
