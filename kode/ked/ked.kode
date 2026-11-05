@@ -130,11 +130,7 @@ use child_process ▪ spawn exec
         @dircol.hide()
         @funcol.hide()
         
-    # ████████   ███   ███  ███   ███  
-    # ███   ███  ███   ███  ████  ███  
-    # ███████    ███   ███  ███ █ ███  
-    # ███   ███  ███   ███  ███  ████  
-    # ███   ███   ███████   ███   ███  
+#!run
     
     @run: ○->
         
@@ -151,11 +147,7 @@ use child_process ▪ spawn exec
         proc = spawn cmd args {stdio:"inherit" detached:true shell:true}
         proc.unref()
         
-    # ███   ███  ████████   ███████   ███████    ███      ████████   ███████   ███████
-    # ███   ███  ███       ███   ███  ███   ███  ███      ███       ███       ███     
-    # █████████  ███████   █████████  ███   ███  ███      ███████   ███████   ███████ 
-    # ███   ███  ███       ███   ███  ███   ███  ███      ███            ███       ███
-    # ███   ███  ████████  ███   ███  ███████    ███████  ████████  ███████   ███████ 
+#!headless
     
     #  the headless mode: the editor runs without a terminal
     #  input keys come from the standard input, and the screen is dumped for each key
@@ -203,12 +195,6 @@ use child_process ▪ spawn exec
         else
             process.stdout.write @screen.textMarked().join('\n') + '\n'
 
-    #  ███████  ████████   ███████   ███████  ███   ███████   ███   ███
-    # ███       ███       ███       ███       ███  ███   ███  ████  ███
-    # ███████   ███████   ███████   ███████   ███  ███   ███  ███ █ ███
-    #      ███  ███            ███       ███  ███  ███   ███  ███  ████
-    # ███████   ████████  ███████   ███████   ███   ███████   ███   ███
-
     startup: ○=>
         
         ○ config.loaded if config.loaded
@@ -225,12 +211,6 @@ use child_process ▪ spawn exec
                 @hideEditor()
                 @menu.show true
                 
-    #  ███████   ████████   ████████    ███████   ███   ███   ███████   ████████
-    # ███   ███  ███   ███  ███   ███  ███   ███  ████  ███  ███        ███     
-    # █████████  ███████    ███████    █████████  ███ █ ███  ███  ████  ███████ 
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███  ████  ███   ███  ███     
-    # ███   ███  ███   ███  ███   ███  ███   ███  ███   ███   ███████   ████████
-
     arrange: =>
         
         w = @t.cols()
@@ -253,12 +233,6 @@ use child_process ▪ spawn exec
         @title.layout   dcw   0  w-dcw      1
         @editor.layout  dcw   1  w-dcw-fcw  h-1
     
-    #  ███████   ███   ███  ███  █████████
-    # ███   ███  ███   ███  ███     ███   
-    # ███ ██ ██  ███   ███  ███     ███   
-    # ███ ████   ███   ███  ███     ███   
-    #  █████ ██   ███████   ███     ███   
-
     quit: msg ○=>
         
         watcher.close()
@@ -281,12 +255,6 @@ use child_process ▪ spawn exec
             # process.stderr.write "#{y5 msg}" if msg?
             process.exit msg? ? 1 : 0
             
-    # ███   ███  ████████  ███   ███  
-    # ████  ███  ███       ███ █ ███  
-    # ███ █ ███  ███████   █████████  
-    # ███  ████  ███       ███   ███  
-    # ███   ███  ████████  ██     ██  
-    
     newFile: =>
         
         delete @currentFile
@@ -309,12 +277,6 @@ use child_process ▪ spawn exec
         
         @redraw()
             
-    # ████████  ███  ███      ████████   ███████  ███   ███   ███████   ███   ███   ███████   ████████
-    # ███       ███  ███      ███       ███       ███   ███  ███   ███  ████  ███  ███        ███     
-    # ██████    ███  ███      ███████   ███       █████████  █████████  ███ █ ███  ███  ████  ███████ 
-    # ███       ███  ███      ███       ███       ███   ███  ███   ███  ███  ████  ███   ███  ███     
-    # ███       ███  ███████  ████████   ███████  ███   ███  ███   ███  ███   ███   ███████   ████████
-
     onFileChange: event =>
     
         if event.path == @currentFile
@@ -325,35 +287,29 @@ use child_process ▪ spawn exec
                 
         ⮐ if KED.building
         ⮐ if @args.headless or @args.headless_colors
-        ⮐ if true
-        if event.change == 'rename' and slash.ext(event.path) == 'kode'        
-            # log "src change?" event
-            if event.path.startsWith slash.path(◆dir '../../kode/ked')
-                KED.building = true
-                # log "building"
-                kk = slash.path ◆dir '../../kk'
-                # exec "#{kk} -k" {shell:true} (err stdout stderr) => 
-                exec "#{kk} -k" {} (err stdout stderr) => 
-                    if empty err
-                        exec "#{kk} -t ked" {} (err stdout stderr) => 
-                            if empty err
-                                @restart()
-                                @quit()
-                            else
-                                log err stdout stderr
-                                KED.building = false
-                    else
-                        log err stdout stderr
-                        KED.building = false
+
+        # if event.change == 'rename' and slash.ext(event.path) == 'kode'        
+        #     # log "src change?" event
+        #     if event.path.startsWith slash.path(◆dir '../../kode/ked')
+        #         KED.building = true
+        #         # log "building"
+        #         kk = slash.path ◆dir '../../kk'
+        #         # exec "#{kk} -k" {shell:true} (err stdout stderr) => 
+        #         exec "#{kk} -k" {} (err stdout stderr) => 
+        #             if empty err
+        #                 exec "#{kk} -t ked" {} (err stdout stderr) => 
+        #                     if empty err
+        #                         @restart()
+        #                         @quit()
+        #                     else
+        #                         log err stdout stderr
+        #                         KED.building = false
+        #             else
+        #                 log err stdout stderr
+        #                 KED.building = false
             
     onGitStatus: => git.diff @currentFile
         
-    # ████████   ████████  ███       ███████    ███████   ███████  
-    # ███   ███  ███       ███      ███   ███  ███   ███  ███   ███
-    # ███████    ███████   ███      ███   ███  █████████  ███   ███
-    # ███   ███  ███       ███      ███   ███  ███   ███  ███   ███
-    # ███   ███  ████████  ███████   ███████   ███   ███  ███████  
-
     reloadFile: => 
         
         if valid @currentFile
@@ -361,23 +317,11 @@ use child_process ▪ spawn exec
         else
             @newFile()
             
-    #  ███████   ████████   ████████  ███   ███  
-    # ███   ███  ███   ███  ███       ████  ███  
-    # ███   ███  ████████   ███████   ███ █ ███  
-    # ███   ███  ███        ███       ███  ████  
-    #  ███████   ███        ████████  ███   ███  
-    
     openFile: path row col view =>
         
         @currentLoad = @loadFile path row col view
         @editor.grabFocus()
         
-    #  ███████   ███   ███  ███   ███████  ███   ███  ███   ███  
-    # ███   ███  ███   ███  ███  ███       ███  ███    ███ ███   
-    # ███ ██ ██  ███   ███  ███  ███       ███████      █████    
-    # ███ ████   ███   ███  ███  ███       ███  ███      ███     
-    #  █████ ██   ███████   ███   ███████  ███   ███     ███     
-    
     onQuicky: path ○=>
         
         ⮐  if valid @loadingFile
@@ -413,12 +357,6 @@ use child_process ▪ spawn exec
 
         @editor.grabFocus()
                                 
-    # ███       ███████    ███████   ███████          ████████  ███  ███      ████████
-    # ███      ███   ███  ███   ███  ███   ███        ███       ███  ███      ███     
-    # ███      ███   ███  █████████  ███   ███        ██████    ███  ███      ███████ 
-    # ███      ███   ███  ███   ███  ███   ███        ███       ███  ███      ███     
-    # ███████   ███████   ███   ███  ███████          ███       ███  ███████  ████████
-
     loadFile: p row col view ○=>
     
         # log "ked.loadFile #{p} #{row} #{col} #{@loadingFile}"
@@ -568,11 +506,7 @@ use child_process ▪ spawn exec
 
         @
 
-    #  ███████   ███████   ███   ███  ████████  
-    # ███       ███   ███  ███   ███  ███       
-    # ███████   █████████   ███ ███   ███████   
-    #      ███  ███   ███     ███     ███       
-    # ███████   ███   ███      █      ████████  
+#!save
     
     saveFile: file ○=>
         
@@ -654,23 +588,11 @@ use child_process ▪ spawn exec
         
         @redraw()
     
-    # ████████    ███████    ███████  █████████  ████████  
-    # ███   ███  ███   ███  ███          ███     ███       
-    # ████████   █████████  ███████      ███     ███████   
-    # ███        ███   ███       ███     ███     ███       
-    # ███        ███   ███  ███████      ███     ████████  
-    
     onPaste: text => 
     
         @editor.state.insert text
         @redraw()
                                     
-    # ██     ██   ███████   ███   ███   ███████  ████████  
-    # ███   ███  ███   ███  ███   ███  ███       ███       
-    # █████████  ███   ███  ███   ███  ███████   ███████   
-    # ███ █ ███  ███   ███  ███   ███       ███  ███       
-    # ███   ███   ███████    ███████   ███████   ████████  
-    
     onMouse: event =>
 
         if event.type == 'wheel'
@@ -721,11 +643,7 @@ use child_process ▪ spawn exec
             scy = int @screen.rows/2
             post.emit 'droop.show' files:files pos:[scx scy-6]
                 
-    # ███   ███  ████████  ███   ███  
-    # ███  ███   ███        ███ ███   
-    # ███████    ███████     █████    
-    # ███  ███   ███          ███     
-    # ███   ███  ████████     ███     
+#!key
     
     onKey: key event =>
     
@@ -771,12 +689,6 @@ use child_process ▪ spawn exec
                 
         @redraw() if result?.redraw != false
         
-    #  ███████  ███  ███████  ████████  
-    # ███       ███     ███   ███       
-    # ███████   ███    ███    ███████   
-    #      ███  ███   ███     ███       
-    # ███████   ███  ███████  ████████  
-    
     onViewSize: name side delta =>
         
         @viewSizeDelta = name:name side:side delta:delta
@@ -802,12 +714,6 @@ use child_process ▪ spawn exec
         @redraw()
         @editor.mapscr?.onResize()
         
-    # ███  ███   ███  ████████   ███   ███  █████████       ████████    ███████   ████████   ███   ███  ████████ 
-    # ███  ████  ███  ███   ███  ███   ███     ███          ███   ███  ███   ███  ███   ███  ███   ███  ███   ███
-    # ███  ███ █ ███  ████████   ███   ███     ███          ████████   ███   ███  ████████   ███   ███  ████████ 
-    # ███  ███  ████  ███        ███   ███     ███          ███        ███   ███  ███        ███   ███  ███      
-    # ███  ███   ███  ███         ███████      ███          ███         ███████   ███         ███████   ███      
-
     onInputPopup: opt =>
     
         @input.set opt.text
@@ -831,12 +737,6 @@ use child_process ▪ spawn exec
                     @input.cb @input.orig
                 @input.hide()
     
-    # ███████    ████████    ███████   ███   ███
-    # ███   ███  ███   ███  ███   ███  ███ █ ███
-    # ███   ███  ███████    █████████  █████████
-    # ███   ███  ███   ███  ███   ███  ███   ███
-    # ███████    ███   ███  ███   ███  ██     ██
-
     redraw: =>    
         
         ⮐  if @quitting

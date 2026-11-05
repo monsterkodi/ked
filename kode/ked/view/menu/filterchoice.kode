@@ -28,27 +28,34 @@ use ../../edit/tool ◆ belt
     #     
     #     if key == 'bg' and @input
     #         @input.setColor 'bg_blur' @color.bg
+
+    toggleFilter: =>
+        
+        if @input.visible() ➜ @hideFilter()
+                            ➜ @showFilter()
         
     showFilter: =>
         
         ⮐  if @input.visible()
-        
         @input.show()
         @input.grabFocus()
+        true
         
     hideFilter: =>
         
         @state.clearHighlights()
-        
         ⮐ if not @input.visible()
         @input.set ''
         @input.hide()
         @grabFocus()
+        true
                 
     onInputAction: action text =>
         
         switch action
+            
             'change'
+                
                 if empty text 
                     @state.clearHighlights()
                     @state.setSelections []
@@ -57,21 +64,17 @@ use ../../edit/tool ◆ belt
                     if @state.s.highlights.length
                         @selectLineAndAdjust @state.s.highlights[0][1]
             'submit'
-                log "INPUT ACTION" action
+                
                 @hideFilter()
                 @emitAction 'return' @current()
                     
     selectLineAndAdjust: li =>
         
         @state.setSelections [belt.rangeOfLine(@state.s.lines li)]
-        @state.setCursors [[0 li]] main:'ind' adjust:'topBotDelta'
+        @state.setCursors [[0 li]] adjust:'topBotDelta'
+        true
         
-    toggleFilter: =>
-        
-        if @input.visible() ➜ @hideFilter()
-                            ➜ @showFilter()
-        
-    hasFocus: => super() or (@input and @input.hasFocus())
+    hasFocus: => super() or @input.hasFocus()
     
     layout: x y w h =>
         
@@ -113,12 +116,11 @@ use ../../edit/tool ◆ belt
             @input.draw()
         
     onKey: key event =>
-        # dbg event    
+
         if @input.visible()
             
             if event.combo == 'esc'
-                @hideFilter()
-                ⮐ true
+                ⮐ @hideFilter()
                 
             if event.combo == 'tab'
                 if @input.hasFocus()
@@ -131,14 +133,12 @@ use ../../edit/tool ◆ belt
                 
                 if event.combo == 'up'
                     @state.selectPrevHighlight()
-                    @selectLineAndAdjust @state.s.selections[0][1]
-                    ⮐ true
+                    ⮐ @selectLineAndAdjust @state.s.selections[0][1]
                     
                 if event.combo == 'down'
-                    @state.selectNextHighlight()
-                    @state.selectNextHighlight()
-                    @selectLineAndAdjust @state.s.selections[0][1]
-                    ⮐ true
+                    @state.selectNextHighlight() # 𝜏𝖍𝚒𝖘 ϝϵϵ⟅𝖘 𝕒 𝔟𝚒𝜏 𝖍𝕒⊂𝛋𝛾
+                    @state.selectNextHighlight() # 𝔟𝓊𝜏 𝚒𝜏 𝖘ϵξ⫙𝖘 𝜏◯ ⟒⊚ℜ𝛋 ϝ◯ℜ ∩⊚⟒
+                    ⮐ @selectLineAndAdjust @state.s.selections[0][1]
                     
                 if @input.onKey key event
                     ⮐ true
@@ -156,7 +156,6 @@ use ../../edit/tool ◆ belt
             
             if event.combo not in ['tab''return''space']
                 @showFilter()
-                # dbg event
                 @input.onKey key event
                 ⮐ true
         

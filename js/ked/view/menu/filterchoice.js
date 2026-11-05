@@ -27,16 +27,28 @@ filterchoice = (function ()
         this["draw"] = this["draw"].bind(this)
         this["layout"] = this["layout"].bind(this)
         this["hasFocus"] = this["hasFocus"].bind(this)
-        this["toggleFilter"] = this["toggleFilter"].bind(this)
         this["selectLineAndAdjust"] = this["selectLineAndAdjust"].bind(this)
         this["onInputAction"] = this["onInputAction"].bind(this)
         this["hideFilter"] = this["hideFilter"].bind(this)
         this["showFilter"] = this["showFilter"].bind(this)
+        this["toggleFilter"] = this["toggleFilter"].bind(this)
         filterchoice.__super__.constructor.call(this,screen,name,features)
         this.input = new input(this.screen,`${this.name}_input`)
         this.filterCells = new cells(this.screen)
         this.input.on('action',this.onInputAction)
         this.input.hide()
+    }
+
+    filterchoice.prototype["toggleFilter"] = function ()
+    {
+        if (this.input.visible())
+        {
+            return this.hideFilter()
+        }
+        else
+        {
+            return this.showFilter()
+        }
     }
 
     filterchoice.prototype["showFilter"] = function ()
@@ -46,7 +58,8 @@ filterchoice = (function ()
             return
         }
         this.input.show()
-        return this.input.grabFocus()
+        this.input.grabFocus()
+        return true
     }
 
     filterchoice.prototype["hideFilter"] = function ()
@@ -58,7 +71,8 @@ filterchoice = (function ()
         }
         this.input.set('')
         this.input.hide()
-        return this.grabFocus()
+        this.grabFocus()
+        return true
     }
 
     filterchoice.prototype["onInputAction"] = function (action, text)
@@ -81,7 +95,6 @@ filterchoice = (function ()
                 }
                 break
             case 'submit':
-                console.log("INPUT ACTION",action)
                 this.hideFilter()
                 return this.emitAction('return',this.current())
 
@@ -92,24 +105,13 @@ filterchoice = (function ()
     filterchoice.prototype["selectLineAndAdjust"] = function (li)
     {
         this.state.setSelections([belt.rangeOfLine(this.state.s.lines,li)])
-        return this.state.setCursors([[0,li]],{main:'ind',adjust:'topBotDelta'})
-    }
-
-    filterchoice.prototype["toggleFilter"] = function ()
-    {
-        if (this.input.visible())
-        {
-            return this.hideFilter()
-        }
-        else
-        {
-            return this.showFilter()
-        }
+        this.state.setCursors([[0,li]],{adjust:'topBotDelta'})
+        return true
     }
 
     filterchoice.prototype["hasFocus"] = function ()
     {
-        return filterchoice.__super__.hasFocus.call(this) || (this.input && this.input.hasFocus())
+        return filterchoice.__super__.hasFocus.call(this) || this.input.hasFocus()
     }
 
     filterchoice.prototype["layout"] = function (x, y, w, h)
@@ -161,8 +163,7 @@ filterchoice = (function ()
         {
             if (event.combo === 'esc')
             {
-                this.hideFilter()
-                return true
+                return this.hideFilter()
             }
             if (event.combo === 'tab')
             {
@@ -181,15 +182,13 @@ filterchoice = (function ()
                 if (event.combo === 'up')
                 {
                     this.state.selectPrevHighlight()
-                    this.selectLineAndAdjust(this.state.s.selections[0][1])
-                    return true
+                    return this.selectLineAndAdjust(this.state.s.selections[0][1])
                 }
                 if (event.combo === 'down')
                 {
                     this.state.selectNextHighlight()
                     this.state.selectNextHighlight()
-                    this.selectLineAndAdjust(this.state.s.selections[0][1])
-                    return true
+                    return this.selectLineAndAdjust(this.state.s.selections[0][1])
                 }
                 if (this.input.onKey(key,event))
                 {
@@ -244,5 +243,5 @@ filterchoice = (function ()
 
 export default filterchoice;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmlsdGVyY2hvaWNlLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L21lbnUvZmlsdGVyY2hvaWNlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQVM7O09BQ0EsWUFBWjtPQUFrQixZQUFsQjs7T0FDWSxZQUFmOztPQUNlLFlBQWY7O09BQ2UsY0FBZjs7T0FDZSxXQUFQOzs7QUFDZCxnQkFBRDs7NkJBQWM7YUFNVixjQUFHLFFBQU8sTUFBSzs7Ozs7Ozs7Ozs7O3FEQUVMLE9BQU8sS0FBSztRQUVsQixLQUFDLFlBQWtCLE1BQU0sS0FBQyxVQUFVLEtBQUM7UUFDckMsS0FBQyxrQkFBa0IsTUFBTSxLQUFDO1FBRTFCLEtBQUMsTUFBTSxHQUFHLFNBQVMsS0FBQztRQUVwQixLQUFDLE1BQU07Ozs0QkFTWDs7WUFFVSxLQUFDLE1BQU07Ozs7UUFFYixLQUFDLE1BQU07ZUFDUCxLQUFDLE1BQU07Ozs0QkFFWDs7UUFFSSxLQUFDLE1BQU07YUFFRSxLQUFDLE1BQU07Ozs7UUFDaEIsS0FBQyxNQUFNLElBQUk7UUFDWCxLQUFDLE1BQU07ZUFDUCxLQUFDOzs7NEJBRUwsNEJBQWUsUUFBTzs7Z0JBRVg7O2lCQUNIOzhCQUNhOztvQkFDTCxLQUFDLE1BQU07MkJBQ1AsS0FBQyxNQUFNOzs7O29CQUVQLEtBQUMsTUFBTSxjQUFjO3dCQUNsQixLQUFDLE1BQU0sRUFBRSxXQUFXOzsrQkFDbkIsS0FBQyxvQkFBb0IsS0FBQyxNQUFNLEVBQUUsV0FBVyxHQUFHOzs7O2lCQUN4RDtnQkFDSSxZQUFJLGVBQWU7Z0JBQ25CLEtBQUM7dUJBQ0QsS0FBQyxXQUFXLFNBQVMsS0FBQzs7Ozs7OzRCQUVsQyxrQ0FBcUI7O1FBRWpCLEtBQUMsTUFBTSxlQUFlLEtBQUssWUFBWSxLQUFDLE1BQU0sRUFBRSxNQUFNO2VBQ3RELEtBQUMsTUFBTSxhQUFhLEVBQUUsTUFBSyxLQUFLLE1BQU0sT0FBTzs7OzRCQUVqRDs7WUFFTyxLQUFDLE1BQU07O21CQUFZLEtBQUM7Ozs7bUJBQ0QsS0FBQzs7Ozs0QkFFM0I7OzhEQUF5QixLQUFDLFNBQVUsS0FBQyxNQUFNOzs7NEJBRTNDLHFCQUFRLEdBQUUsR0FBRSxHQUFFOzs7O1lBRVAsS0FBQyxNQUFNOztZQUVOLGFBQVMsRUFBRTtZQUVYLEtBQUMsWUFBWSxPQUFPLEVBQUUsRUFBRSxFQUFFO1lBQzFCLEtBQUMsTUFBTSxPQUFhLElBQUUsRUFBRSxJQUFFLEVBQUUsSUFBRSxFQUFFOzJEQUUxQixFQUFFLElBQUUsR0FBRyxFQUFFLElBQUU7Ozs7MkRBSVgsRUFBRSxFQUFFLEVBQUU7Ozs7NEJBRXBCOzs7O1lBRVUsS0FBQzs7Ozs7WUFJSixLQUFDLE1BQU07O1lBRU4sUUFBUSxLQUFDO2dCQUVILE1BQU0sT0FBTyxLQUFLLE1BQU0sT0FBTzs7OztZQUVyQyxNQUFNLFVBQVUsRUFBRSxFQUFFLEdBQUcsR0FBRyxJQUFJLEtBQUssS0FBQyxNQUFNO1lBRTFDLFNBQVEsS0FBQyxNQUFNLGFBQWEsTUFBTSxTQUFTLEtBQUMsTUFBTSxNQUFNLEtBQUMsTUFBTTtZQUMvRCxTQUFRLEtBQUMsTUFBTSxhQUFhLEtBQUMsTUFBTSxNQUFNLFdBQVcsS0FBQyxNQUFNLE1BQU07WUFFakUsTUFBTSxvQkFBb0IsRUFBRSxFQUFFLEdBQUcsR0FBRSxHQUFHO1lBRXRDLE1BQU0sc0JBQXNCLEVBQUUsRUFBRSxNQUFNO1lBQ3RDLE1BQU0sc0JBQXNCLE1BQU0sT0FBSyxFQUFFLEVBQUUsTUFBTTttQkFFakQsS0FBQyxNQUFNOzs7OzRCQUVmLG9CQUFPLEtBQUk7O1lBRUosS0FBQyxNQUFNOztnQkFFSCxNQUFNLFVBQVM7O2dCQUNkLEtBQUM7dUJBQ0M7O2dCQUVILE1BQU0sVUFBUzs7b0JBQ1gsS0FBQyxNQUFNOztvQkFDTixLQUFDOzs7O29CQUVELEtBQUMsTUFBTTs7dUJBQ1Q7O2dCQUVILEtBQUMsTUFBTTs7b0JBRUgsTUFBTSxVQUFTOztvQkFDZCxLQUFDLE1BQU07b0JBQ1AsS0FBQyxvQkFBb0IsS0FBQyxNQUFNLEVBQUUsV0FBVyxHQUFHOzJCQUMxQzs7b0JBRUgsTUFBTSxVQUFTOztvQkFDZCxLQUFDLE1BQU07b0JBQ1AsS0FBQyxNQUFNO29CQUNQLEtBQUMsb0JBQW9CLEtBQUMsTUFBTSxFQUFFLFdBQVcsR0FBRzsyQkFDMUM7O29CQUVILEtBQUMsTUFBTSxNQUFNLElBQUk7OzJCQUNkOzs4REFFRSxJQUFJOztnQkFFYixNQUFNOztnQkFDTCxLQUFDLE1BQU07b0JBQ0osS0FBQyxNQUFNLE1BQU0sSUFBSTs7MkJBQ2Q7OzswREFFRixJQUFJOztZQUViLE1BQU07O3lCQUVGLE1BQU0sT0FBYyxNQUFLLFNBQVE7O2dCQUNoQyxLQUFDO2dCQUVELEtBQUMsTUFBTSxNQUFNLElBQUk7dUJBQ2Y7OztzREFFSixJQUFJOzs7NEJBRWQsc0JBQVM7Ozs7WUFFRixLQUFDLE1BQU0sYUFBYyxLQUFDLFlBQVksY0FBYzs7Z0JBRXpCLE1BQU0sU0FBUTs7Z0JBQXBDLEtBQUMsTUFBTTs7WUFFUCxNQUFNLEtBQUMsTUFBTSxRQUFRO2dCQUNaOzt1QkFBUDs7b0JBRUEsT0FBTzs7d0RBRVA7OztXQXhLYjs7O2VBMEtNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmlsdGVyY2hvaWNlLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L21lbnUvZmlsdGVyY2hvaWNlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQVM7O09BQ0EsWUFBWjtPQUFrQixZQUFsQjs7T0FDWSxZQUFmOztPQUNlLFlBQWY7O09BQ2UsY0FBZjs7T0FDZSxXQUFQOzs7QUFDZCxnQkFBRDs7NkJBQWM7YUFNVixjQUFHLFFBQU8sTUFBSzs7Ozs7Ozs7Ozs7O3FEQUVMLE9BQU8sS0FBSztRQUVsQixLQUFDLFlBQWtCLE1BQU0sS0FBQyxVQUFVLEtBQUM7UUFDckMsS0FBQyxrQkFBa0IsTUFBTSxLQUFDO1FBRTFCLEtBQUMsTUFBTSxHQUFHLFNBQVMsS0FBQztRQUVwQixLQUFDLE1BQU07Ozs0QkFTWDs7WUFFTyxLQUFDLE1BQU07O21CQUFZLEtBQUM7Ozs7bUJBQ0QsS0FBQzs7Ozs0QkFFM0I7O1lBRVUsS0FBQyxNQUFNOzs7O1FBQ2IsS0FBQyxNQUFNO1FBQ1AsS0FBQyxNQUFNO2VBQ1A7Ozs0QkFFSjs7UUFFSSxLQUFDLE1BQU07YUFDRSxLQUFDLE1BQU07Ozs7UUFDaEIsS0FBQyxNQUFNLElBQUk7UUFDWCxLQUFDLE1BQU07UUFDUCxLQUFDO2VBQ0Q7Ozs0QkFFSiw0QkFBZSxRQUFPOztnQkFFWDs7aUJBRUg7OEJBRWE7O29CQUNMLEtBQUMsTUFBTTsyQkFDUCxLQUFDLE1BQU07Ozs7b0JBRVAsS0FBQyxNQUFNLGNBQWM7d0JBQ2xCLEtBQUMsTUFBTSxFQUFFLFdBQVc7OytCQUNuQixLQUFDLG9CQUFvQixLQUFDLE1BQU0sRUFBRSxXQUFXLEdBQUc7Ozs7aUJBQ3hEO2dCQUVJLEtBQUM7dUJBQ0QsS0FBQyxXQUFXLFNBQVMsS0FBQzs7Ozs7OzRCQUVsQyxrQ0FBcUI7O1FBRWpCLEtBQUMsTUFBTSxlQUFlLEtBQUssWUFBWSxLQUFDLE1BQU0sRUFBRSxNQUFNO1FBQ3RELEtBQUMsTUFBTSxhQUFhLEVBQUUsTUFBSyxPQUFPO2VBQ2xDOzs7NEJBRUo7OzZEQUF3QixLQUFDLE1BQU07Ozs0QkFFL0IscUJBQVEsR0FBRSxHQUFFLEdBQUU7Ozs7WUFFUCxLQUFDLE1BQU07O1lBRU4sYUFBUyxFQUFFO1lBRVgsS0FBQyxZQUFZLE9BQU8sRUFBRSxFQUFFLEVBQUU7WUFDMUIsS0FBQyxNQUFNLE9BQWEsSUFBRSxFQUFFLElBQUUsRUFBRSxJQUFFLEVBQUU7MkRBRTFCLEVBQUUsSUFBRSxHQUFHLEVBQUUsSUFBRTs7OzsyREFJWCxFQUFFLEVBQUUsRUFBRTs7Ozs0QkFFcEI7Ozs7WUFFVSxLQUFDOzs7OztZQUlKLEtBQUMsTUFBTTs7WUFFTixRQUFRLEtBQUM7Z0JBRUgsTUFBTSxPQUFPLEtBQUssTUFBTSxPQUFPOzs7O1lBRXJDLE1BQU0sVUFBVSxFQUFFLEVBQUUsR0FBRyxHQUFHLElBQUksS0FBSyxLQUFDLE1BQU07WUFFMUMsU0FBUSxLQUFDLE1BQU0sYUFBYSxNQUFNLFNBQVMsS0FBQyxNQUFNLE1BQU0sS0FBQyxNQUFNO1lBQy9ELFNBQVEsS0FBQyxNQUFNLGFBQWEsS0FBQyxNQUFNLE1BQU0sV0FBVyxLQUFDLE1BQU0sTUFBTTtZQUVqRSxNQUFNLG9CQUFvQixFQUFFLEVBQUUsR0FBRyxHQUFFLEdBQUc7WUFFdEMsTUFBTSxzQkFBc0IsRUFBRSxFQUFFLE1BQU07WUFDdEMsTUFBTSxzQkFBc0IsTUFBTSxPQUFLLEVBQUUsRUFBRSxNQUFNO21CQUVqRCxLQUFDLE1BQU07Ozs7NEJBRWYsb0JBQU8sS0FBSTs7WUFFSixLQUFDLE1BQU07O2dCQUVILE1BQU0sVUFBUzs7dUJBQ1osS0FBQzs7Z0JBRUosTUFBTSxVQUFTOztvQkFDWCxLQUFDLE1BQU07O29CQUNOLEtBQUM7Ozs7b0JBRUQsS0FBQyxNQUFNOzt1QkFDVDs7Z0JBRUgsS0FBQyxNQUFNOztvQkFFSCxNQUFNLFVBQVM7O29CQUNkLEtBQUMsTUFBTTsyQkFDTCxLQUFDLG9CQUFvQixLQUFDLE1BQU0sRUFBRSxXQUFXLEdBQUc7O29CQUUvQyxNQUFNLFVBQVM7O29CQUNkLEtBQUMsTUFBTTtvQkFDUCxLQUFDLE1BQU07MkJBQ0wsS0FBQyxvQkFBb0IsS0FBQyxNQUFNLEVBQUUsV0FBVyxHQUFHOztvQkFFL0MsS0FBQyxNQUFNLE1BQU0sSUFBSTs7MkJBQ2Q7OzhEQUVFLElBQUk7O2dCQUViLE1BQU07O2dCQUNMLEtBQUMsTUFBTTtvQkFDSixLQUFDLE1BQU0sTUFBTSxJQUFJOzsyQkFDZDs7OzBEQUVGLElBQUk7O1lBRWIsTUFBTTs7eUJBRUYsTUFBTSxPQUFjLE1BQUssU0FBUTs7Z0JBQ2hDLEtBQUM7Z0JBQ0QsS0FBQyxNQUFNLE1BQU0sSUFBSTt1QkFDZjs7O3NEQUVKLElBQUk7Ozs0QkFFZCxzQkFBUzs7OztZQUVGLEtBQUMsTUFBTSxhQUFjLEtBQUMsWUFBWSxjQUFjOztnQkFFekIsTUFBTSxTQUFROztnQkFBcEMsS0FBQyxNQUFNOztZQUVQLE1BQU0sS0FBQyxNQUFNLFFBQVE7Z0JBQ1o7O3VCQUFQOztvQkFFQSxPQUFPOzt3REFFUDs7O1dBdktiOzs7ZUF5S00ifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/menu/filterchoice.kode
