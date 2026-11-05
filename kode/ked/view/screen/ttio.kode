@@ -37,6 +37,8 @@ use ../../util/img ◆ rounded
         @imgIds     = 100
         @lastplImgs = {}
         @placedImgs = {}
+        @plargs     = {}
+        @hiddenImgs = {}
         
         @modifiers  = ['cmd' 'ctrl' 'alt' 'shift']
         @activeMods = {}
@@ -236,6 +238,7 @@ use ../../util/img ◆ rounded
         
         # log "●#{img.id} #{img.pid} #{img.name} #{[x y px py pw ph].toString()} z:#{z}"
         z ?= 1000
+        @plargs[[img.id img.pid]] = [x y px py pw ph z]
         @write "\x1b_Gq=1,a=p,i=#{img.id},p=#{img.pid},X=#{px},Y=#{py},w=#{pw},h=#{ph},z=#{z},C=1\x1b\\"
         
         [img.id img.pid]
@@ -243,7 +246,24 @@ use ../../util/img ◆ rounded
     hideImg: id pl ->
         
         # log "▪#{id} #{pl}"
+        ⮐  if @hiddenImgs[[id pl]]
+        if args = @plargs[[id pl]]
+            delete @plargs[[id pl]]
+            @hiddenImgs[[id pl]] = args
         @write "\x1b_Gq=1,a=d,d=i,i=#{id},p=#{pl}\x1b\\"
+        
+    showImg: id pl ->
+        
+        args = @hiddenImgs[[id pl]]
+        ⮐  if empty args
+        
+        delete @hiddenImgs[[id pl]]
+        @plargs[[id pl]] = args
+        
+        [x y px py pw ph z] = args
+        
+        @setCursor x y
+        @write "\x1b_Gq=1,a=p,i=#{id},p=#{pl},X=#{px},Y=#{py},w=#{pw},h=#{ph},z=#{z},C=1\x1b\\"
         
     removeImgs: ->
         
@@ -251,6 +271,7 @@ use ../../util/img ◆ rounded
             for pos,plid of posplids
                 if empty(@placedImgs[iid]) or empty(@placedImgs[iid][pos])
                     @hideImg iid plid
+                    delete @hiddenImgs[[iid plid]]
                 
         @lastplImgs = @placedImgs
         @placedImgs = {}

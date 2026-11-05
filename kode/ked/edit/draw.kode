@@ -381,6 +381,21 @@ use              ◆ mode
             @cursorIds[s.main] = @cells.draw_rounded_cursor(x y bg scale)
             
         # dbg @cursorIds
+    
+    showCursorsOutsideRects: rects =>
+        
+        rects = rects.map (rect) => @cells.rectForScreen rect
+        
+        for cursor,idx in @state.s.cursors
+            if imgId = @cursorIds[idx]
+                if @isCursorVisible(cursor) and not @isCursorInAnyRect(cursor rects)
+                    global.ked_ttio.showImg imgId[0] imgId[1]
+    
+    isCursorInAnyRect: cursor rects =>
+        
+        for rect in rects
+            ⮐ true if @isCursorInRect cursor rect
+        false
 
 #!colorpills
     

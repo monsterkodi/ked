@@ -1,5 +1,7 @@
 
+use ../edit        ◆ editor
 use ../view/screen ◆ ttio
+use ../util        ◆ harness
 
 ▸ ttio
 
@@ -36,6 +38,106 @@ use ../view/screen ◆ ttio
         t.placeImg img 1 2 null null null null 1000
 
         (t.written().split('a=p').length - 1) ▸ 1
+
+  ▸ a hidden image placement can be shown again
+
+        t = new ttio headless:true input:false
+        t.cellsz = [10 20]
+        img = {id:42}
+
+        t.placeImg img 1 2 null null null null 1000
+        t.hideImg img.id img.pid
+        t.showImg img.id img.pid
+
+        (t.written().split('a=p').length - 1) ▸ 2
+        t.written().includes("a=p,i=42,p=1,X=0,Y=0,w=10,h=20,z=1000,C=1") ▸ true
+
+  ▸ a hidden image stays hidden when placed again
+
+        t = new ttio headless:true input:false
+        t.cellsz = [10 20]
+        img = {id:42}
+
+        t.placeImg img 1 2 null null null null 1000
+        t.hideImg img.id img.pid
+
+        t.removeImgs()
+        t.placeImg img 1 2 null null null null 1000
+
+        (t.written().split('a=p').length - 1) ▸ 1
+
+  ▸ a hidden image stays hidden when placed again in the same frame
+
+        t = new ttio headless:true input:false
+        t.cellsz = [10 20]
+        img = {id:42}
+
+        t.placeImg img 1 2 null null null null 1000
+        t.hideImg img.id img.pid
+        t.placeImg img 1 2 null null null null 1000
+
+        (t.written().split('a=p').length - 1) ▸ 1
+
+  ▸ an image removed while hidden is not shown again
+
+        t = new ttio headless:true input:false
+        t.cellsz = [10 20]
+        img = {id:42}
+
+        t.placeImg img 1 2 null null null null 1000
+        t.hideImg img.id img.pid
+
+        t.removeImgs()
+        t.removeImgs()
+
+        t.out = []
+        t.showImg img.id img.pid
+
+        t.written().includes('a=p') ▸ false
+
+  ▸ a cursor hidden under an erasure is shown when the erasure is gone
+
+        h = new harness cols:40 rows:12
+        h.t.cellsz = [10 20]
+
+        e = new editor h.screen 'test_show_cursors' []
+        e.layout 0 0 40 12
+        e.state.loadLines ['abc']
+        e.state.setCursors [[0 0]]
+
+        img = {id:42}
+        h.t.placeImg img 0 0 null null null null 666
+        h.t.hideImg img.id img.pid
+
+        e.cursorIds = {}
+        e.cursorIds[0] = [img.id img.pid]
+
+        h.t.out = []
+        e.showCursorsOutsideRects []
+
+        (h.t.written().split('a=p').length - 1) ▸ 1
+
+  ▸ a cursor hidden under an erasure stays hidden while it exists
+
+        h = new harness cols:40 rows:12
+        h.t.cellsz = [10 20]
+
+        e = new editor h.screen 'test_show_cursors' []
+        e.layout 0 0 40 12
+        e.state.loadLines ['abc']
+        e.state.setCursors [[0 0]]
+
+        img = {id:42}
+        h.t.placeImg img 0 0 null null null null 666
+        h.t.hideImg img.id img.pid
+
+        e.cursorIds = {}
+        e.cursorIds[0] = [img.id img.pid]
+
+        h.t.out = []
+        e.showCursorsOutsideRects [[0 0 39 11]]
+
+        h.t.written().includes('a=p') ▸ false
 
   ▸ the keys of a chunk are keys of their own
 

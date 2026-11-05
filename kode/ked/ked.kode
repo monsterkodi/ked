@@ -758,6 +758,8 @@ use child_process ▪ spawn exec
         
         @arrange()
         
+        editorDrawn = @menu.greet.hidden() and not @differ.visible() and not @editor.hidden()
+        
         # ●▸ draw
         if @menu.greet.hidden()
             @editor.draw() if not @differ.visible()
@@ -779,8 +781,10 @@ use child_process ▪ spawn exec
         @input.draw()
         # ●▪ draw
         # ●▸ render
+        erases = @screen.eraseRects
         @screen.render()
         @t.removeImgs()
+        @editor.showCursorsOutsideRects(erases) if editorDrawn
         # ●▪ render
         
         @title.time = process.hrtime(start)[1]
