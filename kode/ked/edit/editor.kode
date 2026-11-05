@@ -120,14 +120,6 @@ use                ◆ state draw complete mode
     isCursorVisible: cursor =>
         
         cursor ?= @state.mainCursor()
-#         
-#         v = @state.s.view
-# 
-#         scale = @state.lineHeight cursor[1]
-#         row   = @state.rowOfLine cursor[1]
-#         x     = cursor[0]*scale - v[0]
-#         
-#         0 <= x and x + scale <= @cells.cols and 0 <= row and row + scale <= @cells.rows
     
         @isCursorInRect cursor [0 0 @cells.cols @cells.rows]
         
