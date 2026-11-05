@@ -221,7 +221,7 @@ import rgxs from './quicky.json' with { type: "json" }
                     
                     'click' 
                     'return'
-                        ⮐ if event.button == 'right' 
+                        ⮐ if event?.button == 'right' 
                         ⮐ post.emit 'file.open' choice.path
         
         super action choice event

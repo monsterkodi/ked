@@ -1,21 +1,7 @@
-filetypes
-    config       noon
-    .kkache      noon
-    .todo        noon
-    .gitignore   noon
-    kk           js
-    ked          js
-    ked_restart  js
-    salter       js
-    where        js
-    zero2blocks  js
-    
-project
-    maxDepth    12
-    ignore      
-        node_modules
-        .kkache
-        ked.log
+
+cursor
+    topOffset     15%
+    bottomOffset  33%
         
 mouse
     wheelSteps    1
@@ -23,10 +9,6 @@ mouse
     
 mapScroll
     clickOffset   5
-
-cursor
-    topOffset     15%
-    bottomOffset  33%
 
 scale
     enabled   true
@@ -52,6 +34,25 @@ novim
     autoEnableOnEscape  true
     yankFlashMs         700
 
+project
+    maxDepth    12
+    ignore      
+        node_modules
+        .kkache
+        ked.log
+
+filetypes
+    config       noon
+    .kkache      noon
+    .todo        noon
+    .gitignore   noon
+    kk           js
+    ked          js
+    ked_restart  js
+    salter       js
+    where        js
+    zero2blocks  js
+    
 sourceFileExtensions
     kode 
     mm 
