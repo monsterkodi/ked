@@ -204,6 +204,9 @@ use ../base         ◆ view colorslider rgbinput radio
                 @setHex (@colorAtSelection('fg') ? '#ff0000') 0 
                 @setHex (@colorAtSelection('bg') ? '#000000') 1 
                 
+            else if syntax = @editor.syntaxColorAtMainCursor()
+                @setHex syntax
+                
             else
                 @setHex "#ffffff"
 

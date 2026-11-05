@@ -347,7 +347,9 @@ use              ◆ mode
 
         bg = color.darken(bg) if not @cells.screen.t.hasFocus
         
-        for cursor in s.cursors
+        @cursorIds = {}
+        
+        for cursor,idx in s.cursors
  
             continue if cursor eql mainCursor
             
@@ -355,7 +357,7 @@ use              ◆ mode
              
                 scale = @state.lineHeight cursor[1]
                 cx = cursor[0]*scale - s.view[0]
-                @cells.draw_rounded_multi_cursor cx @state.rowOfLine(cursor[1]) bg scale
+                @cursorIds[idx] = @cells.draw_rounded_multi_cursor(cx @state.rowOfLine(cursor[1]) bg scale)
                         
         if @isCursorVisible mainCursor
              
@@ -376,7 +378,9 @@ use              ◆ mode
                      
             bg = color.darken bg if not @cells.screen.t.hasFocus
                  
-            @cells.draw_rounded_cursor x y bg scale
+            @cursorIds[s.main] = @cells.draw_rounded_cursor(x y bg scale)
+            
+        # dbg @cursorIds
 
 #!colorpills
     

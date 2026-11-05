@@ -754,11 +754,11 @@ use child_process ▪ spawn exec
             'cmd+.' 'ctrl+.'             ➜ ⮐  @browse.gotoDir slash.dir(@currentFile)
             'cmd+o' 'ctrl+o'             ➜ ⮐  post.emit 'browse.dir' process.cwd()
             'cmd+i'                      ➜ ⮐  post.emit 'differ.status'
-            'alt+r'                      ➜ ⮐  post.emit 'dircol.reveal' @currentFile
-            'cmd+\\' 'ctrl+\\'           ➜ ⮐  post.emit 'dircol.toggle'
-            "cmd+'" "ctrl+'"             ➜ ⮐  post.emit 'funcol.toggle'
-            "alt+\\"                     ➜ ⮐  post.emit 'dircol.focus'
-            "alt+'"                      ➜ ⮐  post.emit 'funcol.focus'
+            "cmd+["                      ➜ ⮐  post.emit 'dircol.show'
+            "alt+cmd+["                  ➜ ⮐  post.emit 'dircol.toggle'
+            'shift+cmd+['                ➜ ⮐  post.emit 'dircol.reveal' @currentFile
+            "cmd+]"                      ➜ ⮐  post.emit 'funcol.show'
+            "alt+cmd+]"                  ➜ ⮐  post.emit 'funcol.toggle'
             'alt+c'                      ➜ ⮐  post.emit 'colorpicker.show'
             'alt+u'                      ➜ ⮐  post.emit 'uniko.show'
             'alt+shift+c' 'shift+alt+c'  ➜ ⮐  @editor.state.clearColorsAtCursorOrSelection()

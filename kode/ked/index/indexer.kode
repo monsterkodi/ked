@@ -80,10 +80,13 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
             sds.set @classes "#{clss.name}.file" file
             sds.set @classes "#{clss.name}.line" clss.line+1
             
-            fileInfo.classes.push 
+            fileInfo.classes.push # 𝕎𝖍𝛾 𝕒ɼϵ ⟒ϵ ⊂⊚𝔭𝛾𝚒∩𝚐 𝜏𝖍ϵ ϝ𝚒ϵ⟅𝒹𝖘 𝖍ϵɼϵ? 𝜏𝖍𝕒𝜏 𝖘𝓊⊂𝛋𝖘 𝕒 ⟅𝚒𝜏⟙⎣ϵ!
                 clss: true
                 name: clss.name
                 line: clss.line+1
+                
+            if clss.base
+                fileInfo.classes[-1].base = clss.base
                 
         for func in parsed.funcs
 

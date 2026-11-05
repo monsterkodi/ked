@@ -1,6 +1,7 @@
 
 use ../util        ◆ harness
 use ../edit        ◆ state editor
+use ../theme       ◆ color theme
 use ../view/colmns ◆ colorpicker
 
 pickr = ->
@@ -75,4 +76,18 @@ pickr = ->
 
         p.radio.options.length ▸ 1
         p.radio.focusable ▸ false
+
+  ▸ a syntax color at the cursor seeds the picker
+
+        h = new harness cols:30 rows:9
+        e = new editor h.screen 'test_editor_colorpicker_syntax' []
+        e.state.syntax.ext = 'kode'
+        e.state.loadLines ['class Foo']
+        e.state.setMainCursor 5 0
+
+        p = new colorpicker h.screen e 'test_colorpicker_syntax'
+        p.layout 0 0 30 9
+        p.show()
+
+        p.foregroundHex() ▸ (color.hex(theme.syntax.keyword))
 

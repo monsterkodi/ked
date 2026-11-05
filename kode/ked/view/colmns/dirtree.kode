@@ -31,8 +31,10 @@ import rgxs from './quicky.json' with { type: "json" }
         # log 'dirtree.onGitStatus' status
     
         for item in @items
-        
-            if item.type == 'dir' 
+            
+            if item.tilde.endsWith '..' ➜ continue
+            
+            else if item.type == 'dir'
             
                 foundChange = false
                 
@@ -77,10 +79,14 @@ import rgxs from './quicky.json' with { type: "json" }
         
         if info.path.startsWith @currentRoot
             if info.change == 'rename'
+                dir = slash.dir info.path
                 for item in @items
                     if item.path == info.path
                         ⮐  
-                @setRoot @currentRoot redraw:true index:@currentIndex()
+                    if item.path == dir
+                        log "item #{dir}" item    
+                    
+                # @setRoot @currentRoot redraw:true index:@currentIndex()
                 
             if info.change in ['remove' 'deleted']
                 for item in @items
@@ -99,12 +105,20 @@ import rgxs from './quicky.json' with { type: "json" }
         @currentRoot = dir
                 
         ⮐  if empty items
-        
+                        
         for item in items
             item.depth = 0
             @tilde item
 
         items.sort (a b) => @weight(a) - @weight(b)
+
+        parent = slash.dir dir
+        if parent
+            items.unshift 
+                type: 'dir'
+                file: slash.name(parent)
+                path: parent
+                tilde: ' ' + icons.dir + '\u00A0..'
         
         # log 'setRoot' opt
                     
@@ -163,27 +177,28 @@ import rgxs from './quicky.json' with { type: "json" }
                     'click'
                     'space'
                         ⮐ if event.button == 'right'
-                        if action == 'click' and event.mods ➜ ⮐  post.emit 'dircol.root' choice.path
+                        if action == 'click' and event.mods or choice.tilde.endsWith('..')
+                            ⮐  post.emit 'dircol.root' choice.path
                         
                         if not choice.open ➜ @openDir(choice redraw:true) 
                         else @closeDir choice
                         ⮐ 
                         
                     'right'
-                    
+                        if choice.tilde.endsWith('..') ➜ ⮐ @moveSelection 'down'
                         if not choice.open ➜ @openDir(choice redraw:true)
                         else @selectNextKeepOffset()
                         ⮐ 
 
                     'left'
-                    
+                        if choice.tilde.endsWith '..' ➜ ⮐ 
                         if choice.open ➜ @closeDir(choice redraw:true)
                         else @selectPrevKeepOffset()
                         ⮐ 
                         
                     'delete'
                     'esc'
-                    
+                        if choice.tilde.endsWith '..' ➜ ⮐ 
                         @selectOpenSiblingAboveOrParent() if not choice.open
                         @closeDir(choice redraw:true) if choice.open
                         ⮐ 

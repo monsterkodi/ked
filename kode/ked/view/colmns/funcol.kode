@@ -33,6 +33,7 @@ use                 ◆ funtree colorpicker uniko
         
         post.on 'funcol.resize' @onFuncolResize
         post.on 'funcol.toggle' @onFuncolToggle
+        post.on 'funcol.show'   @onFuncolShow
         post.on 'session.merge' @onSessionMerge
         post.on 'funcol.focus'  => @funtree.grabFocus()
         post.on 'colorpicker.show'  @onColorPickerShow
@@ -106,11 +107,18 @@ use                 ◆ funtree colorpicker uniko
     onFuncolResize: => @knob.doDrag = true
     onFuncolToggle: => 
     
-        @toggle() if not (@visible() and @collapsed())
+        @toggle() # if not (@visible() and @collapsed())
         @active = @visible()
         ked_session.set 'funcol▸active' @active
         cols = max 16 int(@cells.screen.cols / 6)
         post.emit 'view.size' @name 'left' (@hidden() ? -@cells.cols : cols-@cells.cols)
+        if @hidden() ➜ post.emit 'focus' 'editor'
+                     ➜ @funtree.grabFocus()
+        
+    onFuncolShow: =>
+    
+        if @hidden() ➜ @onFuncolToggle()
+                     ➜ @funtree.grabFocus()
         
     onMouse: event =>
     

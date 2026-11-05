@@ -115,12 +115,13 @@ SYMBOL =
         log "can't find func:" func
         
     onFileIndexed: path info =>
-        # log "#{path}" #info
+        
         ⮐  if path != @editor.currentFile
         ⮐  if empty info.classes and empty info.funcs
     
         clssl = clone info.classes
         funcs = clone info.funcs
+        # log "funtree.onFileIndexed #{path}" clssl
         
         for clss in clssl
             clss.file ?= path
@@ -152,10 +153,18 @@ SYMBOL =
         items = clssl.concat funcs
         items.sort (a b) -> a.line - b.line
         
+        items = items.concat @itemsForBaseClass(clssl[-1])
+        
         @set items 'name'
         post.emit 'funtree.loaded'
         @onCursorsSet()
         post.emit 'redraw'
+        
+    itemsForBaseClass: supr =>
+        
+        ⮐ [] if empty supr.base
+        dbg supr
+        []
         
     emitAction: action choice event  ->
     

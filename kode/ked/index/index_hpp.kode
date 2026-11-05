@@ -156,7 +156,7 @@
 
                     poppedRegion = @regionStack.pop()
 
-                    if topToken? and key == 'codeBlock' and @regionStack.length == topToken?.depth
+                    if topToken? and key == 'codeBlock' and topToken.codeBlock? and @regionStack.length == topToken?.depth
                         topToken.codeBlock.end =
                             line:   lineIndex
                             col:    p

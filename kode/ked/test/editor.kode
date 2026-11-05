@@ -1,0 +1,34 @@
+
+use ../edit  ◆ editor
+use ../theme ◆ color theme
+use ../util  ◆ harness
+
+editorFor = lines ->
+    h = new harness cols:30 rows:9
+    e = new editor h.screen 'test_editor_syntax_color' []
+    e.state.syntax.ext = 'kode'
+    e.state.loadLines lines
+    e
+
+▸ syntaxColorAtMainCursor
+
+  ▸ uses the character left of the cursor
+
+        e = editorFor ['class Foo']
+        e.state.setMainCursor 5 0
+
+        e.syntaxColorAtMainCursor() ▸ (color.hex(theme.syntax.keyword))
+
+  ▸ falls back to the character right of the cursor
+
+        e = editorFor ['class Foo']
+        e.state.setMainCursor 0 0
+
+        e.syntaxColorAtMainCursor() ▸ (color.hex(theme.syntax.keyword))
+
+  ▸ returns null outside of the line
+
+        e = editorFor ['class Foo']
+        e.state.setMainCursor 20 0
+
+        e.syntaxColorAtMainCursor() ▸ null

@@ -103,17 +103,20 @@ maskStrings = (text) ->
 
                 firstClass  ?= className
                 currentClass = className
-
+                
                 result.classes.push 
                     name: className
                     line: li
+                    
+                if base = @base code 
+                    result.classes[-1].base = base
 
             words = code.split index_utils.splitRegExp
             for word in words
                 result.words.add word
         
         while funcStack.length
-            last(funcStack)[1].last = li - 1
+            last(funcStack)[1].last = li - 1   
             funcInfo = funcStack.pop()[1]
             funcInfo.class ?= firstClass
             result.funcs.push funcInfo
@@ -121,5 +124,11 @@ maskStrings = (text) ->
         result.words = Array.from result.words    
         
         result
+        
+    base: code =>
+        for s in [' extends ' '□']
+            splt = code.split s
+            if splt.length == 2                
+                ⮐ trim splt[1]
     
 export index_kode

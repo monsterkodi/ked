@@ -37,6 +37,7 @@ use                 ◆ dirtree
         post.on 'dircol.reveal' @onReveal
         post.on 'dircol.resize' @onResize
         post.on 'dircol.toggle' @onToggle
+        post.on 'dircol.show'   @onShow
         post.on 'dircol.root'   @setRoot
         post.on 'dircol.focus'  => @dirtree.grabFocus()
         
@@ -134,10 +135,11 @@ use                 ◆ dirtree
                         
     onReveal: p ○=>
     
-        # todo: select revealed file 
         @dirtree.grabFocus()
     
-        ⮐  if @dirtree.itemForPath p
+        if item = @dirtree.itemForPath p
+            @select item
+            ⮐ 
 
         if d = @dirtree.itemForPath slash.dir(p)
             if not d.open
@@ -172,11 +174,17 @@ use                 ◆ dirtree
     onResize: => @knob.doDrag = true
     onToggle: => 
         
-        @toggle() if not (@visible() and @collapsed())
+        @toggle() #if not (@visible() and @collapsed())
         @active = @visible()
         ked_session.set 'dircol▸active' @active
         cols = max 16 int(@cells.screen.cols / 6)
         post.emit 'view.size' @name 'right' (@hidden() ? -@cells.cols : cols-@cells.cols )
+        if @hidden() ➜ post.emit 'focus' 'editor'
+                     ➜ @dirtree.grabFocus() 
+        
+    onShow: =>
+        if @hidden() ➜ @onToggle()
+                     ➜ @dirtree.grabFocus()
         
     onMouse: event =>
     

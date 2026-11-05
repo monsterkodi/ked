@@ -220,13 +220,14 @@ use ../../util/img ◆ rounded
             # log "◆#{img.id} #{placed} #{[x y px py pw ph]}"  
             @placedImgs[img.id] ?= {}
             @placedImgs[img.id][[x y px py pw ph]] = placed
-            ⮐
+            ⮐ [img.id placed]
 
         #  a second placement at the same position in the same frame would
         #  replace the recorded id, leaving the first one on screen forever
 
-        ⮐  if @placedImgs[img.id]?[[x y px py pw ph]]
-
+        if placed = @placedImgs[img.id]?[[x y px py pw ph]]
+            ⮐ [img.id placed]
+             
         img.pid ?= 0                   
         img.pid++
         
@@ -236,7 +237,9 @@ use ../../util/img ◆ rounded
         # log "●#{img.id} #{img.pid} #{img.name} #{[x y px py pw ph].toString()} z:#{z}"
         z ?= 1000
         @write "\x1b_Gq=1,a=p,i=#{img.id},p=#{img.pid},X=#{px},Y=#{py},w=#{pw},h=#{ph},z=#{z},C=1\x1b\\"
-
+        
+        [img.id img.pid]
+        
     hideImg: id pl ->
         
         # log "▪#{id} #{pl}"

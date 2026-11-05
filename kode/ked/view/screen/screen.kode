@@ -1,5 +1,5 @@
 
-use ../../../kxk    ▪ kseg
+use ../../../kxk    ▪ kseg post
 use ../../theme     ◆ color
 use ../../edit/tool ◆ belt
 
@@ -76,6 +76,32 @@ use ../../edit/tool ◆ belt
                         @set x+i y+j null null null
 
         scale*w
+        
+    erase_scaled: x1 y1 x2 y2 bg=null =>
+
+        x1 = max 0 x1
+        y1 = max 0 y1
+        x2 = min @cols-1 x2
+        y2 = min @rows-1 y2
+
+        ⮐  if x1 > x2 or y1 > y2
+
+        @eraseRects ?= []
+        @eraseRects.push [x1 y1 x2 y2]
+        
+        post.emit 'screen.erased' [x1 y1 x2 y2]
+
+        for y in y1..y2
+            for x in x1..x2
+                @c[y][x].char = ' '
+                @c[y][x].bg   = bg if bg?
+
+        for [bx by scale w] in @frameBlocks ? []
+            continue if bx > x2 or bx + scale*w - 1 < x1
+            continue if by > y2 or by + scale   - 1 < y1
+            for yy in by..min(@rows-1 by+scale-1)
+                for xx in bx..min(@cols-1 bx+scale*w-1)
+                    @c[yy][xx].char = ' '
     
     set: x y char fg bg =>
         
@@ -239,30 +265,6 @@ use ../../edit/tool ◆ belt
     render: =>
         
         @t.write @renderString()
-
-    erase_scaled: x1 y1 x2 y2 bg=null =>
-
-        x1 = max 0 x1
-        y1 = max 0 y1
-        x2 = min @cols-1 x2
-        y2 = min @rows-1 y2
-
-        ⮐  if x1 > x2 or y1 > y2
-
-        @eraseRects ?= []
-        @eraseRects.push [x1 y1 x2 y2]
-
-        for y in y1..y2
-            for x in x1..x2
-                @c[y][x].char = ' '
-                @c[y][x].bg   = bg if bg?
-
-        for [bx by scale w] in @frameBlocks ? []
-            continue if bx > x2 or bx + scale*w - 1 < x1
-            continue if by > y2 or by + scale   - 1 < y1
-            for yy in by..min(@rows-1 by+scale-1)
-                for xx in bx..min(@cols-1 bx+scale*w-1)
-                    @c[yy][xx].char = ' '
 
     #  the frame as it is written to the terminal
     

@@ -41,6 +41,18 @@ use                 ◆ mapscr
         post.on 'jumpToWord'       @jumpToWord
         post.on 'config.loaded'    @onConfigLoaded        
         post.on 'funtree.loaded'   @onFuntreeLoaded
+        post.on 'screen.erased'    @onScreenErased
+        
+    onScreenErased: rect => 
+        dbg rect
+        # log "cursorIds" @cursorIds
+        # log "cursors" @state.s.cursors
+        for cursor,idx in @state.s.cursors
+            # log "#{idx}: #{@cursorIds[idx]}"
+            if imgId = @cursorIds[idx]
+                log "cursor col #{cursor[0]} line #{cursor[1]} inrect #{@isCursorInRect(cursor rect)}"
+                if @isCursorVisible(cursor) and @isCursorInRect(cursor rect)
+                    log "hide~~~!!!!!!!!!!!!!!!!? #{imgId}" cursor
         
     onConfigLoaded: data =>
         
