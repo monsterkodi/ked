@@ -42,7 +42,7 @@ use                 ◆ finder searcherfile
         files = @filterFiles files [editorExt]
         files = @sortFiles files
 
-        log "searcher - search #{files.length} files in #{dir} for |#{text}|" #files
+        # log "searcher - search #{files.length} files in #{dir} for |#{text}|" #files
         
         view.prototype.show.call @ # bypass finder to avoid reading selection or cursor word again
         
@@ -50,7 +50,7 @@ use                 ◆ finder searcherfile
         @choices.clearEmpty()        
         @sfils = []
         
-        ●▸ searcher
+        # ●▸ searcher
         
         items = []
         appended = 0
@@ -122,10 +122,10 @@ use                 ◆ finder searcherfile
 
         ⮐ if @hidden()
 
-        log y6('▸▸▸ searcher done')
+        # log y6('▸▸▸ searcher done')
         @highlightTextAndEmitRedraw text if finalAppend or not flushed
                 
-        ●▪ searcher
+        # ●▪ searcher
             
     arrange: =>
 

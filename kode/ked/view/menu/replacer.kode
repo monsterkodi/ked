@@ -1,0 +1,36 @@
+
+use ../../../kxk    ▪ post kseg slash
+use ../../edit/tool ◆ belt
+use ../../index     ◆ prjcts kacher
+use ../base         ◆ view
+use                 ◆ finder searcher
+■replacer□searcher
+    # replaces in multiple files provided by index▸prjcts
+    
+    @: @screen @editor name='replacer' ->
+
+        super @screen @editor name
+        
+        if @name == 'replacer'
+            post.on 'replacer.show' @show
+            post.on 'file.loaded'   @onFileLoaded
+        
+        @sfils = []
+        @searchId = 0
+
+    onFileLoaded: file =>
+    
+        ⮐ if @hidden()
+    
+        @hide()
+        
+    #     ⮐ if empty @fileToHighlight
+    #     ⮐ if empty @textToHighlight
+    #     ⮐ if empty file
+    # 
+    #     post.emit 'editor.highlight' @textToHighlight
+    #     
+    #     delete @fileToHighlight
+    #     delete @textToHighlight
+
+export replacer
