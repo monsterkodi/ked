@@ -1,5 +1,5 @@
 
-use ../../../kxk    ▪ post
+use ../../../kxk    ▪ krzl
 use ../../theme     ◆ color theme
 use ../base         ◆ input
 use ../screen       ◆ cells
@@ -43,19 +43,65 @@ use ../menu         ◆ choices
         
         @input.set ''
         @input.hide()
-        
-        @filter ''
-        @state.selectLine 0
-        @state.setMainCursor 0 0
-        
         @grabFocus()
         
+    matchIndices: text =>
+        
+        indices = []
+        
+        ⮐ indices if empty @items
+        
+        if empty text
+            for item,idx in @items
+                indices.push idx
+            ⮐ indices
+            
+        fuzz    = new krzl values:@items extract:@extract
+        matches = fuzz.filter text
+        
+        for item in matches
+            indices.push @items.indexOf(item)
+            
+        indices.sort (a b) -> a - b
+        indices
+        
+    selectIndex: index =>
+        
+        ⮐  if not (0 <= index < @state.s.lines.length)
+        
+        @state.selectLine index
+        @state.setMainCursor 0 index
+        
+    selectFirstMatch: text =>
+        
+        indices = @matchIndices text
+        
+        ⮐  if empty indices
+        @selectIndex indices[0]
+        
+    selectMatch: direction =>
+        
+        indices = @matchIndices @input.current()
+        
+        ⮐  if empty indices
+        
+        current = @currentIndex()
+        
+        if direction < 0
+            for index in indices.reverse()
+                if index < current
+                    @selectIndex index
+                    ⮐  
+        else
+            for index in indices
+                if index > current
+                    @selectIndex index
+                    ⮐  
+                    
     onInputAction: action text =>
         
         if action == 'change'
-            @filter text
-            @state.selectLine 0
-            @state.setMainCursor 0 0
+            @selectFirstMatch text
         
     toggleFilter: =>
         
@@ -113,11 +159,33 @@ use ../menu         ◆ choices
                 @hideFilter()
                 ⮐ true
                 
-            @input.grabFocus() if not @input.hasFocus()
-            
-            if @input.onKey key event
+            if event.combo == 'tab'
+                if @input.hasFocus()
+                    @grabFocus()
+                else
+                    @input.grabFocus()
                 ⮐ true
                 
+            if @input.hasFocus()
+                
+                if event.combo == 'up'
+                    @selectMatch(-1)
+                    ⮐ true
+                    
+                if event.combo == 'down'
+                    @selectMatch(1)
+                    ⮐ true
+                    
+                if @input.onKey key event
+                    ⮐ true
+                    
+                ⮐ super key event
+                
+            if event.char
+                @input.grabFocus()
+                if @input.onKey key event
+                    ⮐ true
+                    
             ⮐ super key event
             
         if event.char
