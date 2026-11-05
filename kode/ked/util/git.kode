@@ -6,6 +6,8 @@ use child_process
 
     @statusRequests: {}
     @statusCache: {}
+    @statusTimers: {}
+    @statusDelay: 150
 
     @: ->
         
@@ -21,18 +23,29 @@ use child_process
         if valid gitDir and gitDir not in @gitDirs
             @gitDirs.push slash.path(gitDir '.git')
                 
-    # triggers a git status update if files in .git/refs/heads change to reflect repository changes made externally
+    # refresh the status when anything in a known repository changes
 
     onFileChange: info =>
         ⮐ if slash.file(info.path) == 'ked.log'
 
         for gitDir in @gitDirs
 
-            if info.path.startsWith gitDir
-                if slash.dir(info.path).endsWith('.git/refs/heads')
-                    if slash.name(info.path) in ['master' 'main']
-                        git.status slash.dir(gitDir)
-                        ⮐ 
+            root = slash.dir gitDir
+
+            if root == '/' or info.path.startsWith(root + '/')
+                git.scheduleStatus root
+
+    @scheduleStatus: root ->
+
+        clearTimeout git.statusTimers[root] if git.statusTimers[root]
+
+        git.statusTimers[root] = setTimeout (=> git.runStatus root) git.statusDelay
+
+    @runStatus: root ○->
+
+        delete git.statusTimers[root]
+
+        ○ git.status root
 
     @dir: path ○-> ○ nfs.git path
     

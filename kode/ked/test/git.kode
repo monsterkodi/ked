@@ -1,0 +1,58 @@
+
+use fs
+use child_process
+use ../../kxk ▪ slash sleep post
+use ../util ◆ git
+
+waitFor = (cond) ○->
+
+    n = 0
+    while n < 100
+        ⮐ true if cond()
+        ○ sleep 10
+        n += 1
+    false
+
+▸ git
+
+  ▸ file changes refresh git status
+
+        repo = '/tmp/opencode/ked-git-status'
+        file = slash.path repo 'a.txt'
+        other = slash.path repo 'b.txt'
+
+        fs.rmSync repo recursive:true force:true
+        fs.mkdirSync repo recursive:true
+        child_process.execSync 'git init -q', cwd:repo
+        fs.writeFileSync file 'hello'
+
+        statuses = []
+        post.on 'git.status' (status) -> statuses.push status if status.gitDir == repo
+
+        g = new git
+        g.gitDirs.push slash.path(repo '.git')
+
+        post.emit 'file.change' path:file change:'modify'
+        ○ waitFor -> statuses.length > 0
+
+        added = statuses[0].files[file]
+
+        fs.renameSync file other
+        post.emit 'file.change' path:other oldPath:file change:'rename'
+        ○ waitFor -> statuses.length > 1
+
+        renamed = statuses[statuses.length-1].files
+
+        fs.rmSync other
+        post.emit 'file.change' path:other change:'delete'
+        ○ waitFor -> statuses.length > 2
+
+        deleted = statuses[statuses.length-1].files
+
+        g.gitDirs = []
+        fs.rmSync repo recursive:true force:true
+
+        added ▸ 'added'
+        renamed[other] ▸ 'added'
+        (renamed[file]?) ▸ false
+        Object.keys(deleted).length ▸ 0
