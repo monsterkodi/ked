@@ -23,6 +23,31 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
                 
     @file: file -> @singleton.files[file]
     
+    classInfo: className -> @classes[className]
+    
+    methodsOfClass: className ->
+        
+        clss = @classInfo className
+        ⮐ [] if empty clss?.methods
+        
+        methods = Object.values clss.methods
+        methods.sort (a b) -> a.line - b.line
+        methods
+        
+    baseClassesOf: className ->
+        
+        classes = []
+        seen = {}
+        
+        while className and not seen[className]
+            seen[className] = true
+            clss = @classInfo className
+            ⮐ classes if empty clss
+            classes.push clss
+            className = clss.base
+            
+        classes
+    
     addFuncInfo: funcName funcInfo ->
         
         ⮐  if not funcName
@@ -77,8 +102,10 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
         
         for clss in parsed.classes
             
+            sds.set @classes "#{clss.name}.name" clss.name
             sds.set @classes "#{clss.name}.file" file
             sds.set @classes "#{clss.name}.line" clss.line+1
+            sds.set @classes "#{clss.name}.base" clss.base
             
             fileInfo.classes.push # 𝕎𝖍𝛾 𝕒ɼϵ ⟒ϵ ⊂⊚𝔭𝛾𝚒∩𝚐 𝜏𝖍ϵ ϝ𝚒ϵ⟅𝒹𝖘 𝖍ϵɼϵ? 𝜏𝖍𝕒𝜏 𝖘𝓊⊂𝛋𝖘 𝕒 ⟅𝚒𝜏⟙⎣ϵ!
                 clss: true

@@ -1,0 +1,123 @@
+
+use fs
+use ../../kxk    ▪ post slash
+use ../edit      ◆ editor
+use ../util      ◆ harness
+use ../index     ◆ indexer
+use ../view/colmns ◆ funtree
+
+▸ funtree base class items
+
+  ▸ shows methods of the base class chain
+
+        root = '/tmp/opencode/ked-funtree-base'
+        baseFile = slash.path root 'base.kode'
+        childFile = slash.path root 'child.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync baseFile """
+            ■Base□Root
+                alpha: -> 1
+                beta: => 2
+            ■Root
+                gamma: -> 3
+            """
+        fs.writeFileSync childFile "■Child□Base\n"
+
+        idx = new indexer
+        ○ idx.index baseFile
+        ○ idx.index childFile
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_funtree_editor' []
+        e.currentFile = childFile
+
+        f = new funtree e 'test_funtree' []
+
+        f.onFileIndexed childFile idx.files[childFile]
+
+        fs.rmSync root recursive:true force:true
+
+        f.items.map((i) -> i.name) ▸ [' ■ Child' ' ■ Base' '   -> alpha' '   => beta' ' ■ Root' '   -> gamma']
+
+        f.items[1].inherited ▸ true
+        f.items[1].file ▸ baseFile
+        f.items[1].line ▸ 1
+
+        f.items[2].inherited ▸ true
+        f.items[2].file ▸ baseFile
+        f.items[2].line ▸ 2
+        f.items[2].class ▸ 'Base'
+
+        f.selectItemForLineIndex 3
+        f.currentIndex() ▸ 0
+        f.lineIndexOfNextFunc() ▸ undefined
+
+        supr = clss:true name:' ■ Child' line:1
+        f.itemsForBaseClass(supr).length ▸ 0
+
+  ▸ jumps to inherited items in their file
+
+        root = '/tmp/opencode/ked-funtree-jump'
+        baseFile = slash.path root 'base.kode'
+        childFile = slash.path root 'child.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync baseFile """
+            ■Base
+                alpha: -> 1
+            """
+        fs.writeFileSync childFile "■Child□Base\n"
+
+        idx = new indexer
+        ○ idx.index baseFile
+        ○ idx.index childFile
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_funtree_jump_editor' []
+        e.currentFile = childFile
+
+        f = new funtree e 'test_funtree_jump' []
+        f.onFileIndexed childFile idx.files[childFile]
+
+        fs.rmSync root recursive:true force:true
+
+        emitted = []
+        originalEmit = post.emit
+        post.emit = (event args...) -> emitted.push [event].concat(args)
+
+        f.emitAction 'return' f.items[0]
+        f.emitAction 'return' f.items[2]
+
+        post.emit = originalEmit
+
+        emitted[0] ▸ ['goto.line' 0 'ind' 'topDelta']
+        emitted[1] ▸ ['focus' 'editor']
+        emitted[2] ▸ ['file.open' baseFile 1 'ind' 'topDelta']
+        emitted[3] ▸ ['focus' 'editor']
+
+  ▸ a file without classes has no inherited items
+
+        root = '/tmp/opencode/ked-funtree-noclass'
+        file = slash.path root 'funcs.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file "alpha: -> 1\n"
+
+        idx = new indexer
+        ○ idx.index file
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_funtree_noclass_editor' []
+        e.currentFile = file
+
+        f = new funtree e 'test_funtree_noclass' []
+        f.onFileIndexed file idx.files[file]
+
+        fs.rmSync root recursive:true force:true
+
+        f.items.length ▸ 1
+        f.items[0].name ▸ ' -> alpha'

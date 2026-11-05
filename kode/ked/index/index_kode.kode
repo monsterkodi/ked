@@ -64,6 +64,7 @@ maskStrings = (text) ->
                         funcInfo = 
                             line:   li
                             name:   methodName
+                            method: methodName
                             class:  currentClass
                             async:  async
                             bound:  bound

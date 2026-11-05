@@ -2,6 +2,7 @@
 use ../../../kxk    ▪ post slash nfs
 use ../../theme     ◆ color theme icons
 use ../../edit/tool ◆ belt
+use ../../index     ◆ indexer
 use ../menu         ◆ choices 
 
 SYMBOL = 
@@ -86,18 +87,31 @@ SYMBOL =
     
         @selectItemForLineIndex @editor.state.mainCursor()[1]
         
+    localItems: => @items.filter (item) -> not item.inherited
+    
     selectItemForLineIndex: li =>
     
-        for item,idx in @items
-            if item.line-1 <= li and (idx >= @items.length-1 or @items[idx+1].line-1 > li)
+        items = @localItems()
+    
+        for item,idx in items
+            if item.line-1 <= li and (idx >= items.length-1 or items[idx+1].line-1 > li)
                 @state.setSelections [belt.rangeOfLine(@state.s.lines idx)]
                 @state.setMainCursor 0 idx
                 ⮐  
                 
     nameOfCurrentFunc:      => @current().name
     lineIndexOfCurrentFunc: => @current().line-1
-    lineIndexOfNextFunc:    => @items[@currentIndex()+1]?.line-1 
-    lineIndexOfPrevFunc:    => @items[@currentIndex()-1]?.line-1
+    lineIndexOfNextFunc:    => 
+    
+        item = @localItems()[@currentIndex()+1]
+        ⮐  if empty item
+        item.line-1
+        
+    lineIndexOfPrevFunc:    => 
+    
+        item = @localItems()[@currentIndex()-1]
+        ⮐  if empty item
+        item.line-1
     
     lineIndexForFunc: func => 
     
@@ -162,9 +176,58 @@ SYMBOL =
         
     itemsForBaseClass: supr =>
         
+        ⮐ [] if empty supr
         ⮐ [] if empty supr.base
-        dbg supr
-        []
+        ⮐ [] if empty indexer.singleton
+        
+        items = []
+        
+        for clss in indexer.singleton.baseClassesOf supr.base
+            
+            items.push
+                clss:       true
+                name:       ' ' + SYMBOL.clss + ' ' + clss.name
+                line:       clss.line
+                file:       clss.file
+                inherited:  true
+                
+            funcs = clone indexer.singleton.methodsOfClass clss.name
+            
+            for func in funcs
+                if func.test
+                    func.name = ' ' + belt.reindent(4 2 func.name)
+                else
+                    if func.async
+                        if func.bound
+                            symbol = SYMBOL.async_bound
+                        else
+                            symbol = SYMBOL.async_unbound
+                    else
+                        if func.bound
+                            symbol = SYMBOL.bound
+                        else
+                            if func.md
+                                symbol = "#"
+                            else
+                                symbol = SYMBOL.unbound
+                            
+                    name = func.name
+                    name = '@' + name if func.static
+                    indt = func.class ? '   ' : ' '
+                    func.name = indt + symbol + ' ' + name
+                    
+                func.file ?= clss.file
+                func.inherited = true
+                items.push func
+                
+        items
+        
+    jumpTo: choice =>
+        
+        if choice.inherited and not slash.samePath(choice.file @editor.currentFile)
+            post.emit 'file.open' choice.file choice.line-1 'ind' 'topDelta'
+        else
+            post.emit 'goto.line' choice.line-1 'ind' 'topDelta'
         
     emitAction: action choice event  ->
     
@@ -176,33 +239,36 @@ SYMBOL =
         switch action
         
             'space'
-                post.emit 'goto.line' choice.line-1 'ind' 'topDelta'
+                @jumpTo choice
+                @grabFocus()
                 ⮐  
         
             'right'
             
                 @selectNext()
                 choice = @choiceAtRow @currentIndex()
-                post.emit 'goto.line' choice.line-1 'ind' 'topDelta'
+                @jumpTo choice
+                @grabFocus()
                 ⮐  
                 
             'left'
             
                 @selectPrev()
                 choice = @choiceAtRow @currentIndex()
-                post.emit 'goto.line' choice.line-1 'ind' 'topDelta'
+                @jumpTo choice
+                @grabFocus()
                 ⮐  
                 
             'click'
             'return'
             
-                post.emit 'goto.line' choice.line-1 'ind' 'topDelta'
+                @jumpTo choice
                 post.emit 'focus' 'editor'
                 ⮐  
                 
             'drag'
             
-                post.emit 'goto.line' choice.line-1 'ind' 'topDelta'
+                @jumpTo choice
                 ⮐  
                  
         super action choice event

@@ -201,3 +201,35 @@ use ../index ◆ index_kode index_noon index_json index_utils indexer
         fs.rmSync root recursive:true force:true
 
         (valid idx.files[file]) ▸ true
+
+  ▸ classes expose their base and methods
+
+        root = '/tmp/opencode/ked-index-base'
+        file = slash.path root 'base.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file """
+            ■Root
+                gamma: -> 3
+            ■Base□Root
+                alpha: -> 1
+                beta: => 2
+            ■Child□Base
+            """
+
+        idx = new indexer
+        ○ idx.index file
+
+        fs.rmSync root recursive:true force:true
+
+        idx.classInfo('Base').file ▸ file
+        idx.classInfo('Base').line ▸ 3
+        idx.classInfo('Base').base ▸ 'Root'
+        idx.classInfo('Child').base ▸ 'Base'
+
+        idx.methodsOfClass('Base').map((f) -> f.name) ▸ ['alpha' 'beta']
+        idx.methodsOfClass('Child').length ▸ 0
+        idx.methodsOfClass('Nope').length ▸ 0
+
+        idx.baseClassesOf('Child').map((c) -> c.name) ▸ ['Child' 'Base' 'Root']
