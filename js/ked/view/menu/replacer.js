@@ -1,10 +1,13 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
 
 var replacer
 
 import kxk from "../../../kxk.js"
 let post = kxk.post
-let slash = kxk.slash
+
+import color from "../../theme/color.js"
+
+import input from "../base/input.js"
 
 import searcher from "./searcher.js"
 
@@ -19,6 +22,16 @@ replacer = (function ()
         this.name = name
     
         this["onFileLoaded"] = this["onFileLoaded"].bind(this)
+        this["onReplaceInputAction"] = this["onReplaceInputAction"].bind(this)
+        this["onMouse"] = this["onMouse"].bind(this)
+        this["onKey"] = this["onKey"].bind(this)
+        this["moveFocus"] = this["moveFocus"].bind(this)
+        this["drawInputFrame"] = this["drawInputFrame"].bind(this)
+        this["drawFrame"] = this["drawFrame"].bind(this)
+        this["drawChoices"] = this["drawChoices"].bind(this)
+        this["arrange"] = this["arrange"].bind(this)
+        this["setColor"] = this["setColor"].bind(this)
+        this["show"] = this["show"].bind(this)
         replacer.__super__.constructor.call(this,this.screen,this.editor,this.name)
         if (this.name === 'replacer')
         {
@@ -27,6 +40,170 @@ replacer = (function ()
         }
         this.sfils = []
         this.searchId = 0
+        this.replaceInput = new input(this.screen,`${this.name}_replace_input`)
+        this.replaceInput.setColor('bg_blur',this.color.bg)
+        this.replaceInput.on('action',this.onReplaceInputAction)
+    }
+
+    replacer.prototype["show"] = async function (text, files)
+    {
+        var searching
+
+        searching = replacer.__super__.show.call(this,text,files)
+        if (!_k_.empty(this.input.current()))
+        {
+            this.replaceInput.grabFocus()
+        }
+        return await searching
+    }
+
+    replacer.prototype["setColor"] = function (key, clr)
+    {
+        replacer.__super__.setColor.call(this,key,clr)
+    
+        var _37_25_
+
+        if (key === 'bg')
+        {
+            return (this.replaceInput != null ? this.replaceInput.setColor('bg_blur',this.color.bg) : undefined)
+        }
+    }
+
+    replacer.prototype["arrange"] = function ()
+    {
+        replacer.__super__.arrange.call(this)
+    
+        var h, mid, w, x, y
+
+        var _a_ = this.arrangeRect(); x = _a_[0]; y = _a_[1]; w = _a_[2]; h = _a_[3]
+
+        mid = parseInt(w / 2)
+        this.input.layout(x + 2,y + 1,mid - 4,1)
+        return this.replaceInput.layout(x + mid + 2,y + 1,w - mid - 4,1)
+    }
+
+    replacer.prototype["drawChoices"] = function ()
+    {
+        this.input.draw()
+        this.replaceInput.draw()
+        return this.choices.draw()
+    }
+
+    replacer.prototype["drawFrame"] = function ()
+    {
+        var mid, sy
+
+        sy = 0
+        if (this.input.visible())
+        {
+            mid = parseInt(this.cells.cols / 2)
+            this.drawInputFrame(this.input,0,mid - 1)
+            this.drawInputFrame(this.replaceInput,mid,-1)
+            sy = 2
+        }
+        return this.cells.draw_rounded_border(0,sy,-1,-1,{fg:this.color.bg,zLayer:1001})
+    }
+
+    replacer.prototype["drawInputFrame"] = function (input, x1, x2)
+    {
+        var inner, outer
+
+        if (this.cells.cols < 2)
+        {
+            return
+        }
+        outer = (input.hasFocus() ? color.brighten(this.color.bg) : this.color.bg)
+        inner = (input.hasFocus() ? input.color.bg_focus : input.color.bg_blur)
+        this.cells.draw_rounded_border(x1,0,x2,2,{fg:outer})
+        this.cells.draw_vertical_padding(x1 + 1,1,outer,inner)
+        return this.cells.draw_vertical_padding(x2 - 1,1,inner,outer)
+    }
+
+    replacer.prototype["moveFocus"] = function ()
+    {
+        if (this.input.hasFocus())
+        {
+            this.replaceInput.grabFocus()
+            return this.replaceInput.selectAll()
+        }
+        else if (this.replaceInput.hasFocus())
+        {
+            this.input.grabFocus()
+            return this.input.selectAll()
+        }
+        else
+        {
+            this.input.grabFocus()
+            return this.input.selectAll()
+        }
+    }
+
+    replacer.prototype["onKey"] = function (key, event)
+    {
+        var result
+
+        if (this.hidden())
+        {
+            return
+        }
+        switch (event.combo)
+        {
+            case 'tab':
+            case 'shift+tab':
+                return this.moveFocus()
+
+            case 'esc':
+                return this.onEscape()
+
+        }
+
+        if (this.replaceInput.hasFocus())
+        {
+            if (result = this.replaceInput.onKey(key,event))
+            {
+                this.autoHide()
+                return result
+            }
+            if (_k_.in(event.combo,['up','down']))
+            {
+                if (event.combo === 'down')
+                {
+                    this.choices.grabFocus()
+                }
+                this.autoHide()
+                return true
+            }
+            return true
+        }
+        return replacer.__super__.onKey.call(this,key,event)
+    }
+
+    replacer.prototype["onMouse"] = function (event)
+    {
+        var ret
+
+        if (this.hidden())
+        {
+            return
+        }
+        ret = this.replaceInput.onMouse(event)
+        if ((ret != null ? ret.redraw : undefined))
+        {
+            return ret
+        }
+        return replacer.__super__.onMouse.call(this,event)
+    }
+
+    replacer.prototype["onReplaceInputAction"] = function (action, text)
+    {
+        switch (action)
+        {
+            case 'up':
+            case 'down':
+                return this.choices.moveSelection(action)
+
+        }
+
     }
 
     replacer.prototype["onFileLoaded"] = function (file)
@@ -43,5 +220,5 @@ replacer = (function ()
 
 export default replacer;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVwbGFjZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvbWVudS9yZXBsYWNlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsVUFBQTtJQUFNO0lBQUs7O09BQ0wsZUFBQTs7O0FBQ2xCLFlBQUQ7O3lCQUFVO2FBR04sVUFBSSxRQUFRLFFBQVE7O1FBQWpCO1FBQVE7UUFBUTs7O2lEQUVULEtBQUMsT0FBTyxLQUFDLE9BQU8sS0FBQztZQUVwQixLQUFDLFNBQVE7O1lBQ1IsS0FBSyxHQUFHLGdCQUFnQixLQUFDO1lBQ3pCLEtBQUssR0FBRyxjQUFnQixLQUFDOztRQUU3QixLQUFDO1FBQ0QsS0FBQyxXQUFXOzs7d0JBRWhCLDJCQUFjOztZQUVMLEtBQUM7Ozs7ZUFFTixLQUFDOzs7V0FsQlI7OztlQTZCTSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVwbGFjZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvbWVudS9yZXBsYWNlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsVUFBQTtJQUFNOztPQUNELFlBQVI7O09BQ1EsWUFBWDs7T0FDVyxlQUFBOzs7QUFDakIsWUFBRDs7eUJBQVU7YUFHTixVQUFJLFFBQVEsUUFBUTs7UUFBakI7UUFBUTtRQUFROzs7Ozs7Ozs7Ozs7O2lEQUVULEtBQUMsT0FBTyxLQUFDLE9BQU8sS0FBQztZQUVwQixLQUFDLFNBQVE7O1lBQ1IsS0FBSyxHQUFHLGdCQUFnQixLQUFDO1lBQ3pCLEtBQUssR0FBRyxjQUFnQixLQUFDOztRQUU3QixLQUFDO1FBQ0QsS0FBQyxXQUFXO1FBRVosS0FBQyxtQkFBbUIsTUFBTSxLQUFDLFVBQVUsS0FBQztRQUN0QyxLQUFDLGFBQWEsU0FBUyxVQUFVLEtBQUMsTUFBTTtRQUN4QyxLQUFDLGFBQWEsR0FBRyxTQUFTLEtBQUM7Ozt3QkFFL0IseUJBQU0sTUFBSzs7OztRQUVQLDhDQUFrQixLQUFLO3VCQUVnQixLQUFDLE1BQU07O1lBQTlDLEtBQUMsYUFBYTs7cUJBRVo7Ozt3QkFFTix1QkFBVSxLQUFJOzs4Q0FFSixJQUFJOzs7O1lBRVAsUUFBTzs7b0JBQ04sS0FBQyx1QkFBRCxLQUFDLGFBQWMsU0FBUyxVQUFVLEtBQUMsTUFBTTs7Ozt3QkFFakQ7Ozs7OztrQkFJZ0IsS0FBQyxlQUFaLFlBQUUsWUFBRSxZQUFFOztRQUVQLGVBQVUsSUFBRTtRQUVaLEtBQUMsTUFBTSxPQUFjLElBQUUsRUFBTSxJQUFFLEVBQUcsTUFBSSxFQUFJO2VBQzFDLEtBQUMsYUFBYSxPQUFPLElBQUUsTUFBSSxFQUFFLElBQUUsRUFBRyxJQUFFLE1BQUksRUFBRTs7O3dCQUU5Qzs7UUFFSSxLQUFDLE1BQU07UUFDUCxLQUFDLGFBQWE7ZUFDZCxLQUFDLFFBQVE7Ozt3QkFFYjs7OztRQUVJLEtBQUs7WUFFRixLQUFDLE1BQU07O1lBRU4sZUFBVSxLQUFDLE1BQU0sT0FBSztZQUV0QixLQUFDLGVBQWUsS0FBQyxNQUFhLEVBQUksTUFBSTtZQUN0QyxLQUFDLGVBQWUsS0FBQyxhQUFhLElBQUk7WUFFbEMsS0FBSzs7ZUFFVCxLQUFDLE1BQU0sb0JBQW9CLEVBQUUsR0FBRyxHQUFHLElBQUcsR0FBRyxLQUFDLE1BQU0sR0FBRyxPQUFROzs7d0JBRS9ELDZCQUFnQixPQUFNLElBQUc7Ozs7WUFFaEIsS0FBQyxNQUFNLE9BQU87Ozs7UUFFbkIsU0FBUSxNQUFNLGFBQWEsTUFBTSxTQUFTLEtBQUMsTUFBTSxNQUFNLEtBQUMsTUFBTTtRQUM5RCxTQUFRLE1BQU0sYUFBYSxNQUFNLE1BQU0sV0FBVyxNQUFNLE1BQU07UUFFOUQsS0FBQyxNQUFNLG9CQUFvQixHQUFHLEVBQUUsR0FBRyxHQUFFLEdBQUc7UUFFeEMsS0FBQyxNQUFNLHNCQUFzQixLQUFHLEVBQUUsRUFBRSxNQUFNO2VBQzFDLEtBQUMsTUFBTSxzQkFBc0IsS0FBRyxFQUFFLEVBQUUsTUFBTTs7O3dCQUU5Qzs7WUFFTyxLQUFDLE1BQU07O1lBQ04sS0FBQyxhQUFhO21CQUNkLEtBQUMsYUFBYTs7aUJBQ1YsS0FBQyxhQUFhOztZQUNsQixLQUFDLE1BQU07bUJBQ1AsS0FBQyxNQUFNOzs7O1lBRVAsS0FBQyxNQUFNO21CQUNQLEtBQUMsTUFBTTs7Ozt3QkFFZixvQkFBTyxLQUFJOzs7O1lBRUYsS0FBQzs7OztnQkFFQyxNQUFNOztpQkFDVDtpQkFBTTt1QkFBZ0IsS0FBQzs7aUJBQ3ZCO3VCQUFVLEtBQUM7Ozs7WUFFWixLQUFDLGFBQWE7O2dCQUNWLFNBQVMsS0FBQyxhQUFhLE1BQU0sSUFBSTs7Z0JBQ2hDLEtBQUM7dUJBQ0M7O3VCQUNILE1BQU0sT0FBVSxLQUFLOztvQkFDSSxNQUFNLFVBQVM7O29CQUF2QyxLQUFDLFFBQVE7O2dCQUNULEtBQUM7dUJBQ0M7O21CQUNKOztrREFFRSxJQUFJOzs7d0JBRWhCLHNCQUFTOzs7O1lBRUEsS0FBQzs7OztRQUVOLE1BQU0sS0FBQyxhQUFhLFFBQVE7YUFDbkIsY0FBQSxJQUFLOzttQkFBWjs7b0RBRUk7Ozt3QkFFVixtQ0FBc0IsUUFBTzs7Z0JBRWxCOztpQkFDSDtpQkFDQTt1QkFBUyxLQUFDLFFBQVEsY0FBYzs7Ozs7O3dCQUV4QywyQkFBYzs7WUFFTCxLQUFDOzs7O2VBRU4sS0FBQzs7O1dBaElSOzs7ZUEySU0ifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/menu/replacer.kode

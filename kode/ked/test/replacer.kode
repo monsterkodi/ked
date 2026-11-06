@@ -1,0 +1,250 @@
+
+use fs
+use ../../kxk    ▪ slash
+use ../edit      ◆ editor
+use ../util      ◆ harness config
+use ../index     ◆ prjcts
+use ../view/menu ◆ replacer
+
+▸ replacer
+
+  ▸ the input is split into search and replacement fields
+
+        root = '/tmp/opencode/ked-replacer-split'
+        main = slash.path root 'main.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync main 'if a\n'
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[main]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index main
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 0 0 80 30
+        r = new replacer h.screen e
+
+        ○ r.show 'if'
+
+        [x y w h] = r.arrangeRect()
+        mid = int w/2
+
+        r.input.cells.x           ▸ x+2
+        r.replaceInput.cells.x    ▸ x+mid+2
+        r.input.cells.y           ▸ y+1
+        r.replaceInput.cells.y    ▸ y+1
+        r.input.cells.cols        ▸ mid-4
+        r.replaceInput.cells.cols ▸ w-mid-4
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true
+
+  ▸ starting with a search text focuses the replacement field
+
+        root = '/tmp/opencode/ked-replacer-focus'
+        main = slash.path root 'main.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync main 'if a\n'
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[main]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index main
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 0 0 80 30
+        r = new replacer h.screen e
+
+        ○ r.show 'if'
+
+        r.replaceInput.hasFocus() ▸ true
+        r.input.hasFocus()        ▸ false
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true
+
+  ▸ starting without a search text focuses the search field
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 0 0 80 30
+        r = new replacer h.screen e
+
+        ○ r.show ''
+
+        r.input.hasFocus()        ▸ true
+        r.replaceInput.hasFocus() ▸ false
+
+  ▸ tab switches between the search and replacement fields
+
+        root = '/tmp/opencode/ked-replacer-tab'
+        main = slash.path root 'main.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync main 'if a\n'
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[main]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index main
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 0 0 80 30
+        r = new replacer h.screen e
+
+        ○ r.show 'if'
+
+        r.replaceInput.hasFocus() ▸ true
+
+        h.key r 'tab'
+        r.input.hasFocus()        ▸ true
+        r.replaceInput.hasFocus() ▸ false
+
+        h.key r 'tab'
+        r.input.hasFocus()        ▸ false
+        r.replaceInput.hasFocus() ▸ true
+
+        h.key r 'shift+tab'
+        r.input.hasFocus()        ▸ true
+        r.replaceInput.hasFocus() ▸ false
+
+        h.key r 'shift+tab'
+        r.input.hasFocus()        ▸ false
+        r.replaceInput.hasFocus() ▸ true
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true
+
+  ▸ typing goes into the focused replacement field
+
+        root = '/tmp/opencode/ked-replacer-type'
+        main = slash.path root 'main.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync main 'if a\n'
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[main]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index main
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 0 0 80 30
+        r = new replacer h.screen e
+
+        ○ r.show 'if'
+
+        h.type r 'xx'
+
+        r.replaceInput.current() ▸ 'xx'
+        r.input.current()        ▸ 'if'
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true
+
+  ▸ file separators are laid out and drawn with the results
+
+        root = '/tmp/opencode/ked-replacer-separators'
+        main = slash.path root 'main.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync main 'if a\n'
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[main]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index main
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 1 0 79 30
+        r = new replacer h.screen e
+
+        ○ r.show 'if'
+
+        r.arrange()
+
+        r.sfils.length ▸ 1
+
+        for sfil in r.sfils
+            sfil.cells.cols ▸ r.choices.cells.cols
+            sfil.cells.rows ▸ 1
+
+        r.draw()
+
+        row = h.row r.sfils[0].cells.y
+        row.includes 'main.kode' ▸ true
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true
