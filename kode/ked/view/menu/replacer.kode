@@ -188,7 +188,7 @@ use             ◆ replacerfile searcher
             if choice?.type == 'file'
                 ⮐ @toggleFile choice.path
             if choice?.row is num
-                ⮐ @toggleLine choice
+                ⮐ @toggleLine choice (action == 'space')
             ⮐ if action == 'click'
 
         super action choice
@@ -199,11 +199,11 @@ use             ◆ replacerfile searcher
             if sfil.path == path
                 ⮐ sfil.toggle()
 
-    toggleLine: item =>
+    toggleLine: item selectNext =>
 
         item.excluded = not item.excluded
         
-        if item.excluded
+        if selectNext
         
             idx  = @choices.items.indexOf item
             next = idx + 1
