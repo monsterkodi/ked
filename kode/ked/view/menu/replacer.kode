@@ -191,6 +191,19 @@ use             ◆ replacerfile searcher
 
         item.excluded = not item.excluded
         
+        if item.excluded
+        
+            idx  = @choices.items.indexOf item
+            next = idx + 1
+            
+            while next < @choices.items.length
+                nextItem = @choices.items[next]
+                break if nextItem.type == 'file'
+                if nextItem.row is num
+                    @choices.select next
+                    break
+                next += 1
+        
         post.emit 'redraw'
 
     onReplaceInputAction: action text =>

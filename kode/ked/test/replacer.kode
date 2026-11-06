@@ -548,3 +548,70 @@ use ../view/menu ◆ replacer
         config.data = savedConfig
         delete global.ked_session
         fs.rmSync root recursive:true force:true
+
+  ▸ excluding a line moves focus to the next result line
+
+        root = '/tmp/opencode/ked-replacer-line-repeat'
+        main = slash.path root 'main.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync main 'if a\nif b\nif c\n'
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[main]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index main
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 1 0 79 30
+        r = new replacer h.screen e
+
+        ○ r.show 'if'
+
+        lineIndices = []
+
+        for item,idx in r.choices.items
+            if item.row is num and item.type != 'file'
+                lineIndices.push idx
+
+        lineIndices.length ▸ 3
+
+        r.choices.select lineIndices[0]
+
+        first = r.choices.current()
+
+        ○ r.onChoicesAction 'space' first
+
+        first.excluded ▸ true
+        r.choices.currentIndex() ▸ lineIndices[1]
+
+        second = r.choices.current()
+
+        ○ r.onChoicesAction 'space' second
+
+        second.excluded ▸ true
+        r.choices.currentIndex() ▸ lineIndices[2]
+
+        third = r.choices.current()
+
+        ○ r.onChoicesAction 'space' third
+
+        third.excluded ▸ true
+        r.choices.currentIndex() ▸ lineIndices[2]
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true
