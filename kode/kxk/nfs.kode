@@ -293,7 +293,27 @@ import fsp from 'fs/promises'
         hfsPath = stdout.match /^file\s(.*)/
         trim hfsPath[1]
      
+    @trashImmediate: p ->
+        
+        p = slash.untilde p
+        
+        home = slash.home()
+        dirs = [
+            '/tmp'
+            slash.path(home 'tmp')
+            slash.path(home '.local/share/Trash')
+            ]
+        
+        for dir in dirs
+            ⮐ true if p == dir or p.startsWith(dir + '/')
+        
+        false
+    
     @trash: p ○->
+        
+        if NFS.trashImmediate p
+            ○ NFS.remove p
+            ⮐ p
         
         os = process.platform
 

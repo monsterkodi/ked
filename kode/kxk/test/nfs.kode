@@ -128,3 +128,61 @@ use .. ◆ nfs slash
         fs.rmSync root recursive:true force:true
 
         slash.file(dupe) ▸ 'README-copy'
+
+    ▸ trashImmediate selects tmp and trash paths
+
+        nfs.trashImmediate '/tmp/a.txt' ▸ true
+        nfs.trashImmediate '/tmp' ▸ true
+        nfs.trashImmediate '/tmpfoo/a.txt' ▸ false
+
+        nfs.trashImmediate(slash.path(slash.home() 'tmp/a.txt')) ▸ true
+        nfs.trashImmediate(slash.path(slash.home() '.local/share/Trash/files/a.txt')) ▸ true
+        nfs.trashImmediate(slash.path(slash.home() 'other/a.txt')) ▸ false
+
+    ▸ trashing a file in /tmp deletes it
+
+        root = '/tmp/opencode/kxk-nfs-trash-tmp'
+        file = slash.path root 'a.txt'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file 'hello'
+
+        res  =○ nfs.trash file
+        gone =○ nfs.exists file
+
+        fs.rmSync root recursive:true force:true
+
+        res ▸ file
+        (gone?) ▸ false
+
+    ▸ trashing a file in ~/tmp deletes it
+
+        root = slash.path(slash.home() 'tmp' "opencode-nfs-trash-#{Date.now()}")
+        file = slash.path root 'a.txt'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file 'hello'
+
+        res  =○ nfs.trash file
+        gone =○ nfs.exists file
+
+        fs.rmSync root recursive:true force:true
+
+        res ▸ file
+        (gone?) ▸ false
+
+    ▸ trashing a file in the trash deletes it
+
+        file = slash.path slash.home() '.local/share/Trash/files' "opencode-nfs-trash-#{Date.now()}.txt"
+
+        fs.writeFileSync file 'hello'
+
+        res  =○ nfs.trash file
+        gone =○ nfs.exists file
+
+        fs.rmSync file force:true
+
+        res ▸ file
+        (gone?) ▸ false
