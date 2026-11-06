@@ -4,17 +4,8 @@ var replacer
 
 import kxk from "../../../kxk.js"
 let post = kxk.post
-let kseg = kxk.kseg
 let slash = kxk.slash
 
-import belt from "../../edit/tool/belt.js"
-
-import prjcts from "../../index/prjcts.js"
-import kacher from "../../index/kacher.js"
-
-import view from "../base/view.js"
-
-import finder from "./finder.js"
 import searcher from "./searcher.js"
 
 
@@ -25,9 +16,10 @@ replacer = (function ()
     {
         this.screen = screen
         this.editor = editor
+        this.name = name
     
         this["onFileLoaded"] = this["onFileLoaded"].bind(this)
-        replacer.__super__.constructor.call(this,this.screen,this.editor,name)
+        replacer.__super__.constructor.call(this,this.screen,this.editor,this.name)
         if (this.name === 'replacer')
         {
             post.on('replacer.show',this.show)
@@ -51,5 +43,5 @@ replacer = (function ()
 
 export default replacer;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVwbGFjZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvbWVudS9yZXBsYWNlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsVUFBQTtJQUFTO0lBQUs7SUFBSzs7T0FDVixXQUFQOztPQUNPLGFBQVg7T0FBa0IsYUFBbEI7O09BQ1csV0FBZjs7T0FDZSxhQUFBO09BQU8sZUFBQTs7O0FBQzVCLFlBQUQ7O3lCQUFVO2FBR04sVUFBSSxRQUFRLFFBQU8sT0FBSzs7UUFBckI7UUFBUTs7O2lEQUVELEtBQUMsT0FBTyxLQUFDLE9BQU87WUFFbkIsS0FBQyxTQUFROztZQUNSLEtBQUssR0FBRyxnQkFBZ0IsS0FBQztZQUN6QixLQUFLLEdBQUcsY0FBZ0IsS0FBQzs7UUFFN0IsS0FBQztRQUNELEtBQUMsV0FBVzs7O3dCQUVoQiwyQkFBYzs7WUFFTCxLQUFDOzs7O2VBRU4sS0FBQzs7O1dBbEJSOzs7ZUE2Qk0ifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVwbGFjZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvbWVudS9yZXBsYWNlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsVUFBQTtJQUFNO0lBQUs7O09BQ0wsZUFBQTs7O0FBQ2xCLFlBQUQ7O3lCQUFVO2FBR04sVUFBSSxRQUFRLFFBQVE7O1FBQWpCO1FBQVE7UUFBUTs7O2lEQUVULEtBQUMsT0FBTyxLQUFDLE9BQU8sS0FBQztZQUVwQixLQUFDLFNBQVE7O1lBQ1IsS0FBSyxHQUFHLGdCQUFnQixLQUFDO1lBQ3pCLEtBQUssR0FBRyxjQUFnQixLQUFDOztRQUU3QixLQUFDO1FBQ0QsS0FBQyxXQUFXOzs7d0JBRWhCLDJCQUFjOztZQUVMLEtBQUM7Ozs7ZUFFTixLQUFDOzs7V0FsQlI7OztlQTZCTSJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/menu/replacer.kode

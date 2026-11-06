@@ -10,7 +10,7 @@ use ./view/base   ◆ view input
 use ./view/title  ◆ title 
 use ./view/editor ◆ fileeditor
 use ./view/screen ◆ screen ttio
-use ./view/menu   ◆ context menu macro finder searcher differ vinder
+use ./view/menu   ◆ context menu macro finder searcher replacer differ vinder
 use ./view/colmns ◆ browse dircol funcol quicky droop saveas
 use child_process ▪ spawn exec
 
@@ -61,6 +61,7 @@ use child_process ▪ spawn exec
         @funcol   = new funcol     @screen @editor  ['scroll' 'knob']
         @finder   = new finder     @screen @editor
         @searcher = new searcher   @screen @editor
+        @replacer = new replacer   @screen @editor
         @vinder   = new vinder     @screen @editor
         @differ   = new differ     @screen @editor
         @title    = new title      @screen @editor
@@ -90,9 +91,9 @@ use child_process ▪ spawn exec
         # post.on 'focus'         (name) -> log "focus: '#{name}'"
         
         @contextHandlers = [                                                                                               @editor         @dircol @funcol ]
-        @mouseHandlers   = [ @input @context @finder @searcher @vinder @differ @quicky @browse @saveas @droop @menu @macro @editor @title  @dircol @funcol ]
-        @wheelHandlers   = [                 @finder @searcher @vinder @differ @quicky @browse @saveas @droop       @macro @editor         @dircol @funcol ]
-        @keyHandlers     = [ @input @context @finder @searcher @vinder @differ @quicky @browse @saveas @droop @menu @macro @editor         @dircol @funcol ]
+        @mouseHandlers   = [ @input @context @finder @searcher @replacer @vinder @differ @quicky @browse @saveas @droop @menu @macro @editor @title  @dircol @funcol ]
+        @wheelHandlers   = [                 @finder @searcher @replacer @vinder @differ @quicky @browse @saveas @droop       @macro @editor         @dircol @funcol ]
+        @keyHandlers     = [ @input @context @finder @searcher @replacer @vinder @differ @quicky @browse @saveas @droop @menu @macro @editor         @dircol @funcol ]
         
         @t.on 'key'    @onKey
         @t.on 'mouse'  @onMouse
@@ -670,6 +671,7 @@ use child_process ▪ spawn exec
             'shift+cmd+p' 'shift+ctrl+p' ➜ ⮐ @quicky.showRecentFiles @currentFile
             'cmd+f' 'ctrl+f'             ➜ ⮐ @showFinderOrSearcher()
             'shift+cmd+f' 'shift+ctrl+f' ➜ ⮐ @searcher.show()
+            'shift+cmd+r' 'shift+ctrl+r' ➜ ⮐ @replacer.show()
             'alt+o'                      ➜ ⮐ @editor.jumpToCounterpart()
             'alt+,'                      ➜ ⮐ @goToPrevFunc()
             'alt+.'                      ➜ ⮐ @goToNextFunc()
@@ -696,15 +698,15 @@ use child_process ▪ spawn exec
         
     goToPrevFunc: =>
     
-        if @searcher.visible()
-            ⮐ @searcher.selectPrevFileHeader()
+        if @searcher.visible() ➜ ⮐ @searcher.selectPrevFileHeader()
+        if @replacer.visible() ➜ ⮐ @replacer.selectPrevFileHeader()
             
         @editor.singleCursorAtLine @funcol.funtree.lineIndexOfPrevFunc()
         
     goToNextFunc: =>
     
-        if @searcher.visible()
-            ⮐ @searcher.selectNextFileHeader()
+        if @searcher.visible() ➜ ⮐ @searcher.selectNextFileHeader()
+        if @replacer.visible() ➜ ⮐ @replacer.selectNextFileHeader()
             
         @editor.singleCursorAtLine @funcol.funtree.lineIndexOfNextFunc()
         
@@ -794,6 +796,7 @@ use child_process ▪ spawn exec
         @droop.draw()
         @finder.draw()
         @searcher.draw()
+        @replacer.draw()
         @vinder.draw()
         @differ.draw()
         @context.draw()

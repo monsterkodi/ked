@@ -1,15 +1,12 @@
 
-use ../../../kxk    ▪ post kseg slash
-use ../../edit/tool ◆ belt
-use ../../index     ◆ prjcts kacher
-use ../base         ◆ view
-use                 ◆ finder searcher
+use ../../../kxk ▪ post slash
+use              ◆ searcher
 ■replacer□searcher
     # replaces in multiple files provided by index▸prjcts
     
-    @: @screen @editor name='replacer' ->
+    @: @screen @editor @name='replacer' ->
 
-        super @screen @editor name
+        super @screen @editor @name
         
         if @name == 'replacer'
             post.on 'replacer.show' @show
