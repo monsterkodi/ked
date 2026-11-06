@@ -2,6 +2,7 @@
 use ../../../kxk    ▪ post slash
 use ../../edit/tool ◆ belt
 use ../../theme     ◆ color theme icons
+use ../../util      ◆ config
 use ../base         ◆ view knob crumbs input
 use ../menu         ◆ context
 use                 ◆ dirtree
@@ -13,6 +14,7 @@ use                 ◆ dirtree
         @isVisible = false
         @active    = true
         
+        @contextItem = null
         @pointerType = 'pointer'
         
         @knob    = new knob    screen "#{@name}_knob"
@@ -53,9 +55,31 @@ use                 ◆ dirtree
     
     @isInSystemRoot: item -> valid item and slash.samePath(slash.dir(item.path), '/')
     
-    @contextItems: item root ->
+    @allowedRoots: -> config.data?.dirtree?.allow ? []
+    
+    @isAllowedPath: path allow ->
+        
+        ⮐ false if empty path
+        
+        path = slash.absolute path
+        
+        for part in slash.pathlist path
+            for root in allow ? []
+                ⮐ true if part == slash.absolute(root)
+        
+        false
+    
+    @itemAtEvent: event dirtree ->
+        
+        [col row] = dirtree.eventPos event
+        ⮐ null if not dirtree.cells.inside(col, row)
+        
+        dirtree.choiceAtRow row + dirtree.state.s.view[1]
+    
+    @contextItems: item root allow ->
         
         ⮐ [] if empty item
+        ⮐ [] if not @isAllowedPath(item.path, allow)
         ⮐ [] if @isParentItem item
         
         create = [icons.dir_open + ' ']
@@ -70,9 +94,10 @@ use                 ◆ dirtree
             '\uF014 ' 
             ]
     
-    @contextActionAllowed: item root choice ->
+    @contextActionAllowed: item root choice allow ->
         
         ⮐ false if empty item
+        ⮐ false if not @isAllowedPath(item.path, allow)
         ⮐ false if @isParentItem item
         ⮐ false if @isInSystemRoot item
         
@@ -141,8 +166,14 @@ use                 ◆ dirtree
         
     onContext: event =>
 
-        current = @dirtree.current()
-        items = dircol.contextItems current @dirtree.currentRoot
+        item = dircol.itemAtEvent event @dirtree
+        
+        if empty item
+            @dirtree.state.deselect()
+            item = {type:'dir' path:@dirtree.currentRoot}
+        
+        @contextItem = item
+        items = dircol.contextItems item @dirtree.currentRoot dircol.allowedRoots()
 
         ⮐ true if empty items
 
@@ -150,9 +181,9 @@ use                 ◆ dirtree
 
     onContextChoice: choice ○=>
     
-        if current = @dirtree.current()
+        if current = @contextItem
             
-            ⮐ if not dircol.contextActionAllowed(current, @dirtree.currentRoot, choice)
+            ⮐ if not dircol.contextActionAllowed(current, @dirtree.currentRoot, choice, dircol.allowedRoots())
             
             switch choice
             

@@ -176,17 +176,35 @@ waitForRoot = (d root) ○->
         root = '/tmp/opencode/ked-dirtree-context'
         parent = {path:'/tmp/opencode' type:'dir' tilde:'  ..'}
         sub = {path:slash.path(root,'sub') type:'dir'}
+        outside = {path:'/opt/elsewhere' type:'dir'}
+        allow = [root]
         create = icons.dir_open + ' '
 
-        dircol.isParentItem(parent) ▸ true
-        dircol.contextItems(parent root) ▸ []
-        dircol.contextItems({path:'/tmp' type:'dir'} root) ▸ []
-        dircol.contextItems({path:'/' type:'dir'} root) ▸ [create]
-        dircol.contextItems({path:root type:'dir'} root) ▸ [create]
-        dircol.contextItems(sub root) ▸ ['\uF044 ' '\uF0C5 ' create '\uF014 ']
+        dircol.isAllowedPath('~/s/x', ['~/s']) ▸ true
+        dircol.isAllowedPath(outside.path allow) ▸ false
 
-        dircol.contextActionAllowed(parent root create) ▸ false
-        dircol.contextActionAllowed({path:'/tmp' type:'dir'} root create) ▸ false
-        dircol.contextActionAllowed({path:root type:'dir'} root icons.dir_open) ▸ true
-        dircol.contextActionAllowed({path:root type:'dir'} root 'rename') ▸ false
-        dircol.contextActionAllowed(sub root create) ▸ true
+        dircol.isParentItem(parent) ▸ true
+        dircol.contextItems(parent root allow) ▸ []
+        dircol.contextItems(outside root allow) ▸ []
+        dircol.contextItems({path:'/tmp' type:'dir'} root ['/tmp']) ▸ []
+        dircol.contextItems({path:'/' type:'dir'} root ['/']) ▸ [create]
+        dircol.contextItems({path:root type:'dir'} root allow) ▸ [create]
+        dircol.contextItems(sub root allow) ▸ ['\uF044 ' '\uF0C5 ' create '\uF014 ']
+
+        dircol.contextActionAllowed(parent root create allow) ▸ false
+        dircol.contextActionAllowed(outside root create allow) ▸ false
+        dircol.contextActionAllowed({path:root type:'dir'} root icons.dir_open allow) ▸ true
+        dircol.contextActionAllowed({path:root type:'dir'} root 'rename' allow) ▸ false
+        dircol.contextActionAllowed(sub root create allow) ▸ true
+
+        event = {pos:[3 5]}
+        dirtree =
+            currentRoot: root
+            cells:
+                inside: (x y) -> true
+            eventPos: (e) -> e.pos
+            state: s: view:[0 0]
+            choiceAtRow: (index) -> null
+        dircol.itemAtEvent(event dirtree) ▸ null
+        dirtree.choiceAtRow = (index) -> sub
+        dircol.itemAtEvent(event dirtree) ▸ sub

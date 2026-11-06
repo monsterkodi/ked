@@ -43,6 +43,13 @@ project
         
 log
     memory      true
+    
+dirtree
+    allow
+        ~/s
+        ~/a
+        ~/.config
+        ~/.local
 
 filetypes
     config       noon
