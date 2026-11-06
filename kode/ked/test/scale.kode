@@ -389,6 +389,19 @@ hed = cols rows ext='md' feats=[]->
 
         h.screen.renderString().startsWith("\x1b[2;6H\x1b[7X") ▸ true
 
+  ▸ a context menu near the bottom moves up to stay on screen
+
+        h = new harness rows:12 cols:40
+        c = new context h.screen
+
+        c.show [5 10] (()->) ['one' 'two']
+
+        h.screen.init()
+        c.draw()
+
+        c.cells.y ▸ 8
+        c.cells.y + c.cells.rows ▸ 12
+
   ▸ the cleared rectangle never leaves a block half drawn
 
         [h e] = hed 40 12 'md' ['complete']

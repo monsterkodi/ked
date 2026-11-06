@@ -26,7 +26,7 @@ use                 ◆ inputchoice
         iz = max 0 ih - 1
         h = c + 2 + ih
         x = @pos[0]
-        y = @pos[1]
+        y = clamp 0 @screen.rows-h @pos[1]
         
         @input.layout    x+2   y+1      w-4  iz
         @choices.layout  x+1   y+1+ih   w-2  c
