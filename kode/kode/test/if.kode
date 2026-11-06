@@ -804,7 +804,7 @@ use ./utils ▪ kc ke
             
         kc  """
             if  a ➜ P
-                ➜   Q
+                ➜ Q
             """ ▸
             """
             if (a)

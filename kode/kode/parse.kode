@@ -309,10 +309,10 @@ closers = '(':')' '[':']' '{':'}'
 
         switch tok.type
                         
-            'block'     ➜   ⮐ @onError "unexpected block token in exp!" tok:tok
-            'nl'        ➜   ⮐ @onError "unexpected nl token in exp!" tok:tok
-            ';'         ➜   ⮐ @onError "unexpected ; token in exp!" tok:tok
-            'section'   ➜   ⮐ @section tok, tokens                
+            'block'     ➜ ⮐ @onError "unexpected block token in exp!" tok:tok
+            'nl'        ➜ ⮐ @onError "unexpected nl token in exp!" tok:tok
+            ';'         ➜ ⮐ @onError "unexpected ; token in exp!" tok:tok
+            'section'   ➜ ⮐ @section tok, tokens                
             'keyword'       # dispatch to block rules identified by keyword
                             if tokens[0]?.text not in ':' # allow keywords as dictionary keys
                                 
@@ -340,7 +340,7 @@ closers = '(':')' '[':']' '{':'}'
                                         if @stack[-1] not in ['▸return']
                                             @verb 'if' @stack if @stack.length
                                             ⮐ @if tok tokens
-                        ➜   switch tok.text
+                        ➜ switch tok.text
                                 '○' ➜ ⮐ @await tok tokens
                                 '->' '=>' '○->' '○=>'
                                     if @stack[-1] not in ['{']
@@ -683,7 +683,7 @@ closers = '(':')' '[':']' '{':'}'
                     @verb 'lhs is lhs of +- op' e nxt
                     e = @operation e tokens.shift() tokens
                                 
-                ➜             
+                ➜           
                     print.tokens "lhs no nxt match? break! stack:#{@stack} nxt:" [nxt] if @debug
                     print.ast "lhs no nxt match? break! stack:#{@stack}" e if @debug
                     if nxt.type == 'block' 

@@ -7,9 +7,9 @@ use                 ◆ finder searcherfile
 ■searcher□finder
     # searches in multiple files provided by index▸prjcts
     
-    @: @screen @editor name='searcher' ->
+    @: @screen @editor @name='searcher' ->
 
-        super @screen @editor name
+        super @screen @editor @name
         
         if @name == 'searcher'
             post.on 'searcher.show' @show

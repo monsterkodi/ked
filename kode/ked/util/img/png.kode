@@ -41,7 +41,7 @@ filterZero = data out off w h ->
             type==3  
                     while x<bpp ➜ data[i+x] = (data[di+x] + ( data[i+x-bpl]>>>1)); x++
                     while x<bpl ➜ data[i+x] = (data[di+x] + ((data[i+x-bpl]+data[i+x-bpp])>>>1) ); x++
-            ➜       
+            ➜     
                     while x<bpp ➜ data[i+x] = (data[di+x] + paeth(0 data[i+x-bpl] 0)); x++
                     while x<bpl ➜ data[i+x] = (data[di+x] + paeth(data[i+x-bpp] data[i+x-bpl] data[i+x-bpp-bpl]) ); x++
     data

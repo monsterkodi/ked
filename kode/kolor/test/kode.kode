@@ -324,7 +324,7 @@ lang 'kode'
         inc rgs, 9 "/"      ▸ 'punct require'
         inc rgs, 10 "mod"   ▸ 'text require string'
         
-        rgs = ranges "use: (n) ->"
+        rgs = ranges "use: n ->"
         inc rgs, 0 "use"    ▸ 'method'
         inc rgs, 3 ":"      ▸ 'punct method'
         

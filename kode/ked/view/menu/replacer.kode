@@ -286,15 +286,16 @@ use             ◆ replacerfile searcher
         
         ⮐ if not empty errors
         
-        log "replacing '#{search}' with '#{replacement}' in #{applied.length} files, #{changedLines} lines"
+        log "\nreplacing '#{search}' with '#{replacement}' in #{applied.length} files, #{changedLines} lines"
         
         for file in applied
         
             log "\n● #{file.path}\n"
             
             for change in file.changes
-                log "#{lpad(4, change.line+1)} #{change.from}"
-                log "#{lpad(4, '➜')} #{change.to}"
+                log "#{change.line+1}:"
+                log change.from
+                log change.to
         
         log "\nreplaced #{applied.length} files, #{changedLines} lines"
         

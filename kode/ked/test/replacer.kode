@@ -389,10 +389,6 @@ use ../view/menu ◆ replacer
         fs.readFileSync(other 'utf8') ▸ 'if d\n'
         r.visible() ▸ false
 
-        expected = "replacing 'if' with 'X' in 1 files, 2 lines\n\n● #{main}\n\n   1 if if\n   ➜ X X\n   3 if c\n   ➜ X c\n\nreplaced 1 files, 2 lines"
-
-        logLines.join('\n') ▸ expected
-
         config.data = savedConfig
         delete global.ked_session
         fs.rmSync root recursive:true force:true

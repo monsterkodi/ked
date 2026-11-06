@@ -272,21 +272,21 @@ initStyles = ->
             for code in cs
                 code = parseInt code, 10
                 switch code
-                    0   ➜   resetStyle()
-                    1   ➜   addStyle 'font-weight:bold'; fg = toHighIntensity fg
-                    2   ➜   addStyle 'opacity:0.5'
-                    4   ➜   addStyle 'text-decoration:underline'
-                    7   ➜   invert = true            
-                    27  ➜   invert = false
-                    8   ➜   addStyle 'display:none'
-                    9   ➜   addStyle 'text-decoration:line-through'
-                    39  ➜   fg = STYLES["f15"] # default foreground
-                    49  ➜   bg = STYLES["b0"]  # default background
-                    38  ➜   setFG cs 
-                    48  ➜   setBG cs 
-                    28  ➜   delStyle 'display:none'
-                    22  ➜   delStyle 'font-weight:bold'; delStyle 'opacity:0.5'
-                        ➜   if 
+                    0   ➜ resetStyle()
+                    1   ➜ addStyle 'font-weight:bold'; fg = toHighIntensity fg
+                    2   ➜ addStyle 'opacity:0.5'
+                    4   ➜ addStyle 'text-decoration:underline'
+                    7   ➜ invert = true            
+                    27  ➜ invert = false
+                    8   ➜ addStyle 'display:none'
+                    9   ➜ addStyle 'text-decoration:line-through'
+                    39  ➜ fg = STYLES["f15"] # default foreground
+                    49  ➜ bg = STYLES["b0"]  # default background
+                    38  ➜ setFG cs 
+                    48  ➜ setBG cs 
+                    28  ➜ delStyle 'display:none'
+                    22  ➜ delStyle 'font-weight:bold'; delStyle 'opacity:0.5'
+                        ➜ if 
                                 30  <= code <= 37  ➜ fg = STYLES["f#{code - 30}"] # normal intensity
                                 40  <= code <= 47  ➜ bg = STYLES["b#{code - 40}"]
                                 90  <= code <= 97  ➜ fg = STYLES["f#{8+code - 90}"] # high intensity

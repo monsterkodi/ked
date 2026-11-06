@@ -207,8 +207,8 @@ use ../kolor ◆ kulur
                                     js  = kode.compile text, file, out
                                     res =○ nfs.write out js
                                     if res?.error then error R2(y3("can't write #{R3(y6(out))}"))
-                    args.run   ➜    log kode.eval(text file global)
-                               ➜    log kode.compile(text file)
+                    args.run   ➜  log kode.eval(text file global)
+                               ➜  log kode.compile(text file)
             catch err
                 log err
 export Kode
