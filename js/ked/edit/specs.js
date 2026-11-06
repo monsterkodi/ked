@@ -8,8 +8,8 @@ specs = (function ()
     function specs ()
     {}
 
-    specs["replex"] = {'~c':'●','~s':'▪','~d':'◆','~C':'○',"~#":'◌',"~.":'∙',"~\"":'¨','~S':'□','~D':'◇','~>':'▸','~<':'◂','~^':'▴','~v':'▾','~o':'✔','~x':'✘','~b':'■','~f':'■','~B':'█','~r':'⮐ ','~t':'➜'}
-    specs["trigger"] = {'~':['■','◯','◌','∙','○','◇','□','✔','✘','▸','▾','▴','◂','●','◆','▪','◼','█','⮐ ','➜ ','△','▷','▽','◁','│','─','┬','├','┼','┤','┴','╭','','╰','╮','','╯'],'r':['⮐ '],'t':['➜ ']}
+    specs["replex"] = {'~c':'●','~C':'◯','~s':'▪','~S':'□','~d':'◆','~D':'◇',"~#":'◌',"~.":'∙',"~\"":'¨','~>':'▸','~<':'◂','~^':'▴','~v':'▾','~o':'✔','~x':'✘','~b':'■','~f':'■','~B':'█','~r':'⮐ ','~t':'➜'}
+    specs["trigger"] = {'~':['■','●','◆','□','◯','◇','∙','✔','✘','▸','▾','▴','◂','◌','▪','◼','█','⮐ ','➜ ','△','▷','▽','◁','│','─','┬','├','┼','┤','┴','╭','','╰','╮','','╯'],'r':['⮐ '],'t':['➜ ']}
     specs["inserts"] = {}
     return specs
 })()
@@ -26,5 +26,5 @@ for (trigger in specs.trigger)
 }
 export default specs;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3BlY3MuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2VkaXQvc3BlY3Mua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFBQyxTQUFEOzs7OztJQU1JLE9BQUMsWUFFRyxLQUFRLElBQ1IsS0FBUSxJQUNSLEtBQVEsSUFDUixLQUFRLElBQ1IsS0FBUSxJQUNSLEtBQVEsSUFDUixNQUFRLElBQ1IsS0FBUSxJQUNSLEtBQVEsSUFDUixLQUFRLElBQ1IsS0FBUSxJQUNSLEtBQVEsSUFDUixLQUFRLElBQ1IsS0FBUSxJQUNSLEtBQVEsSUFDUixLQUFRLElBQ1IsS0FBUSxJQUNSLEtBQVEsSUFDUixLQUFRLEtBQ1IsS0FBUTtJQUVaLE9BQUMsYUFFRyxLQUFRLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLEtBQUssS0FBSyxJQUFJLElBQUksSUFBSSxJQUM5RixJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxLQUV4RCxLQUFPLE1BQ1AsS0FBTztJQUVYLE9BQUM7V0FyQ0o7OztLQXVDRyxXQUFnQixNQUFNOztJQUFkLE9BQVEsTUFBTTt3QkFDYjs7O1FBQUw7UUFDQSxNQUFNLFFBQVEsS0FBSzs7O2VBRXBCIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3BlY3MuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2VkaXQvc3BlY3Mua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFBQyxTQUFEOzs7OztJQU1JLE9BQUMsWUFFRyxLQUFRLElBQ1IsS0FBUSxJQUNSLEtBQVEsSUFDUixLQUFRLElBQ1IsS0FBUSxJQUNSLEtBQVEsSUFDUixLQUFRLElBQ1IsS0FBUSxJQUNSLE1BQVEsSUFDUixLQUFRLElBQ1IsS0FBUSxJQUNSLEtBQVEsSUFDUixLQUFRLElBQ1IsS0FBUSxJQUNSLEtBQVEsSUFDUixLQUFRLElBQ1IsS0FBUSxJQUNSLEtBQVEsSUFDUixLQUFRLEtBQ1IsS0FBUTtJQUVaLE9BQUMsYUFFRyxLQUFRLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxLQUFLLEtBQUssSUFBSSxJQUFJLElBQUksSUFDMUYsSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksS0FFeEQsS0FBTyxNQUNQLEtBQU87SUFFWCxPQUFDO1dBckNKOzs7S0F1Q0csV0FBZ0IsTUFBTTs7SUFBZCxPQUFRLE1BQU07d0JBQ2I7OztRQUFMO1FBQ0EsTUFBTSxRQUFRLEtBQUs7OztlQUVwQiJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/specs.kode
