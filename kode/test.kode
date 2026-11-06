@@ -24,6 +24,7 @@ if lastArg == 'help'
     process.exit 0
 
 tests = {}; for m in mods ➜ tests[m] = true
+moduleTimes = []
 
 fail = false
 
@@ -57,6 +58,7 @@ if
 for mod in mods
     
     if tests[mod]
+        start = Date.now()
         hdr mod
         files =○ nfs.list(slash.path(◆dir mod 'test'))
         for file in files
@@ -64,8 +66,9 @@ for mod in mods
             test =○ import(file.path) # shouldn't the file type be checked here?
             result =○ tester.test test.default
             fail = fail or not (result ? true)
+        moduleTimes.push {name:mod ms:Date.now() - start}
         
-tester.summarize()
+tester.summarize moduleTimes
 
 if fail
     process.exitCode = 1

@@ -1,0 +1,12 @@
+use ../tester
+use ../../kxk ◆ klor
+
+▸ summary
+
+    ▸ module times are names in medium blue and milliseconds in dark blue
+
+        tester.timesText([{name:'kxk' ms:200} {name:'kode' ms:20}]) ▸ ' ' + klor.b3('kxk') + ' ' + klor.b1(200) + '  ' + klor.b3('kode') + ' ' + klor.b1(20) + ' '
+
+    ▸ no module times add nothing
+
+        tester.timesText([]) ▸ ''

@@ -1,6 +1,6 @@
 var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, k: { f:(r,g,b)=>'\x1b[38;5;'+(16+36*r+6*g+b)+'m', F:(r,g,b)=>'\x1b[48;5;'+(16+36*r+6*g+b)+'m', r:(i)=>(i<6)&&_k_.k.f(i,0,0)||_k_.k.f(5,i-5,i-5), R:(i)=>(i<6)&&_k_.k.F(i,0,0)||_k_.k.F(5,i-5,i-5), g:(i)=>(i<6)&&_k_.k.f(0,i,0)||_k_.k.f(i-5,5,i-5), G:(i)=>(i<6)&&_k_.k.F(0,i,0)||_k_.k.F(i-5,5,i-5), b:(i)=>(i<6)&&_k_.k.f(0,0,i)||_k_.k.f(i-5,i-5,5), B:(i)=>(i<6)&&_k_.k.F(0,0,i)||_k_.k.F(i-5,i-5,5), y:(i)=>(i<6)&&_k_.k.f(i,i,0)||_k_.k.f(5,5,i-5), Y:(i)=>(i<6)&&_k_.k.F(i,i,0)||_k_.k.F(5,5,i-5), m:(i)=>(i<6)&&_k_.k.f(i,0,i)||_k_.k.f(5,i-5,5), M:(i)=>(i<6)&&_k_.k.F(i,0,i)||_k_.k.F(5,i-5,5), c:(i)=>(i<6)&&_k_.k.f(0,i,i)||_k_.k.f(i-5,5,5), C:(i)=>(i<6)&&_k_.k.F(0,i,i)||_k_.k.F(i-5,5,5), w:(i)=>'\x1b[38;5;'+(232+(i-1)*3)+'m', W:(i)=>'\x1b[48;5;'+(232+(i-1)*3+2)+'m', wrap:(open,close,reg)=>(s)=>open+(~(s+='').indexOf(close,4)&&s.replace(reg,open)||s)+close, F256:(open)=>_k_.k.wrap(open,'\x1b[39m',new RegExp('\\x1b\\[39m','g')), B256:(open)=>_k_.k.wrap(open,'\x1b[49m',new RegExp('\\x1b\\[49m','g'))}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, file: function () { return import.meta.url.substring(7); }, dir: function () { let url = import.meta.url.substring(7); let si = url.lastIndexOf('/'); return url.substring(0, si); }};_k_.B5=_k_.k.B256(_k_.k.B(5));_k_.y5=_k_.k.F256(_k_.k.y(5))
 
-var columns, fail, file, files, hdr, lastArg, m, mod, mods, result, test, tests
+var columns, fail, file, files, hdr, lastArg, m, mod, mods, moduleTimes, result, start, test, tests
 
 import nfs from "./kxk/nfs.js"
 import slash from "./kxk/slash.js"
@@ -32,6 +32,7 @@ for (var _a_ = 0; _a_ < list.length; _a_++)
     m = list[_a_]
     tests[m] = true
 }
+moduleTimes = []
 fail = false
 
 hdr = function (h)
@@ -76,6 +77,7 @@ for (var _d_ = 0; _d_ < list3.length; _d_++)
     mod = list3[_d_]
     if (tests[mod])
     {
+        start = Date.now()
         hdr(mod)
         files = await nfs.list(slash.path(_k_.dir(),mod,'test'))
         var list4 = _k_.list(files)
@@ -90,13 +92,14 @@ for (var _d_ = 0; _d_ < list3.length; _d_++)
             result = await tester.test(test.default)
             fail = fail || !((result != null ? result : true))
         }
+        moduleTimes.push({name:mod,ms:Date.now() - start})
     }
 }
-tester.summarize()
+tester.summarize(moduleTimes)
 if (fail)
 {
     process.exitCode = 1
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdC5qcyIsInNvdXJjZXMiOlsiLi4va29kZS90ZXN0LmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FBYSxVQUFQO09BQVcsWUFBWDtPQUFpQixXQUFqQjs7T0FDTyxhQUFQOztBQUdOLFFBQVEsTUFBTSxPQUFPLFFBQVEsTUFBTTtBQUVuQyxVQUFVLFFBQVE7QUFDbEIsVUFBVTtJQUVQLFlBQVc7O0lBRVY7Ozs7Ozs7WUFRZ0IsS0FBSyxLQUFLOzs7SUFJMUIsUUFBUSxLQUFLOztBQUVqQjtvQkFBcUI7OztJQUFMO0lBQVksTUFBTSxLQUFLOztBQUV2QyxPQUFPOztBQUVQLGdCQUFNOztJQUFLLFlBQUksT0FBRyxPQUFHLE1BQU0sS0FBSyxLQUFLLEVBQUcsV0FBVzs7SUFHL0MsWUFBVzs7SUFFUCxPQUFPLGNBQWM7O1NBRXpCLFlBQVc7O0lBRVAsT0FBTyxjQUFjO0lBQ3JCLE9BQU8sYUFBYTs7Z0JBRXhCLFFBQVc7O3lCQUVFOzs7UUFBTDtRQUFZLE1BQU0sS0FBSyxNQUFLOzs7U0FFcEMsWUFBWTs7eUJBRUM7OztRQUFMO1FBQVksTUFBTSxLQUFLOztJQUUzQixJQUFJLFFBQVE7SUFFWixPQUFPLE1BQU0sS0FBTSxVQUFJLEtBQUs7SUFDNUIsYUFBUSxPQUFPO0lBQ2YsZUFBVSxPQUFPLEtBQUssS0FBSztJQUMzQixPQUFPLFdBQWEsaUJBQUEsU0FBUzs7cUJBRTFCOzs7SUFBUDtRQUVHLE1BQU07O1FBQ0wsSUFBSTtRQUNKLGNBQVMsSUFBSSxLQUFLLE1BQU0sS0FBTSxVQUFJLElBQUk7NkJBQzFCOzs7WUFBUjtnQkFDWSxLQUFLLFNBQVE7O2dCQUF6Qjs7WUFDQSxhQUFRLE9BQU8sS0FBSztZQUNwQixlQUFVLE9BQU8sS0FBSyxLQUFLO1lBQzNCLE9BQU8sV0FBYSxpQkFBQSxTQUFTOzs7O0FBRXpDLE9BQU87SUFFSjs7SUFDQyxRQUFRLFdBQVcifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdC5qcyIsInNvdXJjZXMiOlsiLi4va29kZS90ZXN0LmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FBYSxVQUFQO09BQVcsWUFBWDtPQUFpQixXQUFqQjs7T0FDTyxhQUFQOztBQUdOLFFBQVEsTUFBTSxPQUFPLFFBQVEsTUFBTTtBQUVuQyxVQUFVLFFBQVE7QUFDbEIsVUFBVTtJQUVQLFlBQVc7O0lBRVY7Ozs7Ozs7WUFRZ0IsS0FBSyxLQUFLOzs7SUFJMUIsUUFBUSxLQUFLOztBQUVqQjtvQkFBcUI7OztJQUFMO0lBQVksTUFBTSxLQUFLOztBQUN2QztBQUVBLE9BQU87O0FBRVAsZ0JBQU07O0lBQUssWUFBSSxPQUFHLE9BQUcsTUFBTSxLQUFLLEtBQUssRUFBRyxXQUFXOztJQUcvQyxZQUFXOztJQUVQLE9BQU8sY0FBYzs7U0FFekIsWUFBVzs7SUFFUCxPQUFPLGNBQWM7SUFDckIsT0FBTyxhQUFhOztnQkFFeEIsUUFBVzs7eUJBRUU7OztRQUFMO1FBQVksTUFBTSxLQUFLLE1BQUs7OztTQUVwQyxZQUFZOzt5QkFFQzs7O1FBQUw7UUFBWSxNQUFNLEtBQUs7O0lBRTNCLElBQUksUUFBUTtJQUVaLE9BQU8sTUFBTSxLQUFNLFVBQUksS0FBSztJQUM1QixhQUFRLE9BQU87SUFDZixlQUFVLE9BQU8sS0FBSyxLQUFLO0lBQzNCLE9BQU8sV0FBYSxpQkFBQSxTQUFTOztxQkFFMUI7OztJQUFQO1FBRUcsTUFBTTs7UUFDTCxRQUFRLEtBQUs7UUFDYixJQUFJO1FBQ0osY0FBUyxJQUFJLEtBQUssTUFBTSxLQUFNLFVBQUksSUFBSTs2QkFDMUI7OztZQUFSO2dCQUNZLEtBQUssU0FBUTs7Z0JBQXpCOztZQUNBLGFBQVEsT0FBTyxLQUFLO1lBQ3BCLGVBQVUsT0FBTyxLQUFLLEtBQUs7WUFDM0IsT0FBTyxXQUFhLGlCQUFBLFNBQVM7O1FBQ2pDLFlBQVksTUFBTSxLQUFLLElBQUksR0FBRyxLQUFLLFFBQVE7OztBQUVuRCxPQUFPLFVBQVU7SUFFZDs7SUFDQyxRQUFRLFdBQVcifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/test.kode
