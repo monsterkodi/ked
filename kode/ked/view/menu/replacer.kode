@@ -18,6 +18,7 @@ use             ◆ replacerfile searcher
         @sfils = []
         @searchId = 0
         @excludedPaths = {}
+        @applying = false
         
         @replaceInput = new input @screen "#{@name}_replace_input"
         @replaceInput.setColor 'bg_blur' @color.bg
@@ -215,6 +216,17 @@ use             ◆ replacerfile searcher
             'down'   ➜ @choices.moveSelection action
 
     applyReplacement: replacement ○=>
+
+        ⮐ if @applying
+        
+        @applying = true
+        
+        try
+            ○ @runReplacement replacement
+        finally
+            @applying = false
+
+    runReplacement: replacement ○=>
 
         search = @lastSearchText ? @input.current()
         
