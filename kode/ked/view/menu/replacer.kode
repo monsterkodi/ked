@@ -1,6 +1,6 @@
 
 use ../../../kxk ▪ post nfs
-use ../../theme ◆ color
+use ../../theme ◆ color theme
 use ../../index ◆ kacher
 use ../base     ◆ input
 use             ◆ replacerfile searcher
@@ -23,6 +23,15 @@ use             ◆ replacerfile searcher
         @replaceInput = new input @screen "#{@name}_replace_input"
         @replaceInput.setColor 'bg_blur' @color.bg
         @replaceInput.on 'action' @onReplaceInputAction
+        
+        @setColor 'included' theme.replacer.included
+        @setColor 'excluded' theme.replacer.excluded
+        
+        @choices.gutter.fgcolor = (x y c) =>
+            if c == '✔'
+                ⮐ @color.included
+            if c == '✘'
+                ⮐ @color.excluded
 
     show: text files ◯=>
     
@@ -175,11 +184,12 @@ use             ◆ replacerfile searcher
 
     onChoicesAction: action choice =>
 
-        if action == 'space'
+        if action in ['space' 'click']
             if choice?.type == 'file'
                 ⮐ @toggleFile choice.path
             if choice?.row is num
                 ⮐ @toggleLine choice
+            ⮐ if action == 'click'
 
         super action choice
 

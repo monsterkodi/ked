@@ -94,6 +94,10 @@
     "bg": "#111",
     "frame": "#222"
   },
+  "replacer": {
+    "included": "#0c0",
+    "excluded": "#c00"
+  },
   "unype": {
     "cursor": {
       "multi": "#800",

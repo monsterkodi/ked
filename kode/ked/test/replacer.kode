@@ -3,6 +3,7 @@ use fs
 use ../../kxk    ▪ slash
 use ../edit      ◆ editor
 use ../util      ◆ harness config
+use ../theme     ◆ theme
 use ../index     ◆ prjcts
 use ../view/menu ◆ replacer
 
@@ -672,6 +673,140 @@ use ../view/menu ◆ replacer
 
         fs.readFileSync(main 'utf8') ▸ 'X a\n'
         r.applying ▸ false
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true
+
+  ▸ included and excluded markers use theme colors
+
+        root = '/tmp/opencode/ked-replacer-theme'
+        main = slash.path root 'main.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync main 'if a\nif b\n'
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[main]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ◯ prjcts.index main
+
+        h = new harness cols:80 rows:16
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 1 0 79 16
+        r = new replacer h.screen e
+
+        ◯ r.show 'if'
+
+        r.draw()
+
+        markerX = r.choices.gutter.cells.x + r.choices.gutter.cells.cols - 2
+        headerY = r.sfils[0].cells.y
+
+        h.screen.get_fg(markerX headerY) ▸ theme.replacer.included
+
+        lineItem = null
+
+        for item in r.sfils[0].resultItems
+            if item.row is num
+                lineItem = item
+                break
+
+        (lineItem != null) ▸ true
+
+        lineIndex = r.choices.items.indexOf lineItem
+        lineY     = r.choices.cells.y - r.choices.state.s.view[1] + lineIndex
+
+        r.choices.select lineIndex
+
+        ◯ r.onChoicesAction 'space' lineItem
+
+        r.draw()
+
+        markerX = r.choices.gutter.cells.x + r.choices.gutter.cells.cols - 2
+
+        h.screen.get_fg(markerX lineY) ▸ theme.replacer.excluded
+
+        ◯ r.onChoicesAction 'space' r.sfils[0].headerItem
+
+        r.draw()
+
+        markerX = r.choices.gutter.cells.x + r.choices.gutter.cells.cols - 2
+        headerY = r.sfils[0].cells.y
+
+        h.screen.get_fg(markerX headerY) ▸ theme.replacer.excluded
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true
+
+  ▸ clicking toggles exclusion and keeps the replacer open
+
+        root = '/tmp/opencode/ked-replacer-click'
+        main = slash.path root 'main.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync main 'if a\nif b\n'
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[main]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ◯ prjcts.index main
+
+        h = new harness cols:80 rows:16
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 1 0 79 16
+        r = new replacer h.screen e
+
+        ◯ r.show 'if'
+
+        ◯ r.onChoicesAction 'click' r.sfils[0].headerItem
+
+        r.sfils[0].excluded ▸ true
+        r.visible() ▸ true
+
+        ◯ r.onChoicesAction 'click' r.sfils[0].headerItem
+
+        r.sfils[0].excluded ▸ false
+        r.visible() ▸ true
+
+        lineItem = null
+
+        for item in r.sfils[0].resultItems
+            if item.row is num
+                lineItem = item
+                break
+
+        (lineItem != null) ▸ true
+
+        ◯ r.onChoicesAction 'click' lineItem
+
+        lineItem.excluded ▸ true
+        r.visible() ▸ true
 
         config.data = savedConfig
         delete global.ked_session
