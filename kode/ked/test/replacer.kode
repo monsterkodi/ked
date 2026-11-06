@@ -479,3 +479,72 @@ use ../view/menu ◆ replacer
         config.data = savedConfig
         delete global.ked_session
         fs.rmSync root recursive:true force:true
+
+  ▸ space on a result line excludes it from the replacement
+
+        root = '/tmp/opencode/ked-replacer-line-exclude'
+        main = slash.path root 'main.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync main 'if a\nif b\nif c\n'
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[main]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index main
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 1 0 79 30
+        r = new replacer h.screen e
+
+        ○ r.show 'if'
+
+        lineIndex = null
+        lineItem  = null
+
+        for item,idx in r.choices.items
+            if item.row is num and item.type != 'file'
+                lineIndex = idx
+                lineItem  = item
+                break
+
+        (lineItem != null) ▸ true
+
+        r.choices.select lineIndex
+
+        ○ r.onChoicesAction 'space' lineItem
+
+        lineItem.excluded ▸ true
+        r.visible() ▸ true
+        r.lineno(lineIndex).includes('✘') ▸ true
+
+        lines = []
+        keep = console.log
+        console.log = (args...) -> lines.push args.join(' ')
+        r.onReplaceInputAction 'submit' 'XX'
+        console.log = keep
+
+        lines[0].includes '2 lines' ▸ true
+        lines[1].includes '2 lines' ▸ true
+
+        ○ r.onChoicesAction 'space' lineItem
+
+        lineItem.excluded ▸ false
+        r.lineno(lineIndex).includes('✘') ▸ false
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true

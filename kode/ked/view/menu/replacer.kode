@@ -173,8 +173,11 @@ use             ◆ replacerfile searcher
 
     onChoicesAction: action choice =>
 
-        if action == 'space' and choice?.type == 'file'
-            ⮐ @toggleFile choice.path
+        if action == 'space'
+            if choice?.type == 'file'
+                ⮐ @toggleFile choice.path
+            if choice?.row is num
+                ⮐ @toggleLine choice
 
         super action choice
 
@@ -184,6 +187,12 @@ use             ◆ replacerfile searcher
             if sfil.path == path
                 ⮐ sfil.toggle()
 
+    toggleLine: item =>
+
+        item.excluded = not item.excluded
+        
+        post.emit 'redraw'
+
     onReplaceInputAction: action text =>
 
         switch action
@@ -191,18 +200,28 @@ use             ◆ replacerfile searcher
             'up'
             'down'   ➜ @choices.moveSelection action
 
+    countReplaceableLines: sfil ->
+
+        count = 0
+        
+        for item in sfil.resultItems
+            if item.row is num and not item.excluded
+                count += 1
+        
+        count
+
     logReplacement: replacement =>
 
         files = @sfils.filter (sfil) -> not sfil.excluded
         total = 0
         
         for sfil in files
-            total += sfil.lineCount ? 0
+            total += @countReplaceableLines sfil
         
         log "replacer would replace '#{@input.current()}' with '#{replacement}' in #{files.length} files, #{total} lines"
         
         for sfil in files
-            count = sfil.lineCount ? 0
+            count = @countReplaceableLines sfil
             log "  #{sfil.path}: #{count} lines"
 
     onFileLoaded: file =>
