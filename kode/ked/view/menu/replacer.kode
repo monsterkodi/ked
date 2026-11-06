@@ -243,13 +243,4 @@ use             ◆ replacerfile searcher
     
         @hide()
         
-    #     ⮐ if empty @fileToHighlight
-    #     ⮐ if empty @textToHighlight
-    #     ⮐ if empty file
-    # 
-    #     post.emit 'editor.highlight' @textToHighlight
-    #     
-    #     delete @fileToHighlight
-    #     delete @textToHighlight
-
 export replacer
