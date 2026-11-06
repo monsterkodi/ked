@@ -43,10 +43,10 @@ use ../base      ◆ view crumbs bubble
             @crumbs.layout x+w-bw-cw  y cw 1
             @bubble.layout x+w-bw     y bw 1
         else
-            @crumbs.layout x        y cw 1
-            @bubble.layout x+cw     y bw 1
+            @crumbs.layout x          y cw 1
+            @bubble.layout x+cw       y bw 1
             
-        @cells.layout  x    y w  1
+        @cells.layout  x y w  1
         
     draw: ->
 
@@ -77,6 +77,6 @@ use ../base      ◆ view crumbs bubble
                 
     onCrumbsAction: action path =>
         
-        log "onCrumbsAction #{action} #{path}" 
+        # log "onCrumbsAction #{action} #{path}" 
 
 export searcherfile
