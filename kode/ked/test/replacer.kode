@@ -377,11 +377,21 @@ use ../view/menu ◆ replacer
 
         ○ r.onChoicesAction 'space' otherHandler.headerItem
 
+        logLines = []
+        keep     = console.log
+        console.log = (args...) -> logLines.push args.join(' ')
+
         ○ r.onReplaceInputAction 'submit' 'X'
+
+        console.log = keep
 
         fs.readFileSync(main 'utf8')  ▸ 'X X\nif b\nX c\n'
         fs.readFileSync(other 'utf8') ▸ 'if d\n'
         r.visible() ▸ false
+
+        expected = "replacing 'if' with 'X' in 1 files, 2 lines\n\n● #{main}\n\n   1 if if\n   ➜ X X\n   3 if c\n   ➜ X c\n\nreplaced 1 files, 2 lines"
+
+        logLines.join('\n') ▸ expected
 
         config.data = savedConfig
         delete global.ked_session

@@ -232,8 +232,8 @@ use             ◆ replacerfile searcher
         
         ⮐ if empty search
         
-        changedFiles = []
         changedLines = 0
+        applied      = []
         errors       = []
         
         for sfil in @sfils
@@ -245,6 +245,7 @@ use             ◆ replacerfile searcher
             continue if empty text
             
             lines   = text.split '\n'
+            changes = []
             changed = false
             
             for item in sfil.resultItems
@@ -261,6 +262,7 @@ use             ◆ replacerfile searcher
                 continue if replaced == line
                 
                 lines[item.row] = replaced
+                changes.push line:item.row from:line to:replaced
                 changed = true
                 changedLines += 1
             
@@ -275,7 +277,7 @@ use             ◆ replacerfile searcher
             
             # kacher.invalidate sfil.path # this should not be necessary
             
-            changedFiles.push sfil.path
+            applied.push path:sfil.path changes:changes
             
             # post.emit 'file.change' path:sfil.path change:'modify' # this is the watchers job
         
@@ -284,7 +286,17 @@ use             ◆ replacerfile searcher
         
         ⮐ if not empty errors
         
-        log "replaced #{changedLines} lines in #{changedFiles.length} files"
+        log "replacing '#{search}' with '#{replacement}' in #{applied.length} files, #{changedLines} lines"
+        
+        for file in applied
+        
+            log "\n● #{file.path}\n"
+            
+            for change in file.changes
+                log "#{lpad(4, change.line+1)} #{change.from}"
+                log "#{lpad(4, '➜')} #{change.to}"
+        
+        log "\nreplaced #{applied.length} files, #{changedLines} lines"
         
         @hide()
         post.emit 'focus' 'editor'
