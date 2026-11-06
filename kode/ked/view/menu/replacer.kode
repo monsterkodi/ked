@@ -24,6 +24,10 @@ use             ◆ replacerfile searcher
 
     show: text files ○=>
     
+        @searchId += 1
+        @sfils = []
+        @excludedPaths = {}
+        
         searching = @search text files
         
         @replaceInput.grabFocus() if not empty @input.current()
@@ -36,7 +40,7 @@ use             ◆ replacerfile searcher
 
     isExcluded: path -> @excludedPaths[path] ? false
 
-    onFileToggled: path ○=>
+    onFileToggled: path =>
 
         handler = null
         for sfil in @sfils
@@ -48,22 +52,30 @@ use             ◆ replacerfile searcher
         
         @excludedPaths[path] = handler.excluded
         
-        hadChoicesFocus = @choices.hasFocus()
+        handler.headerItem.line = handler.marker
         
-        ○ @search @input.current() null false
+        items = @choices.items
+        idx   = handler.lineIndex
+        count = handler.resultItems.length
         
-        handler = null
+        if handler.excluded
+            end   = idx + 1 + count
+            items = items[0...idx+1].concat(items[end..])
+        else
+            items = items[0...idx+1].concat(handler.resultItems).concat(items[idx+1..])
+        
+        @choices.items  = items
+        @choices.fuzzied = items
+        
+        lines = items.map (item) -> item.line
+        @choices.state.setLines lines
+        
         for sfil in @sfils
-            if sfil.path == path
-                handler = sfil
-                break
-        
-        ⮐ if not handler
-        ⮐ if not hadChoicesFocus
+            hidx = items.indexOf sfil.headerItem
+            sfil.lineIndex = hidx if hidx >= 0
         
         @choices.select handler.lineIndex
-        @choices.state.setView [0 handler.lineIndex]
-        @choices.grabFocus()
+        @choices.state.highlightText @input.current()
         
         post.emit 'redraw'
 

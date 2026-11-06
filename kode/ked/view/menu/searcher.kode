@@ -82,27 +82,40 @@ use                 ◆ finder searcherfile
             sfil.path = file
             sfil.lineIndex = appended + items.length + 1
             sfil.lineCount = front.length
-            sfil.set slash.relative(file dir)            
-            @sfils.push sfil
-
-            items.push line:'' 
-
-            items.push
+            
+            header =
                 line:  sfil.marker
                 type:  'file'
                 path:  file
                 row:   0
                 col:   0
-                
+            
+            results = []
+            lastRow = 0
+            
+            for span in front
+                if lastRow != span[1]-1
+                    results.push line:''
+                results.push
+                    line:  ' ' + kseg.str(segls[span[1]])
+                    path:  file
+                    row:   span[1]
+                    col:   span[2]
+                lastRow = span[1]
+            
+            sfil.headerItem  = header
+            sfil.resultItems = results
+            
+            sfil.set slash.relative(file dir)            
+            @sfils.push sfil
+
+            items.push line:'' 
+
+            items.push header
+            
             if not sfil.excluded
-                for span in front
-                    if items[-1].row != span[1]-1
-                        items.push line:''
-                    items.push
-                        line:  ' ' + kseg.str(segls[span[1]])
-                        path:  file
-                        row:   span[1]
-                        col:   span[2]
+                for result in results
+                    items.push result
 
             if not flushed and appended + items.length >= maxRows
                 @choices.append items ext

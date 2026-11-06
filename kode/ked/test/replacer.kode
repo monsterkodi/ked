@@ -369,3 +369,113 @@ use ../view/menu ◆ replacer
         config.data = savedConfig
         delete global.ked_session
         fs.rmSync root recursive:true force:true
+
+  ▸ showing the replacer again resets previous exclusions
+
+        root = '/tmp/opencode/ked-replacer-reset'
+        main = slash.path root 'main.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync main 'if a\nif b\n'
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[main]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index main
+
+        h = new harness cols:80 rows:16
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 1 0 79 16
+        r = new replacer h.screen e
+
+        ○ r.show 'if'
+
+        oldHandler = r.sfils[0]
+        choice    = r.choices.items[oldHandler.lineIndex]
+
+        ○ r.onChoicesAction 'space' choice
+
+        r.sfils[0].excluded ▸ true
+        r.excludedPaths[main] ▸ true
+
+        ○ r.show 'if'
+
+        r.sfils.length ▸ 1
+        (r.sfils[0] != oldHandler) ▸ true
+        r.sfils[0].excluded ▸ false
+        r.sfils[0].marker ▸ '✔'
+        r.isExcluded(main) ▸ false
+        r.choices.items.length ▸ 5
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true
+
+  ▸ toggling a file keeps the file order and the view
+
+        root = '/tmp/opencode/ked-replacer-order'
+        files = []
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+
+        for i in 0...5
+            file = slash.path root "file#{i}.kode"
+            fs.writeFileSync file "if #{i}a\nif #{i}b\n"
+            files.push file
+
+        for file in files ➜ delete prjcts.allFiles[file]
+        delete prjcts.projects[root]
+
+        global.ked_session =
+            get: (key) -> files[0]
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ○ prjcts.index files[0]
+
+        h = new harness cols:80 rows:16
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 1 0 79 16
+        r = new replacer h.screen e
+
+        ○ r.show 'if'
+
+        order = r.sfils.map (sfil) -> sfil.path
+
+        r.choices.state.setView [0 8]
+        r.choices.select r.sfils[2].lineIndex
+        r.choices.grabFocus()
+
+        view   = r.choices.state.s.view.slice()
+        scroll = r.choices.state.s.scrollOffset
+
+        ○ r.onChoicesAction 'space' r.choices.current()
+
+        r.sfils.map((sfil) -> sfil.path) ▸ order
+        r.choices.state.s.view ▸ view
+        r.choices.state.s.scrollOffset ▸ scroll
+        r.choices.current().line ▸ '✘'
+        r.choices.current().path ▸ files[2]
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true
