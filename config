@@ -47,9 +47,7 @@ log
 dirtree
     allow
         ~/s
-        ~/a
-        ~/.config
-        ~/.local
+        /tmp
 
 filetypes
     config       noon

@@ -181,6 +181,7 @@ waitForRoot = (d root) ○->
         create = icons.dir_open + ' '
 
         dircol.isAllowedPath('~/s/x', ['~/s']) ▸ true
+        dircol.isAllowedPath('~/s/x', ['~']) ▸ true
         dircol.isAllowedPath(outside.path allow) ▸ false
 
         dircol.isParentItem(parent) ▸ true

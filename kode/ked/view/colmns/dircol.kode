@@ -61,11 +61,11 @@ use                 ◆ dirtree
         
         ⮐ false if empty path
         
-        path = slash.absolute path
+        path = slash.absolute slash.untilde(path)
         
         for part in slash.pathlist path
             for root in allow ? []
-                ⮐ true if part == slash.absolute(root)
+                ⮐ true if part == slash.absolute(slash.untilde(root))
         
         false
     
