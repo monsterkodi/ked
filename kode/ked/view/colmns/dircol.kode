@@ -47,6 +47,40 @@ use                 ◆ dirtree
         
         @setRoot root
         
+    @isParentItem: item -> valid item?.tilde and item.tilde.endsWith '..'
+    
+    @isRootItem: item root -> valid item and slash.samePath item.path root
+    
+    @isInSystemRoot: item -> valid item and slash.samePath(slash.dir(item.path), '/')
+    
+    @contextItems: item root ->
+        
+        ⮐ [] if empty item
+        ⮐ [] if @isParentItem item
+        
+        create = [icons.dir_open + ' ']
+        
+        ⮐ create if @isRootItem(item root) or slash.samePath(item.path, '/')
+        ⮐ [] if @isInSystemRoot item
+        
+        [
+            " " 
+            " " 
+            icons.dir_open + " "
+            " " 
+            ]
+    
+    @contextActionAllowed: item root choice ->
+        
+        ⮐ false if empty item
+        ⮐ false if @isParentItem item
+        ⮐ false if @isInSystemRoot item
+        
+        if @isRootItem(item root) or slash.samePath(item.path, '/')
+            ⮐ choice == icons.dir_open
+        
+        true
+        
     onCrumbsAction: action path =>
 
         if action == 'click'
@@ -106,19 +140,19 @@ use                 ◆ dirtree
         super()
         
     onContext: event =>
-    
-        # if @dirtree.current()?.type == 'file'
-    
-        context.show event.cell @onContextChoice [
-            " " 
-            " " 
-            icons.dir_open + " "
-            " " 
-            ]
-                
+
+        current = @dirtree.current()
+        items = dircol.contextItems current @dirtree.currentRoot
+
+        ⮐ true if empty items
+
+        context.show event.cell @onContextChoice items
+
     onContextChoice: choice ○=>
     
         if current = @dirtree.current()
+            
+            ⮐ if not dircol.contextActionAllowed(current, @dirtree.currentRoot, choice)
             
             switch choice
             

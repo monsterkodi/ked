@@ -3,6 +3,7 @@ use fs
 use ../../kxk ▪ slash sleep post
 use ../edit     ◆ editor
 use ../util     ◆ harness
+use ../theme    ◆ icons
 use ../view/colmns ◆ dircol
 
 makeCol = ○->
@@ -167,3 +168,25 @@ waitForRoot = (d root) ○->
 
         after ▸ count
 ###
+
+▸ context menu
+
+  ▸ is safe
+
+        root = '/tmp/opencode/ked-dirtree-context'
+        parent = {path:'/tmp/opencode' type:'dir' tilde:'  ..'}
+        sub = {path:slash.path(root,'sub') type:'dir'}
+        create = icons.dir_open + ' '
+
+        dircol.isParentItem(parent) ▸ true
+        dircol.contextItems(parent root) ▸ []
+        dircol.contextItems({path:'/tmp' type:'dir'} root) ▸ []
+        dircol.contextItems({path:'/' type:'dir'} root) ▸ [create]
+        dircol.contextItems({path:root type:'dir'} root) ▸ [create]
+        dircol.contextItems(sub root).length ▸ 4
+
+        dircol.contextActionAllowed(parent root create) ▸ false
+        dircol.contextActionAllowed({path:'/tmp' type:'dir'} root create) ▸ false
+        dircol.contextActionAllowed({path:root type:'dir'} root icons.dir_open) ▸ true
+        dircol.contextActionAllowed({path:root type:'dir'} root 'rename') ▸ false
+        dircol.contextActionAllowed(sub root create) ▸ true
