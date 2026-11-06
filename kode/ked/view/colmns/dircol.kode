@@ -64,10 +64,10 @@ use                 ◆ dirtree
         ⮐ [] if @isInSystemRoot item
         
         [
-            " " 
-            " " 
+            '\uF044 ' 
+            '\uF0C5 ' 
             icons.dir_open + " "
-            " " 
+            '\uF014 ' 
             ]
     
     @contextActionAllowed: item root choice ->

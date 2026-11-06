@@ -183,7 +183,7 @@ waitForRoot = (d root) ○->
         dircol.contextItems({path:'/tmp' type:'dir'} root) ▸ []
         dircol.contextItems({path:'/' type:'dir'} root) ▸ [create]
         dircol.contextItems({path:root type:'dir'} root) ▸ [create]
-        dircol.contextItems(sub root).length ▸ 4
+        dircol.contextItems(sub root) ▸ ['\uF044 ' '\uF0C5 ' create '\uF014 ']
 
         dircol.contextActionAllowed(parent root create) ▸ false
         dircol.contextActionAllowed({path:'/tmp' type:'dir'} root create) ▸ false
