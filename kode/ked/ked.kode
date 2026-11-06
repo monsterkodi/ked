@@ -279,6 +279,11 @@ use child_process ▪ spawn exec
             
     onFileChange: event =>
     
+        if event.change == 'rename' and event.oldPath? and slash.samePath(event.oldPath @currentFile)
+            @currentFile = event.path
+            @reloadFile()
+            ⮐ 
+    
         if event.path == @currentFile
             switch event.change
                 'delete' ➜ @newFile() # todo: load current text into new file
