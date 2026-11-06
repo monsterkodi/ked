@@ -20,6 +20,10 @@ use                 ◆ finder searcherfile
 
     show: text files ○=>
     
+        ○ @search text files
+
+    search: text files focus=true ○=>
+    
         @choices.state.gutterWidthOverride = null
         @gutterMaxLine = 0
         
@@ -30,8 +34,8 @@ use                 ◆ finder searcherfile
         # log g4("#{r6 'searcher'} '#{text}'")
         
         if empty text
-            @input.grabFocus()
-            ⮐ super()
+            @input.grabFocus() if focus
+            ⮐ finder.prototype.show.call @
         
         editorFile = ked_session.get 'editor▸file'
         editorExt  = slash.ext editorFile 
@@ -46,7 +50,7 @@ use                 ◆ finder searcherfile
         
         view.prototype.show.call @ # bypass finder to avoid reading selection or cursor word again
         
-        @input.grabFocus()
+        @input.grabFocus() if focus
         @choices.clearEmpty()        
         @sfils = []
         
@@ -74,28 +78,31 @@ use                 ◆ finder searcherfile
             
             front = belt.frontmostSpans spans
             
-            sfil = new searcherfile @screen "#{@name}_sfil_#{idx}"
+            sfil = @createFileHandler @screen "#{@name}_sfil_#{idx}"
+            sfil.path = file
             sfil.lineIndex = appended + items.length + 1
+            sfil.lineCount = front.length
             sfil.set slash.relative(file dir)            
             @sfils.push sfil
 
             items.push line:'' 
 
             items.push
-                line:  '●'
+                line:  sfil.marker
                 type:  'file'
                 path:  file
                 row:   0
                 col:   0
                 
-            for span in front
-                if items[-1].row != span[1]-1
-                    items.push line:''
-                items.push
-                    line:  ' ' + kseg.str(segls[span[1]])
-                    path:  file
-                    row:   span[1]
-                    col:   span[2]
+            if not sfil.excluded
+                for span in front
+                    if items[-1].row != span[1]-1
+                        items.push line:''
+                    items.push
+                        line:  ' ' + kseg.str(segls[span[1]])
+                        path:  file
+                        row:   span[1]
+                        col:   span[2]
 
             if not flushed and appended + items.length >= maxRows
                 @choices.append items ext
@@ -126,6 +133,10 @@ use                 ◆ finder searcherfile
         @highlightTextAndEmitRedraw text if finalAppend or not flushed
                 
         # ●▪ searcher
+
+    createFileHandler: @screen name ->
+
+        new searcherfile @screen name
             
     arrange: =>
 

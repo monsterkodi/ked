@@ -2,7 +2,7 @@
 use ../../../kxk ▪ post
 use ../../theme ◆ color
 use ../base     ◆ input
-use             ◆ searcher
+use             ◆ replacerfile searcher
 ■replacer□searcher
     # replaces in multiple files provided by index▸prjcts
     
@@ -16,6 +16,7 @@ use             ◆ searcher
         
         @sfils = []
         @searchId = 0
+        @excludedPaths = {}
         
         @replaceInput = new input @screen "#{@name}_replace_input"
         @replaceInput.setColor 'bg_blur' @color.bg
@@ -23,11 +24,48 @@ use             ◆ searcher
 
     show: text files ○=>
     
-        searching = super text files
+        searching = @search text files
         
         @replaceInput.grabFocus() if not empty @input.current()
         
         ○ searching
+
+    createFileHandler: @screen name ->
+
+        new replacerfile @screen name @
+
+    isExcluded: path -> @excludedPaths[path] ? false
+
+    onFileToggled: path ○=>
+
+        handler = null
+        for sfil in @sfils
+            if sfil.path == path
+                handler = sfil
+                break
+        
+        ⮐ if not handler
+        
+        @excludedPaths[path] = handler.excluded
+        
+        hadChoicesFocus = @choices.hasFocus()
+        
+        ○ @search @input.current() null false
+        
+        handler = null
+        for sfil in @sfils
+            if sfil.path == path
+                handler = sfil
+                break
+        
+        ⮐ if not handler
+        ⮐ if not hadChoicesFocus
+        
+        @choices.select handler.lineIndex
+        @choices.state.setView [0 handler.lineIndex]
+        @choices.grabFocus()
+        
+        post.emit 'redraw'
 
     setColor: key clr =>
 
@@ -121,11 +159,39 @@ use             ◆ searcher
 
         super event
 
+    onChoicesAction: action choice =>
+
+        if action == 'space' and choice?.type == 'file'
+            ⮐ @toggleFile choice.path
+
+        super action choice
+
+    toggleFile: path =>
+
+        for sfil in @sfils
+            if sfil.path == path
+                ⮐ sfil.toggle()
+
     onReplaceInputAction: action text =>
 
         switch action
+            'submit' ➜ ⮐ @logReplacement text
             'up'
-            'down' ➜ @choices.moveSelection action
+            'down'   ➜ @choices.moveSelection action
+
+    logReplacement: replacement =>
+
+        files = @sfils.filter (sfil) -> not sfil.excluded
+        total = 0
+        
+        for sfil in files
+            total += sfil.lineCount ? 0
+        
+        log "replacer would replace '#{@input.current()}' with '#{replacement}' in #{files.length} files, #{total} lines"
+        
+        for sfil in files
+            count = sfil.lineCount ? 0
+            log "  #{sfil.path}: #{count} lines"
 
     onFileLoaded: file =>
     

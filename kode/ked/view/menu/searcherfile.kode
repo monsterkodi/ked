@@ -9,6 +9,9 @@ use ../base      ◆ view crumbs bubble
 
         super @screen @name
         
+        @marker   = '●'
+        @excluded = false
+        
         @crumbs = new crumbs @screen "#{@name}_crumbs"
         @bubble = new bubble @screen "#{@name}_bubble"
         

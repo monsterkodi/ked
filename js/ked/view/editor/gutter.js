@@ -268,7 +268,7 @@ gutter = (function ()
             {
                 c = list[i]
                 col = i
-                if (col < this.cells.rows)
+                if (col < this.cells.cols)
                 {
                     if (sc = this.fgcolor(i,y,c))
                     {

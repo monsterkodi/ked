@@ -1,0 +1,31 @@
+
+use ◆ searcherfile
+■replacerfile□searcherfile
+    # clickable file heading used by replacer
+    
+    @: @screen @name @replacer ->
+
+        super @screen @name
+        
+        @excluded  = false
+        @marker    = '✔'
+        @lineCount = 0
+
+    set: file =>
+
+        super file
+        
+        @excluded = false
+        if @replacer?
+            @excluded = @replacer.isExcluded @path
+        
+        @marker = @excluded ? '✘' : '✔'
+
+    toggle: =>
+
+        @excluded = not @excluded
+        @marker   = @excluded ? '✘' : '✔'
+        
+        ⮐ @replacer?.onFileToggled @path
+
+export replacerfile

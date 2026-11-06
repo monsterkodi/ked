@@ -190,7 +190,7 @@ use ../base        ◆ view
             for c,i in lineno
                 
                 col = i
-                if col < @cells.rows
+                if col < @cells.cols
                     
                     if sc = @fgcolor i y c
                         fg = sc
