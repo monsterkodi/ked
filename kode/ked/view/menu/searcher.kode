@@ -178,6 +178,9 @@ use                 ◆ finder searcherfile
         super()
         
         for sfil in @sfils
+        
+            sfil.selected = @choices.currentIndex() == sfil.lineIndex
+            
             if @choices.state.s.view[1] <= sfil.lineIndex < @choices.state.s.view[1]+@choices.cells.rows
                 sfil.draw()
             

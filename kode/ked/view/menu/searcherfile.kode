@@ -11,12 +11,14 @@ use ../base      ◆ view crumbs bubble
         
         @marker   = '●'
         @excluded = false
+        @selected = false
         
         @crumbs = new crumbs @screen "#{@name}_crumbs"
         @bubble = new bubble @screen "#{@name}_bubble"
         
-        @setColor 'bg'     theme.finder.bg
-        @setColor 'frame'  theme.finder.frame
+        @setColor 'bg'        theme.finder.bg
+        @setColor 'frame'     theme.finder.frame
+        @setColor 'selection' theme.selection.span
         
         @crumbs.setColor 'empty' @color.bg
         @bubble.setColor 'empty' @color.bg
@@ -55,12 +57,14 @@ use ../base      ◆ view crumbs bubble
         @crumbs.draw()
         @bubble.draw()
         
+        lineColor = @selected ? @color.selection : @color.frame
+        
         if true
-            @cells.fill_row 0 0 @cells.cols-@crumbs.rounded.length-@bubble.rounded.length-1 '─' @color.frame @color.bg
+            @cells.fill_row 0 0 @cells.cols-@crumbs.rounded.length-@bubble.rounded.length-1 '─' lineColor @color.bg
         else
             xs = @crumbs.rounded.length + @bubble.rounded.length
             xe = @cells.x + @cells.cols
-            @cells.fill_row 0 xs xe '─' @color.frame @color.bg
+            @cells.fill_row 0 xs xe '─' lineColor @color.bg
             
     onMouse: event =>
 

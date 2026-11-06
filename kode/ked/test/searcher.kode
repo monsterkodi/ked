@@ -3,6 +3,7 @@ use fs
 use ../../kxk    ▪ slash
 use ../edit      ◆ editor
 use ../util      ◆ harness config
+use ../theme     ◆ theme
 use ../index     ◆ prjcts
 use ../view/menu ◆ searcher
 
@@ -221,6 +222,57 @@ use ../view/menu ◆ searcher
         s.selectPrevFileHeader() ▸ false
         s.choices.currentIndex() ▸ 1
         s.choices.state.s.view[1] ▸ 1
+
+        config.data = savedConfig
+        delete global.ked_session
+        fs.rmSync root recursive:true force:true
+
+
+  ▸ the selected file separator is blue
+
+        root = '/tmp/opencode/ked-searcher-selected'
+        main = slash.path root 'main.kode'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync main 'if a\n'
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[main]
+
+        global.ked_session =
+            get: (key) -> main
+            set: (key value) -> null
+
+        savedConfig = config.data
+        config.data =
+            project: maxDepth:12 ignore:[]
+            sourceFileExtensions: ['kode']
+
+        ◯ prjcts.index main
+
+        h = new harness cols:80 rows:30
+        e = new editor h.screen 'test_editor' ['gutter']
+        e.cells.layout 1 0 79 30
+        s = new searcher h.screen e
+
+        ◯ s.show 'if'
+
+        s.choices.select 0
+        s.draw()
+
+        sfil  = s.sfils[0]
+        lineX = sfil.cells.x + 2
+        lineY = sfil.cells.y
+
+        h.screen.get_fg(lineX lineY) ▸ theme.finder.frame
+
+        s.choices.select sfil.lineIndex
+        s.draw()
+
+        h.screen.get_fg(lineX lineY) ▸ theme.selection.span
 
         config.data = savedConfig
         delete global.ked_session
