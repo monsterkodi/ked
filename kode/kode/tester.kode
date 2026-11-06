@@ -146,7 +146,7 @@ columns  = 60
         
         s = ''
         for time in times
-            s += ' ' + b3(time.name) + ' ' + b1(time.ms) + ' '
+            s += ' ' + b5(time.name) + ' ' + b2(time.ms) + '  '
         s
     
     summarize: (times) ->
@@ -158,11 +158,11 @@ columns  = 60
             log g3(@showSpace(fail.rhs))
              
         if allsuccs or fails.length
-            summary  = w2 kstr.now() + ' '
+            summary  = '\n '
             if valid allfails
                 summary += R2 y2(' ✘ ') + y6(allfails.length) + y3(' failure' + (allfails.length > 1 ? 's ' : ' ')) 
             else if allsuccs
-                summary += g3(" ✔ ") + g1(allsuccs) + ' ' 
+                summary += g1(allsuccs) + g3(" ✔ ") + ' ' 
                 summary += @timesText(times) if valid times
             log summary
 
