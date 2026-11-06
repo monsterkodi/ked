@@ -68,7 +68,7 @@ initStyles = ->
 
     @strip: s ->
     
-        ⮐  s if not s is str
+        ⮐ s if not s is str
         
         STRIPANSI = /\x1B[[(?);]{0,2}(;?\d)*./g
         s.replace STRIPANSI ''

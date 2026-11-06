@@ -84,7 +84,7 @@ use ../../edit/tool ◆ belt
         x2 = min @cols-1 x2
         y2 = min @rows-1 y2
 
-        ⮐  if x1 > x2 or y1 > y2
+        ⮐ if x1 > x2 or y1 > y2
 
         @eraseRects ?= []
         @eraseRects.push [x1 y1 x2 y2]

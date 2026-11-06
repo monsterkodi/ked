@@ -142,7 +142,7 @@ use ..           ◆ mode
                 if brckts.surround[event.char][1] == event.char # if entering closing bracket         # should check if this condition 
                     if seg == event.char                        # and it is already there             # is true for all cursors 
                         @state.moveCursors 'right'              # move cursor over existing bracket   # ϝ𝓊𝜏𝓊ɼϵ ⫙ϵ 𝖍𝕒𝜏ϵ ⟅𝚒𝛋ϵ⟅𝛾 
-                        ⮐                                      # to not disturb manual closing       # 𝔟𝓊𝜏 𝔭ℜϵ𝖘ϵ∩𝜏 ⫙ϵ ⟅⩜𝓏𝛾 ;)
+                        ⮐                                     # to not disturb manual closing       # 𝔟𝓊𝜏 𝔭ℜϵ𝖘ϵ∩𝜏 ⫙ϵ ⟅⩜𝓏𝛾 ;)
                         
                 if seg not in ['' undefined ' ' '}' ']' ')']    # if any cursor is not at a space or eol or on a closing bracket
                     ⮐ "unhandled"                              # abort the insertion

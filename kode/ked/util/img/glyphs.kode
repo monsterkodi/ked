@@ -24,7 +24,7 @@ import fontmap from './fontmap.json' with { type: "json" }
             ⮐ @cache[key]
 
         raw = fontmap[key]
-        ⮐  null if not raw
+        ⮐ null if not raw
 
         masks = {}
 

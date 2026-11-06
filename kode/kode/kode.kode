@@ -92,7 +92,7 @@ use ../kolor ◆ kulur
     
     compile: @text @file @target ->
 
-        ⮐  '' if empty trim @text
+        ⮐ '' if empty trim @text
         
         log @text if @args.verbose
 

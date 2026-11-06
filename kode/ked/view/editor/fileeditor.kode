@@ -172,7 +172,7 @@ use                 ◆ mapscr
             
     singleCursorAtLine: li =>
     
-        ⮐  if empty li
+        ⮐ if empty li
     
         @state.setCursors [[0 li]] main:'ind' adjust:'topBotDelta'
         
@@ -222,10 +222,10 @@ use                 ◆ mapscr
         
     onMouse: event =>
     
-        ret = super event ; ⮐  ret if ret?.redraw
+        ret = super event ; ⮐ ret if ret?.redraw
         
         if not (@dragStart or @cells.isInsideEvent(event) or (@gutter?.cells.isInsideEvent(event)))
-            ⮐  @hover 
+            ⮐ @hover 
         
         [col row] = @eventPos event
         
@@ -253,7 +253,7 @@ use                 ◆ mapscr
                         
                     @dragStart = copy @state.s.selections[0]
                     
-                    ⮐  redraw:true
+                    ⮐ redraw:true
                     
                 else
                     
@@ -278,7 +278,7 @@ use                 ◆ mapscr
                     
                     @grabFocus()
                     
-                    ⮐  redraw:true
+                    ⮐ redraw:true
                     
             'drag'
             
@@ -294,7 +294,7 @@ use                 ◆ mapscr
                     if event.shift ➜ @state.addRangeToSelectionWithMainCursorAtEnd belt.rangeFromStartToEnd(start [x y])
                     else             @state.select start [x y]
                         
-                    ⮐  redraw:true
+                    ⮐ redraw:true
                     
             'release'
             
@@ -316,7 +316,7 @@ use                 ◆ mapscr
         
     onWheel: event =>
         
-        ⮐  if event.cell[1] >= @cells.y + @cells.rows
+        ⮐ if event.cell[1] >= @cells.y + @cells.rows
         
         if @dragStart
             

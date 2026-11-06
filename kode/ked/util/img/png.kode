@@ -52,9 +52,9 @@ paeth = a b c ->
     pa = (p-a) 
     pb = (p-b) 
     pc = (p-c)
-    ⮐  a if pa*pa <= pb*pb and pa*pa <= pc*pc
-    ⮐  b if pb*pb <= pc*pc
-    ⮐  c
+    ⮐ a if pa*pa <= pb*pb and pa*pa <= pc*pc
+    ⮐ b if pb*pb <= pc*pc
+    ⮐ c
 
 copyTile = sb sw sh tb tw th xoff yoff mode ->
 
@@ -94,7 +94,7 @@ copyTile = sb sw sh tb tw th xoff yoff mode ->
                     ba = tb[ti+3]; br=tb[ti]; bg=tb[ti+1]; bb=tb[ti+2]
                     continue if fa==ba and fr==br and fg==bg and fb==bb
 
-                    ⮐  false if fa < 220 and ba > 20
+                    ⮐ false if fa < 220 and ba > 20
     true
 
 crcLib = 
@@ -904,7 +904,7 @@ getNearest = nd r g b a ->
 
     if nd.left == null
         nd.tdst = dist nd.est.q r g b a
-        ⮐  nd
+        ⮐ nd
         
     pd = planeDst nd.est r g b a
     
@@ -915,7 +915,7 @@ getNearest = nd r g b a ->
         node1 = nd.left
     
     ln = getNearest node0 r g b a
-    ⮐  ln if ln.tdst <= pd*pd
+    ⮐ ln if ln.tdst <= pd*pd
     rn = getNearest node1 r g b a
     
     (rn.tdst < ln.tdst) ? rn : ln

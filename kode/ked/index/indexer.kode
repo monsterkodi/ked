@@ -62,7 +62,7 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
     
     addFuncInfo: funcName funcInfo ->
         
-        ⮐  if not funcName
+        ⮐ if not funcName
         
         if funcName.length > 1 and funcName.startsWith '@'
             funcName = funcName.slice 1
@@ -93,7 +93,7 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
 
     removeFile: file ->
         
-        ⮐  if not @files[file]?
+        ⮐ if not @files[file]?
         
         for name,infos of @funcs
             pullIf infos (v) -> v.file == file
@@ -213,7 +213,7 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
                                 
         text =○ nfs.read file
         
-        ⮐  if empty text
+        ⮐ if empty text
         
         # ●▸ hash
         hash = kstr.hash text
@@ -243,18 +243,18 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
         
         if 
             
-            isHpp or isCpp    ➜ ⮐  @applyIndexer file fileInfo text index_hpp
-            isJS              ➜ ⮐  @applyIndexer file fileInfo text index_js
-            fileExt == 'mm'   ➜ ⮐  @applyIndexer file fileInfo text index_mm
-            fileExt == 'md'   ➜ ⮐  @applyIndexer file fileInfo text index_md
-            fileExt == 'styl' ➜ ⮐  @applyIndexer file fileInfo text index_styl
-            fileExt == 'kode' ➜ ⮐  @applyIndexer file fileInfo text index_kode
-            fileExt == 'noon' ➜ ⮐  @applyIndexer file fileInfo text index_noon
-            fileExt == 'json' ➜ ⮐  @applyIndexer file fileInfo text index_json
-            fileExt == 'nim'  ➜ ⮐  @applyIndexer file fileInfo text index_nim
-            fileExt == 'lua'  ➜ ⮐  @applyIndexer file fileInfo text index_lua
-            fileExt == 'kim'  ➜ ⮐  @applyIndexer file fileInfo text index_kim
-            fileExt == 'kua'  ➜ ⮐  @applyIndexer file fileInfo text index_kua
+            isHpp or isCpp    ➜ ⮐ @applyIndexer file fileInfo text index_hpp
+            isJS              ➜ ⮐ @applyIndexer file fileInfo text index_js
+            fileExt == 'mm'   ➜ ⮐ @applyIndexer file fileInfo text index_mm
+            fileExt == 'md'   ➜ ⮐ @applyIndexer file fileInfo text index_md
+            fileExt == 'styl' ➜ ⮐ @applyIndexer file fileInfo text index_styl
+            fileExt == 'kode' ➜ ⮐ @applyIndexer file fileInfo text index_kode
+            fileExt == 'noon' ➜ ⮐ @applyIndexer file fileInfo text index_noon
+            fileExt == 'json' ➜ ⮐ @applyIndexer file fileInfo text index_json
+            fileExt == 'nim'  ➜ ⮐ @applyIndexer file fileInfo text index_nim
+            fileExt == 'lua'  ➜ ⮐ @applyIndexer file fileInfo text index_lua
+            fileExt == 'kim'  ➜ ⮐ @applyIndexer file fileInfo text index_kim
+            fileExt == 'kua'  ➜ ⮐ @applyIndexer file fileInfo text index_kua
                     
         # ●▪ index
         @

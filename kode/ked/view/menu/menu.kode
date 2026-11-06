@@ -129,7 +129,7 @@ use                 ◆ greet inputchoice
                             
     draw: ->
 
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         @arrange()
         @erase()

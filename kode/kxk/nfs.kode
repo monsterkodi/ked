@@ -75,7 +75,7 @@ import fsp from 'fs/promises'
                 r =○ fsp.readlink p
                 if not slash.isAbsolute r
                     r = slash.path slash.dir(p) r
-                ⮐  r
+                ⮐ r
         catch err
             warn "nfs.resolveSymlink --" err
         p
@@ -122,7 +122,7 @@ import fsp from 'fs/promises'
     @info: p ○->
         
         try
-            ⮐  ○ fsp.stat p
+            ⮐ ○ fsp.stat p
         catch err
             error "nfs.info -- " + String(err)
          
@@ -138,7 +138,7 @@ import fsp from 'fs/promises'
     @exists: p ○->
         
         try
-            ⮐  if not p?
+            ⮐ if not p?
             p = slash.absolute slash.removeLinePos(p) process.cwd()
             ○ fsp.stat p
                               
@@ -246,7 +246,7 @@ import fsp from 'fs/promises'
         
         while git.length and git != "/"
            
-            ⮐  git if ○ NFS.isDir(slash.path(git '.git'))
+            ⮐ git if ○ NFS.isDir(slash.path(git '.git'))
             
             git = slash.dir git
      
@@ -256,7 +256,7 @@ import fsp from 'fs/promises'
         
         while pkg.length and pkg != "/"
            
-            ⮐  pkg if ○ NFS.isFile(slash.path(pkg 'package.json'))
+            ⮐ pkg if ○ NFS.isFile(slash.path(pkg 'package.json'))
             
             pkg = slash.dir pkg
            
@@ -269,9 +269,9 @@ import fsp from 'fs/promises'
         
         while pth.length and pth != "/"
            
-            ⮐  pth if ○ NFS.isDir(slash.path(pth '.git'))
-            ⮐  pth if ○ NFS.isFile(slash.path(pth 'package.json'))
-            ⮐  pth if ○ NFS.isFile(slash.path(slash.dir(pth) 'kakao.kode')) # should be done differently at some point!
+            ⮐ pth if ○ NFS.isDir(slash.path(pth '.git'))
+            ⮐ pth if ○ NFS.isFile(slash.path(pth 'package.json'))
+            ⮐ pth if ○ NFS.isFile(slash.path(slash.dir(pth) 'kakao.kode')) # should be done differently at some point!
            
             pth = slash.dir pth
            

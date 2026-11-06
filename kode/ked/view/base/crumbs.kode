@@ -36,8 +36,8 @@ use              ◆ view
         
     draw: ->
         
-        ⮐  if @hidden()
-        ⮐  if empty @rounded
+        ⮐ if @hidden()
+        ⮐ if empty @rounded
             
         colors = []
         for i in 0...@split.length
@@ -73,7 +73,7 @@ use              ◆ view
         for si in 0...@split.length
             sl += @split[si].length + 2
             if sl > col
-                ⮐  si
+                ⮐ si
         @split.length-1
         
     colsAtSplitIndex: idx ->
@@ -96,13 +96,13 @@ use              ◆ view
         
     adjustText: ->
         
-        ⮐  if @hidden()
+        ⮐ if @hidden()
     
         @path ?= ''
         
         if @path == ''
             @rounded = ''
-            ⮐  
+            ⮐ 
                                   
         @split = slash.split @path
         
@@ -146,7 +146,7 @@ use              ◆ view
         if not @hover
             if @hoverIndex?
                 delete @hoverIndex
-                ⮐  true
+                ⮐ true
             ⮐ 
 
         switch event.type
@@ -157,7 +157,7 @@ use              ◆ view
                 if 0 <= @hoverIndex < @split.length
                     path = @pathAtSplitIndex @hoverIndex
                     @emit 'action' 'click' path event
-                ⮐  redraw:true
+                ⮐ redraw:true
                 
             'move'
             
@@ -165,7 +165,7 @@ use              ◆ view
                 if @hoverIndex != index
                     @hoverIndex = index
                     @emit 'action' 'enter' @pathAtSplitIndex(index) index:index cols:@colsAtSplitIndex(index) 
-                    ⮐  redraw:true
+                    ⮐ redraw:true
 
         @hover
                     

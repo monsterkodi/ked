@@ -447,7 +447,7 @@ salter.desalt = text ->
     for line in lines
         width = max width line.length
     
-    ⮐  '' if width == 0
+    ⮐ '' if width == 0
     
     rows = lines.map (line) -> line + ' '.repeat(width - line.length)
     

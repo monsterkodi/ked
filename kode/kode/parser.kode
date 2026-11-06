@@ -811,7 +811,7 @@ use ./utils ▪ firstLineCol lastLineCol
     parens: open tokens ->
 
         if tokens[0]?.text == ')'
-            ⮐  parens:
+            ⮐ parens:
                 open:  open
                 exps:  []
                 close: tokens.shift()
@@ -825,7 +825,7 @@ use ./utils ▪ firstLineCol lastLineCol
         @pop '('
 
         if comp = @lcomp(exps)
-            ⮐  comp 
+            ⮐ comp 
         
         parens:
             open:  open
@@ -862,7 +862,7 @@ use ./utils ▪ firstLineCol lastLineCol
     curly: open tokens ->
 
         if tokens[0]?.text == '}'
-            ⮐  object:
+            ⮐ object:
                 open:    open
                 keyvals: []
                 close:   tokens.shift()
@@ -979,7 +979,7 @@ use ./utils ▪ firstLineCol lastLineCol
     
         if empty tokens
             @onError "keyval is missing tokens in:\n#{noon key}"
-            ⮐  
+            ⮐ 
 
         colon = tokens.shift()
 

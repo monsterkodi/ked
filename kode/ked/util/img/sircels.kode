@@ -30,7 +30,7 @@ use ◆ png
         
     @place: sx sy sd fg z ->
     
-        ⮐  if empty @csz
+        ⮐ if empty @csz
         
         img = @cache[fg]
         if empty img

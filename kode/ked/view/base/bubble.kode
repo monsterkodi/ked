@@ -26,7 +26,7 @@ use ../base      ◆ view
         
     draw: ->
         
-        ⮐  if @hidden()
+        ⮐ if @hidden()
     
         super()
             
@@ -63,7 +63,7 @@ use ../base      ◆ view
                 
                 if @hover
                     @emit 'action' 'click' @item
-                    ⮐  redraw:true
+                    ⮐ redraw:true
                     
         @hover
     

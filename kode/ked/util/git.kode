@@ -86,7 +86,7 @@ use child_process
             added:   []
             files:   {}
         
-        ⮐  status if empty gitDir 
+        ⮐ status if empty gitDir 
         
         if @statusRequests[gitDir]
             @statusAgain[gitDir] = true

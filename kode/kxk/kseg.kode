@@ -10,8 +10,8 @@ segmenter = new Intl.Segmenter "en-US" granularity:'grapheme'
 
 kseg = s ->
     
-    ⮐  [] if empty s
-    ⮐  s if not s is str
+    ⮐ [] if empty s
+    ⮐ s if not s is str
     
     Array.from(segmenter.segment(s)).map (r) -> r.segment
     
@@ -87,8 +87,8 @@ kseg.segls = any ->
 
 kseg.str = any ->
 
-    ⮐  '' if empty any
-    ⮐  String(any) if not any is arr
+    ⮐ '' if empty any
+    ⮐ String(any) if not any is arr
     if any[0] is str
         any.join ''
     else
@@ -113,7 +113,7 @@ kseg.join = args... ->
 
 kseg.detab = a tw=4 ->
     
-    ⮐  a if not a is arr
+    ⮐ a if not a is arr
     
     i = 0
     while i < a.length
@@ -167,7 +167,7 @@ kseg.words = any ->
     
 kseg.infos = any key test ->
     
-    ⮐  [] if empty any
+    ⮐ [] if empty any
     
     infos = []
     turd = true
@@ -202,9 +202,9 @@ kseg.infos = any key test ->
 
 kseg.startsWith = a prefix ->
     
-    ⮐  false if a.length < prefix.length
-    ⮐  false if empty a or empty prefix
-    ⮐  false if not a is arr
+    ⮐ false if a.length < prefix.length
+    ⮐ false if empty a or empty prefix
+    ⮐ false if not a is arr
     
     segs = kseg prefix
     a[0...segs.length] eql segs
@@ -217,9 +217,9 @@ kseg.startsWith = a prefix ->
 
 kseg.endsWith = a postfix ->
     
-    ⮐  false if a.length < postfix.length
-    ⮐  false if empty a or empty postfix
-    ⮐  false if not a is arr
+    ⮐ false if a.length < postfix.length
+    ⮐ false if empty a or empty postfix
+    ⮐ false if not a is arr
     
     segs = kseg postfix
     a[a.length-segs.length..] eql segs
@@ -236,49 +236,49 @@ kseg.endsWith = a postfix ->
 kseg.headCount = a c ->
     
     for s,i in a
-        ⮐  i if s != c
+        ⮐ i if s != c
     i
     
 kseg.tailCount = a c ->
     
     for i in 0...a.length
-        ⮐  i if a[a.length-1-i] != c
+        ⮐ i if a[a.length-1-i] != c
     i
 
 kseg.headCountWord = a ->
     
     for s,i in a
-        ⮐  i if not /\w+/.test s
+        ⮐ i if not /\w+/.test s
     i
     
 kseg.tailCountWord = a ->
     
     for i in 0...a.length
-        ⮐  i if not /\w+/.test a[a.length-1-i]
+        ⮐ i if not /\w+/.test a[a.length-1-i]
     i
 
 kseg.headCountTurd = a ->
     
     for s,i in a
-        ⮐  i if /[\s\w]+/.test s
+        ⮐ i if /[\s\w]+/.test s
     i
     
 kseg.tailCountTurd = a ->
     
     for i in 0...a.length
-        ⮐  i if /[\s\w]+/.test a[a.length-1-i]
+        ⮐ i if /[\s\w]+/.test a[a.length-1-i]
     i
 
 kseg.headCountChunk = a ->
     
     for s,i in a
-        ⮐  i if /[\s]+/.test s
+        ⮐ i if /[\s]+/.test s
     i
     
 kseg.tailCountChunk = a ->
     
     for i in 0...a.length
-        ⮐  i if /[\s]+/.test a[a.length-1-i]
+        ⮐ i if /[\s]+/.test a[a.length-1-i]
     i
     
 kseg.collectGraphemes = a ->
@@ -330,7 +330,7 @@ kseg.splitAtIndent = a ->
     
 kseg.repeat = n s=' ' ->
     
-    ⮐  [] if n <= 0
+    ⮐ [] if n <= 0
     s = kseg s
     a = []
     for i in 0...n
@@ -339,7 +339,7 @@ kseg.repeat = n s=' ' ->
     
 kseg.trim = s c=' ' ->
     
-    ⮐  [] if empty s
+    ⮐ [] if empty s
     s = kseg s
     hc = kseg.headCount s c
     tc = kseg.tailCount s c
@@ -348,7 +348,7 @@ kseg.trim = s c=' ' ->
 ### 
     segment index at column w 
     
-    ⮐  start of segment if column is inside
+    ⮐ start of segment if column is inside
 ###
 kseg.segiAtWidth = segs w ->
 
@@ -372,7 +372,7 @@ kseg.widthAtSegi = segs segi ->
 ###
 kseg.width = s ->
     
-    ⮐  0 if empty s
+    ⮐ 0 if empty s
     if s is str
         segs = kseg s
     else
@@ -387,7 +387,7 @@ kseg.segWidth = seg -> wcwidth seg.codePointAt(0)
 ### 
     segment index at column w 
     
-    ⮐  start of next segment if column is inside
+    ⮐ start of next segment if column is inside
 ###
 kseg.indexAtWidth = segs w ->
 
@@ -399,7 +399,7 @@ kseg.indexAtWidth = segs w ->
     
 kseg.hash = s ->
 
-    ⮐  0 if empty s
+    ⮐ 0 if empty s
     s = kseg s
     h = 9
     for i in s.length-1..0 
@@ -541,8 +541,8 @@ wcwidth_singlewidth = [
 
 intable = table c ->
   
-    ⮐  if c < table[0][0]
-    ⮐  if c > table[-1][1]
+    ⮐ if c < table[0][0]
+    ⮐ if c > table[-1][1]
   
     bot = 0
     top = table.length - 1
@@ -555,18 +555,18 @@ intable = table c ->
         else if table[mid][0] > c
             top = mid - 1
         else 
-            ⮐  true
+            ⮐ true
   
 wcwidth = c ->
     
-    ⮐  0 if c < 0 or c > 0x10ffff
-    ⮐  1 if intable wcwidth_singlewidth    c
-    ⮐  1 if intable wcwidth_ambiguous      c
-    ⮐  1 if intable wcwidth_private        c
-    ⮐  2 if intable wcwidth_doublewidth    c
-    ⮐  2 if intable wcwidth_emoji_width    c
-    ⮐  0 if intable wcwidth_nonprint       c
-    ⮐  0 if intable wcwidth_combining      c
+    ⮐ 0 if c < 0 or c > 0x10ffff
+    ⮐ 1 if intable wcwidth_singlewidth    c
+    ⮐ 1 if intable wcwidth_ambiguous      c
+    ⮐ 1 if intable wcwidth_private        c
+    ⮐ 2 if intable wcwidth_doublewidth    c
+    ⮐ 2 if intable wcwidth_emoji_width    c
+    ⮐ 0 if intable wcwidth_nonprint       c
+    ⮐ 0 if intable wcwidth_combining      c
     1
     
 dumptable = table ->

@@ -260,7 +260,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
                     t = @fixAsserts t
                 else 
                     t = splt[0]
-                ⮐  "(#{t} != null)"
+                ⮐ "(#{t} != null)"
                 
             s = ''
 

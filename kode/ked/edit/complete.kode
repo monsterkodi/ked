@@ -38,7 +38,7 @@ use           ◆ specs
         
         # log "complete.complete #{tcw} #{hcw}"
         
-        ⮐  if tcw > 1 and hcw # don't complete if cursor is inside a word
+        ⮐ if tcw > 1 and hcw # don't complete if cursor is inside a word
         
         tct = kseg.tailCountTurd before
         
@@ -77,7 +77,7 @@ use           ◆ specs
 
         @visible = valid @words
         
-        ⮐  if empty @words
+        ⮐ if empty @words
         
         mc = @editor.state.mainCursor()
         
@@ -100,7 +100,7 @@ use           ◆ specs
             @choices.selectFirst()
         
     hide: -> 
-        ⮐  if not @visible
+        ⮐ if not @visible
         @editor.state.syntax.setSegls @editor.state.s.lines
         @visible = false
         
@@ -108,21 +108,21 @@ use           ◆ specs
         
     onEditorLayout: =>
     
-        ⮐  if @hidden()
+        ⮐ if @hidden()
 
 #!key        
     handleKey: key event ->
         
-        ⮐  'unhandled' if @hidden() or empty @words
+        ⮐ 'unhandled' if @hidden() or empty @words
         
         switch key
             'tab'
-            'return' ➜ ⮐  @apply()
-            'esc'    ➜ ⮐  @hide()
+            'return' ➜ ⮐ @apply()
+            'esc'    ➜ ⮐ @hide()
             'up'
             'down' 
                 if @words.length > 1
-                    ⮐  @moveSelection key
+                    ⮐ @moveSelection key
         
         'unhandled'
     
@@ -130,7 +130,7 @@ use           ◆ specs
     
     onMouse: event =>
         
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         cret = @choices.onMouse event
         
@@ -142,7 +142,7 @@ use           ◆ specs
 
     onWheel: event => 
         
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         @choices.onWheel event
         
@@ -168,7 +168,7 @@ use           ◆ specs
     onChoicesAction: action choice=>
         
         switch action
-            'click' ➜ ⮐  @apply()
+            'click' ➜ ⮐ @apply()
             
     currentWord: ->
         
@@ -179,7 +179,7 @@ use           ◆ specs
         
     preDrawLines: lines ->
     
-        ⮐  lines if @hidden() or empty @words
+        ⮐ lines if @hidden() or empty @words
 
         word  = @currentWord()
         lines = lines.asMutable()
@@ -190,7 +190,7 @@ use           ◆ specs
 #!draw        
     drawCompletion: ->
         
-        ⮐  if @hidden() or empty @words
+        ⮐ if @hidden() or empty @words
 
         word = @currentWord()
         
@@ -209,8 +209,8 @@ use           ◆ specs
 
     drawPopup: ->
         
-        ⮐  if @hidden() or empty @words
-        ⮐  if @words.length <= 1
+        ⮐ if @hidden() or empty @words
+        ⮐ if @words.length <= 1
         
         mc = @editor.state.mainCursor()  
          

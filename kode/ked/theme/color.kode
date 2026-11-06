@@ -58,17 +58,17 @@ use ../edit/tool ◆ belt
     
     @darken: c f=0.5 -> 
     
-        ⮐  [0 0 0] if empty c
+        ⮐ [0 0 0] if empty c
         c.map((v) -> clamp(0 255 int(f*v)))
         
     @brighten: c f=0.5 ->
     
-        ⮐  [255 255 255] if empty c
+        ⮐ [255 255 255] if empty c
         c.map((v) -> clamp(0 255 int((1+f)*v)))
         
     @vibrant: c f=0.5 ->
         
-        ⮐  [128 128 128] if empty c
+        ⮐ [128 128 128] if empty c
         w = (c[0] + c[1] + c[2]) / 3
         w *= 2 if c[0] * c[1] * c[2] == 0
         [
@@ -131,9 +131,9 @@ use ../edit/tool ◆ belt
             hue2rgb = p q t ->
                 if t < 0   ➜  t += 1
                 if t > 1   ➜  t -= 1
-                if t < 1/6 ➜ ⮐  p + (q - p) * 6 * t
-                if t < 1/2 ➜ ⮐  q
-                if t < 2/3 ➜ ⮐  p + (q - p) * (2/3 - t) * 6
+                if t < 1/6 ➜ ⮐ p + (q - p) * 6 * t
+                if t < 1/2 ➜ ⮐ q
+                if t < 2/3 ➜ ⮐ p + (q - p) * (2/3 - t) * 6
                 p
     
             q = if l < 0.5 ➜ l * (1 + s) else l + s - l * s
@@ -199,17 +199,17 @@ use ../edit/tool ◆ belt
         
     @bg_rgb: c -> # background
     
-        ⮐  '\x1b[49m' if empty c
+        ⮐ '\x1b[49m' if empty c
         "\x1b[48;2;#{c[0]};#{c[1]};#{c[2]}m" 
 
     @fg_rgb: c -> # foreground (text) 
         
-        ⮐  '\x1b[39m' if empty c
+        ⮐ '\x1b[39m' if empty c
         "\x1b[38;2;#{c[0]};#{c[1]};#{c[2]}m" 
 
     @ul_rgb: c -> # underline color
         
-        ⮐  '\x1b[59m' if empty c
+        ⮐ '\x1b[59m' if empty c
         "\x1b[58;2;#{c[0]};#{c[1]};#{c[2]}m" 
         
     @randomBackgroundColors: lines bg fg ->
@@ -301,14 +301,14 @@ use ../edit/tool ◆ belt
         color.readabilityCache[bg] ?= {}
         
         if clr = color.readabilityCache[bg][fg]
-            ⮐  clr
+            ⮐ clr
     
         color.readabilityCache[bg][fg] = @ensureReadability fg bg
                 
     @ensureReadability: fg bg ->
     
-        ⮐  fg if empty fg or not fg[0] is num
-        ⮐  fg if empty bg or not bg[0] is num
+        ⮐ fg if empty fg or not fg[0] is num
+        ⮐ fg if empty bg or not bg[0] is num
     
         contrastRatio = l1 l2 -> (max(l1 l2) + 0.05) / (min(l1 l2) + 0.05)
     
@@ -330,7 +330,7 @@ use ../edit/tool ◆ belt
     
             contrast = contrastRatio fgLuminance bgLuminance
     
-            ⮐  fg if contrast >= 4.5 # WCAG AA standard - ⊂𝕒𝓊𝖘ϵ ⫐ϵϵ𝔭𝓢ϵϵ𝓚 𝖘𝕒𝚒𝒹 𝖘⊚ :Ρ
+            ⮐ fg if contrast >= 4.5 # WCAG AA standard - ⊂𝕒𝓊𝖘ϵ ⫐ϵϵ𝔭𝓢ϵϵ𝓚 𝖘𝕒𝚒𝒹 𝖘⊚ :Ρ
     
             l += step
             step = -step if l < 0 or l > 100

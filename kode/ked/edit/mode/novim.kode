@@ -119,7 +119,7 @@ use ../../theme  ◆ theme
     @clipboardEnabled: ->
 
         if novim.clipboardSync == null
-            ⮐  not novim.isHeadless()
+            ⮐ not novim.isHeadless()
 
         novim.clipboardSync
 
@@ -186,7 +186,7 @@ use ../../theme  ◆ theme
 
     repeatFind: reverse=false ->
 
-        ⮐  if not @lastFind
+        ⮐ if not @lastFind
 
         forward = reverse ? not @lastFind.forward : @lastFind.forward
 
@@ -225,7 +225,7 @@ use ../../theme  ◆ theme
             'q'   
                     if @state.isDirty()
                         post.emit 'novim.error' 'unsaved changes'
-                        ⮐  false
+                        ⮐ false
                     post.emit 'quit'
             'q!'  ➜ post.emit 'quit'
             'w'

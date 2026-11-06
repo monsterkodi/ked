@@ -58,7 +58,7 @@ use ../base        ◆ view
             if valid @preview
                 @preview = []
                 post.emit 'redraw'
-            ⮐  
+            ⮐ 
                 
         if valid @gitChanges and (event.cmd or event.ctrl or event.alt)            
             pos = @eventPos event
@@ -69,7 +69,7 @@ use ../base        ◆ view
                 else if event.type == 'move'
                     if @gitChanges[idx].old
                         @preview = [idx]
-                        ⮐  redraw:true
+                        ⮐ redraw:true
 
         if valid @preview
             @preview = []
@@ -77,7 +77,7 @@ use ../base        ◆ view
                 
     drawPreviews: -> 
     
-        ⮐  if empty @preview or empty @gitChanges
+        ⮐ if empty @preview or empty @gitChanges
         
         for idx in @preview
             segl = kseg(@gitChanges[idx].old ? '')
@@ -132,9 +132,9 @@ use ../base        ◆ view
             
     drawGitScroll: ->
     
-        ⮐  if empty @gitBlocks
+        ⮐ if empty @gitBlocks
         csz = @screen.t.cellsz
-        ⮐  if empty csz
+        ⮐ if empty csz
         
         sw = int csz[0]/2 
         sx = (@cells.x-1)*csz[0]

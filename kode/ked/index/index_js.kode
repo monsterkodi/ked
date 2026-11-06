@@ -48,7 +48,7 @@
 
     matchTokens: (tokens ptn) ->
         
-        ⮐  if empty tokens
+        ⮐ if empty tokens
         
         strongMatch = false
         weakMatch = false
@@ -81,7 +81,7 @@
                     '○' 
                         if ci == ptn.length-1
                             rslt[varName] = tokens[si..].join ' '
-                            ⮐  rslt
+                            ⮐ rslt
                         else
                             if ptn[ci+1] == tokens[si]
                                 weakMatch = false
@@ -101,12 +101,12 @@
 
             ⮐ 
         
-        ⮐  if ci < ptn.length
+        ⮐ if ci < ptn.length
         
         if ci == ptn.length and varName and si < tokens.length
             rslt[varName] += ' ' + tokens[si..].join(' ')
         
-        ⮐  rslt if strongMatch or weakMatch
+        ⮐ rslt if strongMatch or weakMatch
 
     validFuncName: (name) -> name not in ['if' 'for' 'while' 'switch' 'return' 'catch']
     validFuncArgs: (args) -> args[0] == '(' and args[-1] == ')'
@@ -131,7 +131,7 @@
     parseLine: index line ->
         
         t = trim line
-        ⮐  if empty t
+        ⮐ if empty t
         
         top = not line.startsWith ' '
         tokens = null

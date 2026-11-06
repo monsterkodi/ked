@@ -30,7 +30,7 @@ use              ◆ view
                 if @hover
                     post.emit 'pointer' 'grabbing'
                     @doDrag = true
-                    ⮐  redraw:true
+                    ⮐ redraw:true
                     
             'drag'
             
@@ -47,7 +47,7 @@ use              ◆ view
                     if delta
                         post.emit 'view.size' @parentName @frameSide delta
                         
-                    ⮐  redraw:true
+                    ⮐ redraw:true
                     
                 @hover = false
                 
@@ -56,12 +56,12 @@ use              ◆ view
                 if @doDrag
                     post.emit 'pointer' @pointerType if @hover
                     delete @doDrag
-                    ⮐  redraw:true
+                    ⮐ redraw:true
         @hover
             
     draw: =>
     
-        ⮐  if not @hover
+        ⮐ if not @hover
         
         @cells.fill_col 0 0 @cells.rows-1 '|' @color.fg @color.bg
 

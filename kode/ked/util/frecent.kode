@@ -13,7 +13,7 @@ use ../../kxk ▪ kstr pretty post
     
         if empty key
             error "frecent.sample - needs key to sample! got" key
-            ⮐      
+            ⮐     
     
         @buckets[bucket][key] ?= rank:1 time:@now()
         

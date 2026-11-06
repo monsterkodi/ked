@@ -25,9 +25,9 @@ use ◆ png
 
     @set: img x y rgba ->
     
-        ⮐  if x < 0 or y < 0
-        ⮐  if x >= img.w
-        ⮐  if y >= img.h
+        ⮐ if x < 0 or y < 0
+        ⮐ if x >= img.w
+        ⮐ if y >= img.h
         
         for i in 0...rgba.length
             img.view.setUint8 ((x+y*img.w)*4)+i rgba[i]
@@ -217,7 +217,7 @@ use ◆ png
     @place: x y name fg xe ye z bg scale=1 ->
         
         csz = ked_ttio.cellsz
-        ⮐  if empty csz
+        ⮐ if empty csz
         
         key = name+fg+scale
         img = @cache[key]

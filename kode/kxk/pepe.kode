@@ -30,8 +30,8 @@
 
 pepe = str opt ->
     
-    ⮐  []   if not str is str
-    ⮐  [''] if empty str
+    ⮐ []   if not str is str
+    ⮐ [''] if empty str
     
     opt ?= {}
     index = opt.index ? false
@@ -85,7 +85,7 @@ pepe = str opt ->
                             advance end.length
                         else
                             contentPush()
-                            ⮐  mismatch:stack tail:str[p...str.length]
+                            ⮐ mismatch:stack tail:str[p...str.length]
                         break
                 
         if p == op
@@ -133,7 +133,7 @@ pepe.depepe = pep cb ->
 pepe.flatten = pep ->
 
     f = []
-    ⮐  f if not f is arr
+    ⮐ f if not f is arr
     for p in pep
         if not p is str
             f.push start:p.start rng:p.rng end:p.end

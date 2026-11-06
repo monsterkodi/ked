@@ -34,14 +34,14 @@ use                ◆ view
                 if @hover
                     @doDrag = true
                     post.emit 'pointer''grabbing' 
-                    ⮐  @scrollToPixel event.pixel
+                    ⮐ @scrollToPixel event.pixel
                     
             'drag'
             
                 if @doDrag
                     @hover = true
                     post.emit 'pointer''grab' 
-                    ⮐  @scrollToPixel event.pixel
+                    ⮐ @scrollToPixel event.pixel
                     
                 @hover = false
                 
@@ -50,7 +50,7 @@ use                ◆ view
                 if @doDrag
                     post.emit 'pointer''pointer' if @hover
                     delete @doDrag 
-                    ⮐  true
+                    ⮐ true
         @hover
         
     isActive: ->
@@ -83,7 +83,7 @@ use                ◆ view
         
     scrollToPixel: pixel =>
     
-        ⮐  if empty (csz = @screen.t.cellsz)
+        ⮐ if empty (csz = @screen.t.cellsz)
 
         rows   = @cells.rows
         total  = @state.totalRows()
@@ -97,13 +97,13 @@ use                ◆ view
 
         @state.setScrollTop row
 
-        ⮐  true if @state.s.view[1] == li and @state.s.scrollOffset == offset
+        ⮐ true if @state.s.view[1] == li and @state.s.scrollOffset == offset
 
         redraw:true
         
     draw: =>
 
-        ⮐  if empty (csz = @screen.t.cellsz)
+        ⮐ if empty (csz = @screen.t.cellsz)
         
         rows = @cells.rows
         
@@ -111,7 +111,7 @@ use                ◆ view
         
         total = @state.totalRows()
         
-        ⮐  if total <= rows
+        ⮐ if total <= rows
         
         kh = @knobHeight csz
         ky = @knobOffset csz

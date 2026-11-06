@@ -25,7 +25,7 @@ use ../../edit   ◆ editor
         
     onMouse: event =>
     
-        ⮐  if @hidden()
+        ⮐ if @hidden()
         
         super event
 

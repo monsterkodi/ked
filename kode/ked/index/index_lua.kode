@@ -42,8 +42,8 @@ use ../../kxk ▪ kermit
                 @result.funcs.push fnc
                 null
                                 
-            if match = methMatch "function #{className}:●name(○args)"        ➜ ⮐  addMeth match.name
-            if match = methMatch "function #{className}.static.●name(○args)" ➜ ⮐  addMeth match.name, static:true
+            if match = methMatch "function #{className}:●name(○args)"        ➜ ⮐ addMeth match.name
+            if match = methMatch "function #{className}.static.●name(○args)" ➜ ⮐ addMeth match.name, static:true
                                      
         addFunc = name opt={} =>
             
