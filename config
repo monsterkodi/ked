@@ -42,11 +42,11 @@ project
         ked.log
         
 log
-    memory      true
+    memory      false
     
 dirtree
     allow
-        ~/s
+        ~
         /tmp
 
 filetypes
