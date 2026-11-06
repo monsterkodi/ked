@@ -31,6 +31,8 @@ use                 ◆ finder searcherfile
         
         text = @searchText text # to use selection or cursor word if text is empty
         
+        @lastSearchText = text
+        
         # log g4("#{r6 'searcher'} '#{text}'")
         
         if empty text

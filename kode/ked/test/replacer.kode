@@ -318,19 +318,21 @@ use ../view/menu ◆ replacer
         delete global.ked_session
         fs.rmSync root recursive:true force:true
 
-  ▸ submitting the replacement field logs the planned changes
+  ▸ replacing changes included lines and skips excluded files and lines
 
-        root = '/tmp/opencode/ked-replacer-submit'
-        main = slash.path root 'main.kode'
+        root  = '/tmp/opencode/ked-replacer-submit'
+        main  = slash.path root 'main.kode'
+        other = slash.path root 'other.kode'
 
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
 
         fs.writeFileSync slash.path(root 'package.json') '{}'
-        fs.writeFileSync main 'if a\nif b\nif c\n'
+        fs.writeFileSync main 'if if\nif b\nif c\n'
+        fs.writeFileSync other 'if d\n'
 
         delete prjcts.projects[root]
-        delete prjcts.allFiles[main]
+        for file in [main other] ➜ delete prjcts.allFiles[file]
 
         global.ked_session =
             get: (key) -> main
@@ -350,21 +352,36 @@ use ../view/menu ◆ replacer
 
         ○ r.show 'if'
 
-        h.type r 'XX'
+        mainHandler  = null
+        otherHandler = null
 
-        lines = []
-        keep = console.log
-        console.log = (args...) -> lines.push args.join(' ')
+        for sfil in r.sfils
+            if sfil.path == main ➜ mainHandler  = sfil
+            if sfil.path == other ➜ otherHandler = sfil
 
-        h.key r 'return'
+        (mainHandler != null)  ▸ true
+        (otherHandler != null) ▸ true
 
-        console.log = keep
+        lineItem = null
 
-        lines.length ▸ 2
-        lines[0].includes '1 files' ▸ true
-        lines[0].includes '3 lines' ▸ true
-        lines[1].includes 'main.kode' ▸ true
-        lines[1].includes '3 lines' ▸ true
+        for item in mainHandler.resultItems
+            if item.row == 1
+                lineItem = item
+                break
+
+        (lineItem != null) ▸ true
+
+        r.choices.select r.choices.items.indexOf lineItem
+
+        ○ r.onChoicesAction 'space' lineItem
+
+        ○ r.onChoicesAction 'space' otherHandler.headerItem
+
+        ○ r.onReplaceInputAction 'submit' 'X'
+
+        fs.readFileSync(main 'utf8')  ▸ 'X X\nif b\nX c\n'
+        fs.readFileSync(other 'utf8') ▸ 'if d\n'
+        r.visible() ▸ false
 
         config.data = savedConfig
         delete global.ked_session
@@ -530,15 +547,6 @@ use ../view/menu ◆ replacer
         lineItem.excluded ▸ true
         r.visible() ▸ true
         r.lineno(lineIndex).includes('✘') ▸ true
-
-        lines = []
-        keep = console.log
-        console.log = (args...) -> lines.push args.join(' ')
-        r.onReplaceInputAction 'submit' 'XX'
-        console.log = keep
-
-        lines[0].includes '2 lines' ▸ true
-        lines[1].includes '2 lines' ▸ true
 
         ○ r.onChoicesAction 'space' lineItem
 

@@ -1,6 +1,7 @@
 
-use ../../../kxk ▪ post
+use ../../../kxk ▪ post nfs
 use ../../theme ◆ color
+use ../../index ◆ kacher
 use ../base     ◆ input
 use             ◆ replacerfile searcher
 ■replacer□searcher
@@ -209,33 +210,71 @@ use             ◆ replacerfile searcher
     onReplaceInputAction: action text =>
 
         switch action
-            'submit' ➜ ⮐ @logReplacement text
+            'submit' ➜ ⮐ @applyReplacement text
             'up'
             'down'   ➜ @choices.moveSelection action
 
-    countReplaceableLines: sfil ->
+    applyReplacement: replacement ○=>
 
-        count = 0
+        search = @lastSearchText ? @input.current()
         
-        for item in sfil.resultItems
-            if item.row is num and not item.excluded
-                count += 1
+        ⮐ if empty search
         
-        count
-
-    logReplacement: replacement =>
-
-        files = @sfils.filter (sfil) -> not sfil.excluded
-        total = 0
+        changedFiles = []
+        changedLines = 0
+        errors       = []
         
-        for sfil in files
-            total += @countReplaceableLines sfil
+        for sfil in @sfils
         
-        log "replacer would replace '#{@input.current()}' with '#{replacement}' in #{files.length} files, #{total} lines"
+            continue if sfil.excluded
+            
+            text =○ kacher.getText sfil.path
+            
+            continue if empty text
+            
+            lines   = text.split '\n'
+            changed = false
+            
+            for item in sfil.resultItems
+            
+                continue if not item.row is num
+                continue if item.excluded
+                continue if item.row >= lines.length
+                
+                line  = lines[item.row]
+                parts = line.split search
+                
+                replaced = parts.join replacement
+                
+                continue if replaced == line
+                
+                lines[item.row] = replaced
+                changed = true
+                changedLines += 1
+            
+            continue if not changed
+            
+            newText = lines.join('\n')
+            result  =○ nfs.write sfil.path newText
+            
+            if result?.error
+                errors.push result.error
+                continue
+            
+            # kacher.invalidate sfil.path # this should not be necessary
+            changedFiles.push sfil.path
+            
+            post.emit 'file.change' path:sfil.path change:'modify'
         
-        for sfil in files
-            count = @countReplaceableLines sfil
-            log "  #{sfil.path}: #{count} lines"
+        for err in errors
+            log err
+        
+        ⮐ if not empty errors
+        
+        log "replaced #{changedLines} lines in #{changedFiles.length} files"
+        
+        @hide()
+        post.emit 'focus' 'editor'
 
     onFileLoaded: file =>
     
