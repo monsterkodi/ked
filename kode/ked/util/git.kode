@@ -17,9 +17,9 @@ use child_process
         post.on 'project.indexed' @onProjectIndexed
         post.on 'file.change'     @onFileChange
         
-    onProjectIndexed: prjPath ○=>
+    onProjectIndexed: prjPath ◯=>
         
-        gitDir =○ git.dir prjPath
+        gitDir =◯ git.dir prjPath
         
         if valid gitDir and gitDir not in @gitDirs
             @gitDirs.push slash.path(gitDir '.git')
@@ -42,15 +42,15 @@ use child_process
 
         git.statusTimers[root] = setTimeout (=> git.runStatus root) git.statusDelay
 
-    @runStatus: root ○->
+    @runStatus: root ◯->
 
         delete git.statusTimers[root]
 
-        ○ git.status root
+        ◯ git.status root
 
-    @dir: path ○-> ○ nfs.git path
+    @dir: path ◯-> ◯ nfs.git path
     
-    @exec: args opt ○->
+    @exec: args opt ◯->
 
         new Promise (resolve reject) ->
         
@@ -75,9 +75,9 @@ use child_process
         checks for changes in the git repository at path
         posts 'git.status' with modified files in repository
     ###
-    @status: path ○->
+    @status: path ◯->
         
-        gitDir =○ git.dir path
+        gitDir =◯ git.dir path
         
         status =
             gitDir:  gitDir
@@ -94,7 +94,7 @@ use child_process
         
         @statusRequests[gitDir] = true
         
-        gitStatus =○ git.exec 'status --porcelain' cwd:gitDir
+        gitStatus =◯ git.exec 'status --porcelain' cwd:gitDir
         
         delete @statusRequests[gitDir]
         
@@ -131,7 +131,7 @@ use child_process
         
         if @statusAgain[gitDir]
             delete @statusAgain[gitDir]
-            ○ git.status gitDir
+            ◯ git.status gitDir
                 
         status
 
@@ -140,13 +140,13 @@ use child_process
     # parses the output of git diff for file
     # posts 'git.diff'
     
-    @diff: file ○->
+    @diff: file ◯->
         
-        gitDir =○ git.dir file
+        gitDir =◯ git.dir file
 
-        ○ watcher.snapshot file # this prevents unwanted file change events under node when diffing
-        diff   =○ git.exec "--no-pager diff --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
-        diff   +=○ git.exec "--no-pager diff --staged --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
+        ◯ watcher.snapshot file # this prevents unwanted file change events under node when diffing
+        diff   =◯ git.exec "--no-pager diff --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
+        diff   +=◯ git.exec "--no-pager diff --staged --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
         
         status = file:file changes:[]
         lines  = diff.split '\n'
@@ -196,12 +196,12 @@ use child_process
         
 #!patch
     
-    @patch: rev ○->
+    @patch: rev ◯->
         
         currentFile = ked_session.get 'editor▸file'
-        gitDir =○ git.dir currentFile
+        gitDir =◯ git.dir currentFile
         
-        patch =○ git.exec "--no-pager diff #{rev}^..#{rev} --no-color -U0 --ignore-blank-lines" cwd:gitDir 
+        patch =◯ git.exec "--no-pager diff #{rev}^..#{rev} --no-color -U0 --ignore-blank-lines" cwd:gitDir 
         patch = '\n' + patch
         
         patches = []
@@ -216,7 +216,7 @@ use child_process
                     ■changes
                         @@ ●lineinfo @@
                         ■changedlines
-                            ●type ○line
+                            ●type ◯line
                     """ 'diff --git ' + diffgit
                 patches = patches.concat r
             catch err
@@ -226,7 +226,7 @@ use child_process
 
 #!history
     
-    @history: path ○->
+    @history: path ◯->
         
         args = ["--no-pager" "log" "--name-status" "--no-color" '.']
         
@@ -235,9 +235,9 @@ use child_process
             cwd = slash.dir path
         else
             currentFile = ked_session.get 'editor▸file'
-            cwd =○ git.dir currentFile
+            cwd =◯ git.dir currentFile
             
-        history =○ git.exec args.join(' ') cwd:cwd
+        history =◯ git.exec args.join(' ') cwd:cwd
 
         kermit """
             commit  ●commit

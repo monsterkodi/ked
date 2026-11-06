@@ -68,17 +68,17 @@ index_kim = (function ()
             switch (classType)
             {
                 case 'object':
-                    if (match = kermit.lineMatch(line,`proc ●name(●this:${className}○args)`,['(',')']))
+                    if (match = kermit.lineMatch(line,`proc ●name(●this:${className}◯args)`,['(',')']))
                     {
                         addMeth(match.name)
                     }
                     break
                 case 'class':
-                    if (match = kermit.lineMatch(line,"●name: ○args ->",[':']))
+                    if (match = kermit.lineMatch(line,"●name: ◯args ->",[':']))
                     {
                         addMeth(match.name)
                     }
-                    if (match = kermit.lineMatch(line,"●name: ○args =>",[':']))
+                    if (match = kermit.lineMatch(line,"●name: ◯args =>",[':']))
                     {
                         addMeth(match.name,{bound:true})
                     }
@@ -106,23 +106,23 @@ index_kim = (function ()
             this.result.funcs.push(fnc)
             return null
         }).bind(this)
-        if (match = kermit.lineMatch(line,'proc ●name ○args',['(',')']))
+        if (match = kermit.lineMatch(line,'proc ●name ◯args',['(',')']))
         {
             addFunc(match.name,{bound:true})
         }
-        if (match = kermit.lineMatch(line,'macro ●name ○args',['(',')']))
+        if (match = kermit.lineMatch(line,'macro ●name ◯args',['(',')']))
         {
             addFunc(match.name,{bound:true,async:true})
         }
-        if (match = kermit.lineMatch(line,'template ●name ○args',['(',')']))
+        if (match = kermit.lineMatch(line,'template ●name ◯args',['(',')']))
         {
             addFunc(match.name,{async:true})
         }
-        if (match = kermit.lineMatch(line,'●name = ○args ->'))
+        if (match = kermit.lineMatch(line,'●name = ◯args ->'))
         {
             addFunc(match.name)
         }
-        if (match = kermit.lineMatch(line,'▸ ○name'))
+        if (match = kermit.lineMatch(line,'▸ ◯name'))
         {
             return addFunc(line,{test:true})
         }

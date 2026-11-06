@@ -2,12 +2,12 @@ use fs
 use ../../kxk ▪ slash sleep post
 use ../index ◆ index_kode index_noon index_json index_utils indexer
 
-waitFor = (cond) ○->
+waitFor = (cond) ◯->
 
     n = 0
     while n < 100
         ⮐ true if cond()
-        ○ sleep 10
+        ◯ sleep 10
         n += 1
     false
 
@@ -163,7 +163,7 @@ waitFor = (cond) ○->
         fs.writeFileSync file 'alpha\n    beta  1\ngamma  2\n'
 
         idx = new indexer
-        ○ idx.index file
+        ◯ idx.index file
 
         info = idx.files[file]
         fs.rmSync root recursive:true force:true
@@ -184,7 +184,7 @@ waitFor = (cond) ○->
         fs.writeFileSync file '{\n  "alpha": 1,\n  "beta": {"gamma": 2}\n}\n'
 
         idx = new indexer
-        ○ idx.index file
+        ◯ idx.index file
 
         info = idx.files[file]
         fs.rmSync root recursive:true force:true
@@ -205,7 +205,7 @@ waitFor = (cond) ○->
         fs.writeFileSync file 'x = 1'
 
         idx = new indexer
-        ○ idx.index file
+        ◯ idx.index file
 
         fs.rmSync root recursive:true force:true
 
@@ -228,7 +228,7 @@ waitFor = (cond) ○->
             """
 
         idx = new indexer
-        ○ idx.index file
+        ◯ idx.index file
 
         fs.rmSync root recursive:true force:true
 
@@ -252,13 +252,13 @@ waitFor = (cond) ○->
         fs.writeFileSync file '■Gone\n    zebraword: -> 1\n'
 
         idx = new indexer
-        ○ idx.index file
+        ◯ idx.index file
 
         hadword = idx.words['zebraword']?.has(file)
 
         fs.rmSync file
         post.emit 'file.change' path:file change:'delete'
-        ○ waitFor -> not idx.files[file]?
+        ◯ waitFor -> not idx.files[file]?
 
         fs.rmSync root recursive:true force:true
 
@@ -278,11 +278,11 @@ waitFor = (cond) ○->
         fs.writeFileSync oldFile '■Old\n    zebraword: -> 1\n'
 
         idx = new indexer
-        ○ idx.index oldFile
+        ◯ idx.index oldFile
 
         fs.renameSync oldFile newFile
         post.emit 'file.change' path:newFile oldPath:oldFile change:'rename'
-        ○ waitFor -> idx.files[newFile]? and not idx.files[oldFile]?
+        ◯ waitFor -> idx.files[newFile]? and not idx.files[oldFile]?
 
         fs.rmSync root recursive:true force:true
 
@@ -305,12 +305,12 @@ waitFor = (cond) ○->
         fs.writeFileSync two 'twoword = 2\n'
 
         idx = new indexer
-        ○ idx.index one
-        ○ idx.index two
+        ◯ idx.index one
+        ◯ idx.index two
 
         fs.rmSync dir recursive:true force:true
         post.emit 'file.change' path:dir change:'delete'
-        ○ waitFor -> not idx.files[one]? and not idx.files[two]?
+        ◯ waitFor -> not idx.files[one]? and not idx.files[two]?
 
         fs.rmSync root recursive:true force:true
 
@@ -329,11 +329,11 @@ waitFor = (cond) ○->
         fs.writeFileSync oldFile 'oneword = 1\n'
 
         idx = new indexer
-        ○ idx.index oldFile
+        ◯ idx.index oldFile
 
         fs.renameSync oldDir newDir
         post.emit 'file.change' path:newDir oldPath:oldDir change:'rename'
-        ○ waitFor -> idx.files[newFile]? and not idx.files[oldFile]?
+        ◯ waitFor -> idx.files[newFile]? and not idx.files[oldFile]?
 
         fs.rmSync root recursive:true force:true
 
@@ -350,7 +350,7 @@ waitFor = (cond) ○->
         idx = new indexer
         fs.writeFileSync file 'newword = 1\n'
         post.emit 'file.change' path:file change:'create'
-        ○ waitFor -> idx.files[file]?
+        ◯ waitFor -> idx.files[file]?
 
         fs.rmSync root recursive:true force:true
 

@@ -2,8 +2,8 @@
 use ./utils ▪ kc
 use ..     ◆ lexer
 
-SEED  = +(○ process.env.KODE_FUZZ_SEED)  ? 1
-COUNT = +(○ process.env.KODE_FUZZ_N)    ? 3000
+SEED  = +(◯ process.env.KODE_FUZZ_SEED)  ? 1
+COUNT = +(◯ process.env.KODE_FUZZ_N)    ? 3000
 
 rand = st =>
 
@@ -22,7 +22,7 @@ pick = r list -> list[Math.floor r() * list.length]
 
 FRAGMENTS = lexer.Patterns.keyword.concat [
     '@'  '@a'  '@.'  'this'  '▸'  '▴'  '⮐'  '◆'  '▪'  '●'  '●▸'  '■'
-    '->'  '=>'  '○->'  '○=>'  '+'  '-'  '*'  '/'  '%'  '!'  '~'  '^'
+    '->'  '=>'  '◯->'  '◯=>'  '+'  '-'  '*'  '/'  '%'  '!'  '~'  '^'
     '&&'  '||'  '<<'  '>>'  '++'  '--'  '??'  '==='
     '('  ')'  '['  ']'  '{'  '}'  ','  ';'  ':'  '.'  '?'  '?.'  '\\'
     '"str"'  "'s'"  '`t`'  '"""triple"""'  '/re/g'  '/re/i'

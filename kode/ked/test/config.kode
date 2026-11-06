@@ -18,8 +18,8 @@ use ../util   ◆ config
         savedFile = config.file
 
         config.file = file
-        ○ config.load()
-        ○ config.loaded
+        ◯ config.load()
+        ◯ config.loaded
 
         config.data.value.number ▸ 111
 
@@ -27,13 +27,13 @@ use ../util   ◆ config
         post.on 'config.loaded' -> reloads += 1
 
         fs.writeFileSync file 'value\n    number  2222'
-        ○ sleep 300
+        ◯ sleep 300
 
         reloads ▸ 1
         config.data.value.number ▸ 2222
 
         fs.writeFileSync slash.path(dir 'other') 'unrelated'
-        ○ sleep 200
+        ◯ sleep 200
 
         reloads ▸ 1
 

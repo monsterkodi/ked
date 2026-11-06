@@ -465,9 +465,9 @@ parseStr = str p ext ->
         'json' ➜ JSON.parse str
                ➜ parse str
 
-load = p ext ○->
+load = p ext ◯->
     
-    str =○ nfs.readText p
+    str =◯ nfs.readText p
          
     if valid str
         # log "noon load" str
@@ -476,7 +476,7 @@ load = p ext ○->
         log 'noon load null'
         null
                     
-save = p data strOpt ○->
+save = p data strOpt ◯->
 
     str = stringify data, Object.assign(ext:slash.ext(p), strOpt)
     nfs.write p, str

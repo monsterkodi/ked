@@ -9,10 +9,10 @@ index_js = (function ()
     {
         this.classPtn = this.tokenize('class ●name',false)
         this.funcClassPtn = this.tokenize('●name = (function ()',false)
-        this.classMethodPtns = [[this.tokenize('●name ○args'),{}],[this.tokenize('async ●name ○args'),{async:true}],[this.tokenize('static ●name ○args'),{static:true}],[this.tokenize('static async ●name ○args'),{static:true,async:true}]]
+        this.classMethodPtns = [[this.tokenize('●name ◯args'),{}],[this.tokenize('async ●name ◯args'),{async:true}],[this.tokenize('static ●name ◯args'),{static:true}],[this.tokenize('static async ●name ◯args'),{static:true,async:true}]]
         this.classBoundPtn = this.tokenize('this.●name = this.●bound.bind(this)')
         this.funcBoundPtn = this.tokenize('this["●name"] = this["●bound"].bind(this)')
-        this.topPtns = [[this.tokenize('●name = function ○args'),{}],[this.tokenize('●name = async function ○args'),{async:true}]]
+        this.topPtns = [[this.tokenize('●name = function ◯args'),{}],[this.tokenize('●name = async function ◯args'),{async:true}]]
         this.funcClassName = null
         this.funcClassPtns = null
     }
@@ -83,7 +83,7 @@ index_js = (function ()
                 ci++
                 continue
             }
-            if (_k_.in((cp != null ? cp[0] : undefined),'●○'))
+            if (_k_.in((cp != null ? cp[0] : undefined),'●◯'))
             {
                 weakMatch = true
                 varName = cp.slice(1)
@@ -95,7 +95,7 @@ index_js = (function ()
                         ci++
                         continue
                         break
-                    case '○':
+                    case '◯':
                         if (ci === ptn.length - 1)
                         {
                             rslt[varName] = tokens.slice(si).join(' ')
@@ -170,7 +170,7 @@ index_js = (function ()
         if (this.funcClassName !== className)
         {
             this.funcClassName = className
-            this.funcClassPtns = [[this.tokenize(`function ${className} ○args`),{name:className}],[this.tokenize(`${className}["●name"] = function ○args`),{static:true}],[this.tokenize(`${className}["●name"] = async function ○args`),{static:true,async:true}],[this.tokenize(`${className}.prototype["●name"] = function ○args`),{}],[this.tokenize(`${className}.prototype["●name"] = async function ○args`),{async:true}]]
+            this.funcClassPtns = [[this.tokenize(`function ${className} ◯args`),{name:className}],[this.tokenize(`${className}["●name"] = function ◯args`),{static:true}],[this.tokenize(`${className}["●name"] = async function ◯args`),{static:true,async:true}],[this.tokenize(`${className}.prototype["●name"] = function ◯args`),{}],[this.tokenize(`${className}.prototype["●name"] = async function ◯args`),{async:true}]]
         }
         return this.funcClassPtns
     }

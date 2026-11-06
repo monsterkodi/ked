@@ -184,7 +184,7 @@ import rgxs from './quicky.json' with { type: "json" }
         
         @preview @choices.current()
     
-    preview: item ○=>
+    preview: item ◯=>
         
         ⮐ @hideMap() if empty item?.path
         
@@ -192,7 +192,7 @@ import rgxs from './quicky.json' with { type: "json" }
         ext ?= slash.ext item.path
         
         if item.type == 'file' and ext in config.data.sourceFileExtensions
-            text =○ nfs.read item.path
+            text =◯ nfs.read item.path
             fileColorData = filecolors.split item.path text
             text = fileColorData.text
             segls = belt.seglsForText text
@@ -204,7 +204,7 @@ import rgxs from './quicky.json' with { type: "json" }
             
         post.emit 'redraw'
 
-    browseDir: dir select ○=>
+    browseDir: dir select ◯=>
     
         log "#{@name} browseDir #{dir}"
         post.emit 'browse.dir' dir

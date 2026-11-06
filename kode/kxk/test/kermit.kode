@@ -35,15 +35,15 @@ use .. ◆ kermit
         lm "class" "class ●class"           ▸ class:undefined
         lm "class MyClass" "class ●class"   ▸ class:'MyClass'
 
-        lm "func (arg1, arg2)" "●name ○args"    ▸ name:'func' args:'(arg1, arg2)'
-        lm "  func (arg1, arg2)" "●name ○args"  ▸ name:'func' args:'(arg1, arg2)'
-        lm "  constructor ()" "●name ○args"     ▸ name:'constructor' args:'()'
+        lm "func (arg1, arg2)" "●name ◯args"    ▸ name:'func' args:'(arg1, arg2)'
+        lm "  func (arg1, arg2)" "●name ◯args"  ▸ name:'func' args:'(arg1, arg2)'
+        lm "  constructor ()" "●name ◯args"     ▸ name:'constructor' args:'()'
         
-        lm """Git.prototype["onFileChanged"] = function (file)""" """Git.prototype["●name"] = function ○args""" ['"'] ▸
+        lm """Git.prototype["onFileChanged"] = function (file)""" """Git.prototype["●name"] = function ◯args""" ['"'] ▸
             name:'onFileChanged'
             args:'(file)'
             
-        lm "post.on('index',(function (file)" '●name ○args' ['"''.'','"'"] ▸ 
+        lm "post.on('index',(function (file)" '●name ◯args' ['"''.'','"'"] ▸ 
             name:'post'
             args:". on( ' index '  , (function (file)"
             
@@ -54,11 +54,11 @@ use .. ◆ kermit
         lm "proc build() =" 'proc ●name(●args) =' ['(' ')'] ▸ name:'build' args:''
         lm "proc build() : int =" "proc ●name(●args) : ●type =" ['(' ')'] ▸ name:'build' args:'' type:'int'
         
-        lm 'logFile = ◇string f prefix="" ->' '●name = ○args ->' ▸ name:'logFile' args:'◇string f prefix=""' 
-        lm 'myfunc = args ->' '●name = ○args ->' ▸ name:'myfunc' args:"args" 
-        lm 'nofunc = args' '●name = ○args ->' ▸ undefined
+        lm 'logFile = ◇string f prefix="" ->' '●name = ◯args ->' ▸ name:'logFile' args:'◇string f prefix=""' 
+        lm 'myfunc = args ->' '●name = ◯args ->' ▸ name:'myfunc' args:"args" 
+        lm 'nofunc = args' '●name = ◯args ->' ▸ undefined
         
-        lm "function test hello(arg1, arg2)" "function test ●name(○args)" ['(' ')'] ▸ name:"hello" args:"arg1, arg2"
+        lm "function test hello(arg1, arg2)" "function test ●name(◯args)" ['(' ')'] ▸ name:"hello" args:"arg1, arg2"
 
     #  ███████  ███  ██     ██  ████████   ███      ████████  
     # ███       ███  ███   ███  ███   ███  ███      ███       
@@ -293,13 +293,13 @@ use .. ◆ kermit
     ▸ pre
     
         kermit """
-            ○line
+            ◯line
             """ "               GitInfo.diff()" ▸ [
             line: '               GitInfo.diff()'
             ]
 
         kermit """
-            ●type ○line
+            ●type ◯line
             """ "+               GitInfo.diff()\n-               more stuff" ▸ [
                 type: '+'
                 line: '               GitInfo.diff()'
@@ -320,7 +320,7 @@ use .. ◆ kermit
             ■changes
                 @@ ●lineinfo @@ ●context
                 ■changedlines
-                    ●type ○line
+                    ●type ◯line
             """ """
             diff --git a/kakao.app/js/ko/commands/macro.js b/kakao.app/js/ko/commands/macro.js
             index a6bb5d7..10b7d0a 100644
@@ -360,7 +360,7 @@ use .. ◆ kermit
             ■changes
                 @@ ●lineinfo @@ ●context
                 ■changedlines
-                    ●type ○line
+                    ●type ◯line
             """ """
             diff --git a/kakao.app/js/ko/commands/macro.js b/kakao.app/js/ko/commands/macro.js
             index a6bb5d7..10b7d0a 100644

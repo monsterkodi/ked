@@ -53,10 +53,10 @@ use ./util ▪ defaults isEqual
         @timer = null
         nfs.remove @file
         
-    load: file ○->
+    load: file ◯->
         
         file ?= @file
-        data =○ noon.load file
+        data =◯ noon.load file
 
         if valid data
             @data = data

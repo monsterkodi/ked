@@ -5,11 +5,11 @@ use ../../kxk ▪ post nfs
 
     @cache: Object.create(null)
 
-    @getText: file ○->
+    @getText: file ◯->
 
         ⮐ @cache[file] if @cache[file]?
 
-        text =○ nfs.readText file
+        text =◯ nfs.readText file
 
         @cache[file] = text if text?
 

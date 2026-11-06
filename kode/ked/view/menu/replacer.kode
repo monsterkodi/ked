@@ -24,7 +24,7 @@ use             ◆ replacerfile searcher
         @replaceInput.setColor 'bg_blur' @color.bg
         @replaceInput.on 'action' @onReplaceInputAction
 
-    show: text files ○=>
+    show: text files ◯=>
     
         @searchId += 1
         @sfils = []
@@ -34,7 +34,7 @@ use             ◆ replacerfile searcher
         
         @replaceInput.grabFocus() if not empty @input.current()
         
-        ○ searching
+        ◯ searching
 
     createFileHandler: @screen name ->
 
@@ -215,18 +215,18 @@ use             ◆ replacerfile searcher
             'up'
             'down'   ➜ @choices.moveSelection action
 
-    applyReplacement: replacement ○=>
+    applyReplacement: replacement ◯=>
 
         ⮐ if @applying
         
         @applying = true
         
         try
-            ○ @runReplacement replacement
+            ◯ @runReplacement replacement
         finally
             @applying = false
 
-    runReplacement: replacement ○=>
+    runReplacement: replacement ◯=>
 
         search = @lastSearchText ? @input.current()
         
@@ -240,7 +240,7 @@ use             ◆ replacerfile searcher
         
             continue if sfil.excluded
             
-            text =○ kacher.getText sfil.path
+            text =◯ kacher.getText sfil.path
             
             continue if empty text
             
@@ -269,7 +269,7 @@ use             ◆ replacerfile searcher
             continue if not changed
             
             newText = lines.join('\n')
-            result  =○ nfs.write sfil.path newText
+            result  =◯ nfs.write sfil.path newText
             
             if result?.error
                 errors.push result.error

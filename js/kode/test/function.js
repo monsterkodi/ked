@@ -61,9 +61,9 @@ D = (function ()
     await section("async", async function ()
     {
         compare(kc(`function C
-    @a: ○->
-    b: ○->
-    c: ○=>`),`
+    @a: ◯->
+    b: ◯->
+    c: ◯=>`),`
 C = (function ()
 {
     function C ()

@@ -131,11 +131,11 @@ use child_process ▪ spawn exec
         
 #!run
     
-    @run: ○->
+    @run: ◯->
         
         ked = new KED
         
-        ○ ked.runHeadless() if ked.args.headless or ked.args.headless_colors
+        ◯ ked.runHeadless() if ked.args.headless or ked.args.headless_colors
         
         ked
 
@@ -151,21 +151,21 @@ use child_process ▪ spawn exec
     #  the headless mode: the editor runs without a terminal
     #  input keys come from the standard input, and the screen is dumped for each key
     
-    runHeadless: ○=>
+    runHeadless: ◯=>
         
         ended = new Promise (resolve) =>
             @t.on 'end' resolve
         
-        ○ @currentLoad if @currentLoad
+        ◯ @currentLoad if @currentLoad
         
         if @t.input
-            ○ ended
+            ◯ ended
         
         #  wait for the startup work the editor needs, instead of guessing
         #  how long it takes
         
-        ○ config.loaded if config.loaded
-        ○ mode.loaded
+        ◯ config.loaded if config.loaded
+        ◯ mode.loaded
         
         @dump 'start'
         
@@ -173,8 +173,8 @@ use child_process ▪ spawn exec
             
             @t.play step[1]
             
-            ○ @currentLoad if @currentLoad
-            ○ sleep 15
+            ◯ @currentLoad if @currentLoad
+            ◯ sleep 15
             
             @dump step[0]
         
@@ -194,10 +194,10 @@ use child_process ▪ spawn exec
         else
             process.stdout.write @screen.textMarked().join('\n') + '\n'
 
-    startup: ○=>
+    startup: ◯=>
         
-        ○ config.loaded if config.loaded
-        ○ @session.loaded
+        ◯ config.loaded if config.loaded
+        ◯ @session.loaded
         
         leak.start @args if config.data?.log?.memory
         
@@ -234,13 +234,13 @@ use child_process ▪ spawn exec
         @title.layout   dcw   0  w-dcw      1
         @editor.layout  dcw   1  w-dcw-fcw  h-1
     
-    quit: msg ○=>
+    quit: msg ◯=>
         
         watcher.close()
         clearImmediate @redrawId
         @quitting = true
         
-        ○ @session.save()
+        ◯ @session.save()
         
         log w2("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #{b8 @session.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
 
@@ -328,7 +328,7 @@ use child_process ▪ spawn exec
         @currentLoad = @loadFile path row col view
         @editor.grabFocus()
         
-    onQuicky: path ○=>
+    onQuicky: path ◯=>
         
         ⮐ if valid @loadingFile
         
@@ -339,10 +339,10 @@ use child_process ▪ spawn exec
         
         ⮐ if slash.samePath(file @currentFile)
         
-        ○ @loadFile file
+        ◯ @loadFile file
 
     # the first file argument opens, the other existing ones go to the file history
-    openArguments: ○=>
+    openArguments: ◯=>
 
         [file line column] = slash.splitFileLine @args.options[0]
 
@@ -355,15 +355,15 @@ use child_process ▪ spawn exec
 
         paths = @args.options[1..].map (option) -> slash.splitFileLine(option)[0]
 
-        files =○ fileutil.existingFiles paths
+        files =◯ fileutil.existingFiles paths
 
         filepos.addFiles files
 
-        ○ loading
+        ◯ loading
 
         @editor.grabFocus()
                                 
-    loadFile: p row col view ○=>
+    loadFile: p row col view ◯=>
     
         # log "ked.loadFile #{p} #{row} #{col} #{@loadingFile}"
         
@@ -390,16 +390,16 @@ use child_process ▪ spawn exec
         #  the file is opened once the config and the modes are there:
         #  both decide what happens to it, and neither is loaded yet
         
-        ○ config.loaded if config.loaded
-        ○ mode.loaded
+        ◯ config.loaded if config.loaded
+        ◯ mode.loaded
         
-        exists =○ nfs.fileExists @loadingFile
+        exists =◯ nfs.fileExists @loadingFile
         
         if not exists
             @loadMissingFile absFile
             ⮐ 
         
-        @loadingFile =○ nfs.resolveSymlink @loadingFile
+        @loadingFile =◯ nfs.resolveSymlink @loadingFile
         
         if empty @loadingFile
             warn "ked.loadFile - #{absFile} resolved to empty!"
@@ -409,7 +409,7 @@ use child_process ▪ spawn exec
         
         readingFile = @loadingFile
         
-        text =○ nfs.readText @loadingFile
+        text =◯ nfs.readText @loadingFile
         
         if @loadingFile != readingFile
             # warn 'another file started loading, skip editor update'
@@ -424,7 +424,7 @@ use child_process ▪ spawn exec
         @title.setFile slash.tilde(@currentFile)
                 
         if text == undefined
-            text = '○ binary ○'
+            text = '◯ binary ◯'
 
         fileColorData = filecolors.split @currentFile text
         text          = fileColorData.text
@@ -471,7 +471,7 @@ use child_process ▪ spawn exec
         
         @saveSessionFile @currentFile 'loaded'        
         
-        if gitDir =○ git.dir @currentFile
+        if gitDir =◯ git.dir @currentFile
             watcher.watch slash.path(gitDir '.git/refs/heads') recursive:false
             
         @
@@ -514,7 +514,7 @@ use child_process ▪ spawn exec
 
 #!save
     
-    saveFile: file ○=>
+    saveFile: file ◯=>
         
         text = kseg.str @editor.state.s.lines
         path = file ? @currentFile
@@ -525,7 +525,7 @@ use child_process ▪ spawn exec
 
         text = filecolors.join path text @editor.state.s.colors
 
-        result = ○ nfs.write path text
+        result = ◯ nfs.write path text
         
         if result?.error
             post.emit 'novim.error' "can't open file for writing: #{path}"
@@ -538,9 +538,9 @@ use child_process ▪ spawn exec
             
         true
     
-    saveAndQuit: file ○=>
+    saveAndQuit: file ◯=>
         
-        saved = ○ @saveFile file
+        saved = ◯ @saveFile file
         
         ⮐ if not saved
         
@@ -563,12 +563,12 @@ use child_process ▪ spawn exec
         
         @saveas.showDialog dir file
     
-    onSaveAs: path ○=>
+    onSaveAs: path ◯=>
         
         text = kseg.str @editor.state.s.lines
         text = filecolors.join path text @editor.state.s.colors
         
-        ○ nfs.write path text
+        ◯ nfs.write path text
         
         @editor.state.clearHistory()
         

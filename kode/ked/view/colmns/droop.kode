@@ -38,7 +38,7 @@ use                 ◆ quicky diritem
         @choicesWidth = belt.widthOfLines lines
         @showPathItems items
         
-    preview: item ○=>        
+    preview: item ◯=>        
     
     drawFrame: ->
 

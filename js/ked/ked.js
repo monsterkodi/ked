@@ -556,7 +556,7 @@ ked [file...]
         this.title.setFile(slash.tilde(this.currentFile))
         if (text === undefined)
         {
-            text = '○ binary ○'
+            text = '◯ binary ◯'
         }
         fileColorData = filecolors.split(this.currentFile,text)
         text = fileColorData.text

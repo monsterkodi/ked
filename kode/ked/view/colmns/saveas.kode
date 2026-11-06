@@ -27,9 +27,9 @@ use              ◆ browse
         else
             @choices.grabFocus()
         
-    showDialog: dir file ○=>
+    showDialog: dir file ◯=>
     
-        ○ @gotoDir dir slash.path(dir file)
+        ◯ @gotoDir dir slash.path(dir file)
         @setFile file
         
     setFile: file =>

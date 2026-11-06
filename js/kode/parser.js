@@ -801,10 +801,10 @@ Parser = (function ()
     {
         var exps
 
-        this.push('○rgs')
+        this.push('◯rgs')
         tokens.unshift(firstArg)
-        exps = this.exps('○rgs',tokens)
-        this.pop('○rgs')
+        exps = this.exps('◯rgs',tokens)
+        this.pop('◯rgs')
         return {parens:{open:{type:'paren',text:'('},exps:exps,close:{type:'paren',text:')'}}}
     }
 
@@ -870,7 +870,7 @@ Parser = (function ()
                 }
                 continue
             }
-            return _k_.in(t.text,['->','=>','○->','○=>'])
+            return _k_.in(t.text,['->','=>','◯->','◯=>'])
         }
         return false
     }

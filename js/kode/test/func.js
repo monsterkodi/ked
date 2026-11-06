@@ -7,8 +7,8 @@ toExport["func"] = async function ()
 {
     await section("async", async function ()
     {
-        compare(kc('○->'),'async function ()\n{}')
-        compare(kc('○=>'),'async function ()\n{}')
+        compare(kc('◯->'),'async function ()\n{}')
+        compare(kc('◯=>'),'async function ()\n{}')
     })
     await section("func", async function ()
     {

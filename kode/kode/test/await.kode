@@ -2,8 +2,8 @@
 use ./utils ▪ kc ke
 use ../../kxk ▪ sleep
     
-delayed = value ○->
-    ○ sleep 1
+delayed = value ◯->
+    ◯ sleep 1
     value
 
 ▸ await
@@ -13,46 +13,46 @@ delayed = value ○->
     kc 'await call 1; await again 2'   ▸ 'await call(1)\nawait again(2)'
     
     kc 'd = { await:1 }' ▸ 'd = {await:1}'
-    kc "d = { '○':2 }" ▸ "d = {'○':2}"
+    kc "d = { '◯':2 }" ▸ "d = {'◯':2}"
     
     kc 'd = await someFunc()' ▸ 'd = await someFunc()'
     
-    kc '○ async 1' ▸ 'await async(1)'
-    kc '    ○ async 2' ▸ 'await async(2)'
-    kc '    ○async 3' ▸ 'await async(3)'
+    kc '◯ async 1' ▸ 'await async(1)'
+    kc '    ◯ async 2' ▸ 'await async(2)'
+    kc '    ◯async 3' ▸ 'await async(3)'
     
-    # kc 'list = list.concat ○ fs.list dir' ▸ """
+    # kc 'list = list.concat ◯ fs.list dir' ▸ """
         # list = list.concat(await fs.list(dir))
         # """
 
-    kc 'list = list.concat ○ fs.list(dir)' ▸ """
+    kc 'list = list.concat ◯ fs.list(dir)' ▸ """
         list = list.concat(await fs.list(dir))
         """
         
-    kc "if ○ fs.remove 'blah' ➜ 2" ▸ """
+    kc "if ◯ fs.remove 'blah' ➜ 2" ▸ """
         if (await fs.remove('blah'))
         {
             2
         }
         """
         
-    kc 'd = ○ someFunc()' ▸ 'd = await someFunc()'
-    kc 'd =○ someFunc()' ▸ 'd = await someFunc()'
-    kc 'd = ○someFunc()' ▸ 'd = await someFunc()'
+    kc 'd = ◯ someFunc()' ▸ 'd = await someFunc()'
+    kc 'd =◯ someFunc()' ▸ 'd = await someFunc()'
+    kc 'd = ◯someFunc()' ▸ 'd = await someFunc()'
     
-    kc 'if test ➜ ○ info()' ▸ """
+    kc 'if test ➜ ◯ info()' ▸ """
         if (test)
         {
             await info()
         }
         """
-    kc 'if test ➜ ○info()' ▸ """
+    kc 'if test ➜ ◯info()' ▸ """
         if (test)
         {
             await info()
         }
         """
-    kc 'if test ➜○ info()' ▸ """
+    kc 'if test ➜◯ info()' ▸ """
         if (test)
         {
             await info()
@@ -61,10 +61,10 @@ delayed = value ○->
     
     ▸ the async comparison
     
-        kc 'x ○▸ y' ▸ 'compare(await (x),await (y))'
+        kc 'x ◯▸ y' ▸ 'compare(await (x),await (y))'
         kc 'x ▸ y'   ▸ 'compare(x,y)'
     
     ▸ an async comparison waits for both sides
     
-        delayed 42 ○▸ 42
+        delayed 42 ◯▸ 42
     

@@ -5,8 +5,8 @@ use ../../kxk ▪ matchr
 
     @requireRegExp : /^\s*([\w\{\}]+)\s+=\s+require\s+[\'\"]([\.\/\w]+)[\'\"]/
     @includeRegExp : /^#include\s+[\"\<]([\.\/\w]+)[\"\>]/
-    @methodRegExp  : /^\s+([\@]?\w+|@)\s*\:\s*(\(?.*\)?)?\s*○?[=-]\>/
-    @funcRegExp    : /^\s*([\w\.]+)\s*[\:\=][^\(\)\'\"]*(\(.*\))?\s*○?[=-]\>/
+    @methodRegExp  : /^\s+([\@]?\w+|@)\s*\:\s*(\(?.*\)?)?\s*◯?[=-]\>/
+    @funcRegExp    : /^\s*([\w\.]+)\s*[\:\=][^\(\)\'\"]*(\(.*\))?\s*◯?[=-]\>/
     @postRegExp    : /^\s*post\.on\s+[\'\"](\w+)[\'\"]\s*\,?\s*(\(.*\))?\s*[=-]\>/
     @testRegExp    : /^\s*(▸\s+.+)/
     @nimTestRegExp : /^\s*((suite|test)\s+\"[^"]+\"\s*\:)/

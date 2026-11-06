@@ -17,7 +17,7 @@ log Gg2(' output: ') g2(extlangFile)
 
 lang = {}
 exts = ['txt''log']
-langNoon = ○ noon.load noonFile
+langNoon = ◯ noon.load noonFile
 for names, keywords of langNoon
 
     for ext in names.split /\s/
@@ -31,7 +31,7 @@ json = JSON.stringify {exts:exts lang:lang} null 4
 
 extlang = "export default #{json}"
     
-if ○ nfs.write extlangFile extlang
+if ◯ nfs.write extlangFile extlang
     log Gg1(' ok ')
 else
     log Rr1(' fail ')

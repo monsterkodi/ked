@@ -27,60 +27,60 @@ args = karg """
     
 #!run
     
-    @run: ○->
+    @run: ◯->
     
         files = args.files    
-        if args.version ➜ ○ log w4(○ knrd.fingerprint()) g7(slash.name(slash.path(◆dir '../../'))) b7(process.cwd())
-        if args.info    ➜ ○ knrd [] util.defaults(args dryrun:true)
-        if args.knrd    ➜ ○ knrd files args 
-        if args.build   ➜ ○ child_process.exec "pnpm build" {shell:true} (err stdout stderr) -> log stdout
+        if args.version ➜ ◯ log w4(◯ knrd.fingerprint()) g7(slash.name(slash.path(◆dir '../../'))) b7(process.cwd())
+        if args.info    ➜ ◯ knrd [] util.defaults(args dryrun:true)
+        if args.knrd    ➜ ◯ knrd files args 
+        if args.build   ➜ ◯ child_process.exec "pnpm build" {shell:true} (err stdout stderr) -> log stdout
         if args.test
-            ok = ○ kk.test files
+            ok = ◯ kk.test files
             if not ok
                 process.exitCode = 1
-        if args.watch   ➜ ○ kk.watch()                            
-        if args.run     ➜ ○ kode.run files:files run:true
+        if args.watch   ➜ ◯ kk.watch()                            
+        if args.run     ➜ ◯ kode.run files:files run:true
         
         if valid args.__ignored
             log 'ignored options' args.__ignored
                                                 
 #!watch
     
-    @watch: ○->
+    @watch: ◯->
         
         log '👁 ' w5(kk.bundleDir())
         
-        ○ watcher.watch kk.bundleDir()
+        ◯ watcher.watch kk.bundleDir()
         
-        post.on 'file.change' (info) ○-> 
+        post.on 'file.change' (info) ◯-> 
             
             ⮐ if slash.contains info.path '.stash'
             ⮐ if info.change == 'delete'
             
             if slash.ext(info.path) in ['kode' 'pug' 'styl' 'noon']
                 log b5('🔧') w3(info.path)
-                ○ knrd info.path
-                ○ kk.test args.files silent:true
+                ◯ knrd info.path
+                ◯ kk.test args.files silent:true
     
 #!test
     
-    @test: files opt ○->
+    @test: files opt ◯->
         
-        if ○ knrd.stale()
+        if ◯ knrd.stale()
             log y5('⚠ ') r5('kk -k')
-            ○ knrd [] 
+            ◯ knrd [] 
         
         ok = true
         
         if 
-            ○ nfs.exists "js/test.js"
+            ◯ nfs.exists "js/test.js"
                 
                 cmd = "node js/test.js"
                 cmd += ' ' + files.join(' ') if valid files
                 cmd += ' silent' if opt?.silent
                 opt = shell:true cwd:kk.bundleDir()
                 
-                ok = ○ new Promise (resolve reject) ->
+                ok = ◯ new Promise (resolve reject) ->
                 
                     child_process.exec cmd opt (err stdout stderr) -> 
                         
@@ -89,18 +89,18 @@ args = karg """
                         
                         resolve(not err)
             
-            ○ nfs.isDir "js/test"
+            ◯ nfs.isDir "js/test"
 
                 if opt?.silent
                     tester.logSections = false
                     tester.logModules  = false
     
-                files =○ nfs.list slash.path(process.cwd() 'js' 'test')
+                files =◯ nfs.list slash.path(process.cwd() 'js' 'test')
                 
                 for file in files
                     continue if file.type == 'dir' # ignore subdirectories for now
-                    test =○ import(file.path) # shouldn't the file type be checked here?
-                    result =○ tester.test test.default
+                    test =◯ import(file.path) # shouldn't the file type be checked here?
+                    result =◯ tester.test test.default
                     ok = ok and (result ? true)
             
                 tester.summarize()

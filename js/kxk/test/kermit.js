@@ -23,18 +23,18 @@ toExport["kermit"] = async function ()
         compare(lm("hello","class ●class"),undefined)
         compare(lm("class","class ●class"),{class:undefined})
         compare(lm("class MyClass","class ●class"),{class:'MyClass'})
-        compare(lm("func (arg1, arg2)","●name ○args"),{name:'func',args:'(arg1, arg2)'})
-        compare(lm("  func (arg1, arg2)","●name ○args"),{name:'func',args:'(arg1, arg2)'})
-        compare(lm("  constructor ()","●name ○args"),{name:'constructor',args:'()'})
-        compare(lm(`Git.prototype["onFileChanged"] = function (file)`,`Git.prototype["●name"] = function ○args`,['"']),{name:'onFileChanged',args:'(file)'})
-        compare(lm("post.on('index',(function (file)",'●name ○args',['"','.',',',"'"]),{name:'post',args:". on( ' index '  , (function (file)"})
+        compare(lm("func (arg1, arg2)","●name ◯args"),{name:'func',args:'(arg1, arg2)'})
+        compare(lm("  func (arg1, arg2)","●name ◯args"),{name:'func',args:'(arg1, arg2)'})
+        compare(lm("  constructor ()","●name ◯args"),{name:'constructor',args:'()'})
+        compare(lm(`Git.prototype["onFileChanged"] = function (file)`,`Git.prototype["●name"] = function ◯args`,['"']),{name:'onFileChanged',args:'(file)'})
+        compare(lm("post.on('index',(function (file)",'●name ◯args',['"','.',',',"'"]),{name:'post',args:". on( ' index '  , (function (file)"})
         compare(lm('        this["onKeyUp"] = this["onKeyUp"].bind(this)','this["●name"] = this["●bind"].bind(this)',['"','.',',',"'"]),{name:'onKeyUp',bind:'onKeyUp'})
         compare(lm("proc build() =",'proc ●name(●args) =',['(',')']),{name:'build',args:''})
         compare(lm("proc build() : int =","proc ●name(●args) : ●type =",['(',')']),{name:'build',args:'',type:'int'})
-        compare(lm('logFile = ◇string f prefix="" ->','●name = ○args ->'),{name:'logFile',args:'◇string f prefix=""'})
-        compare(lm('myfunc = args ->','●name = ○args ->'),{name:'myfunc',args:"args"})
-        compare(lm('nofunc = args','●name = ○args ->'),undefined)
-        compare(lm("function test hello(arg1, arg2)","function test ●name(○args)",['(',')']),{name:"hello",args:"arg1, arg2"})
+        compare(lm('logFile = ◇string f prefix="" ->','●name = ◯args ->'),{name:'logFile',args:'◇string f prefix=""'})
+        compare(lm('myfunc = args ->','●name = ◯args ->'),{name:'myfunc',args:"args"})
+        compare(lm('nofunc = args','●name = ◯args ->'),undefined)
+        compare(lm("function test hello(arg1, arg2)","function test ●name(◯args)",['(',')']),{name:"hello",args:"arg1, arg2"})
     })
     await section("simple", async function ()
     {
@@ -122,8 +122,8 @@ C   changed/file
     })
     await section("pre", async function ()
     {
-        compare(kermit(`○line`,"               GitInfo.diff()"),[{line:'               GitInfo.diff()'}])
-        compare(kermit(`●type ○line`,"+               GitInfo.diff()\n-               more stuff"),[{type:'+',line:'               GitInfo.diff()'},{type:'-',line:'               more stuff'}])
+        compare(kermit(`◯line`,"               GitInfo.diff()"),[{line:'               GitInfo.diff()'}])
+        compare(kermit(`●type ◯line`,"+               GitInfo.diff()\n-               more stuff"),[{type:'+',line:'               GitInfo.diff()'},{type:'-',line:'               more stuff'}])
     })
     await section("patch", async function ()
     {
@@ -134,7 +134,7 @@ index ●refs
 ■changes
     @@ ●lineinfo @@ ●context
     ■changedlines
-        ●type ○line`,`diff --git a/kakao.app/js/ko/commands/macro.js b/kakao.app/js/ko/commands/macro.js
+        ●type ◯line`,`diff --git a/kakao.app/js/ko/commands/macro.js b/kakao.app/js/ko/commands/macro.js
 index a6bb5d7..10b7d0a 100644
 --- a/kakao.app/js/ko/commands/macro.js
 +++ b/kakao.app/js/ko/commands/macro.js
@@ -153,7 +153,7 @@ index ●refs
 ■changes
     @@ ●lineinfo @@ ●context
     ■changedlines
-        ●type ○line`,`diff --git a/kakao.app/js/ko/commands/macro.js b/kakao.app/js/ko/commands/macro.js
+        ●type ◯line`,`diff --git a/kakao.app/js/ko/commands/macro.js b/kakao.app/js/ko/commands/macro.js
 index a6bb5d7..10b7d0a 100644
 --- a/kakao.app/js/ko/commands/macro.js
 +++ b/kakao.app/js/ko/commands/macro.js

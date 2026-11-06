@@ -21,9 +21,9 @@ use ../theme  ◆ theme
     
     @names: -> Object.keys mode.modes
     
-    @loadModules: ○->
+    @loadModules: ◯->
 
-        list =○ nfs.list slash.path(◆dir 'mode')
+        list =◯ nfs.list slash.path(◆dir 'mode')
         
         for item in list
             file = item.path
@@ -31,7 +31,7 @@ use ../theme  ◆ theme
 
             try
                 moduleJS    = './' + slash.relative(file ◆dir)
-                moduleExport =○ import(moduleJS)
+                moduleExport =◯ import(moduleJS)
             catch err
                 error "import of #{moduleJS} failed" err
                 continue

@@ -4,12 +4,12 @@ use child_process
 use ../../kxk ▪ slash sleep post
 use ../util ◆ git
 
-waitFor = (cond) ○->
+waitFor = (cond) ◯->
 
     n = 0
     while n < 100
         ⮐ true if cond()
-        ○ sleep 10
+        ◯ sleep 10
         n += 1
     false
 
@@ -33,19 +33,19 @@ waitFor = (cond) ○->
         g.gitDirs.push slash.path(repo '.git')
 
         post.emit 'file.change' path:file change:'modify'
-        ○ waitFor -> statuses.length > 0
+        ◯ waitFor -> statuses.length > 0
 
         added = statuses[0].files[file]
 
         fs.renameSync file other
         post.emit 'file.change' path:other oldPath:file change:'rename'
-        ○ waitFor -> statuses.length > 1
+        ◯ waitFor -> statuses.length > 1
 
         renamed = statuses[statuses.length-1].files
 
         fs.rmSync other
         post.emit 'file.change' path:other change:'delete'
-        ○ waitFor -> statuses.length > 2
+        ◯ waitFor -> statuses.length > 2
 
         deleted = statuses[statuses.length-1].files
 
@@ -71,20 +71,20 @@ waitFor = (cond) ○->
         post.on 'git.status' (status) -> statuses.push status if status.gitDir == repo
 
         keepExec = git.exec
-        git.exec = (args opt) ○->
-            ○ sleep 100
-            ○ keepExec args opt
+        git.exec = (args opt) ◯->
+            ◯ sleep 100
+            ◯ keepExec args opt
 
         first = git.status repo
-        ○ waitFor -> git.statusRequests[repo]
+        ◯ waitFor -> git.statusRequests[repo]
 
         second = git.status repo
-        ○ waitFor -> git.statusAgain[repo]
+        ◯ waitFor -> git.statusAgain[repo]
         again = git.statusAgain[repo]
 
-        ○ first
-        ○ second
-        ○ waitFor -> statuses.length > 1
+        ◯ first
+        ◯ second
+        ◯ waitFor -> statuses.length > 1
 
         git.exec = keepExec
 

@@ -27,7 +27,7 @@ use           ◆ index_utils
                                 
             if classType == 'object'
                 
-                if match = kermit.lineMatch(line 'proc ●name(self:#{className}○args)' ['(' ')']) ➜ addMeth match.name
+                if match = kermit.lineMatch(line 'proc ●name(self:#{className}◯args)' ['(' ')']) ➜ addMeth match.name
                     
         addFunc = name opt={} =>
             
@@ -36,7 +36,7 @@ use           ◆ index_utils
             @result.funcs.push fnc
             null
         
-        if match = kermit.lineMatch(line 'proc ●name ○args' ['(' ')']) ➜ addFunc match.name
+        if match = kermit.lineMatch(line 'proc ●name ◯args' ['(' ')']) ➜ addFunc match.name
             
         m = line.match index_utils.nimTestRegExp
         if m?[0]?

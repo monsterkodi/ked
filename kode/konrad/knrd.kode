@@ -47,9 +47,9 @@ bundlePath = p='' -> slash.path bundleDir() p
     
 bundleDir = -> process.cwd()
   
-gatherFiles = ○->
+gatherFiles = ◯->
     
-    list  =○ nfs.list(bundlePath('kode'))
+    list  =◯ nfs.list(bundlePath('kode'))
     list  = list.filter (item) -> item.type == 'file'
     
     files = list.map (item) -> item.path
@@ -82,7 +82,7 @@ stampSource = (text, file) =>
 
     slash.absolute map.sources[0], slash.dir(file)
 
-reconcile = dirs opt={} ○->
+reconcile = dirs opt={} ◯->
 
     srcDir = opt.srcDir
     if not srcDir
@@ -92,26 +92,26 @@ reconcile = dirs opt={} ○->
 
     for dir in dirs
 
-        here = ○ nfs.dirExists dir
+        here = ◯ nfs.dirExists dir
         if not here ➜ continue
 
-        list = ○ nfs.list dir
+        list = ◯ nfs.list dir
 
         for item in list
 
             if item.type != 'file' ➜ continue
 
             file = item.path
-            text = ○ nfs.read file
+            text = ◯ nfs.read file
             from = stampSource text, file
             if not from ➜ continue
 
             if not from.startsWith srcDir + '/' ➜ continue
 
-            still = ○ nfs.isFile from
+            still = ◯ nfs.isFile from
             if still ➜ continue
 
-            ○ nfs.remove file
+            ◯ nfs.remove file
             removed.push file
 
             log r4('🗑 ') w3(slash.tilde(file)) if not opt.quiet
@@ -131,17 +131,17 @@ fpDirs = ['kode' 'kxk' 'kolor'] # the modules whose source can reach the compile
 
 compilerDir = -> slash.path(◆dir, '..')
 
-fingerprintFiles = ○->
+fingerprintFiles = ◯->
     
     files = []
     
     for d in fpDirs
         
         dir = slash.path(compilerDir(), d)
-        here = ○ nfs.isDir dir
+        here = ◯ nfs.isDir dir
         if not here ➜ continue
         
-        for item in ○ nfs.list dir
+        for item in ◯ nfs.list dir
             
             continue if item.type != 'file'
             continue if slash.ext(item.path) != 'js'
@@ -151,21 +151,21 @@ fingerprintFiles = ○->
     
     files.sort()
 
-fingerprint = ○-> # generates the fingerprint for the kode compiler
+fingerprint = ◯-> # generates the fingerprint for the kode compiler
 
-    files =○ fingerprintFiles()
+    files =◯ fingerprintFiles()
 
     parts = []
     for f in files
-        body = ○ nfs.read f
+        body = ◯ nfs.read f
         parts.push "#{slash.relative f, compilerDir()}\0#{body}"
 
     joined = parts.join ''
     hash joined
 
-loadCache = path ○->
+loadCache = path ◯->
 
-    text = ○ nfs.read path
+    text = ◯ nfs.read path
 
     if valid text
 
@@ -191,19 +191,19 @@ usable = (kache, fp, srcmap) ->
 
     shaped(kache) and (kache.kode == fp) and (kache.srcmap == srcmap)
 
-stale = ○->
+stale = ◯->
 
     path = cachePath()
-    here = ○ nfs.isFile path
+    here = ◯ nfs.isFile path
     ⮐ false if not here
 
-    kache = ○ loadCache path
+    kache = ◯ loadCache path
     ⮐ false if not kache
     ⮐ false if empty kache.kode
 
-    kache.kode != (○ fingerprint())
+    kache.kode != (◯ fingerprint())
 
-isCurrent = (kache, srcFile, tgtFile, srcText) ○->
+isCurrent = (kache, srcFile, tgtFile, srcText) ◯->
 
     ⮐ false if empty kache
 
@@ -213,10 +213,10 @@ isCurrent = (kache, srcFile, tgtFile, srcText) ○->
     ⮐ false if not (s? and t?)
     ⮐ false if s != hash(srcText)
 
-    tgtText = ○ nfs.read tgtFile
+    tgtText = ◯ nfs.read tgtFile
     ⮐ hash(tgtText) == t
 
-saveCache = (path, kache, fp, srcmap, srcs, tgts, whole=no) ○->
+saveCache = (path, kache, fp, srcmap, srcs, tgts, whole=no) ◯->
 
     ⮐ false if empty srcs
 
@@ -244,12 +244,12 @@ saveCache = (path, kache, fp, srcmap, srcs, tgts, whole=no) ○->
         source: source
         target: target
 
-    ○ nfs.write path, noon.stringify(out maxalign:64)
+    ◯ nfs.write path, noon.stringify(out maxalign:64)
     true
 
 #!knrd
 
-knrd = files=[] opt={} ○->
+knrd = files=[] opt={} ◯->
     # log "files" files   
     if files is str
         if slash.ext(files) in ['kode' 'noon']
@@ -270,15 +270,15 @@ knrd = files=[] opt={} ○->
     # ● 🔨
             
     whole = empty files
-    files =○ gatherFiles() if whole
+    files =◯ gatherFiles() if whole
     
     icon = opt.dryrun ? w4(' ') : '🔨'
         
     log icon w5(slash.name(bundleDir())) b5(files.length) if not opt.quiet
     
     kpath  = cachePath()
-    loaded = ○ loadCache kpath
-    fp     = ○ fingerprint()
+    loaded = ◯ loadCache kpath
+    fp     = ◯ fingerprint()
     cache  = if usable loaded, fp, opt.map then loaded else null
     
     log w2('  ') w3('cache is for another compiler, ignoring it') if opt.verbose and loaded? and empty cache
@@ -307,13 +307,13 @@ knrd = files=[] opt={} ○->
             dir = slash.dir tgtFile
             dirs.push dir if dir not in dirs
             
-            srcText  =○ nfs.read srcFile
+            srcText  =◯ nfs.read srcFile
             
-            if ○ isCurrent cache, srcFile, tgtFile, srcText
+            if ◯ isCurrent cache, srcFile, tgtFile, srcText
                 log g2('▸') m3(slash.tilde(tgtFile)) w4('cached') if opt.verbose
                 continue
             
-            tgtText  =○ nfs.read tgtFile
+            tgtText  =◯ nfs.read tgtFile
             log g2('▸') m3(srcFile) m5(tgtFile) if opt.verbose
             compText = rule.compile srcText, srcFile, tgtFile, opt
             log g2('▸') m3(srcFile) m5(tgtFile) if opt.verbose
@@ -327,18 +327,18 @@ knrd = files=[] opt={} ○->
                 log g2('🔧') m3(slash.tilde(srcFile)) if opt.verbose
                 if tgtText != compText
                     transpiled++
-                    ○ nfs.write tgtFile, compText if not opt.dryrun
+                    ◯ nfs.write tgtFile, compText if not opt.dryrun
                     log b5('✔ ') g5(slash.tilde(tgtFile))
                 
                 srcs[rel srcFile] = hash srcText
                 tgts[rel tgtFile] = hash compText
                     
     if not opt.dryrun
-        ○ saveCache kpath, loaded, fp, opt.map, srcs, tgts, whole
+        ◯ saveCache kpath, loaded, fp, opt.map, srcs, tgts, whole
     
     opt.reconcile ?= true
     if opt.reconcile and not opt.dryrun
-        ○ reconcile dirs, opt
+        ◯ reconcile dirs, opt
     
     transpiled
         

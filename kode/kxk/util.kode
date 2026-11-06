@@ -186,7 +186,7 @@ util =
             result[pair[0]] = pair[1]
         result
     
-    sleep: ms ○-> ○ new Promise((r) => setTimeout(r ms)); true
+    sleep: ms ◯-> ◯ new Promise((r) => setTimeout(r ms)); true
     
     uuid: -> crypto.randomUUID()
     

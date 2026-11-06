@@ -19,7 +19,7 @@ use .. ◆ nfs slash
 
         console.log = (args...) -> lines.push args
 
-        items =○ nfs.list secret recursive:false
+        items =◯ nfs.list secret recursive:false
 
         console.log = keep
 
@@ -38,7 +38,7 @@ use .. ◆ nfs slash
         file = slash.path root 'test.txt'
         fs.writeFileSync file 'hello'
 
-        dupe =○ nfs.duplicate file
+        dupe =◯ nfs.duplicate file
         text = fs.readFileSync dupe 'utf8'
 
         fs.rmSync root recursive:true force:true
@@ -55,9 +55,9 @@ use .. ◆ nfs slash
         file = slash.path root 'test.txt'
         fs.writeFileSync file 'hello'
 
-        first  =○ nfs.duplicate file
-        second =○ nfs.duplicate file
-        third  =○ nfs.duplicate file
+        first  =◯ nfs.duplicate file
+        second =◯ nfs.duplicate file
+        third  =◯ nfs.duplicate file
 
         fs.rmSync root recursive:true force:true
 
@@ -73,7 +73,7 @@ use .. ◆ nfs slash
         fs.writeFileSync file 'hello'
         fs.writeFileSync slash.path(root 'test-copy666.txt') 'old'
 
-        dupe =○ nfs.duplicate file
+        dupe =◯ nfs.duplicate file
 
         fs.rmSync root recursive:true force:true
 
@@ -90,7 +90,7 @@ use .. ◆ nfs slash
         fs.writeFileSync file 'hello'
         fs.writeFileSync copy666 'old'
 
-        dupe =○ nfs.duplicate copy666
+        dupe =◯ nfs.duplicate copy666
 
         fs.rmSync root recursive:true force:true
 
@@ -106,7 +106,7 @@ use .. ◆ nfs slash
         fs.mkdirSync folder
         fs.writeFileSync slash.path(folder 'inside.txt') 'inside'
 
-        dupe =○ nfs.duplicate folder
+        dupe =◯ nfs.duplicate folder
         text = fs.readFileSync slash.path(dupe 'inside.txt') 'utf8'
 
         fs.rmSync root recursive:true force:true
@@ -123,7 +123,7 @@ use .. ◆ nfs slash
         file = slash.path root 'README'
         fs.writeFileSync file 'docs'
 
-        dupe =○ nfs.duplicate file
+        dupe =◯ nfs.duplicate file
 
         fs.rmSync root recursive:true force:true
 
@@ -148,8 +148,8 @@ use .. ◆ nfs slash
         fs.mkdirSync root recursive:true
         fs.writeFileSync file 'hello'
 
-        res  =○ nfs.trash file
-        gone =○ nfs.exists file
+        res  =◯ nfs.trash file
+        gone =◯ nfs.exists file
 
         fs.rmSync root recursive:true force:true
 
@@ -165,8 +165,8 @@ use .. ◆ nfs slash
         fs.mkdirSync root recursive:true
         fs.writeFileSync file 'hello'
 
-        res  =○ nfs.trash file
-        gone =○ nfs.exists file
+        res  =◯ nfs.trash file
+        gone =◯ nfs.exists file
 
         fs.rmSync root recursive:true force:true
 
@@ -179,8 +179,8 @@ use .. ◆ nfs slash
 
         fs.writeFileSync file 'hello'
 
-        res  =○ nfs.trash file
-        gone =○ nfs.exists file
+        res  =◯ nfs.trash file
+        gone =◯ nfs.exists file
 
         fs.rmSync file force:true
 

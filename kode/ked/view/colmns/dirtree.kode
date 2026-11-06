@@ -90,7 +90,7 @@ import rgxs from './quicky.json' with { type: "json" }
         clearTimeout @refreshTimer if @refreshTimer
         @refreshTimer = setTimeout (=> @setRoot @currentRoot redraw:true index:@currentIndex()) 50
                     
-    setRoot: path opt ○=>
+    setRoot: path opt ◯=>
         
         opt ?= {}
         
@@ -98,7 +98,7 @@ import rgxs from './quicky.json' with { type: "json" }
         
         watcher.watch dir recursive:false
         
-        items =○ @dirItems dir 'dirtree.setRoot'
+        items =◯ @dirItems dir 'dirtree.setRoot'
         
         @currentRoot = dir
                         
@@ -222,7 +222,7 @@ import rgxs from './quicky.json' with { type: "json" }
         
         super action choice event
         
-    openDir: dirItem opt ○->
+    openDir: dirItem opt ◯->
         
         ⮐ if empty dirItem
         ⮐ if dirItem.open
@@ -233,7 +233,7 @@ import rgxs from './quicky.json' with { type: "json" }
         
         watcher.watch dirItem.path recursive:false
         
-        items =○ @dirItems dirItem.path 'dirtree.openDir'
+        items =◯ @dirItems dirItem.path 'dirtree.openDir'
         
         dirItem.tilde = dirItem.tilde.replace icons.dir_close icons.dir_open 
             
@@ -292,10 +292,10 @@ import rgxs from './quicky.json' with { type: "json" }
         
         post.emit 'redraw' if opt.redraw
                 
-    dirItems: dir info ○=>
+    dirItems: dir info ◯=>
         
         try
-            items =○ nfs.list dir recursive:false
+            items =◯ nfs.list dir recursive:false
         catch err
             error "list error -- #{info}" err
             ⮐ 

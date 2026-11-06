@@ -294,7 +294,7 @@ index ●refs
 ■changes
     @@ ●lineinfo @@
     ■changedlines
-        ●type ○line`,'diff --git ' + diffgit)
+        ●type ◯line`,'diff --git ' + diffgit)
                 patches = patches.concat(r)
             }
             catch (err)

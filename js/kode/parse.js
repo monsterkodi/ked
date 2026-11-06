@@ -15,7 +15,7 @@ nameable = ['await','enum','implements','interface','let','package','private','p
 wantsRight = ['+','-','~','!']
 wantsLeft = ['*','/','%','^','&','|','<','>','=','==']
 wantsSlice = ['..']
-needsPair = {'(':'parens is missing closing )','[':'array is missing closing ]','{':'curly is missing closing }',',':"missing expression after ','",'.':'property access is missing property name',':':': is missing a key and a value','▴':'assert is missing what to assert','○':'await is missing an operand','◆':'◆ is missing what it calls'}
+needsPair = {'(':'parens is missing closing )','[':'array is missing closing ]','{':'curly is missing closing }',',':"missing expression after ','",'.':'property access is missing property name',':':': is missing a key and a value','▴':'assert is missing what to assert','◯':'await is missing an operand','◆':'◆ is missing what it calls'}
 closers = {'(':')','[':']','{':'}'}
 
 Parse = (function ()
@@ -82,12 +82,12 @@ Parse = (function ()
                         return tok.text === ']'
 
                     case '{':
-                        return _k_.in(tok.text,['}','->','=>','○->','○=>','[','{','(','▸',':',']'])
+                        return _k_.in(tok.text,['}','->','=>','◯->','◯=>','[','{','(','▸',':',']'])
 
                     case '(':
                         return tok.text === ')'
 
-                    case '○rgs':
+                    case '◯rgs':
                         return tok.type === 'func'
 
                     case '▸args':
@@ -412,13 +412,13 @@ Parse = (function ()
             default:
                 switch (tok.text)
             {
-                case '○':
+                case '◯':
                     return this.await(tok,tokens)
 
                 case '->':
                 case '=>':
-                case '○->':
-                case '○=>':
+                case '◯->':
+                case '◯=>':
                     if (!(_k_.in(this.stack.slice(-1)[0],['{'])))
                     {
                         return this.func(null,tok,tokens)
@@ -446,7 +446,7 @@ Parse = (function ()
             this.onError(`${tok.text} is missing what it goes with`,{tok:tok})
         }
         this.sheapPush('exp',((_365_34_=tok.text) != null ? _365_34_ : tok.type))
-        if (tok.type !== 'paren' && !(_k_.in('○rgs',this.stack)))
+        if (tok.type !== 'paren' && !(_k_.in('◯rgs',this.stack)))
         {
             if (this.stack.slice(-1)[0] === ':' && this.stack.slice(-2,-1)[0] === 'class' || this.stack.slice(-1)[0] === 'op=' && !this.blockAssign || this.stack.slice(-1)[0] === ':' && this.stack.slice(-2,-1)[0] === '{' && !(_k_.in('▸args',this.stack)))
             {
@@ -769,7 +769,7 @@ Parse = (function ()
             {
                 e = this.prop(e,tokens)
             }
-            else if (nxt.type === 'dots' && !(this.stack.slice(-1)[0] != null ? this.stack.slice(-1)[0].startsWith('op') : undefined) && this.stack.slice(-1)[0] !== '(' && !(_k_.in('○rgs',this.stack)))
+            else if (nxt.type === 'dots' && !(this.stack.slice(-1)[0] != null ? this.stack.slice(-1)[0].startsWith('op') : undefined) && this.stack.slice(-1)[0] !== '(' && !(_k_.in('◯rgs',this.stack)))
             {
                 e = this.slice(e,tokens)
             }
@@ -834,7 +834,7 @@ Parse = (function ()
             {
                 e = {operation:{operator:tokens.shift(),rhs:this.incond(e,tokens)}}
             }
-            else if ((spaced && (nxt.line === last.line || (nxt.col > first.col && !(_k_.in(this.stack.slice(-1)[0],['if','when'])))) && !(_k_.in('○rgs',this.stack)) && !(_k_.in('[',this.stack)) && !(_k_.in(this.stack.slice(-1)[0],['(','call','args(','op|','op&','op/','op*','op+','op-'])) && (!(_k_.in(this.stack.slice(-1)[0],['▸args',':'])) || (nxt.line > last.line && nxt.col > first.col)) && !(_k_.in(nxt.text,['then','when','else','break','continue','in','of','for','while'])) && (!(_k_.in(nxt.text,['if'])) || !this.noThenAhead(tokens)) && !(_k_.in(nxt.text,',.;:)}]')) && !(_k_.in(nxt.type,['nl'])) && !(nxt.type === 'block' && (nxt.tokens[0] != null ? nxt.tokens[0].text : undefined) === '.') && (nxt.type !== 'op' || _k_.in(nxt.text,['++','--','noon','new','not']) || _k_.in(nxt.text,['+','-']) && (tokens[1] != null ? tokens[1].col : undefined) === nxt.col + 1) && this.isSuitableForImplicitCall(e)))
+            else if ((spaced && (nxt.line === last.line || (nxt.col > first.col && !(_k_.in(this.stack.slice(-1)[0],['if','when'])))) && !(_k_.in('◯rgs',this.stack)) && !(_k_.in('[',this.stack)) && !(_k_.in(this.stack.slice(-1)[0],['(','call','args(','op|','op&','op/','op*','op+','op-'])) && (!(_k_.in(this.stack.slice(-1)[0],['▸args',':'])) || (nxt.line > last.line && nxt.col > first.col)) && !(_k_.in(nxt.text,['then','when','else','break','continue','in','of','for','while'])) && (!(_k_.in(nxt.text,['if'])) || !this.noThenAhead(tokens)) && !(_k_.in(nxt.text,',.;:)}]')) && !(_k_.in(nxt.type,['nl'])) && !(nxt.type === 'block' && (nxt.tokens[0] != null ? nxt.tokens[0].text : undefined) === '.') && (nxt.type !== 'op' || _k_.in(nxt.text,['++','--','noon','new','not']) || _k_.in(nxt.text,['+','-']) && (tokens[1] != null ? tokens[1].col : undefined) === nxt.col + 1) && this.isSuitableForImplicitCall(e)))
             {
                 this.verb('lhs is lhs of implicit call! e',e,this.stack.slice(-1)[0])
                 this.verb('    is lhs of implicit call! nxt',nxt)

@@ -78,7 +78,7 @@ index_kode = (function ()
                         unbndIndex = code.indexOf('->')
                         boundIndex = code.indexOf('=>')
                         bound = boundIndex > 0 && (unbndIndex < 0 || boundIndex < unbndIndex)
-                        async = code.indexOf('○') >= 0
+                        async = code.indexOf('◯') >= 0
                         funcInfo = {line:li,name:methodName,method:methodName,class:currentClass,async:async,bound:bound}
                         funcStack.push([indent,funcInfo])
                     }
@@ -92,7 +92,7 @@ index_kode = (function ()
                 }
                 if (funcName = index_utils.funcNameInLine(code))
                 {
-                    funcInfo = addFuncInfo(funcName,{line:li,async:code.indexOf('○') >= 0})
+                    funcInfo = addFuncInfo(funcName,{line:li,async:code.indexOf('◯') >= 0})
                     funcStack.push([indent,funcInfo])
                 }
                 else if (code.includes('post.on'))

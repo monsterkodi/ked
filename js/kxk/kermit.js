@@ -79,7 +79,7 @@ lineMatch = function (line, pt, splitlist)
             ci++
             continue
         }
-        if (_k_.in((cp != null ? cp[0] : undefined),'●○'))
+        if (_k_.in((cp != null ? cp[0] : undefined),'●◯'))
         {
             weakMatch = true
             varName = cp.slice(1)
@@ -91,7 +91,7 @@ lineMatch = function (line, pt, splitlist)
                     ci++
                     continue
                     break
-                case '○':
+                case '◯':
                     if (ci === cpt.length - 1)
                     {
                         rslt[varName] = splt.slice(si).join(' ')
@@ -169,7 +169,7 @@ addMatch = function (line, ctx)
             ci++
             continue
         }
-        if (_k_.in((cp != null ? cp[0] : undefined),'●○'))
+        if (_k_.in((cp != null ? cp[0] : undefined),'●◯'))
         {
             weakMatch = true
             varName = cp.slice(1)
@@ -178,7 +178,7 @@ addMatch = function (line, ctx)
                 case '●':
                     rslt[varName] = splt[si]
                     break
-                case '○':
+                case '◯':
                     rslt[varName] = line.slice((splt.slice(0, typeof si === 'number' ? si : -1).join(' ').length))
                     varName = null
                     break

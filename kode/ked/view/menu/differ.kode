@@ -87,19 +87,19 @@ use                 ◆ searcher searcherfile
         @input.grabFocus()
         post.emit 'redraw'
 
-    file: ○=>
+    file: ◯=>
     
         currentFile = ked_session.get 'editor▸file'
-        diff =○ git.diff currentFile
+        diff =◯ git.diff currentFile
                        
         if valid diff.changes
             @show()
             @diff diff
             
-    status: ○=> 
+    status: ◯=> 
     
         currentFile = ked_session.get 'editor▸file'
-        status =○ git.status currentFile
+        status =◯ git.status currentFile
 
         ⮐ if empty status
         ⮐ if empty status.gitDir
@@ -155,7 +155,7 @@ use                 ◆ searcher searcherfile
             
                 fileHeader 'added' file status
             
-                text =○ nfs.read file
+                text =◯ nfs.read file
                 lines = belt.linesForText text
                 newl  = lines.map (l) -> new:l
                 diff  = file:file changes:[line:1 add:newl]
@@ -167,17 +167,17 @@ use                 ◆ searcher searcherfile
             
                 fileHeader 'changed' file status
                 
-                diff =○ git.diff file
+                diff =◯ git.diff file
                 
                 if @hidden()
                     log 'hidden?'
                 
                 @diff diff if valid diff
 
-    commit: msg ○=>
+    commit: msg ◯=>
     
         currentFile = ked_session.get 'editor▸file'
-        gitDir =○ git.dir currentFile
+        gitDir =◯ git.dir currentFile
         
         ⮐ if empty gitDir
         
@@ -185,24 +185,24 @@ use                 ◆ searcher searcherfile
         post.emit 'focus' 'editor'
         
         out = ''
-        out +=○ git.exec "add ."                cwd:gitDir       
-        out +=○ git.exec "commit -m \"#{msg}\"" cwd:gitDir
+        out +=◯ git.exec "add ."                cwd:gitDir       
+        out +=◯ git.exec "commit -m \"#{msg}\"" cwd:gitDir
 
         log r4("differ.commit\n#{b7 out}")
         
         post.emit 'git.commit'
         post.emit 'redraw'
                         
-    history: ○=>
+    history: ◯=>
         
-        history =○ git.history()
+        history =◯ git.history()
 
         ⮐ if empty history
         
         @show()
         
         currentFile = ked_session.get 'editor▸file'
-        gitDir =○ git.dir currentFile
+        gitDir =◯ git.dir currentFile
         
         items = []
         for h in history 
@@ -227,16 +227,16 @@ use                 ◆ searcher searcherfile
         @choices.append items
         post.emit 'redraw'
         
-    patch: rev ○=>
+    patch: rev ◯=>
     
-        patch =○ git.patch rev
+        patch =◯ git.patch rev
         
         ⮐ if empty patch
         
         # log "rev #{rev}" patch
         
         currentFile = ked_session.get 'editor▸file'
-        gitDir =○ git.dir currentFile
+        gitDir =◯ git.dir currentFile
         
         items = []
         

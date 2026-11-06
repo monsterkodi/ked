@@ -43,10 +43,10 @@ use           ◆ index_utils
                                 
             switch classType
                 'object'
-                    if match = kermit.lineMatch(line "proc ●name(●this:#{className}○args)" ['(' ')']) ➜ addMeth match.name
+                    if match = kermit.lineMatch(line "proc ●name(●this:#{className}◯args)" ['(' ')']) ➜ addMeth match.name
                 'class'
-                    if match = kermit.lineMatch(line "●name: ○args ->" [':']) ➜ addMeth match.name
-                    if match = kermit.lineMatch(line "●name: ○args =>" [':']) ➜ addMeth match.name bound:true
+                    if match = kermit.lineMatch(line "●name: ◯args ->" [':']) ➜ addMeth match.name
+                    if match = kermit.lineMatch(line "●name: ◯args =>" [':']) ➜ addMeth match.name bound:true
                     
         addFunc = name opt={} =>
             
@@ -57,12 +57,12 @@ use           ◆ index_utils
             @result.funcs.push fnc
             null
         
-        if match = kermit.lineMatch(line 'proc ●name ○args' ['(' ')']) ➜ addFunc match.name bound:true
-        if match = kermit.lineMatch(line 'macro ●name ○args' ['(' ')']) ➜ addFunc match.name bound:true async:true
-        if match = kermit.lineMatch(line 'template ●name ○args' ['(' ')']) ➜ addFunc match.name async:true
+        if match = kermit.lineMatch(line 'proc ●name ◯args' ['(' ')']) ➜ addFunc match.name bound:true
+        if match = kermit.lineMatch(line 'macro ●name ◯args' ['(' ')']) ➜ addFunc match.name bound:true async:true
+        if match = kermit.lineMatch(line 'template ●name ◯args' ['(' ')']) ➜ addFunc match.name async:true
         
-        if match = kermit.lineMatch(line '●name = ○args ->') ➜ addFunc match.name
-        if match = kermit.lineMatch(line '▸ ○name') ➜ addFunc line test:true
+        if match = kermit.lineMatch(line '●name = ◯args ->') ➜ addFunc match.name
+        if match = kermit.lineMatch(line '▸ ◯name') ➜ addFunc line test:true
                     
     parse: text ->
         

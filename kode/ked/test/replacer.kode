@@ -31,14 +31,14 @@ use ../view/menu ◆ replacer
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 0 0 80 30
         r = new replacer h.screen e
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         [x y w h] = r.arrangeRect()
         mid = int w/2
@@ -77,14 +77,14 @@ use ../view/menu ◆ replacer
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 0 0 80 30
         r = new replacer h.screen e
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         r.replaceInput.hasFocus() ▸ true
         r.input.hasFocus()        ▸ false
@@ -100,7 +100,7 @@ use ../view/menu ◆ replacer
         e.cells.layout 0 0 80 30
         r = new replacer h.screen e
 
-        ○ r.show ''
+        ◯ r.show ''
 
         r.input.hasFocus()        ▸ true
         r.replaceInput.hasFocus() ▸ false
@@ -128,14 +128,14 @@ use ../view/menu ◆ replacer
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 0 0 80 30
         r = new replacer h.screen e
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         r.replaceInput.hasFocus() ▸ true
 
@@ -182,14 +182,14 @@ use ../view/menu ◆ replacer
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 0 0 80 30
         r = new replacer h.screen e
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         h.type r 'xx'
 
@@ -223,14 +223,14 @@ use ../view/menu ◆ replacer
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 1 0 79 30
         r = new replacer h.screen e
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         r.arrange()
 
@@ -272,14 +272,14 @@ use ../view/menu ◆ replacer
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 1 0 79 30
         r = new replacer h.screen e
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         r.sfils.length ▸ 1
         r.sfils[0].marker ▸ '✔'
@@ -293,7 +293,7 @@ use ../view/menu ◆ replacer
 
         choice = r.choices.items[r.sfils[0].lineIndex]
 
-        ○ r.onChoicesAction 'space' choice
+        ◯ r.onChoicesAction 'space' choice
 
         r.sfils.length ▸ 1
         r.sfils[0].excluded ▸ true
@@ -308,7 +308,7 @@ use ../view/menu ◆ replacer
 
         choice = r.choices.items[r.sfils[0].lineIndex]
 
-        ○ r.onChoicesAction 'space' choice
+        ◯ r.onChoicesAction 'space' choice
 
         r.sfils[0].excluded ▸ false
         r.sfils[0].marker ▸ '✔'
@@ -343,14 +343,14 @@ use ../view/menu ◆ replacer
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 1 0 79 30
         r = new replacer h.screen e
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         mainHandler  = null
         otherHandler = null
@@ -373,15 +373,15 @@ use ../view/menu ◆ replacer
 
         r.choices.select r.choices.items.indexOf lineItem
 
-        ○ r.onChoicesAction 'space' lineItem
+        ◯ r.onChoicesAction 'space' lineItem
 
-        ○ r.onChoicesAction 'space' otherHandler.headerItem
+        ◯ r.onChoicesAction 'space' otherHandler.headerItem
 
         logLines = []
         keep     = console.log
         console.log = (args...) -> logLines.push args.join(' ')
 
-        ○ r.onReplaceInputAction 'submit' 'X'
+        ◯ r.onReplaceInputAction 'submit' 'X'
 
         console.log = keep
 
@@ -416,24 +416,24 @@ use ../view/menu ◆ replacer
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:16
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 1 0 79 16
         r = new replacer h.screen e
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         oldHandler = r.sfils[0]
         choice    = r.choices.items[oldHandler.lineIndex]
 
-        ○ r.onChoicesAction 'space' choice
+        ◯ r.onChoicesAction 'space' choice
 
         r.sfils[0].excluded ▸ true
         r.excludedPaths[main] ▸ true
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         r.sfils.length ▸ 1
         (r.sfils[0] != oldHandler) ▸ true
@@ -473,14 +473,14 @@ use ../view/menu ◆ replacer
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index files[0]
+        ◯ prjcts.index files[0]
 
         h = new harness cols:80 rows:16
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 1 0 79 16
         r = new replacer h.screen e
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         order = r.sfils.map (sfil) -> sfil.path
 
@@ -491,7 +491,7 @@ use ../view/menu ◆ replacer
         view   = r.choices.state.s.view.slice()
         scroll = r.choices.state.s.scrollOffset
 
-        ○ r.onChoicesAction 'space' r.choices.current()
+        ◯ r.onChoicesAction 'space' r.choices.current()
 
         r.sfils.map((sfil) -> sfil.path) ▸ order
         r.choices.state.s.view ▸ view
@@ -526,14 +526,14 @@ use ../view/menu ◆ replacer
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 1 0 79 30
         r = new replacer h.screen e
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         lineIndex = null
         lineItem  = null
@@ -548,13 +548,13 @@ use ../view/menu ◆ replacer
 
         r.choices.select lineIndex
 
-        ○ r.onChoicesAction 'space' lineItem
+        ◯ r.onChoicesAction 'space' lineItem
 
         lineItem.excluded ▸ true
         r.visible() ▸ true
         r.lineno(lineIndex).includes('✘') ▸ true
 
-        ○ r.onChoicesAction 'space' lineItem
+        ◯ r.onChoicesAction 'space' lineItem
 
         lineItem.excluded ▸ false
         r.lineno(lineIndex).includes('✘') ▸ false
@@ -586,14 +586,14 @@ use ../view/menu ◆ replacer
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 1 0 79 30
         r = new replacer h.screen e
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         lineIndices = []
 
@@ -607,21 +607,21 @@ use ../view/menu ◆ replacer
 
         first = r.choices.current()
 
-        ○ r.onChoicesAction 'space' first
+        ◯ r.onChoicesAction 'space' first
 
         first.excluded ▸ true
         r.choices.currentIndex() ▸ lineIndices[1]
 
         second = r.choices.current()
 
-        ○ r.onChoicesAction 'space' second
+        ◯ r.onChoicesAction 'space' second
 
         second.excluded ▸ true
         r.choices.currentIndex() ▸ lineIndices[2]
 
         third = r.choices.current()
 
-        ○ r.onChoicesAction 'space' third
+        ◯ r.onChoicesAction 'space' third
 
         third.excluded ▸ true
         r.choices.currentIndex() ▸ lineIndices[2]
@@ -653,22 +653,22 @@ use ../view/menu ◆ replacer
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 1 0 79 30
         r = new replacer h.screen e
 
-        ○ r.show 'if'
+        ◯ r.show 'if'
 
         first  = r.applyReplacement 'X'
         second = r.applyReplacement 'Y'
 
         r.applying ▸ true
 
-        ○ first
-        ○ second
+        ◯ first
+        ◯ second
 
         fs.readFileSync(main 'utf8') ▸ 'X a\n'
         r.applying ▸ false

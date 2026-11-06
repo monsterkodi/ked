@@ -80,15 +80,15 @@ use ◆ frecent
         
     reload: => @load()
     
-    load: ○=>
+    load: ◯=>
         
         try
-            @data =○ noon.load @file
+            @data =◯ noon.load @file
         catch err
             error "session -- can't load '#{@file}':" err
             {}
         
-    save: ○=>
+    save: ◯=>
         
         ⮐ if not @file
         ⮐ if empty @data
@@ -99,7 +99,7 @@ use ◆ frecent
         try
             text = noon.stringify(@data {indent:4 maxalign:8})+'\n'
 
-            result =○ nfs.write @file text
+            result =◯ nfs.write @file text
             if result.error
                 log 'session.save failed!' @file result
             # else
@@ -108,13 +108,13 @@ use ◆ frecent
         catch err
             log "session -- can't save to '#{@file}':" err
     
-    loadAndMerge: ○=>
+    loadAndMerge: ◯=>
         
-        file =○ @newestSessionFile()
+        file =◯ @newestSessionFile()
         
         if valid file
             
-            recent =○ noon.read file
+            recent =◯ noon.read file
             
             post.emit 'session.merge' recent
             
@@ -124,21 +124,21 @@ use ◆ frecent
         @emit 'loaded'
         @resolveLoaded()
     
-    newestSessionFile: ○=>
+    newestSessionFile: ◯=>
         
-        files =○ @listSessions()
+        files =◯ @listSessions()
         files[-1]
             
-    listSessions: ○=>
+    listSessions: ◯=>
         
-        files =○ nfs.list @dir
+        files =◯ nfs.list @dir
         [f.path for f in files]
         
-    cleanSessions: ○=>
+    cleanSessions: ◯=>
         
         maxFiles = 100
-        files =○ @listSessions()
+        files =◯ @listSessions()
         for file in files[0...files.length-maxFiles]
-            ○ nfs.remove file
+            ◯ nfs.remove file
                     
 export session

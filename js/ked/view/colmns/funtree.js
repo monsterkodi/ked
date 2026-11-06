@@ -17,7 +17,7 @@ import indexer from "../../index/indexer.js"
 
 import filterchoice from "../menu/filterchoice.js"
 
-SYMBOL = {clss:'■',extends:'□',unbound:'->',bound:'=>',async_unbound:'○→',async_bound:'●→'}
+SYMBOL = {clss:'■',extends:'□',unbound:'->',bound:'=>',async_unbound:'◯→',async_bound:'●→'}
 
 funSyntax = (function ()
 {

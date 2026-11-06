@@ -40,7 +40,7 @@ index_nim = (function ()
             }).bind(this)
             if (classType === 'object')
             {
-                if (match = kermit.lineMatch(line,'proc ●name(self:#{className}○args)',['(',')']))
+                if (match = kermit.lineMatch(line,'proc ●name(self:#{className}◯args)',['(',')']))
                 {
                     addMeth(match.name)
                 }
@@ -58,7 +58,7 @@ index_nim = (function ()
             this.result.funcs.push(fnc)
             return null
         }).bind(this)
-        if (match = kermit.lineMatch(line,'proc ●name ○args',['(',')']))
+        if (match = kermit.lineMatch(line,'proc ●name ◯args',['(',')']))
         {
             addFunc(match.name)
         }

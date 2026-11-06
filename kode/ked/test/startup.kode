@@ -9,7 +9,7 @@ use ../../kxk ▪ watcher
 
         (mode.loaded instanceof Promise) ▸ true
 
-        ○ mode.loaded
+        ◯ mode.loaded
 
         mode.names().includes('novim') ▸ true
         mode.pending.length ▸ 0
@@ -20,8 +20,8 @@ use ../../kxk ▪ watcher
 
         (config.loaded instanceof Promise) ▸ true
 
-        ○ loading
-        ○ config.loaded
+        ◯ loading
+        ◯ config.loaded
 
         (config.data != null) ▸ true
 
@@ -33,4 +33,4 @@ use ../../kxk ▪ watcher
 
         (s.loaded instanceof Promise) ▸ true
 
-        ○ s.loaded
+        ◯ s.loaded

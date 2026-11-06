@@ -51,8 +51,8 @@ if
         hdr process.argv[-1]
         
         file = slash.path ◆dir '..' lastArg
-        test =○ import(file)
-        result =○ tester.test test.default
+        test =◯ import(file)
+        result =◯ tester.test test.default
         fail = fail or not (result ? true)
     
 for mod in mods
@@ -60,11 +60,11 @@ for mod in mods
     if tests[mod]
         start = Date.now()
         hdr mod
-        files =○ nfs.list(slash.path(◆dir mod 'test'))
+        files =◯ nfs.list(slash.path(◆dir mod 'test'))
         for file in files
             continue if file.type == 'dir' # ignore subdirectories for now
-            test =○ import(file.path) # shouldn't the file type be checked here?
-            result =○ tester.test test.default
+            test =◯ import(file.path) # shouldn't the file type be checked here?
+            result =◯ tester.test test.default
             fail = fail or not (result ? true)
         moduleTimes.push {name:mod ms:Date.now() - start}
         

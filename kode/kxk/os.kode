@@ -7,7 +7,7 @@
     @homedir:  null
 
 try
-    (○->
+    (◯->
         # log 'OS'
         import('os').catch((e)->).then (os) ->
             if os

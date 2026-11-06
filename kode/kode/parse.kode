@@ -60,7 +60,7 @@ needsPair =
     '.':  'property access is missing property name'
     ':':  ': is missing a key and a value'
     '▴':  'assert is missing what to assert'
-    '○':  'await is missing an operand'
+    '◯':  'await is missing an operand'
     '◆':  '◆ is missing what it calls'
 
 closers = '(':')' '[':']' '{':'}'
@@ -123,9 +123,9 @@ closers = '(':')' '[':']' '{':'}'
                 'if' 'then' 
                 '▸else'     ➜ tok.text == 'else'
                 '['         ➜ tok.text == ']'  
-                '{'         ➜ tok.text in ['}' '->' '=>' '○->' '○=>' '[' '{' '(' '▸' ':' ']']
+                '{'         ➜ tok.text in ['}' '->' '=>' '◯->' '◯=>' '[' '{' '(' '▸' ':' ']']
                 '('         ➜ tok.text == ')'
-                '○rgs'      ➜ tok.type == 'func'
+                '◯rgs'      ➜ tok.type == 'func'
                 '▸args'     ➜ tok.text in [']' ';' 'else' 'then']
                 '▸return'   ➜ tok.text == 'if'
                 'call'      ➜ tok.text in ';' # bail out for implicit calls
@@ -341,8 +341,8 @@ closers = '(':')' '[':']' '{':'}'
                                             @verb 'if' @stack if @stack.length
                                             ⮐ @if tok tokens
                         ➜ switch tok.text
-                                '○' ➜ ⮐ @await tok tokens
-                                '->' '=>' '○->' '○=>'
+                                '◯' ➜ ⮐ @await tok tokens
+                                '->' '=>' '◯->' '◯=>'
                                     if @stack[-1] not in ['{']
                                         ⮐ @func null tok tokens
 
@@ -364,7 +364,7 @@ closers = '(':')' '[':']' '{':'}'
 
         @sheapPush 'exp' tok.text ? tok.type
         
-        if tok.type != 'paren' and '○rgs' not in @stack # treat methods and funcs with minimal args
+        if tok.type != 'paren' and '◯rgs' not in @stack # treat methods and funcs with minimal args
             
             if @stack[-1] == ':' and @stack[-2] == 'class' or # class/function  m: a b -> 
                @stack[-1] == 'op=' and not @blockAssign or  # f = a b ->
@@ -593,7 +593,7 @@ closers = '(':')' '[':']' '{':'}'
                 
             if      
                 nxt.text == '.'    ➜ e = @prop(e tokens)
-                nxt.type == 'dots' and not @stack[-1]?.startsWith('op') and @stack[-1] != '(' and '○rgs' not in @stack ➜ e = @slice(e tokens)
+                nxt.type == 'dots' and not @stack[-1]?.startsWith('op') and @stack[-1] != '(' and '◯rgs' not in @stack ➜ e = @slice(e tokens)
                 nxt.text == 'each' ➜ e = @each(e tokens)
                 nxt.text == '?' 
                 
@@ -658,7 +658,7 @@ closers = '(':')' '[':']' '{':'}'
                         
                 (   spaced and 
                     (nxt.line == last.line or (nxt.col > first.col and @stack[-1] not in ['if''when'])) and
-                    '○rgs' not in @stack and
+                    '◯rgs' not in @stack and
                     '[' not in @stack and
                     @stack[-1] not in ['(' 'call' 'args(' 'op|' 'op&' 'op/' 'op*' 'op+' 'op-'] and
                     (@stack[-1] not in ['▸args' ':'] or (nxt.line > last.line and nxt.col > first.col)) and

@@ -14,12 +14,12 @@ use ../index ◆ kacher
         fs.mkdirSync root recursive:true
         fs.writeFileSync file 'alpha'
 
-        text =○ kacher.getText file
+        text =◯ kacher.getText file
         text ▸ 'alpha'
 
         fs.writeFileSync file 'beta'
 
-        text =○ kacher.getText file
+        text =◯ kacher.getText file
         text ▸ 'alpha'
 
         fs.rmSync root recursive:true force:true
@@ -33,13 +33,13 @@ use ../index ◆ kacher
         fs.mkdirSync root recursive:true
         fs.writeFileSync file 'alpha'
 
-        text =○ kacher.getText file
+        text =◯ kacher.getText file
         text ▸ 'alpha'
 
         fs.writeFileSync file 'beta'
         post.emit 'file.change' path:file change:'modify'
 
-        text =○ kacher.getText file
+        text =◯ kacher.getText file
         text ▸ 'beta'
 
         fs.rmSync root recursive:true force:true
@@ -54,14 +54,14 @@ use ../index ◆ kacher
         fs.mkdirSync root recursive:true
         fs.writeFileSync oldFile 'alpha'
 
-        text =○ kacher.getText oldFile
+        text =◯ kacher.getText oldFile
         text ▸ 'alpha'
 
         fs.renameSync oldFile newFile
         post.emit 'file.change' path:newFile oldPath:oldFile change:'rename'
 
         fs.writeFileSync oldFile 'beta'
-        text =○ kacher.getText oldFile
+        text =◯ kacher.getText oldFile
 
         fs.rmSync root recursive:true force:true
 
@@ -76,14 +76,14 @@ use ../index ◆ kacher
         fs.mkdirSync root recursive:true
         fs.writeFileSync file 'alpha'
 
-        text =○ kacher.getText file
+        text =◯ kacher.getText file
         text ▸ 'alpha'
 
         fs.rmSync file
         post.emit 'file.change' path:file change:'delete'
 
         fs.writeFileSync file 'beta'
-        text =○ kacher.getText file
+        text =◯ kacher.getText file
 
         fs.rmSync root recursive:true force:true
 
@@ -101,7 +101,7 @@ use ../index ◆ kacher
         fs.mkdirSync oldDir recursive:true
         fs.writeFileSync oldFile 'alpha'
 
-        text =○ kacher.getText oldFile
+        text =◯ kacher.getText oldFile
         text ▸ 'alpha'
 
         fs.renameSync oldDir newDir
@@ -109,7 +109,7 @@ use ../index ◆ kacher
 
         fs.mkdirSync oldDir recursive:true
         fs.writeFileSync oldFile 'beta'
-        text =○ kacher.getText oldFile
+        text =◯ kacher.getText oldFile
 
         fs.rmSync root recursive:true force:true
 

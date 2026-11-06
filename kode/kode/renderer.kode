@@ -582,7 +582,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
                 con = m
             else if name?.startsWith '@'
                 m.keyval.val.func.name.text = 'static ' + name[1..]
-            else if m.keyval.val.func?.arrow.text in ['=>' '○=>']
+            else if m.keyval.val.func?.arrow.text in ['=>' '◯=>']
                 bind.push m
 
         if (bind.length or @fncnName) and not con  # found some methods to bind or old school class, but no constructor
@@ -601,7 +601,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         
         name ?= n.name?.text ? 'function'
         
-        if n.arrow.text[0] == '○'
+        if n.arrow.text[0] == '◯'
             if name.indexOf('function') >= 0
                 name = name.replace 'function' 'async function'
             else if name.indexOf('static') >= 0

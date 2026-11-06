@@ -7,18 +7,18 @@
         @funcClassPtn = @tokenize '●name = (function ()' false
         
         @classMethodPtns = [
-            [@tokenize('●name ○args')               {}]
-            [@tokenize('async ●name ○args')         {async:true}]
-            [@tokenize('static ●name ○args')        {static:true}]
-            [@tokenize('static async ●name ○args')  {static:true async:true}]
+            [@tokenize('●name ◯args')               {}]
+            [@tokenize('async ●name ◯args')         {async:true}]
+            [@tokenize('static ●name ◯args')        {static:true}]
+            [@tokenize('static async ●name ◯args')  {static:true async:true}]
         ]
         
         @classBoundPtn = @tokenize('this.●name = this.●bound.bind(this)')
         @funcBoundPtn  = @tokenize('this["●name"] = this["●bound"].bind(this)')
         
         @topPtns = [
-            [@tokenize('●name = function ○args')        {}]
-            [@tokenize('●name = async function ○args')  {async:true}]
+            [@tokenize('●name = function ◯args')        {}]
+            [@tokenize('●name = async function ◯args')  {async:true}]
         ]
         
         @funcClassName = null
@@ -69,7 +69,7 @@
                 ci++
                 continue
                 
-            if cp?[0] in '●○'
+            if cp?[0] in '●◯'
                 weakMatch = true
                 varName = cp[1..]
                 switch cp[0]
@@ -78,7 +78,7 @@
                         si++
                         ci++
                         continue
-                    '○' 
+                    '◯' 
                         if ci == ptn.length-1
                             rslt[varName] = tokens[si..].join ' '
                             ⮐ rslt
@@ -119,11 +119,11 @@
             @funcClassName = className
             
             @funcClassPtns = [
-                [@tokenize("""function #{className} ○args""")                            {name:className}]
-                [@tokenize("""#{className}["●name"] = function ○args""")                 {static:true}]
-                [@tokenize("""#{className}["●name"] = async function ○args""")           {static:true async:true}]
-                [@tokenize("""#{className}.prototype["●name"] = function ○args""")       {}]
-                [@tokenize("""#{className}.prototype["●name"] = async function ○args""") {async:true}]
+                [@tokenize("""function #{className} ◯args""")                            {name:className}]
+                [@tokenize("""#{className}["●name"] = function ◯args""")                 {static:true}]
+                [@tokenize("""#{className}["●name"] = async function ◯args""")           {static:true async:true}]
+                [@tokenize("""#{className}.prototype["●name"] = function ◯args""")       {}]
+                [@tokenize("""#{className}.prototype["●name"] = async function ◯args""") {async:true}]
             ]
             
         @funcClassPtns

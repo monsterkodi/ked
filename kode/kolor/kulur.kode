@@ -98,7 +98,7 @@ chunked = segls ext ->
                 
                 isUniko = ch cc -> 
                     isu = cc >= 2000
-                    if isu ➜ ⮐ false if ch in '■□▪◆●○▸➜⮐'
+                    if isu ➜ ⮐ false if ch in '■□▪◆●◯▸➜⮐'
                     isu
                 
                 b = base s
@@ -286,7 +286,7 @@ funcArgs = ->
     ⮐ if notCode
     ⮐ if not chunk.turd
     
-    turd = chunk.turd[0] == '○' ? chunk.turd[1..2] : chunk.turd[0..1]
+    turd = chunk.turd[0] == '◯' ? chunk.turd[1..2] : chunk.turd[0..1]
     if turd[0] in '=-' and turd[1] == '>'
         ⮐ if getChunk(-1)?.match in ':)'
         if line.chunks[0].clss in ['text''dictionary key'] and line.chunks[1].match in ':=' 
@@ -313,7 +313,7 @@ dashArrow = ->
 
     if chunk.turd
         
-        if chunk.turd.startsWith('○->')
+        if chunk.turd.startsWith('◯->')
             markFunc()
             addValue 0 'function async'
             addValue 1 'function tail'
@@ -327,7 +327,7 @@ dashArrow = ->
                 line.chunks[2].clss = 'punct method class'
             ⮐ 3
             
-        if chunk.turd.startsWith '○=>'
+        if chunk.turd.startsWith '◯=>'
             markFunc()
             addValue 0 'function bound async'
             addValue 1 'function bound tail'
@@ -398,7 +398,7 @@ kodePunct = ->
 
     if next = getChunk 1
         
-        if chunk.match in '○' and next.match not in '-='
+        if chunk.match in '◯' and next.match not in '-='
             ⮐ addValue 0 'await'
             
         if chunk.turd in ['==''!=''>=''<=']

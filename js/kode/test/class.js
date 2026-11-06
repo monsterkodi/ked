@@ -24,8 +24,8 @@ toExport["class"] = async function ()
     await section("async", async function ()
     {
         compare(kc(`class C
-    @a: ○->
-    b: ○->`),`class C
+    @a: ◯->
+    b: ◯->`),`class C
 {
     static async a ()
     {}
@@ -207,7 +207,7 @@ toExport["class"] = async function ()
 
     @: ->
 
-    asyncBound: ○=>`),`class E extends e
+    asyncBound: ◯=>`),`class E extends e
 {
     constructor ()
     {

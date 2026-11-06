@@ -107,7 +107,7 @@ chunked = function (segls, ext)
                     isu = cc >= 2000
                     if (isu)
                     {
-                        if (_k_.in(ch,'■□▪◆●○▸➜⮐'))
+                        if (_k_.in(ch,'■□▪◆●◯▸➜⮐'))
                         {
                             return false
                         }
@@ -413,7 +413,7 @@ funcArgs = function ()
     {
         return
     }
-    turd = (chunk.turd[0] === '○' ? chunk.turd.slice(1, 3) : chunk.turd.slice(0, 2))
+    turd = (chunk.turd[0] === '◯' ? chunk.turd.slice(1, 3) : chunk.turd.slice(0, 2))
     if (_k_.in(turd[0],'=-') && turd[1] === '>')
     {
         if (_k_.in((getChunk(-1) != null ? getChunk(-1).match : undefined),':)'))
@@ -462,7 +462,7 @@ dashArrow = function ()
     }
     if (chunk.turd)
     {
-        if (chunk.turd.startsWith('○->'))
+        if (chunk.turd.startsWith('◯->'))
         {
             markFunc()
             addValue(0,'function async')
@@ -481,7 +481,7 @@ dashArrow = function ()
             }
             return 3
         }
-        if (chunk.turd.startsWith('○=>'))
+        if (chunk.turd.startsWith('◯=>'))
         {
             markFunc()
             addValue(0,'function bound async')
@@ -590,7 +590,7 @@ kodePunct = function ()
     }
     if (next = getChunk(1))
     {
-        if (_k_.in(chunk.match,'○') && !(_k_.in(next.match,'-=')))
+        if (_k_.in(chunk.match,'◯') && !(_k_.in(next.match,'-=')))
         {
             return addValue(0,'await')
         }

@@ -3,12 +3,12 @@ use fs
 use ../../kxk ▪ slash sleep post
 use ../index ◆ prjcts
 
-waitFor = (cond) ○->
+waitFor = (cond) ◯->
 
     n = 0
     while n < 100
         ⮐ true if cond()
-        ○ sleep 10
+        ◯ sleep 10
         n += 1
     false
 
@@ -29,7 +29,7 @@ waitFor = (cond) ○->
         prjcts.allFiles[a] = root
 
         post.emit 'file.change' path:b change:'create'
-        ○ waitFor -> b in prjcts.projects[root].files
+        ◯ waitFor -> b in prjcts.projects[root].files
 
         files = prjcts.projects[root].files
         mapping = prjcts.allFiles[b]
@@ -59,7 +59,7 @@ waitFor = (cond) ○->
 
         fs.rmSync b
         post.emit 'file.change' path:b change:'delete'
-        ○ waitFor -> b not in prjcts.projects[root].files
+        ◯ waitFor -> b not in prjcts.projects[root].files
 
         files = prjcts.projects[root].files
         mapping = prjcts.allFiles[b]
@@ -87,7 +87,7 @@ waitFor = (cond) ○->
 
         fs.renameSync a c
         post.emit 'file.change' path:c oldPath:a change:'rename'
-        ○ waitFor -> c in prjcts.projects[root].files
+        ◯ waitFor -> c in prjcts.projects[root].files
 
         files = prjcts.projects[root].files
         oldMapping = prjcts.allFiles[a]
@@ -119,7 +119,7 @@ waitFor = (cond) ○->
 
         fs.renameSync oldDir newDir
         post.emit 'file.change' path:newDir oldPath:oldDir change:'rename'
-        ○ waitFor -> newFile in prjcts.projects[root].files
+        ◯ waitFor -> newFile in prjcts.projects[root].files
 
         files = prjcts.projects[root].files
 

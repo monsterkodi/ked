@@ -82,9 +82,9 @@ use ./utils ▪ kc ke kd
         
         kc  """
             function C
-                @a: ○->
-                b: ○->
-                c: ○=>
+                @a: ◯->
+                b: ◯->
+                c: ◯=>
             """ ▸
             """
 

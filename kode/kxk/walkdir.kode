@@ -15,7 +15,7 @@ use ◆ slash nfs
         
     ignore: (p) -> #log 'ignore' p; true
       
-    start: ○->
+    start: ◯->
         
         dir = @cfg.root
         
@@ -29,7 +29,7 @@ use ◆ slash nfs
             
             # log 'walk dir' listDir
         
-            items = ○ nfs.list listDir
+            items = ◯ nfs.list listDir
             
             # log 'Walker items' listDir, items.length
             
@@ -65,4 +65,4 @@ use ◆ slash nfs
         # log 'walkdir done' @cfg
         @cfg
                 
-export (cfg) ○-> w = new walkdir cfg; ⮐ ○ w.start()
+export (cfg) ◯-> w = new walkdir cfg; ⮐ ◯ w.start()

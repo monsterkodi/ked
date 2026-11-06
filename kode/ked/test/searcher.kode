@@ -34,7 +34,7 @@ use ../view/menu ◆ searcher
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
@@ -47,7 +47,7 @@ use ../view/menu ◆ searcher
             appendCount += 1
             append items ext
 
-        ○ s.show 'if'
+        ◯ s.show 'if'
 
         appendCount ▸ 1
         s.sfils.length ▸ 2
@@ -87,7 +87,7 @@ use ../view/menu ◆ searcher
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
@@ -100,7 +100,7 @@ use ../view/menu ◆ searcher
             appends.push items.length
             append items ext
 
-        ○ s.show 'if'
+        ◯ s.show 'if'
 
         appends ▸ [12 8]
         s.sfils.length ▸ 5
@@ -143,7 +143,7 @@ use ../view/menu ◆ searcher
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
@@ -157,7 +157,7 @@ use ../view/menu ◆ searcher
             s.arrange()
             widths.push s.choices.gutter.cells.cols
 
-        ○ s.show 'if'
+        ◯ s.show 'if'
 
         widths ▸ [5 5]
         s.choices.gutter.cells.cols ▸ 5
@@ -195,14 +195,14 @@ use ../view/menu ◆ searcher
             project: maxDepth:12 ignore:[]
             sourceFileExtensions: ['kode']
 
-        ○ prjcts.index main
+        ◯ prjcts.index main
 
         h = new harness cols:80 rows:30
         e = new editor h.screen 'test_editor' ['gutter']
         e.cells.layout 0 0 80 30
         s = new searcher h.screen e
 
-        ○ s.show 'if'
+        ◯ s.show 'if'
 
         s.choices.currentIndex() ▸ 0
 

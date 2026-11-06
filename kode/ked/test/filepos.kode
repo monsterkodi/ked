@@ -83,7 +83,7 @@ use child_process ▪ spawn
 #         third  = slash.path(process.cwd() 'kode/ked/help.md')
 #         gone   = slash.path(process.cwd() 'doesntexist')
 # 
-#         output =○ new Promise (resolve) ->
+#         output =◯ new Promise (resolve) ->
 #             
 #             proc = spawn slash.path(process.cwd() 'bin' 'ked') ['-H' '--fresh' first, gone, second, third]
 #             

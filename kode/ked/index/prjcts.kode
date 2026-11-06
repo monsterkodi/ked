@@ -27,14 +27,14 @@ use ../util   ◆ walker config
         log 'missing prj?' path
         null
         
-    @addFile: file ○->
+    @addFile: file ◯->
         
         file = slash.absolute file process.cwd()
         
         extensions = config.data?.sourceFileExtensions
         ⮐ if extensions and slash.ext(file) not in extensions
         
-        prjPath =○ nfs.prj file
+        prjPath =◯ nfs.prj file
         prjPath = null if prjPath == '/'
         prjPath ?= slash.dir file
         
@@ -68,11 +68,11 @@ use ../util   ◆ walker config
             if file.startsWith prefix
                 @removeFile file
         
-    @renamePath: oldPath newPath ○->
+    @renamePath: oldPath newPath ◯->
         
         if @allFiles[oldPath]
             @removeFile oldPath
-            ○ @addFile newPath
+            ◯ @addFile newPath
             ⮐ 
         
         prefix = oldPath + '/'
@@ -84,9 +84,9 @@ use ../util   ◆ walker config
         
         for pair in moved
             @removeFile pair[0]
-            ○ @addFile pair[1]
+            ◯ @addFile pair[1]
         
-    @index: file ○=>
+    @index: file ◯=>
         
         if not file is str
             error "prjcts.index - expected a string, got" file
@@ -98,11 +98,11 @@ use ../util   ◆ walker config
         
         # log 'prjcts.index ●' file
         
-        exists =○ nfs.exists file
+        exists =◯ nfs.exists file
         
         ⮐ if not exists
         
-        prjPath =○ nfs.prj file
+        prjPath =◯ nfs.prj file
         
         # log 'prjcts.index ▪' prjPath
         
@@ -132,7 +132,7 @@ use ../util   ◆ walker config
             # file:     (f) => post.emit 'prjcts.file.indexed' f
                   
         # log 'start walker'
-        result =○ walk.start()
+        result =◯ walk.start()
         
         if result
             @projects[prjPath] = dir:prjPath files:result.files
@@ -147,17 +147,17 @@ use ../util   ◆ walker config
         
         if valid @queue
             # log 'dequeue' @queue[0]
-            ○ @index @queue.shift()
+            ◯ @index @queue.shift()
 
-post.on 'file.change' (info) ○=>
+post.on 'file.change' (info) ◯=>
     
     switch info.change
         'create'
-            ○ prjcts.addFile info.path
+            ◯ prjcts.addFile info.path
         'delete'
             prjcts.removePath info.path
         'rename'
-            ○ prjcts.renamePath info.oldPath info.path
+            ◯ prjcts.renamePath info.oldPath info.path
             
 export prjcts
 

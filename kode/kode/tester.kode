@@ -16,7 +16,7 @@ columns  = 60
 
     @: ->
         
-    section: t f ○=>
+    section: t f ◯=>
 
         stack.push t
         comps = 0
@@ -24,7 +24,7 @@ columns  = 60
         if @logSections != false
             log W1(lpad(depth*3-1) + ' ' + global["g#{max(1, 8-2*depth)}"](kstr.crop(t, columns+1-depth*3) + ' '))
         try
-            ○ f()
+            ◯ f()
         catch err
             # log err
             fails.push
@@ -95,7 +95,7 @@ columns  = 60
             lhs:   a
             rhs:   b
             
-    test: testModule ○=>
+    test: testModule ◯=>
         
         # return if not /\n\s*▸\s\w+/gm.test text
         ⮐ if testModule?._test_ != true
@@ -121,7 +121,7 @@ columns  = 60
                 if logModules != false
                     log G1(y8(' ' + kstr.crop(k, columns) + ' '))
                 try
-                    ○ v()
+                    ◯ v()
                 catch err
                     # log err
                     fails.push
@@ -189,15 +189,15 @@ export new Tester
 
 ◆main
     
-    files =○ nfs.list slash.path(◆dir, 'test')
+    files =◯ nfs.list slash.path(◆dir, 'test')
     fail = false
     for file in files
         continue if slash.name(file.path) == 'utils'
-        test =○ import(file.path)
+        test =◯ import(file.path)
         tester = new Tester
         tester.logSections = false
         tester.logModules = false
-        fail = fail or not (○ tester.test(test.default))
+        fail = fail or not (◯ tester.test(test.default))
     tester.summarize()
     if fail
         process.exit 1

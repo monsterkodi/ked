@@ -72,11 +72,11 @@ index_lua = (function ()
                 this.result.funcs.push(fnc)
                 return null
             }).bind(this)
-            if (match = methMatch(`function ${className}:●name(○args)`))
+            if (match = methMatch(`function ${className}:●name(◯args)`))
             {
                 return addMeth(match.name)
             }
-            if (match = methMatch(`function ${className}.static.●name(○args)`))
+            if (match = methMatch(`function ${className}.static.●name(◯args)`))
             {
                 return addMeth(match.name,{static:true})
             }
@@ -99,7 +99,7 @@ index_lua = (function ()
         }).bind(this)
         if (!line.startsWith(' '))
         {
-            if (match = funcMatch('function ●name(○args)'))
+            if (match = funcMatch('function ●name(◯args)'))
             {
                 return addFunc(match.name)
             }

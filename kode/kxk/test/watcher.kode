@@ -36,8 +36,8 @@ watcher.maxDelay = 40
         thrown = null
 
         try
-            ○ watcher.watch root
-            ○ sleep 20
+            ◯ watcher.watch root
+            ◯ sleep 20
         catch err
             thrown = err
 
@@ -65,11 +65,11 @@ watcher.maxDelay = 40
         fs.mkdirSync root recursive:true
 
         events = []
-        ○ watcher.watch root
-        ○ sleep 20
+        ◯ watcher.watch root
+        ◯ sleep 20
 
         fs.writeFileSync slash.path(root 'a.txt') 'hello'
-        ○ sleep 80
+        ◯ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -87,11 +87,11 @@ watcher.maxDelay = 40
         fs.writeFileSync file 'hello'
 
         events = []
-        ○ watcher.watch root
-        ○ sleep 20
+        ◯ watcher.watch root
+        ◯ sleep 20
 
         fs.writeFileSync file 'hello world'
-        ○ sleep 80
+        ◯ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -109,11 +109,11 @@ watcher.maxDelay = 40
         fs.writeFileSync file 'hello'
 
         events = []
-        ○ watcher.watch root
-        ○ sleep 20
+        ◯ watcher.watch root
+        ◯ sleep 20
 
         fs.rmSync file
-        ○ sleep 80
+        ◯ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -132,11 +132,11 @@ watcher.maxDelay = 40
         fs.writeFileSync oldFile 'hello'
 
         events = []
-        ○ watcher.watch root
-        ○ sleep 20
+        ◯ watcher.watch root
+        ◯ sleep 20
 
         fs.renameSync oldFile newFile
-        ○ sleep 80
+        ◯ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -156,11 +156,11 @@ watcher.maxDelay = 40
         fs.writeFileSync oldFile 'hello'
 
         events = []
-        ○ watcher.watch root
-        ○ sleep 20
+        ◯ watcher.watch root
+        ◯ sleep 20
 
         fs.copyFileSync oldFile newFile
-        ○ sleep 80
+        ◯ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -179,12 +179,12 @@ watcher.maxDelay = 40
         fs.writeFileSync file 'old'
 
         events = []
-        ○ watcher.watch root
-        ○ sleep 20
+        ◯ watcher.watch root
+        ◯ sleep 20
 
         fs.writeFileSync tmp 'new'
         fs.renameSync tmp file
-        ○ sleep 80
+        ◯ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -202,11 +202,11 @@ watcher.maxDelay = 40
         fs.writeFileSync file 'old'
 
         events = []
-        ○ watcher.watch root
-        ○ sleep 20
+        ◯ watcher.watch root
+        ◯ sleep 20
 
-        ○ nfs.write file 'new'
-        ○ sleep 80
+        ◯ nfs.write file 'new'
+        ◯ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -223,12 +223,12 @@ watcher.maxDelay = 40
         dir = slash.path root 'folder'
 
         events = []
-        ○ watcher.watch root
-        ○ sleep 20
+        ◯ watcher.watch root
+        ◯ sleep 20
 
         fs.mkdirSync dir
         fs.writeFileSync slash.path(dir 'inside.txt') 'hello'
-        ○ sleep 80
+        ◯ sleep 80
 
         created = events.length
         createdChange = events[0]?.change
@@ -236,7 +236,7 @@ watcher.maxDelay = 40
 
         events = []
         fs.rmSync dir recursive:true force:true
-        ○ sleep 80
+        ◯ sleep 80
 
         deleted = events.length
         deletedChange = events[0]?.change
@@ -263,11 +263,11 @@ watcher.maxDelay = 40
         fs.writeFileSync slash.path(oldDir 'inside.txt') 'hello'
 
         events = []
-        ○ watcher.watch root
-        ○ sleep 20
+        ◯ watcher.watch root
+        ◯ sleep 20
 
         fs.renameSync oldDir newDir
-        ○ sleep 80
+        ◯ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -284,16 +284,16 @@ watcher.maxDelay = 40
         fs.mkdirSync root recursive:true
 
         events = []
-        ○ watcher.watch root
-        ○ sleep 20
+        ◯ watcher.watch root
+        ◯ sleep 20
 
         dir = slash.path root 'folder'
         fs.mkdirSync dir
-        ○ sleep 80
+        ◯ sleep 80
 
         events = []
         fs.writeFileSync slash.path(dir 'inside.txt') 'hello'
-        ○ sleep 80
+        ◯ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -309,13 +309,13 @@ watcher.maxDelay = 40
         fs.mkdirSync root recursive:true
 
         events = []
-        ○ watcher.watch root
-        ○ sleep 20
+        ◯ watcher.watch root
+        ◯ sleep 20
 
         dir = slash.path root 'node_modules'
         fs.mkdirSync dir
         fs.writeFileSync slash.path(dir 'inside.txt') 'hello'
-        ○ sleep 80
+        ◯ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -334,19 +334,19 @@ watcher.maxDelay = 40
         fs.writeFileSync nested 'hello'
 
         events = []
-        ○ watcher.watch slash.path(root 'a.txt') recursive:false
-        ○ sleep 20
+        ◯ watcher.watch slash.path(root 'a.txt') recursive:false
+        ◯ sleep 20
 
         fs.writeFileSync nested 'changed'
-        ○ sleep 80
+        ◯ sleep 80
 
         beforeUpgrade = events.length
 
-        ○ watcher.watch nested
-        ○ sleep 20
+        ◯ watcher.watch nested
+        ◯ sleep 20
 
         fs.writeFileSync nested 'changed again'
-        ○ sleep 80
+        ◯ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true
@@ -367,16 +367,16 @@ watcher.maxDelay = 40
         fs.writeFileSync sibling 'hello'
 
         events = []
-        ○ watcher.watch file
-        ○ sleep 20
+        ◯ watcher.watch file
+        ◯ sleep 20
 
         fs.writeFileSync sibling 'changed'
-        ○ sleep 80
+        ◯ sleep 80
 
         siblingEvents = events.length
 
         fs.writeFileSync file 'changed'
-        ○ sleep 80
+        ◯ sleep 80
 
         watcher.close()
         fs.rmSync root recursive:true force:true

@@ -15,7 +15,7 @@ use           ◆ fileutil config
         @cfg.ignoreExt   ?= ['asar']
         @cfg.includeExt  ?= []
         
-    start: ○=>
+    start: ◯=>
         
         dir = @cfg.root
         
@@ -31,7 +31,7 @@ use           ◆ fileutil config
             
             # log 'walk dir' listDir
         
-            items = ○ nfs.list listDir recursive:false
+            items = ◯ nfs.list listDir recursive:false
             # log 'walker items' listDir items
             
             for item in items

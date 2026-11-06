@@ -5,8 +5,8 @@ use ./utils ▪ kc ke
 
     ▸ async
     
-        kc  '○->'               ▸   'async function ()\n{}'
-        kc  '○=>'               ▸   'async function ()\n{}'
+        kc  '◯->'               ▸   'async function ()\n{}'
+        kc  '◯=>'               ▸   'async function ()\n{}'
 
     ▸ func
 

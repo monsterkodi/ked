@@ -6,19 +6,19 @@ use child_process
 import fsp from 'fs/promises'
 
 ■NFS
-    @listdir: dir opt ○->
+    @listdir: dir opt ◯->
          
         opt ?= {}
         opt.recursive ?= true
         opt.found ?= []
         opt.ignoreDirs ?= []
          
-        dir =○ NFS.resolveSymlink dir
+        dir =◯ NFS.resolveSymlink dir
         
         # log 'nfs.listdir' dir
         
         try
-            dirents =○ fsp.readdir dir withFileTypes:true
+            dirents =◯ fsp.readdir dir withFileTypes:true
         catch err
             log err if err.code not in ['EACCES' 'EPERM' 'ENOENT']
             ⮐ opt.found
@@ -31,11 +31,11 @@ import fsp from 'fs/promises'
             resolved = undefined
              
             if dirent.isSymbolicLink()
-                resolved =○ fsp.readlink absPath
+                resolved =◯ fsp.readlink absPath
                 if not slash.isAbsolute resolved
                     resolved = slash.path dir resolved
                 # log 'symlink' absPath resolved
-                isDir =○ @isDir resolved
+                isDir =◯ @isDir resolved
              
             if isDir # is it a good idea to hardcode this here?
                 continue if file in ['node_modules' '.git']
@@ -55,7 +55,7 @@ import fsp from 'fs/promises'
              
             if isDir and opt.recursive
 
-                ○ NFS.listdir absPath opt
+                ◯ NFS.listdir absPath opt
         
         opt.found.sort (a b) -> a.path.localeCompare b.path # if not opt.recursive
         opt.found
@@ -63,16 +63,16 @@ import fsp from 'fs/promises'
     @list:    NFS.listdir
     @dirlist: NFS.listdir
     
-    @resolveSymlink: p ○->
+    @resolveSymlink: p ◯->
          
         if not p is str
             error "nfs.resolveSymlink needs a string! #{p}"
             ⮐ p
         
         try 
-            stat =○ fsp.lstat p
+            stat =◯ fsp.lstat p
             if stat.isSymbolicLink()
-                r =○ fsp.readlink p
+                r =◯ fsp.readlink p
                 if not slash.isAbsolute r
                     r = slash.path slash.dir(p) r
                 ⮐ r
@@ -80,123 +80,123 @@ import fsp from 'fs/promises'
             warn "nfs.resolveSymlink --" err
         p
     
-    @read: p ○-> 
+    @read: p ◯-> 
         
         try
-            ○ fsp.readFile p 'utf8'
+            ◯ fsp.readFile p 'utf8'
         catch err
             ''
          
-    @mode: p ○->
+    @mode: p ◯->
         
         ⮐ if empty p
         
         try
-            stat = ○ fsp.stat p
+            stat = ◯ fsp.stat p
         catch err
             # no file yet, or unreadable: keep the temp file's default mode
             ⮐
         
         stat.mode & 0o7777
     
-    @write: p text ○->
+    @write: p text ◯->
         
         file = slash.untilde p
         dir  = slash.dir file
         
-        mode = ○ NFS.mode file
+        mode = ◯ NFS.mode file
         
         try
-            ○ fsp.mkdir dir recursive:true
-            if ○ fsp.access dir fs.constants.W_OK ➜ ⮐ error: "can't access #{dir}"
+            ◯ fsp.mkdir dir recursive:true
+            if ◯ fsp.access dir fs.constants.W_OK ➜ ⮐ error: "can't access #{dir}"
              
             tmp = slash.tmpsib file # sibling temp, so the rename cannot cross a filesystem
             
-            if ○ fsp.writeFile tmp text           ➜ ⮐ error: "can't write #{tmp}"
-            ○ fsp.chmod tmp mode if valid mode
-            if ○ fsp.rename tmp file              ➜ ⮐ error: "can't move #{tmp} to #{file}"
+            if ◯ fsp.writeFile tmp text           ➜ ⮐ error: "can't write #{tmp}"
+            ◯ fsp.chmod tmp mode if valid mode
+            if ◯ fsp.rename tmp file              ➜ ⮐ error: "can't move #{tmp} to #{file}"
             file
         catch err
             ⮐ error: "nfs.write -- #{String(err)}"
          
-    @info: p ○->
+    @info: p ◯->
         
         try
-            ⮐ ○ fsp.stat p
+            ⮐ ◯ fsp.stat p
         catch err
             error "nfs.info -- " + String(err)
          
-    @mkdir: p ○->
+    @mkdir: p ◯->
         
         try
-            ○ fsp.mkdir p recursive:true
+            ◯ fsp.mkdir p recursive:true
         catch err
             if err.code != 'EEXIST'
                 ⮐ error: "nfs.mkdir -- #{String(err)}"
         p
      
-    @exists: p ○->
+    @exists: p ◯->
         
         try
             ⮐ if not p?
             p = slash.absolute slash.removeLinePos(p) process.cwd()
-            ○ fsp.stat p
+            ◯ fsp.stat p
                               
         catch err
            null
             
-    @type: p ○->
+    @type: p ◯->
         
-        if stat =○ NFS.exists p
+        if stat =◯ NFS.exists p
             stat.isFile() ? 'file' : 'dir'
                  
-    @fileExists: p ○->
+    @fileExists: p ◯->
         
-        stat =○ NFS.exists p
+        stat =◯ NFS.exists p
         stat if stat?.isFile()
         
-    @isFile: p ○-> NFS.fileExists p
+    @isFile: p ◯-> NFS.fileExists p
                  
-    @dirExists: p ○->
+    @dirExists: p ◯->
 
-        stat =○ NFS.exists p
+        stat =◯ NFS.exists p
         stat if stat?.isDirectory()
         
-    @isDir: p ○-> NFS.dirExists p
+    @isDir: p ◯-> NFS.dirExists p
      
-    @remove: p ○-> ○ fsp.rm p, force:true recursive:true
+    @remove: p ◯-> ◯ fsp.rm p, force:true recursive:true
      
-    @copy: from to ○-> 
+    @copy: from to ◯-> 
         
-        if ○ NFS.isDir to
+        if ◯ NFS.isDir to
             to = slash.path to, slash.file(from)
            
-        ○ fsp.cp from, to, recursive:true
+        ◯ fsp.cp from, to, recursive:true
 
-    @move: from to ○-> 
+    @move: from to ◯-> 
         
-        if ○ NFS.isDir to
+        if ◯ NFS.isDir to
             to = slash.path to, slash.file(from)
         
-        if ○ NFS.exists from
-            ○ fsp.rename from, to
+        if ◯ NFS.exists from
+            ◯ fsp.rename from, to
     
-    @duplicate: p ○->
+    @duplicate: p ◯->
         
         ⮐ if empty p
         
         p = slash.path p
         
-        ⮐ if not ○ NFS.exists p
+        ⮐ if not ◯ NFS.exists p
         
-        target =○ NFS.copyPath p
+        target =◯ NFS.copyPath p
         ⮐ if empty target
         
-        ○ NFS.copy p target
+        ◯ NFS.copy p target
         
         target
     
-    @copyPath: p ○->
+    @copyPath: p ◯->
 
         parsed = slash.parse p
         dir    = parsed.dir
@@ -213,7 +213,7 @@ import fsp from 'fs/promises'
         highest = 0
         
         try
-            entries =○ fsp.readdir dir
+            entries =◯ fsp.readdir dir
         catch err
             entries = []
             
@@ -240,56 +240,56 @@ import fsp from 'fs/promises'
         else
             slash.path dir "#{prefix}#{suffix}"
      
-    @git: p ○->
+    @git: p ◯->
         
         git = slash.path p
         
         while git.length and git != "/"
            
-            ⮐ git if ○ NFS.isDir(slash.path(git '.git'))
+            ⮐ git if ◯ NFS.isDir(slash.path(git '.git'))
             
             git = slash.dir git
      
-    @pkg: p ○->
+    @pkg: p ◯->
         
         pkg = slash.path p
         
         while pkg.length and pkg != "/"
            
-            ⮐ pkg if ○ NFS.isFile(slash.path(pkg 'package.json'))
+            ⮐ pkg if ◯ NFS.isFile(slash.path(pkg 'package.json'))
             
             pkg = slash.dir pkg
            
-    @prj: p ○->
+    @prj: p ◯->
         
         pth = slash.path p
         
-        if ○ NFS.isFile pth
+        if ◯ NFS.isFile pth
             pth = slash.dir pth
         
         while pth.length and pth != "/"
            
-            ⮐ pth if ○ NFS.isDir(slash.path(pth '.git'))
-            ⮐ pth if ○ NFS.isFile(slash.path(pth 'package.json'))
-            ⮐ pth if ○ NFS.isFile(slash.path(slash.dir(pth) 'kakao.kode')) # should be done differently at some point!
+            ⮐ pth if ◯ NFS.isDir(slash.path(pth '.git'))
+            ⮐ pth if ◯ NFS.isFile(slash.path(pth 'package.json'))
+            ⮐ pth if ◯ NFS.isFile(slash.path(slash.dir(pth) 'kakao.kode')) # should be done differently at some point!
            
             pth = slash.dir pth
            
         pth
      
-    @readText: p ○->
+    @readText: p ◯->
         
-        text =○ NFS.read p 
+        text =◯ NFS.read p 
         if text.includes '\ufffd' # unicode replacement character
             if text[0..32].includes '\x00'
                 ⮐
         text
         
-    @hfsPath: p ○-> # using ideas from https://github.com/johansatge/mac-trash
+    @hfsPath: p ◯-> # using ideas from https://github.com/johansatge/mac-trash
         
         escapedPath = p.replace /"/g '\\\"'
         osascript = "tell application \\"Finder\\" to return posix file \\"#{escapedPath}\\""
-        stdout =○ @exec "/usr/bin/osascript -e \"#{osascript}\""
+        stdout =◯ @exec "/usr/bin/osascript -e \"#{osascript}\""
         hfsPath = stdout.match /^file\s(.*)/
         trim hfsPath[1]
      
@@ -309,17 +309,17 @@ import fsp from 'fs/promises'
         
         false
     
-    @trash: p ○->
+    @trash: p ◯->
         
         if NFS.trashImmediate p
-            ○ NFS.remove p
+            ◯ NFS.remove p
             ⮐ p
         
         os = process.platform
 
         if os == 'darwin' # using ideas from https://github.com/johansatge/mac-trash
 
-            hfs =○ NFS.hfsPath p
+            hfs =◯ NFS.hfsPath p
             shellCommand = "/usr/bin/osascript -l JavaScript -e \"Application('Finder').delete([\"#{hfs}\"])\""
             @exec shellCommand
 
@@ -329,10 +329,10 @@ import fsp from 'fs/promises'
             fileName = slash.file p
             
             try
-                ○ fsp.mkdir trashPath recursive:true
+                ◯ fsp.mkdir trashPath recursive:true
                 
                 newPath = slash.path trashPath fileName
-                ○ fsp.rename p newPath
+                ◯ fsp.rename p newPath
                 ⮐ newPath
             catch err
                 error "Failed to move to trash: #{err}"
@@ -341,7 +341,7 @@ import fsp from 'fs/promises'
             error "Trash functionality not supported on #{os}"
             ⮐ null
      
-    @exec: cmd ○->
+    @exec: cmd ◯->
         
         new Promise (resolve reject) ->
             try
@@ -353,18 +353,18 @@ import fsp from 'fs/promises'
             catch err
                 reject err
      
-    @isWritable: p ○->
+    @isWritable: p ◯->
         
         try
-            ○ fsp.access p fs.constants.W_OK
+            ◯ fsp.access p fs.constants.W_OK
             ⮐ true
         catch err
             ⮐ false
         
-    @isReadable: p ○->
+    @isReadable: p ◯->
         
         try
-            ○ fsp.access p fs.constants.R_OK
+            ◯ fsp.access p fs.constants.R_OK
             ⮐ true
         catch err
             ⮐ false

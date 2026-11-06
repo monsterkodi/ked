@@ -22,7 +22,7 @@ use ../view/colmns ◆ dircol
         d.crumbs.path ▸ slash.tilde(slash.path(process.cwd() 'kode'))
         d.crumbs.split[0] ▸ '~'
 
-        ○ sleep 10
+        ◯ sleep 10
         delete global.ked_session
 
   ▸ a dot relative root shows the absolute folder path
@@ -42,7 +42,7 @@ use ../view/colmns ◆ dircol
         d.crumbs.path ▸ slash.tilde(slash.path(process.cwd() 'kode'))
         d.crumbs.split[0] ▸ '~'
 
-        ○ sleep 10
+        ◯ sleep 10
         delete global.ked_session
 
   ▸ a tilde root stays where it is
@@ -62,6 +62,6 @@ use ../view/colmns ◆ dircol
         d.crumbs.path ▸ '~/s/ked'
         d.crumbs.split[0] ▸ '~'
 
-        ○ sleep 10
+        ◯ sleep 10
         delete global.ked_session
 ###

@@ -6,7 +6,7 @@ use ../util     ◆ harness
 use ../theme    ◆ icons
 use ../view/colmns ◆ dircol
 
-makeCol = ○->
+makeCol = ◯->
 
     store = {}
     fakeGet = (key def) ->
@@ -35,16 +35,16 @@ makeCol = ○->
     d = new dircol h.screen e []
     d.layout 0 0 100 30
 
-    ○ waitForRoot d process.cwd()
+    ◯ waitForRoot d process.cwd()
     d
 
-waitForRoot = (d root) ○->
+waitForRoot = (d root) ◯->
     parent = slash.dir root
     n = 0
     while n < 100
         items = d.dirtree.items
         ⮐ if not empty items and items[0].path == parent
-        ○ sleep 10
+        ◯ sleep 10
         n += 1
 ###
 ▸ dirtree
@@ -55,14 +55,14 @@ waitForRoot = (d root) ○->
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
 
-        d =○ makeCol()
+        d =◯ makeCol()
         d.setRoot root
-        ○ waitForRoot d root
+        ◯ waitForRoot d root
 
         file = slash.path root 'a.txt'
         fs.writeFileSync file 'hello'
         post.emit 'file.change' path:file change:'create'
-        ○ sleep 120
+        ◯ sleep 120
 
         names = d.dirtree.items.map (i) -> i.path
 
@@ -78,13 +78,13 @@ waitForRoot = (d root) ○->
         file = slash.path root 'a.txt'
         fs.writeFileSync file 'hello'
 
-        d =○ makeCol()
+        d =◯ makeCol()
         d.setRoot root
-        ○ waitForRoot d root
+        ◯ waitForRoot d root
 
         fs.rmSync file
         post.emit 'file.change' path:file change:'delete'
-        ○ sleep 120
+        ◯ sleep 120
 
         names = d.dirtree.items.map (i) -> i.path
 
@@ -101,13 +101,13 @@ waitForRoot = (d root) ○->
         newFile = slash.path root 'b.txt'
         fs.writeFileSync oldFile 'hello'
 
-        d =○ makeCol()
+        d =◯ makeCol()
         d.setRoot root
-        ○ waitForRoot d root
+        ◯ waitForRoot d root
 
         fs.renameSync oldFile newFile
         post.emit 'file.change' path:newFile oldPath:oldFile change:'rename'
-        ○ sleep 120
+        ◯ sleep 120
 
         names = d.dirtree.items.map (i) -> i.path
 
@@ -125,16 +125,16 @@ waitForRoot = (d root) ○->
         fs.mkdirSync sub
         fs.writeFileSync slash.path(sub 'keep.txt') 'hello'
 
-        d =○ makeCol()
+        d =◯ makeCol()
         d.setRoot root
-        ○ waitForRoot d root
+        ◯ waitForRoot d root
 
-        ○ d.dirtree.openDir d.dirtree.itemForPath(sub) redraw:true
+        ◯ d.dirtree.openDir d.dirtree.itemForPath(sub) redraw:true
 
         file = slash.path sub 'new.txt'
         fs.writeFileSync file 'hello'
         post.emit 'file.change' path:file change:'create'
-        ○ sleep 120
+        ◯ sleep 120
 
         names = d.dirtree.items.map (i) -> i.path
         open  = d.dirtree.itemForPath(sub)?.open
@@ -152,15 +152,15 @@ waitForRoot = (d root) ○->
         file = slash.path root 'a.txt'
         fs.writeFileSync file 'hello'
 
-        d =○ makeCol()
+        d =◯ makeCol()
         d.setRoot root
-        ○ waitForRoot d root
+        ◯ waitForRoot d root
 
         count = d.dirtree.items.length
 
         fs.writeFileSync file 'changed'
         post.emit 'file.change' path:file change:'modify'
-        ○ sleep 120
+        ◯ sleep 120
 
         after = d.dirtree.items.length
 

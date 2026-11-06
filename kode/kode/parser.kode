@@ -836,12 +836,12 @@ use ./utils ▪ firstLineCol lastLineCol
     
     argsWithoutParens: firstArg tokens ->
         
-        @push '○rgs'
+        @push '◯rgs'
         tokens.unshift firstArg
-        exps = @exps '○rgs' tokens
-        @pop '○rgs'
+        exps = @exps '◯rgs' tokens
+        @pop '◯rgs'
         
-        # log '○rgs exps' noon exps
+        # log '◯rgs exps' noon exps
         
         parens:
             open:  type: 'paren' text:'('
@@ -900,7 +900,7 @@ use ./utils ▪ firstLineCol lastLineCol
                     closed = yes if depth == 0
                 continue
 
-            ⮐ t.text in ['->' '=>' '○->' '○=>']
+            ⮐ t.text in ['->' '=>' '◯->' '◯=>']
 
         false
 

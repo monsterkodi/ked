@@ -141,12 +141,12 @@ kodfiles = (dir, out=[]) ->
 
     out
 
-writeJs = c file=JS_FILE ○->
+writeJs = c file=JS_FILE ◯->
 
     s = slash.swapExt file 'kode'
     js = kmap c, s
     
-    ○ nfs.write file, js
+    ◯ nfs.write file, js
     file
     
 ▸ srcmap
@@ -468,8 +468,8 @@ writeJs = c file=JS_FILE ○->
 
     ▸ sourcePosition finds where a position came from
 
-        file = ○ writeJs 'log b\n'
-        pos  = ○ smap.sourcePosition file, 1, 12
+        file = ◯ writeJs 'log b\n'
+        pos  = ◯ smap.sourcePosition file, 1, 12
 
         pos.file ▸ SRCFILE
         pos.line ▸ 1
@@ -477,16 +477,16 @@ writeJs = c file=JS_FILE ○->
 
     ▸ sourcePosition takes columns from zero
 
-        file = ○ writeJs 'log b\n'
-        pos  = ○ smap.sourcePosition file, 1
+        file = ◯ writeJs 'log b\n'
+        pos  = ◯ smap.sourcePosition file, 1
 
         pos.line ▸ 1
         pos.col  ▸ 0
 
     ▸ sourcePosition takes lines from one
 
-        file = ○ writeJs 'a = 1\n'
-        pos  = ○ smap.sourcePosition file, 3, 0
+        file = ◯ writeJs 'a = 1\n'
+        pos  = ◯ smap.sourcePosition file, 3, 0
 
         pos.file ▸ SRCFILE
         pos.line ▸ 1
@@ -494,30 +494,30 @@ writeJs = c file=JS_FILE ○->
 
     ▸ sourcePosition says nothing before the first mapping
 
-        file = ○ writeJs 'a = 1\n'
-        pos  = ○ smap.sourcePosition file, 1, 0
+        file = ◯ writeJs 'a = 1\n'
+        pos  = ◯ smap.sourcePosition file, 1, 0
 
         pos ▸ undefined
 
     ▸ sourcePosition says nothing for a file with no map
 
         js = kplain 'a = 1\n'
-        ○ nfs.write JS_FILE, js
-        pos = ○ smap.sourcePosition JS_FILE, 1, 0
+        ◯ nfs.write JS_FILE, js
+        pos = ◯ smap.sourcePosition JS_FILE, 1, 0
 
         pos ▸ undefined
 
     ▸ sourcePosition says nothing for a file that is not there
 
-        pos = ○ smap.sourcePosition slash.path('/tmp', 'gone.js'), 1, 0
+        pos = ◯ smap.sourcePosition slash.path('/tmp', 'gone.js'), 1, 0
 
         pos ▸ undefined
 
     ▸ sourcePosition reads the map at the foot and not the marker in the code
 
         c    = 'x = "//# sourceMappingURL=data:application/json;base64,"\nlog x\n'
-        file = ○ writeJs c
-        pos  = ○ smap.sourcePosition file, 4, 0
+        file = ◯ writeJs c
+        pos  = ◯ smap.sourcePosition file, 4, 0
 
         pos.file ▸ SRCFILE
         pos.line ▸ 2
@@ -526,9 +526,9 @@ writeJs = c file=JS_FILE ○->
     ▸ sourcePosition names the source from where the map was written
 
         out = (new kode header:false, map:true).compile 'a = 1\n', SRCFILE, JS_FILE
-        ○ nfs.write JS_FILE, out
+        ◯ nfs.write JS_FILE, out
 
-        pos = ○ smap.sourcePosition JS_FILE, 3, 0
+        pos = ◯ smap.sourcePosition JS_FILE, 3, 0
 
         pos.file ▸ SRCFILE
         pos.line ▸ 1

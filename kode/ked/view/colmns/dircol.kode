@@ -176,7 +176,7 @@ use                 ◆ dirtree
         
         @choiceAtRow row + @state.s.view[1]
 
-    onContextChoice: choice ○=>
+    onContextChoice: choice ◯=>
     
         if current = @contextItem
             
@@ -199,7 +199,7 @@ use                 ◆ dirtree
                 '' 
                     post.emit 'file.trash' current.path
                         
-    onReveal: p ○=>
+    onReveal: p ◯=>
     
         @dirtree.grabFocus()
     
@@ -209,14 +209,14 @@ use                 ◆ dirtree
 
         if d = @dirtree.itemForPath slash.dir(p)
             if not d.open
-                ○ @dirtree.openDir d redraw:true
+                ◯ @dirtree.openDir d redraw:true
             else
                 error "dircol.onReveal already open? #{d}"
         else
             if dd = @dirtree.itemForPath slash.dir(slash.dir(p))
                 if not dd.open
-                    ○ @dirtree.openDir dd
-                    ○ @dirtree.openDir d redraw:true
+                    ◯ @dirtree.openDir dd
+                    ◯ @dirtree.openDir d redraw:true
                 else
                     error "dircol.onReveal already open dd? #{d}"
             else

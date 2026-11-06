@@ -14,7 +14,7 @@ cells = cols:55 rows:66
 
     ▸ the active modes and a pending ex command are shown
 
-        ○ mode.loaded
+        ◯ mode.loaded
 
         s = new state cells 'modes'
         s.allowedModes.unype = true

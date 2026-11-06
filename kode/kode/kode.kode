@@ -166,7 +166,7 @@ use ../kolor ◆ kulur
 
         slash.absolute slash.path(outdir slash.swapExt(rel 'js')) process.cwd()
 
-    @run: args ○-> 
+    @run: args ◯-> 
                                    
         log 'Kode.run args' args if args.verbose
         kode = new Kode args
@@ -195,7 +195,7 @@ use ../kolor ◆ kulur
             file = slash.absolute slash.path(file), process.cwd()
             log gray(file) if args.verbose
     
-            text =○ nfs.read file
+            text =◯ nfs.read file
     
             if empty text then error Y4(r2("can't read #{R3(y5(file))}")); continue
     
@@ -205,7 +205,7 @@ use ../kolor ◆ kulur
                                     out = Kode.outPath file, args.outdir, root
                                     log out if args.verbose
                                     js  = kode.compile text, file, out
-                                    res =○ nfs.write out js
+                                    res =◯ nfs.write out js
                                     if res?.error then error R2(y3("can't write #{R3(y6(out))}"))
                     args.run   ➜  log kode.eval(text file global)
                                ➜  log kode.compile(text file)

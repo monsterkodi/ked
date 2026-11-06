@@ -44,7 +44,8 @@ use                 ◆ mapscr
         post.on 'screen.erased'    @onScreenErased
         
     onScreenErased: rect =>
-         
+        
+        ⮐ if empty @cursorIds 
         for cursor,idx in @state.s.cursors
             if imgId = @cursorIds[idx]
                 if @isCursorVisible(cursor) and @isCursorInRect(cursor @cells.rectForScreen(rect))
@@ -124,7 +125,7 @@ use                 ◆ mapscr
             switch choice
                 'status' ➜ post.emit 'differ.status'
                 
-    jumpToWord: word ○=>
+    jumpToWord: word ◯=>
     
         # log "fileeditor.jumpToWord '#{word}'"
         
@@ -157,7 +158,7 @@ use                 ◆ mapscr
             if valid func.file
                 if slash.ext(func.file) == 'js'
                     map = new srcmap()
-                    src =○ map.sourcePosition func.file func.line Infinity
+                    src =◯ map.sourcePosition func.file func.line Infinity
                     if canJumpTo src 
                         ⮐ true
                 if canJumpTo func
@@ -178,14 +179,14 @@ use                 ◆ mapscr
         
         post.emit 'redraw'
             
-    jumpToCounterpart: ○=>
+    jumpToCounterpart: ◯=>
             
         currentFile = ked_session.get 'editor▸file'
         currext = slash.ext currentFile
         
         for ext in fileutil.counterparts[currext] ? []
             
-            if ○ nfs.fileExists slash.swapExt(currentFile, ext)
+            if ◯ nfs.fileExists slash.swapExt(currentFile, ext)
                 @gotoFuncOnLoad = @funtree.current()
                 post.emit 'file.open' slash.swapExt(currentFile, ext)
                 ⮐ 
@@ -195,7 +196,7 @@ use                 ◆ mapscr
             counter = slash.swapExt currentFile ext
             file = fileutil.swapLastDir counter currext ext
             
-            if ○ nfs.fileExists file
+            if ◯ nfs.fileExists file
                 @gotoFuncOnLoad = @funtree.current()
                 post.emit 'file.open' file
                 ⮐ 
@@ -207,14 +208,14 @@ use                 ◆ mapscr
             if currext in ['noon']
 
                 file = fileutil.swapLastDir counter 'kode' 'js'
-                if ○ nfs.fileExists file
+                if ◯ nfs.fileExists file
                     post.emit 'file.open' file
                     ⮐
                     
             if currext in ['json']
                 
                 file = fileutil.swapLastDir counter 'js' 'kode'
-                if ○ nfs.fileExists file
+                if ◯ nfs.fileExists file
                     post.emit 'file.open' file
                     ⮐ 
 

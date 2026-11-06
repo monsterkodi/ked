@@ -5,9 +5,9 @@ use              ◆ diritem
 
 ■dirlist
     
-    @items: dir ○=>
+    @items: dir ◯=>
         
-        items =○ nfs.list dir recursive:false
+        items =◯ nfs.list dir recursive:false
         
         for item in items
             item.tilde = diritem.symbolName(item)

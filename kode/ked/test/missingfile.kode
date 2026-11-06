@@ -7,7 +7,7 @@ use ../../kxk     ▪ slash
 
         path = slash.path(process.cwd() 'doesntexist')
 
-        output =○ new Promise (resolve) ->
+        output =◯ new Promise (resolve) ->
             
             proc = spawn slash.path(process.cwd() 'bin' 'ked') ['-H' '--fresh' path]
             

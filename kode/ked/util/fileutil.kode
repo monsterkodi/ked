@@ -39,7 +39,7 @@ use ../../kxk ◆ salter
         path
         
     # paths that exist as files, made absolute, symlinks resolved, duplicates removed
-    @existingFiles: paths cwd ○->
+    @existingFiles: paths cwd ◯->
 
         cwd ?= process.cwd()
 
@@ -51,10 +51,10 @@ use ../../kxk ◆ salter
 
             continue if absFile in files
 
-            exists =○ nfs.fileExists absFile
+            exists =◯ nfs.fileExists absFile
             continue if not exists
 
-            absFile =○ nfs.resolveSymlink absFile
+            absFile =◯ nfs.resolveSymlink absFile
             continue if empty absFile
 
             continue if absFile in files
@@ -63,17 +63,17 @@ use ../../kxk ◆ salter
 
         files
 
-    @trash: path ○->
+    @trash: path ◯->
     
-        ○ nfs.trash path
+        ◯ nfs.trash path
         
-    @class: name ○->
+    @class: name ◯->
     
         currentDir = slash.dir ked_session.get('editor▸file')
         currentDir ?= process.cwd()
         file       = slash.path currentDir "#{name}.kode"
         
-        ○ nfs.write file """
+        ◯ nfs.write file """
             ###
             #{salter(name prepend:'    ')}
             ###
@@ -88,24 +88,24 @@ use ../../kxk ◆ salter
             
         post.emit 'file.open' file 6 'eol'
         
-    @newFolder: parent ○->
+    @newFolder: parent ◯->
     
         dir = slash.path parent 'new_folder'
-        res =○ nfs.mkdir dir
+        res =◯ nfs.mkdir dir
         if res == dir
             post.emit 'redraw'
         
-    @rename: oldPath newPath ○->
+    @rename: oldPath newPath ◯->
         
         ⮐ if oldPath == newPath
         
-        res =○ nfs.move oldPath newPath
+        res =◯ nfs.move oldPath newPath
         if res != newPath
             error "rename failed! #{res}"
     
-    @duplicate: path ○->
+    @duplicate: path ◯->
         
-        res =○ nfs.duplicate path
+        res =◯ nfs.duplicate path
         if res
             post.emit 'redraw'
         

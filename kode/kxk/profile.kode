@@ -3,11 +3,11 @@
 
     @hrtime: {}
 
-    @start: id ○-> 
+    @start: id ◯-> 
         
         profile.hrtime[id] = performance.now()
         
-    @end: id threshold=0 ○->
+    @end: id threshold=0 ◯->
         
         t = performance.now()
             

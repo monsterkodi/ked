@@ -118,8 +118,8 @@ lang 'kode'
         rgs = ranges "dolate: -> "
         inc rgs, 8 '->'          ▸ 'punct function'
     
-        rgs = ranges "async ○->"
-        inc rgs, 6 '○'          ▸ 'punct function async'
+        rgs = ranges "async ◯->"
+        inc rgs, 6 '◯'          ▸ 'punct function async'
         inc rgs, 7 '-'          ▸ 'punct function tail'
         inc rgs, 8 '>'          ▸ 'punct function head'
                 
@@ -162,10 +162,10 @@ lang 'kode'
         inc rgs, 9 'b'              ▸ 'function argument'
         inc rgs, 11 '->'            ▸ 'punct function'
 
-        rgs = ranges "    f: a b ○->"
+        rgs = ranges "    f: a b ◯->"
         inc rgs, 7 'a'              ▸ 'function argument'
         inc rgs, 9 'b'              ▸ 'function argument'
-        inc rgs, 11 '○'             ▸ 'punct function async'
+        inc rgs, 11 '◯'             ▸ 'punct function async'
         inc rgs, 12 '-'             ▸ 'punct function tail'
         inc rgs, 13 '>'             ▸ 'punct function head'
         

@@ -106,8 +106,8 @@ lang 'coffee'
         rgs = ranges "dolater ->"
         inc rgs, 8 '->'         ▸ 'punct function'
 
-        rgs = ranges "async ○->"
-        inc rgs, 6 '○'          ▸ 'punct function async'
+        rgs = ranges "async ◯->"
+        inc rgs, 6 '◯'          ▸ 'punct function async'
         inc rgs, 7 '-'          ▸ 'punct function tail'
         inc rgs, 8 '>'          ▸ 'punct function head'
                 

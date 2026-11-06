@@ -177,9 +177,9 @@ NodeSourceMap = module.SourceMap
         
         JSON.parse @base64decode(encoded)
             
-    sourcePosition: file line col=0 ○-> # returns file:srcfile line:srcline col:srccol or undefined
+    sourcePosition: file line col=0 ◯-> # returns file:srcfile line:srcline col:srccol or undefined
         
-        text = ○ nfs.read file
+        text = ◯ nfs.read file
         ⮐ if not text
                 
         mark = 'sourceMappingURL=data:application/json;base64,'

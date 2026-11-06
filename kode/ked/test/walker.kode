@@ -21,7 +21,7 @@ use ../util   ◆ walker
             ignore:     []
             includeExt: ['md']
 
-        result =○ walk.start()
+        result =◯ walk.start()
 
         fs.rmSync root recursive:true force:true
 
@@ -45,7 +45,7 @@ use ../util   ◆ walker
             ignore:     []
             includeExt: ['md']
 
-        result =○ walk.start()
+        result =◯ walk.start()
 
         fs.rmSync root recursive:true force:true
 

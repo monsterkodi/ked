@@ -13,15 +13,15 @@ Patterns =
     regex: "(?<!\\d\\s*)\\/(?:\\\\[\\/]|\\([^\\n\\s]*\\)|[^\\n\\s\\)])*\\/[gimsuy]*(?!\\s*\\d)"
     dots: "(?<!\\.)\\.\\.\\.?(?!\\.)"
     paren: "[\\(\\)\\[\\]\\{\\}]"
-    func: "(○->|○=>|->|=>)" # use ◯-> and ◯=> instead
+    func: "(◯->|◯=>|->|=>)" # use ◯-> and ◯=> instead
     then: "➜"
     this: "@"
     test: "(?<!●)▸[\\s\\n]+"
     profile: "●▸"
     profilend: "●▪"
     prof: "●"
-    atest: "○▸" # use ◯▸ instead
-    await: "○"  # use ◯  instead
+    atest: "◯▸" # use ◯▸ instead
+    await: "◯"  # use ◯  instead
     assert: "▴"
     down: "▾"
     left: "◂"

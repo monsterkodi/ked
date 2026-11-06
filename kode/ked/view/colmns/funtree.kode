@@ -10,7 +10,7 @@ SYMBOL =
     extends:       '□'
     unbound:       '->'
     bound:         '=>'
-    async_unbound: '○→'
+    async_unbound: '◯→'
     async_bound:   '●→' 
         
 ■funSyntax

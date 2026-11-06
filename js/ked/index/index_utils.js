@@ -13,8 +13,8 @@ index_utils = (function ()
 
     index_utils["requireRegExp"] = /^\s*([\w\{\}]+)\s+=\s+require\s+[\'\"]([\.\/\w]+)[\'\"]/
     index_utils["includeRegExp"] = /^#include\s+[\"\<]([\.\/\w]+)[\"\>]/
-    index_utils["methodRegExp"] = /^\s+([\@]?\w+|@)\s*\:\s*(\(?.*\)?)?\s*○?[=-]\>/
-    index_utils["funcRegExp"] = /^\s*([\w\.]+)\s*[\:\=][^\(\)\'\"]*(\(.*\))?\s*○?[=-]\>/
+    index_utils["methodRegExp"] = /^\s+([\@]?\w+|@)\s*\:\s*(\(?.*\)?)?\s*◯?[=-]\>/
+    index_utils["funcRegExp"] = /^\s*([\w\.]+)\s*[\:\=][^\(\)\'\"]*(\(.*\))?\s*◯?[=-]\>/
     index_utils["postRegExp"] = /^\s*post\.on\s+[\'\"](\w+)[\'\"]\s*\,?\s*(\(.*\))?\s*[=-]\>/
     index_utils["testRegExp"] = /^\s*(▸\s+.+)/
     index_utils["nimTestRegExp"] = /^\s*((suite|test)\s+\"[^"]+\"\s*\:)/

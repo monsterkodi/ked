@@ -26,8 +26,8 @@ use ../view/colmns ◆ funtree
         fs.writeFileSync childFile "■Child□Base\n"
 
         idx = new indexer
-        ○ idx.index baseFile
-        ○ idx.index childFile
+        ◯ idx.index baseFile
+        ◯ idx.index childFile
 
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_funtree_editor' []
@@ -96,8 +96,8 @@ use ../view/colmns ◆ funtree
         fs.writeFileSync childFile "■Child□Base\n"
 
         idx = new indexer
-        ○ idx.index baseFile
-        ○ idx.index childFile
+        ◯ idx.index baseFile
+        ◯ idx.index childFile
 
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_funtree_jump_editor' []
@@ -132,7 +132,7 @@ use ../view/colmns ◆ funtree
         fs.writeFileSync file "alpha: -> 1\n"
 
         idx = new indexer
-        ○ idx.index file
+        ◯ idx.index file
 
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_funtree_noclass_editor' []

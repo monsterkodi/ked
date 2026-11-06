@@ -20,7 +20,7 @@ use fs
     @ignoreFiles: ['.DS_Store' '.localized' 'ked.log']
     @ignoredWatchErrors: ['EACCES' 'EPERM' 'ENOENT' 'ENOSPC']
     
-    @watch: path opt ○->
+    @watch: path opt ◯->
 
         if empty path
             error "watcher.watch - can't watch empty path!"
@@ -31,13 +31,13 @@ use fs
         opt ?= {}
         opt.recursive ?= true
 
-        isDir =○ nfs.isDir path
+        isDir =◯ nfs.isDir path
 
         if isDir
             @watchDir path opt.recursive
             ⮐
 
-        prjPath =○ nfs.prj path
+        prjPath =◯ nfs.prj path
 
         if prjPath and prjPath not in ['/' slash.untilde('~')]
             @watchDir prjPath opt.recursive
@@ -45,7 +45,7 @@ use fs
             @watchDir slash.dir(path) false
 
     # remember the state of a file, so reading it does not look like a change
-    @snapshot: file ○->
+    @snapshot: file ◯->
 
         if info = @statPath file
             @known[file] = info

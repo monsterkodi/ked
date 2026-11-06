@@ -7,15 +7,15 @@ use ../../kxk ▪ noon slash post watcher
     @file   = null # the config file, re-read when it changes
     @reloadTimer: null
     
-    @load: ○->
+    @load: ◯->
     
         @loaded = new Promise (resolve) => @resolveLoaded = resolve
         @file ?= slash.path ◆dir '../../../config'
         
         # log 'load config file' @file
         
-        ○ watcher.watch @file recursive:false
-        ○ @read()
+        ◯ watcher.watch @file recursive:false
+        ◯ @read()
         
         # log 'config loaded' #@data
         post.emit 'config.loaded' config.data
@@ -25,10 +25,10 @@ use ../../kxk ▪ noon slash post watcher
     #  remember the file state before reading it,
     #  so that reading it does not look like a change
     
-    @read: ○->
+    @read: ◯->
         
-        ○ watcher.snapshot @file
-        @data =○ noon.load @file
+        ◯ watcher.snapshot @file
+        @data =◯ noon.load @file
     
     @onFileChange: event =>
 
@@ -38,14 +38,14 @@ use ../../kxk ▪ noon slash post watcher
         clearTimeout @reloadTimer if @reloadTimer
         @reloadTimer = setTimeout (=> @reload()) 100
 
-    @reload: ○->
+    @reload: ◯->
 
         # log 'reload config file' @file
 
         @loaded = new Promise (resolve) => @resolveLoaded = resolve
 
         try
-            ○ @read()
+            ◯ @read()
             post.emit 'config.loaded' config.data
         catch err
             log 'config reload failed' err

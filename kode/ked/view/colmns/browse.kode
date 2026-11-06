@@ -88,13 +88,13 @@ import rgxs from './quicky.json' with { type: "json" }
                 @choices.cells.fill_row     y choice.tilde.length x-1 ' ' bg cc
                 @choices.cells.set          x y '' cc bg 
         
-    gotoDir: dir select ○=>
+    gotoDir: dir select ◯=>
         
         dir = process.cwd() if empty dir
         dir = slash.untilde dir
         
         try
-            items =○ dirlist.items dir
+            items =◯ dirlist.items dir
         catch err
             log 'list error' err
             ⮐ 
@@ -106,18 +106,18 @@ import rgxs from './quicky.json' with { type: "json" }
                
         @showPathItems items select
             
-    gotoDirOrOpenFile: path ○=>
+    gotoDirOrOpenFile: path ◯=>
         
-        isDir =○ nfs.dirExists path
+        isDir =◯ nfs.dirExists path
         
         if isDir
-            ○ @gotoDir path
+            ◯ @gotoDir path
         else
-            isFile =○ nfs.fileExists path
+            isFile =◯ nfs.fileExists path
             if isFile
                 @openFileInEditor path
                                     
-    preview: item ○=>
+    preview: item ◯=>
         
         ⮐ @hideMap() if empty item?.path
         
@@ -126,7 +126,7 @@ import rgxs from './quicky.json' with { type: "json" }
             @brocol.hide()
         
             if slash.ext(item.path) in config.data.sourceFileExtensions
-                text =○ nfs.read item.path
+                text =◯ nfs.read item.path
                 ⮐ if @brocol.visible()
                 fileColorData = filecolors.split item.path text
                 text = fileColorData.text

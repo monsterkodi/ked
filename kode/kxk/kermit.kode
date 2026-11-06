@@ -54,7 +54,7 @@ lineMatch = (line, pt, splitlist) ->
             ci++
             continue
             
-        if cp?[0] in '●○'
+        if cp?[0] in '●◯'
             weakMatch = true
             # log "weak #{si} #{ci} #{cp}"
             varName = cp[1..]
@@ -64,7 +64,7 @@ lineMatch = (line, pt, splitlist) ->
                     si++
                     ci++
                     continue
-                '○' 
+                '◯' 
                     if ci == cpt.length-1 # last capture pattern ➜ swallow rest of split
                         rslt[varName] = splt[si..].join ' '
                         ⮐ rslt
@@ -120,13 +120,13 @@ addMatch = (line, ctx) ->
             ci++
             continue
             
-        if cp?[0] in '●○'
+        if cp?[0] in '●◯'
             
             weakMatch = true
             varName = cp[1..]
             switch cp[0]
                 '●' ➜ rslt[varName] = splt[si]
-                '○' 
+                '◯' 
                     rslt[varName] = line[(splt[0...si].join(' ').length)..]
                     varName = null
                     break

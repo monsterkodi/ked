@@ -18,11 +18,11 @@ use                 ◆ finder searcherfile
         @sfils = []
         @searchId = 0
 
-    show: text files ○=>
+    show: text files ◯=>
     
-        ○ @search text files
+        ◯ @search text files
 
-    search: text files focus=true ○=>
+    search: text files focus=true ◯=>
     
         @choices.state.gutterWidthOverride = null
         @gutterMaxLine = 0
@@ -69,7 +69,7 @@ use                 ◆ finder searcherfile
         
         for file,idx in files
                     
-            filet =○ kacher.getText file
+            filet =◯ kacher.getText file
             
             ⮐ if searchId != @searchId
             
@@ -125,10 +125,10 @@ use                 ◆ finder searcherfile
                 items = []
                 flushed = true
                 @highlightTextAndEmitRedraw text
-                ○ new Promise (resolve) -> setImmediate resolve
+                ◯ new Promise (resolve) -> setImmediate resolve
                 ⮐ if searchId != @searchId
             else if flushed and (idx+1) % 8 == 0
-                ○ new Promise (resolve) -> setImmediate resolve
+                ◯ new Promise (resolve) -> setImmediate resolve
                 ⮐ if searchId != @searchId
             
             break if @hidden()

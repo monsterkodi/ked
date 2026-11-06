@@ -882,7 +882,7 @@ Renderer = (function ()
             {
                 m.keyval.val.func.name.text = 'static ' + name.slice(1)
             }
-            else if (_k_.in((m.keyval.val.func != null ? m.keyval.val.func.arrow.text : undefined),['=>','○=>']))
+            else if (_k_.in((m.keyval.val.func != null ? m.keyval.val.func.arrow.text : undefined),['=>','◯=>']))
             {
                 bind.push(m)
             }
@@ -907,7 +907,7 @@ Renderer = (function ()
         }
         gi = this.ind()
         name = (name != null ? name : ((_602_29_=(n.name != null ? n.name.text : undefined)) != null ? _602_29_ : 'function'))
-        if (n.arrow.text[0] === '○')
+        if (n.arrow.text[0] === '◯')
         {
             if (name.indexOf('function') >= 0)
             {

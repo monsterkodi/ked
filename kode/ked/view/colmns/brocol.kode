@@ -35,10 +35,10 @@ import rgxs from './quicky.json' with { type: "json" }
             
         ret
         
-    listDir: dir ○->
+    listDir: dir ◯->
         
         try
-            items =○ nfs.list dir recursive:false
+            items =◯ nfs.list dir recursive:false
         catch err
             @clear()
             post.emit 'redraw'

@@ -19,19 +19,19 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
         post.on 'index'       (file) => @index file
         post.on 'file.change' @onFileChange
     
-    onFileChange: info ○=>
+    onFileChange: info ◯=>
         
         switch info.change
             'create'
                 if slash.ext(info.path) in fileutil.sourceFileExtensions
-                    ○ @index info.path
+                    ◯ @index info.path
             'delete'
                 @removePath info.path
             'rename'
-                ○ @renamePath info.oldPath info.path
+                ◯ @renamePath info.oldPath info.path
             'modify'
                 if @files[info.path]
-                    ○ @index info.path refresh:true
+                    ◯ @index info.path refresh:true
                 
     @file: file -> @singleton.files[file]
     
@@ -119,12 +119,12 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
             if file.startsWith prefix
                 @removeFile file
     
-    renamePath: oldPath newPath ○->
+    renamePath: oldPath newPath ◯->
         
         if @files[oldPath]?
             @removeFile oldPath
             if slash.ext(newPath) in fileutil.sourceFileExtensions
-                ○ @index newPath
+                ◯ @index newPath
             ⮐ 
         
         prefix = oldPath + '/'
@@ -137,7 +137,7 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
         for pair in moved
             @removeFile pair[0]
             if slash.ext(pair[1]) in fileutil.sourceFileExtensions
-                ○ @index pair[1]
+                ◯ @index pair[1]
         
     applyIndexer: file fileInfo text indexerClass ->
                 
@@ -184,17 +184,17 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
         @files[file] = fileInfo
         post.emit 'file.indexed' file fileInfo        
         
-    onProjectIndexed: prjDir ○=>
+    onProjectIndexed: prjDir ◯=>
     
         files = prjcts.projects[prjDir].files
         for file in files
-            ○ @index file
+            ◯ @index file
             
-    index: file opt ○=>
+    index: file opt ◯=>
         
         #  let input and timers run between files while a project is indexed
         
-        ○ new Promise (resolve) -> setImmediate resolve
+        ◯ new Promise (resolve) -> setImmediate resolve
         
         # ● indexFile
         
@@ -211,7 +211,7 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
             @files[file] = {}
             ⮐ 
                                 
-        text =○ nfs.read file
+        text =◯ nfs.read file
         
         ⮐ if empty text
         
