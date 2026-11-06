@@ -35,7 +35,7 @@ novim
     yankFlashMs         700
 
 project
-    maxDepth    12
+    maxDepth    6
     ignore      
         node_modules
         .kkache
