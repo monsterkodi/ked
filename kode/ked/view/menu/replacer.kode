@@ -281,6 +281,7 @@ use             ◆ replacerfile searcher
     
         ⮐ if @hidden()
     
-        @hide()
+        log "replacer.onFileLoaded (hide?) #{file}"
+        # @hide()
         
 export replacer
