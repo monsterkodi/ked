@@ -5,6 +5,7 @@ use child_process
 ■git
 
     @statusRequests: {}
+    @statusAgain: {}
     @statusCache: {}
     @statusTimers: {}
     @statusDelay: 150
@@ -86,7 +87,10 @@ use child_process
             files:   {}
         
         ⮐  status if empty gitDir 
-        ⮐  status if @statusRequests[gitDir]
+        
+        if @statusRequests[gitDir]
+            @statusAgain[gitDir] = true
+            ⮐ status
         
         @statusRequests[gitDir] = true
         
@@ -94,7 +98,9 @@ use child_process
         
         delete @statusRequests[gitDir]
         
-        ⮐  status if gitStatus.startsWith 'fatal:'
+        if gitStatus.startsWith 'fatal:'
+            delete @statusAgain[gitDir]
+            ⮐ status
         
         lines = gitStatus.split '\n'
                 
@@ -122,6 +128,10 @@ use child_process
         
         post.emit 'git.status' status
         @statusCache[gitDir] = status
+        
+        if @statusAgain[gitDir]
+            delete @statusAgain[gitDir]
+            ○ git.status gitDir
                 
         status
 

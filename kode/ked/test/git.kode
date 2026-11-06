@@ -56,3 +56,41 @@ waitFor = (cond) ○->
         renamed[other] ▸ 'added'
         (renamed[file]?) ▸ false
         Object.keys(deleted).length ▸ 0
+
+  ▸ a request during a running status runs again
+
+        repo = '/tmp/opencode/ked-git-again'
+        file = slash.path repo 'a.txt'
+
+        fs.rmSync repo recursive:true force:true
+        fs.mkdirSync repo recursive:true
+        child_process.execSync 'git init -q', cwd:repo
+        fs.writeFileSync file 'hello'
+
+        statuses = []
+        post.on 'git.status' (status) -> statuses.push status if status.gitDir == repo
+
+        keepExec = git.exec
+        git.exec = (args opt) ○->
+            ○ sleep 100
+            ○ keepExec args opt
+
+        first = git.status repo
+        ○ waitFor -> git.statusRequests[repo]
+
+        second = git.status repo
+        ○ waitFor -> git.statusAgain[repo]
+        again = git.statusAgain[repo]
+
+        ○ first
+        ○ second
+        ○ waitFor -> statuses.length > 1
+
+        git.exec = keepExec
+
+        delete git.statusAgain[repo]
+        fs.rmSync repo recursive:true force:true
+
+        again ▸ true
+        (statuses.length > 1) ▸ true
+        (git.statusAgain[repo]?) ▸ false
