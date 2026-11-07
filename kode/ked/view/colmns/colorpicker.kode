@@ -2,7 +2,7 @@
 use ../../../kxk    ▪ post kseg kutil clip
 use ../../theme     ◆ color theme
 use ../../edit/tool ◆ belt
-use ../base         ◆ view colorslider rgbinput radio
+use ../base         ◆ view colorslider rgbinput radio palette
 ■colorpicker□view
     
     # #3c3cf0 #3ecc12 #8c6900
@@ -19,6 +19,10 @@ use ../base         ◆ view colorslider rgbinput radio
         @voided        = [false false]
         @colorStates   = []
 
+        @palette    = []
+        @paletteMax = 8
+        @paletteFits = false
+
         @hue    = new colorslider screen "#{@name}_hue" 360 (v) => color.hsvToRgb [v 100 100]
         @sat    = new colorslider screen "#{@name}_sat" 100 (v) => color.hsvToRgb [@h() v @v()]
         @val    = new colorslider screen "#{@name}_val" 100 (v) => color.hsvToRgb [@h() @s() v]
@@ -28,6 +32,8 @@ use ../base         ◆ view colorslider rgbinput radio
         @blue   = new rgbinput screen "#{@name}_blue"
                 
         @radio  = new radio screen "#{@name}_radio"
+
+        @paletteView = new palette screen "#{@name}_palette"
 
         @sliders   = [@hue @sat @val]
         @inputs    = [@red @green @blue]
@@ -52,6 +58,7 @@ use ../base         ◆ view colorslider rgbinput radio
 
         @setColor 'bg' theme.colorpicker.bg
         @setColor 'fg' theme.colorpicker.fg
+        @setColor 'separator' theme.colorpicker.separator
 
         @isVisible = false
 
@@ -85,6 +92,70 @@ use ../base         ◆ view colorslider rgbinput radio
         @syncRadio()
 
         post.emit 'redraw'
+
+    # the palette is a list of hex colors
+    # it is empty until a color is added to it
+    # the picker grows by two rows to show it
+
+    paletteFocused: => @paletteView.hasFocus()
+
+    pickerHeight: => @height + (@palette.length ? 2 : 0)
+
+    syncPalette: =>
+
+        @paletteView.setColors @palette
+
+        @paletteView.setFocusable @palette.length > 0
+
+        @focusRing = [@radio @hue @sat @val @red @green @blue]
+        @focusRing.push @paletteView if @palette.length and @paletteFits
+
+    addCurrentColor: =>
+
+        hex = @hex()
+        ⮐ if empty hex
+        ⮐ if @palette.includes hex
+
+        @palette.push hex
+
+        @palette.shift() if @palette.length > @paletteMax
+
+        @syncPalette()
+
+        post.emit 'redraw'
+
+        true
+
+    removePaletteColor: =>
+
+        idx = @paletteView.active
+        ⮐ if idx < 0 or idx >= @palette.length
+
+        @palette.splice idx 1
+
+        @syncPalette()
+
+        @paletteView.setActive clamp(0 @palette.length-1 idx) if @palette.length
+
+        @blue.grabFocus() if empty @palette
+
+        post.emit 'redraw'
+
+        true
+
+    applyPaletteColor: =>
+
+        opt = @paletteView.options[@paletteView.active]
+        ⮐ if empty opt
+
+        @setHex opt.label
+
+        @syncAll()
+
+        post.emit 'colorpicker.change' @hex()
+        post.emit 'redraw'
+
+        true
 
     rgb: => @colorStates[@activeIndex()]
     hex: => color.hex @rgb()
@@ -202,6 +273,7 @@ use ../base         ◆ view colorslider rgbinput radio
                 @setHex "#ffffff"
 
         @syncAll()
+        @syncPalette()
         super()
 
         @hue.grabFocus()
@@ -313,6 +385,8 @@ use ../base         ◆ view colorslider rgbinput radio
 
         ret = @radio.onMouse event     ; ⮐ ret if ret?.redraw
 
+        ret = @paletteView.onMouse event ; ⮐ ret if ret?.redraw
+
         for slider in @sliders
             ret = slider.onMouse event ; ⮐ ret if ret?.redraw
 
@@ -348,20 +422,33 @@ use ../base         ◆ view colorslider rgbinput radio
         ⮐ true if @val   .onKey key event
         
         ⮐ true if @radio .onKey key event
+        ⮐ true if @paletteView.onKey key event
 
         switch event.combo
             'down''tab'      ➜ ⮐ @focusNext() 
             'up''shift+tab'  ➜ ⮐ @focusPrev()
             'esc'            ➜ ⮐ @cancel()
-            'return'         ➜ ⮐ @submit()
+            'return'         ➜ ⮐ @onReturn()
             'delete'         
-            'backspace'      ➜ ⮐ @voidActiveColor()
+            'backspace'      ➜ ⮐ @onDelete()
             'cmd+left'       
             'cmd+right'      ➜ ⮐ @swapColors()
             'ctrl+c' 'cmd+c' ➜   clip.copy @hex() ; ⮐ true
             'ctrl+v' 'cmd+v' ➜   @setHex(clip.paste()) ; @syncAll() ; ⮐ true
 
         false
+
+    onReturn: =>
+
+        ⮐ @applyPaletteColor() if @paletteFocused()
+
+        @submit()
+
+    onDelete: =>
+
+        ⮐ @removePaletteColor() if @paletteFocused()
+
+        @voidActiveColor()
 
     layout: x y w h =>
 
@@ -380,11 +467,23 @@ use ../base         ◆ view colorslider rgbinput radio
         @green.layout x+1+int((aw-iw)/2) y+7 iw 1
         @blue.layout  x+1+aw-iw          y+7 iw 1
 
+        @paletteFits = @palette.length > 0 and h > 9
+
+        if @paletteFits
+            @paletteView.layout x y+9 w 1
+        else
+            @paletteView.layout x y 0 0
+
     draw: =>
 
         ⮐ if @hidden() or @collapsed()
 
+        @syncPalette()
+
         @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
+
+        if @paletteFits
+            @cells.fill_row 8 0 @cells.cols-1 '─' @color.separator @color.bg
 
         for child in @focusRing
             child.draw()

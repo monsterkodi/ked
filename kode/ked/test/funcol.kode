@@ -176,3 +176,26 @@ ked_sess = ->
         f.colorpicker.cells.cols ▸ 16
 
         delete global.ked_session
+
+  ▸ the color picker grows when the palette is not empty
+
+        ked_sess()
+        
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['']
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow ''
+
+        f.layout 0 0 16 29
+        f.colorpicker.cells.rows ▸ 9
+
+        f.colorpicker.setHex '#ff0000'
+        f.colorpicker.addCurrentColor()
+
+        f.layout 0 0 16 29
+        f.colorpicker.cells.rows ▸ 11
+
+        delete global.ked_session

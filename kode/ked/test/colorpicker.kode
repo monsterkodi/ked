@@ -91,3 +91,126 @@ pickr = ->
 
         p.foregroundHex() ▸ (color.hex(theme.syntax.keyword))
 
+▸ colorpicker palette
+
+  ▸ the palette starts empty
+
+        p = pickr()
+
+        p.palette ▸ []
+        p.pickerHeight() ▸ 9
+
+  ▸ the palette holds eight colors by default
+
+        p = pickr()
+
+        p.paletteMax ▸ 8
+
+  ▸ the current color is added to the palette
+
+        p = pickr()
+        p.setHex '#ff0000'
+        p.addCurrentColor()
+
+        p.palette ▸ ['#ff0000']
+
+  ▸ a color is not added twice
+
+        p = pickr()
+        p.setHex '#ff0000'
+        p.addCurrentColor()
+        p.addCurrentColor()
+
+        p.palette.length ▸ 1
+
+  ▸ the leftmost color is dropped when the palette is full
+
+        p = pickr()
+        p.paletteMax = 3
+
+        for hex in ['#ff0000' '#00ff00' '#0000ff']
+            p.setHex hex
+            p.addCurrentColor()
+
+        p.setHex '#ffffff'
+        p.addCurrentColor()
+
+        p.palette ▸ ['#00ff00' '#0000ff' '#ffffff']
+
+  ▸ the picker grows by two rows when the palette is not empty
+
+        p = pickr()
+        p.setHex '#ff0000'
+        p.addCurrentColor()
+
+        p.pickerHeight() ▸ 11
+
+  ▸ the palette is shown below the picker
+
+        h = new harness cols:30 rows:12
+        e = new editor h.screen 'test_editor_colorpicker_palette' []
+        p = new colorpicker h.screen e 'test_colorpicker_palette'
+        p.layout 0 0 30 11
+        p.show()
+
+        p.setHex '#ff0000'
+        p.addCurrentColor()
+
+        p.layout 0 0 30 11
+        p.draw()
+
+        h.row(8).includes('─') ▸ true
+        h.row(9).includes('#ff0000') ▸ true
+
+  ▸ enter on a palette cell sets the current color
+
+        p = pickr()
+        p.setHex '#ff0000'
+        p.addCurrentColor()
+
+        p.setHex '#00ff00'
+
+        p.paletteView.setActive 0
+        p.paletteView.grabFocus()
+
+        e =
+            type: 'press'
+            combo: 'return'
+            char: ''
+        p.onKey 'return' e
+
+        p.hex() ▸ '#ff0000'
+
+  ▸ backspace on a focused palette cell removes it
+
+        p = pickr()
+        p.setHex '#ff0000'
+        p.addCurrentColor()
+        p.setHex '#00ff00'
+        p.addCurrentColor()
+
+        p.paletteView.setActive 1
+        p.paletteView.grabFocus()
+
+        e =
+            type: 'press'
+            combo: 'backspace'
+            char: ''
+        p.onKey 'backspace' e
+
+        p.palette ▸ ['#ff0000']
+
+  ▸ the palette is not in the focus ring when it is empty
+
+        p = pickr()
+
+        p.focusRing.includes(p.paletteView) ▸ false
+
+        p.setHex '#ff0000'
+        p.addCurrentColor()
+
+        p.layout 0 0 30 11
+        p.draw()
+
+        p.focusRing.includes(p.paletteView) ▸ true
+

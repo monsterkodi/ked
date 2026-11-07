@@ -1,0 +1,78 @@
+
+use ../util      ◆ harness
+use ../view/base ◆ palette
+
+▸ palette
+
+  ▸ a cell shows its color
+
+        h = new harness cols:20 rows:2
+        p = new palette h.screen 'test_palette'
+
+        p.layout 0 0 20 1
+        p.setColors ['#ff0000' '#00ff00']
+        p.draw()
+
+        h.screen.get_bg(5 0) ▸ [255 0 0]
+        h.screen.get_bg(15 0) ▸ [0 255 0]
+
+  ▸ a wide cell shows its hex value
+
+        h = new harness cols:40 rows:2
+        p = new palette h.screen 'test_palette'
+
+        p.layout 0 0 40 1
+        p.setColors ['#ff0000' '#00ff00']
+        p.draw()
+
+        h.row(0).includes('#ff0000') ▸ true
+        h.row(0).includes('#00ff00') ▸ true
+
+  ▸ a narrow cell shows no hex value
+
+        h = new harness cols:10 rows:2
+        p = new palette h.screen 'test_palette'
+
+        p.layout 0 0 10 1
+        p.setColors ['#ff0000' '#00ff00']
+        p.draw()
+
+        h.row(0).includes('#ff0000') ▸ false
+        h.row(0).includes('#00ff00') ▸ false
+
+  ▸ the focused cell is marked
+
+        h = new harness cols:20 rows:2
+        p = new palette h.screen 'test_palette'
+
+        p.layout 0 0 20 1
+        p.setColors ['#ff0000' '#00ff00']
+        p.setActive 0
+        p.grabFocus()
+        p.draw()
+
+        h.row(0).includes('●#ff0000●') ▸ true
+
+  ▸ the palette has rounded edges
+
+        h = new harness cols:20 rows:2
+        p = new palette h.screen 'test_palette'
+
+        p.layout 0 0 20 1
+        p.setColors ['#ff0000']
+        p.draw()
+
+        h.screen.get_char(0 0) ▸ '◖'
+        h.screen.get_char(19 0) ▸ '◗'
+
+  ▸ an empty palette has no cells
+
+        h = new harness cols:20 rows:2
+        p = new palette h.screen 'test_palette'
+
+        p.layout 0 0 20 1
+        p.setColors []
+        p.draw()
+
+        p.options.length ▸ 0
+        h.screen.get_bg(0 0) ▸ []

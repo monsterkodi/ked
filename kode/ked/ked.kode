@@ -669,7 +669,13 @@ use child_process ▪ spawn exec
     onKey: key event =>
     
         # log 'ked.onKey' event
+
+        #  the colorpicker grabs cmd+s to add the current color to its palette
             
+        if key == 'ctrl+s' or key == 'cmd+s'
+            if @funcol.colorpickerVisible()
+                ⮐ @funcol.colorpicker.addCurrentColor()
+
         switch key
             
             'alt+1'                      ➜ ⮐ post.emit 'filepos.goBackward'  

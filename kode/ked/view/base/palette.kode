@@ -1,0 +1,94 @@
+
+use ../../theme ◆ color
+use             ◆ radio
+■palette□radio
+###
+    a row of color cells
+    used by the colorpicker to show and pick palette colors
+    every cell shows its color
+    the hex value is shown on top of the color if the cell is wide enough
+###
+
+    @: screen name ->
+
+        super screen name
+
+        @setFocusable()
+
+    setColors: hexes =>
+
+        opts = []
+
+        for hex in hexes
+            rgb = color.values hex
+            opts.push {color: rgb label: hex} if rgb?
+
+        if empty opts
+            @options = []
+            @active  = 0
+            ⮐
+
+        @setOptions opts
+
+    draw: =>
+
+        ⮐ if @hidden() or @collapsed()
+
+        w = @cells.cols
+        ⮐ if w < 1
+
+        n = @options.length
+        ⮐ if n < 1
+
+        @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
+
+        starts = []
+        ends   = []
+
+        for idx in 0...n
+            starts.push int(idx*w/n)
+            ends.push   int((idx+1)*w/n)
+            for x in starts[idx]...ends[idx]
+                @cells.set_bg x 0 @options[idx].color
+
+        used = []
+
+        for idx in 0...n
+            @drawCell idx starts[idx] ends[idx]-starts[idx] used
+
+        if w > 1
+            @cells.set 0    0 '◖' @options[0].color  @color.bg if not used[0]
+            @cells.set w-1 0 '◗' @options[-1].color @color.bg if not used[w-1]
+
+    drawCell: idx start segw used =>
+
+        hex = @options[idx].label ? ''
+        focused = @focused and idx == @active
+
+        fg = color.adjustForBackground @color.fg @options[idx].color
+        fg = color.adjustForBackground [255 255 255] @options[idx].color if focused
+
+        label = ''
+
+        if focused
+            for candidate in ['● '+hex+' ●' '●'+hex+'●' '●'+hex]
+                if candidate.length <= segw
+                    label = candidate
+                    break
+
+        if empty label and hex.length <= segw
+            label = hex
+
+        if empty label and focused and segw > 0
+            label = '●'
+
+        ⮐ if empty label
+
+        pad = max 0 int((segw - label.length)/2)
+        x = start + pad
+
+        for ch, i in label
+            @cells.set x+i 0 ch fg @options[idx].color
+            used[x+i] = true
+
+export palette

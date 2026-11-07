@@ -74,10 +74,15 @@ use                 ◆ funtree colorpicker uniko
 
         ked_session.set 'funcol▸active' @active
         post.emit 'redraw'
-        
+
+    #  the color picker is only there, when the column is shown
+
+    colorpickerVisible: => @visible() and @active and @colorpicker.visible()
+
+
     layout: x y w h ->
         
-        ph = @colorpicker.visible() ? min(@colorpicker.height h-1) : 0
+        ph = @colorpicker.visible() ? min(@colorpicker.pickerHeight() h-1) : 0
         ph = 0 if ph < 1
 
         uh = @uniko.visible() ? min(@uniko.height h-ph-1) : 0
