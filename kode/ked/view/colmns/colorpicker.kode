@@ -21,7 +21,6 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         @palette    = []
         @paletteMax = 8
-        @paletteFits = false
 
         @hue    = new colorslider screen "#{@name}_hue" 360 (v) => color.hsvToRgb [v 100 100]
         @sat    = new colorslider screen "#{@name}_sat" 100 (v) => color.hsvToRgb [@h() v @v()]
@@ -92,10 +91,6 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         post.emit 'redraw'
 
-    # the palette is a list of hex colors
-    # it is empty until a color is added to it
-    # the picker grows by two rows to show it
-
     paletteFocused: => @paletteView.hasFocus()
 
     pickerHeight: => @height + (@palette.length ? 2 : 0)
@@ -106,8 +101,9 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         @paletteView.setFocusable @palette.length > 0
 
-        @focusRing = [@radio @hue @sat @val @red @green @blue]
-        @focusRing.push @paletteView if @palette.length and @paletteFits
+        @focusRing = [@radio @hue @sat @val] 
+        @focusRing.push @paletteView if @palette.length
+        @focusRing = @focusRing.concat [@red @green @blue]
 
     addCurrentColor: =>
 
@@ -463,16 +459,16 @@ use ../base         ◆ view colorslider rgbinput radio palette
         aw = max 1 w-2
         iw = 4
 
-        @red.layout   x+1                y+7 iw 1
-        @green.layout x+1+int((aw-iw)/2) y+7 iw 1
-        @blue.layout  x+1+aw-iw          y+7 iw 1
-
-        @paletteFits = @palette.length > 0 and h > 9
-
-        if @paletteFits
-            @paletteView.layout x+1 y+9 w-2 1
+        if @palette.length > 0
+            @paletteView.layout x+1 y+7 w-2 1
+            p = 2
         else
             @paletteView.layout x y 0 0
+            p = 0
+
+        @red.layout   x+1                y+7+p iw 1
+        @green.layout x+1+int((aw-iw)/2) y+7+p iw 1
+        @blue.layout  x+1+aw-iw          y+7+p iw 1
 
     draw: =>
 

@@ -12,18 +12,21 @@ palette = (function ()
     _k_.extend(palette, radio)
     function palette (screen, name)
     {
+        this.screen = screen
+        this.name = name
+    
         this["drawCell"] = this["drawCell"].bind(this)
         this["draw"] = this["draw"].bind(this)
         this["setColors"] = this["setColors"].bind(this)
-        palette.__super__.constructor.call(this,screen,name)
+        palette.__super__.constructor.call(this,this.screen,this.name)
         this.setFocusable()
     }
 
     palette.prototype["setColors"] = function (hexes)
     {
-        var hex, opts, rgb
+        var hex, rgb
 
-        opts = []
+        this.options = []
         var list = _k_.list(hexes)
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
@@ -31,21 +34,19 @@ palette = (function ()
             rgb = color.values(hex)
             if ((rgb != null))
             {
-                opts.push({color:rgb,label:hex})
+                this.options.push({color:rgb,label:hex})
             }
         }
-        if (_k_.empty(opts))
+        if (_k_.empty(this.options))
         {
-            this.options = []
             this.active = 0
             return
         }
-        return this.setOptions(opts)
     }
 
     palette.prototype["draw"] = function ()
     {
-        var ends, idx, n, starts, used, w, x
+        var ends, idx, n, starts, w, x
 
         if (this.hidden() || this.collapsed())
         {
@@ -73,69 +74,23 @@ palette = (function ()
                 this.cells.set_bg(x,0,this.options[idx].color)
             }
         }
-        used = []
+        this.cells.set(0,0,'◖',this.options[0].color,this.color.bg)
         for (var _e_ = idx = 0, _f_ = n; (_e_ <= _f_ ? idx < n : idx > n); (_e_ <= _f_ ? ++idx : --idx))
         {
-            this.drawCell(idx,starts[idx],ends[idx] - starts[idx],used)
+            this.drawCell(idx,starts[idx],ends[idx] - starts[idx])
         }
-        if (w > 1)
-        {
-            if (!used[0])
-            {
-                this.cells.set(0,0,'◖',this.options[0].color,this.color.bg)
-            }
-            if (!used[w - 1])
-            {
-                return this.cells.set(w - 1,0,'◗',this.options.slice(-1)[0].color,this.color.bg)
-            }
-        }
+        return this.cells.set(w - 1,0,'◗',this.options.slice(-1)[0].color,this.color.bg)
     }
 
-    palette.prototype["drawCell"] = function (idx, start, segw, used)
+    palette.prototype["drawCell"] = function (idx, start, segw)
     {
-        var candidate, ch, fg, focused, hex, i, label, pad, x, _65_34_
+        var fg, x
 
-        hex = ((_65_34_=this.options[idx].label) != null ? _65_34_ : '')
-        focused = this.focused && idx === this.active
-        fg = color.adjustForBackground(this.color.fg,this.options[idx].color)
-        if (focused)
+        if (this.focused && idx === this.active)
         {
-            fg = color.adjustForBackground([255,255,255],this.options[idx].color)
-        }
-        label = ''
-        if (focused)
-        {
-            var list = ['● ' + hex + ' ●','●' + hex + '●','●' + hex]
-            for (var _a_ = 0; _a_ < list.length; _a_++)
-            {
-                candidate = list[_a_]
-                if (candidate.length <= segw)
-                {
-                    label = candidate
-                    break
-                }
-            }
-        }
-        if (_k_.empty(label) && hex.length <= segw)
-        {
-            label = hex
-        }
-        if (_k_.empty(label) && focused && segw > 0)
-        {
-            label = '●'
-        }
-        if (_k_.empty(label))
-        {
-            return
-        }
-        pad = _k_.max(0,parseInt((segw - label.length) / 2))
-        x = start + pad
-        var list1 = _k_.list(label)
-        for (i = 0; i < list1.length; i++)
-        {
-            ch = list1[i]
-            this.cells.set(x + i,0,ch,fg,this.options[idx].color)
-            used[x + i] = true
+            fg = color.subtle(this.options[idx].color,35)
+            x = start + _k_.max(0,parseInt((segw - 1) / 2))
+            return this.cells.set(x,0,'●',fg,this.options[idx].color)
         }
     }
 
@@ -144,5 +99,5 @@ palette = (function ()
 
 export default palette;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicGFsZXR0ZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy9iYXNlL3BhbGV0dGUua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUNrQixZQUFSOztPQUNRLFlBQUE7OztBQUNqQixXQUFEOzt3QkFBUzthQVFMLFNBQUcsUUFBTzs7Ozs7Z0RBRUEsT0FBTztRQUViLEtBQUM7Ozt1QkFFTCx3QkFBVzs7OztRQUVQOzRCQUVXOzs7WUFBUDtZQUNBLE1BQU0sTUFBTSxPQUFPO2lCQUNrQjs7Z0JBQXJDLEtBQUssTUFBTSxNQUFPLElBQUksTUFBTzs7O3NCQUV4Qjs7WUFDTCxLQUFDO1lBQ0QsS0FBQyxTQUFVOzs7ZUFHZixLQUFDLFdBQVc7Ozt1QkFFaEI7Ozs7WUFFUyxLQUFDLFlBQVksS0FBQzs7OztRQUVuQixJQUFJLEtBQUMsTUFBTTtZQUNOLElBQUk7Ozs7UUFFVCxJQUFJLEtBQUMsUUFBUTtZQUNSLElBQUk7Ozs7UUFFVCxLQUFDLE1BQU0sVUFBVSxFQUFFLEVBQUUsR0FBRyxHQUFHLElBQUksS0FBSyxLQUFDLE1BQU07UUFFM0M7UUFDQTt1QkFFSSxNQUFPLFNBQUksdUJBQUEsVUFBQTs7WUFDWCxPQUFPLGNBQVMsTUFBSSxJQUFFO1lBQ3RCLEtBQUssZUFBWSxNQUFJLEtBQUcsSUFBRTsyQkFDdEIsSUFBSyxPQUFPLFlBQU8sS0FBSyx3QkFBTCxLQUFLLFdBQUwsS0FBSzs7Z0JBQ3hCLEtBQUMsTUFBTSxPQUFPLEVBQUUsRUFBRSxLQUFDLFFBQVEsS0FBSzs7O1FBRXhDO3VCQUVJLE1BQU8sU0FBSSx1QkFBQSxVQUFBOztZQUNYLEtBQUMsU0FBUyxJQUFJLE9BQU8sS0FBSyxLQUFLLE9BQUssT0FBTyxLQUFLOztZQUVqRCxJQUFJOztpQkFDdUQsS0FBSzs7Z0JBQS9ELEtBQUMsTUFBTSxJQUFJLEVBQUssRUFBRSxJQUFJLEtBQUMsUUFBUSxHQUFHLE1BQU8sS0FBQyxNQUFNOztpQkFDUyxLQUFLLElBQUU7O3VCQUFoRSxLQUFDLE1BQU0sSUFBSSxJQUFFLEVBQUUsRUFBRSxJQUFJLEtBQUMscUJBQVksTUFBTSxLQUFDLE1BQU07Ozs7O3VCQUV2RCx1QkFBVSxLQUFJLE9BQU0sTUFBSzs7OztRQUVyQixnQkFBTSxLQUFDLFFBQVEsS0FBSywyQkFBUTtRQUM1QixVQUFVLEtBQUMsV0FBWSxRQUFPLEtBQUM7UUFFL0IsS0FBSyxNQUFNLG9CQUFvQixLQUFDLE1BQU0sR0FBRyxLQUFDLFFBQVEsS0FBSztZQUNhOztZQUFwRSxLQUFLLE1BQU0scUJBQXFCLElBQUksSUFBSSxLQUFLLEtBQUMsUUFBUSxLQUFLOztRQUUzRCxRQUFRO1lBRUw7O3dCQUNtQixPQUFLLE1BQUksS0FBSyxNQUFJLE1BQUksSUFBSSxNQUFJOzs7Z0JBQTVDO29CQUNHLFVBQVUsVUFBVTs7b0JBQ25CLFFBQVE7b0JBQ1I7Ozs7c0JBRUgsVUFBVSxJQUFJLFVBQVU7O1lBQzdCLFFBQVE7O3NCQUVILFVBQVUsV0FBWSxPQUFPOztZQUNsQyxRQUFROztzQkFFRDs7OztRQUVYLGNBQVUsWUFBTyxPQUFPLE1BQU0sVUFBUTtRQUN0QyxJQUFJLFFBQVE7NkJBRUM7YUFBTDs7WUFBSjtZQUNBLEtBQUMsTUFBTSxJQUFJLElBQUUsRUFBRSxFQUFFLEdBQUcsR0FBRyxLQUFDLFFBQVEsS0FBSztZQUNyQyxLQUFLLElBQUUsS0FBSzs7OztXQXhGdkI7OztlQTBGTSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicGFsZXR0ZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy9iYXNlL3BhbGV0dGUua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUNrQixZQUFSOztPQUNRLFlBQUE7OztBQUNqQixXQUFEOzt3QkFBUzthQUdMLFNBQUksUUFBUTs7UUFBVDtRQUFROzs7OztnREFFRCxLQUFDLE9BQU8sS0FBQztRQUVmLEtBQUM7Ozt1QkFFTCx3QkFBVzs7OztRQUVQLEtBQUM7NEJBRVU7OztZQUFQO1lBQ0EsTUFBTSxNQUFNLE9BQU87aUJBQ3NCOztnQkFBekMsS0FBQyxRQUFRLE1BQU0sTUFBTyxJQUFJLE1BQU87OztzQkFFNUIsS0FBQzs7WUFDTixLQUFDLFNBQVU7Ozs7O3VCQUduQjs7OztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7O1FBRW5CLElBQUksS0FBQyxNQUFNO1lBQ04sSUFBSTs7OztRQUVULElBQUksS0FBQyxRQUFRO1lBQ1IsSUFBSTs7OztRQUVULEtBQUMsTUFBTSxVQUFVLEVBQUUsRUFBRSxHQUFHLEdBQUcsSUFBSSxLQUFLLEtBQUMsTUFBTTtRQUUzQztRQUNBO3VCQUVJLE1BQU8sU0FBSSx1QkFBQSxVQUFBOztZQUNYLE9BQU8sY0FBUyxNQUFJLElBQUU7WUFDdEIsS0FBSyxlQUFZLE1BQUksS0FBRyxJQUFFOzJCQUN0QixJQUFLLE9BQU8sWUFBTyxLQUFLLHdCQUFMLEtBQUssV0FBTCxLQUFLOztnQkFDeEIsS0FBQyxNQUFNLE9BQU8sRUFBRSxFQUFFLEtBQUMsUUFBUSxLQUFLOzs7UUFFeEMsS0FBQyxNQUFNLElBQUksRUFBRSxFQUFFLElBQUksS0FBQyxRQUFRLEdBQUcsTUFBTyxLQUFDLE1BQU07dUJBRXpDLE1BQU8sU0FBSSx1QkFBQSxVQUFBOztZQUNYLEtBQUMsU0FBUyxJQUFJLE9BQU8sS0FBSyxLQUFLLE9BQUssT0FBTzs7ZUFFL0MsS0FBQyxNQUFNLElBQUksSUFBRSxFQUFFLEVBQUUsSUFBSSxLQUFDLHFCQUFZLE1BQU0sS0FBQyxNQUFNOzs7dUJBRW5ELHVCQUFVLEtBQUksT0FBTTs7OztZQUViLEtBQUMsV0FBWSxRQUFPLEtBQUM7O1lBQ3BCLEtBQUssTUFBTSxPQUFPLEtBQUMsUUFBUSxLQUFLLE1BQU07WUFDdEMsSUFBSSxnQkFBWSxZQUFPLE9BQU8sS0FBRzttQkFDakMsS0FBQyxNQUFNLElBQUksRUFBRSxFQUFFLElBQUksR0FBRyxLQUFDLFFBQVEsS0FBSzs7OztXQXREL0M7OztlQXdETSJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/base/palette.kode

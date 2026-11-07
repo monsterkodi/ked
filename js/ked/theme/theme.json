@@ -49,8 +49,7 @@
     "fg": "#888",
     "red": "#f55",
     "green": "#5f5",
-    "blue": "#55f",
-    "separator": "#333"
+    "blue": "#55f"
   },
   "uniko": {
     "bg": "#0c0c0c",

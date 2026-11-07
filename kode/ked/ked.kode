@@ -671,14 +671,12 @@ use child_process ▪ spawn exec
         # log 'ked.onKey' event
 
         for handler in @keyHandlers
-            # ●▸ on key
             continue if handler.hidden()
             result = handler.onKey key event
             @redraw() if result?.redraw != false
             if result
-                log "ked.onKey #{result} #{handler.name}"
+                # log "ked.onKey #{result} #{handler.name}"
                 ⮐ 
-            # ●▪ on key
         
         switch key
             
@@ -713,8 +711,6 @@ use child_process ▪ spawn exec
             'alt+u'                      ➜ ⮐ post.emit 'uniko.show'
             'alt+shift+c' 'shift+alt+c'  ➜ ⮐ @editor.state.clearColorsAtCursorOrSelection()
                             
-        # @redraw() if result?.redraw != false
-        
     goToPrevFunc: =>
     
         if @searcher.visible() ➜ ⮐ @searcher.selectPrevFileHeader()
