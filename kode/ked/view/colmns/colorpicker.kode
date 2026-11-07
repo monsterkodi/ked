@@ -58,7 +58,6 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         @setColor 'bg' theme.colorpicker.bg
         @setColor 'fg' theme.colorpicker.fg
-        @setColor 'separator' theme.colorpicker.separator
 
         @isVisible = false
 
@@ -435,7 +434,8 @@ use ../base         ◆ view colorslider rgbinput radio palette
             'cmd+right'      ➜ ⮐ @swapColors()
             'ctrl+c' 'cmd+c' ➜   clip.copy @hex() ; ⮐ true
             'ctrl+v' 'cmd+v' ➜   @setHex(clip.paste()) ; @syncAll() ; ⮐ true
-
+            'ctrl+s' 'cmd+s' ➜ ⮐ @addCurrentColor()
+        
         false
 
     onReturn: =>
@@ -470,7 +470,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
         @paletteFits = @palette.length > 0 and h > 9
 
         if @paletteFits
-            @paletteView.layout x y+9 w 1
+            @paletteView.layout x+1 y+9 w-2 1
         else
             @paletteView.layout x y 0 0
 
@@ -482,11 +482,9 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
 
-        if @paletteFits
-            @cells.fill_row 8 0 @cells.cols-1 '─' @color.separator @color.bg
-
-        for child in @focusRing
-            child.draw()
+        if @cells.cols >= 11
+            for child in @focusRing
+                child.draw()
 
         super()
 

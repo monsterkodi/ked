@@ -670,12 +670,16 @@ use child_process ▪ spawn exec
     
         # log 'ked.onKey' event
 
-        #  the colorpicker grabs cmd+s to add the current color to its palette
-            
-        if key == 'ctrl+s' or key == 'cmd+s'
-            if @funcol.colorpickerVisible()
-                ⮐ @funcol.colorpicker.addCurrentColor()
-
+        for handler in @keyHandlers
+            # ●▸ on key
+            continue if handler.hidden()
+            result = handler.onKey key event
+            @redraw() if result?.redraw != false
+            if result
+                log "ked.onKey #{result} #{handler.name}"
+                ⮐ 
+            # ●▪ on key
+        
         switch key
             
             'alt+1'                      ➜ ⮐ post.emit 'filepos.goBackward'  
@@ -708,14 +712,8 @@ use child_process ▪ spawn exec
             'alt+c'                      ➜ ⮐ post.emit 'colorpicker.show'
             'alt+u'                      ➜ ⮐ post.emit 'uniko.show'
             'alt+shift+c' 'shift+alt+c'  ➜ ⮐ @editor.state.clearColorsAtCursorOrSelection()
-            
-        for handler in @keyHandlers
-            # ●▸ on key
-            continue if handler.hidden()
-            break if result = handler.onKey key event
-            # ●▪ on key
-                
-        @redraw() if result?.redraw != false
+                            
+        # @redraw() if result?.redraw != false
         
     goToPrevFunc: =>
     

@@ -66,6 +66,19 @@ use ../edit/tool ◆ belt
         ⮐ [255 255 255] if empty c
         c.map((v) -> clamp(0 255 int((1+f)*v)))
         
+    @subtle: baseColor amount=20 ->
+    
+        ⮐ baseColor if empty baseColor or not baseColor[0] is num
+        
+        [h s l] = @rgbToHsl baseColor
+        
+        if l < 50
+            l = l + amount
+        else
+            l = l - amount
+        
+        @hslToRgb [h s l]
+        
     @vibrant: c f=0.5 ->
         
         ⮐ [128 128 128] if empty c

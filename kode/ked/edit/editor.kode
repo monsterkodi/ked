@@ -177,12 +177,12 @@ use                ◆ state draw complete mode
             @complete?.hide()
             ⮐ true
         
-        if valid event.char
+        if valid event.char and event.char == event.combo or event.combo in ['space''return''tab']
             @state.insert event.char
             @complete?.complete()
             ⮐ true
         else
             if key.split('+')[-1] not in ['shift' 'ctrl' 'alt' 'cmd' 'esc'] 
-                log "editor.onKey? |#{key}|" event 
+                log "editor.onKey? |#{key}|" event
 
 export editor

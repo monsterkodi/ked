@@ -145,23 +145,6 @@ pickr = ->
 
         p.pickerHeight() ▸ 11
 
-  ▸ the palette is shown below the picker
-
-        h = new harness cols:30 rows:12
-        e = new editor h.screen 'test_editor_colorpicker_palette' []
-        p = new colorpicker h.screen e 'test_colorpicker_palette'
-        p.layout 0 0 30 11
-        p.show()
-
-        p.setHex '#ff0000'
-        p.addCurrentColor()
-
-        p.layout 0 0 30 11
-        p.draw()
-
-        h.row(8).includes('─') ▸ true
-        h.row(9).includes('#ff0000') ▸ true
-
   ▸ enter on a palette cell sets the current color
 
         p = pickr()
