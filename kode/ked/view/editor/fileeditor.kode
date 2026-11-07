@@ -129,7 +129,7 @@ use                 ◆ mapscr
     
         # log "fileeditor.jumpToWord '#{word}'"
         
-        currentFile = ked_session.get('editor▸file')
+        currentFile = ked_session.get 'editor▸file'
         
         canJumpTo = fileLine => 
             ⮐ false if empty fileLine

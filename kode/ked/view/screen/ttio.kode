@@ -456,6 +456,12 @@ use ../../util/img ◆ rounded
                 key = String.fromCharCode code + 96
                 ⮐ @keyEventForCombo "alt+cmd+#{key}"
             ⮐ if esc == '\\' # esc\ end of kitty graphics message
+            if 32 <= code <= 126
+                key   = esc.toLowerCase()
+                combo = 'alt'
+                combo += '+shift' if esc != key
+                combo += "+#{key}"
+                ⮐ @keyEventForCombo combo esc
         else
             ⮐ if esc.startsWith '_G' # start of kitty graphics message
         

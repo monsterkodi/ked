@@ -7,11 +7,7 @@ use ../view/colmns ◆ dircol
 
   ▸ a relative root shows the absolute folder path
 
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
+        ked_sess()
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_editor' []
         d = new dircol h.screen e []

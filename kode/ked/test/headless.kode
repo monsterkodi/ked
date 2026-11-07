@@ -1,0 +1,40 @@
+
+use fs
+use child_process ▪ spawn
+use ../../kxk ▪ slash
+
+▸ headless
+
+  ▸ the first screen waits for the session file
+
+        home = slash.path '/tmp/opencode' "ked-headless-#{Date.now()}"
+        sessions = slash.path home '.config' 'ked' 'headless-sessions'
+        file = slash.path home 'target.txt'
+
+        fs.mkdirSync sessions recursive:true
+        fs.writeFileSync file 'hello'
+
+        session = "editor\n    file  #{file}\n"
+        fs.writeFileSync slash.path(sessions 'zzzz.noon') session
+
+        env = Object.assign {} process.env
+        env.HOME = home
+
+        output =◯ new Promise (resolve) ->
+
+            proc = spawn slash.path(process.cwd() 'bin' 'ked') ['-H'] env:env
+
+            out = ''
+
+            proc.stdout.on 'data' (data) -> out += data
+            proc.stderr.on 'data' (data) -> out += data
+
+            proc.on 'close' (code) -> resolve out
+
+            proc.stdin.end 'a'
+
+        [start after] = output.split '=== a'
+
+        start.includes("[file: #{file}]") ▸ true
+
+        fs.rmSync home recursive:true force:true

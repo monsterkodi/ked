@@ -4,14 +4,17 @@ use ../edit        ◆ editor
 use ../util        ◆ harness
 use ../view/colmns ◆ funcol
 
+ked_sess = ->
+    store = {}
+    fakeGet = (key def) -> store[key] ? def
+    fakeSet = (key value) -> store[key] = value
+    global.ked_session = get:fakeGet set:fakeSet
+
 ▸ funcol color picker
 
   ▸ a cursor on the hash picks the color
 
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
+        ked_sess()
 
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_editor' []
@@ -28,11 +31,8 @@ use ../view/colmns ◆ funcol
 
   ▸ a word that is not a color keeps the default and no replace mode
 
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
+        ked_sess()
+        
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_editor' []
         e.state.loadLines ['x = hello;']
@@ -48,10 +48,7 @@ use ../view/colmns ◆ funcol
 
   ▸ submitting without changes keeps the original color string
 
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
+        ked_sess()
 
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_editor' []
@@ -71,10 +68,7 @@ use ../view/colmns ◆ funcol
 
   ▸ an explicit show does not replace anything
 
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
+        ked_sess()
 
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_editor' []
@@ -95,11 +89,8 @@ use ../view/colmns ◆ funcol
 
   ▸ a selection color seeds the picker
 
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
+        ked_sess()
+        
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_editor' []
         e.state.loadLines ['hello world']
@@ -117,11 +108,8 @@ use ../view/colmns ◆ funcol
 
   ▸ a selection keeps its existing background when only the foreground changes
 
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
+        ked_sess()
+        
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_editor' []
         e.state.loadLines ['hello world']
@@ -145,11 +133,8 @@ use ../view/colmns ◆ funcol
 
   ▸ a changed background is applied on submit
 
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
+        ked_sess()
+        
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_editor' []
         e.state.loadLines ['hello world']
@@ -169,5 +154,25 @@ use ../view/colmns ◆ funcol
 
         e.state.s.colors.fg ▸ [[0 0 5 '#ff0000']]
         e.state.s.colors.bg ▸ [[0 0 5 '#0000ff']]
+
+        delete global.ked_session
+
+  ▸ an explicit color picker gets a width in a narrow terminal
+
+        ked_sess()
+        
+        h = new harness cols:80 rows:24
+        e = new editor h.screen 'test_editor' []
+        e.state.loadLines ['']
+
+        f = new funcol h.screen e []
+
+        f.onColorPickerShow ''
+
+        f.colorpicker.visible() ▸ true
+        f.cells.cols ▸ 16
+
+        f.layout 64 1 16 23
+        f.colorpicker.cells.cols ▸ 16
 
         delete global.ked_session

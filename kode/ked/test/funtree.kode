@@ -6,7 +6,15 @@ use ../util      ◆ harness
 use ../index     ◆ indexer
 use ../view/colmns ◆ funtree
 
+ked_sess = ->
+    store = {}
+    fakeGet = (key def) -> store[key] ? def
+    fakeSet = (key value) -> store[key] = value
+    global.ked_session = get:fakeGet set:fakeSet
+
 ▸ funtree base class items
+  
+    ked_sess()
 
   ▸ shows methods of the base class chain
 

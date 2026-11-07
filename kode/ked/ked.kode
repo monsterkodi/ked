@@ -113,7 +113,7 @@ use child_process ▪ spawn exec
         else if @args.new
             @newFile()
             
-        @startup()
+        @starting = @startup()
             
     showEditor: -> 
     
@@ -164,6 +164,7 @@ use child_process ▪ spawn exec
         #  wait for the startup work the editor needs, instead of guessing
         #  how long it takes
         
+        ◯ @starting if @starting
         ◯ config.loaded if config.loaded
         ◯ mode.loaded
         
@@ -173,12 +174,26 @@ use child_process ▪ spawn exec
             
             @t.play step[1]
             
-            ◯ @currentLoad if @currentLoad
-            ◯ sleep 15
+            ◯ @settle()
             
             @dump step[0]
         
         @quit()
+    
+    #  let the work a key started finish before the screen is written out
+    
+    settle: ◯=>
+        
+        ◯ @currentLoad if @currentLoad
+        
+        #  a reload is not recorded in currentLoad, so wait for the loader
+        
+        waited = 0
+        while @loadingFile and waited < 5000
+            ◯ sleep 1
+            waited += 1
+        
+        ◯ sleep 15
     
     dump: label =>
         
@@ -207,7 +222,7 @@ use child_process ▪ spawn exec
         if empty @currentFile and empty @loadingFile
             if file = ked_session.get "editor▸file"
                 # log "no current or loading file ... loading last session #{file}"
-                @loadFile file
+                ◯ @loadFile file
             else
                 @hideEditor()
                 @menu.show true

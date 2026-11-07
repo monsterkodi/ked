@@ -80,14 +80,23 @@ SYMBOL =
         
         @state.syntax = new funSyntax @
         
-        @showBases  = true
-        @baseItems  = []
+        @showBases   = true
+        @baseItems   = []
         @dividerItem = null
         
         @editor.state.on 'cursorsSet' @onCursorsSet
         
-        post.on 'file.loaded'  @clear
-        post.on 'file.indexed' @onFileIndexed
+        post.on 'file.loaded'    @clear
+        post.on 'session.merge'  @onSessionMerge
+        post.on 'file.indexed'   @onFileIndexed
+
+    onSessionMerge: recent =>
+    
+        ⮐ if empty recent.funtree
+        
+        @showBases = recent.funtree.showBases
+            
+        ked_session.set 'funtree' recent.funtree
         
     onCursorsSet: =>
     
@@ -182,7 +191,7 @@ SYMBOL =
                 divider: true
                 name:    @baseDividerName(@baseItems)
                 line:    (supr?.line ? 1)
-                
+            
             items.push @dividerItem
             items = items.concat @baseItems if @showBases
         
@@ -250,8 +259,11 @@ SYMBOL =
     toggleBases: =>
         
         ⮐ if empty @dividerItem
-        
+
         @showBases = not @showBases
+        
+        ked_session.set 'funtree▸showBases' @showBases
+        
         @dividerItem.name = @baseDividerName @baseItems
         
         items = @localItems()

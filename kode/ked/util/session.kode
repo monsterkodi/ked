@@ -122,6 +122,7 @@ use ◆ frecent
             @set 'editor' recent.editor
         
         @emit 'loaded'
+        post.emit 'session.loaded' @
         @resolveLoaded()
     
     newestSessionFile: ◯=>

@@ -148,3 +148,34 @@ use ../util        ◆ harness
         t.onData Buffer.from('\x1b[B\x1b[B\r')
 
         keys ▸ ['down' 'down' 'return']
+
+  ▸ an escape before a printable character is alt and that character
+
+        t = new ttio headless:true input:false
+
+        event = t.parseEsc 'c'
+
+        event.combo ▸ 'alt+c'
+        event.key   ▸ 'c'
+        event.char  ▸ 'c'
+
+  ▸ an escape before punctuation is alt and the punctuation
+
+        t = new ttio headless:true input:false
+
+        t.parseEsc(',').combo ▸ 'alt+,'
+
+  ▸ an escape before an uppercase character is alt shift and that character
+
+        t = new ttio headless:true input:false
+
+        event = t.parseEsc 'C'
+
+        event.combo ▸ 'alt+shift+c'
+        event.char  ▸ 'C'
+
+  ▸ an escape before the end of a graphics message is still no key
+
+        t = new ttio headless:true input:false
+
+        t.parseEsc('\\') ▸ undefined
