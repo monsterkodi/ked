@@ -1,5 +1,5 @@
 
-use ../../../kxk    ▪ post kseg kutil
+use ../../../kxk    ▪ post kseg kutil clip
 use ../../theme     ◆ color theme
 use ../../edit/tool ◆ belt
 use ../base         ◆ view colorslider rgbinput radio
@@ -142,6 +142,7 @@ use ../base         ◆ view colorslider rgbinput radio
         
         @voided[idx] = false
         @bgChanged = true if idx == 1
+        true
 
     setActiveColor: idx =>
 
@@ -349,14 +350,16 @@ use ../base         ◆ view colorslider rgbinput radio
         ⮐ true if @radio .onKey key event
 
         switch event.combo
-            'down''tab'     ➜ ⮐ @focusNext() 
-            'up''shift+tab' ➜ ⮐ @focusPrev()
-            'esc'           ➜ ⮐ @cancel()
-            'return'        ➜ ⮐ @submit()
-            'delete' 
-            'backspace'     ➜ ⮐ @voidActiveColor()
-            'cmd+left'
-            'cmd+right'     ➜ ⮐ @swapColors()
+            'down''tab'      ➜ ⮐ @focusNext() 
+            'up''shift+tab'  ➜ ⮐ @focusPrev()
+            'esc'            ➜ ⮐ @cancel()
+            'return'         ➜ ⮐ @submit()
+            'delete'         
+            'backspace'      ➜ ⮐ @voidActiveColor()
+            'cmd+left'       
+            'cmd+right'      ➜ ⮐ @swapColors()
+            'ctrl+c' 'cmd+c' ➜   clip.copy @hex() ; ⮐ true
+            'ctrl+v' 'cmd+v' ➜   @setHex(clip.paste()) ; @syncAll() ; ⮐ true
 
         false
 
