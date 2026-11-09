@@ -130,6 +130,39 @@ ked_sess = ->
         emitted[2] ▸ ['file.open' baseFile 1 'ind' 'topDelta']
         emitted[3] ▸ ['focus' 'editor']
 
+  ▸ cpp files with unnamed index entries do not crash
+
+        root = '/tmp/opencode/ked-funtree-cpp'
+        file = slash.path root 'main.cpp'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file """
+            static JsonNode* route_info (const fs::path& path)
+            {
+                struct stat st;
+                if (::stat(path.c_str(), &st) != 0)
+                {
+                    return node_null();
+                }
+            }
+            """
+
+        idx = new indexer
+        ◯ idx.index file
+
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_funtree_cpp_editor' []
+        e.currentFile = file
+
+        f = new funtree e 'test_funtree_cpp' []
+        f.onFileIndexed file idx.files[file]
+
+        fs.rmSync root recursive:true force:true
+
+        f.items.length ▸ 1
+        f.items[0].name ▸ ' -> @route_info'
+
   ▸ a file without classes has no inherited items
 
         root = '/tmp/opencode/ked-funtree-noclass'

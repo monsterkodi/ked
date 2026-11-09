@@ -77,7 +77,7 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
         
         funcInfo
 
-    addMethod: className funcName file li async bound statik=false ->
+    addMethod: className funcName file li async=false bound=false statik=false ->
 
         funcInfo = @addFuncInfo funcName,
             line:   li+1
@@ -165,13 +165,14 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
                 
         for func in parsed.funcs
 
-            if func.method
+            if func.method and func.class
                 funcInfo = @addMethod func.class func.method file func.line func.async func.bound func.static
             else
                 func.line = func.line+1
                 func.file = file
                 funcInfo = @addFuncInfo func.name func
                 
+            continue if empty funcInfo
             fileInfo.funcs.push funcInfo
             
         if valid parsed.words

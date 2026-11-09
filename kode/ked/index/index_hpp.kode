@@ -12,11 +12,11 @@
             blockComment:    open: '/*' close: '*/'
             lineComment:     open: '//' close: null
 
-        @classRegExp   = /^\s*(\S+\s+)?(enum|enum\s+class|class|struct)\s+/
-        @methodRegExp  = /^([\w\&\*]+)\s+(\w+)\s*\(/
+        @classRegExp   = /^\s*(\S+\s+)?(enum\s+class|enum|class|struct)\s+(\w+)/
+        @methodRegExp  = /^([\w\&\*\:]+)\s+(\w+)\s*\(/
         @constrRegExp  = /^(\~?\w+)\s*\(/
         @topMethRegExp = /^(\w+)\:\:(\w+)\s*\(/
-        @funcRegExp    = /^(\w+)\s+(\w+)\s*\(/
+        @funcRegExp    = /^((?:[\w\:]+\s+)*[\w\:]+\s*[\*\&]*)\s+(\w+)\s*\(/
 
     parseLine: lineIndex lineText ->
 
@@ -68,7 +68,8 @@
                         @tokenStack.push
                             line:       lineIndex
                             col:        p
-                            classType:  match[1]
+                            classType:  match[2]
+                            name:       match[3]
                             depth:      @regionStack.length
                         advance match[0].length
                         @currentWord = ''
@@ -89,14 +90,15 @@
                                     line:   lineIndex
                                     col:    p
                                     name:   match[1]
-                        else if match = rest.match @funcRegExp
+                        else if p == 0 and match = rest.match @funcRegExp
+                            statik = /\bstatic\b/.test match[1]
                             @tokenStack.push
                                 line:   lineIndex
                                 col:    p
                                 method: match[2]
                                 name:   match[2]
                                 depth:  0
-                                static: true
+                                static: statik
 
                 else if last(@tokenStack).classType
                     if match = rest.match @methodRegExp

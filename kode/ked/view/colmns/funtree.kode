@@ -150,7 +150,7 @@ SYMBOL =
     
         clssl = clone info.classes
         funcs = clone info.funcs
-        # log "funtree.onFileIndexed #{path}" clssl
+        log "funtree.onFileIndexed #{path}" funcs
         
         for clss in clssl
             clss.file ?= path

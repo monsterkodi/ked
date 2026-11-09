@@ -1,6 +1,6 @@
 use fs
 use ../../kxk ▪ slash sleep post
-use ../index ◆ index_kode index_noon index_json index_utils indexer
+use ../index ◆ index_kode index_hpp index_noon index_json index_utils indexer
 
 waitFor = (cond) ◯->
 
@@ -242,6 +242,79 @@ waitFor = (cond) ◯->
         idx.methodsOfClass('Nope').length ▸ 0
 
         idx.baseClassesOf('Child').map((c) -> c.name) ▸ ['Child' 'Base' 'Root']
+
+  ▸ cpp structs and their methods are indexed
+
+        idx = new index_hpp
+        result = idx.parse """
+            struct Win
+            {
+                void show (int x);
+                int width () const;
+            };
+            """
+
+        result.classes.map((c) -> c.name) ▸ ['Win']
+        result.funcs.map((f) -> f.method) ▸ ['show' 'width']
+        result.funcs.map((f) -> f.class) ▸ ['Win' 'Win']
+
+  ▸ cpp free functions are indexed without unnamed entries
+
+        idx = new index_hpp
+        result = idx.parse """
+            static JsonNode* route_info (const fs::path& path)
+            {
+                struct stat st;
+                if (::stat(path.c_str(), &st) != 0)
+                {
+                    return node_null();
+                }
+            }
+
+            int main (int argc, char** argv)
+            {
+                return 0;
+            }
+            """
+
+        result.classes.length ▸ 0
+        result.funcs.map((f) -> f?.name) ▸ ['route_info' 'main']
+
+  ▸ cpp files index without undefined entries
+
+        root = '/tmp/opencode/ked-index-cpp'
+        file = slash.path root 'main.cpp'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file """
+            struct Win
+            {
+                void show (int x);
+            };
+
+            static JsonNode* route_info (const fs::path& path)
+            {
+                struct stat st;
+                if (::stat(path.c_str(), &st) != 0)
+                {
+                    return node_null();
+                }
+            }
+            """
+
+        idx = new indexer
+        ◯ idx.index file
+
+        info = idx.files[file]
+        fs.rmSync root recursive:true force:true
+
+        info.classes.map((c) -> c.name) ▸ ['Win']
+        info.funcs.filter((f) -> not f?.name).length ▸ 0
+        info.funcs.map((f) -> f.name) ▸ ['show' 'route_info']
+        info.funcs[0].class ▸ 'Win'
+        info.funcs[0].async ▸ false
+        info.funcs[0].bound ▸ false
 
   ▸ deleted files leave the index
 
