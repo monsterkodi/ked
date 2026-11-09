@@ -667,18 +667,40 @@ use ../../util/img ◆ rounded
     
     onData: data =>
     
+        startMarker = Buffer.from '\x1b[200~'
+        endMarker   = Buffer.from '\x1b[201~'
+        
         if @pasteBuffer?
         
-            dataStr = data.toString 'utf8'
+            @pasteBuffer = Buffer.concat [@pasteBuffer data]
+            end = @pasteBuffer.indexOf endMarker
             
-            if dataStr.endsWith '\x1b[201~'
-                @pasteBuffer += data[0...-6].toString 'utf8'
-                # log 'tty paste end' noon(@pasteBuffer)
-                @emit 'paste' kstr.clean(@pasteBuffer)
+            if end >= 0
+                text = @pasteBuffer[0...end].toString 'utf8'
+                rest = @pasteBuffer[end+6..]
+                # log 'tty paste end' noon(text)
+                @emit 'paste' kstr.clean(text)
                 delete @pasteBuffer
+                @onData rest if rest.length
+            ⮐ 
+        
+        start = data.indexOf startMarker
+        
+        if start >= 0
+        
+            @onData data[0...start] if start > 0
+            
+            content = data[start+6..]
+            end = content.indexOf endMarker
+            
+            if end >= 0
+                # log 'tty paste end' noon(content)
+                @emit 'paste' kstr.clean(content[0...end].toString('utf8'))
+                rest = content[end+6..]
+                @onData rest if rest.length
             else
-                @pasteBuffer += dataStr
-                # log 'tty paste cont' noon(@pasteBuffer)
+                @pasteBuffer = content
+                # log 'tty paste start' noon(@pasteBuffer)
             ⮐ 
         
         for seq in @parseData data
@@ -704,25 +726,7 @@ use ../../util/img ◆ rounded
                     
                     continue
                 
-                if csi.startsWith '200~' # paste start
-                    
-                    @pasteBuffer = data[6..].toString('utf8')
-                    
-                    # log 'tty paste start' noon(@pasteBuffer)
-                    
-                    continue
-                    
-                if csi.startsWith '201~' # paste end
-                    
-                    # log 'tty paste end' noon(@pasteBuffer)
-                    
-                    @emit 'paste' kstr.clean(@pasteBuffer)
-                    delete @pasteBuffer
-                    
-                    continue
-
-                    
-                if csi.startsWith('<') and csi[-1] in 'Mm'
+                if csi.startsWith '<' and csi[-1] in 'Mm'
                     
                     if event = @parseMouse csi
                         @emitMouseEvent event

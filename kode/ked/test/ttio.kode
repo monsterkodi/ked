@@ -149,6 +149,64 @@ use ../util        ◆ harness
 
         keys ▸ ['down' 'down' 'return']
 
+  ▸ a bracketed paste in one chunk is pasted
+
+        t = new ttio headless:true input:false
+        pasted = []
+        keys = []
+
+        t.on 'paste' (text) -> pasted.push text
+        t.on 'key'   (combo) -> keys.push combo
+
+        t.onData Buffer.from('\x1b[200~■\x1b[201~' 'utf8')
+
+        pasted ▸ ['■']
+        keys   ▸ []
+
+  ▸ a bracketed paste with unicode and text is pasted as text
+
+        t = new ttio headless:true input:false
+        pasted = []
+        keys = []
+
+        t.on 'paste' (text) -> pasted.push text
+        t.on 'key'   (combo) -> keys.push combo
+
+        t.onData Buffer.from('\x1b[200~a■b\x1b[201~' 'utf8')
+
+        pasted ▸ ['a■b']
+        keys   ▸ []
+
+  ▸ a bracketed paste arriving in parts is pasted when it ends
+
+        t = new ttio headless:true input:false
+        pasted = []
+
+        t.on 'paste' (text) -> pasted.push text
+
+        t.onData Buffer.from('\x1b[200~a' 'utf8')
+        t.onData Buffer.from('■b\x1b[20' 'utf8')
+
+        pasted ▸ []
+
+        t.onData Buffer.from('1~' 'utf8')
+
+        pasted ▸ ['a■b']
+
+  ▸ input after a bracketed paste is still handled
+
+        t = new ttio headless:true input:false
+        pasted = []
+        keys = []
+
+        t.on 'paste' (text) -> pasted.push text
+        t.on 'key'   (combo) -> keys.push combo
+
+        t.onData Buffer.from('\x1b[200~■\x1b[201~\x1b[B' 'utf8')
+
+        pasted ▸ ['■']
+        keys   ▸ ['down']
+
   ▸ an escape before a printable character is alt and that character
 
         t = new ttio headless:true input:false
