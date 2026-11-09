@@ -20,3 +20,24 @@ use ../util   ◆ fileutil
 
         ◯ nfs.remove first
         ◯ nfs.remove second
+
+  ▸ the language of a snippet is detected
+
+        fileutil.detectExt('') ▸ 'kode'
+        fileutil.detectExt('ordinary words only') ▸ 'kode'
+        fileutil.detectExt('{"name": "kodi", "ok": true}') ▸ 'kode'
+        fileutil.detectExt("log 'hello'") ▸ 'kode'
+        fileutil.detectExt("use ../../kxk ▪ post\nlog 'hi'") ▸ 'kode'
+
+        fileutil.detectExt('function foo() { const x = 1; return x; }') ▸ 'js'
+        fileutil.detectExt('async function load() { await fetch(url) }') ▸ 'js'
+        fileutil.detectExt('const greet = (name) => console.log(name)') ▸ 'js'
+        fileutil.detectExt('interface Foo { readonly name: string }') ▸ 'ts'
+
+        fileutil.detectExt('def greet(name):\n    print(name)') ▸ 'py'
+        fileutil.detectExt('for f in *.txt; do cat "$f"; done') ▸ 'sh'
+        fileutil.detectExt('pub fn main() void { var x: u32 = 1; }') ▸ 'zig'
+        fileutil.detectExt('const std = @import("std");') ▸ 'zig'
+        fileutil.detectExt('local x = 1\nprint(x)') ▸ 'lua'
+        fileutil.detectExt('unless x then y else z') ▸ 'coffee'
+        fileutil.detectExt('<div class="foo">hello</div>') ▸ 'html'

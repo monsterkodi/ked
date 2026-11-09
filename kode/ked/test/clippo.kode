@@ -46,6 +46,14 @@ mk = (history current) ->
         c.dividerRows ▸ [0 2 5]
         c.entryStart  ▸ [0 2 5]
 
+  ▸ history entries use the detected language for highlighting
+
+        [h e c] = mk ['const greet = (name) => name' "use ../../kxk ▪ post"] 'current'
+
+        c.show()
+
+        c.choices.state.syntax.getClasses(3)[0] ▸ 'keyword'
+
   ▸ the selected divider is blue with a yellow circle
 
         [h e c] = mk ['new' 'old'] 'new'

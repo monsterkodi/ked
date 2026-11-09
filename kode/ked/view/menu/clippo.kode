@@ -1,9 +1,10 @@
-use ../../../kxk    ▪ post clip
-use child_process   ▪ spawn
-use ../../theme     ◆ theme
-use                 ◆ inputchoice
+use ../../../kxk  ▪ post clip
+use child_process ▪ spawn
+use ../../theme   ◆ theme
+use ../../util    ◆ fileutil
+use               ◆ inputchoice
 ■clippo□inputchoice
-    # clipboard history with kode syntax highlighting
+    # clipboard history with detected language syntax highlighting
     #
     # history is newest first, the current clipboard text is always on top
     # the system clipboard is watched so external copies show up as well
@@ -132,8 +133,6 @@ use                 ◆ inputchoice
 
     rebuild: =>
 
-        items = []
-
         @lineEntry   = []
         @entryStart  = []
         @dividerRows = []
@@ -142,29 +141,25 @@ use                 ◆ inputchoice
 
         for text, idx in @history
 
-            @entryStart.push items.length
+            ext   = fileutil.detectExt text
+            items = []
 
-            items.push
-                line:  ''
-                ext:   'kode'
-                entry: idx
-                type:  'divider'
-            @lineEntry.push idx
-            @dividerRows.push items.length-1
+            items.push line:''
 
             lines = text.split '\n'
             lines = [''] if empty lines
 
             for line in lines
-                items.push
-                    line:  line
-                    ext:   'kode'
-                    entry: idx
-                    type:  'text'
+                items.push line:line
+
+            @entryStart.push @choices.items.length
+            @dividerRows.push @choices.items.length
+            @lineEntry.push idx
+
+            for line in lines
                 @lineEntry.push idx
 
-        if items.length
-            @choices.append items 'kode'
+            @choices.append items ext
 
         @choices.state.setHighlights []
 

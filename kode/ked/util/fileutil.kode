@@ -1,6 +1,7 @@
 
-use ../../kxk ▪ post slash nfs 
-use ../../kxk ◆ salter
+use ../../kxk           ▪ post slash nfs
+use ../../kxk           ◆ salter
+use ../../kolor/extlang ▪ exts lang
 
 ■fileutil
 
@@ -9,6 +10,25 @@ use ../../kxk ◆ salter
     @dotFileExtensions:    [ 'bashrc' 'bash_history' 'gitconfig' 'gitignore_global' 'lesshst' 'npmrc' 'nvimrc' 'profile' 'zprofile' 'zsh_history' 'zshrc' ]
     @sourceFileExtensions: fileutil.indexFileExtensions.concat(fileutil.dotFileExtensions [ 'ts' 'js' 'mjs' 'swift' 'styl' 'css' 'pug' 'html' 'md' 'noon' 'json' 'txt' 'log' 'sh' 'fish' 'py' 'frag' 'vert' 'config' 'toml' 'conf' 'gitignore' 'plist' ]) 
     @imageExtensions:      ['png' 'jpg' 'jpeg' 'gif' 'tiff' 'pxm' 'icns' 'webp']
+
+    @detectClassWeights:
+        keyword:            1
+        'keyword function': 1
+        'keyword type':     1
+        require:            0.9
+        define:             0.9
+        punct:              0.8
+        type:               0.7
+        function:           0.5
+        'function call':    0.5
+        method:             0.5
+        module:             0.35
+        property:           0.2
+        'property color':   0.2
+        'property special': 0.2
+        argument:           0.35
+        important:          0.4
+        nil:                0.3
     
     @counterparts: # todo: move this to a config file?
         mm:      ['h']
@@ -31,6 +51,145 @@ use ../../kxk ◆ salter
         css:     ['styl']
         styl:    ['css']
     
+    @looksLikeKode: text ->
+
+        for marker in ['⮐' '◆' '▪' '■' '□' '➜']
+            ⮐ true if text.includes marker
+
+        ⮐ true if /(^|\n)\s*log\s+/.test text
+        ⮐ true if /(^|\n)\s*use\s+/.test text
+        ⮐ true if /(^|\n)\s*@\w*\s*:/.test text
+
+        false
+
+    @detectTokens: text ->
+
+        tokens = []
+        seen   = {}
+        i      = 0
+        n      = text.length
+
+        while i < n
+
+            c = text[i]
+
+            if c in ['"' "'" '`']
+
+                quote = c
+                i += 1
+
+                while i < n
+                    if text[i] == '\\'
+                        i += 2
+                    else if text[i] == quote
+                        i += 1
+                        break
+                    else
+                        i += 1
+
+                continue
+
+            if c == '/' and text[i+1] == '/'
+                while i < n and text[i] != '\n'
+                    i += 1
+                continue
+
+            if c == '/' and text[i+1] == '*'
+                i += 2
+                while i < n and not (text[i] == '*' and text[i+1] == '/')
+                    i += 1
+                i += 2
+                continue
+
+            if c == '#'
+                while i < n and text[i] != '\n'
+                    i += 1
+                continue
+
+            if c == '@' and i+1 < n and /[A-Za-z_]/.test(text[i+1])
+
+                j = i+2
+                while j < n and /[A-Za-z0-9_]/.test(text[j])
+                    j += 1
+
+                word = text[i...j]
+
+                if not seen[word]
+                    seen[word] = true
+                    tokens.push word
+
+                i = j
+                continue
+
+            if /[A-Za-z_$]/.test(c)
+
+                j = i+1
+
+                while j < n and /[A-Za-z0-9_$]/.test(text[j])
+                    j += 1
+
+                word   = text[i...j]
+                before = i > 0 ? text[i-1] : ''
+
+                if word.length > 1 and before != '.' and not seen[word]
+                    seen[word] = true
+                    tokens.push word
+
+                i = j
+                continue
+
+            i += 1
+
+        tokens
+
+    @detectExt: text ->
+
+        ⮐ 'kode' if empty text
+        ⮐ 'kode' if @looksLikeKode text
+
+        tokens = @detectTokens text
+
+        detectedExts = exts.filter (ext) -> ext not in ['txt' 'log']
+        n = detectedExts.length
+        scores = {}
+
+        for token in tokens
+
+            owners = []
+
+            for ext in detectedExts
+                words = lang[ext]
+                owners.push ext if words and words.hasOwnProperty token
+
+            continue if empty owners
+
+            weight = Math.log((n+1)/owners.length)
+
+            for ext in owners
+                cls = lang[ext][token]
+                classWeight = fileutil.detectClassWeights[cls] ? 0.5
+                scores[ext] ?= 0
+                scores[ext] += weight * classWeight
+
+        bestScore  = 0
+        candidates = []
+
+        for ext in detectedExts
+
+            score = scores[ext] ? 0
+
+            if score > bestScore + 0.000001
+                bestScore = score
+                candidates = [ext]
+            else if score > 0 and Math.abs(score-bestScore) <= 0.000001
+                candidates.push ext
+
+        ⮐ 'kode' if bestScore < 1
+        ⮐ 'kode' if 'kode' in candidates
+        ⮐ candidates[0] if candidates.length
+
+        'kode'
+
     @swapLastDir: path from to ->
 
         lastIndex = path.lastIndexOf "/#{from}/"
