@@ -149,6 +149,21 @@ use ../util        ◆ harness
 
         keys ▸ ['down' 'down' 'return']
 
+  ▸ a mouse press in a chunk is a mouse event
+
+        t = new ttio headless:true input:false
+        t.cellsz = [10 20]
+        clicks = []
+
+        t.on 'mouse' (event) -> clicks.push event
+
+        t.onData Buffer.from('\x1b[<0;100;80M')
+
+        clicks.length     ▸ 1
+        clicks[0].type    ▸ 'press'
+        clicks[0].button  ▸ 'left'
+        clicks[0].cell    ▸ [10 4]
+
   ▸ a bracketed paste in one chunk is pasted
 
         t = new ttio headless:true input:false

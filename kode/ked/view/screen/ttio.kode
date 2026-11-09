@@ -726,7 +726,7 @@ use ../../util/img ◆ rounded
                     
                     continue
                 
-                if csi.startsWith '<' and csi[-1] in 'Mm'
+                if csi.startsWith('<') and (csi[-1] in 'Mm')
                     
                     if event = @parseMouse csi
                         @emitMouseEvent event
