@@ -374,6 +374,15 @@ import rgxs from './quicky.json' with { type: "json" }
         for item,idx in @items
             ⮐ idx if slash.samePath item.path p
             
+    itemAtEvent: event =>
+        
+        [col row] = @eventPos event
+        if not @cells.inside(col, row)
+            ⮐ 
+        item = @choiceAtRow row + @state.s.view[1]
+        log "itemAtEvent #{row} #{@state.s.view[1]} #{item.path}"
+        item
+            
     weight: item ->
 
         p = slash.parse item.path

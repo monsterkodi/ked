@@ -4,7 +4,7 @@ cursor
     bottomOffset  33%
         
 mouse
-    wheelSteps    1
+    wheelSteps    4
     wheelSpeedup  2
     
 mapScroll

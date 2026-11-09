@@ -58,34 +58,31 @@ use                 ◆ dirtree
     @isAllowedPath: path ->
         
         ⮐ false if empty path
-        
         path = slash.absolute slash.untilde(path)
         allow = config.data?.dirtree?.allow ? []
         for part in slash.pathlist path
             for root in allow
-                ⮐ true if part == slash.absolute(slash.untilde(root))
+                if part == slash.absolute(slash.untilde(root))
+                    ⮐ true 
         false
         
     @contextItems: item root ->
-        
+
         ⮐ [] if empty item
         ⮐ [] if not @isAllowedPath(item.path)
         ⮐ [] if @isParentItem item
-        
-        create = [icons.dir_open + ' ']
-        
-        ⮐ create if @isRootItem(item root) or slash.samePath(item.path, '/')
+        ⮐ [icons.dir_open + ' '] if @isRootItem(item root) or slash.samePath(item.path, '/')
         ⮐ [] if @isInSystemRoot item
-        
+
         [
             '\uF044 ' 
             '\uF0C5 ' 
             icons.dir_open + " "
             '\uF014 ' 
-            ]
+        ]
     
     @contextActionAllowed: item root choice ->
-        
+
         ⮐ false if empty item
         ⮐ false if not @isAllowedPath(item.path)
         ⮐ false if @isParentItem item
@@ -93,7 +90,6 @@ use                 ◆ dirtree
         
         if @isRootItem(item root) or slash.samePath(item.path, '/')
             ⮐ choice == icons.dir_open
-        
         true
         
     onCrumbsAction: action path =>
@@ -156,8 +152,7 @@ use                 ◆ dirtree
         
     onContext: event =>
 
-        item = @itemAtEvent event
-        
+        item = @dirtree.itemAtEvent event
         if empty item
             @dirtree.state.deselect()
             item = {type:'dir' path:@dirtree.currentRoot}
@@ -168,13 +163,6 @@ use                 ◆ dirtree
         ⮐ true if empty items
 
         context.show event.cell @onContextChoice items
-
-    itemAtEvent: event ->
-        
-        [col row] = @eventPos event
-        ⮐ if not @cells.inside(col, row)
-        
-        @choiceAtRow row + @state.s.view[1]
 
     onContextChoice: choice ◯=>
     

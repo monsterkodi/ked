@@ -7,7 +7,7 @@ use ../base      ◆ view
 ###
     displays some clickable text in a rounded 'bubble'
     used by 
-        ◆ searcher to display file headings
+        ◆ searcher and replacer to display file headings
         ◆ status to display filepos status
 ###
     @: screen name ->
