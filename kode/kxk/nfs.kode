@@ -1,5 +1,6 @@
 
 use ◆ slash
+use ◆ kstr
 use fs
 use child_process
 
@@ -331,7 +332,21 @@ import fsp from 'fs/promises'
             try
                 ◯ fsp.mkdir trashPath recursive:true
                 
-                newPath = slash.path trashPath fileName
+                # a unique folder per operation keeps names from clashing
+                now = new Date Date.now()
+                stamp = [
+                    now.getFullYear()
+                    kstr.lpad(now.getMonth() + 1, 2, '0')
+                    kstr.lpad(now.getDate(), 2, '0')
+                    kstr.lpad(now.getHours(), 2, '0')
+                    kstr.lpad(now.getMinutes(), 2, '0')
+                    kstr.lpad(now.getSeconds(), 2, '0')
+                    ].join '-'
+                
+                trashDir = slash.path trashPath "#{stamp}-#{crypto.randomUUID()[..7]}"
+                ◯ fsp.mkdir trashDir
+                
+                newPath = slash.path trashDir fileName
                 ◯ fsp.rename p newPath
                 ⮐ newPath
             catch err

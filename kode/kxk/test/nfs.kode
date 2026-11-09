@@ -186,3 +186,93 @@ use .. ◆ nfs slash
 
         res ▸ file
         (gone?) ▸ false
+
+    ▸ trashed items go into a timestamped hashed folder
+
+        root = slash.path slash.home() '.cache/opencode' "kxk-nfs-trash-stamp-#{Date.now()}"
+        file = slash.path root 'a.txt'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file 'hello'
+
+        res =◯ nfs.trash file
+
+        folder = ''
+        if res
+            folder = slash.file slash.dir(res)
+
+        fs.rmSync root recursive:true force:true
+        if res
+            fs.rmSync slash.dir(res) recursive:true force:true
+
+        (res?) ▸ true
+        (/^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}-[0-9a-f]{8}$/.test(folder)) ▸ true
+
+    ▸ trashing a file with a name already in the trash keeps both
+
+        trashRoot = slash.path slash.home() '.local/share/Trash/files'
+        stamp     = Date.now()
+        name      = "opencode-nfs-trash-collision-#{stamp}.txt"
+        oldItem   = slash.path trashRoot name
+        root      = slash.path slash.home() '.cache/opencode' "kxk-nfs-trash-collision-#{stamp}"
+        file      = slash.path root name
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync file 'new'
+
+        fs.mkdirSync trashRoot recursive:true
+        fs.writeFileSync oldItem 'old'
+
+        res  =◯ nfs.trash file
+        gone =◯ nfs.exists file
+
+        oldText = fs.readFileSync oldItem 'utf8'
+        newText = ''
+        if res
+            newText = fs.readFileSync res 'utf8'
+
+        fs.rmSync root recursive:true force:true
+        fs.rmSync oldItem force:true
+        if res
+            fs.rmSync slash.dir(res) recursive:true force:true
+
+        (gone?) ▸ false
+        (res?)  ▸ true
+        oldText ▸ 'old'
+        newText ▸ 'new'
+
+    ▸ trashing a folder with a name already in the trash keeps both
+
+        trashRoot = slash.path slash.home() '.local/share/Trash/files'
+        stamp     = Date.now()
+        name      = "opencode-nfs-trash-collision-dir-#{stamp}"
+        oldItem   = slash.path trashRoot name
+        root      = slash.path slash.home() '.cache/opencode' "kxk-nfs-trash-collision-dir-#{stamp}"
+        folder    = slash.path root name
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync folder recursive:true
+        fs.writeFileSync slash.path(folder 'inside.txt') 'new'
+
+        fs.mkdirSync oldItem recursive:true
+        fs.writeFileSync slash.path(oldItem 'inside.txt') 'old'
+
+        res  =◯ nfs.trash folder
+        gone =◯ nfs.exists folder
+
+        oldText = fs.readFileSync slash.path(oldItem 'inside.txt') 'utf8'
+        newText = ''
+        if res
+            newText = fs.readFileSync slash.path(res 'inside.txt') 'utf8'
+
+        fs.rmSync root recursive:true force:true
+        fs.rmSync oldItem recursive:true force:true
+        if res
+            fs.rmSync slash.dir(res) recursive:true force:true
+
+        (gone?) ▸ false
+        (res?)  ▸ true
+        oldText ▸ 'old'
+        newText ▸ 'new'
