@@ -1,0 +1,161 @@
+use ../../kxk    ▪ kseg
+use ../edit      ◆ editor
+use ../util      ◆ harness
+use ../theme     ◆ theme
+use ../view/menu ◆ clippo
+
+mk = (history current) ->
+    h = new harness cols:80 rows:20
+    e = new editor h.screen 'editor' []
+    e.cells.layout 0 0 80 20
+    e.state.loadLines ['start']
+    e.state.setMainCursor 0 0
+    opt = watch:false readClipboard:(-> current)
+    c = new clippo h.screen e 'clippo' opt
+    c.history = history
+    [h e c]
+
+▸ clippo
+
+  ▸ the current clipboard text is first and selected
+
+        [h e c] = mk ['older' 'oldest'] 'current'
+
+        c.show()
+
+        c.history ▸ ['current' 'older' 'oldest']
+        c.choices.currentIndex() ▸ 0
+        c.choices.hasFocus() ▸ true
+        c.choices.state.s.selections ▸ []
+
+  ▸ a repeated clipboard text moves to the top
+
+        [h e c] = mk ['old' 'current'] 'current'
+
+        c.show()
+
+        c.history ▸ ['current' 'old']
+
+  ▸ history entries start with a divider line
+
+        [h e c] = mk ['one\ntwo' 'old'] 'new'
+
+        c.show()
+
+        c.choices.state.s.lines.map((line) -> kseg.str(line)) ▸ ['' 'new' '' 'one' 'two' '' 'old']
+        c.dividerRows ▸ [0 2 5]
+        c.entryStart  ▸ [0 2 5]
+
+  ▸ the selected divider is blue with a yellow circle
+
+        [h e c] = mk ['new' 'old'] 'new'
+
+        c.show()
+        c.draw()
+
+        y0 = c.choices.cells.y - c.choices.state.s.view[1] + c.entryStart[0]
+        y1 = c.choices.cells.y - c.choices.state.s.view[1] + c.entryStart[1]
+        x  = c.choices.cells.x
+
+        h.screen.get_fg(x y0)     ▸ theme.cursor.main
+        h.screen.get_fg(x+2 y0)   ▸ theme.selection.span
+        h.screen.get_fg(x+2 y1)   ▸ theme.finder.frame
+
+        h.key c 'down'
+        c.draw()
+
+        h.screen.get_fg(x y0)     ▸ theme.finder.frame
+        h.screen.get_fg(x+2 y0)   ▸ theme.finder.frame
+        h.screen.get_fg(x y1)     ▸ theme.cursor.main
+        h.screen.get_fg(x+2 y1)   ▸ theme.selection.span
+
+  ▸ down and up move between entries
+
+        [h e c] = mk ['new' 'middle' 'old'] 'new'
+
+        c.show()
+
+        h.key c 'down'
+        c.choices.currentIndex() ▸ c.entryStart[1]
+
+        h.key c 'up'
+        c.choices.currentIndex() ▸ c.entryStart[0]
+
+        h.key c 'alt+.'
+        c.choices.currentIndex() ▸ c.entryStart[1]
+
+        h.key c 'alt+.'
+        c.choices.currentIndex() ▸ c.entryStart[2]
+
+        h.key c 'alt+,'
+        c.choices.currentIndex() ▸ c.entryStart[1]
+
+  ▸ tab moves the focus between input and history
+
+        [h e c] = mk ['one'] 'one'
+
+        c.show()
+
+        c.choices.hasFocus() ▸ true
+
+        h.key c 'tab'
+        c.input.hasFocus() ▸ true
+
+        h.key c 'tab'
+        c.choices.hasFocus() ▸ true
+
+  ▸ typing highlights matches and down and up select them
+
+        [h e c] = mk ['alpha' 'beta' 'alphabet'] 'gamma'
+
+        c.show()
+
+        h.key c 'tab'
+        h.type c 'alpha'
+
+        c.matchEntries ▸ [1 3]
+        c.choices.currentIndex() ▸ c.entryStart[1]
+
+        h.key c 'down'
+        c.choices.currentIndex() ▸ c.entryStart[3]
+
+        h.key c 'up'
+        c.choices.currentIndex() ▸ c.entryStart[1]
+
+  ▸ return inserts the selected entry and closes
+
+        [h e c] = mk ['hello'] 'hello'
+
+        c.show()
+
+        h.key c 'return'
+
+        c.hidden() ▸ true
+        kseg.str(e.state.s.lines) ▸ 'hellostart'
+        e.hasFocus() ▸ true
+
+  ▸ space inserts the selected entry without closing
+
+        [h e c] = mk ['hello'] 'hello'
+
+        c.show()
+
+        h.key c 'space'
+
+        c.hidden() ▸ false
+        kseg.str(e.state.s.lines) ▸ 'hellostart'
+
+  ▸ return inserts the entry containing the selected match
+
+        [h e c] = mk ['alpha' 'beta' 'alphabet'] 'gamma'
+
+        c.show()
+
+        h.key c 'tab'
+        h.type c 'alpha'
+
+        h.key c 'down'
+        h.key c 'return'
+
+        c.hidden() ▸ true
+        kseg.str(e.state.s.lines) ▸ 'alphabetstart'

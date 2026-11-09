@@ -1,0 +1,407 @@
+use ../../../kxk    ▪ post clip
+use child_process   ▪ spawn
+use ../../theme     ◆ theme
+use                 ◆ inputchoice
+■clippo□inputchoice
+    # clipboard history with kode syntax highlighting
+    #
+    # history is newest first, the current clipboard text is always on top
+    # the system clipboard is watched so external copies show up as well
+
+    @: @screen @editor @name='clippo' opt ->
+
+        @editor = editor
+        @history = []
+        @maxHistory = opt?.maxHistory ? 50
+        @readClipboard = opt?.readClipboard
+        @readClipboard ?= -> clip.paste()
+
+        @autoHideInput = false
+
+        @matchEntries = []
+        @lineEntry    = []
+        @entryStart   = []
+        @dividerRows  = []
+
+        @watchProcess = null
+        @watchTimer   = null
+        @watchBuffer  = ''
+
+        super @screen @name ['scroll']
+
+        @setColor 'bg'       theme.finder.bg
+        @setColor 'frame'    theme.finder.frame
+        @setColor 'divider'  theme.finder.frame
+        @setColor 'selected' theme.selection.span
+        @setColor 'marker'   theme.cursor.main
+
+        @choices.drawSelections = ->
+        @choices.state.skipAdjustViewForMainCursor = true
+
+        @input.set ''
+
+        @startWatch() if opt?.watch != false
+
+    startWatch: =>
+
+        tool = clip.detect()
+
+        ⮐ if tool == 'none'
+        ⮐ if @watchProcess? or @watchTimer?
+
+        if tool == 'wl'
+
+            @watchProcess = spawn 'wl-paste' ['--watch' 'sh' '-c' 'base64 -w0; echo']
+            @watchProcess.on 'error' (err) -> error "clippo watch -- #{err}"
+            @watchProcess.stdout.on 'data' @onWatchData
+
+        else
+
+            @pollClipboard()
+            @watchTimer = setInterval (=> @pollClipboard()) 1000
+
+    stopWatch: =>
+
+        if @watchProcess?
+            @watchProcess.kill()
+            @watchProcess = null
+
+        if @watchTimer?
+            clearInterval @watchTimer
+            @watchTimer = null
+
+    pollClipboard: =>
+
+        @remember @readClipboard()
+
+    onWatchData: data =>
+
+        @watchBuffer += data.toString 'utf8'
+
+        while true
+
+            idx = @watchBuffer.indexOf '\n'
+
+            break if idx < 0
+
+            line = @watchBuffer[0...idx]
+            @watchBuffer = @watchBuffer[idx+1..]
+
+            continue if empty line
+
+            try
+                text = Buffer.from(line, 'base64').toString('utf8')
+                @remember text
+            catch err
+                error "clippo watch -- #{err}"
+
+    remember: text =>
+
+        ⮐ if empty text
+
+        idx = @history.indexOf text
+        @history.splice idx 1 if idx >= 0
+
+        @history.unshift text
+        @history = @history[0...@maxHistory] if @history.length > @maxHistory
+
+    refreshHistory: =>
+
+        @remember @readClipboard()
+
+    show: =>
+
+        @refreshHistory()
+        @rebuild()
+
+        @input.set ''
+        @input.show()
+
+        @matchEntries = []
+
+        super()
+
+        if @history.length
+            @selectEntry 0
+            @choices.state.setView [0 0]
+            @choices.grabFocus()
+        else
+            @input.grabFocus()
+
+        post.emit 'redraw'
+
+    rebuild: =>
+
+        items = []
+
+        @lineEntry   = []
+        @entryStart  = []
+        @dividerRows = []
+
+        @choices.clearEmpty()
+
+        for text, idx in @history
+
+            @entryStart.push items.length
+
+            items.push
+                line:  ''
+                ext:   'kode'
+                entry: idx
+                type:  'divider'
+            @lineEntry.push idx
+            @dividerRows.push items.length-1
+
+            lines = text.split '\n'
+            lines = [''] if empty lines
+
+            for line in lines
+                items.push
+                    line:  line
+                    ext:   'kode'
+                    entry: idx
+                    type:  'text'
+                @lineEntry.push idx
+
+        if items.length
+            @choices.append items 'kode'
+
+        @choices.state.setHighlights []
+
+    arrangeRect: =>
+
+        g = @editor.gutter?.cells.cols ? 0
+
+        x = max 0 int(@editor.cells.x-g)
+        w = min int(@editor.cells.cols+g) @screen.cols-x
+
+        [
+            x
+            int(@editor.cells.y)
+            w
+            int(@editor.cells.rows-3)
+        ]
+
+    arrange: =>
+
+        [x y w h] = @arrangeRect()
+
+        cs = min h-1 @choices.numFiltered()
+        cs = max 0 cs
+
+        @input.layout    x+2   y+1  w-4  1
+        @choices.layout  x+1   y+3  w-2  cs
+        @cells.layout    x     y    w    cs+4
+
+    draw: =>
+
+        ⮐ if @hidden()
+
+        super()
+
+        current = @entryAtCurrent()
+        view    = @choices.state.s.view
+        rows    = @choices.cells.rows
+        cols    = @choices.cells.cols
+
+        for row in @dividerRows
+
+            y = row - view[1]
+
+            continue if y < 0 or y >= rows
+
+            selected = @lineEntry[row] == current
+
+            lineColor   = selected ? @color.selected : @color.divider
+            markerColor = selected ? @color.marker   : @color.divider
+
+            @choices.cells.set 0 y '●' markerColor @choices.color.bg
+            @choices.cells.fill_row y 2 cols-1 '─' lineColor @choices.color.bg
+
+    moveFocus: =>
+
+        if @choices.hasFocus()
+            @input.grabFocus()
+            @input.selectAll()
+        else
+            @choices.grabFocus()
+            @autoHide()
+
+    entryAtCurrent: =>
+
+        @lineEntry[@choices.state.mainCursor()[1]] ? -1
+
+    selectRow: row =>
+
+        @choices.state.setSelections []
+        @choices.state.setMainCursor 0 row
+
+    selectEntry: index =>
+
+        ⮐ if empty @history
+
+        index = clamp 0 @history.length-1 index
+        row   = @entryStart[index]
+
+        ⮐ if not row is num
+
+        @selectRow row
+        @scrollToRow row
+
+        post.emit 'redraw'
+
+    selectEntryDelta: delta =>
+
+        current = @entryAtCurrent()
+
+        if current < 0
+            current = delta > 0 ? -1 : @history.length
+
+        @selectEntry current+delta
+
+    selectMatch: delta =>
+
+        ⮐ @selectEntryDelta(delta) if empty @matchEntries
+
+        current = @entryAtCurrent()
+        idx     = @matchEntries.indexOf current
+
+        if idx < 0
+            idx = delta > 0 ? -1 : @matchEntries.length
+
+        next = clamp 0 @matchEntries.length-1 idx+delta
+
+        @selectEntry @matchEntries[next]
+
+    scrollToRow: row =>
+
+        rows = @choices.cells.rows
+
+        ⮐ if rows <= 0
+
+        view = @choices.state.s.view
+
+        if row < view[1]
+            @choices.state.setView [view[0] row]
+        else if row >= view[1]+rows
+            @choices.state.setView [view[0] row-rows+1]
+
+    collectMatchEntries: =>
+
+        @matchEntries = []
+
+        for span in @choices.state.s.highlights
+
+            entry = @lineEntry[span[1]] ? -1
+
+            continue if entry < 0
+            continue if @matchEntries.length and @matchEntries[-1] == entry
+
+            @matchEntries.push entry
+
+    onInputChange: text =>
+
+        if empty text
+
+            @choices.state.setHighlights []
+            @matchEntries = []
+            @selectEntry 0
+
+        else
+
+            @choices.state.highlightText text
+            @collectMatchEntries()
+            @selectEntry @matchEntries[0] if not empty @matchEntries
+
+        post.emit 'redraw'
+
+    applyCurrent: close=true =>
+
+        idx = @entryAtCurrent()
+
+        ⮐ false if idx < 0 or idx >= @history.length
+
+        text = @history[idx]
+
+        @editor.state.insert text
+
+        if close
+            post.emit 'focus' 'editor'
+            @hide()
+        else
+            post.emit 'redraw'
+
+        true
+
+    applyChoice: choice => @applyCurrent true
+
+    onKey: key event =>
+
+        ⮐ if @hidden()
+
+        combo = event.combo
+
+        switch combo
+            'esc' 'escape' ➜ @onEscape() ; ⮐ true
+            'tab' 'shift+tab' ➜ @moveFocus() ; ⮐ true
+
+        if combo in ['return' 'enter']
+            ⮐ @applyCurrent true
+
+        if combo in ['up' 'down']
+
+            delta = combo == 'down' ? 1 : -1
+
+            if not empty @input.current() and not empty @matchEntries
+                @selectMatch delta
+            else
+                @selectEntryDelta delta
+
+            ⮐ true
+
+        if combo == 'alt+.'
+            @selectEntryDelta 1
+            ⮐ true
+
+        if combo == 'alt+,'
+            @selectEntryDelta -1
+            ⮐ true
+
+        if @input.hasFocus()
+
+            if result = @input.onKey key event
+                ⮐ result
+
+            ⮐ true
+
+        if combo in ['space' ' ']
+            ⮐ @applyCurrent false
+
+        if valid event.char and event.char not in ' \n\t'
+
+            @input.grabFocus()
+
+            if result = @input.onKey key event
+                ⮐ result
+
+        @choices.onKey key event
+
+        true
+
+    onInputAction: action text =>
+
+        switch action
+            'submit' ➜ ⮐ @applyCurrent()
+            'change' ➜ ⮐ @onInputChange text
+
+        true
+
+    onChoicesAction: action choice =>
+
+        switch action
+            'space' ➜ ⮐ @applyCurrent false
+            'return' 'click' ➜ ⮐ @applyCurrent true
+
+        super action choice
+
+export clippo

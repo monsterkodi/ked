@@ -19,6 +19,7 @@
     cmd+p           ctrl+p              quicky: project files
     cmd+f           ctrl+f              finder, or searcher if finder is open
     shift+cmd+f     shift+ctrl+f        searcher
+    shift+cmd+v     shift+ctrl+v        clippo: clipboard history
     cmd+.           ctrl+.              browse: go to directory
     alt+,                               cursor to previous function
     alt+.                               cursor to next function
@@ -210,8 +211,9 @@
     │   ├── mapscr
     │   └── mapview
     ├── menu
-    │   ├── choices
-    │   ├── context
+    │   ├── choices
+    │   ├── clippo                  clipboard history
+    │   ├── context
     │   ├── differ                  git status, history, diff, commit
     │   ├── finder                  search in current file
     │   ├── greet                   splash screen
