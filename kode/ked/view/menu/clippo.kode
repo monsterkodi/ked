@@ -104,8 +104,6 @@ use               ◆ inputchoice
         
         ⮐ if idx == 0
         
-        log "ext:" fileutil.detectExt(text)
-        
         @history.splice idx 1 if idx > 0
 
         @history.unshift text
