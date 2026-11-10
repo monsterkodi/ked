@@ -101,7 +101,12 @@ use               ◆ inputchoice
         ⮐ if empty text
 
         idx = @history.indexOf text
-        @history.splice idx 1 if idx >= 0
+        
+        ⮐ if idx == 0
+        
+        log "ext:" fileutil.detectExt(text)
+        
+        @history.splice idx 1 if idx > 0
 
         @history.unshift text
         @history = @history[0...@maxHistory] if @history.length > @maxHistory

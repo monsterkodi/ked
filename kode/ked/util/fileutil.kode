@@ -11,25 +11,6 @@ use ../../kolor/extlang ▪ exts lang
     @sourceFileExtensions: fileutil.indexFileExtensions.concat(fileutil.dotFileExtensions [ 'ts' 'js' 'mjs' 'swift' 'styl' 'css' 'pug' 'html' 'md' 'noon' 'json' 'txt' 'log' 'sh' 'fish' 'py' 'frag' 'vert' 'config' 'toml' 'conf' 'gitignore' 'plist' ]) 
     @imageExtensions:      ['png' 'jpg' 'jpeg' 'gif' 'tiff' 'pxm' 'icns' 'webp']
 
-    @detectClassWeights:
-        keyword:            1
-        'keyword function': 1
-        'keyword type':     1
-        require:            0.9
-        define:             0.9
-        punct:              0.8
-        type:               0.7
-        function:           0.5
-        'function call':    0.5
-        method:             0.5
-        module:             0.35
-        property:           0.2
-        'property color':   0.2
-        'property special': 0.2
-        argument:           0.35
-        important:          0.4
-        nil:                0.3
-    
     @counterparts: # todo: move this to a config file?
         mm:      ['h']
         cpp:     ['hpp' 'h']
@@ -50,6 +31,25 @@ use ../../kolor/extlang ▪ exts lang
         html:    ['pug']
         css:     ['styl']
         styl:    ['css']
+
+    @detectClassWeights:
+        keyword:            1
+        'keyword function': 1
+        'keyword type':     1
+        require:            0.9
+        define:             0.9
+        punct:              0.8
+        type:               0.7
+        function:           0.5
+        'function call':    0.5
+        method:             0.5
+        module:             0.35
+        property:           0.2
+        'property color':   0.2
+        'property special': 0.2
+        argument:           0.35
+        important:          0.4
+        nil:                0.3
     
     @looksLikeKode: text ->
 
@@ -147,7 +147,13 @@ use ../../kolor/extlang ▪ exts lang
         ⮐ 'kode' if empty text
         ⮐ 'kode' if @looksLikeKode text
 
+        log "---------------------"
+        log text
+        log "---------------------"
+
         tokens = @detectTokens text
+        
+        log "tokens:" tokens
 
         detectedExts = exts.filter (ext) -> ext not in ['txt' 'log']
         n = detectedExts.length
@@ -174,6 +180,8 @@ use ../../kolor/extlang ▪ exts lang
         bestScore  = 0
         candidates = []
 
+        log "scores:" scores
+
         for ext in detectedExts
 
             score = scores[ext] ? 0
@@ -182,7 +190,12 @@ use ../../kolor/extlang ▪ exts lang
                 bestScore = score
                 candidates = [ext]
             else if score > 0 and Math.abs(score-bestScore) <= 0.000001
+                log "??? #{ext}"
                 candidates.push ext
+
+        log "bestScore: #{bestScore}" 
+        log "candidates:" candidates
+        log "---------------------"
 
         ⮐ 'kode' if bestScore < 1
         ⮐ 'kode' if 'kode' in candidates
