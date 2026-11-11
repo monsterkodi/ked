@@ -46,3 +46,13 @@ use ../util ◆ detector
         detector.detectExt('[user]\n\tname = Foo\n\temail = a@b.c') ▸ 'ini'
         detector.detectExt('key = value') ▸ 'ini'
         detector.detectExt('<?xml version="1.0"?><plist><dict><key>a</key></dict></plist>') ▸ 'plist'
+
+        detector.detectExt('file     = dirent.name') ▸ 'kode'
+        detector.detectExt('this["onFileChange"] = this["onFileChange"].bind(this)') ▸ 'js'
+        detector.detectExt('let slash = kxk.slash') ▸ 'js'
+        detector.detectExt('let kstr = kxk.kstr') ▸ 'js'
+        detector.detectExt('GtkWidget* window = nullptr;') ▸ 'cpp'
+        detector.detectExt('static JsonNode* node_null ()\n{\n    return json_node_new(JSON_NODE_NULL);\n}') ▸ 'cpp'
+        detector.detectExt('return json_node_new(JSON_NODE_NULL);') ▸ 'cpp'
+        detector.detectExt('return foo();') ▸ 'kode'
+        detector.detectExt('{') ▸ 'kode'

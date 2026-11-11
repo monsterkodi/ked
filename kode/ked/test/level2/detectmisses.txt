@@ -1,0 +1,21 @@
+
+# should fallback to kode:
+
+file     = dirent.name
+
+# those lines should be detected as js:
+
+this["onFileChange"] = this["onFileChange"].bind(this)
+
+let slash = kxk.slash
+
+let kstr = kxk.kstr
+
+# should be detected as cpp
+
+GtkWidget* window = nullptr;
+
+static JsonNode* node_null ()
+{
+    return json_node_new(JSON_NODE_NULL);
+}

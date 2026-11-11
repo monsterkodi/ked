@@ -74,9 +74,6 @@ use ../../kxk           ◆ salter
         file       = slash.path currentDir "#{name}.kode"
         
         ◯ nfs.write file """
-            ###
-            #{salter(name prepend:'    ')}
-            ###
             
             function #{name}
             
