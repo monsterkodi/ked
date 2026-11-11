@@ -1,0 +1,48 @@
+use ../util ◆ detector
+
+▸ detector
+
+  ▸ the language of a snippet is detected
+
+        detector.detectExt('') ▸ 'kode'
+        detector.detectExt('ordinary words only') ▸ 'kode'
+        detector.detectExt('{\n  "name": "kodi",\n  "ok": true\n}') ▸ 'json'
+        detector.detectExt("log 'hello'") ▸ 'kode'
+        detector.detectExt("use ../../kxk ▪ post\nlog 'hi'") ▸ 'kode'
+
+        detector.detectExt('function foo() { const x = 1; return x; }') ▸ 'js'
+        detector.detectExt('async function load() { await fetch(url) }') ▸ 'js'
+        detector.detectExt('const greet = (name) => console.log(name)') ▸ 'js'
+        detector.detectExt('function f() {\n  return 1;\n}') ▸ 'js'
+        detector.detectExt('console.log("hi")') ▸ 'js'
+        detector.detectExt('interface Foo { readonly name: string }') ▸ 'ts'
+        detector.detectExt('const x: number = 1') ▸ 'ts'
+
+        detector.detectExt('def greet(name):\n    print(name)') ▸ 'py'
+        detector.detectExt('class Foo:\n    def __init__(self):\n        self.x = 1') ▸ 'py'
+        detector.detectExt('for f in *.txt; do cat "$f"; done') ▸ 'sh'
+        detector.detectExt('#!/bin/bash\necho "$HOME" | grep home') ▸ 'sh'
+        detector.detectExt('#!/usr/bin/fish\nset x 1') ▸ 'fish'
+        detector.detectExt('pub fn main() void { var x: u32 = 1; }') ▸ 'zig'
+        detector.detectExt('const std = @import("std");') ▸ 'zig'
+        detector.detectExt('#include <stdio.h>\nint main(void) { return 0; }') ▸ 'c'
+        detector.detectExt('template <typename T>\nclass Foo { public: T x; };') ▸ 'cpp'
+        detector.detectExt('@interface Foo : NSObject\n@end') ▸ 'mm'
+        detector.detectExt('proc greet(name: string): string =\n  echo name') ▸ 'nim'
+        detector.detectExt('func greet(name: String) -> String { return name }') ▸ 'swift'
+        detector.detectExt('using System;\nclass Program { static void Main() { Console.WriteLine("hi"); } }') ▸ 'cs'
+        detector.detectExt('local x = 1\nprint(x)') ▸ 'lua'
+        detector.detectExt('function foo()\n  return 1\nend') ▸ 'lua'
+        detector.detectExt('unless x then y else z') ▸ 'coffee'
+        detector.detectExt('x = -> 42') ▸ 'coffee'
+        detector.detectExt('<div class="foo">hello</div>') ▸ 'html'
+        detector.detectExt('<!DOCTYPE html>\n<html><body><p>hi</p></body></html>') ▸ 'html'
+        detector.detectExt('body { color: #fff; margin: 0; }') ▸ 'css'
+        detector.detectExt('body\n  color #fff\n  margin 0') ▸ 'styl'
+        detector.detectExt('$color: red;\n.foo { color: $color; }') ▸ 'scss'
+        detector.detectExt('<svg viewBox="0 0 10 10"><circle r="4"/></svg>') ▸ 'svg'
+        detector.detectExt('# heading\nsome **bold** text') ▸ 'md'
+        detector.detectExt('name: foo\nitems:\n  - a\n  - b') ▸ 'yml'
+        detector.detectExt('[user]\n\tname = Foo\n\temail = a@b.c') ▸ 'ini'
+        detector.detectExt('key = value') ▸ 'ini'
+        detector.detectExt('<?xml version="1.0"?><plist><dict><key>a</key></dict></plist>') ▸ 'plist'

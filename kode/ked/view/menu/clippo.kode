@@ -1,7 +1,7 @@
 use ../../../kxk  ▪ post clip
 use child_process ▪ spawn
 use ../../theme   ◆ theme
-use ../../util    ◆ fileutil
+use ../../util    ◆ detector
 use               ◆ inputchoice
 ■clippo□inputchoice
     # clipboard history with detected language syntax highlighting
@@ -144,7 +144,7 @@ use               ◆ inputchoice
 
         for text, idx in @history
 
-            ext   = fileutil.detectExt text
+            ext   = detector.detectExt text
             items = []
 
             items.push line:''

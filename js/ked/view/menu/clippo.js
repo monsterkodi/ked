@@ -11,7 +11,7 @@ let spawn = child_process.spawn
 
 import theme from "../../theme/theme.js"
 
-import fileutil from "../../util/fileutil.js"
+import detector from "../../util/detector.js"
 
 import inputchoice from "./inputchoice.js"
 
@@ -229,7 +229,7 @@ clippo = (function ()
         for (idx = 0; idx < list.length; idx++)
         {
             text = list[idx]
-            ext = fileutil.detectExt(text)
+            ext = detector.detectExt(text)
             items = []
             items.push({line:''})
             lines = text.split('\n')
