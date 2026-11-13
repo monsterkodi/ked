@@ -292,18 +292,24 @@ use                 ◆ mapview
             sy = @mapY + @lineOffset(li) 
             continue if sy < @mapY or sy >= @mapBot
             
+            sh = @lineRows(li) * @pixelsPerRow
+            sh = min sh (@mapY + @mapHeight - sy)
+
             if @state.isSpanSelectedLine li 
                 clr = @color.selection
             else
                 clr = @color.fullysel
                 
-            squares.place xoff-selw sy selw @pixelsPerRow clr 2000
+            squares.place xoff-selw sy selw sh clr 2000
     
         for li in belt.lineIndicesForSpans @state.s.highlights
         
             sy = @mapY + @lineOffset(li) 
             continue if sy < @mapY or sy >= @mapBot
             
-            squares.place xoff-hlw sy hlw @pixelsPerRow @color.highlight 2001
+            sh = @lineRows(li) * @pixelsPerRow
+            sh = min sh (@mapY + @mapHeight - sy)
+
+            squares.place xoff-hlw sy hlw sh @color.highlight 2001
 
 export mapscr

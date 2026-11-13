@@ -859,6 +859,33 @@ hed = cols rows ext='md' feats=[]->
         out.includes('w=4,h=8') ▸ true
         out.includes('w=8,h=8') ▸ true
 
+  ▸ the map selection and highlights scale with their line
+
+        [h e] = hed 40 10
+        e.state.loadLines ['a' 'b' '# h1' '## h2']
+        e.state.applyScales {enabled:true md:{h1:3 h2:2}}
+
+        m = new mapscr e
+        m.cells.layout 30 0 12 10
+        m.csz = [10 40]
+
+        squares.onResize 40 10 null [10 40]
+        h.screen.t.pixels = [400 400]
+        h.screen.t.cellsz = [10 40]
+
+        e.state.setSelections [[0 2 4 2]]
+        e.state.setHighlights [[0 3 4 3]]
+        e.state.setView [0 0]
+        m.calcView()
+
+        h.screen.t.out = []
+        m.drawHighlights()
+
+        out = h.screen.t.written()
+
+        out.includes('w=10,h=12') ▸ true
+        out.includes('w=10,h=8') ▸ true
+
   ▸ the map follows the display rows near the end of a long file
 
         [h e] = hed 40 10
