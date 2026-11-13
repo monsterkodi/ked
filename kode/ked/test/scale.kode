@@ -886,6 +886,31 @@ hed = cols rows ext='md' feats=[]->
         out.includes('w=10,h=12') ▸ true
         out.includes('w=10,h=8') ▸ true
 
+  ▸ the main cursor marker stays when the cursor is off the map
+
+        [h e] = hed 40 10
+        e.state.loadLines ['a' 'b' 'c']
+
+        m = new mapscr e
+        m.cells.layout 30 0 12 10
+        m.csz = [10 20]
+
+        squares.onResize 40 10 null [10 20]
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+
+        e.state.setCursors [[100 0] [0 2]] main:[100 0] adjust:false
+        e.state.setView [0 0]
+        m.calcView()
+
+        h.screen.t.out = []
+        m.drawCursors()
+
+        out = h.screen.t.written()
+
+        out.includes('w=8,h=4') ▸ true
+        (out.includes('w=4,h=4')) ▸ false
+
   ▸ the map follows the display rows near the end of a long file
 
         [h e] = hed 40 10

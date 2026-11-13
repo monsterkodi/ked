@@ -261,23 +261,29 @@ use                 ◆ mapview
             [sx sy] = @pixelPos pos 
             
             continue if sy < @mapY or sy >= @mapBot
-            continue if sx < @mapX or sx >= @mapX + @mapWidth
-        
-            if idx == @state.s.main
+
+            isMain = idx == @state.s.main
+
+            if isMain
                 fg = theme.cursor.main
-                sw = @pixelsPerCol*2
-                sx -= int @pixelsPerCol/2
             else
                 fg = theme.cursor.multi
-                sw = @pixelsPerCol
 
             sh = @lineRows(pos[1]) * @pixelsPerRow
             sh = min sh (@mapY + @mapHeight - sy)
+
+            if isMain
+                squares.place @cells.x*@csz[0]+@mapWidth-@pixelsPerCol*4 sy @pixelsPerCol*4 sh fg 2002
+
+            continue if sx < @mapX or sx >= @mapX + @mapWidth
+
+            if isMain
+                sw = @pixelsPerCol*2
+                sx -= int @pixelsPerCol/2
+            else
+                sw = @pixelsPerCol
                 
             squares.place sx sy sw sh fg
-            
-            if idx == @state.s.main
-                squares.place @cells.x*@csz[0]+@mapWidth-@pixelsPerCol*4 sy @pixelsPerCol*4 sh fg 2002
 
     drawHighlights: =>
         
