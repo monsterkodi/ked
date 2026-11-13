@@ -179,7 +179,7 @@ use                ◆ state draw complete mode
 
         if valid event.char and \ 
                 (event.char == event.combo or \
-                event.combo in ['space''return''tab'] or \
+                event.combo in ['space''shift+space''return''tab'] or \
                 event.combo[0..-2] == "shift+")
             @state.insert event.char
             @complete?.complete()

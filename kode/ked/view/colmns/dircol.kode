@@ -189,28 +189,7 @@ use                 ◆ dirtree
                         
     onReveal: p ◯=>
     
-        @dirtree.grabFocus()
-    
-        if item = @dirtree.itemForPath p
-            @select item
-            ⮐ 
-
-        if d = @dirtree.itemForPath slash.dir(p)
-            if not d.open
-                ◯ @dirtree.openDir d redraw:true
-            else
-                error "dircol.onReveal already open? #{d}"
-        else
-            if dd = @dirtree.itemForPath slash.dir(slash.dir(p))
-                if not dd.open
-                    ◯ @dirtree.openDir dd
-                    ◯ @dirtree.openDir d redraw:true
-                else
-                    error "dircol.onReveal already open dd? #{d}"
-            else
-                @setRoot d
-                
-        @dirtree.grabFocus()
+        ◯ @dirtree.onReveal p
                 
     rename: =>
     

@@ -23,8 +23,6 @@ import rgxs from './quicky.json' with { type: "json" }
         @frontRoundOffset = 0
         @refreshTimer = null
         
-    tilde: item -> item.tilde = lpad(item.depth*2+1) + diritem.symbolName(item)
-
     onGitStatus: status =>
     
         # todo: handle added files
@@ -85,11 +83,43 @@ import rgxs from './quicky.json' with { type: "json" }
             'delete'
             'rename' ➜ @refresh()
     
-    refresh: =>
+    onMouseLeave: event => @revealEditorFile()
         
-        clearTimeout @refreshTimer if @refreshTimer
-        @refreshTimer = setTimeout (=> @setRoot @currentRoot redraw:true index:@currentIndex()) 50
-                    
+    revealEditorFile: ◯=> 
+    
+        if file = ked_session.get "editor▸file"
+            ◯ @onReveal file false
+        
+    onReveal: p focus=true ◯=>
+        
+        if item = @itemForPath p
+            @select item
+            ⮐ 
+
+        pd = slash.dir p
+        
+        if d = @itemForPath pd
+            if not d.open
+                ◯ @openDir d
+        else
+            ddd = prjcts.dir p
+            rel = slash.relative pd ddd
+
+            ◯ @setRoot ddd
+            ◯ @openRelPath rel
+
+        if focus ➜ @grabFocus()
+                 ➜ @redraw()
+    
+    openRelPath: rel ◯=>
+
+        spl = slash.split rel
+        for sub,idx in spl
+            pth = slash.path @currentRoot spl[0..idx].join('/')
+            pi = @itemForPath pth
+            ⮐ if not pi
+            ◯ @openDir pi
+
     setRoot: path opt ◯=>
         
         opt ?= {}
@@ -116,15 +146,68 @@ import rgxs from './quicky.json' with { type: "json" }
                 path: parent
                 tilde: ' ' + icons.dir + '\u00A0..'
         
-        # log 'setRoot' opt
-                    
         @set items opt.index ? 0
         
         @restoreSessionState opt
         
         post.emit 'redraw' if opt.redraw
+
+    dirItems: dir info ◯=>
         
-    restoreSessionState: opt ->
+        try
+            items =◯ nfs.list dir recursive:false
+            ⮐ items
+        catch err
+            error "list error -- #{info}" err
+            ⮐ 
+
+    openDir: dirItem opt ◯=>
+        
+        ⮐ if empty dirItem
+        
+        ⮐ if dirItem.open
+        
+        opt ?= {}
+        
+        dirItem.open = true
+        
+        watcher.watch dirItem.path recursive:false
+        
+        items =◯ @dirItems dirItem.path 'dirtree.openDir'
+        
+        dirItem.tilde = dirItem.tilde.replace icons.dir_close icons.dir_open 
+            
+        state = ked_session.get @name {}
+        
+        depth = dirItem.depth + 1
+        for item in items
+            item.depth = depth
+            @tilde item
+            if item.type == 'dir' and state.open?[item.path]
+                if empty opt.select and empty opt.index
+                    opt.select = dirItem
+                @openDir item opt
+        
+        items.sort (a b) => @weight(a) - @weight(b)
+        
+        index = @items.indexOf dirItem
+        
+        kutil.insert @items index+1 items
+        
+        if opt.index?
+            index = opt.index
+        else if opt.select?
+            index = @items.indexOf opt.select
+        
+        @set @items index
+        
+        ked_session.set "#{@name}▸open▸#{dirItem.path}" '✔'
+        
+        git.status dirItem.path
+        
+        @redraw() if opt.redraw
+        
+    restoreSessionState: opt =>
         
         opt ?= {}
         opt.redraw = true
@@ -139,6 +222,11 @@ import rgxs from './quicky.json' with { type: "json" }
                 @openDir @itemForPath(key) opt
         
     onSessionMerge: recent => @setState recent[@name]    
+
+    refresh: =>
+        
+        clearTimeout @refreshTimer if @refreshTimer
+        @refreshTimer = setTimeout (=> @setRoot @currentRoot redraw:true index:@currentIndex()) 50
         
     setState: state =>
         
@@ -149,7 +237,7 @@ import rgxs from './quicky.json' with { type: "json" }
         
         ked_session.set @name state
                     
-    emitAction: action choice event  ->
+    emitAction: action choice event  =>
     
         # log "emitAction #{action}" choice
         
@@ -221,54 +309,8 @@ import rgxs from './quicky.json' with { type: "json" }
                         ⮐ post.emit 'file.open' choice.path
         
         super action choice event
-        
-    openDir: dirItem opt ◯->
-        
-        ⮐ if empty dirItem
-        ⮐ if dirItem.open
-        
-        opt ?= {}
-        
-        dirItem.open = true
-        
-        watcher.watch dirItem.path recursive:false
-        
-        items =◯ @dirItems dirItem.path 'dirtree.openDir'
-        
-        dirItem.tilde = dirItem.tilde.replace icons.dir_close icons.dir_open 
-            
-        state = ked_session.get @name {}
-        
-        depth = dirItem.depth + 1
-        for item in items
-            item.depth = depth
-            @tilde item
-            if item.type == 'dir' and state.open?[item.path]
-                if empty opt.select and empty opt.index
-                    opt.select = dirItem
-                opt.redraw = true
-                @openDir item opt
-        
-        items.sort (a b) => @weight(a) - @weight(b)
-        
-        index = @items.indexOf dirItem
-        
-        kutil.insert @items index+1 items
-        
-        if opt.index?
-            index = opt.index
-        else if opt.select?
-            index = @items.indexOf opt.select
-        
-        @set @items index
-        
-        ked_session.set "#{@name}▸open▸#{dirItem.path}" '✔'
-        
-        git.status dirItem.path
-        
-        post.emit 'redraw' if opt.redraw
-        
-    closeDir: dirItem opt ->
+                
+    closeDir: dirItem opt =>
         
         ⮐ if empty dirItem
         
@@ -292,15 +334,7 @@ import rgxs from './quicky.json' with { type: "json" }
         
         post.emit 'redraw' if opt.redraw
                 
-    dirItems: dir info ◯=>
-        
-        try
-            items =◯ nfs.list dir recursive:false
-        catch err
-            error "list error -- #{info}" err
-            ⮐ 
-
-    set: items index=0 -> 
+    set: items index=0 => 
         
         oldTop = @state.s.view[1]
         super items 'tilde'
@@ -308,13 +342,13 @@ import rgxs from './quicky.json' with { type: "json" }
         @state.selectLine index
         @state.setMainCursor 0 index
         
-    selectPrevKeepOffset: ->
+    selectPrevKeepOffset: =>
         
         @selectPrev()
         post.emit 'quicky' @current().path if @current().type == 'file'
         @state.setView [0 @state.s.view[1]-1]
 
-    selectNextKeepOffset: ->
+    selectNextKeepOffset: =>
     
         if @current().type == 'file' and ked_session.get('editor▸file') != @current().path
             post.emit 'quicky' @current().path
@@ -324,7 +358,7 @@ import rgxs from './quicky.json' with { type: "json" }
         post.emit 'quicky' @current().path if @current().type == 'file'
         @state.setView [0 @state.s.view[1]+1]
         
-    selectOpenSiblingAboveOrParent: ->
+    selectOpenSiblingAboveOrParent: =>
     
         index = @fuzzied.indexOf @current()
         index -= 1
@@ -333,7 +367,7 @@ import rgxs from './quicky.json' with { type: "json" }
         @state.selectLine index
         @state.setMainCursor 0 index
         
-    selectParent: ->
+    selectParent: =>
     
         index = @fuzzied.indexOf @current()
         index -= 1
@@ -342,7 +376,7 @@ import rgxs from './quicky.json' with { type: "json" }
         @state.selectLine index
         @state.setMainCursor 0 index
         
-    drawSelections: ->
+    drawSelections: =>
         
         if li = @indexOfOpenFile()
             bg = theme.gutter.bg
@@ -355,7 +389,7 @@ import rgxs from './quicky.json' with { type: "json" }
         
         super()
                 
-    indexOfOpenFile: ->
+    indexOfOpenFile: =>
     
         currentFile = ked_session.get 'editor▸file'
         
@@ -364,12 +398,12 @@ import rgxs from './quicky.json' with { type: "json" }
         for item,idx in @fuzzied
             ⮐ idx if item.path == currentFile
             
-    itemForPath: p ->
+    itemForPath: p =>
         
         for item,idx in @items
             ⮐ item if slash.samePath item.path p
 
-    itemIndexForPath: p ->
+    itemIndexForPath: p =>
         
         for item,idx in @items
             ⮐ idx if slash.samePath item.path p
@@ -382,6 +416,8 @@ import rgxs from './quicky.json' with { type: "json" }
         item = @choiceAtRow row + @state.s.view[1]
         log "itemAtEvent #{row} #{@state.s.view[1]} #{item.path}"
         item
+
+    tilde: item -> item.tilde = lpad(item.depth*2+1) + diritem.symbolName(item)
             
     weight: item ->
 
