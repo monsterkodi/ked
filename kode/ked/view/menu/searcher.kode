@@ -1,5 +1,5 @@
 
-use ../../../kxk    ▪ post kseg slash
+use ../../../kxk    ▪ post kseg kstr slash
 use ../../edit/tool ◆ belt
 use ../../index     ◆ prjcts kacher
 use ../base         ◆ view
@@ -269,13 +269,19 @@ use                 ◆ finder searcherfile
         files.sort (a b) ->
             weight = f -> 
                 ext = slash.ext f
-                switch ext 
+                exw = switch ext 
                     'kode'  ➜ 1000
                     'noon'  ➜ 900
                     'md'    ➜ 800
                     'json'  ➜ 20
                     'js'    ➜ 10
                             ➜ 0
+                            
+                if not '/test/' in f
+                    exw += 1000
+                stw = kstr.weight f
+                exw += stw
+                exw
             weight(b) - weight(a)
         files
         
@@ -290,8 +296,6 @@ use                 ◆ finder searcherfile
         super choice
                                     
     onInputAction: action text ->
-    
-        # log "searcher.onInputAction #{action} #{text}"
     
         switch action
             

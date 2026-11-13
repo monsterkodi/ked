@@ -11,7 +11,7 @@ mapScroll
     clickOffset   5
 
 scale
-    enabled   true
+    enabled    false
     md
         h1        7
         h2        6
