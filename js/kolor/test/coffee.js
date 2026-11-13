@@ -203,7 +203,7 @@ toExport["coffee"] = async function ()
         compare(inc(rgs,2,'0'),'comment')
         compare(inc(rgs,6,'0'),'comment')
         dss = dissect("###\n 0 1 0 \n###")
-        compare(inc(dss[1],1,"0"),'number')
+        compare(inc(dss[1],1,"0"),'comment triple')
     })
 }
 toExport["coffee"]._section_ = true

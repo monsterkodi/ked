@@ -149,6 +149,22 @@ use                ◆ state draw complete mode
                 rgb = state.syntax.getColor cx y
                 ⮐ color.hex rgb
         null
+    
+    syntaxClassAtMainCursor: =>
+    
+        state = @state
+        [x y] = state.mainCursor()
+        lines = state.s.lines
+
+        ⮐ if y < 0 or y >= lines.length
+
+        line  = lines[y]
+        width = kseg.width line
+
+        for cx in [x-1 x]
+            if 0 <= cx < width
+                ⮐ state.syntax.getClass cx y
+        null
 
     grabFocus: =>
     

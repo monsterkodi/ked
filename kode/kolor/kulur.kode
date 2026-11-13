@@ -941,6 +941,7 @@ luaString = ->
 number = ->
 
     ⮐ 0 if topType?.startsWith 'string'
+    ⮐ 0 if topType?.startsWith 'comment'
 
     if NUMBER.test chunk.match
         prev = getmatch(-1)

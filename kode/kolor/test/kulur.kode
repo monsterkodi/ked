@@ -237,7 +237,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 6 '0'      ▸ 'comment'
         
         dss = dissect "###\n 0 1 0 \n###"
-        inc dss[1] 1 "0"   ▸ 'number'
+        inc dss[1] 1 "0"   ▸ 'comment triple'
         
         rgs = ranges "# █ ██ ███"
         inc rgs 0  "#"     ▸ 'punct comment'

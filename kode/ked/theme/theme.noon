@@ -154,7 +154,7 @@ complete
 syntax 
     text                                    #fff   
     text file                               #eee   
-    punct                                   #555   
+    punct                                   #88d   
     template                                #555   
     define                                  #555   
     text require                            #555   
@@ -163,10 +163,10 @@ syntax
     keyword require                         #444   
     keyword function                        #444   
     comment                                 #444   
+    punct minor                             #444   
     punct require                           #3a3a3a
     punct template                          #3a3a3a
     comment ligature                        #333   
-    punct minor                             #333   
     punct define                            #333   
     punct comment triple                    #222   
     punct code triple                       #222   
@@ -191,8 +191,8 @@ syntax
     punct function bound head               #d59   
     keyword type                            #55d   
     punct range                             #55d   
-    punct keyword return                    #44c   
-    punct keyword                           #33b   
+    punct keyword return                    #55d   
+    punct keyword                           #44c   
     punct function class                    #220   
     punct keyword extends                   #220   
     url domain                              #d00   
@@ -263,6 +263,7 @@ syntax
     punct h5                                #224   
                                                         
     text bold                               #ff8   
+    text code                               #fa8   
     text unicode li1                        #aaa   
     text unicode li2                        #888   
     text unicode li3                        #666   

@@ -263,7 +263,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
                 
             else if syntax = @editor.syntaxColorAtMainCursor()
                 @setHex syntax
-                
+                log @editor.syntaxClassAtMainCursor()
             else
                 @setHex "#ffffff"
 

@@ -84,7 +84,6 @@ use ../kolor ◆ kulur
 #!compile        
     ###
     converts a string of kode into a string of javascript
-    
     throws on syntax errors and internal lexer, parser or renderer errors
     ###
 
@@ -102,7 +101,6 @@ use ../kolor ◆ kulur
         catch err
             msg = ""
             if err is str
-                # msg += "[syntax error]\n"
                 msg += err
             else
                 msg += "[internal kode compiler error]\n"
