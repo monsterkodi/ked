@@ -2,9 +2,9 @@
 
 **kode** is a programming language that transpiles to JavaScript.
 
-#control flow
+# control flow
 
-###if
+### if
 
 ```kode
 if  
@@ -20,7 +20,7 @@ else if b then Y
           else Z
 ```
 
-###switch
+### switch
 
 ```kode
 switch x
@@ -38,7 +38,7 @@ switch x
     else            Z
 ```
 
-###for
+### for
 
 ```kode
 x = null
@@ -48,7 +48,7 @@ for a in x
 
 **kode** generates code that doesn't fail if x is not an array.
 
-###each
+### each
 
 ```kode
 obj each (k,v) -> [k,v]
@@ -69,7 +69,7 @@ A new object, array or string is build from the results and returned:
 If the function takes only one argument, 
 it is the value/item/character and a single return value is expected.
 
-###list comprehension
+### list comprehension
 
 ```kode
 l = [1,2,3]
@@ -81,7 +81,7 @@ a = (x for x in l)                                                  ▸ [1,2,3]
 
 #classes
 
-###constructor
+### constructor
 
 ```kode
 class C
@@ -95,11 +95,11 @@ class C
     constructor: ->
 ```
 
-###old school classes
+### old school classes
 
 **kode** gives you two choices for class definitions:
 
-####function
+#### function
 
 ```kode
 function ES5
@@ -124,7 +124,7 @@ ES5 = (function ()
 ■ Supr □ Base  # Supr extends Base
 ```
 
-####class
+#### class
 
 ```kode
 class ES2015
@@ -146,9 +146,9 @@ class ES2015
 
 Both forms can be used in the same module, but not in the same class hierarchy. 
 
-#modules
+# modules
 
-###use
+### use
 
 ```kode
 use ./utils ▪ kc ke        ▸ import utils from "./utils.js"
@@ -178,7 +178,7 @@ log ◆dir                   ▸ [source directory]
 
 The body only runs when the module is the one node was started with.
 
-#commata
+# commata
 
 In **kode**, commata are optional almost anywhere.
 Those are all valid expressions:
@@ -196,7 +196,7 @@ test 'something' ->
 on 'event' @myCallback
 ```
 
-####calls without parens
+#### calls without parens
 
 ```kode
 f a b     ▸ f(a, b)
@@ -220,7 +220,7 @@ f a b and c   ▸ f(a, b && c)
 ```kode
 f('op') and b != 'op='   ▸ f('op') && b !== 'op='
 ```
-####operators
+#### operators
 
 Operators - unlike calls - take only one argument:
 
@@ -232,16 +232,16 @@ empty x and valid y ▸ empty(x) && valid(y)
 They are `not` `delete` `new` `noon` `copy` `clone` `empty`
 `valid` `first` and `last`.
 
-#misc
+# misc
 
-###ranges
+### ranges
 
 ```kode
 for i in 0..2                                                       ▸ i : [0,1,2]
     a = 1...3                                                       ▸ a = [1,2]
 ```
 
-###empty
+### empty
 
 ```kode
 empty [] and empty {} and empty '' and empty null and empty NaN     ▸ true
@@ -250,27 +250,27 @@ empty 0 or empty 'a' or empty [null] or empty Infinity              ▸ false
 
 Returns true for null, undefined, NaN and empty array, object or string.
 
-###valid
+### valid
 
 ```kode
 valid 0 and valid 'a' and valid [null] and valid Infinity           ▸ true
 valid [] or valid {} or valid '' or valid null or valid NaN         ▸ false
 ```
 
-###first & last
+### first & last
 
 ```kode
 a = first [1 2 3]   ▸ 1
 b = last [1 2 3]    ▸ 3
 ```
-###negative indexing
+### negative indexing
 
 ```kode
 "abc"[-2]       ▸ 'b'
 [1,2,3][-2]     ▸ 2
 ```
 
-###ternary
+### ternary
 
 ```kode
 false ? 1 : 2                                                       ▸ 2
@@ -284,7 +284,7 @@ a = clone b                             # deep copy of b
 
 Only plain Objects, Arrays and Strings are copied. Functions, Maps, Sets, etc. are not copied.
 ```
-###eql
+### eql
 
 ```
 a eql b                                 # deep comparison
@@ -293,7 +293,7 @@ a eql b                                 # deep comparison
 Does a deep comparison of its operands. 
 Only plain Objects, Arrays and Strings are compared.
 
-###is
+### is
 
 ```kode
 1 is 'number' and '' is 'string' and {} is Object and [] is Array   ▸ true
@@ -303,7 +303,7 @@ Only plain Objects, Arrays and Strings are compared.
 `is` is a shortcut for `typeof` and `instanceof`. 
 The first is used, when the right hand side is a string.
 
-####is num 
+#### is num 
 
 ```kode
 "0xFF" is num and "-4.536" is num and 42 is num                     ▸  true
@@ -335,9 +335,9 @@ null is obj or new Map() is obj or [] is obj                        ▸  false
 null is arr or new Set() is arr or {} is arr                        ▸  false
 ```
 
-#output
+# output
 
-###console
+### console
 
 ```kode
 log 'hello'     ▸ hello
@@ -346,7 +346,7 @@ error 'world!'  ▸ world!
 
 Simple shortcuts for `log`, `warn` and `error` methods of `console`.
 
-###noon
+### noon
 
 ```kode
 s = noon a:1 b:2
