@@ -277,6 +277,20 @@ use ../../util/img ◆ rounded
         @lastplImgs = @placedImgs
         @placedImgs = {}
 
+    #  hide placements of the previous frame at a z layer that were not
+    #  placed again in this frame, before the frame is written to the terminal
+
+    hideStaleImgs: z =>
+        
+        for iid,posplids of @lastplImgs
+            for pos,plid of posplids
+                args = @plargs[[iid plid]]
+                continue if empty args
+                continue if args[6] != z
+                continue if @placedImgs[iid]?[pos]
+                @hideImg iid plid
+                delete @lastplImgs[iid][pos]
+
     hideImage: id ->
         
         @write "\x1b_Gq=1,a=d,d=i,i=#{id}\x1b\\"

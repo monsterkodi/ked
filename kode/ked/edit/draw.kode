@@ -341,6 +341,10 @@ use              ◆ mode
         s = @state.s
         mainCursor = @state.mainCursor()
         
+        #  hide the previous frame's cursor images before placing the new ones
+        #  so the stream never has two cursors alive at the same time
+        @cells.screen.t.hideStaleImgs 666
+        
         fg = @color.cursor.fg
 
         bg = mode.themeColor @state 'cursor.multi' @color.cursor.multi

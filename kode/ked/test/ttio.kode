@@ -148,6 +148,44 @@ use ../util        ◆ harness
 
         h.t.written().includes('a=p') ▸ false
 
+  ▸ a moved cursor never has two placements at once
+
+        h = new harness cols:40 rows:12
+        h.t.cellsz = [10 20]
+        h.t.headless = false
+
+        live = 0
+        maxLive = 0
+
+        h.t.write = (str) ->
+            h.t.out.push str
+            live = 0
+            for idpl,args of h.t.plargs
+                live += 1 if args[6] == 666
+            maxLive = max maxLive live
+
+        e = new editor h.screen 'test_two_cursors' []
+        e.layout 0 0 40 12
+        e.state.loadLines ['abcdefghijabcdefghijabcdefghijabcdefghij']
+        e.state.setCursors [[0 0]]
+
+        frame = ->
+            erases = h.screen.eraseRects
+            e.draw()
+            h.screen.render()
+            h.t.removeImgs()
+            e.showCursorsOutsideRects erases
+
+        frame()
+
+        maxLive ▸ 1
+
+        e.state.setCursors [[1 0]]
+
+        frame()
+
+        maxLive ▸ 1
+
   ▸ the keys of a chunk are keys of their own
 
         keys = []
