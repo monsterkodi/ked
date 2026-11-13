@@ -5,6 +5,7 @@ use ../util        ◆ harness config
 use ../view/menu   ◆ choices context
 use ../view/editor ◆ mapscr mapview
 use ../view/base   ◆ scroll
+use ../util/img    ◆ squares
 
 cells = cols:40 rows:20
 tstt = ext='md' -> 
@@ -772,6 +773,91 @@ hed = cols rows ext='md' feats=[]->
 
         (out.split('i=107,').length - 1) ▸ 1
         out.includes('y=0,w=120,h=4') ▸ true
+
+  ▸ the map cursors scale vertically with their line
+
+        [h e] = hed 40 10
+        e.state.loadLines ['a' 'b' 'c' '# h1' 'd']
+        e.state.applyScales {enabled:true md:{h1:3}}
+
+        m = new mapscr e
+        m.cells.layout 30 0 12 10
+        m.csz = [10 40]
+
+        squares.onResize 40 10 null [10 40]
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 40]
+
+        e.state.setCursors [[1 3] [1 1]] main:[1 3] adjust:false
+        e.state.setView [0 0]
+        m.calcView()
+
+        h.screen.t.out = []
+        m.drawCursors()
+
+        out = h.screen.t.written()
+
+        out.includes('w=4,h=12') ▸ true
+        out.includes('w=2,h=4') ▸ true
+        out.includes('w=8,h=12') ▸ true
+
+  ▸ a normal map cursor keeps the height of one row
+
+        [h e] = hed 40 10
+        e.state.loadLines ['a' '# h1' 'b']
+
+        m = new mapscr e
+        m.cells.layout 30 0 12 10
+        m.csz = [10 20]
+
+        squares.onResize 40 10 null [10 20]
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+
+        e.state.setCursors [[1 0] [0 2]] main:0 adjust:false
+        e.state.setView [0 0]
+        m.calcView()
+
+        h.screen.t.out = []
+        m.drawCursors()
+
+        out = h.screen.t.written()
+
+        (out.split('w=4,h=4').length - 1) ▸ 1
+        (out.split('w=2,h=4').length - 1) ▸ 1
+
+  ▸ the map cuts a tall cursor at its bottom edge
+
+        [h e] = hed 40 10
+        lines = []
+        for i in 0...110
+            lines.push (i == 104) ? '# h1' : 'x'
+        e.state.loadLines lines
+        e.state.applyScales {enabled:true md:{h1:3}}
+
+        m = new mapscr e
+        m.cells.layout 30 0 12 10
+        m.csz = [10 40]
+
+        squares.onResize 40 10 null [10 40]
+        h.screen.t.pixels = [400 400]
+        h.screen.t.cellsz = [10 40]
+
+        e.state.setView [0 55]
+        m.calcView()
+
+        m.lineOffset(104) ▸ 392
+        m.mapHeight ▸ 400
+
+        e.state.setCursors [[1 104]] main:0 adjust:false
+
+        h.screen.t.out = []
+        m.drawCursors()
+
+        out = h.screen.t.written()
+
+        out.includes('w=4,h=8') ▸ true
+        out.includes('w=8,h=8') ▸ true
 
   ▸ the map follows the display rows near the end of a long file
 

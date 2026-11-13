@@ -270,11 +270,14 @@ use                 ◆ mapview
             else
                 fg = theme.cursor.multi
                 sw = @pixelsPerCol
+
+            sh = @lineRows(pos[1]) * @pixelsPerRow
+            sh = min sh (@mapY + @mapHeight - sy)
                 
-            squares.place sx sy sw @pixelsPerRow fg
+            squares.place sx sy sw sh fg
             
             if idx == @state.s.main
-                squares.place @cells.x*@csz[0]+@mapWidth-@pixelsPerCol*4 sy @pixelsPerCol*4 @pixelsPerRow fg 2002
+                squares.place @cells.x*@csz[0]+@mapWidth-@pixelsPerCol*4 sy @pixelsPerCol*4 sh fg 2002
 
     drawHighlights: =>
         
