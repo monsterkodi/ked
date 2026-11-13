@@ -13,7 +13,7 @@ use                 ◆ searcher searcherfile
         super @screen @editor 'differ'
         
         @symbol = 
-            changed: '●'
+            changed: '◆'
             added:   '✔'
             deleted: '✘'
             renamed: '➜'
@@ -21,7 +21,7 @@ use                 ◆ searcher searcherfile
         @symbolColors =
             '✘': [155 0 0] 
             '✔': [0 200 0] 
-            '●': [50 50 50] 
+            '◆': [50 50 50] 
             '➜': [150 150 250] 
         
         @choices.gutter.fgcolor = (x y c) => 
@@ -209,6 +209,7 @@ use                 ◆ searcher searcherfile
             items.push 
                 line:   ' ● ' + h.msg
                 commit: h.commit
+                ext: 'txt'
 
             for f in h.files
                 
@@ -217,14 +218,14 @@ use                 ◆ searcher searcherfile
                     'A' ➜ @symbol.added
                     'R' ➜ @symbol.renamed
                     'M' ➜ @symbol.changed
-                        ➜ '◆'
-                if symbol != '◆'
+                        ➜ '?'
+                if symbol != '?'
                     items.push
                         line:  '      ' + symbol + ' ' + f.path
                         path:   slash.path(gitDir f.path)
                         commit: h.commit
         
-        @choices.append items
+        @choices.append items 'md'
         post.emit 'redraw'
         
     patch: rev ◯=>
@@ -247,7 +248,7 @@ use                 ◆ searcher searcherfile
             # log "file #{file}"
         
             items.push 
-                line:   ' ● ' + p.tgtfile[2..]
+                line:   ' ◆ ' + p.tgtfile[2..]
                 path:   file
                 
             if p.changes is arr
