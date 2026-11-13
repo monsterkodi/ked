@@ -14,12 +14,12 @@ cur = x y -> s.mainCursor() ▸ [x y]
 
 mrange = lines x y m -> motion.range lines [x y] m
 
-▸ motion ranges
+▸ novim
 
-    segls  = kseg.segls """
-        one two three
-        four five
-        """
+  segls  = kseg.segls """
+      one two three
+      four five
+      """
 
   ▸ words
         
@@ -114,556 +114,495 @@ mrange = lines x y m -> motion.range lines [x y] m
         mrange(flines, 0, 1, {kind:'lineFirst',     count:2}) ▸ [0 1 6 2]
         mrange(flines, 0, 0, {kind:'lineFirst',     count:5}) ▸ [0 0 6 2]
 
-▸ merging ranges
-
-    motion.mergeRanges [[0 0 1 0] [1 0 2 0]] ▸ [[0 0 2 0]]
-    motion.mergeRanges [[0 0 3 0] [0 0 3 0]] ▸ [[0 0 3 0]]
-    motion.mergeRanges [[0 0 3 0] [1 0 3 0]] ▸ [[0 0 3 0]]
-    motion.mergeRanges [[0 0 5 1] [0 1 3 1]] ▸ [[0 0 5 1]]
-    motion.mergeRanges [[0 0 3 0] [0 1 3 1]] ▸ [[0 0 3 0] [0 1 3 1]]
-    motion.mergeRanges [[0 0 0 0] [0 0 0 0]] ▸ [[0 0 0 0]]
-
-▸ text object ranges
-
-    words = kseg.segls "one two three four"
-
-    wobj = (x area count) -> mrange(words, x, 0, {kind:'textObject', area:area, target:'word', count:count})
-
-    wobj(5, 'inner', 1)  ▸ [4 0 7 0]
-    wobj(5, 'around', 1) ▸ [4 0 8 0]
-    wobj(0, 'inner', 1)  ▸ [0 0 3 0]
-    wobj(0, 'around', 1) ▸ [0 0 4 0]
-    wobj(14, 'around', 1) ▸ [13 0 18 0]
-    wobj(3, 'inner', 1)  ▸ [3 0 4 0]
-    wobj(3, 'around', 1) ▸ [4 0 8 0]
-    wobj(0, 'inner', 2)  ▸ [0 0 7 0]
-    wobj(0, 'around', 2) ▸ [0 0 8 0]
-    wobj(0, 'inner', 3)  ▸ [0 0 13 0]
-    wobj(0, 'around', 4) ▸ [0 0 18 0]
-
-    mrange(kseg.segls("foo\nbar"), 0, 0, {kind:'textObject', area:'inner', target:'word', count:2}) ▸ [0 0 3 1]
-
-    bigwords = kseg.segls "foo.bar baz, qux"
-
-    Wobj = (x area count) -> mrange(bigwords, x, 0, {kind:'textObject', area:area, target:'WORD', count:count})
-
-    Wobj(0, 'inner', 1)  ▸ [0 0 7 0]
-    Wobj(0, 'around', 1) ▸ [0 0 8 0]
-    Wobj(2, 'inner', 1)  ▸ [0 0 7 0]
-    Wobj(8, 'inner', 1)  ▸ [8 0 12 0]
-    Wobj(0, 'inner', 2)  ▸ [0 0 12 0]
-    Wobj(0, 'around', 3) ▸ [0 0 16 0]
-
-    quoted = kseg.segls 'say "hello there" ok'
-    qobj = (x area) -> mrange(quoted, x, 0, {kind:'textObject', area:area, target:'"', count:1})
-
-    qobj(7, 'inner')  ▸ [5 0 16 0]
-    qobj(7, 'around') ▸ [4 0 18 0]
-    qobj(0, 'inner')  ▸ [5 0 16 0]
-
-    mrange(quoted, 20, 0, {kind:'textObject', area:'inner', target:'"', count:1}) ▸ null
-
-    lead = kseg.segls 'x = "abc"'
-    lobj = (x area) -> mrange(lead, x, 0, {kind:'textObject', area:area, target:'"', count:1})
-
-    lobj(5, 'inner')  ▸ [5 0 8 0]
-    lobj(5, 'around') ▸ [3 0 9 0]
-
-    single = kseg.segls "a 'b c' d"
-    sobj = (x) -> mrange(single, x, 0, {kind:'textObject', area:'inner', target:"'", count:1})
-
-    sobj(4) ▸ [3 0 6 0]
-
-    parens = kseg.segls 'call(one, two) end'
-    pobj = (x area) -> mrange(parens, x, 0, {kind:'textObject', area:area, target:'(', count:1})
-
-    pobj(8, 'inner')  ▸ [5 0 13 0]
-    pobj(8, 'around') ▸ [4 0 14 0]
-
-    mrange(kseg.segls('f(a[1]) x'), 4, 0, {kind:'textObject', area:'inner', target:'(', count:1}) ▸ [2 0 6 0]
-
-    pobj(0, 'inner') ▸ [5 0 13 0]
-
-    brackets = kseg.segls 'x[one] y{two}'
-    mrange(brackets, 3, 0,  {kind:'textObject', area:'inner', target:'[', count:1}) ▸ [2 0 5 0]
-    mrange(brackets, 10, 0, {kind:'textObject', area:'inner', target:'{', count:1}) ▸ [9 0 12 0]
-
-    array = kseg.segls "if seg not in ['', undefined, ' ', '}', ']', ')']"
-    aobj  = (x area) -> mrange(array, x, 0, {kind:'textObject', area:area, target:'[', count:1})
-
-    aobj(21, 'inner')  ▸ [15 0 48 0]
-    aobj(21, 'around') ▸ [14 0 49 0]
-    aobj(14, 'inner') ▸ [15 0 48 0]
-    aobj(41, 'inner') ▸ [15 0 48 0]
-    aobj(48, 'inner') ▸ [15 0 48 0]
-
-    instring = kseg.segls "x = '[' + y]"
-    iobj = (x) -> mrange(instring, x, 0, {kind:'textObject', area:'inner', target:'[', count:1})
-
-    iobj(5) ▸ null
-
-    afterstring = kseg.segls "x = '[' ; a[b]"
-    nobj = (x) -> mrange(afterstring, x, 0, {kind:'textObject', area:'inner', target:'[', count:1})
-
-    nobj(0) ▸ [12 0 13 0]
-
-    multiline = kseg.segls """
-        foo(
-          bar
-        )
-        """
-
-    mrange(multiline, 3, 1, {kind:'textObject', area:'inner',  target:'(', count:1}) ▸ [4 0 0 2]
-    mrange(multiline, 3, 1, {kind:'textObject', area:'around', target:'(', count:1}) ▸ [3 0 1 2]
-
-    mrange(kseg.segls('nothing here'), 0, 0, {kind:'textObject', area:'inner', target:'(', count:1}) ▸ null
-
-▸ cursor to start and end of line
-
-    s.loadLines belt.linesForText("one two\nfour")
-    s.setMainCursor 0 0
-
-    s.executeNovim {operator:'move', motion:{kind:'eol'}}
-    cur 7 0
-
-    s.setMainCursor 6 0
-    s.executeNovim {operator:'move', motion:{kind:'bol'}}
-    cur 0 0
-
-    s.loadLines belt.linesForText("\nabc")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'move', motion:{kind:'eol'}}
-    cur 0 0
+  ▸ merging ranges
     
-▸ yank
-
-  ▸ yank motions
+        motion.mergeRanges [[0 0 1 0] [1 0 2 0]] ▸ [[0 0 2 0]]
+        motion.mergeRanges [[0 0 3 0] [0 0 3 0]] ▸ [[0 0 3 0]]
+        motion.mergeRanges [[0 0 3 0] [1 0 3 0]] ▸ [[0 0 3 0]]
+        motion.mergeRanges [[0 0 5 1] [0 1 3 1]] ▸ [[0 0 5 1]]
+        motion.mergeRanges [[0 0 3 0] [0 1 3 1]] ▸ [[0 0 3 0] [0 1 3 1]]
+        motion.mergeRanges [[0 0 0 0] [0 0 0 0]] ▸ [[0 0 0 0]]
     
-        s.loadLines belt.linesForText("one two three\nfour five")
+  ▸ text object ranges
+    
+        words = kseg.segls "one two three four"
+    
+        wobj = (x area count) -> mrange(words, x, 0, {kind:'textObject', area:area, target:'word', count:count})
+    
+        wobj(5, 'inner', 1)  ▸ [4 0 7 0]
+        wobj(5, 'around', 1) ▸ [4 0 8 0]
+        wobj(0, 'inner', 1)  ▸ [0 0 3 0]
+        wobj(0, 'around', 1) ▸ [0 0 4 0]
+        wobj(14, 'around', 1) ▸ [13 0 18 0]
+        wobj(3, 'inner', 1)  ▸ [3 0 4 0]
+        wobj(3, 'around', 1) ▸ [4 0 8 0]
+        wobj(0, 'inner', 2)  ▸ [0 0 7 0]
+        wobj(0, 'around', 2) ▸ [0 0 8 0]
+        wobj(0, 'inner', 3)  ▸ [0 0 13 0]
+        wobj(0, 'around', 4) ▸ [0 0 18 0]
+    
+        mrange(kseg.segls("foo\nbar"), 0, 0, {kind:'textObject', area:'inner', target:'word', count:2}) ▸ [0 0 3 1]
+    
+        bigwords = kseg.segls "foo.bar baz, qux"
+    
+        Wobj = (x area count) -> mrange(bigwords, x, 0, {kind:'textObject', area:area, target:'WORD', count:count})
+    
+        Wobj(0, 'inner', 1)  ▸ [0 0 7 0]
+        Wobj(0, 'around', 1) ▸ [0 0 8 0]
+        Wobj(2, 'inner', 1)  ▸ [0 0 7 0]
+        Wobj(8, 'inner', 1)  ▸ [8 0 12 0]
+        Wobj(0, 'inner', 2)  ▸ [0 0 12 0]
+        Wobj(0, 'around', 3) ▸ [0 0 16 0]
+    
+        quoted = kseg.segls 'say "hello there" ok'
+        qobj = (x area) -> mrange(quoted, x, 0, {kind:'textObject', area:area, target:'"', count:1})
+    
+        qobj(7, 'inner')  ▸ [5 0 16 0]
+        qobj(7, 'around') ▸ [4 0 18 0]
+        qobj(0, 'inner')  ▸ [5 0 16 0]
+    
+        mrange(quoted, 20, 0, {kind:'textObject', area:'inner', target:'"', count:1}) ▸ null
+    
+        lead = kseg.segls 'x = "abc"'
+        lobj = (x area) -> mrange(lead, x, 0, {kind:'textObject', area:area, target:'"', count:1})
+    
+        lobj(5, 'inner')  ▸ [5 0 8 0]
+        lobj(5, 'around') ▸ [3 0 9 0]
+    
+        single = kseg.segls "a 'b c' d"
+        sobj = (x) -> mrange(single, x, 0, {kind:'textObject', area:'inner', target:"'", count:1})
+    
+        sobj(4) ▸ [3 0 6 0]
+    
+        parens = kseg.segls 'call(one, two) end'
+        pobj = (x area) -> mrange(parens, x, 0, {kind:'textObject', area:area, target:'(', count:1})
+    
+        pobj(8, 'inner')  ▸ [5 0 13 0]
+        pobj(8, 'around') ▸ [4 0 14 0]
+    
+        mrange(kseg.segls('f(a[1]) x'), 4, 0, {kind:'textObject', area:'inner', target:'(', count:1}) ▸ [2 0 6 0]
+    
+        pobj(0, 'inner') ▸ [5 0 13 0]
+    
+        brackets = kseg.segls 'x[one] y{two}'
+        mrange(brackets, 3, 0,  {kind:'textObject', area:'inner', target:'[', count:1}) ▸ [2 0 5 0]
+        mrange(brackets, 10, 0, {kind:'textObject', area:'inner', target:'{', count:1}) ▸ [9 0 12 0]
+    
+        array = kseg.segls "if seg not in ['', undefined, ' ', '}', ']', ')']"
+        aobj  = (x area) -> mrange(array, x, 0, {kind:'textObject', area:area, target:'[', count:1})
+    
+        aobj(21, 'inner')  ▸ [15 0 48 0]
+        aobj(21, 'around') ▸ [14 0 49 0]
+        aobj(14, 'inner') ▸ [15 0 48 0]
+        aobj(41, 'inner') ▸ [15 0 48 0]
+        aobj(48, 'inner') ▸ [15 0 48 0]
+    
+        instring = kseg.segls "x = '[' + y]"
+        iobj = (x) -> mrange(instring, x, 0, {kind:'textObject', area:'inner', target:'[', count:1})
+    
+        iobj(5) ▸ null
+    
+        afterstring = kseg.segls "x = '[' ; a[b]"
+        nobj = (x) -> mrange(afterstring, x, 0, {kind:'textObject', area:'inner', target:'[', count:1})
+    
+        nobj(0) ▸ [12 0 13 0]
+    
+        multiline = kseg.segls """
+            foo(
+              bar
+            )
+            """
+    
+        mrange(multiline, 3, 1, {kind:'textObject', area:'inner',  target:'(', count:1}) ▸ [4 0 0 2]
+        mrange(multiline, 3, 1, {kind:'textObject', area:'around', target:'(', count:1}) ▸ [3 0 1 2]
+    
+        mrange(kseg.segls('nothing here'), 0, 0, {kind:'textObject', area:'inner', target:'(', count:1}) ▸ null
+    
+  ▸ cursor to start and end of line
+    
+        s.loadLines belt.linesForText("one two\nfour")
         s.setMainCursor 0 0
     
-        s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
-        s.novimRegister.lines ▸ ['one ']
-        s.novimRegister.linewise ▸ false
+        s.executeNovim {operator:'move', motion:{kind:'eol'}}
+        cur 7 0
+    
+        s.setMainCursor 6 0
+        s.executeNovim {operator:'move', motion:{kind:'bol'}}
         cur 0 0
     
-        s.setMainCursor 8 0
-        s.executeNovim {operator:'yank', motion:{kind:'drow', count:1}}
-        s.novimRegister.lines ▸ ['two ']
-        cur 4 0
+        s.loadLines belt.linesForText("\nabc")
+        s.setMainCursor 0 0
+        s.executeNovim {operator:'move', motion:{kind:'eol'}}
+        cur 0 0
+        
+  ▸ yank
     
-        s.loadLines belt.linesForText("alpha\nbeta\ngamma")
-        s.setMainCursor 3 1
+    ▸ yank motions
+        
+            s.loadLines belt.linesForText("one two three\nfour five")
+            s.setMainCursor 0 0
+        
+            s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
+            s.novimRegister.lines ▸ ['one ']
+            s.novimRegister.linewise ▸ false
+            cur 0 0
+        
+            s.setMainCursor 8 0
+            s.executeNovim {operator:'yank', motion:{kind:'drow', count:1}}
+            s.novimRegister.lines ▸ ['two ']
+            cur 4 0
+        
+            s.loadLines belt.linesForText("alpha\nbeta\ngamma")
+            s.setMainCursor 3 1
+        
+            s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+            s.novimRegister.lines ▸ ['beta']
+            s.novimRegister.linewise ▸ true
+            cur 3 1
+        
+            s.executeNovim {operator:'yank', motion:{kind:'lineDown', count:1}}
+            s.novimRegister.lines ▸ ['beta' 'gamma']
+        
+            history = s.h.length
+            s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
+            s.h.length ▸ history
+            txt "alpha\nbeta\ngamma"
+        
+    ▸ yank flash
+        
+            s.loadLines belt.linesForText("one two three\nfour five")
+            s.setMainCursor 0 0
+        
+            s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
+            s.yankFlash ▸ [[0 0 4 0]]
+        
+            s.clearYankFlash()
+            s.yankFlash ▸ null
+        
+            s.loadLines belt.linesForText("one two")
+            s.setMainCursor 0 0
+            s.startVisual 'char'
+            s.setMainCursor 2 0
+            s.updateVisual()
+        
+            s.executeNovim {operator:'visualYank'}
+            s.yankFlash ▸ [[0 0 2 0]]
+            s.visual ▸ null
+        
+            s.clearYankFlash()
+            s.yankFlash ▸ null
+        
+    ▸ yank flash fades
+        
+            s.loadLines belt.linesForText("one two")
+            s.setMainCursor 0 0
+        
+            s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
+            s.yankFlash ▸ [[0 0 4 0]]
+        
+    ▸ yank flash is drawn
+        
+            h = new harness rows:4 cols:24
+            e = new editor h.screen 'test_yank' []
+        
+            e.layout 0 0 24 4
+            e.state.loadLines belt.linesForText("one two three")
+            e.state.setMainCursor 0 0
+        
+            e.state.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
+            e.draw()
+        
+            h.screen.get_bg 1 0 ▸ theme.novim.yank
+            h.screen.get_bg 4 0 ▸ theme.editor.bg
+        
+            e.state.clearYankFlash()
+            e.draw()
+        
+            h.screen.get_bg 1 0 ▸ theme.editor.bg
+            
+    ▸ yank line command
+    
+            m = new novim s
+            key = c -> m.handleKey c {combo:c, char:c}
+            keys = s x y -> 
+                for c in s
+                    key c
+                cur x y if x?
+    
+            s.loadLines belt.linesForText("one\ntwo\nthree")
+            s.setMainCursor 1 1
+            
+            key 'Y'
+            s.novimRegister.lines ▸ ['two']
+            s.novimRegister.linewise ▸ true
+            cur 1 1
+            txt "one\ntwo\nthree"
+            
+            s.setMainCursor 0 0
+            keys '2Y'
+            s.novimRegister.lines ▸ ['one' 'two']
+    
+  ▸ put
+    
+        s.loadLines belt.linesForText("alpha\nbeta")
+        s.setMainCursor 0 0
     
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
-        s.novimRegister.lines ▸ ['beta']
-        s.novimRegister.linewise ▸ true
+    
+        s.executeNovim {operator:'put', after:true}
+        txt "alpha\nalpha\nbeta"
+        cur 0 1
+    
+        s.executeNovim {operator:'put', after:false}
+        txt "alpha\nalpha\nalpha\nbeta"
+        cur 0 1
+    
+        s.loadLines belt.linesForText("  alpha\nbeta")
+        s.setMainCursor 2 0
+        s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+        s.setMainCursor 0 1
+        s.executeNovim {operator:'put', after:false}
+        txt "  alpha\n  alpha\nbeta"
+        cur 2 1
+    
+        s.loadLines belt.linesForText("x\ny")
+        s.setMainCursor 0 0
+        s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+        s.setMainCursor 0 1
+        s.executeNovim {operator:'put', after:true, count:2}
+        txt "x\ny\nx\nx"
+        cur 0 3
+    
+        s.loadLines belt.linesForText("abc\ndef")
+        s.setMainCursor 0 0
+        s.executeNovim {operator:'yank', motion:{kind:'eol'}}
+        s.setMainCursor 3 1
+        s.executeNovim {operator:'put', after:true}
+        txt "abc\ndefabc"
+        cur 6 1
+    
+        s.loadLines belt.linesForText("abc\ndef")
+        s.setMainCursor 0 0
+        s.executeNovim {operator:'yank', motion:{kind:'eol'}}
+        s.setMainCursor 1 1
+        s.executeNovim {operator:'put', after:false}
+        txt "abc\nabcdef"
         cur 3 1
     
-        s.executeNovim {operator:'yank', motion:{kind:'lineDown', count:1}}
-        s.novimRegister.lines ▸ ['beta' 'gamma']
-    
-        history = s.h.length
-        s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
-        s.h.length ▸ history
-        txt "alpha\nbeta\ngamma"
-    
-  ▸ yank flash
-    
-        s.loadLines belt.linesForText("one two three\nfour five")
+        s.novimRegister = { lines: ['one' 'two'], linewise: false }
+        s.loadLines belt.linesForText("ab")
         s.setMainCursor 0 0
+        s.executeNovim {operator:'put', after:true}
+        txt "one\ntwo\nab"
+        cur 0 2
     
-        s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
-        s.yankFlash ▸ [[0 0 4 0]]
-    
-        s.clearYankFlash()
-        s.yankFlash ▸ null
-    
-        s.loadLines belt.linesForText("one two")
+        s.novimRegister = null
+        s.loadLines belt.linesForText("abc")
         s.setMainCursor 0 0
-        s.startVisual 'char'
-        s.setMainCursor 2 0
-        s.updateVisual()
+        s.executeNovim {operator:'put', after:true}
+        txt "abc"
     
-        s.executeNovim {operator:'visualYank'}
-        s.yankFlash ▸ [[0 0 2 0]]
-        s.visual ▸ null
+    ▸ put text at the cursor
     
-        s.clearYankFlash()
-        s.yankFlash ▸ null
-    
-  ▸ yank flash fades
-    
-        s.loadLines belt.linesForText("one two")
-        s.setMainCursor 0 0
-    
-        s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
-        s.yankFlash ▸ [[0 0 4 0]]
-    
-  ▸ yank flash is drawn
-    
-        h = new harness rows:4 cols:24
-        e = new editor h.screen 'test_yank' []
-    
-        e.layout 0 0 24 4
-        e.state.loadLines belt.linesForText("one two three")
-        e.state.setMainCursor 0 0
-    
-        e.state.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
-        e.draw()
-    
-        h.screen.get_bg 1 0 ▸ theme.novim.yank
-        h.screen.get_bg 4 0 ▸ theme.editor.bg
-    
-        e.state.clearYankFlash()
-        e.draw()
-    
-        h.screen.get_bg 1 0 ▸ theme.editor.bg
+            s.novimRegister = { lines: ['X'], linewise: false }
         
-  ▸ yank line command
-
+            s.loadLines belt.linesForText("abc")
+            s.setMainCursor 0 0
+            s.executeNovim {operator:'put', after:true}
+            txt "Xabc"
+            cur 1 0
+        
+            s.loadLines belt.linesForText("abc")
+            s.setMainCursor 1 0
+            s.executeNovim {operator:'put', after:true}
+            txt "aXbc"
+            cur 2 0
+        
+            s.loadLines belt.linesForText("abc")
+            s.setMainCursor 1 0
+            s.executeNovim {operator:'put', after:false}
+            txt "Xabc"
+            cur 1 0
+        
+            s.loadLines belt.linesForText("abc")
+            s.setMainCursor 3 0
+            s.executeNovim {operator:'put', after:true}
+            txt "abcX"
+            cur 4 0
+        
+            s.loadLines belt.linesForText("abc\ndef")
+            s.setMainCursor 0 0
+            before = s.h.length
+        
+            s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+            s.executeNovim {operator:'put', after:true, count:3}
+        
+            (s.h.length - before) ▸ 1
+            s.executeNovim {operator:'undo', count:1}
+            txt "abc\ndef"
+    
+  ▸ delete fills the register
+    
+        s.loadLines belt.linesForText("one two\nthree")
+        s.setMainCursor 0 0
+    
+        s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
+        s.novimRegister.lines ▸ ['one two']
+        s.novimRegister.linewise ▸ true
+        txt "three"
+    
+        s.executeNovim {operator:'put', after:false}
+        txt "one two\nthree"
+    
+        s.loadLines belt.linesForText("abc")
+        s.setMainCursor 1 0
+        s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+        s.novimRegister.lines ▸ ['b']
+        s.novimRegister.linewise ▸ false
+        txt "ac"
+    
+        s.loadLines belt.linesForText("one two")
+        s.setMainCursor 3 0
+        s.executeNovim {operator:'delete', motion:{kind:'eol'}}
+        s.novimRegister.lines ▸ [' two']
+        s.novimRegister.linewise ▸ false
+        txt "one"
+    
+        s.loadLines belt.linesForText("abcd")
+        s.setMainCursor 0 0
+        s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
+        s.executeNovim {operator:'repeat', count:1}
+        s.novimRegister.lines ▸ ['cd']
+        txt ""
+    
+  ▸ clipboard registers
+    
+        copies = []
+        savedCopy  = clip.copy
+        savedPaste = clip.paste
+        savedTool  = clip.tool
+        pasted     = ''
+    
+        clip.tool  = 'wl'
+        clip.copy  = (text) -> copies.push text
+        clip.paste = -> pasted
+    
+        novim.clipboardSync = null
+    
+        global.ked_screen = {}
+        novim.isHeadless() ▸ false
+        novim.clipboardEnabled() ▸ true
+        global.ked_screen = undefined
+    
+        novim.isHeadless() ▸ true
+        novim.clipboardEnabled() ▸ false
+    
+        s.loadLines belt.linesForText("one\ntwo")
+        s.setMainCursor 0 0
+    
+        s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+        copies ▸ []
+    
+        s.executeNovim {operator:'put', after:true}
+        txt "one\none\ntwo"
+    
+        novim.toggleClipboard() ▸ true
+        novim.clipboardEnabled() ▸ true
+    
+        s.loadLines belt.linesForText("one\ntwo")
+        s.setMainCursor 0 0
+        s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+        copies ▸ ['one\n']
+    
+        pasted = "shared\n"
+        s.executeNovim {operator:'put', after:true}
+        txt "one\nshared\ntwo"
+    
+        pasted = "XYZ"
+        s.loadLines belt.linesForText("abc")
+        s.setMainCursor 1 0
+        s.executeNovim {operator:'put', after:true}
+        txt "aXYZbc"
+    
+        s.loadLines belt.linesForText("gone\nkept")
+        s.setMainCursor 0 0
+        s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
+        copies[-1] ▸ 'gone\n'
+    
+        novim.clipboardSync = false
+        novim.clipboardEnabled() ▸ false
+    
+        s.loadLines belt.linesForText("alpha\nbeta")
+        s.setMainCursor 0 0
+    
+        s.executeNovim {operator:'yank', motion:{kind:'line', count:1}, register:'clipboard'}
+        copies[-1] ▸ 'alpha\n'
+        s.novimRegister.linewise ▸ true
+    
+        pasted = "plus\n"
+        s.executeNovim {operator:'put', after:true, register:'clipboard'}
+        txt "alpha\nplus\nbeta"
+    
+        pasted = "star"
+        s.loadLines belt.linesForText("ab")
+        s.setMainCursor 0 0
+        s.executeNovim {operator:'put', after:true, register:'clipboard'}
+        txt "starab"
+    
+        s.loadLines belt.linesForText("abc")
+        s.setMainCursor 0 0
+        s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+        s.novimRegister.lines ▸ ['a']
+    
         m = new novim s
         key = c -> m.handleKey c {combo:c, char:c}
         keys = s x y -> 
             for c in s
                 key c
             cur x y if x?
-
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 1 1
-        
-        key 'Y'
-        s.novimRegister.lines ▸ ['two']
-        s.novimRegister.linewise ▸ true
-        cur 1 1
-        txt "one\ntwo\nthree"
-        
+    
+        s.loadLines belt.linesForText("one\ntwo")
         s.setMainCursor 0 0
-        keys '2Y'
-        s.novimRegister.lines ▸ ['one' 'two']
-
-▸ put
-
-    s.loadLines belt.linesForText("alpha\nbeta")
-    s.setMainCursor 0 0
-
-    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
-
-    s.executeNovim {operator:'put', after:true}
-    txt "alpha\nalpha\nbeta"
-    cur 0 1
-
-    s.executeNovim {operator:'put', after:false}
-    txt "alpha\nalpha\nalpha\nbeta"
-    cur 0 1
-
-    s.loadLines belt.linesForText("  alpha\nbeta")
-    s.setMainCursor 2 0
-    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
-    s.setMainCursor 0 1
-    s.executeNovim {operator:'put', after:false}
-    txt "  alpha\n  alpha\nbeta"
-    cur 2 1
-
-    s.loadLines belt.linesForText("x\ny")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
-    s.setMainCursor 0 1
-    s.executeNovim {operator:'put', after:true, count:2}
-    txt "x\ny\nx\nx"
-    cur 0 3
-
-    s.loadLines belt.linesForText("abc\ndef")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'yank', motion:{kind:'eol'}}
-    s.setMainCursor 3 1
-    s.executeNovim {operator:'put', after:true}
-    txt "abc\ndefabc"
-    cur 6 1
-
-    s.loadLines belt.linesForText("abc\ndef")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'yank', motion:{kind:'eol'}}
-    s.setMainCursor 1 1
-    s.executeNovim {operator:'put', after:false}
-    txt "abc\nabcdef"
-    cur 3 1
-
-    s.novimRegister = { lines: ['one' 'two'], linewise: false }
-    s.loadLines belt.linesForText("ab")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'put', after:true}
-    txt "one\ntwo\nab"
-    cur 0 2
-
-    s.novimRegister = null
-    s.loadLines belt.linesForText("abc")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'put', after:true}
-    txt "abc"
-
-  ▸ put text at the cursor
-
-        s.novimRegister = { lines: ['X'], linewise: false }
     
-        s.loadLines belt.linesForText("abc")
+        keys '"+yy'
+        copies[-1] ▸ 'one\n'
+        s.novimRegister.lines ▸ ['one']
+    
+        keys '"*yy'
+        copies[-1] ▸ 'one\n'
+    
+        before = copies.length
+        keys '""yy'
+        copies.length ▸ before
+    
+        s.loadLines belt.linesForText("one\ntwo")
         s.setMainCursor 0 0
-        s.executeNovim {operator:'put', after:true}
-        txt "Xabc"
-        cur 1 0
+        key '"'
+        m.handleKey 'esc' {combo:'esc'}
+        key 'x'
+        txt "ne\ntwo"
     
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 1 0
-        s.executeNovim {operator:'put', after:true}
-        txt "aXbc"
-        cur 2 0
+        clip.tool = 'none'
+        clip.text = ''
     
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 1 0
-        s.executeNovim {operator:'put', after:false}
-        txt "Xabc"
-        cur 1 0
-    
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 3 0
-        s.executeNovim {operator:'put', after:true}
-        txt "abcX"
-        cur 4 0
-    
-        s.loadLines belt.linesForText("abc\ndef")
+        s.loadLines belt.linesForText("fall\nback")
         s.setMainCursor 0 0
-        before = s.h.length
+        s.executeNovim {operator:'yank', motion:{kind:'line', count:1}, register:'clipboard'}
+        clip.text ▸ 'fall\n'
     
-        s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
-        s.executeNovim {operator:'put', after:true, count:3}
+        s.loadLines belt.linesForText("fall\nback")
+        s.setMainCursor 0 0
+        s.executeNovim {operator:'put', after:true, register:'clipboard'}
+        txt "fall\nfall\nback"
     
-        (s.h.length - before) ▸ 1
-        s.executeNovim {operator:'undo', count:1}
-        txt "abc\ndef"
-
-▸ delete fills the register
-
-    s.loadLines belt.linesForText("one two\nthree")
-    s.setMainCursor 0 0
-
-    s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
-    s.novimRegister.lines ▸ ['one two']
-    s.novimRegister.linewise ▸ true
-    txt "three"
-
-    s.executeNovim {operator:'put', after:false}
-    txt "one two\nthree"
-
-    s.loadLines belt.linesForText("abc")
-    s.setMainCursor 1 0
-    s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
-    s.novimRegister.lines ▸ ['b']
-    s.novimRegister.linewise ▸ false
-    txt "ac"
-
-    s.loadLines belt.linesForText("one two")
-    s.setMainCursor 3 0
-    s.executeNovim {operator:'delete', motion:{kind:'eol'}}
-    s.novimRegister.lines ▸ [' two']
-    s.novimRegister.linewise ▸ false
-    txt "one"
-
-    s.loadLines belt.linesForText("abcd")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
-    s.executeNovim {operator:'repeat', count:1}
-    s.novimRegister.lines ▸ ['cd']
-    txt ""
-
-▸ clipboard registers
-
-    copies = []
-    savedCopy  = clip.copy
-    savedPaste = clip.paste
-    savedTool  = clip.tool
-    pasted     = ''
-
-    clip.tool  = 'wl'
-    clip.copy  = (text) -> copies.push text
-    clip.paste = -> pasted
-
-    novim.clipboardSync = null
-
-    global.ked_screen = {}
-    novim.isHeadless() ▸ false
-    novim.clipboardEnabled() ▸ true
-    global.ked_screen = undefined
-
-    novim.isHeadless() ▸ true
-    novim.clipboardEnabled() ▸ false
-
-    s.loadLines belt.linesForText("one\ntwo")
-    s.setMainCursor 0 0
-
-    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
-    copies ▸ []
-
-    s.executeNovim {operator:'put', after:true}
-    txt "one\none\ntwo"
-
-    novim.toggleClipboard() ▸ true
-    novim.clipboardEnabled() ▸ true
-
-    s.loadLines belt.linesForText("one\ntwo")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
-    copies ▸ ['one\n']
-
-    pasted = "shared\n"
-    s.executeNovim {operator:'put', after:true}
-    txt "one\nshared\ntwo"
-
-    pasted = "XYZ"
-    s.loadLines belt.linesForText("abc")
-    s.setMainCursor 1 0
-    s.executeNovim {operator:'put', after:true}
-    txt "aXYZbc"
-
-    s.loadLines belt.linesForText("gone\nkept")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
-    copies[-1] ▸ 'gone\n'
-
-    novim.clipboardSync = false
-    novim.clipboardEnabled() ▸ false
-
-    s.loadLines belt.linesForText("alpha\nbeta")
-    s.setMainCursor 0 0
-
-    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}, register:'clipboard'}
-    copies[-1] ▸ 'alpha\n'
-    s.novimRegister.linewise ▸ true
-
-    pasted = "plus\n"
-    s.executeNovim {operator:'put', after:true, register:'clipboard'}
-    txt "alpha\nplus\nbeta"
-
-    pasted = "star"
-    s.loadLines belt.linesForText("ab")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'put', after:true, register:'clipboard'}
-    txt "starab"
-
-    s.loadLines belt.linesForText("abc")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
-    s.novimRegister.lines ▸ ['a']
-
-    m = new novim s
-    key = c -> m.handleKey c {combo:c, char:c}
-    keys = s x y -> 
-        for c in s
-            key c
-        cur x y if x?
-
-    s.loadLines belt.linesForText("one\ntwo")
-    s.setMainCursor 0 0
-
-    keys '"+yy'
-    copies[-1] ▸ 'one\n'
-    s.novimRegister.lines ▸ ['one']
-
-    keys '"*yy'
-    copies[-1] ▸ 'one\n'
-
-    before = copies.length
-    keys '""yy'
-    copies.length ▸ before
-
-    s.loadLines belt.linesForText("one\ntwo")
-    s.setMainCursor 0 0
-    key '"'
-    m.handleKey 'esc' {combo:'esc'}
-    key 'x'
-    txt "ne\ntwo"
-
-    clip.tool = 'none'
-    clip.text = ''
-
-    s.loadLines belt.linesForText("fall\nback")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'yank', motion:{kind:'line', count:1}, register:'clipboard'}
-    clip.text ▸ 'fall\n'
-
-    s.loadLines belt.linesForText("fall\nback")
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'put', after:true, register:'clipboard'}
-    txt "fall\nfall\nback"
-
-    clip.tool  = 'wl'
-    novim.clipboardSync = null
-    clip.copy  = savedCopy
-    clip.paste = savedPaste
-    clip.tool  = savedTool
-
-▸ execute command
-
-    text = """
-        alpha beta
-        gamma delta
-        """
-
-    s.loadLines belt.linesForText(text)
-
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'delete', motion:{kind:'word', count:1}}
-
-    txt """
-        beta
-        gamma delta
-        """
-    cur 0 0
-
-    s.setMainCursor 2 1
-    s.executeNovim {operator:'delete', motion:{kind:'eol'}}
-
-    txt """
-        beta
-        ga
-        """
-    cur 2 1
-
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
-
-    txt """
-        ga
-        """
-    cur 0 0
-
-    s.loadLines belt.linesForText(text)
-
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'delete', motion:{kind:'char', count:3}}
-
-    txt """
-        ha beta
-        gamma delta
-        """
-
-    s.setMainCursor 5 1
-    s.executeNovim {operator:'delete', motion:{kind:'charBack', count:3}}
-
-    txt """
-        ha beta
-        ga delta
-        """
-
-    s.setMainCursor 0 0
-    s.executeNovim {operator:'delete', motion:{kind:'eol'}}
-
-    txt """
-        
-        ga delta
-        """
-
-  ▸ execute command undo
-
+        clip.tool  = 'wl'
+        novim.clipboardSync = null
+        clip.copy  = savedCopy
+        clip.paste = savedPaste
+        clip.tool  = savedTool
+    
+  ▸ execute command
+    
         text = """
             alpha beta
             gamma delta
@@ -671,1724 +610,1786 @@ mrange = lines x y m -> motion.range lines [x y] m
     
         s.loadLines belt.linesForText(text)
     
-        before = s.h.length
-    
         s.setMainCursor 0 0
-        s.executeNovim {operator:'delete', motion:{kind:'line', count:2}}
-    
-        txt """
-            """
-        (s.h.length - before) ▸ 1
-    
-        s.undo()
-    
-        txt text
-
-  ▸ undo command
-
-        s.loadLines belt.linesForText("alpha beta\ngamma delta")
-        s.setMainCursor 0 0
-    
-        s.executeNovim {operator:'delete', motion:{kind:'word', count:1}}
-        txt "beta\ngamma delta"
-    
-        s.executeNovim {operator:'undo', count:1}
-        txt "alpha beta\ngamma delta"
-        cur 0 0
-    
-        s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
-        s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
-        txt ""
-    
-        s.executeNovim {operator:'undo', count:2}
-        txt "alpha beta\ngamma delta"
-    
-        s.executeNovim {operator:'undo', count:5}
-        txt "alpha beta\ngamma delta"
-
-  ▸ execute command with multiple cursors
-
-        text = """
-            alpha beta
-            gamma delta
-            """
-    
-        s.loadLines belt.linesForText(text)
-    
-        s.setCursors [[0 0] [0 1]]
-    
         s.executeNovim {operator:'delete', motion:{kind:'word', count:1}}
     
         txt """
             beta
-            delta
+            gamma delta
             """
-        s.allCursors().length ▸ 2
-    
-        s.loadLines belt.linesForText("abc def")
-        s.setCursors [[0 0] [1 0]]
-    
-        s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
-    
-        txt " def"
-    
-        s.loadLines belt.linesForText("\nalpha\nbeta")
-        s.setMainCursor 0 0
-    
-        s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
-    
-        txt "alpha\nbeta"
-
-▸ execute text objects
-
-    s.loadLines belt.linesForText("one two three four")
-    s.setMainCursor 5 0
-
-    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
-    txt "one  three four"
-
-    s.loadLines belt.linesForText("one two three four")
-    s.setMainCursor 5 0
-
-    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}}
-    txt "one three four"
-
-    s.loadLines belt.linesForText("one two")
-    s.setMainCursor 7 0
-
-    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
-    txt "one "
-
-    s.loadLines belt.linesForText('say "hello there" ok')
-    s.setMainCursor 7 0
-
-    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'"', count:1}}
-    txt 'say "" ok'
-
-    s.loadLines belt.linesForText('say "hello there" ok')
-    s.setMainCursor 7 0
-
-    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'"', count:1}}
-    txt 'say ok'
-
-    s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
-    s.setMainCursor 21 0
-
-    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'[', count:1}}
-    txt "if seg not in []"
-
-    s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
-    s.setMainCursor 21 0
-
-    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'[', count:1}}
-    txt "if seg not in "
-
-    s.loadLines belt.linesForText("foo(\n  bar\n)")
-    s.setMainCursor 3 1
-
-    s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'(', count:1}}
-    txt "foo"
-
-    s.loadLines belt.linesForText("alpha")
-    s.setMainCursor 3 0
-
-    s.executeNovim {operator:'delete', motion:{kind:'charBack', count:1}}
-    txt "alha"
-
-    s.loadLines belt.linesForText("alpha")
-    s.setMainCursor 0 0
-
-    s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
-    txt "lpha"
-
-    s.loadLines belt.linesForText("alpha")
-    s.setMainCursor 0 0
-
-    s.executeNovim {operator:'delete', motion:{kind:'charBack', count:1}}
-    txt "alpha"
-
-▸ change
-  
-  ▸ change selects by motion
-
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 5 0
-    
-        s.selectByMotion {kind:'textObject', area:'inner', target:'word', count:1}
-    
-        txt "one two three"
-        s.s.selections ▸ [[4 0 7 0]]
-        cur 5 0
-    
-        s.loadLines belt.linesForText("one two\nthree four")
-        s.setCursors [[0 0] [0 1]]
-    
-        s.selectByMotion {kind:'word', count:1}
-    
-        txt "one two\nthree four"
-        s.s.selections ▸ [[0 0 4 0] [0 1 6 1]]
-        s.allCursors() ▸ [[0 0] [0 1]]
-
-  ▸ change only selects
-
-        s.novimRegister = { lines: ['keep'], linewise: false }
-    
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 5 0
-    
-        s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
-    
-        txt "one two three"
-        s.s.selections ▸ [[4 0 7 0]]
-        cur 7 0
-        s.novimRegister.lines ▸ ['keep']
-    
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 5 0
-    
-        s.executeNovim {operator:'change', motion:{kind:'textObject', area:'around', target:'word', count:1}}
-    
-        txt "one two three"
-        s.s.selections ▸ [[4 0 8 0]]
-        cur 8 0
-    
-        s.loadLines belt.linesForText("one two\nthree four")
-        s.setCursors [[0 0] [0 1]]
-    
-        s.executeNovim {operator:'change', motion:{kind:'word', count:1}}
-    
-        txt "one two\nthree four"
-        s.s.selections ▸ [[0 0 4 0] [0 1 6 1]]
-        s.allCursors() ▸ [[4 0] [6 1]]
-    
-        s.loadLines belt.linesForText("one two")
-        s.setMainCursor 4 0
-    
-        s.executeNovim {operator:'change', motion:{kind:'eol'}}
-    
-        txt "one two"
-        s.s.selections ▸ [[4 0 7 0]]
-        cur 7 0
-    
-        s.loadLines belt.linesForText("one\ntwo")
-        s.setMainCursor 0 1
-    
-        s.executeNovim {operator:'change', motion:{kind:'line', count:1}}
-    
-        txt "one\ntwo"
-        s.s.selections ▸ [[0 1 3 1]]
-        cur 3 1
-
-  ▸ typing replaces the change selection
-
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 5 0
-    
-        s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
-        s.insert 'X'
-    
-        txt "one X three"
-
-  ▸ change does not touch history
-
-        s.loadLines belt.linesForText("alpha beta")
-        s.setMainCursor 0 0
-        before = s.h.length
-    
-        s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
-    
-        txt "alpha beta"
-        s.s.selections ▸ [[0 0 5 0]]
-        (s.h.length - before) ▸ 0
-
-  ▸ change commands and keys
-
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 5 0
-        keys 'ciw'
-        txt "one two three"
-        s.s.selections ▸ [[4 0 7 0]]
-        cur 7 0
-        m.operator ▸ null
-    
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 5 0
-        keys 'caw'
-        txt "one two three"
-        s.s.selections ▸ [[4 0 8 0]]
-    
-        s.loadLines belt.linesForText("one two")
-        s.setMainCursor 4 0
-        keys 'C'
-        txt "one two"
-        s.s.selections ▸ [[4 0 7 0]]
-        cur 7 0
-    
-        s.loadLines belt.linesForText("one\ntwo")
-        s.setMainCursor 0 0
-        keys 'S'
-        txt "one\ntwo"
-        s.s.selections ▸ [[0 0 3 0]]
-        cur 3 0
-    
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
-        keys 's'
-        txt "abcdef"
-        s.s.selections ▸ [[0 0 1 0]]
-        cur 1 0
-    
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
-        keys '2s'
-        txt "abcdef"
-        s.s.selections ▸ [[0 0 2 0]]
-        cur 2 0
-    
-        s.loadLines belt.linesForText("one\ntwo")
-        s.setMainCursor 0 0
-        keys 'cc'
-        txt "one\ntwo"
-        s.s.selections ▸ [[0 0 3 0]]
-        cur 3 0
-    
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 0 0
-        keys 'dw'
-        txt "two three"
-    
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 0 0
-        keys 'ciw'
-        txt "one two three"
-        s.s.selections ▸ [[0 0 3 0]]
-    
-        s.lastChange = null
-        s.novimInsert = null
-    
-        keys '.'
-        txt "one two three"
-        s.s.selections ▸ [[0 0 3 0]]
-    
-  ▸ change exits novim
-    
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 5 0
-    
-        s.allowedModes.novim = true
-        mode.modes.novim = novim
-        mode.start s 'novim'
-    
-        mode.isActive s 'novim' ▸ true
-    
-        s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
-    
-        mode.isActive s 'novim' ▸ false
-        txt "one two three"
-        s.s.selections ▸ [[4 0 7 0]]
-        cur 7 0
-    
-        delete s.allowedModes.novim
-
-▸ repeat
-
-  ▸ repeat command
-
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
-    
-        s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
-        txt "bcdef"
-    
-        s.executeNovim {operator:'repeat', count:1}
-        txt "cdef"
-    
-        s.executeNovim {operator:'repeat', count:2}
-        txt "ef"
-    
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
-    
-        s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
-        txt "cdef"
-    
-        s.executeNovim {operator:'repeat', count:1}
-        txt "ef"
-    
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
-    
-        s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
-        s.executeNovim {operator:'move', motion:{kind:'right', count:1}}
-        s.executeNovim {operator:'repeat', count:1}
-        txt "bdef"
-    
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
-    
-        s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
-        s.executeNovim {operator:'undo', count:1}
-        txt "abcdef"
-    
-        s.executeNovim {operator:'repeat', count:1}
-        txt "bcdef"
-    
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 0 0
-    
-        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}}
-        txt "two three"
-    
-        s.executeNovim {operator:'repeat', count:1}
-        txt "three"
-    
-        s.lastChange = null
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 0 0
-    
-        s.executeNovim {operator:'repeat', count:1}
-        txt "abc"
-    
-  ▸ repeat insert
-    
-        s.loadLines belt.linesForText("abc\ndef")
-        s.setMainCursor 0 0
-    
-        keys 'i'
-        s.novimInsert.kind ▸ 'insert'
-        s.insert 'X'
-        s.finishNovimInsert()
-        txt "Xabc\ndef"
-    
-        s.setMainCursor 0 1
-        s.executeNovim {operator:'repeat', count:1}
-        txt "Xabc\nXdef"
-    
-        s.loadLines belt.linesForText("one two")
-        s.setMainCursor 0 0
-    
-        keys 'i'
-        s.insert 'new '
-        s.finishNovimInsert()
-        txt "new one two"
-    
-        s.setMainCursor 0 4
-        s.executeNovim {operator:'repeat', count:2}
-        txt "new new new one two"
-    
-  ▸ repeat insert with backspace
-    
-        s.loadLines belt.linesForText("abc\ndef")
-        s.setMainCursor 0 0
-    
-        keys 'i'
-        s.insert 'XY'
-        s.delete 'back' false
-        s.insert 'Z'
-        s.finishNovimInsert()
-        txt "XZabc\ndef"
-    
-        s.setMainCursor 0 1
-        s.executeNovim {operator:'repeat', count:1}
-        txt "XZabc\nXZdef"
-    
-  ▸ repeat append
-    
-        s.loadLines belt.linesForText("abc\ndef")
-        s.setMainCursor 0 1
-    
-        keys 'A'
-        s.insert 'Z'
-        s.finishNovimInsert()
-        txt "abc\ndefZ"
-    
-        s.setMainCursor 0 0
-        s.executeNovim {operator:'repeat', count:1}
-        txt "abcZ\ndefZ"
-    
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 0 0
-    
-        keys 'a'
-        s.insert 'X'
-        s.finishNovimInsert()
-        txt "aXbc"
-    
-        s.setMainCursor 0 0
-        s.executeNovim {operator:'repeat', count:1}
-        txt "aXXbc"
-    
-  ▸ repeat open line
-    
-        s.loadLines belt.linesForText("abc\ndef")
-        s.setMainCursor 0 0
-    
-        keys 'o'
-        s.insert 'new'
-        s.finishNovimInsert()
-        txt "abc\nnew\ndef"
-    
-        s.setMainCursor 0 0
-        s.executeNovim {operator:'repeat', count:1}
-        txt "abc\nnew\nnew\ndef"
-    
-  ▸ repeat change with text
-    
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 4 0
-    
-        keys 'ciw'
-        s.insert 'X'
-        s.finishNovimInsert()
-        txt "one X three"
-    
-        s.setMainCursor 8 0
-        s.executeNovim {operator:'repeat', count:1}
-        txt "one X X"
-    
-  ▸ repeat change without text
-    
-        s.loadLines belt.linesForText("one two")
-        s.setMainCursor 0 0
-    
-        keys 'ciw'
-        s.finishNovimInsert()
-        txt "one two"
-    
-        s.setMainCursor 0 0
-        s.executeNovim {operator:'repeat', count:1}
-        txt " two"
-    
-  ▸ repeat put
-    
-        s.loadLines belt.linesForText("one\ntwo")
-        s.setMainCursor 0 0
-        s.novimRegister = { lines: ['new'], linewise: true }
-    
-        keys 'p'
-        txt "one\nnew\ntwo"
-    
-        s.setMainCursor 0 2
-        s.executeNovim {operator:'repeat', count:1}
-        txt "one\nnew\ntwo\nnew"
-    
-        s.loadLines belt.linesForText("one two")
-        s.setMainCursor 0 0
-        s.novimRegister = { lines: ['X'], linewise: false }
-    
-        keys 'p'
-        txt "Xone two"
-    
-        s.setMainCursor 4 0
-        s.executeNovim {operator:'repeat', count:1}
-        txt "XoneX two"
-    
-  ▸ repeat visual delete
-    
-        s.loadLines belt.linesForText("abcdefg")
-        s.setMainCursor 0 0
-    
-        keys 'vlld'
-        txt "cdefg"
-    
-        s.executeNovim {operator:'repeat', count:1}
-        txt "efg"
-    
-        s.executeNovim {operator:'repeat', count:1}
-        txt "g"
-    
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 0 0
-    
-        keys 'Vd'
-        txt "two\nthree"
-    
-        s.executeNovim {operator:'repeat', count:1}
-        txt "three"
-    
-  ▸ repeat visual change
-    
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
-    
-        keys 'vllc'
-        s.insert 'XY'
-        s.finishNovimInsert()
-        txt "XYcdef"
-    
-        s.setMainCursor 2 0
-        s.executeNovim {operator:'repeat', count:1}
-        txt "XYXYef"
-    
-        s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
-        s.setMainCursor 0 0
-    
-        keys 'Vc'
-        s.insert 'X'
-        s.finishNovimInsert()
-        txt "Xtwo\nthree\nfour"
-    
-        s.setMainCursor 0 1
-        s.executeNovim {operator:'repeat', count:1}
-        txt "Xtwo\nXfour"
-
-▸ keys
-
-    text = """
-        alpha beta
-        gamma delta
-        """
-
-    s.loadLines belt.linesForText(text)
-
-    m = new novim s
-
-    key = c -> m.handleKey c {combo:c, char:c}
-    keys = s x y -> 
-        for c in s
-            key c
-        cur x y if x?
-
-    keys 'd2w'
-    txt """
-        gamma delta
-        """
-
-    s.loadLines belt.linesForText(text)
-    s.setMainCursor 0 0
-
-    key 'd'
-    m.handleKey 'esc' {combo:'esc'}
-
-    txt text
-    m.operator ▸ null
-
-    key 'x'
-
-    txt """
-        lpha beta
-        gamma delta
-        """
-
-    s.loadLines belt.linesForText(text)
-    s.setMainCursor 0 0
-
-    keys 'dw'
-    txt """
-        beta
-        gamma delta
-        """
-
-    key 'u'
-    txt text
-
-    s.loadLines belt.linesForText("abc def")
-    s.setMainCursor 4 0
-
-    key 'd'
-    m.handleKey 'left' {combo:'left'}
-    txt "abcdef"
-
-    s.loadLines belt.linesForText("abc def")
-    s.setMainCursor 4 0
-
-    key 'd'
-    m.handleKey 'right' {combo:'right'}
-    txt "abc ef"
-
-    s.loadLines belt.linesForText("abc\ndef\nghi")
-    s.setMainCursor 0 1
-
-    key 'd'
-    m.handleKey 'down' {combo:'down'}
-    txt "abc"
-
-    s.loadLines belt.linesForText("abc\ndef\nghi")
-    s.setMainCursor 0 1
-
-    key 'd'
-    m.handleKey 'up' {combo:'up'}
-    txt "ghi"
-
-    s.loadLines belt.linesForText("alpha")
-    s.setMainCursor 3 0
-
-    keys 'dh'
-    txt "alha"
-
-    s.loadLines belt.linesForText("alpha")
-    s.setMainCursor 0 0
-
-    keys 'dl'
-    txt "lpha"
-
-    s.loadLines belt.linesForText("one two three")
-    s.setMainCursor 5 0
-
-    keys 'diw'
-    txt "one  three"
-    m.operator ▸ null
-
-    s.loadLines belt.linesForText('say "hello there" ok')
-    s.setMainCursor 7 0
-
-    keys 'da"'
-    txt "say ok"
-
-    s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
-    s.setMainCursor 21 0
-
-    keys 'di['
-    txt "if seg not in []"
-
-    s.loadLines belt.linesForText("one two three")
-    s.setMainCursor 0 0
-
-    keys 'd2iw'
-    txt " three"
-
-    s.loadLines belt.linesForText("abc")
-
-    keys 'di'
-    m.handleKey 'esc' {combo:'esc'}
-    txt "abc"
-    m.area ▸ null
-
-    s.loadLines belt.linesForText("abcdef")
-    s.setMainCursor 0 0
-
-    key 'x'
-    txt "bcdef"
-
-    key '.'
-    txt "cdef"
-
-    keys '2.'
-    txt "ef"
-
-    s.loadLines belt.linesForText("abcdef")
-    s.setMainCursor 0 0
-
-    keys 'xl.'
-    txt "bdef"
-
-    s.loadLines belt.linesForText("one two three")
-    s.setMainCursor 0 0
-
-    keys 'daw'
-    txt "two three"
-
-    key '.'
-    txt "three"
-
-    s.loadLines belt.linesForText("one\n  two\n  three")
-    s.setMainCursor 0 0
-    keys 'gg'   0 0
-
-▸ open lines
-
-    s.loadLines belt.linesForText("abc\ndef")
-    s.setMainCursor 0 1
-
-    key 'o'
-    txt "abc\ndef\n"
-    cur 0 2
-
-    s.loadLines belt.linesForText("abc\ndef")
-    s.setMainCursor 0 1
-
-    key 'O'
-    txt "abc\n\ndef"
-    cur 0 1
-
-    s.loadLines belt.linesForText("abc")
-    s.setMainCursor 0 0
-
-    keys '2o'
-    txt "abc\n\n"
-    cur 0 2
-
-    s.loadLines belt.linesForText("abc")
-    s.setMainCursor 0 0
-
-    keys '2O'
-    txt "\n\nabc"
-    cur 0 0
-
-▸ insert at first non blank
-
-    s.loadLines belt.linesForText("    abc")
-    s.setMainCursor 6 0
-
-    s.allowedModes.novim = true
-    mode.modes.novim = novim
-    mode.start s 'novim'
-
-    key 'I'
-    cur 4 0
-    mode.isActive s 'novim' ▸ false
-
-    delete s.allowedModes.novim
-
-▸ replace chars
-
-    s.loadLines belt.linesForText("abcdef")
-    s.setMainCursor 1 0
-
-    key 'r'
-    m.replace ▸ true
-    key 'X'
-    txt "aXcdef"
-    cur 2 0
-    m.replace ▸ null
-
-    s.loadLines belt.linesForText("abcdef")
-    s.setMainCursor 0 0
-
-    keys '3rx'
-    txt "xxxdef"
-    cur 3 0
-
-    s.loadLines belt.linesForText("ab")
-    s.setMainCursor 1 0
-
-    keys '3rx'
-    txt "ab"
-    cur 1 0
-
-    s.loadLines belt.linesForText("abc")
-    s.setMainCursor 0 0
-
-    keys 'rX.'
-    txt "XXc"
-    cur 2 0
-
-    s.loadLines belt.linesForText("abcdef")
-    s.setMainCursor 0 0
-
-    key 'r'
-    m.handleKey 'esc' {combo:'esc'}
-    txt "abcdef"
-    m.replace ▸ null
-
-▸ toggle case
-
-    s.loadLines belt.linesForText("abc")
-    s.setMainCursor 0 0
-
-    key '~'
-    txt "Abc"
-    cur 1 0
-
-    s.loadLines belt.linesForText("aBc")
-    s.setMainCursor 0 0
-
-    keys '3~'
-    txt "AbC"
-    cur 2 0
-
-    s.loadLines belt.linesForText("abc")
-    s.setMainCursor 2 0
-
-    key '~'
-    txt "abC"
-    cur 2 0
-
-    s.loadLines belt.linesForText("abcd")
-    s.setMainCursor 0 0
-
-    keys '~l.'
-    txt "AbCd"
-    cur 3 0
-
-▸ join lines
-
-    s.loadLines belt.linesForText("one\ntwo\nthree")
-    s.setMainCursor 0 0
-
-    key 'J'
-    txt "one two\nthree"
-    cur 3 0
-
-    s.loadLines belt.linesForText("one  \n   two\nthree")
-    s.setMainCursor 0 0
-
-    key 'J'
-    txt "one two\nthree"
-    cur 3 0
-
-    s.loadLines belt.linesForText("  one\n    two")
-    s.setMainCursor 0 0
-
-    key 'J'
-    txt "  one two"
-    cur 5 0
-
-    s.loadLines belt.linesForText("one\ntwo\nthree")
-    s.setMainCursor 0 0
-
-    keys '3J'
-    txt "one two three"
-    cur 3 0
-
-    s.loadLines belt.linesForText("one\ntwo\nthree")
-    s.setMainCursor 0 1
-
-    key 'J'
-    txt "one\ntwo three"
-    cur 3 1
-
-▸ match bracket
-
-    s.loadLines belt.linesForText("if (a[b]) { c }")
-    s.setMainCursor 3 0
-
-    key '%'
-    cur 8 0
-
-    key '%'
-    cur 3 0
-
-    s.setMainCursor 5 0
-    key '%'
-    cur 7 0
-
-    s.setMainCursor 0 0
-    key '%'
-    cur 8 0
-
-    s.loadLines belt.linesForText("call(\n  x\n)")
-    s.setMainCursor 4 0
-    key '%'
-    cur 0 2
-
-▸ sentence motions by keys
-
-    s.loadLines belt.linesForText("one two. three four. five six.")
-    s.setMainCursor 0 0
-
-    key ')'
-    cur 9 0
-
-    key ')'
-    cur 21 0
-
-    key '('
-    cur 9 0
-
-    key '('
-    cur 0 0
-
-    keys '2)'
-    cur 21 0
-
-    s.setMainCursor 20 0
-    key '('
-    cur 9 0
-
-    s.loadLines belt.linesForText("one two. three four.")
-    s.setMainCursor 0 0
-    keys 'd)'
-    txt "three four."
-
-    s.loadLines belt.linesForText("one two. three four.")
-    s.setMainCursor 9 0
-    keys 'd('
-    txt "three four."
-
-    s.loadLines belt.linesForText("one two. three four.")
-    s.setMainCursor 0 0
-    keys 'v)'
-    s.s.selections ▸ [[0 0 9 0]]
-    cur 9 0
-    key 'esc'
-
-▸ paragraph motions by keys
-
-    s.loadLines belt.linesForText("a\n\nb\nc\n\nd")
-    s.setMainCursor 0 0
-
-    key '}'
-    cur 0 1
-
-    key '}'
-    cur 0 4
-
-    key '{'
-    cur 0 2
-
-    key '{'
-    cur 0 1
-
-    key '{'
-    cur 0 0
-
-    keys '2}'
-    cur 0 4
-
-    s.setMainCursor 0 2
-    keys 'd}'
-    txt "a\n\nd"
-
-    s.loadLines belt.linesForText("hello world\nfoo bar\n\nbaz")
-    s.setMainCursor 6 0
-    keys 'd}'
-    txt "hello \n\nbaz"
-    cur 6 0
-
-    s.loadLines belt.linesForText("a\n\nb")
-    s.setMainCursor 0 0
-    keys 'v}'
-    s.s.selections ▸ [[0 0 0 1]]
-    cur 0 1
-    key 'esc'
-
-▸ line first motions by keys
-
-    s.loadLines belt.linesForText("  one\n    two\n three")
-    s.setMainCursor 0 0
-
-    key '+'
-    cur 4 1
-
-    key '+'
-    cur 1 2
-
-    key '-'
-    cur 4 1
-
-    key '_'
-    cur 4 1
-
-    keys '2_'
-    cur 1 2
-
-    s.setMainCursor 0 0
-    keys '5_'
-    cur 1 2
-
-    s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
-    s.setMainCursor 0 1
-    keys 'd+'
-    txt "one\nfour"
-
-    s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
-    s.setMainCursor 0 2
-    keys 'd-'
-    txt "one\nfour"
-
-    s.loadLines belt.linesForText("one\ntwo\nthree")
-    s.setMainCursor 3 1
-    keys 'd_'
-    txt "one\nthree"
-
-    s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
-    s.setMainCursor 3 0
-    keys '2d_'
-    txt "three\nfour"
-
-▸ search word under cursor
-
-    s.loadLines belt.linesForText("foo bar foo\nfoobar foo")
-    s.setMainCursor 0 0
-
-    key '*'
-    cur 8 0
-    novim.lastVind ▸ 'foo'
-    s.s.highlights ▸ [[0 0 3] [8 0 11] [7 1 10]]
-
-    key '*'
-    cur 7 1
-    s.s.highlights ▸ [[0 0 3] [8 0 11] [7 1 10]]
-
-    key '#'
-    cur 8 0
-
-    s.loadLines belt.linesForText("foo bar foo\nfoobar foo")
-    s.setMainCursor 0 0
-
-    key '#'
-    cur 0 0
-
-    novim.lastVind = ''
-
-▸ visual mode
-
-    s.loadLines belt.linesForText("one two\nthree four")
-    s.setMainCursor 0 0
-
-    key 'v'
-    s.visual ▸ 'char'
-    s.s.selections ▸ []
-    cur 0 0
-
-    keys 'l'
-    s.s.selections ▸ [[0 0 1 0]]
-    cur 1 0
-
-    keys 'l'
-    s.s.selections ▸ [[0 0 2 0]]
-    cur 2 0
-
-    keys 'h'
-    s.s.selections ▸ [[0 0 1 0]]
-    cur 1 0
-
-    keys 'h'
-    s.s.selections ▸ []
-    cur 0 0
-
-    key 'V'
-    s.visual ▸ 'line'
-    s.s.selections ▸ [[0 0 7 0]]
-    cur 0 0
-
-    keys 'j'
-    s.s.selections ▸ [[0 0 10 1]]
-    cur 0 1
-
-    key 'esc'
-    s.visual ▸ null
-    s.s.selections ▸ []
-    txt "one two\nthree four"
-
-  ▸ visual multicursor
-    
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setCursors [[0 0] [0 2]]
-    
-        key 'v'
-        s.s.selections ▸ []
-    
-        keys 'l'
-        s.s.selections ▸ [[0 0 1 0] [0 2 1 2]]
-        s.allCursors() ▸ [[1 0] [1 2]]
-    
-        key 'esc'
-    
-  ▸ visual vertical
-    
-        s.loadLines belt.linesForText("abcd\nefgh")
-        s.setMainCursor 1 0
-    
-        key 'v'
-        key 'j'
-        s.s.selections ▸ [[1 0 1 1]]
-        cur 1 1
-    
-        key '$'
-        s.s.selections ▸ [[1 0 4 1]]
-        cur 4 1
-    
-        key 'esc'
-    
-  ▸ visual line mode
-    
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 1 1
-    
-        keys 'Vj'
-        s.visual ▸ 'line'
-        s.s.selections ▸ [[0 1 5 2]]
-        cur 1 2
-    
-        key 'V'
-        s.visual ▸ null
-        s.s.selections ▸ []
-    
-  ▸ visual block starts empty
-    
-        s.loadLines belt.linesForText("abcd\nefgh")
-        s.setMainCursor 0 0
-    
-        key 'ctrl+v'
-        s.visual ▸ 'block'
-        s.s.selections ▸ []
         cur 0 0
     
-        key 'j'
-        s.visual ▸ 'block'
-        s.s.selections ▸ []
-        cur 0 1
+        s.setMainCursor 2 1
+        s.executeNovim {operator:'delete', motion:{kind:'eol'}}
     
-        key 'l'
-        s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
-        cur 1 1
-    
-        key 'l'
-        s.s.selections ▸ [[0 0 2 0] [0 1 2 1]]
+        txt """
+            beta
+            ga
+            """
         cur 2 1
     
-        key 'h'
-        s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
-        cur 1 1
+        s.setMainCursor 0 0
+        s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
     
-        key 'h'
-        s.s.selections ▸ []
-        cur 0 1
-    
-        key 'k'
-        s.s.selections ▸ []
+        txt """
+            ga
+            """
         cur 0 0
     
-        key 'l'
-        s.s.selections ▸ [[0 0 1 0]]
-        cur 1 0
+        s.loadLines belt.linesForText(text)
     
-        key 'j'
-        s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
-        cur 1 1
-    
-        key 'esc'
-        s.visual ▸ null
-        s.s.selections ▸ []
-    
-  ▸ visual block toggles and switches
-    
-        s.loadLines belt.linesForText("abcd\nefgh")
         s.setMainCursor 0 0
+        s.executeNovim {operator:'delete', motion:{kind:'char', count:3}}
     
-        key 'ctrl+v'
-        key 'ctrl+v'
-        s.visual ▸ null
-        s.s.selections ▸ []
+        txt """
+            ha beta
+            gamma delta
+            """
     
-        key 'ctrl+v'
-        key 'v'
-        s.visual ▸ 'char'
-        s.s.selections ▸ []
+        s.setMainCursor 5 1
+        s.executeNovim {operator:'delete', motion:{kind:'charBack', count:3}}
     
-        key 'V'
-        s.visual ▸ 'line'
-        s.s.selections ▸ [[0 0 4 0]]
+        txt """
+            ha beta
+            ga delta
+            """
     
-        key 'esc'
-    
-  ▸ visual block delete
-    
-        s.loadLines belt.linesForText("abcd\nefgh")
         s.setMainCursor 0 0
+        s.executeNovim {operator:'delete', motion:{kind:'eol'}}
     
-        key 'ctrl+v'
-        keys 'lj'
-        s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
+        txt """
+            
+            ga delta
+            """
     
-        key 'd'
-        txt "bcd\nfgh"
-        s.visual ▸ null
-        s.novimRegister.lines ▸ ['a' 'e']
-        s.novimRegister.linewise ▸ false
+    ▸ execute command undo
     
-        s.executeNovim {operator:'repeat', count:1}
-        txt "cd\ngh"
+            text = """
+                alpha beta
+                gamma delta
+                """
+        
+            s.loadLines belt.linesForText(text)
+        
+            before = s.h.length
+        
+            s.setMainCursor 0 0
+            s.executeNovim {operator:'delete', motion:{kind:'line', count:2}}
+        
+            txt """
+                """
+            (s.h.length - before) ▸ 1
+        
+            s.undo()
+        
+            txt text
     
-  ▸ visual block yank
+    ▸ undo command
     
-        s.loadLines belt.linesForText("abcd\nefgh")
-        s.setMainCursor 0 0
+            s.loadLines belt.linesForText("alpha beta\ngamma delta")
+            s.setMainCursor 0 0
+        
+            s.executeNovim {operator:'delete', motion:{kind:'word', count:1}}
+            txt "beta\ngamma delta"
+        
+            s.executeNovim {operator:'undo', count:1}
+            txt "alpha beta\ngamma delta"
+            cur 0 0
+        
+            s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
+            s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
+            txt ""
+        
+            s.executeNovim {operator:'undo', count:2}
+            txt "alpha beta\ngamma delta"
+        
+            s.executeNovim {operator:'undo', count:5}
+            txt "alpha beta\ngamma delta"
     
-        key 'ctrl+v'
-        keys 'lj'
-        key 'y'
+    ▸ execute command with multiple cursors
     
-        s.novimRegister.lines ▸ ['a' 'e']
-        s.novimRegister.linewise ▸ false
-        s.visual ▸ null
-        s.s.selections ▸ []
-        cur 0 0
-        txt "abcd\nefgh"
+            text = """
+                alpha beta
+                gamma delta
+                """
+        
+            s.loadLines belt.linesForText(text)
+        
+            s.setCursors [[0 0] [0 1]]
+        
+            s.executeNovim {operator:'delete', motion:{kind:'word', count:1}}
+        
+            txt """
+                beta
+                delta
+                """
+            s.allCursors().length ▸ 2
+        
+            s.loadLines belt.linesForText("abc def")
+            s.setCursors [[0 0] [1 0]]
+        
+            s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
+        
+            txt " def"
+        
+            s.loadLines belt.linesForText("\nalpha\nbeta")
+            s.setMainCursor 0 0
+        
+            s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
+        
+            txt "alpha\nbeta"
     
-  ▸ visual block change
+  ▸ execute text objects
     
-        s.loadLines belt.linesForText("abcd\nefgh")
-        s.setMainCursor 0 0
+        s.loadLines belt.linesForText("one two three four")
+        s.setMainCursor 5 0
     
-        key 'ctrl+v'
-        keys 'lj'
-        key 'c'
+        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+        txt "one  three four"
     
-        txt "abcd\nefgh"
-        s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
+        s.loadLines belt.linesForText("one two three four")
+        s.setMainCursor 5 0
     
-        s.insert 'XY'
-        txt "XYbcd\nXYfgh"
-        s.allCursors() ▸ [[2 0] [2 1]]
-    
-        s.finishNovimInsert()
-    
-        s.setMainCursor 2 0
-        s.executeNovim {operator:'repeat', count:1}
-        txt "XYXYcd\nXYXYgh"
-    
-  ▸ visual block prepend and append
-    
-        s.loadLines belt.linesForText("abcd\nefgh")
-        s.setMainCursor 0 0
-    
-        key 'ctrl+v'
-        keys 'lj'
-        key 'I'
-    
-        s.visual ▸ null
-        s.s.selections ▸ []
-        s.allCursors() ▸ [[0 0] [0 1]]
-    
-        s.insert 'XY'
-        s.finishNovimInsert()
-        txt "XYabcd\nXYefgh"
-    
-        s.loadLines belt.linesForText("abcd\nefgh")
-        s.setMainCursor 0 0
-    
-        key 'ctrl+v'
-        keys 'lj'
-        key 'A'
-    
-        s.visual ▸ null
-        s.s.selections ▸ []
-        s.allCursors() ▸ [[1 0] [1 1]]
-    
-        s.insert 'XY'
-        txt "aXYbcd\neXYfgh"
-    
-        s.loadLines belt.linesForText("abcd\nefgh\nijkl")
-        s.setMainCursor 0 0
-    
-        key 'ctrl+v'
-        keys 'lj'
-        key 'I'
-        s.insert 'X'
-        s.finishNovimInsert()
-        txt "Xabcd\nXefgh\nijkl"
-    
-        s.setMainCursor 0 2
-        s.executeNovim {operator:'repeat', count:1}
-        txt "Xabcd\nXefgh\nXijkl"
-    
-        key 'ctrl+v'
-        key 'j'
-        key 'I'
-        s.visual ▸ 'block'
-        s.s.selections ▸ []
-    
-        key 'esc'
-    
-  ▸ visual yank
-    
-        s.novimRegister = null
-        s.loadLines belt.linesForText("one two")
-        s.setMainCursor 0 0
-    
-        keys 'vlly'
-        s.novimRegister.lines ▸ ['on']
-        s.novimRegister.linewise ▸ false
-        s.visual ▸ null
-        s.s.selections ▸ []
-        cur 0 0
-        txt "one two"
-    
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 1 1
-    
-        keys 'Vy'
-        s.novimRegister.lines ▸ ['two']
-        s.novimRegister.linewise ▸ true
-    
-  ▸ visual delete
+        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}}
+        txt "one three four"
     
         s.loadLines belt.linesForText("one two")
-        s.setMainCursor 0 0
+        s.setMainCursor 7 0
     
-        keys 'vlld'
-        txt "e two"
-        s.novimRegister.lines ▸ ['on']
-        s.visual ▸ null
-        cur 0 0
+        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+        txt "one "
     
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 0 1
+        s.loadLines belt.linesForText('say "hello there" ok')
+        s.setMainCursor 7 0
     
-        keys 'Vd'
-        txt "one\nthree"
-        s.novimRegister.lines ▸ ['two']
-        s.novimRegister.linewise ▸ true
-        cur 0 1
+        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'"', count:1}}
+        txt 'say "" ok'
     
-  ▸ visual change
+        s.loadLines belt.linesForText('say "hello there" ok')
+        s.setMainCursor 7 0
     
-        s.loadLines belt.linesForText("one two")
-        s.setMainCursor 0 0
+        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'"', count:1}}
+        txt 'say ok'
     
-        keys 'vllc'
-        txt "one two"
-        s.s.selections ▸ [[0 0 2 0]]
-        cur 2 0
-        s.visual ▸ null
+        s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
+        s.setMainCursor 21 0
     
-        s.insert 'X'
-        txt "Xe two"
+        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'[', count:1}}
+        txt "if seg not in []"
     
-  ▸ visual swap ends
+        s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
+        s.setMainCursor 21 0
     
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 1 0
+        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'[', count:1}}
+        txt "if seg not in "
     
-        keys 'vll'
-        s.s.selections ▸ [[1 0 3 0]]
-        cur 3 0
+        s.loadLines belt.linesForText("foo(\n  bar\n)")
+        s.setMainCursor 3 1
     
-        key 'o'
-        s.s.selections ▸ [[1 0 3 0]]
-        cur 1 0
+        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'(', count:1}}
+        txt "foo"
     
-        key 'o'
-        cur 3 0
-    
-        key 'esc'
-    
-  ▸ visual counts and find
-    
-        s.loadLines belt.linesForText("a b c d")
-        s.setMainCursor 0 0
-    
-        keys 'v2l'
-        s.s.selections ▸ [[0 0 2 0]]
-        cur 2 0
-    
-        key 'esc'
-    
-        s.loadLines belt.linesForText("a b c d")
-        s.setMainCursor 0 0
-    
-        keys 'vf '
-        s.s.selections ▸ [[0 0 1 0]]
-        cur 1 0
-    
-        key 'esc'
-    
-    ▸ visual bracket
-    
-        s.loadLines belt.linesForText("if (a[b]) c")
+        s.loadLines belt.linesForText("alpha")
         s.setMainCursor 3 0
     
-        keys 'v%'
-        s.s.selections ▸ [[3 0 8 0]]
-        cur 8 0
+        s.executeNovim {operator:'delete', motion:{kind:'charBack', count:1}}
+        txt "alha"
     
-        key 'esc'
+        s.loadLines belt.linesForText("alpha")
+        s.setMainCursor 0 0
     
-  ▸ visual escape stays in novim
+        s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+        txt "lpha"
+    
+        s.loadLines belt.linesForText("alpha")
+        s.setMainCursor 0 0
+    
+        s.executeNovim {operator:'delete', motion:{kind:'charBack', count:1}}
+        txt "alpha"
+    
+  ▸ change
+      
+    ▸ change selects by motion
+    
+            s.loadLines belt.linesForText("one two three")
+            s.setMainCursor 5 0
+        
+            s.selectByMotion {kind:'textObject', area:'inner', target:'word', count:1}
+        
+            txt "one two three"
+            s.s.selections ▸ [[4 0 7 0]]
+            cur 5 0
+        
+            s.loadLines belt.linesForText("one two\nthree four")
+            s.setCursors [[0 0] [0 1]]
+        
+            s.selectByMotion {kind:'word', count:1}
+        
+            txt "one two\nthree four"
+            s.s.selections ▸ [[0 0 4 0] [0 1 6 1]]
+            s.allCursors() ▸ [[0 0] [0 1]]
+    
+    ▸ change only selects
+    
+            s.novimRegister = { lines: ['keep'], linewise: false }
+        
+            s.loadLines belt.linesForText("one two three")
+            s.setMainCursor 5 0
+        
+            s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+        
+            txt "one two three"
+            s.s.selections ▸ [[4 0 7 0]]
+            cur 7 0
+            s.novimRegister.lines ▸ ['keep']
+        
+            s.loadLines belt.linesForText("one two three")
+            s.setMainCursor 5 0
+        
+            s.executeNovim {operator:'change', motion:{kind:'textObject', area:'around', target:'word', count:1}}
+        
+            txt "one two three"
+            s.s.selections ▸ [[4 0 8 0]]
+            cur 8 0
+        
+            s.loadLines belt.linesForText("one two\nthree four")
+            s.setCursors [[0 0] [0 1]]
+        
+            s.executeNovim {operator:'change', motion:{kind:'word', count:1}}
+        
+            txt "one two\nthree four"
+            s.s.selections ▸ [[0 0 4 0] [0 1 6 1]]
+            s.allCursors() ▸ [[4 0] [6 1]]
+        
+            s.loadLines belt.linesForText("one two")
+            s.setMainCursor 4 0
+        
+            s.executeNovim {operator:'change', motion:{kind:'eol'}}
+        
+            txt "one two"
+            s.s.selections ▸ [[4 0 7 0]]
+            cur 7 0
+        
+            s.loadLines belt.linesForText("one\ntwo")
+            s.setMainCursor 0 1
+        
+            s.executeNovim {operator:'change', motion:{kind:'line', count:1}}
+        
+            txt "one\ntwo"
+            s.s.selections ▸ [[0 1 3 1]]
+            cur 3 1
+    
+    ▸ typing replaces the change selection
+    
+            s.loadLines belt.linesForText("one two three")
+            s.setMainCursor 5 0
+        
+            s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+            s.insert 'X'
+        
+            txt "one X three"
+    
+    ▸ change does not touch history
+    
+            s.loadLines belt.linesForText("alpha beta")
+            s.setMainCursor 0 0
+            before = s.h.length
+        
+            s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+        
+            txt "alpha beta"
+            s.s.selections ▸ [[0 0 5 0]]
+            (s.h.length - before) ▸ 0
+    
+    ▸ change commands and keys
+    
+            s.loadLines belt.linesForText("one two three")
+            s.setMainCursor 5 0
+            keys 'ciw'
+            txt "one two three"
+            s.s.selections ▸ [[4 0 7 0]]
+            cur 7 0
+            m.operator ▸ null
+        
+            s.loadLines belt.linesForText("one two three")
+            s.setMainCursor 5 0
+            keys 'caw'
+            txt "one two three"
+            s.s.selections ▸ [[4 0 8 0]]
+        
+            s.loadLines belt.linesForText("one two")
+            s.setMainCursor 4 0
+            keys 'C'
+            txt "one two"
+            s.s.selections ▸ [[4 0 7 0]]
+            cur 7 0
+        
+            s.loadLines belt.linesForText("one\ntwo")
+            s.setMainCursor 0 0
+            keys 'S'
+            txt "one\ntwo"
+            s.s.selections ▸ [[0 0 3 0]]
+            cur 3 0
+        
+            s.loadLines belt.linesForText("abcdef")
+            s.setMainCursor 0 0
+            keys 's'
+            txt "abcdef"
+            s.s.selections ▸ [[0 0 1 0]]
+            cur 1 0
+        
+            s.loadLines belt.linesForText("abcdef")
+            s.setMainCursor 0 0
+            keys '2s'
+            txt "abcdef"
+            s.s.selections ▸ [[0 0 2 0]]
+            cur 2 0
+        
+            s.loadLines belt.linesForText("one\ntwo")
+            s.setMainCursor 0 0
+            keys 'cc'
+            txt "one\ntwo"
+            s.s.selections ▸ [[0 0 3 0]]
+            cur 3 0
+        
+            s.loadLines belt.linesForText("one two three")
+            s.setMainCursor 0 0
+            keys 'dw'
+            txt "two three"
+        
+            s.loadLines belt.linesForText("one two three")
+            s.setMainCursor 0 0
+            keys 'ciw'
+            txt "one two three"
+            s.s.selections ▸ [[0 0 3 0]]
+        
+            s.lastChange = null
+            s.novimInsert = null
+        
+            keys '.'
+            txt "one two three"
+            s.s.selections ▸ [[0 0 3 0]]
+        
+    ▸ change exits novim
+        
+            s.loadLines belt.linesForText("one two three")
+            s.setMainCursor 5 0
+        
+            s.allowedModes.novim = true
+            mode.modes.novim = novim
+            mode.start s 'novim'
+        
+            mode.isActive s 'novim' ▸ true
+        
+            s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+        
+            mode.isActive s 'novim' ▸ false
+            txt "one two three"
+            s.s.selections ▸ [[4 0 7 0]]
+            cur 7 0
+        
+            delete s.allowedModes.novim
+    
+  ▸ repeat
+    
+    ▸ repeat command
+    
+            s.loadLines belt.linesForText("abcdef")
+            s.setMainCursor 0 0
+        
+            s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+            txt "bcdef"
+        
+            s.executeNovim {operator:'repeat', count:1}
+            txt "cdef"
+        
+            s.executeNovim {operator:'repeat', count:2}
+            txt "ef"
+        
+            s.loadLines belt.linesForText("abcdef")
+            s.setMainCursor 0 0
+        
+            s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
+            txt "cdef"
+        
+            s.executeNovim {operator:'repeat', count:1}
+            txt "ef"
+        
+            s.loadLines belt.linesForText("abcdef")
+            s.setMainCursor 0 0
+        
+            s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+            s.executeNovim {operator:'move', motion:{kind:'right', count:1}}
+            s.executeNovim {operator:'repeat', count:1}
+            txt "bdef"
+        
+            s.loadLines belt.linesForText("abcdef")
+            s.setMainCursor 0 0
+        
+            s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+            s.executeNovim {operator:'undo', count:1}
+            txt "abcdef"
+        
+            s.executeNovim {operator:'repeat', count:1}
+            txt "bcdef"
+        
+            s.loadLines belt.linesForText("one two three")
+            s.setMainCursor 0 0
+        
+            s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}}
+            txt "two three"
+        
+            s.executeNovim {operator:'repeat', count:1}
+            txt "three"
+        
+            s.lastChange = null
+            s.loadLines belt.linesForText("abc")
+            s.setMainCursor 0 0
+        
+            s.executeNovim {operator:'repeat', count:1}
+            txt "abc"
+        
+    ▸ repeat insert
+        
+            s.loadLines belt.linesForText("abc\ndef")
+            s.setMainCursor 0 0
+        
+            keys 'i'
+            s.novimInsert.kind ▸ 'insert'
+            s.insert 'X'
+            s.finishNovimInsert()
+            txt "Xabc\ndef"
+        
+            s.setMainCursor 0 1
+            s.executeNovim {operator:'repeat', count:1}
+            txt "Xabc\nXdef"
+        
+            s.loadLines belt.linesForText("one two")
+            s.setMainCursor 0 0
+        
+            keys 'i'
+            s.insert 'new '
+            s.finishNovimInsert()
+            txt "new one two"
+        
+            s.setMainCursor 0 4
+            s.executeNovim {operator:'repeat', count:2}
+            txt "new new new one two"
+        
+    ▸ repeat insert with backspace
+        
+            s.loadLines belt.linesForText("abc\ndef")
+            s.setMainCursor 0 0
+        
+            keys 'i'
+            s.insert 'XY'
+            s.delete 'back' false
+            s.insert 'Z'
+            s.finishNovimInsert()
+            txt "XZabc\ndef"
+        
+            s.setMainCursor 0 1
+            s.executeNovim {operator:'repeat', count:1}
+            txt "XZabc\nXZdef"
+        
+    ▸ repeat append
+        
+            s.loadLines belt.linesForText("abc\ndef")
+            s.setMainCursor 0 1
+        
+            keys 'A'
+            s.insert 'Z'
+            s.finishNovimInsert()
+            txt "abc\ndefZ"
+        
+            s.setMainCursor 0 0
+            s.executeNovim {operator:'repeat', count:1}
+            txt "abcZ\ndefZ"
+        
+            s.loadLines belt.linesForText("abc")
+            s.setMainCursor 0 0
+        
+            keys 'a'
+            s.insert 'X'
+            s.finishNovimInsert()
+            txt "aXbc"
+        
+            s.setMainCursor 0 0
+            s.executeNovim {operator:'repeat', count:1}
+            txt "aXXbc"
+        
+    ▸ repeat open line
+        
+            s.loadLines belt.linesForText("abc\ndef")
+            s.setMainCursor 0 0
+        
+            keys 'o'
+            s.insert 'new'
+            s.finishNovimInsert()
+            txt "abc\nnew\ndef"
+        
+            s.setMainCursor 0 0
+            s.executeNovim {operator:'repeat', count:1}
+            txt "abc\nnew\nnew\ndef"
+        
+    ▸ repeat change with text
+        
+            s.loadLines belt.linesForText("one two three")
+            s.setMainCursor 4 0
+        
+            keys 'ciw'
+            s.insert 'X'
+            s.finishNovimInsert()
+            txt "one X three"
+        
+            s.setMainCursor 8 0
+            s.executeNovim {operator:'repeat', count:1}
+            txt "one X X"
+        
+    ▸ repeat change without text
+        
+            s.loadLines belt.linesForText("one two")
+            s.setMainCursor 0 0
+        
+            keys 'ciw'
+            s.finishNovimInsert()
+            txt "one two"
+        
+            s.setMainCursor 0 0
+            s.executeNovim {operator:'repeat', count:1}
+            txt " two"
+        
+    ▸ repeat put
+        
+            s.loadLines belt.linesForText("one\ntwo")
+            s.setMainCursor 0 0
+            s.novimRegister = { lines: ['new'], linewise: true }
+        
+            keys 'p'
+            txt "one\nnew\ntwo"
+        
+            s.setMainCursor 0 2
+            s.executeNovim {operator:'repeat', count:1}
+            txt "one\nnew\ntwo\nnew"
+        
+            s.loadLines belt.linesForText("one two")
+            s.setMainCursor 0 0
+            s.novimRegister = { lines: ['X'], linewise: false }
+        
+            keys 'p'
+            txt "Xone two"
+        
+            s.setMainCursor 4 0
+            s.executeNovim {operator:'repeat', count:1}
+            txt "XoneX two"
+        
+    ▸ repeat visual delete
+        
+            s.loadLines belt.linesForText("abcdefg")
+            s.setMainCursor 0 0
+        
+            keys 'vlld'
+            txt "cdefg"
+        
+            s.executeNovim {operator:'repeat', count:1}
+            txt "efg"
+        
+            s.executeNovim {operator:'repeat', count:1}
+            txt "g"
+        
+            s.loadLines belt.linesForText("one\ntwo\nthree")
+            s.setMainCursor 0 0
+        
+            keys 'Vd'
+            txt "two\nthree"
+        
+            s.executeNovim {operator:'repeat', count:1}
+            txt "three"
+        
+    ▸ repeat visual change
+        
+            s.loadLines belt.linesForText("abcdef")
+            s.setMainCursor 0 0
+        
+            keys 'vllc'
+            s.insert 'XY'
+            s.finishNovimInsert()
+            txt "XYcdef"
+        
+            s.setMainCursor 2 0
+            s.executeNovim {operator:'repeat', count:1}
+            txt "XYXYef"
+        
+            s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
+            s.setMainCursor 0 0
+        
+            keys 'Vc'
+            s.insert 'X'
+            s.finishNovimInsert()
+            txt "Xtwo\nthree\nfour"
+        
+            s.setMainCursor 0 1
+            s.executeNovim {operator:'repeat', count:1}
+            txt "Xtwo\nXfour"
+    
+  ▸ keys
+    
+        text = """
+            alpha beta
+            gamma delta
+            """
+    
+        s.loadLines belt.linesForText(text)
+    
+        m = new novim s
+    
+        key = c -> m.handleKey c {combo:c, char:c}
+        keys = s x y -> 
+            for c in s
+                key c
+            cur x y if x?
+    
+        keys 'd2w'
+        txt """
+            gamma delta
+            """
+    
+        s.loadLines belt.linesForText(text)
+        s.setMainCursor 0 0
+    
+        key 'd'
+        m.handleKey 'esc' {combo:'esc'}
+    
+        txt text
+        m.operator ▸ null
+    
+        key 'x'
+    
+        txt """
+            lpha beta
+            gamma delta
+            """
+    
+        s.loadLines belt.linesForText(text)
+        s.setMainCursor 0 0
+    
+        keys 'dw'
+        txt """
+            beta
+            gamma delta
+            """
+    
+        key 'u'
+        txt text
+    
+        s.loadLines belt.linesForText("abc def")
+        s.setMainCursor 4 0
+    
+        key 'd'
+        m.handleKey 'left' {combo:'left'}
+        txt "abcdef"
+    
+        s.loadLines belt.linesForText("abc def")
+        s.setMainCursor 4 0
+    
+        key 'd'
+        m.handleKey 'right' {combo:'right'}
+        txt "abc ef"
+    
+        s.loadLines belt.linesForText("abc\ndef\nghi")
+        s.setMainCursor 0 1
+    
+        key 'd'
+        m.handleKey 'down' {combo:'down'}
+        txt "abc"
+    
+        s.loadLines belt.linesForText("abc\ndef\nghi")
+        s.setMainCursor 0 1
+    
+        key 'd'
+        m.handleKey 'up' {combo:'up'}
+        txt "ghi"
+    
+        s.loadLines belt.linesForText("alpha")
+        s.setMainCursor 3 0
+    
+        keys 'dh'
+        txt "alha"
+    
+        s.loadLines belt.linesForText("alpha")
+        s.setMainCursor 0 0
+    
+        keys 'dl'
+        txt "lpha"
+    
+        s.loadLines belt.linesForText("one two three")
+        s.setMainCursor 5 0
+    
+        keys 'diw'
+        txt "one  three"
+        m.operator ▸ null
+    
+        s.loadLines belt.linesForText('say "hello there" ok')
+        s.setMainCursor 7 0
+    
+        keys 'da"'
+        txt "say ok"
+    
+        s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
+        s.setMainCursor 21 0
+    
+        keys 'di['
+        txt "if seg not in []"
+    
+        s.loadLines belt.linesForText("one two three")
+        s.setMainCursor 0 0
+    
+        keys 'd2iw'
+        txt " three"
+    
+        s.loadLines belt.linesForText("abc")
+    
+        keys 'di'
+        m.handleKey 'esc' {combo:'esc'}
+        txt "abc"
+        m.area ▸ null
+    
+        s.loadLines belt.linesForText("abcdef")
+        s.setMainCursor 0 0
+    
+        key 'x'
+        txt "bcdef"
+    
+        key '.'
+        txt "cdef"
+    
+        keys '2.'
+        txt "ef"
+    
+        s.loadLines belt.linesForText("abcdef")
+        s.setMainCursor 0 0
+    
+        keys 'xl.'
+        txt "bdef"
+    
+        s.loadLines belt.linesForText("one two three")
+        s.setMainCursor 0 0
+    
+        keys 'daw'
+        txt "two three"
+    
+        key '.'
+        txt "three"
+    
+        s.loadLines belt.linesForText("one\n  two\n  three")
+        s.setMainCursor 0 0
+        keys 'gg'   0 0
+    
+  ▸ open lines
+    
+        s.loadLines belt.linesForText("abc\ndef")
+        s.setMainCursor 0 1
+    
+        key 'o'
+        txt "abc\ndef\n"
+        cur 0 2
+    
+        s.loadLines belt.linesForText("abc\ndef")
+        s.setMainCursor 0 1
+    
+        key 'O'
+        txt "abc\n\ndef"
+        cur 0 1
     
         s.loadLines belt.linesForText("abc")
         s.setMainCursor 0 0
+    
+        keys '2o'
+        txt "abc\n\n"
+        cur 0 2
+    
+        s.loadLines belt.linesForText("abc")
+        s.setMainCursor 0 0
+    
+        keys '2O'
+        txt "\n\nabc"
+        cur 0 0
+    
+  ▸ insert at first non blank
+    
+        s.loadLines belt.linesForText("    abc")
+        s.setMainCursor 6 0
     
         s.allowedModes.novim = true
         mode.modes.novim = novim
         mode.start s 'novim'
     
-        key 'v'
-        key 'esc'
+        key 'I'
+        cur 4 0
+        mode.isActive s 'novim' ▸ false
     
-        s.visual ▸ null
-        s.s.selections ▸ []
-        mode.isActive s 'novim' ▸ true
-    
-        mode.stop s 'novim'
         delete s.allowedModes.novim
-
-▸ indent
-
-  ▸ indent lines
+    
+  ▸ replace chars
+    
+        s.loadLines belt.linesForText("abcdef")
+        s.setMainCursor 1 0
+    
+        key 'r'
+        m.replace ▸ true
+        key 'X'
+        txt "aXcdef"
+        cur 2 0
+        m.replace ▸ null
+    
+        s.loadLines belt.linesForText("abcdef")
+        s.setMainCursor 0 0
+    
+        keys '3rx'
+        txt "xxxdef"
+        cur 3 0
+    
+        s.loadLines belt.linesForText("ab")
+        s.setMainCursor 1 0
+    
+        keys '3rx'
+        txt "ab"
+        cur 1 0
+    
+        s.loadLines belt.linesForText("abc")
+        s.setMainCursor 0 0
+    
+        keys 'rX.'
+        txt "XXc"
+        cur 2 0
+    
+        s.loadLines belt.linesForText("abcdef")
+        s.setMainCursor 0 0
+    
+        key 'r'
+        m.handleKey 'esc' {combo:'esc'}
+        txt "abcdef"
+        m.replace ▸ null
+    
+  ▸ toggle case
+    
+        s.loadLines belt.linesForText("abc")
+        s.setMainCursor 0 0
+    
+        key '~'
+        txt "Abc"
+        cur 1 0
+    
+        s.loadLines belt.linesForText("aBc")
+        s.setMainCursor 0 0
+    
+        keys '3~'
+        txt "AbC"
+        cur 2 0
+    
+        s.loadLines belt.linesForText("abc")
+        s.setMainCursor 2 0
+    
+        key '~'
+        txt "abC"
+        cur 2 0
+    
+        s.loadLines belt.linesForText("abcd")
+        s.setMainCursor 0 0
+    
+        keys '~l.'
+        txt "AbCd"
+        cur 3 0
+    
+  ▸ join lines
     
         s.loadLines belt.linesForText("one\ntwo\nthree")
         s.setMainCursor 0 0
     
-        keys '>>'
-        txt "    one\ntwo\nthree"
-        cur 4 0
+        key 'J'
+        txt "one two\nthree"
+        cur 3 0
+    
+        s.loadLines belt.linesForText("one  \n   two\nthree")
+        s.setMainCursor 0 0
+    
+        key 'J'
+        txt "one two\nthree"
+        cur 3 0
+    
+        s.loadLines belt.linesForText("  one\n    two")
+        s.setMainCursor 0 0
+    
+        key 'J'
+        txt "  one two"
+        cur 5 0
     
         s.loadLines belt.linesForText("one\ntwo\nthree")
         s.setMainCursor 0 0
     
-        keys '2>>'
-        txt "    one\n    two\nthree"
-        cur 4 0
-    
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 0 0
-    
-        keys '>j'
-        txt "    one\n    two\nthree"
-    
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 0 0
-    
-        keys '>>j.'
-        txt "    one\n    two\nthree"
-    
-  ▸ deindent lines
-    
-        s.loadLines belt.linesForText("    one\n        two\n            three")
-        s.setMainCursor 0 0
-    
-        keys '<<'
-        txt "one\n        two\n            three"
-        cur 0 0
-    
-        s.loadLines belt.linesForText("    one\n        two\n            three")
-        s.setMainCursor 0 0
-    
-        keys '2<<'
-        txt "one\n    two\n            three"
-        cur 0 0
-    
-        s.loadLines belt.linesForText("    one\n        two\n            three")
-        s.setMainCursor 0 0
-    
-        keys '<j'
-        txt "one\n    two\n            three"
-    
-  ▸ visual indent
-    
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 1 1
-    
-        keys 'Vj>'
-        txt "one\n    two\n    three"
-        s.visual ▸ 'line'
-        s.s.selections ▸ [[0 1 9 2]]
-        cur 5 2
-    
-        key '>'
-        txt "one\n        two\n        three"
-        s.visual ▸ 'line'
-        s.s.selections ▸ [[0 1 13 2]]
-        cur 9 2
-    
-        s.loadLines belt.linesForText("    one\n        two\n            three")
-        s.setMainCursor 1 1
-    
-        keys 'Vj<'
-        txt "    one\n    two\n        three"
-        s.visual ▸ 'line'
-        s.s.selections ▸ [[0 1 13 2]]
-        cur 0 2
+        keys '3J'
+        txt "one two three"
+        cur 3 0
     
         s.loadLines belt.linesForText("one\ntwo\nthree")
         s.setMainCursor 0 1
     
-        keys 'vlj>'
-        txt "one\n    two\n    three"
+        key 'J'
+        txt "one\ntwo three"
+        cur 3 1
+    
+  ▸ match bracket
+    
+        s.loadLines belt.linesForText("if (a[b]) { c }")
+        s.setMainCursor 3 0
+    
+        key '%'
+        cur 8 0
+    
+        key '%'
+        cur 3 0
+    
+        s.setMainCursor 5 0
+        key '%'
+        cur 7 0
+    
+        s.setMainCursor 0 0
+        key '%'
+        cur 8 0
+    
+        s.loadLines belt.linesForText("call(\n  x\n)")
+        s.setMainCursor 4 0
+        key '%'
+        cur 0 2
+    
+  ▸ sentence motions by keys
+    
+        s.loadLines belt.linesForText("one two. three four. five six.")
+        s.setMainCursor 0 0
+    
+        key ')'
+        cur 9 0
+    
+        key ')'
+        cur 21 0
+    
+        key '('
+        cur 9 0
+    
+        key '('
+        cur 0 0
+    
+        keys '2)'
+        cur 21 0
+    
+        s.setMainCursor 20 0
+        key '('
+        cur 9 0
+    
+        s.loadLines belt.linesForText("one two. three four.")
+        s.setMainCursor 0 0
+        keys 'd)'
+        txt "three four."
+    
+        s.loadLines belt.linesForText("one two. three four.")
+        s.setMainCursor 9 0
+        keys 'd('
+        txt "three four."
+    
+        s.loadLines belt.linesForText("one two. three four.")
+        s.setMainCursor 0 0
+        keys 'v)'
+        s.s.selections ▸ [[0 0 9 0]]
+        cur 9 0
+        key 'esc'
+    
+  ▸ paragraph motions by keys
+    
+        s.loadLines belt.linesForText("a\n\nb\nc\n\nd")
+        s.setMainCursor 0 0
+    
+        key '}'
+        cur 0 1
+    
+        key '}'
+        cur 0 4
+    
+        key '{'
+        cur 0 2
+    
+        key '{'
+        cur 0 1
+    
+        key '{'
+        cur 0 0
+    
+        keys '2}'
+        cur 0 4
+    
+        s.setMainCursor 0 2
+        keys 'd}'
+        txt "a\n\nd"
+    
+        s.loadLines belt.linesForText("hello world\nfoo bar\n\nbaz")
+        s.setMainCursor 6 0
+        keys 'd}'
+        txt "hello \n\nbaz"
+        cur 6 0
+    
+        s.loadLines belt.linesForText("a\n\nb")
+        s.setMainCursor 0 0
+        keys 'v}'
+        s.s.selections ▸ [[0 0 0 1]]
+        cur 0 1
+        key 'esc'
+    
+  ▸ line first motions by keys
+    
+        s.loadLines belt.linesForText("  one\n    two\n three")
+        s.setMainCursor 0 0
+    
+        key '+'
+        cur 4 1
+    
+        key '+'
+        cur 1 2
+    
+        key '-'
+        cur 4 1
+    
+        key '_'
+        cur 4 1
+    
+        keys '2_'
+        cur 1 2
+    
+        s.setMainCursor 0 0
+        keys '5_'
+        cur 1 2
+    
+        s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
+        s.setMainCursor 0 1
+        keys 'd+'
+        txt "one\nfour"
+    
+        s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
+        s.setMainCursor 0 2
+        keys 'd-'
+        txt "one\nfour"
+    
+        s.loadLines belt.linesForText("one\ntwo\nthree")
+        s.setMainCursor 3 1
+        keys 'd_'
+        txt "one\nthree"
+    
+        s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
+        s.setMainCursor 3 0
+        keys '2d_'
+        txt "three\nfour"
+    
+  ▸ search word under cursor
+    
+        s.loadLines belt.linesForText("foo bar foo\nfoobar foo")
+        s.setMainCursor 0 0
+    
+        key '*'
+        cur 8 0
+        novim.lastVind ▸ 'foo'
+        s.s.highlights ▸ [[0 0 3] [8 0 11] [7 1 10]]
+    
+        key '*'
+        cur 7 1
+        s.s.highlights ▸ [[0 0 3] [8 0 11] [7 1 10]]
+    
+        key '#'
+        cur 8 0
+    
+        s.loadLines belt.linesForText("foo bar foo\nfoobar foo")
+        s.setMainCursor 0 0
+    
+        key '#'
+        cur 0 0
+    
+        novim.lastVind = ''
+    
+  ▸ visual mode
+    
+        s.loadLines belt.linesForText("one two\nthree four")
+        s.setMainCursor 0 0
+    
+        key 'v'
         s.visual ▸ 'char'
-        s.s.selections ▸ [[4 1 5 2]]
-        cur 5 2
-
-▸ search highlights
-
-    s.loadLines belt.linesForText("foo\nbar\nfoo\nbar\nfoo")
-    s.setMainCursor 0 0
-
-    s.setHighlights [[0 0 3 0] [0 2 3 2] [0 4 3 4]]
-
-    key 'n'
-    cur 0 2
-
-    key 'n'
-    cur 0 4
-
-    key 'n'
-    cur 0 4
-
-    s.setMainCursor 0 4
-    key 'N'
-    cur 0 2
-
-    key 'N'
-    cur 0 0
-
-    s.setMainCursor 0 0
-
-    key '2'
-    key 'n'
-    cur 0 4
-
-    s.setMainCursor 0 0
-
-    key 'N'
-    cur 0 0
-
-    s.setMainCursor 0 0
-
-    key 'n'
-    s.s.highlights ▸ [[0 0 3 0] [0 2 3 2] [0 4 3 4]]
-
-    key 'N'
-    s.s.highlights ▸ [[0 0 3 0] [0 2 3 2] [0 4 3 4]]
-
-    key 'j'
-    s.s.highlights ▸ []
-
-    s.setMainCursor 0 0
-
-    key 'n'
-    cur 0 0
-
-    key 'N'
-    cur 0 0
-
-    s.loadLines belt.linesForText("foo\nbar")
-    s.setMainCursor 0 0
-
-    key '/'
-    txt "foo\nbar"
-
-▸ ex commands
-
-    m = new novim s
-
-    key   = c -> m.handleKey c {combo:c, char:c}
-    keys  = t ->
-        for c in t
-            key c
-    enter = -> m.handleKey 'return'    {combo:'return', char:'\n'}
-    back  = -> m.handleKey 'backspace' {combo:'backspace'}
-    esc   = -> m.handleKey 'esc'       {combo:'esc', char:''}
-
-    quits  = 0
-    saves  = []
-    writes = []
-
-    clean = -> s.clearHistory()
-    dirty = ->
-        s.clearHistory()
-        s.pushState()
-
-    post.on 'quit'                    -> quits += 1
-    post.on 'file.saveAndQuit' (file) -> saves.push file ? null
-    post.on 'file.save'        (file) -> writes.push file ? null
-
-    clean()
-
-    keys ':q'
-
-    m.ex        ▸ 'q'
-
-    enter()
-
-    quits  ▸ 1
-    writes ▸ []
-    saves  ▸ []
-    m.ex   ▸ null
-
-    dirty()
-
-    keys ':q'
-    enter()
-
-    quits      ▸ 1
-
-    keys ':q!'
-
-    m.ex        ▸ 'q!'
-
-    enter()
-
-    quits  ▸ 2
-    writes ▸ []
-    saves  ▸ []
-
-    keys '3:q'
-
-    m.ex       ▸ 'q'
-
-    esc()
-
-    m.ex ▸ null
-
-    keys ':wqq'
-    back()
-
-    m.ex ▸ 'wq'
-
-    esc()
-
-    m.ex ▸ null
-
-    clean()
-
-    keys ':w'
-    enter()
-
-    writes ▸ [null]
-    saves  ▸ []
-    quits  ▸ 2
-    m.ex   ▸ null
-
-▸ brckts lets novim handle text keys
-
-    stack = new state cells 'stack'
-
-    mode.modes.novim  = novim
-    mode.modes.brckts = brckts
-    mode.start stack 'brckts'
-    mode.start stack 'novim'
-
-    press = c -> mode.handleKey stack c {combo:c, char:c}
-    stxt  = t -> kseg.str(stack.s.lines) ▸ t
-
-    onKeys = (text x y keys) ->
-        stack.loadLines belt.linesForText(text)
-        stack.setMainCursor x y
-        mode.stop  stack 'novim'
+        s.s.selections ▸ []
+        cur 0 0
+    
+        keys 'l'
+        s.s.selections ▸ [[0 0 1 0]]
+        cur 1 0
+    
+        keys 'l'
+        s.s.selections ▸ [[0 0 2 0]]
+        cur 2 0
+    
+        keys 'h'
+        s.s.selections ▸ [[0 0 1 0]]
+        cur 1 0
+    
+        keys 'h'
+        s.s.selections ▸ []
+        cur 0 0
+    
+        key 'V'
+        s.visual ▸ 'line'
+        s.s.selections ▸ [[0 0 7 0]]
+        cur 0 0
+    
+        keys 'j'
+        s.s.selections ▸ [[0 0 10 1]]
+        cur 0 1
+    
+        key 'esc'
+        s.visual ▸ null
+        s.s.selections ▸ []
+        txt "one two\nthree four"
+    
+    ▸ visual multicursor
+        
+            s.loadLines belt.linesForText("one\ntwo\nthree")
+            s.setCursors [[0 0] [0 2]]
+        
+            key 'v'
+            s.s.selections ▸ []
+        
+            keys 'l'
+            s.s.selections ▸ [[0 0 1 0] [0 2 1 2]]
+            s.allCursors() ▸ [[1 0] [1 2]]
+        
+            key 'esc'
+        
+    ▸ visual vertical
+        
+            s.loadLines belt.linesForText("abcd\nefgh")
+            s.setMainCursor 1 0
+        
+            key 'v'
+            key 'j'
+            s.s.selections ▸ [[1 0 1 1]]
+            cur 1 1
+        
+            key '$'
+            s.s.selections ▸ [[1 0 4 1]]
+            cur 4 1
+        
+            key 'esc'
+        
+    ▸ visual line mode
+        
+            s.loadLines belt.linesForText("one\ntwo\nthree")
+            s.setMainCursor 1 1
+        
+            keys 'Vj'
+            s.visual ▸ 'line'
+            s.s.selections ▸ [[0 1 5 2]]
+            cur 1 2
+        
+            key 'V'
+            s.visual ▸ null
+            s.s.selections ▸ []
+        
+    ▸ visual block starts empty
+        
+            s.loadLines belt.linesForText("abcd\nefgh")
+            s.setMainCursor 0 0
+        
+            key 'ctrl+v'
+            s.visual ▸ 'block'
+            s.s.selections ▸ []
+            cur 0 0
+        
+            key 'j'
+            s.visual ▸ 'block'
+            s.s.selections ▸ []
+            cur 0 1
+        
+            key 'l'
+            s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
+            cur 1 1
+        
+            key 'l'
+            s.s.selections ▸ [[0 0 2 0] [0 1 2 1]]
+            cur 2 1
+        
+            key 'h'
+            s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
+            cur 1 1
+        
+            key 'h'
+            s.s.selections ▸ []
+            cur 0 1
+        
+            key 'k'
+            s.s.selections ▸ []
+            cur 0 0
+        
+            key 'l'
+            s.s.selections ▸ [[0 0 1 0]]
+            cur 1 0
+        
+            key 'j'
+            s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
+            cur 1 1
+        
+            key 'esc'
+            s.visual ▸ null
+            s.s.selections ▸ []
+        
+    ▸ visual block toggles and switches
+        
+            s.loadLines belt.linesForText("abcd\nefgh")
+            s.setMainCursor 0 0
+        
+            key 'ctrl+v'
+            key 'ctrl+v'
+            s.visual ▸ null
+            s.s.selections ▸ []
+        
+            key 'ctrl+v'
+            key 'v'
+            s.visual ▸ 'char'
+            s.s.selections ▸ []
+        
+            key 'V'
+            s.visual ▸ 'line'
+            s.s.selections ▸ [[0 0 4 0]]
+        
+            key 'esc'
+        
+    ▸ visual block delete
+        
+            s.loadLines belt.linesForText("abcd\nefgh")
+            s.setMainCursor 0 0
+        
+            key 'ctrl+v'
+            keys 'lj'
+            s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
+        
+            key 'd'
+            txt "bcd\nfgh"
+            s.visual ▸ null
+            s.novimRegister.lines ▸ ['a' 'e']
+            s.novimRegister.linewise ▸ false
+        
+            s.executeNovim {operator:'repeat', count:1}
+            txt "cd\ngh"
+        
+    ▸ visual block yank
+        
+            s.loadLines belt.linesForText("abcd\nefgh")
+            s.setMainCursor 0 0
+        
+            key 'ctrl+v'
+            keys 'lj'
+            key 'y'
+        
+            s.novimRegister.lines ▸ ['a' 'e']
+            s.novimRegister.linewise ▸ false
+            s.visual ▸ null
+            s.s.selections ▸ []
+            cur 0 0
+            txt "abcd\nefgh"
+        
+    ▸ visual block change
+        
+            s.loadLines belt.linesForText("abcd\nefgh")
+            s.setMainCursor 0 0
+        
+            key 'ctrl+v'
+            keys 'lj'
+            key 'c'
+        
+            txt "abcd\nefgh"
+            s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
+        
+            s.insert 'XY'
+            txt "XYbcd\nXYfgh"
+            s.allCursors() ▸ [[2 0] [2 1]]
+        
+            s.finishNovimInsert()
+        
+            s.setMainCursor 2 0
+            s.executeNovim {operator:'repeat', count:1}
+            txt "XYXYcd\nXYXYgh"
+        
+    ▸ visual block prepend and append
+        
+            s.loadLines belt.linesForText("abcd\nefgh")
+            s.setMainCursor 0 0
+        
+            key 'ctrl+v'
+            keys 'lj'
+            key 'I'
+        
+            s.visual ▸ null
+            s.s.selections ▸ []
+            s.allCursors() ▸ [[0 0] [0 1]]
+        
+            s.insert 'XY'
+            s.finishNovimInsert()
+            txt "XYabcd\nXYefgh"
+        
+            s.loadLines belt.linesForText("abcd\nefgh")
+            s.setMainCursor 0 0
+        
+            key 'ctrl+v'
+            keys 'lj'
+            key 'A'
+        
+            s.visual ▸ null
+            s.s.selections ▸ []
+            s.allCursors() ▸ [[1 0] [1 1]]
+        
+            s.insert 'XY'
+            txt "aXYbcd\neXYfgh"
+        
+            s.loadLines belt.linesForText("abcd\nefgh\nijkl")
+            s.setMainCursor 0 0
+        
+            key 'ctrl+v'
+            keys 'lj'
+            key 'I'
+            s.insert 'X'
+            s.finishNovimInsert()
+            txt "Xabcd\nXefgh\nijkl"
+        
+            s.setMainCursor 0 2
+            s.executeNovim {operator:'repeat', count:1}
+            txt "Xabcd\nXefgh\nXijkl"
+        
+            key 'ctrl+v'
+            key 'j'
+            key 'I'
+            s.visual ▸ 'block'
+            s.s.selections ▸ []
+        
+            key 'esc'
+        
+    ▸ visual yank
+        
+            s.novimRegister = null
+            s.loadLines belt.linesForText("one two")
+            s.setMainCursor 0 0
+        
+            keys 'vlly'
+            s.novimRegister.lines ▸ ['on']
+            s.novimRegister.linewise ▸ false
+            s.visual ▸ null
+            s.s.selections ▸ []
+            cur 0 0
+            txt "one two"
+        
+            s.loadLines belt.linesForText("one\ntwo\nthree")
+            s.setMainCursor 1 1
+        
+            keys 'Vy'
+            s.novimRegister.lines ▸ ['two']
+            s.novimRegister.linewise ▸ true
+        
+    ▸ visual delete
+        
+            s.loadLines belt.linesForText("one two")
+            s.setMainCursor 0 0
+        
+            keys 'vlld'
+            txt "e two"
+            s.novimRegister.lines ▸ ['on']
+            s.visual ▸ null
+            cur 0 0
+        
+            s.loadLines belt.linesForText("one\ntwo\nthree")
+            s.setMainCursor 0 1
+        
+            keys 'Vd'
+            txt "one\nthree"
+            s.novimRegister.lines ▸ ['two']
+            s.novimRegister.linewise ▸ true
+            cur 0 1
+        
+    ▸ visual change
+        
+            s.loadLines belt.linesForText("one two")
+            s.setMainCursor 0 0
+        
+            keys 'vllc'
+            txt "one two"
+            s.s.selections ▸ [[0 0 2 0]]
+            cur 2 0
+            s.visual ▸ null
+        
+            s.insert 'X'
+            txt "Xe two"
+        
+    ▸ visual swap ends
+        
+            s.loadLines belt.linesForText("abcdef")
+            s.setMainCursor 1 0
+        
+            keys 'vll'
+            s.s.selections ▸ [[1 0 3 0]]
+            cur 3 0
+        
+            key 'o'
+            s.s.selections ▸ [[1 0 3 0]]
+            cur 1 0
+        
+            key 'o'
+            cur 3 0
+        
+            key 'esc'
+        
+    ▸ visual counts and find
+        
+            s.loadLines belt.linesForText("a b c d")
+            s.setMainCursor 0 0
+        
+            keys 'v2l'
+            s.s.selections ▸ [[0 0 2 0]]
+            cur 2 0
+        
+            key 'esc'
+        
+            s.loadLines belt.linesForText("a b c d")
+            s.setMainCursor 0 0
+        
+            keys 'vf '
+            s.s.selections ▸ [[0 0 1 0]]
+            cur 1 0
+        
+            key 'esc'
+        
+      ▸ visual bracket
+        
+            s.loadLines belt.linesForText("if (a[b]) c")
+            s.setMainCursor 3 0
+        
+            keys 'v%'
+            s.s.selections ▸ [[3 0 8 0]]
+            cur 8 0
+        
+            key 'esc'
+        
+    ▸ visual escape stays in novim
+        
+            s.loadLines belt.linesForText("abc")
+            s.setMainCursor 0 0
+        
+            s.allowedModes.novim = true
+            mode.modes.novim = novim
+            mode.start s 'novim'
+        
+            key 'v'
+            key 'esc'
+        
+            s.visual ▸ null
+            s.s.selections ▸ []
+            mode.isActive s 'novim' ▸ true
+        
+            mode.stop s 'novim'
+            delete s.allowedModes.novim
+    
+  ▸ indent
+    
+    ▸ indent lines
+        
+            s.loadLines belt.linesForText("one\ntwo\nthree")
+            s.setMainCursor 0 0
+        
+            keys '>>'
+            txt "    one\ntwo\nthree"
+            cur 4 0
+        
+            s.loadLines belt.linesForText("one\ntwo\nthree")
+            s.setMainCursor 0 0
+        
+            keys '2>>'
+            txt "    one\n    two\nthree"
+            cur 4 0
+        
+            s.loadLines belt.linesForText("one\ntwo\nthree")
+            s.setMainCursor 0 0
+        
+            keys '>j'
+            txt "    one\n    two\nthree"
+        
+            s.loadLines belt.linesForText("one\ntwo\nthree")
+            s.setMainCursor 0 0
+        
+            keys '>>j.'
+            txt "    one\n    two\nthree"
+        
+    ▸ deindent lines
+        
+            s.loadLines belt.linesForText("    one\n        two\n            three")
+            s.setMainCursor 0 0
+        
+            keys '<<'
+            txt "one\n        two\n            three"
+            cur 0 0
+        
+            s.loadLines belt.linesForText("    one\n        two\n            three")
+            s.setMainCursor 0 0
+        
+            keys '2<<'
+            txt "one\n    two\n            three"
+            cur 0 0
+        
+            s.loadLines belt.linesForText("    one\n        two\n            three")
+            s.setMainCursor 0 0
+        
+            keys '<j'
+            txt "one\n    two\n            three"
+        
+    ▸ visual indent
+        
+            s.loadLines belt.linesForText("one\ntwo\nthree")
+            s.setMainCursor 1 1
+        
+            keys 'Vj>'
+            txt "one\n    two\n    three"
+            s.visual ▸ 'line'
+            s.s.selections ▸ [[0 1 9 2]]
+            cur 5 2
+        
+            key '>'
+            txt "one\n        two\n        three"
+            s.visual ▸ 'line'
+            s.s.selections ▸ [[0 1 13 2]]
+            cur 9 2
+        
+            s.loadLines belt.linesForText("    one\n        two\n            three")
+            s.setMainCursor 1 1
+        
+            keys 'Vj<'
+            txt "    one\n    two\n        three"
+            s.visual ▸ 'line'
+            s.s.selections ▸ [[0 1 13 2]]
+            cur 0 2
+        
+            s.loadLines belt.linesForText("one\ntwo\nthree")
+            s.setMainCursor 0 1
+        
+            keys 'vlj>'
+            txt "one\n    two\n    three"
+            s.visual ▸ 'char'
+            s.s.selections ▸ [[4 1 5 2]]
+            cur 5 2
+    
+  ▸ search highlights
+    
+        s.loadLines belt.linesForText("foo\nbar\nfoo\nbar\nfoo")
+        s.setMainCursor 0 0
+    
+        s.setHighlights [[0 0 3 0] [0 2 3 2] [0 4 3 4]]
+    
+        key 'n'
+        cur 0 2
+    
+        key 'n'
+        cur 0 4
+    
+        key 'n'
+        cur 0 4
+    
+        s.setMainCursor 0 4
+        key 'N'
+        cur 0 2
+    
+        key 'N'
+        cur 0 0
+    
+        s.setMainCursor 0 0
+    
+        key '2'
+        key 'n'
+        cur 0 4
+    
+        s.setMainCursor 0 0
+    
+        key 'N'
+        cur 0 0
+    
+        s.setMainCursor 0 0
+    
+        key 'n'
+        s.s.highlights ▸ [[0 0 3 0] [0 2 3 2] [0 4 3 4]]
+    
+        key 'N'
+        s.s.highlights ▸ [[0 0 3 0] [0 2 3 2] [0 4 3 4]]
+    
+        key 'j'
+        s.s.highlights ▸ []
+    
+        s.setMainCursor 0 0
+    
+        key 'n'
+        cur 0 0
+    
+        key 'N'
+        cur 0 0
+    
+        s.loadLines belt.linesForText("foo\nbar")
+        s.setMainCursor 0 0
+    
+        key '/'
+        txt "foo\nbar"
+    
+  ▸ ex commands
+    
+        m = new novim s
+    
+        key   = c -> m.handleKey c {combo:c, char:c}
+        keys  = t ->
+            for c in t
+                key c
+        enter = -> m.handleKey 'return'    {combo:'return', char:'\n'}
+        back  = -> m.handleKey 'backspace' {combo:'backspace'}
+        esc   = -> m.handleKey 'esc'       {combo:'esc', char:''}
+    
+        quits  = 0
+        saves  = []
+        writes = []
+    
+        clean = -> s.clearHistory()
+        dirty = ->
+            s.clearHistory()
+            s.pushState()
+    
+        post.on 'quit'                    -> quits += 1
+        post.on 'file.saveAndQuit' (file) -> saves.push file ? null
+        post.on 'file.save'        (file) -> writes.push file ? null
+    
+        clean()
+    
+        keys ':q'
+    
+        m.ex        ▸ 'q'
+    
+        enter()
+    
+        quits  ▸ 1
+        writes ▸ []
+        saves  ▸ []
+        m.ex   ▸ null
+    
+        dirty()
+    
+        keys ':q'
+        enter()
+    
+        quits      ▸ 1
+    
+        keys ':q!'
+    
+        m.ex        ▸ 'q!'
+    
+        enter()
+    
+        quits  ▸ 2
+        writes ▸ []
+        saves  ▸ []
+    
+        keys '3:q'
+    
+        m.ex       ▸ 'q'
+    
+        esc()
+    
+        m.ex ▸ null
+    
+        keys ':wqq'
+        back()
+    
+        m.ex ▸ 'wq'
+    
+        esc()
+    
+        m.ex ▸ null
+    
+        clean()
+    
+        keys ':w'
+        enter()
+    
+        writes ▸ [null]
+        saves  ▸ []
+        quits  ▸ 2
+        m.ex   ▸ null
+    
+  ▸ brckts lets novim handle text keys
+    
+        stack = new state cells 'stack'
+    
+        mode.modes.novim  = novim
+        mode.modes.brckts = brckts
+        mode.start stack 'brckts'
         mode.start stack 'novim'
-        for c in keys
-            press c
-
-    onKeys 'say "hello there" ok' 4 0 ['d' 'i' '"']
-    stxt 'say "" ok'
-
-    onKeys 'say "hello there" ok' 16 0 ['d' 'i' '"']
-    stxt 'say "" ok'
-
-    onKeys "a 'b c' d" 2 0 ['d' 'i' "'"]
-    stxt "a '' d"
-
-    onKeys "a 'b c' d" 6 0 ['d' 'i' "'"]
-    stxt "a '' d"
-
-    onKeys 'call(x)' 6 0 ['d' 'i' ')']
-    stxt 'call()'
-
-    onKeys 'a [b] c' 4 0 ['d' 'a' ']']
-    stxt 'a  c'
-
-    onKeys 'a {b} c' 4 0 ['d' 'a' '}']
-    stxt 'a  c'
-
-    mode.stop stack 'novim'
-    mode.stop stack 'brckts'
-
-▸ brckts still types without novim
-
-    plain = new state cells 'plain'
-
-    mode.modes.brckts = brckts
-    mode.start plain 'brckts'
-
-    pkey = c -> mode.handleKey plain c {combo:c, char:c}
-
-    plain.loadLines belt.linesForText('say "hi" ok')
-    plain.setMainCursor 4 0
-    pkey '"'
-
-    plain.mainCursor() ▸ [5 0]
-    kseg.str(plain.s.lines) ▸ 'say "hi" ok'
-
-    plain.loadLines belt.linesForText('x = ')
-    plain.setMainCursor 4 0
-    pkey '"'
-
-    plain.mainCursor() ▸ [5 0]
-    kseg.str(plain.s.lines) ▸ 'x = ""'
-
-    mode.stop plain 'brckts'
+    
+        press = c -> mode.handleKey stack c {combo:c, char:c}
+        stxt  = t -> kseg.str(stack.s.lines) ▸ t
+    
+        onKeys = (text x y keys) ->
+            stack.loadLines belt.linesForText(text)
+            stack.setMainCursor x y
+            mode.stop  stack 'novim'
+            mode.start stack 'novim'
+            for c in keys
+                press c
+    
+        onKeys 'say "hello there" ok' 4 0 ['d' 'i' '"']
+        stxt 'say "" ok'
+    
+        onKeys 'say "hello there" ok' 16 0 ['d' 'i' '"']
+        stxt 'say "" ok'
+    
+        onKeys "a 'b c' d" 2 0 ['d' 'i' "'"]
+        stxt "a '' d"
+    
+        onKeys "a 'b c' d" 6 0 ['d' 'i' "'"]
+        stxt "a '' d"
+    
+        onKeys 'call(x)' 6 0 ['d' 'i' ')']
+        stxt 'call()'
+    
+        onKeys 'a [b] c' 4 0 ['d' 'a' ']']
+        stxt 'a  c'
+    
+        onKeys 'a {b} c' 4 0 ['d' 'a' '}']
+        stxt 'a  c'
+    
+        mode.stop stack 'novim'
+        mode.stop stack 'brckts'
+    
+  ▸ brckts still types without novim
+    
+        plain = new state cells 'plain'
+    
+        mode.modes.brckts = brckts
+        mode.start plain 'brckts'
+    
+        pkey = c -> mode.handleKey plain c {combo:c, char:c}
+    
+        plain.loadLines belt.linesForText('say "hi" ok')
+        plain.setMainCursor 4 0
+        pkey '"'
+    
+        plain.mainCursor() ▸ [5 0]
+        kseg.str(plain.s.lines) ▸ 'say "hi" ok'
+    
+        plain.loadLines belt.linesForText('x = ')
+        plain.setMainCursor 4 0
+        pkey '"'
+    
+        plain.mainCursor() ▸ [5 0]
+        kseg.str(plain.s.lines) ▸ 'x = ""'
+    
+        mode.stop plain 'brckts'
+    

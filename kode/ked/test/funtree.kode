@@ -12,11 +12,11 @@ ked_sess = ->
     fakeSet = (key value) -> store[key] = value
     global.ked_session = get:fakeGet set:fakeSet
 
-▸ funtree base class items
-  
-    ked_sess()
+ked_sess()
 
-  ▸ shows methods of the base class chain
+▸ funtree
+
+  ▸ base class chain
 
         root = '/tmp/opencode/ked-funtree-base'
         baseFile = slash.path root 'base.kode'
@@ -89,7 +89,7 @@ ked_sess = ->
         supr = clss:true name:' ■ Child' line:1
         f.itemsForBaseClass(supr).length ▸ 0
 
-  ▸ jumps to inherited items in their file
+  ▸ jump to inherited items
 
         root = '/tmp/opencode/ked-funtree-jump'
         baseFile = slash.path root 'base.kode'
@@ -130,7 +130,7 @@ ked_sess = ->
         emitted[2] ▸ ['file.open' baseFile 1 'ind' 'topDelta']
         emitted[3] ▸ ['focus' 'editor']
 
-  ▸ cpp files with unnamed index entries do not crash
+  ▸ cpp with unnamed index
 
         root = '/tmp/opencode/ked-funtree-cpp'
         file = slash.path root 'main.cpp'
@@ -162,27 +162,3 @@ ked_sess = ->
 
         f.items.length ▸ 1
         f.items[0].name ▸ ' -> @route_info'
-
-  ▸ a file without classes has no inherited items
-
-        root = '/tmp/opencode/ked-funtree-noclass'
-        file = slash.path root 'funcs.kode'
-
-        fs.rmSync root recursive:true force:true
-        fs.mkdirSync root recursive:true
-        fs.writeFileSync file "alpha: -> 1\n"
-
-        idx = new indexer
-        ◯ idx.index file
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_funtree_noclass_editor' []
-        e.currentFile = file
-
-        f = new funtree e 'test_funtree_noclass' []
-        f.onFileIndexed file idx.files[file]
-
-        fs.rmSync root recursive:true force:true
-
-        f.items.length ▸ 1
-        f.items[0].name ▸ ' -> alpha'

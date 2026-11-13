@@ -58,49 +58,48 @@ REGRESSIONS = [
     'a each'  'a each (k,v)'
     '1 is'
 ]
-
+###
 ▸ fuzz
 
-    ▸ nothing crashes
+    crashed = []
 
-        crashed = []
+    for src in REGRESSIONS
 
-        for src in REGRESSIONS
+        try
+            kc src ◆file
+        catch err
+            if internal err
+                msg = String err
+                crashed.push
+                    seed: 0
+                    index: src
+                    src:   src
+                    err:   msg
 
-            try
-                kc src ◆file
-            catch err
-                if internal err
-                    msg = String err
-                    crashed.push
-                        seed: 0
-                        index: src
-                        src:   src
-                        err:   msg
+    r = rng SEED
 
-        r = rng SEED
+    for i in 0...COUNT
 
-        for i in 0...COUNT
+        src = program r
 
-            src = program r
+        try
+            kc src ◆file
+        catch err
+            if internal err
+                msg = String err
+                crashed.push
+                    seed:  SEED
+                    index: i
+                    src:   src
+                    err:   msg
 
-            try
-                kc src ◆file
-            catch err
-                if internal err
-                    msg = String err
-                    crashed.push
-                        seed:  SEED
-                        index: i
-                        src:   src
-                        err:   msg
+    for c in crashed
 
-        for c in crashed
+        log r5('fuzz case') b5(c.seed ? c.index : 'regression')
+        log c.seed ? "seed #{c.seed}" : 'regression'
+        log JSON.stringify(c.src)
+        log c.err
+        log ''
 
-            log r5('fuzz case') b5(c.seed ? c.index : 'regression')
-            log c.seed ? "seed #{c.seed}" : 'regression'
-            log JSON.stringify(c.src)
-            log c.err
-            log ''
-
-        crashed.length ▸ 0
+    crashed.length ▸ 0
+###

@@ -4,6 +4,7 @@ use ../../kxk ▪ slash sleep post
 use ../edit     ◆ editor
 use ../util     ◆ harness
 use ../theme    ◆ icons
+use ../index    ◆ prjcts
 use ../view/colmns ◆ dircol
 
 makeCol = ◯->
@@ -37,6 +38,10 @@ makeCol = ◯->
 
     ◯ waitForRoot d process.cwd()
     d
+
+quiet = (d) ->
+    clearTimeout d.dirtree.refreshTimer if d.dirtree.refreshTimer
+    d.dirtree.refresh = ->
 
 waitForRoot = (d root) ◯->
     parent = slash.dir root
@@ -167,4 +172,98 @@ waitForRoot = (d root) ◯->
         fs.rmSync root recursive:true force:true
 
         after ▸ count
+
+▸ dirtree reveal
+
+  ▸ reveal opens all ancestor folders after changing the root
+
+        root = '/tmp/opencode/ked-dirtree-reveal'
+        deep = slash.path root 'a/b/c'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync deep recursive:true
+        file = slash.path deep 'file.txt'
+        fs.writeFileSync file 'hello'
+
+        prjcts.projects[root] = dir:root files:[file]
+        prjcts.allFiles[file] = root
+
+        d =◯ makeCol()
+        d.setRoot '/tmp/opencode'
+        ◯ waitForRoot d '/tmp/opencode'
+
+        ◯ d.dirtree.onReveal file false
+
+        names = d.dirtree.items.map (i) -> i.path
+        open = ['a' 'a/b' 'a/b/c'].map (rel) -> d.dirtree.itemForPath(slash.path(root rel))?.open
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[file]
+        quiet d
+        ◯ d.dirtree.setRoot '/tmp/opencode'
+        fs.rmSync root recursive:true force:true
+
+        (file in names) ▸ true
+        open ▸ [true true true]
+
+  ▸ openRelPath waits for a directory that is already opening
+
+        root = '/tmp/opencode/ked-dirtree-opening'
+        deep = slash.path root 'a/b'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync deep recursive:true
+        file = slash.path deep 'file.txt'
+        fs.writeFileSync file 'hello'
+
+        d =◯ makeCol()
+        d.setRoot root
+        ◯ waitForRoot d root
+
+        a = d.dirtree.itemForPath slash.path(root 'a')
+        opening = d.dirtree.openDir a
+        ◯ d.dirtree.openRelPath 'a/b'
+
+        names = d.dirtree.items.map (i) -> i.path
+        open = d.dirtree.itemForPath(slash.path(root 'a/b'))?.open
+
+        ◯ opening
+        quiet d
+        ◯ d.dirtree.setRoot '/tmp/opencode'
+        fs.rmSync root recursive:true force:true
+
+        (file in names) ▸ true
+        open ▸ true
+
+  ▸ concurrent reveals leave one intact tree
+
+        root = '/tmp/opencode/ked-dirtree-concurrent'
+        deep = slash.path root 'a/b'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync deep recursive:true
+        file = slash.path deep 'file.txt'
+        fs.writeFileSync file 'hello'
+
+        prjcts.projects[root] = dir:root files:[file]
+        prjcts.allFiles[file] = root
+
+        d =◯ makeCol()
+        d.setRoot '/tmp/opencode'
+        ◯ waitForRoot d '/tmp/opencode'
+
+        ◯ Promise.all [d.dirtree.onReveal(file, false) d.dirtree.onReveal(file, false)]
+
+        names = d.dirtree.items.map (i) -> i.path
+        bOpen = d.dirtree.itemForPath(slash.path(root 'a/b'))?.open
+        dups = 0
+        for rel in ['a' 'a/b']
+            dups += names.filter((n) -> n == slash.path(root rel)).length - 1
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[file]
+        quiet d
+        ◯ d.dirtree.setRoot '/tmp/opencode'
+        fs.rmSync root recursive:true force:true
+
+        (file in names) ▸ true
+        bOpen ▸ true
+        dups ▸ 0
 ###

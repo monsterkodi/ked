@@ -22,6 +22,7 @@ import rgxs from './quicky.json' with { type: "json" }
         
         @frontRoundOffset = 0
         @refreshTimer = null
+        @revealing = null
         
     onGitStatus: status =>
     
@@ -83,7 +84,14 @@ import rgxs from './quicky.json' with { type: "json" }
             'delete'
             'rename' ➜ @refresh()
     
-    onMouseLeave: event => @revealEditorFile()
+    onMouseLeave: event => @selectEditorFile()
+    
+    selectEditorFile: =>
+        
+        file = ked_session.get "editor▸file"
+        if item = @itemForPath file
+            row = @rowForChoice item
+            @highlight row
         
     revealEditorFile: ◯=> 
     
@@ -92,21 +100,37 @@ import rgxs from './quicky.json' with { type: "json" }
         
     onReveal: p focus=true ◯=>
         
+        prev = @revealing
+        @revealing = @queuedReveal prev p focus
+        ◯ @revealing
+        @selectEditorFile()
+        
+    queuedReveal: prev p focus ◯=>
+        
+        if prev
+            try
+                ◯ prev
+            catch err
+                error 'dirtree.reveal' err
+        
+        ◯ @reveal p focus
+        
+    reveal: p focus ◯=>
+        
         if item = @itemForPath p
             @select item
-            ⮐ 
-
-        pd = slash.dir p
-        
-        if d = @itemForPath pd
-            if not d.open
-                ◯ @openDir d
         else
-            ddd = prjcts.dir p
-            rel = slash.relative pd ddd
-
-            ◯ @setRoot ddd
-            ◯ @openRelPath rel
+            pd = slash.dir p
+            
+            if item = @itemForPath pd
+                if not item.open
+                    ◯ @openDir item
+            else
+                ddd = prjcts.dir p
+                rel = slash.relative pd ddd
+    
+                ◯ @setRoot ddd
+                ◯ @openRelPath rel
 
         if focus ➜ @grabFocus()
                  ➜ @redraw()
@@ -148,7 +172,7 @@ import rgxs from './quicky.json' with { type: "json" }
         
         @set items opt.index ? 0
         
-        @restoreSessionState opt
+        ◯ @restoreSessionState opt
         
         post.emit 'redraw' if opt.redraw
 
@@ -165,7 +189,20 @@ import rgxs from './quicky.json' with { type: "json" }
         
         ⮐ if empty dirItem
         
+        if dirItem.opening
+            ◯ dirItem.opening
+            @redraw() if opt?.redraw
+            ⮐
+        
         ⮐ if dirItem.open
+        
+        dirItem.opening = @openDirItems dirItem opt
+        
+        ◯ dirItem.opening
+        
+        delete dirItem.opening
+        
+    openDirItems: dirItem opt ◯=>
         
         opt ?= {}
         
@@ -183,10 +220,6 @@ import rgxs from './quicky.json' with { type: "json" }
         for item in items
             item.depth = depth
             @tilde item
-            if item.type == 'dir' and state.open?[item.path]
-                if empty opt.select and empty opt.index
-                    opt.select = dirItem
-                @openDir item opt
         
         items.sort (a b) => @weight(a) - @weight(b)
         
@@ -205,21 +238,27 @@ import rgxs from './quicky.json' with { type: "json" }
         
         git.status dirItem.path
         
+        for item in items
+            if item.type == 'dir' and state.open?[item.path]
+                if empty opt.select and empty opt.index
+                    opt.select = dirItem
+                ◯ @openDir item opt
+        
         @redraw() if opt.redraw
         
-    restoreSessionState: opt =>
+    restoreSessionState: opt ◯=>
         
         opt ?= {}
         opt.redraw = true
         
         state = ked_session.get @name {}
-
+        
         ⮐ if empty state.open
         
         for key,value of state.open
             
             if key.startsWith @currentRoot
-                @openDir @itemForPath(key) opt
+                ◯ @openDir @itemForPath(key) opt
         
     onSessionMerge: recent => @setState recent[@name]    
 

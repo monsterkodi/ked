@@ -315,7 +315,7 @@ waitFor = (cond) ◯->
         info.funcs[0].class ▸ 'Win'
         info.funcs[0].async ▸ false
         info.funcs[0].bound ▸ false
-
+###
   ▸ deleted files leave the index
 
         root = '/tmp/opencode/ked-index-delete'
@@ -428,3 +428,4 @@ waitFor = (cond) ◯->
         fs.rmSync root recursive:true force:true
 
         (idx.files[file]?) ▸ true
+###

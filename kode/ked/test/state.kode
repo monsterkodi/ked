@@ -15,16 +15,16 @@ sel = r... -> s.allSelections() ▸ r
 
 ▸ state
     
-    text = """
-        line 1
-        line 2
-        line 3
-        """
+  text = """
+      line 1
+      line 2
+      line 3
+      """
+  
+  s.syntax.ext = 'kode'
+  s.loadLines belt.linesForText(text)
     
-    s.syntax.ext = 'kode'
-    s.loadLines belt.linesForText(text)
-    
-    txt text
+  txt text
     
   ▸ editing
     

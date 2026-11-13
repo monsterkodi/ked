@@ -2,11 +2,10 @@
 use ../util/img ◆ squares
 
 ▸ squares
-
-    squares.csz = [10 20] 
     
   ▸ tilesInRect
 
+        squares.csz = [10 20] 
         squares.tilesInRect  0  0 10 10 ▸ [[0 0 0  0 10 10]]
         squares.tilesInRect  5  5  5  5 ▸ [[0 0 5  5  5  5]]
         squares.tilesInRect 15 15  5 10 ▸ [[1 0 5 15  5  5] [1 1 5 0  5  5]]

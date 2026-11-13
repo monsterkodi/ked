@@ -1,6 +1,6 @@
 var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}}
 
-var makeCol, waitForRoot
+var makeCol, quiet, waitForRoot
 
 import fs from "fs"
 
@@ -15,6 +15,8 @@ import harness from "../util/harness.js"
 
 import icons from "../theme/icons.js"
 
+import prjcts from "../index/prjcts.js"
+
 import dircol from "../view/colmns/dircol.js"
 
 
@@ -25,7 +27,7 @@ makeCol = async function ()
     store = {}
     fakeGet = function (key, def)
     {
-        var found, k, parts, prefix, rest, result, v, _13_31_, _24_33_, _28_19_
+        var found, k, parts, prefix, rest, result, v, _14_31_, _25_33_, _29_19_
 
         if (!((key != null ? key.split : undefined) != null))
         {
@@ -49,7 +51,7 @@ makeCol = async function ()
             }
             else
             {
-                result[parts[0]] = ((_24_33_=result[parts[0]]) != null ? _24_33_ : {})
+                result[parts[0]] = ((_25_33_=result[parts[0]]) != null ? _25_33_ : {})
                 result[parts[0]][parts.slice(1).join('▸')] = v
             }
             found = true
@@ -58,7 +60,7 @@ makeCol = async function ()
         {
             return result
         }
-        return ((_28_19_=store[key]) != null ? _28_19_ : def)
+        return ((_29_19_=store[key]) != null ? _29_19_ : def)
     }
     fakeSet = function (key, value)
     {
@@ -75,6 +77,16 @@ makeCol = async function ()
     d.layout(0,0,100,30)
     await waitForRoot(d,process.cwd())
     return d
+}
+
+quiet = function (d)
+{
+    if (d.dirtree.refreshTimer)
+    {
+        clearTimeout(d.dirtree.refreshTimer)
+    }
+    return d.dirtree.refresh = function ()
+    {}
 }
 
 waitForRoot = async function (d, root)
@@ -95,5 +107,5 @@ waitForRoot = async function (d, root)
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGlydHJlZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC9kaXJ0cmVlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDSSxTQUFBOztPQUNNLFVBQUE7SUFBTTtJQUFNO0lBQU07O09BQ1YsYUFBWDs7T0FDVyxjQUFYOztPQUNXLFlBQVg7O09BQ2MsYUFBVDs7O0FBRVo7Ozs7SUFFSTtJQUNBLG9CQUFXLEtBQUk7Ozs7ZUFDRSxjQUFBLElBQUs7O21CQUFoQjs7UUFDRixTQUFTLE1BQU07UUFDZjtRQUNBLFFBQVE7YUFDSixLQUFPOztZQUFMLElBQUs7aUJBQ1MsRUFBRSxXQUFXOztnQkFBN0I7O1lBQ0EsT0FBTyxRQUFFLE9BQU87WUFDaEIsUUFBUSxLQUFLLE1BQU07Z0JBQ2hCLE1BQU0sV0FBVTs7Z0JBQ2YsT0FBTyxNQUFNLE1BQU07Ozs7Z0JBRW5CLE9BQU8sTUFBTSxnQkFBYixPQUFPLE1BQU07Z0JBQ2IsT0FBTyxNQUFNLElBQUksWUFBTSxHQUFLLEtBQUssUUFBUTs7WUFDN0MsUUFBUTs7WUFDQTs7bUJBQVY7O3lCQUNGLE1BQU0sMEJBQU87O0lBQ2pCLG9CQUFXLEtBQUk7O2VBQVUsTUFBTSxPQUFPOztJQUN0QyxvQkFBVzs7c0JBQWUsTUFBTTs7SUFDaEMsT0FBTyxlQUFjLElBQUksUUFBUSxJQUFJLFFBQVEsSUFBSTtJQUVqRCxRQUFRLFNBQVEsS0FBSyxJQUFJLEtBQUs7SUFDOUIsUUFBUSxPQUFPLEVBQUUsT0FBTztJQUN4QixRQUFRLE9BQU8sRUFBRSxPQUFPO0lBQ3hCLEVBQUUsT0FBTyxFQUFFLEVBQUUsSUFBSTtVQUVmLFlBQVksRUFBRSxRQUFRO1dBQ3hCOzs7QUFFSiw4QkFBZSxHQUFFOzs7O0lBQ2IsU0FBUyxNQUFNLElBQUk7SUFDbkIsSUFBSTtXQUNFLElBQUk7O1FBQ04sUUFBUSxFQUFFLFFBQVE7dUJBQ0gsVUFBVSxNQUFNLEdBQUcsU0FBUTs7OztjQUN4QyxNQUFNO1FBQ1IsS0FBSyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGlydHJlZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdGVzdC9kaXJ0cmVlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDSSxTQUFBOztPQUNNLFVBQUE7SUFBTTtJQUFNO0lBQU07O09BQ1YsYUFBWDs7T0FDVyxjQUFYOztPQUNXLFlBQVg7O09BQ1csYUFBWDs7T0FDYyxhQUFUOzs7QUFFWjs7OztJQUVJO0lBQ0Esb0JBQVcsS0FBSTs7OztlQUNFLGNBQUEsSUFBSzs7bUJBQWhCOztRQUNGLFNBQVMsTUFBTTtRQUNmO1FBQ0EsUUFBUTthQUNKLEtBQU87O1lBQUwsSUFBSztpQkFDUyxFQUFFLFdBQVc7O2dCQUE3Qjs7WUFDQSxPQUFPLFFBQUUsT0FBTztZQUNoQixRQUFRLEtBQUssTUFBTTtnQkFDaEIsTUFBTSxXQUFVOztnQkFDZixPQUFPLE1BQU0sTUFBTTs7OztnQkFFbkIsT0FBTyxNQUFNLGdCQUFiLE9BQU8sTUFBTTtnQkFDYixPQUFPLE1BQU0sSUFBSSxZQUFNLEdBQUssS0FBSyxRQUFROztZQUM3QyxRQUFROztZQUNBOzttQkFBVjs7eUJBQ0YsTUFBTSwwQkFBTzs7SUFDakIsb0JBQVcsS0FBSTs7ZUFBVSxNQUFNLE9BQU87O0lBQ3RDLG9CQUFXOztzQkFBZSxNQUFNOztJQUNoQyxPQUFPLGVBQWMsSUFBSSxRQUFRLElBQUksUUFBUSxJQUFJO0lBRWpELFFBQVEsU0FBUSxLQUFLLElBQUksS0FBSztJQUM5QixRQUFRLE9BQU8sRUFBRSxPQUFPO0lBQ3hCLFFBQVEsT0FBTyxFQUFFLE9BQU87SUFDeEIsRUFBRSxPQUFPLEVBQUUsRUFBRSxJQUFJO1VBRWYsWUFBWSxFQUFFLFFBQVE7V0FDeEI7OztBQUVKLGtCQUFTOztRQUNrQyxFQUFFLFFBQVE7O1FBQWpELGFBQWEsRUFBRSxRQUFROztXQUN2QixFQUFFLFFBQVE7Ozs7QUFFZCw4QkFBZSxHQUFFOzs7O0lBQ2IsU0FBUyxNQUFNLElBQUk7SUFDbkIsSUFBSTtXQUNFLElBQUk7O1FBQ04sUUFBUSxFQUFFLFFBQVE7dUJBQ0gsVUFBVSxNQUFNLEdBQUcsU0FBUTs7OztjQUN4QyxNQUFNO1FBQ1IsS0FBSyJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/test/dirtree.kode

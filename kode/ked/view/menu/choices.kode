@@ -118,6 +118,7 @@ use ../../edit      ◆ editor
         cc
         
     choiceAtRow: row -> @fuzzied[row]
+    rowForChoice: choice -> @fuzzied.indexOf choice
     
     hasNext: -> @nextRow()?
     hasPrev: -> @prevRow()?
@@ -165,11 +166,16 @@ use ../../edit      ◆ editor
         ⮐ if not row is num
         ⮐ if row < 0 or row >= @state.s.lines.length
     
-        @state.setSelections [belt.rangeOfLine(@state.s.lines row)]
-        @state.setMainCursor 0 row
-
+        @highlight row
+        
         @grabFocus() if @focusable
         @emit 'select' @choiceAtRow(row)
+        
+    highlight: row ->
+        
+        if 0 <= row < @state.s.lines.length
+            @state.setSelections [belt.rangeOfLine(@state.s.lines row)]
+            @state.setMainCursor 0 row
         
     selectFirst: -> @select 0
     
