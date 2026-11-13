@@ -30,6 +30,7 @@ use ../base         ◆ view
         
         @rowCache     = null
         @rowCacheExt  = null
+        @suspended    = false
         
         @setScales config.data?.scale
         
@@ -38,8 +39,21 @@ use ../base         ◆ view
 ##show    
     reload: => 
 
+        if @suspended
+            @redraw = true
+            ⮐
+
         @createImages()
         @drawImages()
+    
+    suspend: => @suspended = true
+    
+    resume: =>
+        
+        ⮐ if not @suspended
+        
+        @suspended = false
+        @redraw    = true
     
     show: => 
     

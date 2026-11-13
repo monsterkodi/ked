@@ -51,6 +51,8 @@ use                 ◆ mapview
         
         sameCount = @state.s.lines.length == @linesCount
         @linesCount = @state.s.lines.length
+        
+        ⮐ if @suspended
 
         if diff.del.length == 0 == diff.chg.length
             @reload()
@@ -234,6 +236,7 @@ use                 ◆ mapview
                 
     drawKnob: =>
     
+        ⮐ if @suspended
         ⮐ if empty @csz
         
         @calcView()

@@ -150,9 +150,12 @@ use           ◆ keys mode
             fg: fgSpans
             bg: bgSpans
 
+        changed = not (@s.colors? and @s.colors eql next)
+
         @s = @s.set 'colors' next
         @clearHistory()
-        @emit 'colors.changed'
+        
+        @emit 'colors.changed' if changed
 
 #!cursors
 

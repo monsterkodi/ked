@@ -457,6 +457,9 @@ use child_process ▪ spawn exec
             ext ?= slash.ext(@currentFile)
             @editor.state.syntax.setExt ext
         
+        mapsc = @editor.mapscr
+        mapsc?.suspend()
+        
         @editor.state.loadSegls segls
         @editor.state.loadColors fileColors
         @editor.setCurrentFile @currentFile     
@@ -469,6 +472,8 @@ use child_process ▪ spawn exec
             @editor.state.setCursors [reloadCursor] adjust:false
         else
             mode.fileLoaded @editor.state @currentFile row col view
+        
+        mapsc?.resume()
         
         post.emit 'file.loaded' @currentFile
         

@@ -577,6 +577,39 @@ hed = cols rows ext='md' feats=[]->
 
         m.images.length ▸ 5
 
+  ▸ a suspended map waits for the restored view
+
+        [h e] = hed cols:40 rows:20
+        m = new mapscr e
+        m.cells.layout 30 0 12 20
+        h.screen.t.pixels = [400 400]
+        h.screen.t.cellsz = [10 20]
+
+        e.state.loadLines [("old #{i}") for i in 0...1000]
+        m.reload()
+
+        h.screen.t.out = []
+
+        m.suspend()
+
+        e.state.loadSegls kseg.segls([("new #{i}") for i in 0...2000])
+        e.state.loadColors {fg: [], bg: []}
+        e.state.setView [0 1200]
+
+        m.resume()
+
+        h.screen.t.written() ▸ ''
+        m.redraw ▸ true
+
+        m.layout 30 0 12 20
+
+        out = h.screen.t.written()
+
+        m.images.length ▸ 2000
+        (m.topLine > 0) ▸ true
+        out.includes("a=p,i=#{m.imgId},") ▸ false
+        out.includes("a=p,i=#{m.imgId + m.topLine},") ▸ true
+
   ▸ a scaled line gets a taller stripe in the map
 
         [h e] = hed 40 10

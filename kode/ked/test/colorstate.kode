@@ -111,6 +111,24 @@ use ../view/editor ◆ mapview
 
         h.screen.get_bg(2 0) ▸ [0 0 255]
 
+  ▸ loading unchanged colors is not announced
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        changes = 0
+        s.on 'colors.changed' -> changes += 1
+
+        s.loadColors {fg: [], bg: []}
+        changes ▸ 0
+
+        s.loadColors {fg: [[0 0 2 '#ff0000']], bg: []}
+        changes ▸ 1
+
+        s.loadColors {fg: [[0 0 2 '#ff0000']], bg: []}
+        changes ▸ 1
+
   ▸ the map uses custom colors
 
         h = new harness cols:20 rows:5
