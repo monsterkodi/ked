@@ -798,6 +798,8 @@ use child_process ▪ spawn exec
         
         start = process.hrtime()
         
+        @t.syncStart()
+        
         @title.gutter = @editor.state.gutterWidth()
         
         @screen.init()
@@ -834,6 +836,8 @@ use child_process ▪ spawn exec
         @t.removeImgs()
         @editor.showCursorsOutsideRects(erases) if editorDrawn
         # ●▪ render
+        
+        @t.syncEnd()
         
         @title.time = process.hrtime(start)[1]
         

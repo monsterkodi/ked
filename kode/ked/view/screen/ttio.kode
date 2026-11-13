@@ -126,6 +126,7 @@ use ../../util/img ◆ rounded
         @restore()
         
     clear: =>
+        @syncEnd()
         @write '\x1b[2J' # clear screen
         @write '\x1b[H'  # cursor home
     
@@ -327,6 +328,9 @@ use ../../util/img ◆ rounded
             @write '\x1b[?25h'
         else
             @hideCursor()
+
+    syncStart: => @write '\x1b[?2026h'
+    syncEnd:   => @write '\x1b[?2026l'
             
     store:    => @write '\x1b7'
     restore:  => @write '\x1b8'

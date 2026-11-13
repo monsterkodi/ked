@@ -10,6 +10,15 @@ use ../util        ◆ harness
         t = new ttio headless:true input:false
         t.cellsz ▸ []
 
+  ▸ a synchronized update can bracket a frame
+
+        t = new ttio headless:true input:false
+
+        t.syncStart()
+        t.syncEnd()
+
+        t.written() ▸ '\x1b[?2026h\x1b[?2026l'
+
   ▸ a csi sequence ends with its final byte
 
         t = new ttio headless:true input:false
