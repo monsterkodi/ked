@@ -69,6 +69,10 @@ gutter
     bg_git_mod                              #030   
     bg_git_add                              #001a00
     bg_git_del                              #400   
+    bg_git_revert_mod                       #026   
+    bg_git_revert_add                       #014   
+    bg_git_revert_del                       #403   
+    bg_git_hover                            #333   
                                               
 title                                      
     bg                                      #222   

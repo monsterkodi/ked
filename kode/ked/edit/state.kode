@@ -2,7 +2,7 @@
 use ../../kxk ▪ immutable kstr kseg events absMin
 use ../../kxk ◆ clip
 use ../util   ◆ syntax config scaling
-use ./act     ◆ del insert select join indent multi main novim sort count
+use ./act     ◆ del insert select join indent multi main novim sort count range
 use ./tool    ◆ belt colorspans
 use           ◆ keys mode
 
@@ -21,7 +21,7 @@ use           ◆ keys mode
         
         @allowedModes = {}
 
-        for act in [del insert select join indent multi main novim sort count]
+        for act in [del insert select join indent multi main novim sort count range]
             for k,v of act
                 @[k] = v.bind @
                 

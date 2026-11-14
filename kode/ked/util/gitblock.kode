@@ -1,0 +1,485 @@
+■gitblock
+###
+    groups the changes of a git diff into visual gutter blocks
+    and plans reverting or restoring a whole block
+
+    a block keeps one op per hunk so that unchanged lines
+    between two hunks of the same visual block are kept
+###
+
+#!diff
+
+    @fromDiff: diff ->
+
+        blocks = []
+
+        for change in diff.changes ? []
+
+            oldLines = change.old ? []
+            newLines = change.new ? []
+
+            count = newLines.length
+            start = if count > 0 ➜ change.line-1 else change.line
+
+            first = if count > 0 ➜ start else max 0 start-1
+            last  = if count > 0 ➜ start+count-1 else max 0 start-1
+
+            hunk =
+                start:    start
+                end:      start+count
+                old:      oldLines
+                new:      newLines
+                oldMarks: @oldMarksFor(oldLines newLines)
+                newMarks: @newMarksFor(oldLines newLines)
+                del:      oldLines.length > newLines.length
+
+            block = last blocks
+
+            if block? and first <= block.last+1
+                block.hunks.push hunk
+                block.end  = max block.end hunk.end
+                block.last = max block.last last
+            else
+                blocks.push
+                    start: first
+                    end:   hunk.end
+                    first: first
+                    last:  last
+                    hunks: [hunk]
+
+        for block in blocks
+            block.start = block.hunks[0].start
+            block.marks = @marksForBlock block
+            block.mods  = @modsOfBlock block
+            delete block.first
+            delete block.last
+
+        blocks
+
+    @oldMarksFor: oldLines newLines ->
+
+        n = min oldLines.length newLines.length
+        marks = []
+        for i in 0...oldLines.length
+            marks.push (i < n ? 'mod' : 'del')
+        marks
+
+    @newMarksFor: oldLines newLines ->
+
+        n = min oldLines.length newLines.length
+        marks = []
+        for i in 0...newLines.length
+            marks.push (i < n ? 'mod' : 'add')
+        marks
+
+    @marksForBlock: block ->
+
+        marks = {}
+
+        for hunk in block.hunks
+
+            for i in 0...hunk.new.length
+                marks[hunk.start+i] = hunk.newMarks[i]
+
+            if hunk.del
+                line = if hunk.new.length ➜ hunk.start+hunk.new.length-1 else max 0 hunk.start-1
+                marks[line] = 'del' if not marks[line]
+
+        marks
+
+    @modsOfBlock: block ->
+
+        mods = 0
+        for hunk in block.hunks
+            mods += min hunk.old.length hunk.new.length
+        mods
+
+#!revert
+
+    @revert: block lines -> 
+
+        ⮐ null if not @matchesNew block lines
+
+        ops   = []
+        delta = 0
+
+        for hunk in block.hunks
+
+            ops.push
+                start:    hunk.start
+                oldStart: hunk.start + delta
+                old:      hunk.old
+                new:      hunk.new
+                oldMarks: hunk.oldMarks
+                newMarks: hunk.newMarks
+
+            delta += hunk.old.length - hunk.new.length
+
+        entry =
+            ops:    ops
+            block:  block
+            start:  ops[0].oldStart
+            end:    ops[0].oldStart
+            before: lines[block.start-1]
+            after:  lines[block.end]
+
+        for op in ops
+            entry.end = max entry.end (op.oldStart+op.old.length)
+
+        entry.marks = @marksForEntry entry
+        entry
+
+    @restore: entry lines ->
+
+        ⮐ null if not @matchesOld entry lines
+        entry.block
+
+    @matchesNew: block lines ->
+
+        for hunk in block.hunks
+
+            ⮐ false if hunk.start + hunk.new.length > lines.length
+
+            for i in 0...hunk.new.length
+                ⮐ false if lines[hunk.start+i] != hunk.new[i]
+
+        true
+
+    @matchesOld: entry lines ->
+
+        for op in entry.ops
+
+            ⮐ false if op.oldStart + op.old.length > lines.length
+
+            for i in 0...op.old.length
+                ⮐ false if lines[op.oldStart+i] != op.old[i]
+
+        true
+
+    @marksForEntry: entry ->
+
+        marks = {}
+
+        for op in entry.ops
+
+            if op.old.length > 0
+                for i in 0...op.old.length
+                    marks[op.oldStart+i] = op.oldMarks[i]
+            else
+                line = max 0 op.oldStart-1
+                marks[line] = 'del' if not marks[line]
+
+            # keep the line above a reverted deletion clickable
+            # so the same spot keeps toggling the block
+            if op.new.length == 0
+                line = max 0 op.oldStart-1
+                marks[line] = 'del' if not marks[line]
+
+        marks
+
+    @revertEdits: entry ->
+
+        edits = []
+        for op in entry.ops
+            edits.push [op.start op.new.length op.old]
+        edits
+
+    @restoreEdits: entry ->
+
+        edits = []
+        for op in entry.ops
+            edits.push [op.oldStart op.old.length op.new]
+        edits
+
+    @applyRevert: entry lines ->
+
+        result = lines.slice()
+
+        for i in entry.ops.length-1..0
+            op = entry.ops[i]
+            result = result[0...op.start].concat(op.old).concat(result[op.start+op.new.length..])
+
+        result
+
+    @applyRestore: entry lines ->
+
+        result = lines.slice()
+
+        for i in entry.ops.length-1..0
+            op = entry.ops[i]
+            result = result[0...op.oldStart].concat(op.new).concat(result[op.oldStart+op.old.length..])
+
+        result
+
+    ###
+        makes an entry for a block whose old content is already in the buffer
+        used after undo and redo or after the buffer was changed by other means
+    ###
+    @stashedBlock: block lines ->
+
+        delta = 0
+
+        for hunk in block.hunks
+
+            os = hunk.start + delta
+
+            if hunk.old.length > 0
+                idx = @findSequence lines hunk.old os
+                if valid idx
+                    d = idx - os
+                    ⮐ @entryAt block lines d
+
+            delta += hunk.old.length - hunk.new.length
+
+        d = @contextShift block.before block.after block.start lines
+        ⮐ null if not valid d
+        @entryAt block lines d
+
+    @entryAt: block lines d ->
+
+        shifted = @shiftBlock block d
+
+        delta = 0
+
+        for hunk in shifted.hunks
+
+            for i in 0...hunk.old.length
+                ⮐ null if lines[hunk.start+delta+i] != hunk.old[i]
+
+            delta += hunk.old.length - hunk.new.length
+
+        ops = []
+        delta = 0
+
+        for hunk in shifted.hunks
+            ops.push
+                start:    hunk.start
+                oldStart: hunk.start + delta
+                old:      hunk.old
+                new:      hunk.new
+                oldMarks: hunk.oldMarks
+                newMarks: hunk.newMarks
+            delta += hunk.old.length - hunk.new.length
+
+        entry =
+            ops:    ops
+            block:  shifted
+            start:  ops[0].oldStart
+            end:    ops[0].oldStart
+
+        for op in ops
+            entry.end = max entry.end (op.oldStart+op.old.length)
+
+        entry.before = lines[entry.start-1]
+        entry.after  = lines[entry.end]
+
+        entry.marks = @marksForEntry entry
+        entry
+
+#!move
+
+    @shiftBlock: block d ->
+
+        ⮐ block if d == 0
+
+        marks = {}
+        for line,kind of block.marks
+            marks[int(line)+d] = kind
+
+        hunks = []
+        for hunk in block.hunks
+            hunks.push
+                start:    hunk.start+d
+                end:      hunk.end+d
+                old:      hunk.old
+                new:      hunk.new
+                oldMarks: hunk.oldMarks
+                newMarks: hunk.newMarks
+                del:      hunk.del
+
+        before = block.before
+        after  = block.after
+
+        block =
+            start: block.start+d
+            end:   block.end+d
+            hunks: hunks
+            marks: marks
+            mods:  block.mods
+        block.before = before if valid before
+        block.after  = after  if valid after
+        block
+
+    @shiftEntry: entry d ->
+
+        ⮐ entry if d == 0
+
+        ops = []
+        for op in entry.ops
+            ops.push
+                start:    op.start+d
+                oldStart: op.oldStart+d
+                old:      op.old
+                new:      op.new
+                oldMarks: op.oldMarks
+                newMarks: op.newMarks
+
+        entry =
+            ops:    ops
+            block:  @shiftBlock(entry.block d)
+            start:  entry.start+d
+            end:    entry.end+d
+            before: entry.before
+            after:  entry.after
+
+        entry.marks = @marksForEntry entry
+        entry
+
+    @reanchorEntry: entry lines ->
+
+        shift = @shiftForEntry entry lines
+        ⮐ null if not valid shift
+        @shiftEntry entry shift
+
+    @undoneBlock: entry lines ->
+
+        block = entry.block
+
+        for hunk in block.hunks
+
+            continue if empty hunk.new
+
+            idx = @findSequence lines hunk.new hunk.start
+            continue if not valid idx
+
+            d = idx - hunk.start
+            ⮐ @shiftBlock block d if @blockMatchesAt block lines d
+
+        d = @contextShift entry.before entry.after block.start lines
+        if valid d and @blockMatchesAt block lines d
+            ⮐ @shiftBlock block d
+
+        null
+
+    @shiftForEntry: entry lines ->
+
+        hasOld = false
+
+        for op in entry.ops
+
+            continue if empty op.old
+
+            hasOld = true
+
+            idx = @findSequence lines op.old op.oldStart
+            continue if not valid idx
+
+            shift = idx - op.oldStart
+            ⮐ shift if @entryMatchesAt entry lines shift
+
+        ⮐ null if hasOld
+
+        @contextShift entry.before entry.after entry.start lines
+
+    @entryMatchesAt: entry lines shift ->
+
+        for op in entry.ops
+
+            ⮐ false if op.oldStart+shift < 0
+            ⮐ false if op.oldStart+shift+op.old.length > lines.length
+
+            for i in 0...op.old.length
+                ⮐ false if lines[op.oldStart+shift+i] != op.old[i]
+
+        true
+
+    @blockMatchesAt: block lines shift ->
+
+        for hunk in block.hunks
+
+            ⮐ false if hunk.start+shift < 0
+            ⮐ false if hunk.start+shift+hunk.new.length > lines.length
+
+            for i in 0...hunk.new.length
+                ⮐ false if lines[hunk.start+shift+i] != hunk.new[i]
+
+        true
+
+    @findSequence: lines seq near ->
+
+        ⮐ null if empty seq
+        ⮐ null if seq.length > lines.length
+
+        near ?= 0
+
+        best = null
+        dist = Infinity
+
+        for i in 0...lines.length-seq.length+1
+
+            match = true
+            for j in 0...seq.length
+                if lines[i+j] != seq[j]
+                    match = false
+                    break
+
+            if match
+                d = Math.abs i-near
+                if d < dist
+                    dist = d
+                    best = i
+
+        best
+
+    @contextShift: before after start lines ->
+
+        if not valid before
+
+            ⮐ null if valid after and empty lines
+
+            if not valid after
+                ⮐ -start if empty lines
+                ⮐ null
+
+            if lines.length and lines[0] == after
+                ⮐ -start
+
+            ⮐ null
+
+        if not valid after
+
+            best = null
+            for i in 0...lines.length
+                best = i if lines[i] == before
+
+            ⮐ null if best == null
+            ⮐ best+1-start
+
+        best = null
+        dist = Infinity
+
+        for i in 0...lines.length-1
+
+            if lines[i] == before and lines[i+1] == after
+                d = Math.abs((i+1)-start)
+                if d < dist
+                    dist = d
+                    best = i+1
+
+        ⮐ null if best == null
+        best-start
+
+#!overlap
+
+    @overlaps: block entry ->
+
+        @intervalOverlap block.start block.end entry.block.start entry.block.end
+
+    @intervalOverlap: aStart aEnd bStart bEnd ->
+
+        ⮐ true  if aStart == aEnd and bStart == bEnd and aStart == bStart
+        ⮐ true  if aStart == aEnd and bStart < aStart < bEnd
+        ⮐ true  if bStart == bEnd and aStart < bStart < aEnd
+        aStart < bEnd and bStart < aEnd
+
+export gitblock

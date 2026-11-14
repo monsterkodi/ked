@@ -630,3 +630,37 @@ sel = r... -> s.allSelections() ▸ r
 
         s.undo()
         s.totalRows() ▸ 4
+
+  ▸ replaceLineRanges applies all edits in one undo step
+
+        s.loadLines ['a' 'b' 'c' 'd' 'e']
+
+        s.replaceLineRanges [
+            [1 1 [(kseg 'B')]]
+            [3 1 [(kseg 'D1') (kseg 'D2')]]
+            ]
+
+        txt 'a\nB\nc\nD1\nD2\ne'
+
+        s.undo()
+
+        txt 'a\nb\nc\nd\ne'
+
+  ▸ replaceLineRanges moves cursors after changed lines
+
+        s.loadLines ['a' 'b' 'c' 'd']
+        s.setCursors [[0 0] [2 3]]
+
+        s.replaceLineRanges [[1 1 [(kseg 'B1') (kseg 'B2')]]]
+
+        s.allCursors() ▸ [[0 0] [1 4]]
+
+  ▸ replaceLineRanges moves a cursor inside a removed range to the start
+
+        s.loadLines ['a' 'b' 'c' 'd']
+        s.setCursors [[0 2]]
+
+        s.replaceLineRanges [[1 2 []]]
+
+        s.s.lines.length ▸ 2
+        s.mainCursor() ▸ [0 1]

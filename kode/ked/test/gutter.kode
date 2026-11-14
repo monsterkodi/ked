@@ -1,0 +1,241 @@
+use ../../kxk ▪ kseg
+use ../edit   ◆ editor
+use ../util   ◆ harness
+
+setup = ->
+
+    h = new harness cols:40 rows:10
+    e = new editor h.screen 'test_gutter' ['gutter']
+    e.layout 0 0 40 10
+    e
+
+press = (e line) ->
+
+    e.onMouse
+        type:   'press'
+        cell:   [1 line]
+        button: 'left'
+        count:  1
+        cmd:    true
+
+move = (e line) ->
+
+    e.onMouse
+        type: 'move'
+        cell: [1 line]
+        cmd:  true
+
+text = (e) -> kseg.str(e.state.segls)
+
+▸ gutter
+
+  ▸ a modifier click reverts and restores a modified line
+
+        e = setup()
+
+        e.state.loadLines ['aa' 'B' 'cc']
+        e.gutter.onGitDiff
+            file:    'test.txt'
+            changes: [{line:2 old:['b'] new:['B']}]
+
+        press e 1
+
+        text(e) ▸ 'aa\nb\ncc'
+        e.gutter.entries.length ▸ 1
+
+        press e 1
+
+        text(e) ▸ 'aa\nB\ncc'
+        e.gutter.entries.length ▸ 0
+
+  ▸ a click without a modifier changes nothing
+
+        e = setup()
+
+        e.state.loadLines ['aa' 'B' 'cc']
+        e.gutter.onGitDiff
+            file:    'test.txt'
+            changes: [{line:2 old:['b'] new:['B']}]
+
+        e.onMouse
+            type:   'press'
+            cell:   [1 1]
+            button: 'left'
+            count:  1
+
+        text(e) ▸ 'aa\nB\ncc'
+        e.gutter.entries.length ▸ 0
+
+  ▸ a click on the line above a deletion reverts the deletion
+
+        e = setup()
+
+        e.state.loadLines ['aa' 'cc']
+        e.gutter.onGitDiff
+            file:    'test.txt'
+            changes: [{line:1 old:['bb']}]
+
+        press e 0
+
+        text(e) ▸ 'aa\nbb\ncc'
+
+        press e 0
+
+        text(e) ▸ 'aa\ncc'
+
+  ▸ a click reverts all changes of a visual block at once
+
+        e = setup()
+
+        e.state.loadLines ['aa' 'B' 'cc' 'dd']
+        e.gutter.onGitDiff
+            file:    'test.txt'
+            changes: [
+                {line:2 old:['b'] new:['B']}
+                {line:2 old:['x']}
+                ]
+
+        e.gutter.blocks.length ▸ 1
+
+        press e 1
+
+        text(e) ▸ 'aa\nb\nx\ncc\ndd'
+
+        press e 1
+
+        text(e) ▸ 'aa\nB\ncc\ndd'
+
+  ▸ modifier hover marks the block under the mouse
+
+        e = setup()
+
+        e.state.loadLines ['aa' 'B' 'cc']
+        e.gutter.onGitDiff
+            file:    'test.txt'
+            changes: [{line:2 old:['b'] new:['B']}]
+
+        move e 1
+
+        e.gutter.hoverBlock ▸ e.gutter.blocks[0]
+
+        e.onMouse
+            type: 'move'
+            cell: [1 1]
+
+        e.gutter.hoverBlock ▸ null
+
+  ▸ a reverted block survives an edit above it
+
+        e = setup()
+
+        e.state.loadLines ['aa' 'B' 'cc']
+        e.gutter.onGitDiff
+            file:    'test.txt'
+            changes: [{line:2 old:['b'] new:['B']}]
+
+        press e 1
+
+        e.state.setLines ['new' 'aa' 'b' 'cc']
+
+        press e 2
+
+        text(e) ▸ 'new\naa\nB\ncc'
+
+  ▸ undoing a revert makes the block clickable again
+
+        e = setup()
+
+        e.state.loadLines ['aa' 'B' 'cc']
+        e.gutter.onGitDiff
+            file:    'test.txt'
+            changes: [{line:2 old:['b'] new:['B']}]
+
+        press e 1
+        e.state.undo()
+
+        e.gutter.entries.length ▸ 0
+        e.gutter.blocks.length ▸ 1
+
+        press e 1
+
+        text(e) ▸ 'aa\nb\ncc'
+
+  ▸ redoing a revert shows the reverted block again
+
+        e = setup()
+
+        e.state.loadLines ['aa' 'B' 'cc']
+        e.gutter.onGitDiff
+            file:    'test.txt'
+            changes: [{line:2 old:['b'] new:['B']}]
+
+        press e 1
+        e.state.undo()
+        e.state.redo()
+
+        e.gutter.entries.length ▸ 1
+        e.gutter.blocks.length ▸ 0
+        text(e) ▸ 'aa\nb\ncc'
+
+        press e 1
+
+        text(e) ▸ 'aa\nB\ncc'
+
+  ▸ redoing a revert of an addition shows the reverted block again
+
+        e = setup()
+
+        e.state.loadLines ['aa' 'X' 'cc']
+        e.gutter.onGitDiff
+            file:    'test.txt'
+            changes: [{line:2 new:['X']}]
+
+        press e 1
+        e.state.undo()
+        e.state.redo()
+
+        e.gutter.entries.length ▸ 1
+        e.gutter.blocks.length ▸ 0
+        text(e) ▸ 'aa\ncc'
+
+        press e 0
+
+        text(e) ▸ 'aa\nX\ncc'
+
+  ▸ a new file has no revertable blocks
+
+        e = setup()
+
+        e.state.loadLines ['aa' 'B']
+        e.gutter.onGitDiff
+            file:    'test.txt'
+            newFile: true
+            changes: [{line:2 old:['b'] new:['B']}]
+
+        press e 1
+
+        text(e) ▸ 'aa\nB'
+        e.gutter.entries.length ▸ 0
+
+  ▸ a diff refresh keeps a reverted block shadowed
+
+        e = setup()
+
+        e.state.loadLines ['aa' 'B' 'cc' 'dd']
+        diff =
+            file:    'test.txt'
+            changes: [{line:2 old:['b'] new:['B']}]
+
+        e.gutter.onGitDiff diff
+        press e 1
+
+        e.gutter.onGitDiff diff
+
+        e.gutter.blocks.length ▸ 0
+        e.gutter.entries.length ▸ 1
+
+        press e 1
+
+        e.gutter.entries.length ▸ 0
+        e.gutter.blocks.length ▸ 1
+        text(e) ▸ 'aa\nB\ncc\ndd'

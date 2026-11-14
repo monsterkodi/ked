@@ -1,0 +1,56 @@
+use ../../../kxk ▪ kseg
+#!range
+export
+
+    ###
+        replaces line ranges in one undoable step
+        edits are [start count segls] in the coordinates before any edit
+    ###
+    replaceLineRanges: edits ->
+
+        ⮐ @ if empty edits
+
+        sorted = edits.slice().sort (a b) -> a[0]-b[0]
+
+        lines = @s.lines.map (l) -> l
+
+        for i in sorted.length-1..0
+            [start count segls] = sorted[i]
+            lines = lines[0...start].concat(segls).concat(lines[start+count..])
+
+        adjust = (y) ->
+
+            for [start count segls] in sorted
+                continue if y < start
+                if y >= start+count
+                    y += segls.length-count
+                else
+                    y = start + min(y-start max(0 segls.length-1))
+
+            y
+
+        maxY = lines.length-1
+
+        clampPos = (pos) ->
+            y = clamp 0 maxY (adjust(pos[1]))
+            [clamp(0 kseg.width(lines[y]) pos[0]) y]
+
+        clampRange = (rng) ->
+
+            p1 = clampPos [rng[0] rng[1]]
+            p2 = clampPos [rng[2] rng[3]]
+
+            if p1[1] > p2[1] or (p1[1] == p2[1] and p1[0] > p2[0])
+                [p2[0] p2[1] p1[0] p1[1]]
+            else
+                [p1[0] p1[1] p2[0] p2[1]]
+
+        cursors    = @s.cursors.map    (pos) -> clampPos   pos
+        selections = @s.selections.map (rng) -> clampRange rng
+        highlights = @s.highlights.map (rng) -> clampRange rng
+
+        @pushState()
+        @setSegls lines
+        @setCursors cursors
+        @setSelections selections
+        @setHighlights highlights

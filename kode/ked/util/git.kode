@@ -61,12 +61,18 @@ use child_process
                     if empty err
                         resolve stdout
                     else
+                        if opt?.allowFail
+                            resolve null
+                            ⮐ 
                         ⮐ if 'pager diff' in args # silent git diff errors
                         error err
                         error stdout
                         error stderr
                         # reject err
             catch err
+                if opt?.allowFail
+                    resolve null
+                    ⮐ 
                 error 'reject2' err
                 # reject err
         
@@ -145,14 +151,23 @@ use child_process
         gitDir =◯ git.dir file
 
         ◯ watcher.snapshot file # this prevents unwanted file change events under node when diffing
-        diff   =◯ git.exec "--no-pager diff --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
-        diff   +=◯ git.exec "--no-pager diff --staged --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
+
+        # one diff against the last commit keeps line numbers and old lines consistent
+        # even when some changes are already staged
+        diff =◯ git.exec "--no-pager diff HEAD --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir allowFail:true
         
+        if not valid diff
+            diff  =◯ git.exec "--no-pager diff --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
+            diff +=◯ git.exec "--no-pager diff --staged --no-color -U0 --ignore-blank-lines #{file}" cwd:gitDir 
+
         status = file:file changes:[]
         lines  = diff.split '\n'
     
         while line = lines.shift()
     
+            if line.startsWith 'new file mode'
+                status.newFile = true
+
             if line.startsWith '@@'
                 [x before after] = line.split ' '
                 afterSplit = after.split ','

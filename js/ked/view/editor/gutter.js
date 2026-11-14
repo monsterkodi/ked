@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, lpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s=c+s} return s}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, lpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s=c+s} return s}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
 
 var gutter
 
@@ -6,12 +6,10 @@ import kxk from "../../../kxk.js"
 let post = kxk.post
 let kseg = kxk.kseg
 
-import kulur from "../../../kolor/kulur.js"
-
 import squares from "../../util/img/squares.js"
 
-import prof from "../../util/prof.js"
-import syntax from "../../util/syntax.js"
+import git from "../../util/git.js"
+import gitblock from "../../util/gitblock.js"
 
 import mode from "../../edit/mode.js"
 
@@ -28,8 +26,20 @@ gutter = (function ()
     {
         this.editor = editor
     
-        this["clearChanges"] = this["clearChanges"].bind(this)
+        this["refreshDiff"] = this["refreshDiff"].bind(this)
+        this["shiftAfter"] = this["shiftAfter"].bind(this)
+        this["applyEdits"] = this["applyEdits"].bind(this)
+        this["restoreEntry"] = this["restoreEntry"].bind(this)
+        this["revertBlock"] = this["revertBlock"].bind(this)
+        this["toggle"] = this["toggle"].bind(this)
         this["onMouse"] = this["onMouse"].bind(this)
+        this["textLines"] = this["textLines"].bind(this)
+        this["onColorsChanged"] = this["onColorsChanged"].bind(this)
+        this["onLinesChanged"] = this["onLinesChanged"].bind(this)
+        this["rebuildMarks"] = this["rebuildMarks"].bind(this)
+        this["reattach"] = this["reattach"].bind(this)
+        this["onGitDiff"] = this["onGitDiff"].bind(this)
+        this["clearChanges"] = this["clearChanges"].bind(this)
         this["onModeStop"] = this["onModeStop"].bind(this)
         this["onModeStart"] = this["onModeStart"].bind(this)
         this.state = this.editor.state
@@ -41,12 +51,25 @@ gutter = (function ()
         this.setColor('bg_git_mod',theme.gutter.bg_git_mod)
         this.setColor('bg_git_add',theme.gutter.bg_git_add)
         this.setColor('bg_git_del',theme.gutter.bg_git_del)
+        this.setColor('bg_git_revert_mod',theme.gutter.bg_git_revert_mod)
+        this.setColor('bg_git_revert_add',theme.gutter.bg_git_revert_add)
+        this.setColor('bg_git_revert_del',theme.gutter.bg_git_revert_del)
+        this.setColor('bg_git_hover',theme.gutter.bg_git_hover)
         this.setColor('cursor_main',theme.cursor.main)
         this.setColor('cursor_multi',theme.cursor.multi)
         this.setColor('selection',theme.selection.span)
         this.setColor('selection_line',theme.selection.line)
         this.setColor('highlight',theme.highlight.bg)
-        this.gitChanges = {}
+        this.blocks = []
+        this.entries = []
+        this.lineMarks = {}
+        this.gitBlocks = []
+        this.hoverBlock = null
+        this.gitFile = null
+        this.canRevert = true
+        this.busy = false
+        this.state.on('lines.changed',this.onLinesChanged)
+        this.state.on('colors.changed',this.onColorsChanged)
         post.on('mode.start',this.onModeStart)
         post.on('mode.stop',this.onModeStop)
     }
@@ -77,65 +100,393 @@ gutter = (function ()
         }
     }
 
+    gutter.prototype["clearChanges"] = function ()
+    {
+        this.blocks = []
+        this.entries = []
+        this.lineMarks = {}
+        this.gitBlocks = []
+        this.hoverBlock = null
+        this.gitFile = null
+        return this.canRevert = true
+    }
+
+    gutter.prototype["onGitDiff"] = function (diff)
+    {
+        var block, lines
+
+        this.gitFile = diff.file
+        this.canRevert = !diff.newFile
+        this.hoverBlock = null
+        this.blocks = []
+        this.reattach()
+        lines = this.textLines()
+        var list = _k_.list(gitblock.fromDiff(diff))
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            block = list[_a_]
+            if (this.isShadowed(block))
+            {
+                continue
+            }
+            block.before = lines[block.start - 1]
+            block.after = lines[block.end]
+            this.blocks.push(block)
+        }
+        this.rebuildMarks()
+        return post.emit('redraw')
+    }
+
+    gutter.prototype["isShadowed"] = function (block)
+    {
+        var entry, other
+
+        var list = _k_.list(this.entries)
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            entry = list[_a_]
+            if (gitblock.overlaps(block,entry))
+            {
+                return true
+            }
+        }
+        var list1 = _k_.list(this.blocks)
+        for (var _b_ = 0; _b_ < list1.length; _b_++)
+        {
+            other = list1[_b_]
+            if (gitblock.intervalOverlap(block.start,block.end,other.start,other.end))
+            {
+                return true
+            }
+        }
+        return false
+    }
+
+    gutter.prototype["reattach"] = function (scanBlocks = false)
+    {
+        var block, blocks, entries, entry, kept, lines, moved
+
+        lines = this.textLines()
+        blocks = this.blocks.slice()
+        entries = []
+        var list = _k_.list(this.entries)
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            entry = list[_a_]
+            moved = gitblock.reanchorEntry(entry,lines)
+            if (moved)
+            {
+                entries.push(moved)
+            }
+            else
+            {
+                block = gitblock.undoneBlock(entry,lines)
+                if (block)
+                {
+                    blocks.push(block)
+                }
+            }
+        }
+        if (scanBlocks)
+        {
+            kept = []
+            var list1 = _k_.list(blocks)
+            for (var _b_ = 0; _b_ < list1.length; _b_++)
+            {
+                block = list1[_b_]
+                if (gitblock.matchesNew(block,lines))
+                {
+                    kept.push(block)
+                }
+                else
+                {
+                    entry = gitblock.stashedBlock(block,lines)
+                    if (entry)
+                    {
+                        entries.push(entry)
+                    }
+                    else
+                    {
+                        kept.push(block)
+                    }
+                }
+            }
+            blocks = kept
+        }
+        this.blocks = blocks.sort(function (a, b)
+        {
+            return a.start - b.start
+        })
+        return this.entries = entries
+    }
+
+    gutter.prototype["rebuildMarks"] = function ()
+    {
+        var block, entry, kind, line
+
+        this.lineMarks = {}
+        this.gitBlocks = []
+        var list = _k_.list(this.blocks)
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            block = list[_a_]
+            for (line in block.marks)
+            {
+                kind = block.marks[line]
+                this.lineMarks[parseInt(line)] = {kind:kind,block:block,reverted:false}
+            }
+            this.gitBlocks.push([block.start,block.end - block.start,block.mods,false])
+        }
+        var list1 = _k_.list(this.entries)
+        for (var _b_ = 0; _b_ < list1.length; _b_++)
+        {
+            entry = list1[_b_]
+            for (line in entry.marks)
+            {
+                kind = entry.marks[line]
+                this.lineMarks[parseInt(line)] = {kind:kind,entry:entry,reverted:true}
+            }
+            this.gitBlocks.push([entry.start,entry.end - entry.start,entry.block.mods,true])
+        }
+    }
+
+    gutter.prototype["onLinesChanged"] = function ()
+    {
+        if (this.busy)
+        {
+            return
+        }
+        if (_k_.empty(this.entries))
+        {
+            return
+        }
+        this.reattach(false)
+        this.rebuildMarks()
+        return post.emit('redraw')
+    }
+
+    gutter.prototype["onColorsChanged"] = function ()
+    {
+        if (this.busy)
+        {
+            return
+        }
+        if (_k_.empty(this.entries) && _k_.empty(this.blocks))
+        {
+            return
+        }
+        this.reattach(true)
+        this.rebuildMarks()
+        return post.emit('redraw')
+    }
+
+    gutter.prototype["textLines"] = function ()
+    {
+        return this.state.s.lines.map(function (l)
+        {
+            return kseg.str(l)
+        })
+    }
+
+    gutter.prototype["changeColor"] = function (kind)
+    {
+        switch (kind)
+        {
+            case 'mod':
+                return this.color.bg_git_mod
+
+            case 'add':
+                return this.color.bg_git_add
+
+            case 'del':
+                return this.color.bg_git_del
+
+            default:
+                return this.color.bg_git_add
+        }
+
+    }
+
+    gutter.prototype["revertColor"] = function (kind)
+    {
+        switch (kind)
+        {
+            case 'mod':
+                return this.color.bg_git_revert_mod
+
+            case 'add':
+                return this.color.bg_git_revert_add
+
+            case 'del':
+                return this.color.bg_git_revert_del
+
+            default:
+                return this.color.bg_git_revert_add
+        }
+
+    }
+
     gutter.prototype["onMouse"] = function (event)
     {
-        var idx, pos
+        var block, button, idx, mark, pos, _221_34_
 
         if (this.cells.isOutsideEvent(event))
         {
-            if (!_k_.empty(this.preview))
+            if (!_k_.empty(this.hoverBlock))
             {
-                this.preview = []
+                this.hoverBlock = null
                 post.emit('redraw')
             }
             return
         }
-        if (!_k_.empty(this.gitChanges) && (event.cmd || event.ctrl || event.alt))
+        if (!(event.cmd || event.ctrl || event.alt))
         {
-            pos = this.eventPos(event)
-            idx = this.state.lineAtRow(pos[1])
-            if (this.gitChanges[idx])
+            if (!_k_.empty(this.hoverBlock))
             {
-                if (event.type === 'press')
-                {
-                    console.log('todo: press on git change!',idx,this.gitChanges)
-                }
-                else if (event.type === 'move')
-                {
-                    if (this.gitChanges[idx].old)
-                    {
-                        this.preview = [idx]
-                        return {redraw:true}
-                    }
-                }
+                this.hoverBlock = null
+                return {redraw:true}
             }
+            return
         }
-        if (!_k_.empty(this.preview))
+        pos = this.eventPos(event)
+        idx = this.state.lineAtRow(pos[1])
+        mark = this.lineMarks[idx]
+        if (event.type === 'press')
         {
-            this.preview = []
-            return post.emit('redraw')
+            button = ((_221_34_=event.button) != null ? _221_34_ : 'left')
+            if (button !== 'left')
+            {
+                return
+            }
+            if (mark)
+            {
+                this.toggle(mark)
+            }
+            return {redraw:true}
+        }
+        if (event.type === 'move')
+        {
+            block = (mark != null) ? (mark.reverted ? mark.entry : mark.block) : undefined
+            if (block !== this.hoverBlock)
+            {
+                this.hoverBlock = block
+                return {redraw:true}
+            }
         }
     }
 
-    gutter.prototype["drawPreviews"] = function ()
+    gutter.prototype["toggle"] = function (mark)
     {
-        var idx, oldDiss, segl, syntax, _83_45_
+        if (mark.reverted)
+        {
+            return this.restoreEntry(mark.entry)
+        }
+        else
+        {
+            return this.revertBlock(mark.block)
+        }
+    }
 
-        if (_k_.empty(this.preview) || _k_.empty(this.gitChanges))
+    gutter.prototype["revertBlock"] = function (block)
+    {
+        var entry
+
+        if (!this.canRevert)
+        {
+            console.log('gutter: no committed version to revert to',this.gitFile)
+            return false
+        }
+        entry = gitblock.revert(block,this.textLines())
+        if (!!_k_.empty(entry))
+        {
+            console.log('gutter: stale diff, refreshing',this.gitFile)
+            this.refreshDiff()
+            return false
+        }
+        this.applyEdits(gitblock.revertEdits(entry))
+        this.blocks = this.blocks.filter(function (b)
+        {
+            return b !== block
+        })
+        this.shiftAfter(block.end,entry.end - block.end)
+        this.entries.push(entry)
+        this.hoverBlock = null
+        this.rebuildMarks()
+        return true
+    }
+
+    gutter.prototype["restoreEntry"] = function (entry)
+    {
+        var block
+
+        block = gitblock.restore(entry,this.textLines())
+        if (!!_k_.empty(block))
+        {
+            console.log('gutter: reverted lines were changed, dropping the block')
+            this.entries = this.entries.filter(function (e)
+            {
+                return e !== entry
+            })
+            this.hoverBlock = null
+            this.rebuildMarks()
+            return false
+        }
+        this.applyEdits(gitblock.restoreEdits(entry))
+        this.entries = this.entries.filter(function (e)
+        {
+            return e !== entry
+        })
+        this.shiftAfter(entry.end,block.end - entry.end)
+        this.blocks.push(block)
+        this.blocks.sort(function (a, b)
+        {
+            return a.start - b.start
+        })
+        this.hoverBlock = null
+        this.rebuildMarks()
+        return true
+    }
+
+    gutter.prototype["applyEdits"] = function (edits)
+    {
+        var segls
+
+        segls = edits.map(function (edit)
+        {
+            return [edit[0],edit[1],edit[2].map(function (line)
+            {
+                kseg
+                return line
+            })]
+        })
+        this.busy = true
+        this.state.replaceLineRanges(segls)
+        return this.busy = false
+    }
+
+    gutter.prototype["shiftAfter"] = function (from, delta)
+    {
+        if (delta === 0)
         {
             return
         }
-        var list = _k_.list(this.preview)
-        for (var _a_ = 0; _a_ < list.length; _a_++)
+        this.blocks = this.blocks.map(function (b)
         {
-            idx = list[_a_]
-            segl = kseg(((_83_45_=this.gitChanges[idx].old) != null ? _83_45_ : ''))
-            syntax = this.editor.state.syntax
-            oldDiss = syntax.diss[idx]
-            syntax.diss[idx] = kulur.dissect([segl],syntax.ext)
-            this.editor.drawLine(segl,idx)
-            syntax.diss[idx] = oldDiss
+            return ((b.start >= from ? gitblock.shiftBlock(b,delta) : b))
+        })
+        return this.entries = this.entries.map(function (e)
+        {
+            return ((e.start >= from ? gitblock.shiftEntry(e,delta) : e))
+        })
+    }
+
+    gutter.prototype["refreshDiff"] = function ()
+    {
+        if (!!_k_.empty(this.gitFile))
+        {
+            return
         }
+        return git.diff(this.gitFile)
     }
 
     gutter.prototype["lineno"] = function (y)
@@ -155,44 +506,9 @@ gutter = (function ()
     gutter.prototype["fgcolor"] = function (x, y)
     {}
 
-    gutter.prototype["clearChanges"] = function ()
-    {
-        this.gitChanges = {}
-        return this.gitBlocks = []
-    }
-
-    gutter.prototype["onGitDiff"] = function (diff)
-    {
-        var add, change, del, firstLine, mod, modi, mods, numLines, off, _115_29_, _116_29_, _117_29_, _124_36_
-
-        this.clearChanges()
-        var list = _k_.list(diff.changes)
-        for (var _a_ = 0; _a_ < list.length; _a_++)
-        {
-            change = list[_a_]
-            firstLine = change.line
-            mod = ((_115_29_=change.mod) != null ? _115_29_ : [])
-            add = ((_116_29_=change.add) != null ? _116_29_ : [])
-            del = ((_117_29_=change.del) != null ? _117_29_ : [])
-            mods = mod.concat(add)
-            numLines = mods.length
-            mods = mods.concat(del)
-            for (var _b_ = modi = 0, _c_ = numLines; (_b_ <= _c_ ? modi < numLines : modi > numLines); (_b_ <= _c_ ? ++modi : --modi))
-            {
-                off = ((mods[modi].new != null) ? -1 : 0)
-                this.gitChanges[firstLine + modi + off] = mods[modi]
-            }
-            this.gitBlocks.push([change.line - 1,numLines,mod.length])
-        }
-        if (!_k_.empty(this.gitChanges))
-        {
-            return post.emit('redraw')
-        }
-    }
-
     gutter.prototype["drawGitScroll"] = function ()
     {
-        var ah, csz, fg, gb, mh, oy, pixelsPerRow, sh, sw, sx, sy
+        var addColor, ah, csz, delColor, fg, gb, mh, modColor, oy, pixelsPerRow, reverted, sh, sw, sx, sy
 
         if (_k_.empty(this.gitBlocks))
         {
@@ -212,23 +528,27 @@ gutter = (function ()
         {
             gb = list[_a_]
             sy = parseInt(gb[0] * pixelsPerRow + oy)
+            reverted = gb[3]
+            modColor = (reverted ? this.color.bg_git_revert_mod : this.color.bg_git_mod)
+            addColor = (reverted ? this.color.bg_git_revert_add : this.color.bg_git_add)
+            delColor = (reverted ? this.color.bg_git_revert_del : this.color.bg_git_del)
             if (gb[1] <= 0)
             {
-                fg = this.color.bg_git_del
+                fg = delColor
                 sh = parseInt(pixelsPerRow)
             }
             else
             {
-                fg = (gb[2] ? this.color.bg_git_mod : this.color.bg_git_add)
+                fg = (gb[2] ? modColor : addColor)
                 sh = parseInt(gb[1] * pixelsPerRow)
             }
             if (gb[2] && gb[2] < gb[1])
             {
                 mh = parseInt(gb[2] * pixelsPerRow)
-                squares.place(sx,sy,sw,mh,this.color.bg_git_mod)
+                squares.place(sx,sy,sw,mh,modColor)
                 sy += mh
                 ah = sh - mh
-                squares.place(sx,sy,sw,ah,this.color.bg_git_add)
+                squares.place(sx,sy,sw,ah,addColor)
             }
             else
             {
@@ -239,7 +559,7 @@ gutter = (function ()
 
     gutter.prototype["draw"] = function ()
     {
-        var bg, c, col, fg, hasCursor, highlighted, i, li, lineno, mainCursor, row, s, sc, scale, selected, spansel, y, _199_96_
+        var bg, c, col, fg, hasCursor, highlighted, i, li, lineno, mainCursor, mark, row, s, sc, scale, selected, spansel, y, _394_96_, _404_45_
 
         mainCursor = this.state.mainCursor()
         li = this.state.s.view[1]
@@ -263,6 +583,7 @@ gutter = (function ()
             selected = this.state.isSelectedLine(y)
             highlighted = this.state.isHighlightedLine(y)
             spansel = this.state.isSpanSelectedLine(y)
+            mark = this.lineMarks[y]
             var list = _k_.list(lineno)
             for (i = 0; i < list.length; i++)
             {
@@ -282,7 +603,7 @@ gutter = (function ()
                             fg = color.darken(fg)
                         }
                     }
-                    bg = (this.gitChanges[y] != null ? this.gitChanges[y].old : undefined) && this.gitChanges[y].new ? this.color.bg_git_mod : (this.gitChanges[y] != null ? this.gitChanges[y].old : undefined) ? this.color.bg_git_del : (this.gitChanges[y] != null) ? this.color.bg_git_add : spansel ? this.color.bg_selected : selected ? this.color.bg_fully_selected : this.color.bg
+                    bg = (mark != null) && (this.hoverBlock != null) && ((mark.reverted ? mark.entry : mark.block)) === this.hoverBlock ? this.color.bg_git_hover : (mark != null ? mark.reverted : undefined) ? this.revertColor(mark.kind) : (mark != null) ? this.changeColor(mark.kind) : spansel ? this.color.bg_selected : selected ? this.color.bg_fully_selected : this.color.bg
                     if (selected && !this.cells.screen.t.hasFocus)
                     {
                         bg = color.darken(bg)
@@ -303,7 +624,6 @@ gutter = (function ()
             row += 1
             li += 1
         }
-        this.drawPreviews()
         return this.drawGitScroll()
     }
 
@@ -312,5 +632,5 @@ gutter = (function ()
 
 export default gutter;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZ3V0dGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2VkaXRvci9ndXR0ZXIua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUNhLFVBQUE7SUFBUTtJQUFLOztPQUNMLFlBQVI7O09BQ1EsY0FBQTs7T0FDQSxXQUFWO09BQWUsYUFBZjs7T0FDVSxXQUFYOztPQUNXLFlBQVg7T0FBaUIsWUFBakI7O09BQ1csV0FBZDs7O0FBRU4sVUFBRDs7dUJBQVE7YUFPSixRQUFJOztRQUFEOzs7Ozs7UUFFQyxLQUFDLFFBQVEsS0FBQyxPQUFPOytDQUVYLEtBQUMsT0FBTyxPQUFPLEtBQUMsTUFBTSxVQUFVO1FBRXRDLEtBQUMsU0FBUyxLQUFvQixNQUFNLE9BQU87UUFDM0MsS0FBQyxTQUFTLEtBQW9CLE1BQU0sT0FBTztRQUMzQyxLQUFDLFNBQVMsY0FBb0IsTUFBTSxPQUFPO1FBQzNDLEtBQUMsU0FBUyxvQkFBb0IsTUFBTSxPQUFPO1FBQzNDLEtBQUMsU0FBUyxhQUFvQixNQUFNLE9BQU87UUFDM0MsS0FBQyxTQUFTLGFBQW9CLE1BQU0sT0FBTztRQUMzQyxLQUFDLFNBQVMsYUFBb0IsTUFBTSxPQUFPO1FBQzNDLEtBQUMsU0FBUyxjQUFvQixNQUFNLE9BQU87UUFDM0MsS0FBQyxTQUFTLGVBQW9CLE1BQU0sT0FBTztRQUMzQyxLQUFDLFNBQVMsWUFBb0IsTUFBTSxVQUFVO1FBQzlDLEtBQUMsU0FBUyxpQkFBb0IsTUFBTSxVQUFVO1FBQzlDLEtBQUMsU0FBUyxZQUFvQixNQUFNLFVBQVU7UUFFOUMsS0FBQztRQUVELEtBQUssR0FBRyxhQUFhLEtBQUM7UUFDdEIsS0FBSyxHQUFHLFlBQWEsS0FBQzs7O3NCQUUxQiwwQkFBYSxPQUFNOztZQUVWLFVBQVMsS0FBQzs7OztZQUNaLFNBQVE7O1lBQ1AsS0FBQyxTQUFTLGNBQWtCLE1BQU0sTUFBTSxPQUFPO21CQUMvQyxLQUFDLFNBQVMsZUFBa0IsTUFBTSxNQUFNLE9BQU87Ozs7c0JBRXZELHlC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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZ3V0dGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2VkaXRvci9ndXR0ZXIua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUNhLFVBQUE7SUFBTTtJQUFLOztPQUNILGNBQUE7O09BQ0EsVUFBVjtPQUFjLGVBQWQ7O09BQ1UsV0FBWDs7T0FDVyxZQUFYO09BQWlCLFlBQWpCOztPQUNXLFdBQWQ7OztBQUVOLFVBQUQ7O3VCQUFRO2FBV0osUUFBSTs7UUFBRDs7Ozs7Ozs7Ozs7Ozs7Ozs7O1FBRUMsS0FBQyxRQUFRLEtBQUMsT0FBTzsrQ0FFWCxLQUFDLE9BQU8sT0FBTyxLQUFDLE1BQU0sVUFBVTtRQUV0QyxLQUFDLFNBQVMsS0FBb0IsTUFBTSxPQUFPO1FBQzNDLEtBQUMsU0FBUyxLQUFvQixNQUFNLE9BQU87UUFDM0MsS0FBQyxTQUFTLGNBQW9CLE1BQU0sT0FBTztRQUMzQyxLQUFDLFNBQVMsb0JBQW9CLE1BQU0sT0FBTztRQUMzQyxLQUFDLFNBQVMsYUFBb0IsTUFBTSxPQUFPO1FBQzNDLEtBQUMsU0FBUyxhQUFvQixNQUFNLE9BQU87UUFDM0MsS0FBQyxTQUFTLGFBQW9CLE1BQU0sT0FBTztRQUMzQyxLQUFDLFNBQVMsb0JBQW9CLE1BQU0sT0FBTztRQUMzQyxLQUFDLFNBQVMsb0JBQW9CLE1BQU0sT0FBTztRQUMzQyxLQUFDLFNBQVMsb0JBQW9CLE1BQU0sT0FBTztRQUMzQyxLQUFDLFNBQVMsZUFBb0IsTUFBTSxPQUFPO1FBQzNDLEtBQUMsU0FBUyxjQUFvQixNQUFNLE9BQU87UUFDM0MsS0FBQyxTQUFTLGVBQW9CLE1BQU0sT0FBTztRQUMzQyxLQUFDLFNBQVMsWUFBb0IsTUFBTSxVQUFVO1FBQzlDLEtBQUMsU0FBUyxpQkFBb0IsTUFBTSxVQUFVO1FBQzlDLEtBQUMsU0FBUyxZQUFvQixNQUFNLFVBQVU7UUFFOUMsS0FBQztRQUNELEtBQUM7UUFDRCxLQUFDO1FBQ0QsS0FBQztRQUNELEtBQUMsYUFBYTtRQUNkLEtBQUMs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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/editor/gutter.kode
