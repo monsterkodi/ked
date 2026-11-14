@@ -2677,6 +2677,43 @@ mrange = lines x y m -> motion.range lines [x y] m
         gm.runEx 'g/a/foo'
         errors.length ▸ count+1
 
+  ▸ edit
+
+        em    = new novim s
+        edits = []
+
+        post.on 'file.edit' (file force) -> edits.push [file force]
+
+        s.clearHistory()
+
+        em.runEx 'e'
+        edits[-1] ▸ ['' false]
+
+        em.runEx 'e!'
+        edits[-1] ▸ ['' true]
+
+        em.runEx 'e /tmp/other.txt'
+        edits[-1] ▸ ['/tmp/other.txt' false]
+
+        s.pushState()
+        count = edits.length
+
+        em.runEx 'e'
+        edits.length ▸ count
+        errors[-1]   ▸ 'unsaved changes (add ! to override)'
+
+        em.runEx 'e /tmp/other.txt'
+        edits.length ▸ count
+        errors[-1]   ▸ 'unsaved changes (add ! to override)'
+
+        em.runEx 'e! /tmp/other.txt'
+        edits[-1] ▸ ['/tmp/other.txt' true]
+
+        s.clearHistory()
+
+        em.runEx 'edit /tmp/one two.txt'
+        edits[-1] ▸ ['/tmp/one two.txt' false]
+
   ▸ brckts lets novim handle text keys
     
         stack = new state cells 'stack'

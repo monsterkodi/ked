@@ -234,6 +234,7 @@ use ..           ◆ mode
         ⮐ @runGlobal(parsed visualRange)   if parsed.name in ['g' 'v' 'global' 'vglobal']
         ⮐ @runNormal(parsed visualRange)   if parsed.name in ['normal' 'norm']
         ⮐ @deleteExRange(parsed visualRange) if parsed.name in ['d' 'delete']
+        ⮐ @runEdit(parsed)                 if parsed.name in ['e' 'edit']
 
         name = parsed.name
         name += '!' if parsed.bang
@@ -392,6 +393,18 @@ use ..           ◆ mode
         rng = [0 y1 kseg.width(lines[y2]) y2]
 
         @state.deleteRanges [rng] [[0 y1]]
+
+        true
+
+    runEdit: parsed ->
+
+        file = parsed.args.trim()
+
+        if not parsed.bang and @state.isDirty()
+            post.emit 'novim.error' 'unsaved changes (add ! to override)'
+            ⮐ false
+
+        post.emit 'file.edit' file parsed.bang
 
         true
 

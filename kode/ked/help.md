@@ -118,6 +118,8 @@
     :q!                                 quit discarding pending changes
     :wq                                 write then quit
     :x                                  write only if changed, then quit
+    :e  :e {file}                       edit a file, fail on unsaved changes
+    :e!  :e! {file}                     edit a file, discarding changes
     :s/old/new/[gic]                    substitute on the current line
     :%s/old/new/[gic]                   substitute in the whole buffer
     :'<,'>s/old/new/[gic]               substitute in the selected lines
