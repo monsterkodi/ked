@@ -273,6 +273,9 @@ use           ◆ keys mode
         
         @h = []
         @r = []
+
+        @beginIndices = []
+        delete @beginIndex
         
     addLine: line ext =>
 
@@ -465,15 +468,24 @@ use           ◆ keys mode
         @syntax.setSegls @s.lines
         @emit 'colors.changed'
 
-    begin: => @beginIndex = @h.length
+    begin: =>
+        @beginIndices ?= []
+        @beginIndices.push @h.length
+        @beginIndex = @beginIndices[-1]
 
     end: =>
 
-        if valid @beginIndex
+        if @beginIndices?.length
 
-            @h.splice @beginIndex @h.length-@beginIndex-1
+            index = @beginIndices.pop()
 
-            delete @beginIndex
+            @h.splice index @h.length-index-1
+
+            if @beginIndices.length
+                @beginIndex = @beginIndices[-1]
+            else
+                delete @beginIndex
+
         @
 
     pushState: => @h.push @s ; @

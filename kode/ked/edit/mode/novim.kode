@@ -348,6 +348,8 @@ use ..           ◆ mode
         range    = @resolveExRange parsed.range visualRange
         wasActive = mode.isActive @state 'novim'
 
+        @state.begin()
+
         for y in range[0]..range[1]
 
             continue if y < 0 or y >= @state.s.lines.length
@@ -357,6 +359,8 @@ use ..           ◆ mode
 
             if wasActive and not mode.isActive(@state 'novim')
                 @state.startMode 'novim'
+
+        @state.end()
 
         if wasActive and not mode.isActive(@state 'novim')
             @state.startMode 'novim'

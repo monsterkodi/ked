@@ -2605,6 +2605,29 @@ mrange = lines x y m -> motion.range lines [x y] m
         gm.runEx '%normal x'
         txt "ne\nwo\nhree"
 
+        s.executeNovim {operator:'undo', count:1}
+        txt "one\ntwo\nthree"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("abc\ndef")
+        s.setMainCursor 0 0
+
+        gm.runEx '%normal rX'
+        txt "Xbc\nXef"
+
+        s.executeNovim {operator:'undo', count:1}
+        txt "abc\ndef"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("a\nb")
+        s.setMainCursor 0 0
+
+        gm.runEx '%normal A!'
+        txt "a!\nb!"
+
+        s.executeNovim {operator:'undo', count:1}
+        txt "a\nb"
+
         s.clearHistory()
         s.loadLines belt.linesForText("a\nb\nc")
         s.setMainCursor 0 0
