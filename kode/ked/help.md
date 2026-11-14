@@ -126,6 +126,13 @@
     :5,9s/old/new/[gic]                 substitute in a line range
     :g/pat/cmd  :v/pat/cmd              run cmd on matching or other lines
     :g!/pat/cmd                         same as :v, run on other lines
+
+        cmd is one of
+            d                               delete the line
+            s/old/new/[gic]                 substitute on the line
+            normal keys                     run normal-mode keys on the line
+            g/pat/cmd  :v/pat/cmd           nest another global
+
     :[range]normal keys                 run normal keys on each range line
     :[range]d                           delete the lines in the range
 

@@ -322,6 +322,8 @@ use ..           ◆ mode
 
         delta = 0
 
+        @state.begin()
+
         for y in marks
 
             target = y + delta
@@ -333,9 +335,14 @@ use ..           ◆ mode
 
             break if @runEx(line) == false
 
-            break if @exConfirms
+            if @exConfirms
+                @finishSubstituteConfirm()
+                post.emit 'novim.error' 'confirm not supported in :g'
+                break
 
             delta += @state.s.lines.length - before
+
+        @state.end()
 
         true
 

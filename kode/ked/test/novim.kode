@@ -2664,6 +2664,46 @@ mrange = lines x y m -> motion.range lines [x y] m
         txt "a\nb"
 
         s.clearHistory()
+        s.loadLines belt.linesForText("keep\ndrop\ndrop\nkeep")
+        s.setMainCursor 0 0
+
+        gm.runEx 'g/drop/d'
+        txt "keep\nkeep"
+
+        s.executeNovim {operator:'undo', count:1}
+        txt "keep\ndrop\ndrop\nkeep"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("x=1\nx=2\ny=3")
+        s.setMainCursor 0 0
+
+        gm.runEx 'g/^x/s/=/ = /'
+        txt "x = 1\nx = 2\ny=3"
+
+        s.executeNovim {operator:'undo', count:1}
+        txt "x=1\nx=2\ny=3"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("ta\ntb\nx")
+        s.setMainCursor 0 0
+
+        gm.runEx 'g/^t/normal I# '
+        txt "# ta\n# tb\nx"
+
+        s.executeNovim {operator:'undo', count:1}
+        txt "ta\ntb\nx"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("a\na")
+        s.setMainCursor 0 0
+
+        gm.runEx 'g/a/s/a/b/c'
+
+        gm.exConfirms ▸ null
+        txt "a\na"
+        errors[-1]   ▸ 'confirm not supported in :g'
+
+        s.clearHistory()
         s.loadLines belt.linesForText("a\nb\nc")
         s.setMainCursor 0 0
 
