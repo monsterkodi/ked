@@ -427,6 +427,16 @@ sel = r... -> s.allSelections() ▸ r
             """
         sel [0 0 6 2]
         mul [6 0] [6 1] [6 2]
+        
+        s.sortSelectionsOrCursorLines()
+        
+        txt """
+            line 3
+            line 2
+            line 1
+            """
+        sel [0 0 6 2]
+        mul [6 0] [6 1] [6 2]
 
   ▸ sortSelectionsOrCursorLines toggles sort direction
 
@@ -513,42 +523,36 @@ sel = r... -> s.allSelections() ▸ r
         sel [0 0 6 0] [0 2 6 2] [0 4 5 4]
         mul [6 0] [6 2] [5 4]
 
-  ▸ sortSelections sorts multi line selections
+  ▸ sortSelections splits multi line selections
 
         text = """
-            b1
-            b2
-            --
-            a1
-            a2
+            c
+            b
+            a
             """
         s.loadLines belt.linesForText(text)
-        s.setSelections [[0 0 2 1] [0 3 2 4]]
-        s.setCursors [[2 1] [2 4]]
+        s.setSelections [[0 0 1 2]]
+        s.setCursors [[1 2]]
         
         s.sortSelectionsOrCursorLines()
         
         txt """
-            a1
-            a2
-            --
-            b1
-            b2
+            a
+            b
+            c
             """
-        sel [0 0 2 1] [0 3 2 4]
-        mul [2 1] [2 4]
+        sel [0 0 1 2]
+        mul [1 0] [1 1] [1 2]
         
         s.sortSelectionsOrCursorLines()
         
         txt """
-            b1
-            b2
-            --
-            a1
-            a2
+            c
+            b
+            a
             """
-        sel [0 0 2 1] [0 3 2 4]
-        mul [2 1] [2 4]
+        sel [0 0 1 2]
+        mul [1 0] [1 1] [1 2]
 
   ▸ deleteRanges
     

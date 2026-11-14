@@ -11,6 +11,8 @@ export
         if empty ranges
             ranges = belt.lineRangesForPositions @s.lines @s.cursors
         
+        ranges = belt.splitLineRanges @s.lines ranges
+        
         texts = ranges.map (rng) => belt.textForLineRange @s.lines rng
         
         sorted = texts.map (text) -> text
