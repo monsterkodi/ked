@@ -36,7 +36,6 @@ use                 ◆ titlefile titlenovim
         @fileoffs = []
         
         @novimText = ''
-        @vinderText = ''
         
         @pointerType = 'pointer'
         
@@ -48,6 +47,7 @@ use                 ◆ titlefile titlenovim
         @filepos    = new bubble      @screen "title_bubble"
 
         @titlenovim.on 'action' @onNovimAction
+        @titlenovim.on 'vinder' @onVinderAction
         
         @crumbs.setColor 'empty_left'  @color.gutter
         @crumbs.setColor 'empty_right' theme.title.empty
@@ -60,8 +60,6 @@ use                 ◆ titlefile titlenovim
         @filepos.on    'action' @onFileposAction
         
         post.on 'title.filepos' @onTitleFilepos
-        
-        post.on 'vinder.text'   (@vinderText) => post.emit 'redraw'
     
     onTitleFilepos: @fileposl @fileoffs => 
     
@@ -133,6 +131,19 @@ use                 ◆ titlefile titlenovim
                 novim?.cancelEx()
             'change'
                 novim?.exChanged text
+
+    onVinderAction: action text =>
+
+        novim = mode.get @state 'novim'
+
+        switch action
+            'submit'
+                @editor.grabFocus()
+            'cancel'
+                @editor.grabFocus()
+                novim?.cancelSearch()
+            'change'
+                novim?.searchChanged text
 
     onKey: (key event) =>
 

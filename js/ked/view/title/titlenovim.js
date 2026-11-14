@@ -24,13 +24,18 @@ titlenovim = (function ()
         this["onError"] = this["onError"].bind(this)
         this["onExecute"] = this["onExecute"].bind(this)
         this["onPending"] = this["onPending"].bind(this)
+        this["onVinderAction"] = this["onVinderAction"].bind(this)
         this["onInputAction"] = this["onInputAction"].bind(this)
+        this["onSearchStart"] = this["onSearchStart"].bind(this)
         this["onExStart"] = this["onExStart"].bind(this)
         titlenovim.__super__.constructor.call(this,screen,name)
         this.stateName = stateName
         this.input = new input(this.screen,`${name}_input`)
+        this.vinder = new input(this.screen,`${name}_vinder`)
         this.input.on('action',this.onInputAction)
+        this.vinder.on('action',this.onVinderAction)
         this.input.hide()
+        this.vinder.hide()
         this.setColor('bg',theme.novim.bg)
         this.setColor('fg',theme.novim.text)
         this.setColor('empty',theme.title.empty)
@@ -38,12 +43,17 @@ titlenovim = (function ()
         this.input.setColor('bg_blur',theme.novim.pending.bg)
         this.input.setColor('bg_focus',theme.novim.pending.bg)
         this.input.setColor('empty',theme.novim.pending.bg)
+        this.vinder.setColor('bg',theme.novim.pending.bg)
+        this.vinder.setColor('bg_blur',theme.novim.pending.bg)
+        this.vinder.setColor('bg_focus',theme.novim.pending.bg)
+        this.vinder.setColor('empty',theme.novim.pending.bg)
         this.pointerType = 'default'
         this.novimText = 'novim'
         post.on('novim.execute',this.onExecute)
         post.on('novim.pending',this.onPending)
         post.on('novim.error',this.onError)
         post.on('novim.ex.start',this.onExStart)
+        post.on('novim.search.start',this.onSearchStart)
     }
 
     titlenovim.prototype["onExStart"] = function (start)
@@ -52,13 +62,39 @@ titlenovim = (function ()
         {
             return
         }
+        if (this.vinder.visible())
+        {
+            this.vinder.hide()
+        }
         this.input.set(start.text)
         this.input.state.moveCursors('eol')
         this.setColor('bg',theme.novim.pending.bg)
         this.setColor('fg',theme.novim.pending.fg)
         this.input.show()
         this.input.grabFocus()
-        this.layoutInput()
+        this.layoutInput(this.input)
+        post.emit('redraw')
+        return true
+    }
+
+    titlenovim.prototype["onSearchStart"] = function (start)
+    {
+        if (start.state !== this.stateName)
+        {
+            return
+        }
+        if (this.input.visible())
+        {
+            this.input.hide()
+        }
+        this.vinder.set(start.text)
+        this.vinder.selectAll()
+        this.vinder.state.moveCursors('eol')
+        this.setColor('bg',theme.novim.pending.bg)
+        this.setColor('fg',theme.novim.pending.fg)
+        this.vinder.show()
+        this.vinder.grabFocus()
+        this.layoutInput(this.vinder)
         post.emit('redraw')
         return true
     }
@@ -81,18 +117,36 @@ titlenovim = (function ()
         return true
     }
 
+    titlenovim.prototype["onVinderAction"] = function (action, text)
+    {
+        switch (action)
+        {
+            case 'submit':
+            case 'cancel':
+                this.vinder.hide()
+                this.novimText = ''
+                this.emit('vinder',action,text)
+                break
+            case 'change':
+                this.emit('vinder','change',text)
+                break
+        }
+
+        return true
+    }
+
     titlenovim.prototype["onPending"] = function (pending)
     {
-        var t, _71_24_, _73_27_, _74_26_, _75_28_, _76_30_
+        var t, _116_24_, _118_27_, _119_26_, _120_28_, _121_30_
 
         this.setColor('bg',theme.novim.pending.bg)
         this.setColor('fg',theme.novim.pending.fg)
-        t = ((_71_24_=pending.op) != null ? _71_24_ : '')
+        t = ((_116_24_=pending.op) != null ? _116_24_ : '')
         t += ' '
-        t += ((_73_27_=pending.count) != null ? _73_27_ : '')
-        t += ((_74_26_=pending.area) != null ? _74_26_ : '')
-        t += ((_75_28_=pending.prefix) != null ? _75_28_ : '')
-        t += ((_76_30_=pending.register) != null ? _76_30_ : '')
+        t += ((_118_27_=pending.count) != null ? _118_27_ : '')
+        t += ((_119_26_=pending.area) != null ? _119_26_ : '')
+        t += ((_120_28_=pending.prefix) != null ? _120_28_ : '')
+        t += ((_121_30_=pending.register) != null ? _121_30_ : '')
         return this.novimText = t
     }
 
@@ -137,6 +191,10 @@ titlenovim = (function ()
 
     titlenovim.prototype["onMouse"] = function (event)
     {
+        if (this.vinder.visible())
+        {
+            return this.vinder.onMouse(event)
+        }
         if (!this.input.visible())
         {
             return false
@@ -146,6 +204,10 @@ titlenovim = (function ()
 
     titlenovim.prototype["onKey"] = function (key, event)
     {
+        if (this.vinder.visible())
+        {
+            return this.vinder.onKey(key,event)
+        }
         return this.input.onKey(key,event)
     }
 
@@ -153,12 +215,13 @@ titlenovim = (function ()
     {
         titlenovim.__super__.layout.call(this,x,y,w,h)
     
-        return this.layoutInput()
+        this.layoutInput(this.input)
+        return this.layoutInput(this.vinder)
     }
 
-    titlenovim.prototype["layoutInput"] = function ()
+    titlenovim.prototype["layoutInput"] = function (input)
     {
-        return this.input.layout(this.cells.x + 1,this.cells.y,_k_.max(0,this.cells.cols - 2),1)
+        return input.layout(this.cells.x + 1,this.cells.y,_k_.max(0,this.cells.cols - 2),1)
     }
 
     titlenovim.prototype["draw"] = function (x, w)
@@ -169,9 +232,15 @@ titlenovim = (function ()
         }
         titlenovim.__super__.draw.call(this)
         this.layout(x,0,w,1)
-        if (this.input.visible())
+        if (this.vinder.visible())
         {
-            this.layoutInput()
+            this.layoutInput(this.vinder)
+            this.vinder.draw()
+            return this.drawFrame()
+        }
+        else if (this.input.visible())
+        {
+            this.layoutInput(this.input)
             this.input.draw()
             return this.drawFrame()
         }
@@ -218,5 +287,5 @@ titlenovim = (function ()
 
 export default titlenovim;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGl0bGVub3ZpbS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy90aXRsZS90aXRsZW5vdmltLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQU07SUFBTTs7T0FDTixZQUFUO09BQWUsWUFBZjs7T0FDUyxXQUFaO09BQWlCLFlBQWpCOzs7QUFFTixjQUFEOzsyQkFBWTthQUlSLFlBQUcsUUFBTyxNQUFLOzs7Ozs7Ozs7O21EQUVMLE9BQU87UUFFYixLQUFDLFlBQVk7UUFDYixLQUFDLFlBQWdCLE1BQU0sS0FBQyxVQUFVO1FBRWxDLEtBQUMsTUFBTSxHQUFHLFNBQVMsS0FBQztRQUNwQixLQUFDLE1BQU07UUFFUCxLQUFDLFNBQVMsS0FBUyxNQUFNLE1BQU07UUFDL0IsS0FBQyxTQUFTLEtBQVMsTUFBTSxNQUFNO1FBQy9CLEtBQUMsU0FBUyxRQUFTLE1BQU0sTUFBTTtRQUUvQixLQUFDLE1BQU0sU0FBUyxLQUFXLE1BQU0sTUFBTSxRQUFRO1FBQy9DLEtBQUMsTUFBTSxTQUFTLFVBQVcsTUFBTSxNQUFNLFFBQVE7UUFDL0MsS0FBQyxNQUFNLFNBQVMsV0FBVyxNQUFNLE1BQU0sUUFBUTtRQUMvQyxLQUFDLE1BQU0sU0FBUyxRQUFXLE1BQU0sTUFBTSxRQUFRO1FBRS9DLEtBQUMsY0FBYztRQUNmLEtBQUMsWUFBYztRQUVmLEtBQUssR0FBRyxnQkFBaUIsS0FBQztRQUMxQixLQUFLLEdBQUcsZ0JBQWlCLEtBQUM7UUFDMUIsS0FBSyxHQUFHLGNBQWlCLEtBQUM7UUFDMUIsS0FBSyxHQUFHLGlCQUFpQixLQUFDOzs7MEJBRTlCLHdCQUFXOztZQUVGLE1BQU0sVUFBUyxLQUFDOzs7O1FBRXJCLEtBQUMsTUFBTSxJQUFJLE1BQU07UUFDakIsS0FBQyxNQUFNLE1BQU0sWUFBWTtRQUV6QixLQUFDLFNBQVMsS0FBSyxNQUFNLE1BQU0sUUFBUTtRQUNuQyxLQUFDLFNBQVMsS0FBSyxNQUFNLE1BQU0sUUFBUTtRQUVuQyxLQUFD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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGl0bGVub3ZpbS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy90aXRsZS90aXRsZW5vdmltLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQU07SUFBTTs7T0FDTixZQUFUO09BQWUsWUFBZjs7T0FDUyxXQUFaO09BQWlCLFlBQWpCOzs7QUFFTixjQUFEOzsyQkFBWTthQUlSLFlBQUcsUUFBTyxNQUFLOzs7Ozs7Ozs7Ozs7bURBRUwsT0FBTztRQUViLEtBQUMsWUFBWTtRQUNiLEtBQUMsWUFBZ0IsTUFBTSxLQUFDLFVBQVU7UUFDbEMsS0FBQyxhQUFnQixNQUFNLEtBQUMsVUFBVTtRQUVsQyxLQUFDLE1BQU0sR0FBSSxTQUFTLEtBQUM7UUFDckIsS0FBQyxPQUFPLEdBQUcsU0FBUyxLQUFDO1FBRXJCLEtBQUMsTUFBTTtRQUNQLEtBQUMsT0FBTztRQUVSLEtBQUMsU0FBUyxLQUFTLE1BQU0sTUFBTTtRQUMvQixLQUFDLFNBQVMsS0FBUyxNQUFNLE1BQU07UUFDL0IsS0FBQyxTQUFTLFFBQVMsTUFBTSxNQUFNO1FBRS9CLEtBQUMsTUFBTSxTQUFTLEtBQVcsTUFBTSxNQUFNLFFBQVE7UUFDL0MsS0FBQyxNQUFNLFNBQVMsVUFBVyxNQUFNLE1BQU0sUUFBUTtRQUMvQyxLQUFDLE1BQU0sU0FBUyxXQUFXLE1BQU0sTUFBTSxRQUFRO1FBQy9DLEtBQUMsTUFBTSxTQUFTLFFBQVcsTUFBTSxNQUFNLFFBQVE7UUFFL0MsS0FBQyxPQUFPLFNBQVMsS0FBVyxNQUFNLE1BQU0sUUFBUTtRQUNoRCxLQUFDLE9BQU8sU0FBUyxVQUFXLE1BQU0sTUFBTSxRQUFRO1FBQ2hELEtBQUMsT0FBTyxTQUFTLFdBQVcsTUFBTSxNQUFNLFFBQVE7UUFDaEQsS0FBQyxPQUFPLFNBQVMsUUFBVyxNQUFNLE1BQU0sUUFBUTtRQUVoRCxLQUFDLGNBQWM7UUFDZixLQUFDLFlBQWM7UUFFZixLQUFLLEdBQUcsZ0JBQXFCLEtBQUM7UUFDOUIsS0FBSyxHQUFHLGdCQUFxQixLQUFDO1FBQzlCLEtBQUssR0FBRyxjQUFxQixLQUFDO1FBQzlCLEtBQUssR0FBRyxpQkFBcUIsS0FBQztRQUM5QixLQUFLLEdBQUcscUJBQXFCLEtBQUM7OzswQkFFbEMsd0JBQVc7O1lBRUYsTUFBTSxVQUFTLEtBQUM7Ozs7WUFFSCxLQUFDLE9BQU87O1lBQTFCLEtBQUMsT0FBTzs7UUFFUixLQUFDLE1BQU0sSUFBSSxNQUFNO1FBQ2pCLEtBQUMsTUFBTSxNQUFNLFlBQVk7UUFFekIsS0FBQyxTQUFTLEtBQUssTUFBTSxNQUFNLFFBQVE7UUFDbkMsS0FBQyxTQUFTLEtBQUssTUFBTSxNQUFNLFFBQVE7UUFFbkMsS0FBQyxNQUFNO1FBQ1AsS0FBQyxNQUFNO1FBRVAsS0FBQyxZQUFZLEtBQUM7UUFDZCxLQUFLLEtBQUs7ZUFFVjs7OzBCQUVKLDRCQUFlOztZQUVOLE1BQU0sVUFBUyxLQUFDOzs7O1lBRUosS0FBQyxNQUFNOztZQUF4QixLQUFDLE1BQU07O1FBRVAsS0FBQyxPQUFPLElBQUksTUFBTTtRQUNsQixLQUFDLE9BQU87UUFDUixLQUFDLE9BQU8sTUFBTSxZQUFZO1FBRTFCLEtBQUMsU0FBUyxLQUFLLE1BQU0sTUFBTSxRQUFRO1FBQ25DLEtBQUMsU0FBUyxLQUFLLE1BQU0sTUFBTSxRQUFRO1FBRW5DLEtBQUMsT0FBTztRQUNSLEtBQUMsT0FBTztRQUVSLEtBQUMsWUFBWSxLQUFDO1FBQ2QsS0FBSyxLQUFLO2VBRVY7OzswQkFFSiw0QkFBZ0IsUUFBTzs7Z0JBRVo7O2lCQUNIO2lCQUFTO2dCQUNMLEtBQUMsTUFBTTtnQkFDUCxLQUFDLFlBQVk7Z0JBQ2IsS0FBQyxLQUFLLFNBQVMsT0FBTzs7aUJBQzFCO2dCQUNJLEtBQUMsS0FBSyxTQUFTLFNBQVM7Ozs7ZUFFaEM7OzswQkFFSiw2QkFBaUIsUUFBTzs7Z0JBRWI7O2lCQUNIO2lCQUFTO2dCQUNMLEtBQUMsT0FBTztnQkFDUixLQUFDLFlBQVk7Z0JBQ2IsS0FBQyxLQUFLLFNBQVMsT0FBTzs7aUJBQzFCO2dCQUNJLEtBQUMsS0FBSyxTQUFTLFNBQVM7Ozs7ZUFFaEM7OzswQkFFSix3QkFBVzs7OztRQUVQLEtBQUMsU0FBUyxLQUFNLE1BQU0sTUFBTSxRQUFRO1FBQ3BDLEtBQUMsU0FBUyxLQUFNLE1BQU0sTUFBTSxRQUFRO1FBQ3BDLGVBQUssUUFBUSx5QkFBSztRQUNsQixLQUFLO1FBQ0wsZ0JBQUssUUFBUSw0QkFBUTtRQUNyQixnQkFBSyxRQUFRLDJCQUFPO1FBQ3BCLGdCQUFLLFFBQVEsNkJBQVM7UUFDdEIsZ0JBQUssUUFBUSwrQkFBVztlQUN4QixLQUFDLFlBQVk7OzswQkFFakIsd0JBQVc7Ozs7UUFFUCxLQUFDLFNBQVMsS0FBTSxNQUFNLE1BQU0sUUFBUTtRQUNwQyxLQUFDLFNBQVMsS0FBTSxNQUFNLE1BQU0sUUFBUTtRQUNwQyxJQUFJLFFBQVE7WUFDZ0IsUUFBUTs7WUFBcEMsS0FBSyxNQUFNLFFBQVE7O1lBQ2hCLFFBQVE7O2dCQUNKLFFBQVEsT0FBTyxTQUFROztvQkFDYyxRQUFRLE9BQU87O29CQUFuRCxLQUFLLE1BQU0sUUFBUSxPQUFPOztvQkFDVSxRQUFRLE9BQU87O29CQUFuRCxLQUFLLE1BQU0sUUFBUSxPQUFPOzs7OztnQkFFMUIsS0FBSyxNQUFNLFFBQVEsT0FBTzs7O2VBQ2xDLEtBQUMsWUFBWTs7OzBCQUVqQixzQkFBUzs7UUFFTCxLQUFDLFNBQVMsS0FBSyxNQUFNLE1BQU0sTUFBTTtRQUNqQyxLQUFDLFNBQVMsS0FBSyxNQUFNLE1BQU0sTUFBTTtlQUNqQyxLQUFDLFlBQVk7OzswQkFFakIsc0JBQVM7O1lBRXVCLEtBQUMsT0FBTzs7bUJBQWxDLEtBQUMsT0FBTyxRQUFROzthQUNILEtBQUMsTUFBTTs7bUJBQXBCOztlQUVGLEtBQUMsTUFBTSxRQUFROzs7MEJBRW5CLG9CQUFRLEtBQUk7O1lBRXNCLEtBQUMsT0FBTzs7bUJBQXBDLEtBQUMsT0FBTyxNQUFNLElBQUk7O2VBRXBCLEtBQUMsTUFBTSxNQUFNLElBQUk7OzswQkFFckIscUJBQVEsR0FBRSxHQUFFLEdBQUU7OzhDQUVKLEVBQUUsRUFBRSxFQUFFOztRQUNaLEtBQUMsWUFBWSxLQUFDO2VBQ2QsS0FBQyxZQUFZLEtBQUM7OzswQkFFbEIsMEJBQWE7O2VBRVQsTUFBTSxPQUFPLEtBQUMsTUFBTSxJQUFFLEVBQUUsS0FBQyxNQUFNLFVBQU0sRUFBRSxLQUFDLE1BQU0sT0FBSyxHQUFHOzs7MEJBRTFELG1CQUFNLEdBQUU7O1lBRUMsS0FBQzs7Ozs7UUFJTixLQUFDLE9BQU8sRUFBRSxFQUFFLEVBQUU7WUFFWCxLQUFDLE9BQU87O1lBQ1AsS0FBQyxZQUFZLEtBQUM7WUFDZCxLQUFDLE9BQU87bUJBQ1IsS0FBQzs7aUJBQ0csS0FBQyxNQUFNOztZQUNYLEtBQUMsWUFBWSxLQUFDO1lBQ2QsS0FBQyxNQUFNO21CQUNQLEtBQUM7Ozs7bUJBRUQsS0FBQzs7OzswQkFFVDs7OztRQUVJLEtBQUssS0FBQyxNQUFNO1FBQ1osS0FBSyxLQUFDLE1BQU07UUFFWixLQUFDLE1BQU0sSUFBSSxFQUFFLEVBQUUsSUFBSSxHQUFHO2VBQ3RCLEtBQUMsTUFBTSxJQUFJLEtBQUMsTUFBTSxPQUFLLEVBQUUsRUFBRSxJQUFJLEdBQUc7OzswQkFFdEM7Ozs7UUFFSSxLQUFDLHVCQUFtQixLQUFDLE1BQU0sT0FBSyxFQUFFLEtBQUM7UUFFbkMsS0FBSyxLQUFDLE1BQU07UUFDWixLQUFLLEtBQUMsTUFBTTs0QkFDQyxLQUFDO2FBQVA7O1lBQUg7dUJBQ0csR0FBTTs7Z0JBQ0wsS0FBQyxNQUFNLElBQUksR0FBRyxFQUFFLEdBQUcsR0FBRyxLQUFDLE1BQU07Ozs7Z0JBRTdCLEtBQUMsTUFBTSxJQUFJLEdBQUcsRUFBRSxHQUFHLEdBQUc7Ozs7O1dBdE1yQzs7O2VBd01NIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/title/titlenovim.kode

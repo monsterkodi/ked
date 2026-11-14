@@ -2777,6 +2777,37 @@ mrange = lines x y m -> motion.range lines [x y] m
         em.runEx 'edit /tmp/one two.txt'
         edits[-1] ▸ ['/tmp/one two.txt' false]
 
+  ▸ search input
+
+        sm     = new novim s
+        starts = []
+
+        post.on 'novim.search.start' (start) -> starts.push start
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("foo bar foo\nfoobar foo")
+        s.setMainCursor 0 0
+
+        sm.startSearch()
+
+        starts[-1]     ▸ {state:'test.state' text:'foo'}
+        novim.lastVind ▸ 'foo'
+        s.s.highlights ▸ [[0 0 3] [8 0 11] [0 1 3] [7 1 10]]
+
+        sm.searchChanged 'bar'
+        novim.lastVind ▸ 'bar'
+        s.s.highlights ▸ [[4 0 7] [3 1 6]]
+
+        sm.searchChanged ''
+        novim.lastVind ▸ ''
+        s.s.highlights ▸ []
+
+        sm.searchChanged 'foo'
+        sm.cancelSearch()
+        s.s.highlights ▸ []
+
+        novim.lastVind = ''
+
   ▸ brckts lets novim handle text keys
     
         stack = new state cells 'stack'

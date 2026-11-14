@@ -108,8 +108,6 @@ use ..           ◆ mode
         @exConfirms = null
         @exHighlighting = false
         @reset()
-        
-        post.on 'vinder.text' (text) => novim.lastVind = text
 
     @clipboardSync: null # on in ked, off in a headless editor
 
@@ -609,6 +607,39 @@ use ..           ◆ mode
 
         true
 
+    startSearch: ->
+
+        text = @state.textOfSelectionOrWordAtCursor()
+        text ?= ''
+
+        novim.lastVind = text
+
+        if empty text
+            @state.setHighlights []
+        else
+            @state.highlightText text
+
+        post.emit 'novim.search.start' state:@state.name text:text
+
+        true
+
+    searchChanged: text ->
+
+        novim.lastVind = text
+
+        if empty text
+            @state.setHighlights []
+        else
+            @state.highlightText text
+
+        true
+
+    cancelSearch: ->
+
+        @state.setHighlights []
+
+        true
+
     startEx: ->
 
         @reset()
@@ -828,8 +859,8 @@ use ..           ◆ mode
                 ⮐ @logPending()
     
             '/'
-                post.emit 'vinder.show' 
-                ⮐ @reset()
+                @reset()
+                ⮐ @startSearch()
 
             'f' 't' 'F' 'T'
     

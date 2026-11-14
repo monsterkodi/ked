@@ -117,4 +117,43 @@ use ../view/title ◆ title
         kseg.str(e.state.s.lines)     ▸ 'aa b'
         e.state.s.highlights          ▸ []
 
+        e.state.loadLines belt.linesForText("foo bar foo")
+        e.state.setMainCursor 0 0
+        e.grabFocus()
+
+        press '/'
+
+        t.titlenovim.vinder.visible()  ▸ true
+        t.titlenovim.vinder.hasFocus() ▸ true
+        t.titlenovim.vinder.current()  ▸ 'foo'
+        e.state.s.highlights          ▸ [[0 0 3] [8 0 11]]
+
+        for i in 0...4
+            press 'delete'
+
+        t.titlenovim.vinder.current() ▸ ''
+        e.state.s.highlights          ▸ []
+
+        press 'b'
+
+        t.titlenovim.vinder.current() ▸ 'b'
+        e.state.s.highlights          ▸ [[4 0 5]]
+
+        press 'esc'
+
+        t.titlenovim.vinder.visible() ▸ false
+        e.state.s.highlights          ▸ []
+        e.state.hasFocus              ▸ true
+
+        e.state.loadLines belt.linesForText("foo\nfoo")
+        e.state.setMainCursor 0 0
+        e.grabFocus()
+
+        press '/'
+        press 'return'
+
+        t.titlenovim.vinder.visible() ▸ false
+        e.state.s.highlights          ▸ [[0 0 3] [0 1 3]]
+        e.state.hasFocus              ▸ true
+
         mode.stop e.state 'novim'

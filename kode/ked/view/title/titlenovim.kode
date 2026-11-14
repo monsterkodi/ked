@@ -13,9 +13,13 @@ use ../base      ◆ view input
 
         @stateName = stateName
         @input     = new input @screen "#{name}_input"
+        @vinder    = new input @screen "#{name}_vinder"
 
-        @input.on 'action' @onInputAction
+        @input.on  'action' @onInputAction
+        @vinder.on 'action' @onVinderAction
+
         @input.hide()
+        @vinder.hide()
         
         @setColor 'bg'     theme.novim.bg
         @setColor 'fg'     theme.novim.text
@@ -25,18 +29,26 @@ use ../base      ◆ view input
         @input.setColor 'bg_blur'  theme.novim.pending.bg
         @input.setColor 'bg_focus' theme.novim.pending.bg
         @input.setColor 'empty'    theme.novim.pending.bg
+
+        @vinder.setColor 'bg'       theme.novim.pending.bg
+        @vinder.setColor 'bg_blur'  theme.novim.pending.bg
+        @vinder.setColor 'bg_focus' theme.novim.pending.bg
+        @vinder.setColor 'empty'    theme.novim.pending.bg
         
         @pointerType = 'default'
         @novimText   = 'novim'
         
-        post.on 'novim.execute'  @onExecute
-        post.on 'novim.pending'  @onPending
-        post.on 'novim.error'    @onError
-        post.on 'novim.ex.start' @onExStart
+        post.on 'novim.execute'      @onExecute
+        post.on 'novim.pending'      @onPending
+        post.on 'novim.error'        @onError
+        post.on 'novim.ex.start'     @onExStart
+        post.on 'novim.search.start' @onSearchStart
 
     onExStart: start =>
         
         ⮐ if start.state != @stateName
+
+        @vinder.hide() if @vinder.visible()
 
         @input.set start.text
         @input.state.moveCursors 'eol'
@@ -47,7 +59,28 @@ use ../base      ◆ view input
         @input.show()
         @input.grabFocus()
 
-        @layoutInput()
+        @layoutInput @input
+        post.emit 'redraw'
+
+        true
+
+    onSearchStart: start =>
+
+        ⮐ if start.state != @stateName
+
+        @input.hide() if @input.visible()
+
+        @vinder.set start.text
+        @vinder.selectAll()
+        @vinder.state.moveCursors 'eol'
+
+        @setColor 'bg' theme.novim.pending.bg
+        @setColor 'fg' theme.novim.pending.fg
+
+        @vinder.show()
+        @vinder.grabFocus()
+
+        @layoutInput @vinder
         post.emit 'redraw'
 
         true
@@ -61,6 +94,18 @@ use ../base      ◆ view input
                 @emit 'action' action text
             'change'
                 @emit 'action' 'change' text
+        
+        true
+
+    onVinderAction: (action text) =>
+        
+        switch action
+            'submit' 'cancel'
+                @vinder.hide()
+                @novimText = ''
+                @emit 'vinder' action text
+            'change'
+                @emit 'vinder' 'change' text
         
         true
 
@@ -98,22 +143,26 @@ use ../base      ◆ view input
 
     onMouse: event =>
 
+        ⮐ @vinder.onMouse(event) if @vinder.visible()
         ⮐ false if not @input.visible()
 
         @input.onMouse event
 
     onKey: (key event) =>
 
+        ⮐ @vinder.onKey(key event) if @vinder.visible()
+
         @input.onKey key event
 
     layout: x y w h =>
 
         super x y w h
-        @layoutInput()
+        @layoutInput @input
+        @layoutInput @vinder
 
-    layoutInput: ->
+    layoutInput: input ->
 
-        @input.layout @cells.x+1 @cells.y max(0 @cells.cols-2) 1
+        input.layout @cells.x+1 @cells.y max(0 @cells.cols-2) 1
 
     draw: x w -> 
         
@@ -123,8 +172,12 @@ use ../base      ◆ view input
         
         @layout x 0 w 1
 
-        if @input.visible()
-            @layoutInput()
+        if @vinder.visible()
+            @layoutInput @vinder
+            @vinder.draw()
+            @drawFrame()
+        else if @input.visible()
+            @layoutInput @input
             @input.draw()
             @drawFrame()
         else

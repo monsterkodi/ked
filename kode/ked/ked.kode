@@ -10,7 +10,7 @@ use ./view/base   ◆ view input
 use ./view/title  ◆ title 
 use ./view/editor ◆ fileeditor
 use ./view/screen ◆ screen ttio
-use ./view/menu   ◆ context menu macro finder searcher replacer clippo differ vinder
+use ./view/menu   ◆ context menu macro finder searcher replacer clippo differ
 use ./view/colmns ◆ browse dircol funcol quicky droop saveas
 use child_process ▪ spawn exec
 
@@ -64,7 +64,6 @@ use child_process ▪ spawn exec
         @replacer = new replacer   @screen @editor
         watchingClipboard = not (@args.headless or @args.headless_colors)
         @clippo   = new clippo     @screen @editor 'clippo' watch:watchingClipboard
-        @vinder   = new vinder     @screen @editor
         @differ   = new differ     @screen @editor
         @title    = new title      @screen @editor
         @context  = new context    @screen
@@ -94,9 +93,9 @@ use child_process ▪ spawn exec
         # post.on 'focus'         (name) -> log "focus: '#{name}'"
         
         @contextHandlers = [                                                                                               @editor         @dircol @funcol ]
-        @mouseHandlers   = [ @input @context @finder @searcher @replacer @clippo @vinder @differ @quicky @browse @saveas @droop @menu @macro @editor @title  @dircol @funcol ]
-        @wheelHandlers   = [                 @finder @searcher @replacer @clippo @vinder @differ @quicky @browse @saveas @droop       @macro @editor         @dircol @funcol ]
-        @keyHandlers     = [ @input @title @context @finder @searcher @replacer @clippo @vinder @differ @quicky @browse @saveas @droop @menu @macro @editor         @dircol @funcol ]
+        @mouseHandlers   = [ @input @context @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop @menu @macro @editor @title  @dircol @funcol ]
+        @wheelHandlers   = [                 @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop       @macro @editor         @dircol @funcol ]
+        @keyHandlers     = [ @input @title @context @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop @menu @macro @editor         @dircol @funcol ]
         
         @t.on 'key'    @onKey
         @t.on 'mouse'  @onMouse
@@ -837,7 +836,6 @@ use child_process ▪ spawn exec
         @searcher.draw()
         @replacer.draw()
         @clippo.draw()
-        @vinder.draw()
         @differ.draw()
         @context.draw()
         @input.draw()
