@@ -1236,18 +1236,34 @@ export
 
         entries
 
-    applySubstitutions: entries spec ->
+    applySubstitutions: entries spec decisions ->
 
         lines = @s.lines.map (l) -> kseg.str l
         total = 0
         last  = null
+        mi    = 0
 
         for entry in entries
 
-            newLine = belt.joinSubstitution entry.line entry.matches spec.tokens
-            lines[entry.y] = newLine
+            accepted    = []
+            anyAccepted = false
 
             for m in entry.matches
+
+                accept = true
+                accept = (decisions[mi] ? true : false) if decisions
+
+                if accept
+                    accepted.push m
+                    anyAccepted = true
+
+                mi += 1
+
+            continue if not anyAccepted
+
+            lines[entry.y] = belt.joinSubstitution entry.line accepted spec.tokens
+
+            for m in accepted
                 total += 1
                 last = [m.x1 entry.y]
 

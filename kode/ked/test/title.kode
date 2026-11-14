@@ -85,4 +85,19 @@ use ../view/title ◆ title
         t.titlenovim.input.visible()  ▸ false
         e.state.visual                ▸ 'line'
 
+        e.state.stopVisual()
+        e.state.loadLines belt.linesForText('aa aa')
+        e.state.setMainCursor 0 0
+        e.grabFocus()
+
+        press ':'
+        for c in '%s/aa/b/gc'
+            press c
+        press 'return'
+
+        press 'n'
+        press 'y'
+
+        kseg.str(e.state.s.lines)     ▸ 'aa b'
+
         mode.stop e.state 'novim'

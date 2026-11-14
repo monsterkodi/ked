@@ -79,7 +79,7 @@ use ../../../kxk ▪ kseg
         ⮐ { error:'no previous pattern' } if empty p.text
 
         tokens = []
-        flags  = { g:false i:false }
+        flags  = { g:false i:false c:false }
 
         if p.closed
 
@@ -96,6 +96,7 @@ use ../../../kxk ▪ kseg
                     switch ch
                         'g' ➜ flags.g = true
                         'i' ➜ flags.i = true
+                        'c' ➜ flags.c = true
                         ➜ ⮐ { error:"unknown flag: #{ch}" }
 
         flagsText = 'g'

@@ -2394,6 +2394,83 @@ mrange = lines x y m -> motion.range lines [x y] m
         s.stopVisual()
 
         s.clearHistory()
+        s.loadLines belt.linesForText("aa aa")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/aa/b/gc'
+
+        nm.exConfirms.index ▸ 0
+        s.s.highlights      ▸ [[0 0 2]]
+
+        nkey 'n'
+        s.s.highlights ▸ [[3 0 5]]
+
+        nkey 'y'
+
+        txt "aa b"
+        s.s.highlights ▸ []
+        nm.exConfirms  ▸ null
+
+        s.executeNovim {operator:'undo', count:1}
+        txt "aa aa"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("aa aa aa")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/aa/X/gc'
+        nkey 'a'
+
+        txt "X X X"
+        nm.exConfirms ▸ null
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("aa aa")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/aa/b/gc'
+        nkey 'l'
+
+        txt "b aa"
+        nm.exConfirms ▸ null
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("aa aa")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/aa/b/gc'
+        nkey 'q'
+
+        txt "aa aa"
+        nm.exConfirms ▸ null
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("aa aa")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/aa/b/gc'
+        nkey 'esc'
+
+        txt "aa aa"
+        nm.exConfirms ▸ null
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("aa aa\naa")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/aa/b/c'
+
+        nm.exConfirms.decisions.length ▸ 2
+        s.s.highlights                ▸ [[0 0 2]]
+
+        nkey 'y'
+        s.s.highlights ▸ [[0 1 2]]
+
+        nkey 'n'
+
+        txt "b aa\naa"
+
+        s.clearHistory()
         s.loadLines belt.linesForText("a\nb")
         depth = s.h.length
         nm.runEx 's/zzz/x/'

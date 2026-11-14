@@ -793,13 +793,13 @@ use ../edit/tool ◆ belt
         belt.parseSubstitute('/foo/bar/g') ▸ {
             pattern:'foo'
             tokens:[{kind:'literal' text:'bar'}]
-            flags:{g:true i:false}
+            flags:{g:true i:false c:false}
         }
 
         belt.parseSubstitute('#a/b#c#') ▸ {
             pattern:'a/b'
             tokens:[{kind:'literal' text:'c'}]
-            flags:{g:false i:false}
+            flags:{g:false i:false c:false}
         }
 
         belt.parseSubstitute('/a\\/b/c/').pattern ▸ 'a/b'
@@ -815,10 +815,11 @@ use ../edit/tool ◆ belt
             {kind:'group' index:1}
         ]
 
-        belt.parseSubstitute('/a/b/ig').flags ▸ {g:true i:true}
-        belt.parseSubstitute('/a/b/igi').flags ▸ {g:true i:true}
+        belt.parseSubstitute('/a/b/ig').flags ▸ {g:true i:true c:false}
+        belt.parseSubstitute('/a/b/igi').flags ▸ {g:true i:true c:false}
 
-        belt.parseSubstitute('/a/b/c').error ▸ 'unknown flag: c'
+        belt.parseSubstitute('/a/b/c').flags ▸ {g:false i:false c:true}
+        belt.parseSubstitute('/a/b/gci').flags ▸ {g:true i:true c:true}
 
         belt.parseSubstitute('/a/b').pattern ▸ 'a'
         belt.parseSubstitute('/a/b').tokens ▸ [{kind:'literal' text:'b'}]

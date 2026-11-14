@@ -104,6 +104,7 @@ use ../tool      ◆ belt
         @name     = 'novim'
         @lastFind = null
         @exRange  = null
+        @exConfirms = null
         @reset()
         
         post.on 'vinder.text' (text) => novim.lastVind = text
@@ -271,7 +272,9 @@ use ../tool      ◆ belt
             post.emit 'novim.error' "pattern not found: #{spec.pattern}"
             ⮐ false
 
-        @state.applySubstitutions entries spec
+        ⮐ @startSubstituteConfirm(entries spec) if spec.flags.c
+
+        @state.applySubstitutions entries spec null
 
         true
 
@@ -312,6 +315,88 @@ use ../tool      ◆ belt
 
         [lo hi]
 
+    startSubstituteConfirm: entries spec ->
+
+        total = 0
+        for entry in entries
+            total += entry.matches.length
+
+        @exConfirms =
+            entries:   entries
+            spec:      spec
+            decisions: (null for i in 0...total)
+            index:     0
+
+        @updateSubstituteConfirm()
+
+    substitutionAt: index ->
+
+        n = index
+
+        for entry in @exConfirms.entries
+            ⮐ [entry entry.matches[n]] if n < entry.matches.length
+            n -= entry.matches.length
+
+    updateSubstituteConfirm: ->
+
+        c = @exConfirms
+
+        ⮐ @finishSubstituteConfirm() if not c or c.index >= c.decisions.length
+
+        [entry match] = @substitutionAt c.index
+
+        @state.setHighlights [[match.x1 entry.y match.x2]]
+
+        post.emit 'novim.pending' {op:'replace? [y/n/a/q/l]'}
+
+        true
+
+    decideSubstitute: value stop ->
+
+        c = @exConfirms
+
+        c.decisions[c.index] = value
+        c.index += 1
+
+        if stop
+            while c.index < c.decisions.length
+                c.decisions[c.index] = false
+                c.index += 1
+
+        @updateSubstituteConfirm()
+
+    handleSubstituteConfirmKey: combo char ->
+
+        switch combo
+            'esc' 'escape' 'ctrl+c' ➜ ⮐ @decideSubstitute false true
+
+        switch char
+            'y' ➜ @decideSubstitute true false
+            'n' ➜ @decideSubstitute false false
+            'q' ➜ @decideSubstitute false true
+            'l' ➜ @decideSubstitute true true
+            'a'
+                c = @exConfirms
+                while c.index < c.decisions.length
+                    c.decisions[c.index] = true
+                    c.index += 1
+                ⮐ @updateSubstituteConfirm()
+        true
+
+    finishSubstituteConfirm: ->
+
+        c = @exConfirms
+        @exConfirms = null
+
+        decisions = c.decisions.map (d) -> d ? true : false
+
+        @state.setHighlights []
+        @state.applySubstitutions c.entries c.spec decisions
+
+        post.emit 'novim.execute' {operator:'substitute'}
+
+        true
+
     startEx: ->
 
         @reset()
@@ -336,6 +421,10 @@ use ../tool      ◆ belt
 
         combo = event.combo ? key
         char  = valid(event.char) ? event.char : combo
+
+        if @exConfirms
+            @handleSubstituteConfirmKey combo char
+            ⮐ true
 
         if combo == 'ctrl+v'
             if not @operator and not @area
