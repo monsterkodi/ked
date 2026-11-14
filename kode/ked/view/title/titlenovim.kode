@@ -132,7 +132,7 @@ use ../base      ◆ view input
         
     drawFrame: ->
 
-        fg = @color.fg 
+        fg = @color.bg 
         bg = @color.empty
 
         @cells.set 0 0 '' fg bg

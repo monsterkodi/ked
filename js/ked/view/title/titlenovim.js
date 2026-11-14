@@ -185,7 +185,7 @@ titlenovim = (function ()
     {
         var bg, fg
 
-        fg = this.color.fg
+        fg = this.color.bg
         bg = this.color.empty
         this.cells.set(0,0,'',fg,bg)
         return this.cells.set(this.cells.cols - 1,0,'',fg,bg)
