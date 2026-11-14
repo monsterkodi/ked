@@ -132,7 +132,7 @@ use                 ◆ titlefile titlenovim
                 @editor.grabFocus()
                 novim?.cancelEx()
             'change'
-                novim.ex = text if novim
+                novim?.exChanged text
 
     onKey: (key event) =>
 

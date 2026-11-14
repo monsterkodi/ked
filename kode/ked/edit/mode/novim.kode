@@ -1,5 +1,5 @@
 
-use ../../../kxk ◆ post keyinfo
+use ../../../kxk ◆ post keyinfo kseg
 use ../../theme  ◆ theme
 use ../tool      ◆ belt
 ■novim
@@ -105,6 +105,7 @@ use ../tool      ◆ belt
         @lastFind = null
         @exRange  = null
         @exConfirms = null
+        @exHighlighting = false
         @reset()
         
         post.on 'vinder.text' (text) => novim.lastVind = text
@@ -209,6 +210,8 @@ use ../tool      ◆ belt
 
     runEx: line ->
 
+        @clearExHighlight()
+
         visualRange = @exRange
 
         @reset()
@@ -272,9 +275,9 @@ use ../tool      ◆ belt
             post.emit 'novim.error' "pattern not found: #{spec.pattern}"
             ⮐ false
 
-        ⮐ @startSubstituteConfirm(entries spec) if spec.flags.c
+        ⮐ @startSubstituteConfirm(range[0] range[1] spec) if spec.flags.c
 
-        @state.applySubstitutions entries spec null
+        @state.applySubstitutions entries spec
 
         true
 
@@ -315,85 +318,155 @@ use ../tool      ◆ belt
 
         [lo hi]
 
-    startSubstituteConfirm: entries spec ->
-
-        total = 0
-        for entry in entries
-            total += entry.matches.length
+    startSubstituteConfirm: y1 y2 spec ->
 
         @exConfirms =
-            entries:   entries
+            y1:        y1
+            y2:        y2
             spec:      spec
-            decisions: (null for i in 0...total)
-            index:     0
+            y:         y1
+            fromX:     0
+            remaining: []
+            total:     0
 
-        @updateSubstituteConfirm()
+        @state.begin()
 
-    substitutionAt: index ->
+        @advanceSubstituteConfirm()
 
-        n = index
+    remainingSubstitutions: ->
 
-        for entry in @exConfirms.entries
-            ⮐ [entry entry.matches[n]] if n < entry.matches.length
-            n -= entry.matches.length
+        c      = @exConfirms
+        result = []
 
-    updateSubstituteConfirm: ->
+        ⮐ [] if c.y > c.y2
+
+        for y in c.y..c.y2
+
+            continue if y < 0 or y >= @state.s.lines.length
+
+            line  = kseg.str @state.s.lines[y]
+            start = y == c.y ? c.fromX : 0
+
+            for m in belt.lineMatches(line c.spec start)
+                result.push { y:y match:m }
+
+        result
+
+    advanceSubstituteConfirm: ->
 
         c = @exConfirms
 
-        ⮐ @finishSubstituteConfirm() if not c or c.index >= c.decisions.length
+        ⮐ @finishSubstituteConfirm() if not c
 
-        [entry match] = @substitutionAt c.index
+        c.remaining = @remainingSubstitutions()
 
-        @state.setHighlights [[match.x1 entry.y match.x2]]
+        ⮐ @finishSubstituteConfirm() if empty c.remaining
+
+        entry = c.remaining[0]
+
+        spans = []
+        for r in c.remaining
+            spans.push [r.match.x1 r.y r.match.x2]
+
+        @state.setHighlights spans
+        @state.setSelections [[entry.match.x1 entry.y entry.match.x2 entry.y]]
+        @state.setCursors [[entry.match.x1 entry.y]]
 
         post.emit 'novim.pending' {op:'replace? [y/n/a/q/l]'}
 
         true
 
-    decideSubstitute: value stop ->
+    applyCurrentSubstitution: ->
 
         c = @exConfirms
 
-        c.decisions[c.index] = value
-        c.index += 1
+        ⮐ false if not c or empty c.remaining
 
-        if stop
-            while c.index < c.decisions.length
-                c.decisions[c.index] = false
-                c.index += 1
+        entry = c.remaining[0]
+        match = entry.match
 
-        @updateSubstituteConfirm()
+        repl = belt.exExpandReplacement c.spec.tokens match.groups
+
+        @state.applySubstitutionAt entry.y match c.spec
+
+        c.total += 1
+        c.y     = entry.y
+        c.fromX = match.index + repl.length
+
+        c.fromX = match.index + 1 if match.length == 0 and repl.length == 0
+
+        if not c.spec.flags.g
+            c.y     = entry.y + 1
+            c.fromX = 0
+
+        true
+
+    skipCurrentSubstitution: ->
+
+        c = @exConfirms
+
+        ⮐ false if not c or empty c.remaining
+
+        entry = c.remaining[0]
+        match = entry.match
+
+        c.y     = entry.y
+        c.fromX = match.index + max(1 match.length)
+
+        if not c.spec.flags.g
+            c.y     = entry.y + 1
+            c.fromX = 0
+
+        true
+
+    acceptSubstituteConfirm: ->
+
+        @applyCurrentSubstitution()
+        @advanceSubstituteConfirm()
+
+    skipSubstituteConfirm: ->
+
+        @skipCurrentSubstitution()
+        @advanceSubstituteConfirm()
+
+    acceptAllSubstitutions: ->
+
+        while @exConfirms and not empty @exConfirms.remaining
+            @applyCurrentSubstitution()
+            @advanceSubstituteConfirm()
+
+        true
 
     handleSubstituteConfirmKey: combo char ->
 
         switch combo
-            'esc' 'escape' 'ctrl+c' ➜ ⮐ @decideSubstitute false true
+            'esc' 'escape' 'ctrl+c' ➜ ⮐ @finishSubstituteConfirm()
 
         switch char
-            'y' ➜ @decideSubstitute true false
-            'n' ➜ @decideSubstitute false false
-            'q' ➜ @decideSubstitute false true
-            'l' ➜ @decideSubstitute true true
-            'a'
-                c = @exConfirms
-                while c.index < c.decisions.length
-                    c.decisions[c.index] = true
-                    c.index += 1
-                ⮐ @updateSubstituteConfirm()
+            'y' ➜ @acceptSubstituteConfirm()
+            'n' ➜ @skipSubstituteConfirm()
+            'q' ➜ @finishSubstituteConfirm()
+            'l'
+                @applyCurrentSubstitution()
+                ⮐ @finishSubstituteConfirm()
+            'a' ➜ @acceptAllSubstitutions()
+
         true
 
     finishSubstituteConfirm: ->
 
         c = @exConfirms
+
+        ⮐ false if not c
+
         @exConfirms = null
 
-        decisions = c.decisions.map (d) -> d ? true : false
-
         @state.setHighlights []
-        @state.applySubstitutions c.entries c.spec decisions
+        @state.setSelections []
 
-        post.emit 'novim.execute' {operator:'substitute'}
+        @state.end()
+
+        post.emit 'novim.execute' {operator:'substitute', count:c.total}
 
         true
 
@@ -414,7 +487,49 @@ use ../tool      ◆ belt
 
     cancelEx: ->
 
+        @clearExHighlight()
         @reset()
+        true
+
+    exChanged: text ->
+
+        @ex = text
+        @updateExHighlight()
+
+        true
+
+    updateExHighlight: ->
+
+        parsed = belt.parseEx @ex
+
+        head = null
+
+        if not parsed.error and parsed.name in ['s' 'substitute']
+            head = belt.parseSubstitutePattern parsed.args
+
+        if head and not empty head.pattern
+
+            if not head.open
+                # the pattern is complete: keep its highlights while the
+                # replacement is typed, but do not update them
+                ⮐ false
+
+            spans = belt.patternSpans @state.s.lines head.pattern
+
+            @exHighlighting = true
+            @state.setHighlights spans
+
+            ⮐ true
+
+        @clearExHighlight()
+
+    clearExHighlight: ->
+
+        ⮐ false if not @exHighlighting
+
+        @exHighlighting = false
+        @state.setHighlights []
+
         true
 
     handleKey: key event ->

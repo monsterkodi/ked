@@ -2394,25 +2394,74 @@ mrange = lines x y m -> motion.range lines [x y] m
         s.stopVisual()
 
         s.clearHistory()
+        s.loadLines belt.linesForText("one two one\nthree one")
+        s.setMainCursor 0 0
+
+        nm.exChanged 's/one'
+
+        s.s.highlights ▸ [[0 0 3] [8 0 11] [6 1 9]]
+        cur 0 0
+
+        nm.exChanged 's/one/1'
+
+        s.s.highlights ▸ [[0 0 3] [8 0 11] [6 1 9]]
+        cur 0 0
+
+        nm.exChanged 'w'
+
+        s.s.highlights ▸ []
+
+        nm.exChanged 's/['
+
+        s.s.highlights ▸ []
+
+        nm.exChanged 's/one'
+        nm.cancelEx()
+
+        s.s.highlights ▸ []
+        nm.ex         ▸ null
+
+        s.clearHistory()
         s.loadLines belt.linesForText("aa aa")
         s.setMainCursor 0 0
 
         nm.runEx '%s/aa/b/gc'
 
-        nm.exConfirms.index ▸ 0
-        s.s.highlights      ▸ [[0 0 2]]
-
-        nkey 'n'
-        s.s.highlights ▸ [[3 0 5]]
+        s.s.highlights ▸ [[0 0 2] [3 0 5]]
+        s.s.selections ▸ [[0 0 2 0]]
+        cur 0 0
 
         nkey 'y'
 
-        txt "aa b"
-        s.s.highlights ▸ []
+        txt "b aa"
+        s.s.highlights ▸ [[2 0 4]]
+        s.s.selections ▸ [[2 0 4 0]]
+        cur 2 0
+
+        nkey 'n'
+
+        txt "b aa"
         nm.exConfirms  ▸ null
+        s.s.highlights ▸ []
+        s.s.selections ▸ []
 
         s.executeNovim {operator:'undo', count:1}
         txt "aa aa"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("aa aa")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/aa/b/gc'
+        nkey 'n'
+
+        txt "aa aa"
+        s.s.highlights ▸ [[3 0 5]]
+        s.s.selections ▸ [[3 0 5 0]]
+        cur 3 0
+
+        nkey 'n'
+        nm.exConfirms ▸ null
 
         s.clearHistory()
         s.loadLines belt.linesForText("aa aa aa")
@@ -2455,20 +2504,51 @@ mrange = lines x y m -> motion.range lines [x y] m
         nm.exConfirms ▸ null
 
         s.clearHistory()
+        s.loadLines belt.linesForText("aa aa")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/aa/b/gc'
+        nkey 'y'
+        nkey 'q'
+
+        txt "b aa"
+        s.executeNovim {operator:'undo', count:1}
+        txt "aa aa"
+
+        s.clearHistory()
         s.loadLines belt.linesForText("aa aa\naa")
         s.setMainCursor 0 0
 
         nm.runEx '%s/aa/b/c'
 
-        nm.exConfirms.decisions.length ▸ 2
-        s.s.highlights                ▸ [[0 0 2]]
+        s.s.highlights ▸ [[0 0 2] [0 1 2]]
+        s.s.selections ▸ [[0 0 2 0]]
+        cur 0 0
 
         nkey 'y'
+
+        txt "b aa\naa"
         s.s.highlights ▸ [[0 1 2]]
+        s.s.selections ▸ [[0 1 2 1]]
+        cur 0 1
 
         nkey 'n'
 
         txt "b aa\naa"
+        nm.exConfirms ▸ null
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("a\nb")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/^/>/gc'
+
+        nkey 'y'
+        txt ">a\nb"
+
+        nkey 'y'
+        txt ">a\n>b"
+        nm.exConfirms ▸ null
 
         s.clearHistory()
         s.loadLines belt.linesForText("a\nb")

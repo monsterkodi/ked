@@ -150,7 +150,28 @@ use ../../../kxk ▪ kseg
 
         { tokens:tokens }
 
+    @parseSubstitutePattern: args ->
+
+        ⮐ null if empty args
+
+        delim = args[0]
+
+        ⮐ null if delim.length != 1
+        ⮐ null if /[a-zA-Z0-9\s\\|"]/.test delim
+
+        scan = @exScan args 1 delim
+
+        { pattern:scan.text open:not scan.closed }
+
     @substituteLine: line spec ->
+
+        matches = @lineMatches line spec
+
+        ⮐ { line:line matches:[] } if empty matches
+
+        { line:@joinSubstitution(line matches spec.tokens) matches:matches }
+
+    @lineMatches: line spec start=0 ->
 
         flagsText = 'g'
         flagsText += 'i' if spec.flags.i
@@ -158,6 +179,8 @@ use ../../../kxk ▪ kseg
         rx      = new RegExp spec.pattern flagsText
         matches = []
         limit   = spec.flags.g ? Infinity : 1
+
+        rx.lastIndex = start
 
         while matches.length < limit
 
@@ -175,9 +198,23 @@ use ../../../kxk ▪ kseg
             if m[0].length == 0
                 rx.lastIndex = m.index + 1
 
-        ⮐ { line:line matches:[] } if empty matches
+        matches
 
-        { line:@joinSubstitution(line matches spec.tokens) matches:matches }
+    @patternSpans: lines pattern i=false ->
+
+        ⮐ [] if empty pattern
+
+        spec  = { pattern:pattern flags:{g:true i:i} }
+        spans = []
+
+        try
+            for line,y in lines
+                for m in @lineMatches(kseg.str(line) spec)
+                    spans.push [m.x1 y m.x2]
+        catch err
+            ⮐ []
+
+        spans
 
     @joinSubstitution: line matches tokens ->
 

@@ -821,6 +821,13 @@ use ../edit/tool ◆ belt
         belt.parseSubstitute('/a/b/c').flags ▸ {g:false i:false c:true}
         belt.parseSubstitute('/a/b/gci').flags ▸ {g:true i:true c:true}
 
+        belt.parseSubstitutePattern('/foo')       ▸ {pattern:'foo' open:true}
+        belt.parseSubstitutePattern('/')          ▸ {pattern:'' open:true}
+        belt.parseSubstitutePattern('/foo/bar')   ▸ {pattern:'foo' open:false}
+        belt.parseSubstitutePattern('/a\\/b')     ▸ {pattern:'a/b' open:true}
+        belt.parseSubstitutePattern('foo')        ▸ null
+        belt.parseSubstitutePattern('')           ▸ null
+
         belt.parseSubstitute('/a/b').pattern ▸ 'a'
         belt.parseSubstitute('/a/b').tokens ▸ [{kind:'literal' text:'b'}]
         belt.parseSubstitute('/a').tokens ▸ []
@@ -863,6 +870,25 @@ use ../edit/tool ◆ belt
         zero.matches.length ▸ 1
         zero.matches[0].x1 ▸ 0
         zero.matches[0].x2 ▸ 0
+
+  ▸ line matches
+
+        spec = belt.parseSubstitute '/one/1/g'
+
+        belt.lineMatches('one two one' spec).length ▸ 2
+        belt.lineMatches('one two one' spec 5).length ▸ 1
+        belt.lineMatches('one two one' spec 5)[0].x1 ▸ 8
+        belt.lineMatches('one two one' spec 9).length ▸ 0
+
+  ▸ pattern spans
+
+        lines = kseg.segls "one two one\nthree one"
+
+        belt.patternSpans(lines 'one')        ▸ [[0 0 3] [8 0 11] [6 1 9]]
+        belt.patternSpans(lines 'one' true)   ▸ [[0 0 3] [8 0 11] [6 1 9]]
+        belt.patternSpans(lines 'ONE')        ▸ []
+        belt.patternSpans(lines 'ONE' true)   ▸ [[0 0 3] [8 0 11] [6 1 9]]
+        belt.patternSpans(lines '[')          ▸ []
 
   ▸ joining substitutions
 

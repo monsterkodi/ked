@@ -49,7 +49,16 @@ use ../view/title ◆ title
         t.titlenovim.input.visible()  ▸ true
         t.titlenovim.input.hasFocus() ▸ true
 
-        for c in 's/one/1/'
+        for c in 's/one'
+            press c
+
+        e.state.s.highlights ▸ [[0 0 3]]
+
+        press '/'
+
+        e.state.s.highlights ▸ [[0 0 3]]
+
+        for c in '1/'
             press c
 
         press 'return'
@@ -57,6 +66,7 @@ use ../view/title ◆ title
         kseg.str(e.state.s.lines)     ▸ '1 two'
         t.titlenovim.input.visible()  ▸ false
         e.state.hasFocus              ▸ true
+        e.state.s.highlights          ▸ []
 
         press ':'
         press 's'
@@ -95,9 +105,16 @@ use ../view/title ◆ title
             press c
         press 'return'
 
+        e.state.s.highlights ▸ [[0 0 2] [3 0 5]]
+        e.state.s.selections ▸ [[0 0 2 0]]
+
         press 'n'
+
+        e.state.s.selections ▸ [[3 0 5 0]]
+
         press 'y'
 
         kseg.str(e.state.s.lines)     ▸ 'aa b'
+        e.state.s.highlights          ▸ []
 
         mode.stop e.state 'novim'
