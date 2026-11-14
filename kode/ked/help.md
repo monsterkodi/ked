@@ -122,6 +122,10 @@
     :%s/old/new/[gic]                   substitute in the whole buffer
     :'<,'>s/old/new/[gic]               substitute in the selected lines
     :5,9s/old/new/[gic]                 substitute in a line range
+    :g/pat/cmd  :v/pat/cmd              run cmd on matching or other lines
+    :g!/pat/cmd                         same as :v, run on other lines
+    :[range]normal keys                 run normal keys on each range line
+    :[range]d                           delete the lines in the range
 
 ###brckts
 

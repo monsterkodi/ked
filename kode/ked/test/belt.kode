@@ -788,6 +788,22 @@ use ../edit/tool ◆ belt
         belt.parseEx('5s/a/b/') ▸ {name:'s' bang:false args:'/a/b/' range:{from:5 to:5}}
         belt.parseEx('.,$s/a/b/') ▸ {name:'s' bang:false args:'/a/b/' range:{from:'current' to:'last'}}
 
+        belt.parseEx('normal I# ') ▸ {name:'normal' bang:false args:'I# ' range:null}
+        belt.parseEx('normal  x') ▸ {name:'normal' bang:false args:' x' range:null}
+        belt.parseEx('g/pat/d') ▸ {name:'g' bang:false args:'/pat/d' range:null}
+        belt.parseEx('g!/pat/d') ▸ {name:'g' bang:true args:'/pat/d' range:null}
+        belt.parseEx('%g/pat/normal I# ') ▸ {name:'g' bang:false args:'/pat/normal I# ' range:{kind:'all'}}
+        belt.parseEx('g /pat/d') ▸ {name:'g' bang:false args:'/pat/d' range:null}
+
+  ▸ global parsing
+
+        belt.parseGlobal('/pat/d') ▸ {pattern:'pat' command:'d'}
+        belt.parseGlobal(' /pat/normal I# ') ▸ {pattern:'pat' command:'normal I# '}
+        belt.parseGlobal('/a\\/b/d') ▸ {pattern:'a/b' command:'d'}
+        belt.parseGlobal('/pat/').error ▸ 'command required'
+        belt.parseGlobal('/pat').error ▸ 'command required'
+        belt.parseGlobal('').error ▸ 'argument required'
+
   ▸ substitute parsing
 
         belt.parseSubstitute('/foo/bar/g') ▸ {

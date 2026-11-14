@@ -2,6 +2,7 @@
 use ../../../kxk ◆ post keyinfo kseg
 use ../../theme  ◆ theme
 use ../tool      ◆ belt
+use ..           ◆ mode
 ■novim
 # maps keys to actions which are executed by edit▸act▸novim
 
@@ -216,7 +217,7 @@ use ../tool      ◆ belt
 
         @reset()
 
-        line = line.trim()
+        line = belt.exTrimLeft line
 
         ⮐ true if empty line
 
@@ -229,6 +230,10 @@ use ../tool      ◆ belt
             ⮐ false
 
         ⮐ @runSubstitute(parsed visualRange) if parsed.name in ['s' 'substitute']
+
+        ⮐ @runGlobal(parsed visualRange)   if parsed.name in ['g' 'v' 'global' 'vglobal']
+        ⮐ @runNormal(parsed visualRange)   if parsed.name in ['normal' 'norm']
+        ⮐ @deleteExRange(parsed visualRange) if parsed.name in ['d' 'delete']
 
         name = parsed.name
         name += '!' if parsed.bang
@@ -252,12 +257,14 @@ use ../tool      ◆ belt
                         post.emit 'file.saveAndQuit' file
                     else
                         post.emit 'quit'
-            ➜ post.emit 'novim.error' "not an editor command: #{name}"
+            ➜
+                    post.emit 'novim.error' "not an editor command: #{name}"
+                    ⮐ false
         true
 
     runSubstitute: parsed visualRange ->
 
-        spec = belt.parseSubstitute parsed.args
+        spec = belt.parseSubstitute parsed.args.trim()
 
         if spec.error
             post.emit 'novim.error' spec.error
@@ -281,12 +288,120 @@ use ../tool      ◆ belt
 
         true
 
-    resolveExRange: rng visualRange ->
+    runGlobal: parsed visualRange ->
+
+        spec = belt.parseGlobal parsed.args
+
+        if spec.error
+            post.emit 'novim.error' spec.error
+            ⮐ false
+
+        invert = parsed.name in ['v' 'vglobal']
+        invert = not invert if parsed.bang
+
+        range = @resolveExRange parsed.range visualRange true
+
+        try
+            re = new RegExp spec.pattern
+        catch err
+            post.emit 'novim.error' "invalid pattern: #{err.message}"
+            ⮐ false
+
+        marks = []
+
+        for y in range[0]..range[1]
+
+            continue if y < 0 or y >= @state.s.lines.length
+
+            matched = re.test kseg.str(@state.s.lines[y])
+
+            continue if matched == invert
+
+            marks.push y
+
+        delta = 0
+
+        for y in marks
+
+            target = y + delta
+
+            continue if target < 0 or target >= @state.s.lines.length
+
+            before = @state.s.lines.length
+            line   = "#{target+1},#{target+1}#{spec.command}"
+
+            break if @runEx(line) == false
+
+            break if @exConfirms
+
+            delta += @state.s.lines.length - before
+
+        true
+
+    runNormal: parsed visualRange ->
+
+        keys = parsed.args
+
+        ⮐ true if empty keys
+
+        range    = @resolveExRange parsed.range visualRange
+        wasActive = mode.isActive @state 'novim'
+
+        for y in range[0]..range[1]
+
+            continue if y < 0 or y >= @state.s.lines.length
+
+            @state.setMainCursor 0 y
+            @feedNormalKeys keys
+
+            if wasActive and not mode.isActive(@state 'novim')
+                @state.startMode 'novim'
+
+        if wasActive and not mode.isActive(@state 'novim')
+            @state.startMode 'novim'
+
+        true
+
+    feedNormalKeys: keys ->
+
+        for c in keys
+
+            if @state.novimInsert
+                event = { combo:c char:c }
+                sr    = @state.handleKey c event
+                @state.insert c if sr == 'unhandled'
+            else
+                @handleKey c {combo:c char:c}
+
+        if @state.novimInsert
+            @state.finishNovimInsert()
+
+        true
+
+    deleteExRange: parsed visualRange ->
+
+        range = @resolveExRange parsed.range visualRange
+
+        [y1 y2] = range
+
+        lines = @state.s.lines
+        y2    = min y2 lines.length-1
+
+        ⮐ true if y1 > y2 or y1 >= lines.length
+
+        rng = [0 y1 kseg.width(lines[y2]) y2]
+
+        @state.deleteRanges [rng] [[0 y1]]
+
+        true
+
+    resolveExRange: rng visualRange all=false ->
 
         lastY   = @state.s.lines.length-1
         cursorY = @state.mainCursor()[1]
 
         if not rng
+            ⮐ [0 lastY] if all
             ⮐ [cursorY cursorY]
 
         switch rng.kind

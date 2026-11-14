@@ -2559,6 +2559,124 @@ mrange = lines x y m -> motion.range lines [x y] m
         s.h.length ▸ depth
         errors[-1] ▸ 'pattern not found: zzz'
 
+  ▸ global and normal
+
+        gm = new novim s
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("keep\ndrop\ndrop\nkeep")
+        s.setMainCursor 0 0
+
+        gm.runEx 'g/drop/d'
+        txt "keep\nkeep"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("keep\ndrop\ndrop\nkeep")
+        s.setMainCursor 0 0
+
+        gm.runEx 'v/keep/d'
+        txt "keep\nkeep"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("keep\ndrop\ndrop\nkeep")
+        s.setMainCursor 0 0
+
+        gm.runEx 'g!/keep/d'
+        txt "keep\nkeep"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("x=1\nx=2\ny=3")
+        s.setMainCursor 0 0
+
+        gm.runEx 'g/^x/s/=/ = /'
+        txt "x = 1\nx = 2\ny=3"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("aaa\nbbb\nccc")
+        s.setMainCursor 0 0
+
+        gm.runEx 'g/^b/normal x'
+        txt "aaa\nbb\nccc"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("one\ntwo\nthree")
+        s.setMainCursor 0 0
+
+        gm.runEx '%normal x'
+        txt "ne\nwo\nhree"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("a\nb\nc")
+        s.setMainCursor 0 0
+
+        gm.runEx '2normal A!'
+        txt "a\nb!\nc"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("one\ntwo")
+        s.setMainCursor 0 0
+
+        gm.runEx 'g/^t/normal I# '
+        txt "one\n# two"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("ta\ntb\nx")
+        s.setMainCursor 0 0
+
+        gm.runEx 'g/^t/normal I# '
+        txt "# ta\n# tb\nx"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("abcd")
+        s.setMainCursor 0 0
+
+        gm.runEx 'normal 2x'
+        txt "cd"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("a\nb\na")
+        s.setMainCursor 0 0
+
+        gm.runEx '2,3g/a/d'
+        txt "a\nb"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("a\nb\nc")
+        s.setMainCursor 0 0
+
+        gm.runEx '2d'
+        txt "a\nc"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("a\nb\nc")
+        s.setMainCursor 0 0
+
+        gm.runEx '2,3d'
+        txt "a"
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("a\nb")
+        s.setMainCursor 0 0
+
+        gm.runEx '%d'
+        txt ""
+
+        gm.runEx 'g/[/d'
+        err = errors[-1]
+        err.startsWith('invalid pattern') ▸ true
+
+        gm.runEx 'g/pat'
+        errors[-1] ▸ 'command required'
+
+        s.loadLines belt.linesForText("a")
+        gm.runEx 'g/a/foo'
+        errors[-1] ▸ 'not an editor command: foo'
+
+        s.loadLines belt.linesForText("a\na")
+        count = errors.length
+        gm.runEx 'g/a/foo'
+        errors.length ▸ count+1
+
   ▸ brckts lets novim handle text keys
     
         stack = new state cells 'stack'
