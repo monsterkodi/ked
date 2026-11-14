@@ -1,6 +1,6 @@
 
-#shortcuts
-##files
+# shortcuts
+## files
 
     ctrl+s          cmd+s               save
     shift+cmd+s     shift+ctrl+s        save as
@@ -13,7 +13,7 @@
     cmd+1           ctrl+1              filepos: swap previous
     alt+h                               show filepos history
 
-##views
+## views
 
     alt+m                               menu
     cmd+p           ctrl+p              quicky: project files
@@ -31,7 +31,7 @@
     alt+\                               focus dir column
     alt+'                               focus function column
     
-##cursors
+## cursors
 
     ctrl+alt+up     ctrl+alt+down       page up / down
     shift+ctrl+alt+up|down              move 16 lines up / down
@@ -52,7 +52,7 @@
     shift+alt+cmd+left                  shift+alt+cmd+right
                                         paint: move main cursor, keep others
 
-###multicursors
+### multicursors
 
     cmd+up          ctrl+up             add cursor line up
     cmd+down        ctrl+down           add cursor line down
@@ -62,14 +62,14 @@
     alt+up          alt+down            move selection or cursor lines
     shift+alt+up    shift+alt+down      clone selection or cursor lines
 
-##selections
+## selections
 
     cmd+a           ctrl+a              select all lines (press again to deselect)
     cmd+l           ctrl+l              select more lines
     shift+cmd+l     shift+ctrl+l        select less lines
     esc                                 clear selections, highlights, cursors
 
-##delete
+## delete
 
     delete                              delete backwards
     ctrl+delete     cmd+delete          delete to previous word boundary
@@ -77,7 +77,7 @@
     shift+ctrl+k    entf                delete forwards
     ctrl+k                              delete to end of line
 
-##edit
+## edit
     tab                                 insert tab
     shift+tab                           deindent selected or cursor lines
     cmd+j                               join lines
@@ -90,7 +90,7 @@
     cmd+/           ctrl+/              toggle comment on lines
     alt+cmd+/       ctrl+alt+/          toggle comment type
 
-##highlights
+## highlights
     cmd+e           ctrl+e              highlight word, go to next highlight
     shift+cmd+e     shift+ctrl+e        highlight word, go to prev highlight
     cmd+d           ctrl+d              select word, add next highlight
@@ -99,12 +99,12 @@
     shift+cmd+g     shift+ctrl+g        select word, select prev highlight
     alt+cmd+d       alt+ctrl+d          select word, select all highlights
 
-##modes
+## modes
     alt+3                               salter mode: ascii art headers
     alt+y                               unype mode: unicode type writer
     alt+n           alt+z               novim mode: vi style commands
 
-###novim (alt+n alt+z)
+### novim (alt+n alt+z)
 
     w  b  e                             next word, previous word, end of word
     W  B  E                             same, but a WORD skips punctuation
@@ -129,12 +129,12 @@
     :[range]normal keys                 run normal keys on each range line
     :[range]d                           delete the lines in the range
 
-###brckts
+### brckts
 
     alt+cmd+'                           swap ' and " around cursor
     alt+cmd+b                           select delimiters or brackets
 
-####structure
+#### structure
 ```    
 ┬ ked
 ├── edit
@@ -240,4 +240,3 @@
         ├── statusfile
         └── status
  ```       
-<!-- ked-colors {"v":1,"hash":"216103610:8351","fg":[[40,4,44,"#2ca1e6"],[40,5,47,"#2ca1e6"],[40,6,61,"#2ca1e6"],[40,7,48,"#2ca1e6"],[40,8,44,"#2ca1e6"],[40,9,59,"#2ca1e6"],[40,10,63,"#2ca1e6"],[40,11,59,"#2ca1e6"],[40,12,62,"#2ca1e6"],[40,13,60,"#2ca1e6"],[40,17,44,"#2ca1e6"],[40,18,61,"#2ca1e6"],[40,19,77,"#2ca1e6"],[40,20,48,"#2ca1e6"],[40,21,63,"#2ca1e6"],[40,22,67,"#2ca1e6"],[40,23,63,"#2ca1e6"],[40,24,65,"#2ca1e6"],[40,25,54,"#2ca1e6"],[40,26,45,"#2ca1e6"],[40,27,57,"#2ca1e6"],[40,28,62,"#2ca1e6"],[40,29,56,"#2ca1e6"],[40,30,61,"#2ca1e6"],[40,34,54,"#2ca1e6"],[40,35,63,"#2ca1e6"],[40,36,77,"#2ca1e6"],[40,37,68,"#2ca1e6"],[40,38,63,"#2ca1e6"],[40,39,61,"#2ca1e6"],[40,41,74,"#2ca1e6"],[40,42,74,"#2ca1e6"],[40,43,74,"#2ca1e6"],[40,44,63,"#2ca1e6"],[40,45,59,"#2ca1e6"],[40,46,67,"#2ca1e6"],[40,47,69,"#2ca1e6"],[40,49,58,"#2ca1e6"],[40,50,59,"#2ca1e6"],[40,51,76,"#2ca1e6"],[40,55,58,"#2ca1e6"],[40,56,60,"#2ca1e6"],[40,57,57,"#2ca1e6"],[40,58,57,"#2ca1e6"],[40,60,70,"#2ca1e6"],[40,61,71,"#2ca1e6"],[40,65,82,"#2ca1e6"],[40,66,57,"#2ca1e6"],[40,67,57,"#2ca1e6"],[40,68,77,"#2ca1e6"],[40,72,56,"#2ca1e6"],[40,73,72,"#2ca1e6"],[40,74,68,"#2ca1e6"],[40,75,55,"#2ca1e6"],[40,76,61,"#2ca1e6"],[40,79,50,"#2ca1e6"],[40,80,73,"#2ca1e6"],[40,81,50,"#2ca1e6"],[40,82,44,"#2ca1e6"],[40,83,44,"#2ca1e6"],[40,84,45,"#2ca1e6"],[40,85,44,"#2ca1e6"],[40,86,44,"#2ca1e6"],[40,87,74,"#2ca1e6"],[40,88,63,"#2ca1e6"],[40,89,59,"#2ca1e6"],[40,92,76,"#2ca1e6"],[40,93,76,"#2ca1e6"],[40,94,71,"#2ca1e6"],[40,95,71,"#2ca1e6"],[40,96,74,"#2ca1e6"],[40,97,74,"#2ca1e6"],[40,98,74,"#2ca1e6"],[40,101,70,"#2ca1e6"],[40,102,71,"#2ca1e6"],[40,103,69,"#2ca1e6"],[40,107,77,"#2ca1e6"],[40,108,74,"#2ca1e6"],[40,109,80,"#2ca1e6"],[40,110,69,"#2ca1e6"],[40,111,82,"#2ca1e6"],[40,112,83,"#2ca1e6"],[40,113,78,"#2ca1e6"],[40,114,68,"#2ca1e6"],[40,115,79,"#2ca1e6"],[40,116,71,"#2ca1e6"],[40,117,55,"#2ca1e6"],[40,118,72,"#2ca1e6"],[40,122,66,"#2ca1e6"],[40,123,69,"#2ca1e6"],[2,127,5,"#6173ff"],[4,128,8,"#ffe100"],[4,160,9,"#eeff00"],[4,164,9,"#eeff00"],[4,169,8,"#ffe100"],[4,187,8,"#eeff00"]],"bg":[[2,127,5,"#000000"],[4,128,8,"#000000"],[4,160,9,"#000000"],[4,164,9,"#000000"],[4,169,8,"#000000"],[4,187,8,"#000000"]]} -->
