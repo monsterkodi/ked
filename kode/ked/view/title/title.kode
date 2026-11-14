@@ -138,6 +138,7 @@ use                 ◆ titlefile titlenovim
 
         switch action
             'submit'
+                novim?.commitSearch()
                 @editor.grabFocus()
             'cancel'
                 @editor.grabFocus()

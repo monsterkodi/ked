@@ -640,6 +640,31 @@ use ..           ◆ mode
 
         true
 
+    commitSearch: ->
+
+        spans = @state.s.highlights
+
+        ⮐ true if empty spans
+
+        pos = @state.mainCursor()
+
+        for span in spans
+            ⮐ true if span[0] == pos[0] and span[1] == pos[1]
+
+        target = null
+
+        for span in spans
+            after = span[1] > pos[1] or (span[1] == pos[1] and span[0] > pos[0])
+            if after
+                target = span
+                break
+
+        target ?= spans[0]
+
+        @state.setMainCursor [target[0] target[1]]
+
+        true
+
     startEx: ->
 
         @reset()

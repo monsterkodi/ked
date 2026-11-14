@@ -2808,6 +2808,26 @@ mrange = lines x y m -> motion.range lines [x y] m
 
         novim.lastVind = ''
 
+        s.loadLines belt.linesForText("foo bar foo")
+        s.setMainCursor 2 0
+
+        sm.searchChanged 'foo'
+        sm.commitSearch()
+
+        cur 8 0
+
+        s.setMainCursor 8 0
+        sm.commitSearch()
+
+        cur 8 0
+
+        s.setMainCursor 11 0
+        sm.commitSearch()
+
+        cur 0 0
+
+        novim.lastVind = ''
+
   ▸ search highlights survive navigation
 
         nav = new state cells 'searchnav'

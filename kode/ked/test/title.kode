@@ -156,4 +156,31 @@ use ../view/title ◆ title
         e.state.s.highlights          ▸ [[0 0 3] [0 1 3]]
         e.state.hasFocus              ▸ true
 
+        e.state.loadLines belt.linesForText("foo bar foo")
+        e.state.setMainCursor 2 0
+        e.grabFocus()
+
+        press '/'
+        press 'return'
+
+        e.state.mainCursor()          ▸ [8 0]
+
+        e.state.setMainCursor 0 0
+        e.grabFocus()
+
+        press '/'
+        press 'return'
+
+        e.state.mainCursor()          ▸ [0 0]
+
+        e.state.setMainCursor 8 0
+        e.grabFocus()
+
+        press '/'
+        for c in 'bar'
+            press c
+        press 'return'
+
+        e.state.mainCursor()          ▸ [4 0]
+
         mode.stop e.state 'novim'
