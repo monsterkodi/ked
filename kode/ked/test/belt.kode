@@ -39,6 +39,16 @@ use ../edit/tool ◆ belt
         belt.extendLineRangesFromPositionToPosition lines immutable([]) [0 0] [0 2] ▸ [[0 0 0 2]]
         belt.extendLineRangesFromPositionToPosition lines immutable([[0 0 1 0] [2 0 3 0]]) [1 1] [0 2] ▸ [[0 0 1 0] [2 0 3 0] [1 1 0 2]]
 
+  ▸ ascii header at a position without a word changes nothing
+
+        lines = ['x = y']
+
+        [lines2 posl ranges] = belt.insertAsciiHeaderForPositionsAndRanges lines [[2 0]] []
+
+        lines2 ▸ ['x = y']
+        posl   ▸ [[2 0]]
+        ranges ▸ []
+
   ▸ removeFromLineRangesBetweenPositions
 
         belt.removeFromLineRangesBetweenPositions [[2 0 4 0]] [4 0] [3 0] ▸ [[2 0 3 0]]

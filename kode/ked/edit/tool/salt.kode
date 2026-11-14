@@ -38,6 +38,8 @@ use ../../../kxk ◆ salter
         
         text = @joinLines @textForLineRanges(lines ranges) ' '
         
+        ⮐ [lines posl []] if empty text
+        
         indt = lpad @lineIndentAtPos(lines posl[0])
         
         salt = salter(text prepend:indt+'# ') + '\n'

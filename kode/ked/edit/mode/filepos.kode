@@ -32,7 +32,6 @@ use ../../../kxk ▪ post kutil slash
         
     cursorsSet: ->
         
-        #  restoring a position must not overwrite the position that is the source of it
         ⮐ if @restoring
         
         if file = ked_session.get "editor▸file"

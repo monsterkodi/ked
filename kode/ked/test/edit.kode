@@ -43,6 +43,18 @@ hed = cols=40 rows=10 ext='md' feats=[]->
         e.state.mainCursor()[1] ▸ 3
         e.state.s.selections ▸ [[0 0 0 3]]
 
+  ▸ ascii header at a non word character changes nothing
+
+        [h e] = hed()
+        e.state.loadLines ['x = y']
+
+        e.state.setCursors [[2 0]]
+
+        h.key e 'ctrl+3'
+
+        kseg.str(e.state.s.lines) ▸ 'x = y'
+        e.state.mainCursor() ▸ [2 0]
+
   ▸ selection cells are marked
 
         [h e] = hed()

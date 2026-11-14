@@ -24,6 +24,8 @@ util =
     
     zip: args... ->
         
+        ⮐ [] if empty args
+        
         result = []
         maxLen = max args.map((a) -> a.length)
         for i in 0...maxLen

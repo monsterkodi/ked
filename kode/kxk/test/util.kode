@@ -20,6 +20,8 @@ use .. ◆ util
     
     ▸ zip
     
+        util.zip() ▸ []
+        
         a = [1 2 4]
         b = ['c' 'd' 'e']
         

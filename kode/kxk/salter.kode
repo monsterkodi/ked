@@ -21,6 +21,8 @@ salter = text opt ->
         if font[c]?
             cs.push font[c]
             
+    ⮐ '' if empty cs
+            
     zs = util.zip.apply null cs
     
     if opt.char != '█'

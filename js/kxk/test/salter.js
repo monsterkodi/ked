@@ -5,6 +5,11 @@ import salter from "../salter.js"
 
 toExport["salter"] = async function ()
 {
+    await section("text without a glyph is empty", async function ()
+    {
+        compare(salter(''),'')
+        compare(salter('◆'),'')
+    })
     await section("desalt reverses salted text", async function ()
     {
         compare(salter.desalt(salter('hello')),'hello')
@@ -24,5 +29,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2FsdGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2t4ay90ZXN0L3NhbHRlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7T0FBUyxhQUFBOzs7Ozs7Z0JBTUQsT0FBTyxPQUFPLE9BQU8sVUFBcUI7Z0JBQzFDLE9BQU8sT0FBTyxPQUFPLGdCQUFxQjtnQkFDMUMsT0FBTyxPQUFPLE9BQU8sVUFBcUI7Z0JBQzFDLE9BQU8sT0FBTyxPQUFPLGVBQXFCO2dCQUMxQyxPQUFPLE9BQU8sT0FBTyxnQkFBcUI7Ozs7UUFJMUMsT0FBTyxPQUFPO2dCQUNkLE9BQU8sT0FBTyxLQUFLLE1BQU0sT0FBUyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2FsdGVyLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2t4ay90ZXN0L3NhbHRlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7T0FBUyxhQUFBOzs7Ozs7Z0JBTUQsT0FBTyxJQUFRO2dCQUNmLE9BQU8sS0FBUTs7OztnQkFJZixPQUFPLE9BQU8sT0FBTyxVQUFxQjtnQkFDMUMsT0FBTyxPQUFPLE9BQU8sZ0JBQXFCO2dCQUMxQyxPQUFPLE9BQU8sT0FBTyxVQUFxQjtnQkFDMUMsT0FBTyxPQUFPLE9BQU8sZUFBcUI7Z0JBQzFDLE9BQU8sT0FBTyxPQUFPLGdCQUFxQjs7OztRQUkxQyxPQUFPLE9BQU87Z0JBQ2QsT0FBTyxPQUFPLEtBQUssTUFBTSxPQUFTIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/kxk/test/salter.kode
