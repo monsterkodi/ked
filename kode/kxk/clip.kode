@@ -54,7 +54,9 @@ use child_process
             ⮐
         
         # log "clip.write" cmd args
-        proc = child_process.spawn cmd args
+        # the clipboard tools may fork a background process which inherits stdio
+        # ignore stdout and stderr so that the forked child does not keep them open
+        proc = child_process.spawn cmd args {stdio:['pipe' 'ignore' 'ignore']}
 
         # without this a missing tool raises an unhandled 'error' event
         proc.on 'error' (err) -> error "clip.copy -- #{cmd}: #{err}"

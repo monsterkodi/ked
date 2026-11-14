@@ -5,9 +5,24 @@ export
     
     sortSelectionsOrCursorLines: ->
         
-        ranges = @selectionsOrCursorLineRanges()
-                 
-        # @setLines lines
-        # @setSelections selections
-        # @setCursors cursors
+        ranges = @s.selections
         
+        # selectionsOrCursorLineRanges would extend the last cursor line with a newline
+        if empty ranges
+            ranges = belt.lineRangesForPositions @s.lines @s.cursors
+        
+        texts = ranges.map (rng) => belt.textForLineRange @s.lines rng
+        
+        sorted = texts.map (text) -> text
+        
+        sorted.sort (a b) -> a.localeCompare b
+        
+        sorted.reverse() if sorted eql texts
+        
+        [lines selections] = belt.replaceTextsInLineRanges @s.lines ranges sorted
+        
+        cursors = belt.endPositionsOfRanges(selections)
+        
+        @setLines lines
+        @setSelections selections
+        @setCursors cursors

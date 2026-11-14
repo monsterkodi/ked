@@ -408,6 +408,148 @@ sel = r... -> s.allSelections() ▸ r
             line 3
             """
             
+  ▸ sortSelectionsOrCursorLines sorts cursor lines
+
+        text = """
+            line 2
+            line 3
+            line 1
+            """
+        s.loadLines belt.linesForText(text)
+        s.setCursors [[2 0] [2 1] [2 2]]
+        
+        s.sortSelectionsOrCursorLines()
+        
+        txt """
+            line 1
+            line 2
+            line 3
+            """
+        sel [0 0 6 2]
+        mul [6 0] [6 1] [6 2]
+
+  ▸ sortSelectionsOrCursorLines toggles sort direction
+
+        text = """
+            line 3
+            --
+            line 1
+            --
+            line 2
+            """
+        s.loadLines belt.linesForText(text)
+        s.setCursors [[0 0] [0 2] [0 4]]
+        
+        s.sortSelectionsOrCursorLines()
+        
+        txt """
+            line 1
+            --
+            line 2
+            --
+            line 3
+            """
+        sel [0 0 6 0] [0 2 6 2] [0 4 6 4]
+        mul [6 0] [6 2] [6 4]
+        
+        s.sortSelectionsOrCursorLines()
+        
+        txt """
+            line 3
+            --
+            line 2
+            --
+            line 1
+            """
+        sel [0 0 6 0] [0 2 6 2] [0 4 6 4]
+        mul [6 0] [6 2] [6 4]
+        
+        s.sortSelectionsOrCursorLines()
+        
+        txt """
+            line 1
+            --
+            line 2
+            --
+            line 3
+            """
+        sel [0 0 6 0] [0 2 6 2] [0 4 6 4]
+        mul [6 0] [6 2] [6 4]
+
+  ▸ sortSelections adjusts range widths and cursors
+
+        text = """
+            banana
+            --
+            apple
+            --
+            cherry
+            """
+        s.loadLines belt.linesForText(text)
+        s.setSelections [[0 0 6 0] [0 2 5 2] [0 4 6 4]]
+        s.setCursors [[6 0] [5 2] [6 4]]
+        
+        s.sortSelectionsOrCursorLines()
+        
+        txt """
+            apple
+            --
+            banana
+            --
+            cherry
+            """
+        sel [0 0 5 0] [0 2 6 2] [0 4 6 4]
+        mul [5 0] [6 2] [6 4]
+        
+        s.sortSelectionsOrCursorLines()
+        
+        txt """
+            cherry
+            --
+            banana
+            --
+            apple
+            """
+        sel [0 0 6 0] [0 2 6 2] [0 4 5 4]
+        mul [6 0] [6 2] [5 4]
+
+  ▸ sortSelections sorts multi line selections
+
+        text = """
+            b1
+            b2
+            --
+            a1
+            a2
+            """
+        s.loadLines belt.linesForText(text)
+        s.setSelections [[0 0 2 1] [0 3 2 4]]
+        s.setCursors [[2 1] [2 4]]
+        
+        s.sortSelectionsOrCursorLines()
+        
+        txt """
+            a1
+            a2
+            --
+            b1
+            b2
+            """
+        sel [0 0 2 1] [0 3 2 4]
+        mul [2 1] [2 4]
+        
+        s.sortSelectionsOrCursorLines()
+        
+        txt """
+            b1
+            b2
+            --
+            a1
+            a2
+            """
+        sel [0 0 2 1] [0 3 2 4]
+        mul [2 1] [2 4]
+
   ▸ deleteRanges
     
         text = """

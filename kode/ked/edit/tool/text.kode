@@ -157,6 +157,41 @@ use ../../theme  ◆ color
             text += '\n'
         text[0...-1]
         
+    @replaceTextsInLineRanges: lines rngs texts ->
+        
+        ⮐ [lines []] if empty rngs
+        
+        lines = kseg.segls lines
+        
+        newLines = [[]]
+        newRngs  = []
+        
+        endPos = -> [kseg.width(newLines[newLines.length-1]) newLines.length-1]
+        
+        appendSegls = (segls) =>
+            for segl,idx in segls
+                li = newLines.length-1
+                newLines[li] = newLines[li].concat segl
+                newLines.push [] if idx < segls.length-1
+        
+        appendRange = (rng) =>
+            ⮐ if rng[0] == rng[2] and rng[1] == rng[3]
+            appendSegls(@seglsForRange(lines rng))
+        
+        prev = [0 0]
+        
+        for rng,idx in rngs
+            appendRange [prev[0] prev[1] rng[0] rng[1]]
+            start = endPos()
+            appendSegls(@seglsForText(texts[idx]))
+            endl = endPos()
+            newRngs.push [start[0] start[1] endl[0] endl[1]]
+            prev = [rng[2] rng[3]]
+        
+        appendRange [prev[0] prev[1] kseg.width(lines[lines.length-1]) lines.length-1]
+        
+        [newLines newRngs]
+        
     @textForSpans: lines spans ->
     
         @textForLineRanges lines @rangesForSpans(spans)

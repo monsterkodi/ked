@@ -454,6 +454,39 @@ use ../edit/tool ◆ belt
             belt.seglsForRange segls [3 0 0 1] ▸ [[] []]
             belt.seglsForRange segls [3 0 1 1] ▸ [[] ['4']]
         
+  ▸ replaceTextsInLineRanges
+        
+        lines = belt.seglsForText """
+            b1
+            b2
+            --
+            a1
+            a2
+            """
+            
+        [newLines newRanges] = belt.replaceTextsInLineRanges lines [[0 0 2 1] [0 3 2 4]] ['a1\na2' 'b1\nb2']
+        
+        newLines.map((l) -> kseg.str l) ▸ ['a1' 'a2' '--' 'b1' 'b2']
+        newRanges ▸ [[0 0 2 1] [0 3 2 4]]
+        
+        lines = belt.linesForText 'dcab'
+        
+        [newLines newRanges] = belt.replaceTextsInLineRanges lines [[0 0 2 0] [2 0 4 0]] ['ab' 'dc']
+        
+        newLines.map((l) -> kseg.str l) ▸ ['abdc']
+        newRanges ▸ [[0 0 2 0] [2 0 4 0]]
+        
+        lines = belt.seglsForText """
+            banana
+            --
+            apple
+            """
+            
+        [newLines newRanges] = belt.replaceTextsInLineRanges lines [[0 0 6 0] [0 2 5 2]] ['apple' 'banana']
+        
+        newLines.map((l) -> kseg.str l) ▸ ['apple' '--' 'banana']
+        newRanges ▸ [[0 0 5 0] [0 2 6 2]]
+        
   ▸ rangesForLinesSplitAtPositions 
     
         lines = belt.linesForText """
