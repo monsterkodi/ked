@@ -111,21 +111,35 @@
     f{char}  t{char}  ;                 find a character, till before it, repeat
     F{char}  T{char}  ,                 the same, searching backwards
     iw  aw  iW  aW                      inner and around word or WORD text objects
+    
+#### search
+    
     /{pattern}                          open the search strip and highlight matches
     n  N                                jump to the next or previous highlight
+    
+#### write & quit
     :w  :w {file}                       write the buffer to the file
     :q                                  quit, fail if there are pending changes
     :q!                                 quit discarding pending changes
     :wq                                 write then quit
     :x                                  write only if changed, then quit
+
+#### edit
+    
     :e  :e {file}                       edit a file, fail on unsaved changes
     :e!  :e! {file}                     edit a file, discarding changes
+    
+#### substitute
+    
     :s/old/new/[gic]                    substitute on the current line
     :%s/old/new/[gic]                   substitute in the whole buffer
     :'<,'>s/old/new/[gic]               substitute in the selected lines
     :5,9s/old/new/[gic]                 substitute in a line range
-    :g/pat/cmd  :v/pat/cmd              run cmd on matching or other lines
-    :g!/pat/cmd                         same as :v, run on other lines
+
+#### global
+    
+    :g/pat/cmd                          run cmd on matching lines
+    :g!/pat/cmd       :v/pat/cmd        run cmd on non-matching lines
 
         cmd is one of
             d                               delete the line
@@ -133,7 +147,10 @@
             normal keys                     run normal-mode keys on the line
             g/pat/cmd  :v/pat/cmd           nest another global
 
+#### normal
     :[range]normal keys                 run normal keys on each range line
+    
+#### delete    
     :[range]d                           delete the lines in the range
 
 ### brckts
