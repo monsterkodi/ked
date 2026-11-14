@@ -1,6 +1,7 @@
 
 use ../../../kxk ◆ post keyinfo
 use ../../theme  ◆ theme
+use ../tool      ◆ belt
 ■novim
 # maps keys to actions which are executed by edit▸act▸novim
 
@@ -102,6 +103,7 @@ use ../../theme  ◆ theme
 
         @name     = 'novim'
         @lastFind = null
+        @exRange  = null
         @reset()
         
         post.on 'vinder.text' (text) => novim.lastVind = text
@@ -142,6 +144,7 @@ use ../../theme  ◆ theme
         @find            = null
         @replace         = null
         @ex              = null
+        @exRange         = null
         true
 
     exitNovim: ->
@@ -156,6 +159,7 @@ use ../../theme  ◆ theme
         op = @operator
         op ?= @find
         op ?= @replace
+        op ?= ":'<,'>#{@ex}" if @ex? and @exRange
         op ?= ':' + @ex if @ex?
         
         pending = op:op area:@area prefix:@prefix count:@count register:@register
@@ -206,23 +210,32 @@ use ../../theme  ◆ theme
 
     runEx: ->
 
-        line = @ex
+        line        = @ex
+        visualRange = @exRange
 
         @reset()
-        
-        ⮐ true if empty line
-        
-        line = line.trim()
-        idx  = line.search /\s/
-        
-        if idx < 0
-            name = line
-        else
-            name = line[0...idx] 
-            file = line[idx..].trim()
 
-        switch name 
-            'q'   
+        ⮐ true if empty line
+
+        line = line.trim()
+
+        @state.stopVisual() if @state.visual
+
+        parsed = belt.parseEx line
+
+        if parsed.error
+            post.emit 'novim.error' parsed.error
+            ⮐ false
+
+        ⮐ @runSubstitute(parsed visualRange) if parsed.name in ['s' 'substitute']
+
+        name = parsed.name
+        name += '!' if parsed.bang
+        file = parsed.args
+        file = null if empty file
+
+        switch name
+            'q'
                     if @state.isDirty()
                         post.emit 'novim.error' 'unsaved changes'
                         ⮐ false
@@ -232,13 +245,82 @@ use ../../theme  ◆ theme
             'w!'  ➜ post.emit 'file.save' file
             'wq'
             'wq!' ➜ post.emit 'file.saveAndQuit' file
-            'x' 
-            'x!'  
+            'x'
+            'x!'
                     if @state.isDirty()
                         post.emit 'file.saveAndQuit' file
                     else
                         post.emit 'quit'
+            ➜ post.emit 'novim.error' "not an editor command: #{name}"
         true
+
+    runSubstitute: parsed visualRange ->
+
+        spec = belt.parseSubstitute parsed.args
+
+        if spec.error
+            post.emit 'novim.error' spec.error
+            ⮐ false
+
+        range = @resolveExRange parsed.range visualRange
+
+        if not range
+            post.emit 'novim.error' 'no visual selection'
+            ⮐ false
+
+        entries = @state.collectSubstitutions range[0] range[1] spec
+
+        if empty entries
+            post.emit 'novim.error' "pattern not found: #{spec.pattern}"
+            ⮐ false
+
+        @state.applySubstitutions entries spec
+
+        true
+
+    resolveExRange: rng visualRange ->
+
+        lastY   = @state.s.lines.length-1
+        cursorY = @state.mainCursor()[1]
+
+        if not rng
+            ⮐ visualRange ? [cursorY cursorY]
+
+        switch rng.kind
+            'all'    ➜ [0 lastY]
+            'visual' ➜ visualRange
+            ➜
+                resolve = (b) ->
+                    ⮐ cursorY if b == 'current'
+                    ⮐ lastY   if b == 'last'
+                    clamp 0 lastY b-1
+                y1 = resolve rng.from
+                y2 = resolve rng.to
+                y1 < y2 ? [y1 y2] : [y2 y1]
+
+    visualLineRange: ->
+
+        ys = [@state.mainCursor()[1]]
+
+        for pair in @state.visualPairs()
+            ys.push pair[0][1]
+            ys.push pair[1][1]
+
+        lo = ys[0]
+        hi = ys[0]
+
+        for y in ys
+            lo = y if y < lo
+            hi = y if y > hi
+
+        [lo hi]
+
+    startEx: ->
+
+        @reset()
+        @ex = ''
+        @exRange = @visualLineRange() if @state.visual
+        ⮐ @logPending()
 
     handleExKey: combo char ->
 
@@ -324,6 +406,7 @@ use ../../theme  ◆ theme
         if @state.visual and not @operator and not @area
 
             switch char
+                ':'     ➜ ⮐ @startEx()
                 'v'     ➜ @state.startVisual 'char' ; ⮐ @reset()
                 'V'     ➜ @state.startVisual 'line' ; ⮐ @reset()
                 'd' 'x' ➜ ⮐ @execute { operator: 'visualDelete' }
@@ -349,9 +432,7 @@ use ../../theme  ◆ theme
                     ⮐ @reset()
                 ':' 
                     if not @state.visual
-                        @reset()
-                        @ex = ''
-                        ⮐ @logPending()
+                        ⮐ @startEx()
         if 
             @prefix # gg 
             

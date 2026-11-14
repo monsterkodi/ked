@@ -1,0 +1,207 @@
+use ../../../kxk ▪ kseg
+
+■ex
+
+    @parseEx: line ->
+
+        text  = line.trim()
+        range = null
+
+        if text.startsWith "'<,'>"
+            range = { kind:'visual' }
+            text  = text[5..]
+        else if text.startsWith '%'
+            range = { kind:'all' }
+            text  = text[1..]
+        else if match = text.match /^([0-9]+|\.|\$)(?:,([0-9]+|\.|\$))?(.*)$/
+            a     = @exBound match[1]
+            b     = match[2] ? @exBound(match[2]) : a
+            range = { from:a to:b }
+            text  = match[3]
+
+        match = text.match /^([a-zA-Z]+)(!?)(.*)$/
+
+        ⮐ { error:'not an editor command' } if not match
+
+        name = match[1]
+        bang = match[2] == '!'
+        args = match[3]
+
+        if args.startsWith(' ') or args.startsWith('\t')
+            args = args.trim()
+
+        { name:name bang:bang args:args range:range }
+
+    @exBound: text ->
+
+        ⮐ 'current' if text == '.'
+        ⮐ 'last'    if text == '$'
+        parseInt text
+
+    @exScan: text start delim ->
+
+        scanned = ''
+        closed  = false
+        i       = start
+
+        while i < text.length
+
+            ch = text[i]
+
+            if ch == '\\' and i+1 < text.length
+                nxt = text[i+1]
+                if nxt == delim
+                    scanned += delim
+                else
+                    scanned += '\\' + nxt
+                i += 2
+            else if ch == delim
+                closed = true
+                i += 1
+                break
+            else
+                scanned += ch
+                i += 1
+
+        { text:scanned closed:closed index:i }
+
+    @parseSubstitute: args ->
+
+        ⮐ { error:'argument required' } if empty args
+
+        delim = args[0]
+
+        ⮐ { error:'invalid delimiter' } if delim.length != 1
+        ⮐ { error:'invalid delimiter' } if /[a-zA-Z0-9\s\\|"]/.test delim
+
+        p = @exScan args 1 delim
+
+        ⮐ { error:'no previous pattern' } if empty p.text
+
+        tokens = []
+        flags  = { g:false i:false }
+
+        if p.closed
+
+            r = @exScan args p.index delim
+
+            rt = @exReplacementTokens r.text delim
+
+            ⮐ { error:rt.error } if rt.error?
+
+            tokens = rt.tokens
+
+            if r.closed
+                for ch in args[r.index..]
+                    switch ch
+                        'g' ➜ flags.g = true
+                        'i' ➜ flags.i = true
+                        ➜ ⮐ { error:"unknown flag: #{ch}" }
+
+        flagsText = 'g'
+        flagsText += 'i' if flags.i
+
+        try
+            new RegExp p.text flagsText
+        catch err
+            ⮐ { error:"invalid pattern: #{err.message}" }
+
+        { pattern:p.text tokens:tokens flags:flags }
+
+    @exReplacementTokens: text delim ->
+
+        tokens = []
+        i      = 0
+
+        addLiteral = (t) ->
+            if not empty tokens and tokens[-1].kind == 'literal'
+                tokens[-1].text += t
+            else
+                tokens.push { kind:'literal' text:t }
+
+        while i < text.length
+
+            ch = text[i]
+
+            if ch == '&'
+                tokens.push { kind:'whole' }
+                i += 1
+            else if ch == '\\' and i+1 < text.length
+                nxt = text[i+1]
+                if nxt in '0123456789'
+                    tokens.push { kind:'group' index:parseInt(nxt) }
+                else if nxt == '\\'
+                    addLiteral '\\'
+                else if nxt == '&'
+                    addLiteral '&'
+                else if nxt == 't'
+                    addLiteral '\t'
+                else if nxt in 'nr'
+                    ⮐ { error:'multi-line replacement not supported' }
+                else if nxt == delim
+                    addLiteral delim
+                else
+                    addLiteral nxt
+                i += 2
+            else
+                addLiteral ch
+                i += 1
+
+        { tokens:tokens }
+
+    @substituteLine: line spec ->
+
+        flagsText = 'g'
+        flagsText += 'i' if spec.flags.i
+
+        rx      = new RegExp spec.pattern flagsText
+        matches = []
+        limit   = spec.flags.g ? Infinity : 1
+
+        while matches.length < limit
+
+            m = rx.exec line
+            break if not m
+
+            matches.push
+                index:  m.index
+                length: m[0].length
+                text:   m[0]
+                groups: m
+                x1:     kseg.width(kseg(line[0...m.index]))
+                x2:     kseg.width(kseg(line[0...m.index+m[0].length]))
+
+            if m[0].length == 0
+                rx.lastIndex = m.index + 1
+
+        ⮐ { line:line matches:[] } if empty matches
+
+        { line:@joinSubstitution(line matches spec.tokens) matches:matches }
+
+    @joinSubstitution: line matches tokens ->
+
+        out  = ''
+        last = 0
+
+        for m in matches
+            out += line[last...m.index]
+            out += @exExpandReplacement tokens m.groups
+            last = m.index + m.length
+
+        out += line[last..]
+
+        out
+
+    @exExpandReplacement: tokens groups ->
+
+        text = ''
+
+        for token in tokens
+            switch token.kind
+                'whole'   ➜ text += groups[0]
+                'group'   ➜ text += (groups[token.index] ? '')
+                'literal' ➜ text += token.text
+
+        text
+
+export ex

@@ -6,7 +6,7 @@ use ../../kxk ▪ kstr
         ⮐ if empty line
         # ⮐ if line[0] in [' ' '\t'] # only top level lines
         if line[0] == '#' # headings
-            m = line.match /^(\#+)(.+)/
+            m = line.match /^(\#+)\s+(.+)/
             if m?[0]?
                 @result.funcs.push name:m[2] line:index md:"h#{m[1].length}"
 

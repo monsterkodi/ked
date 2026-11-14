@@ -21,7 +21,7 @@ index_md = (function ()
         }
         if (line[0] === '#')
         {
-            m = line.match(/^(\#+)(.+)/)
+            m = line.match(/^(\#+)\s+(.+)/)
             if (((m != null ? m[0] : undefined) != null))
             {
                 return this.result.funcs.push({name:m[2],line:index,md:`h${m[1].length}`})

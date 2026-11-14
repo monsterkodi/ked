@@ -79,7 +79,7 @@ a = (x for x in l)                                                  ▸ [1,2,3]
 
 **kode** doesn't distinguish between round and square brackets around list comprehensions.
 
-#classes
+# classes
 
 ### constructor
 
@@ -311,7 +311,7 @@ The first is used, when the right hand side is a string.
 
 `is num` does a string coercion via `parseFloat` in the test.
 
-####is str
+#### is str
 
 ```kode
 '' is str and "a" is str and new String("abc") is str               ▸  true
@@ -319,7 +319,7 @@ The first is used, when the right hand side is a string.
 
 `is str` checks both, type == 'string' or instanceof String.
 
-####is obj
+#### is obj
 
 ```kode
 {} is obj and new Object() is obj                                   ▸  true
@@ -328,7 +328,7 @@ null is obj or new Map() is obj or [] is obj                        ▸  false
 
 `is obj` evaluates to true for plain Objects only.
 
-####is arr
+#### is arr
 
 ```kode
 [] is arr and new Array() is arr                                    ▸  true
@@ -357,7 +357,7 @@ log s                                   ▸ a   1
 Operator that converts argument into string in [noon](https://github.com/monsterkodi/noon) notation.
 Handles recursion, unlike `JSON.stringify`.
 
-###ansi colors
+### ansi colors
 
 ```kode
 log Y5(r2('warning!')) ▸ output in dark red on bright yellow
@@ -367,9 +367,9 @@ log Y5(r2('warning!')) ▸ output in dark red on bright yellow
 Color functions: 'r' 'g' 'b' 'c' 'm' 'y' 'w' for foreground (uppercase for background) and a number between 1 and 8.
 
 
-#debugging
+# debugging
 
-###dbg
+### dbg
 
 ```kode
 myObj = a:1 b:2 c:d:3
@@ -385,7 +385,7 @@ dbg '1st' 0 '2nd' myObj.c               ▸ file.kode:7:0
 Logs file and position followed by arguments in [noon](https://github.com/monsterkodi/noon) notation.
 If first argument is an identifier, appends its name to the file position.
 
-###assert
+### assert
 
 ```kode
 f = (a) -> ▴ a ; a                      ▸ file.kode:1:11 ▴ assert failed! a
@@ -396,7 +396,7 @@ f = (a) -> ▴ a ; a                      ▸ file.kode:1:11 ▴ assert failed! 
 Logs file position, message and condition code if condition isn't truthy. 
 If message is omitted, 'assert failed!' will be used.
 
-#profile
+# profile
 
 ```kode
 ●▸ sunny times
@@ -414,7 +414,7 @@ Logs time difference between matching `●▸` `●▪` pairs.
 
 `●` is a shortcut that can be used in functions: `●▪` is inserted automatically before the function returns.
 
-#tests 
+# tests 
 
 **kode** comes with its own testing framework
 

@@ -1218,3 +1218,45 @@ export
 
         for i in 0...n
             @undo()
+
+    collectSubstitutions: y1 y2 spec ->
+
+        entries = []
+
+        for y in y1..y2
+
+            continue if y < 0 or y >= @s.lines.length
+
+            line = kseg.str @s.lines[y]
+            res  = belt.substituteLine line spec
+
+            continue if empty res.matches
+
+            entries.push { y:y line:line matches:res.matches }
+
+        entries
+
+    applySubstitutions: entries spec ->
+
+        lines = @s.lines.map (l) -> kseg.str l
+        total = 0
+        last  = null
+
+        for entry in entries
+
+            newLine = belt.joinSubstitution entry.line entry.matches spec.tokens
+            lines[entry.y] = newLine
+
+            for m in entry.matches
+                total += 1
+                last = [m.x1 entry.y]
+
+        ⮐ 0 if not total
+
+        @begin()
+        @setLines lines
+        @setCursors [last]
+        @end()
+
+        total
+

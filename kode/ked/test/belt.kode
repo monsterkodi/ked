@@ -774,5 +774,102 @@ use ../edit/tool ◆ belt
         belt.indexOfExtremePositionInDirection posl 'right' 0 ▸ 0 
         belt.indexOfExtremePositionInDirection posl 'right' 1 ▸ 1 
         belt.indexOfExtremePositionInDirection posl 'right' 2 ▸ 2 
+
+  ▸ ex command parsing
+
+        belt.parseEx('s/foo/bar/') ▸ {name:'s' bang:false args:'/foo/bar/' range:null}
+        belt.parseEx('wq!') ▸ {name:'wq' bang:true args:'' range:null}
+        belt.parseEx('q!') ▸ {name:'q' bang:true args:'' range:null}
+        belt.parseEx('w out.txt') ▸ {name:'w' bang:false args:'out.txt' range:null}
+
+        belt.parseEx('%s/foo/bar/g') ▸ {name:'s' bang:false args:'/foo/bar/g' range:{kind:'all'}}
+        belt.parseEx("'<,'>s/a/b/") ▸ {name:'s' bang:false args:'/a/b/' range:{kind:'visual'}}
+        belt.parseEx('5,9s/a/b/g') ▸ {name:'s' bang:false args:'/a/b/g' range:{from:5 to:9}}
+        belt.parseEx('5s/a/b/') ▸ {name:'s' bang:false args:'/a/b/' range:{from:5 to:5}}
+        belt.parseEx('.,$s/a/b/') ▸ {name:'s' bang:false args:'/a/b/' range:{from:'current' to:'last'}}
+
+  ▸ substitute parsing
+
+        belt.parseSubstitute('/foo/bar/g') ▸ {
+            pattern:'foo'
+            tokens:[{kind:'literal' text:'bar'}]
+            flags:{g:true i:false}
+        }
+
+        belt.parseSubstitute('#a/b#c#') ▸ {
+            pattern:'a/b'
+            tokens:[{kind:'literal' text:'c'}]
+            flags:{g:false i:false}
+        }
+
+        belt.parseSubstitute('/a\\/b/c/').pattern ▸ 'a/b'
+        belt.parseSubstitute('/a\\/b/c/').tokens ▸ [{kind:'literal' text:'c'}]
+
+        belt.parseSubstitute('/a/&x/').tokens ▸ [
+            {kind:'whole'}
+            {kind:'literal' text:'x'}
+        ]
+
+        belt.parseSubstitute('/(a)(b)/\\2\\1/').tokens ▸ [
+            {kind:'group' index:2}
+            {kind:'group' index:1}
+        ]
+
+        belt.parseSubstitute('/a/b/ig').flags ▸ {g:true i:true}
+        belt.parseSubstitute('/a/b/igi').flags ▸ {g:true i:true}
+
+        belt.parseSubstitute('/a/b/c').error ▸ 'unknown flag: c'
+
+        belt.parseSubstitute('/a/b').pattern ▸ 'a'
+        belt.parseSubstitute('/a/b').tokens ▸ [{kind:'literal' text:'b'}]
+        belt.parseSubstitute('/a').tokens ▸ []
+
+        belt.parseSubstitute('').error ▸ 'argument required'
+        belt.parseSubstitute('foo').error ▸ 'invalid delimiter'
+        belt.parseSubstitute('//x/').error ▸ 'no previous pattern'
+        belt.parseSubstitute('/a/b/x').error ▸ 'unknown flag: x'
+        belt.parseSubstitute('/a/\\n/').error ▸ 'multi-line replacement not supported'
+        bad = belt.parseSubstitute '/[/x/'
+        bad.error.startsWith('invalid pattern') ▸ true
+
+  ▸ substitute lines
+
+        spec = belt.parseSubstitute '/one/1/g'
+        res  = belt.substituteLine 'one two one' spec
+
+        res.line ▸ '1 two 1'
+        res.matches.length ▸ 2
+        res.matches[0].x1 ▸ 0
+        res.matches[0].x2 ▸ 3
+        res.matches[1].x1 ▸ 8
+        res.matches[1].x2 ▸ 11
+
+        belt.substituteLine('one two one' belt.parseSubstitute('/one/1/')).line ▸ '1 two one'
+
+        belt.substituteLine('ab' belt.parseSubstitute('/(a)(b)/\\2\\1/')).line ▸ 'ba'
+        belt.substituteLine('foo' belt.parseSubstitute('/o/[&]/')).line ▸ 'f[o]o'
+        belt.substituteLine('one ONE' belt.parseSubstitute('/ONE/x/i')).line ▸ 'x ONE'
+        belt.substituteLine('foo' belt.parseSubstitute('/o//g')).line ▸ 'f'
+        belt.substituteLine('nope' belt.parseSubstitute('/x/y/')).matches ▸ []
+
+        wide = belt.substituteLine 'a日b' belt.parseSubstitute('/日/x/')
+        wide.line ▸ 'axb'
+        wide.matches[0].x1 ▸ 1
+        wide.matches[0].x2 ▸ 3
+
+        zero = belt.substituteLine 'ab' belt.parseSubstitute('/^/x/g')
+        zero.line ▸ 'xab'
+        zero.matches.length ▸ 1
+        zero.matches[0].x1 ▸ 0
+        zero.matches[0].x2 ▸ 0
+
+  ▸ joining substitutions
+
+        line    = 'one two one'
+        spec    = belt.parseSubstitute '/one/1/g'
+        matches = belt.substituteLine(line spec).matches
+
+        belt.joinSubstitution line matches spec.tokens ▸ '1 two 1'
+
         
         

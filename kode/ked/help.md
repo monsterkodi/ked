@@ -118,6 +118,10 @@
     :q!                                 quit discarding pending changes
     :wq                                 write then quit
     :x                                  write only if changed, then quit
+    :s/old/new/[gi]                     substitute on the current line
+    :%s/old/new/[gi]                    substitute in the whole buffer
+    :'<,'>s/old/new/[gi]                substitute in the selected lines
+    :5,9s/old/new/[gi]                  substitute in a line range
 
 ###brckts
 

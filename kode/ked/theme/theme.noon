@@ -154,7 +154,7 @@ complete
 syntax 
     text                                    #fff   
     text file                               #eee   
-    punct                                   #88d   
+    punct                                   #77b   
     template                                #555   
     define                                  #555   
     text require                            #555   

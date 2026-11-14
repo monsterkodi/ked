@@ -170,7 +170,7 @@ SYMBOL =
                         symbol = SYMBOL.bound
                     else
                         if func.md
-                            symbol = "#"
+                            symbol = '#'
                         else
                             symbol = SYMBOL.unbound
                         
@@ -233,7 +233,7 @@ SYMBOL =
                             symbol = SYMBOL.bound
                         else
                             if func.md
-                                symbol = "#"
+                                symbol = '#'
                             else
                                 symbol = SYMBOL.unbound
                             

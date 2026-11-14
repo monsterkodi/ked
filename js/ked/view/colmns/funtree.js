@@ -323,7 +323,7 @@ funtree = (function ()
                     {
                         if (func.md)
                         {
-                            symbol = "#"
+                            symbol = '#'
                         }
                         else
                         {
@@ -417,7 +417,7 @@ funtree = (function ()
                         {
                             if (func.md)
                             {
-                                symbol = "#"
+                                symbol = '#'
                             }
                             else
                             {
