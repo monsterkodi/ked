@@ -2808,6 +2808,48 @@ mrange = lines x y m -> motion.range lines [x y] m
 
         novim.lastVind = ''
 
+  ▸ search highlights survive navigation
+
+        nav = new state cells 'searchnav'
+
+        mode.modes.novim  = novim
+        mode.modes.brckts = brckts
+        mode.start nav 'brckts'
+        mode.start nav 'novim'
+
+        nav.loadLines belt.linesForText("foo bar foo\nfoobar")
+        nav.setMainCursor 0 0
+
+        nmv = mode.get nav 'novim'
+        nmv.startSearch()
+        nmv.searchChanged 'bar'
+
+        nav.s.highlights ▸ [[4 0 7] [3 1 6]]
+
+        press = c -> mode.handleKey nav c {combo:c, char:c}
+
+        press 'n'
+
+        nav.mainCursor()   ▸ [4 0]
+        nav.s.highlights   ▸ [[4 0 7] [3 1 6]]
+
+        press 'n'
+
+        nav.mainCursor()   ▸ [3 1]
+        nav.s.highlights   ▸ [[4 0 7] [3 1 6]]
+
+        nav.setMainCursor 0 0
+        press 'j'
+
+        nav.s.highlights   ▸ []
+
+        press 'n'
+
+        nav.s.highlights   ▸ [[4 0 7] [3 1 6]]
+
+        mode.stop nav 'novim'
+        mode.stop nav 'brckts'
+
   ▸ brckts lets novim handle text keys
     
         stack = new state cells 'stack'

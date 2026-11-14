@@ -32,7 +32,7 @@ use ..           ◆ mode
             ⮐ 
             
         if @state.s.highlights.length     # don't highlight brackets when other highlights exist and it's different
-            ⮐ if not @allSpans eql @state.s.highlights.asMutable() # from the previous brckts highlight
+            ⮐ if not (@allSpans eql @state.s.highlights.asMutable()) # from the previous brckts highlight
         
         [spans openClose strings] = belt.spansOfNestedPairsAtPositions(@state.s.lines @state.s.cursors)
 
