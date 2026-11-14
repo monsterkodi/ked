@@ -10,7 +10,7 @@ ked_sess = ->
     fakeSet = (key value) -> store[key] = value
     global.ked_session = get:fakeGet set:fakeSet
 
-▸ funcol color picker
+▸ funcol
 
   ▸ a cursor on the hash picks the color
 

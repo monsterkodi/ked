@@ -6,7 +6,7 @@ use                 ◆ inputchoice
 ■macro□inputchoice
     # menu for actions that don't have keyboard shortcuts
     
-    @: @screen ->
+    @: @screen @editor ->
         
         super @screen 'macro'
         
@@ -30,7 +30,7 @@ use                 ◆ inputchoice
         @choices.layout  x+1   y+1+ih   w-2  c
         @cells.layout    x     y        w    h
 
-    show: ->
+    show: =>
     
         items = belt.linesForText
             """
@@ -38,7 +38,14 @@ use                 ◆ inputchoice
             diff
             history
             """
-        
+
+        s = @editor.state.s
+        indices = belt.lineIndicesForRangesOrPositions s.selections s.cursors
+
+        if indices.length > 1
+            items.push 'count'
+            items.push 'sort'
+                    
         items = items.map (i) -> ' ' + i # padding for  
             
         ccol = int(@screen.cols/2) - 5
@@ -60,10 +67,9 @@ use                 ◆ inputchoice
         
     applyChoice: choice ->
         
-        # log "macro.applyChoice ▸#{choice}◂"
-        
         if empty choice
             input = @input.current()
+            log "macro.applyChoice ◯#{input}◯"
             if 
                 input == 'bof'  ➜ post.emit 'goto.bof'
                 input == 'eof'  ➜ post.emit 'goto.eof'
@@ -81,11 +87,19 @@ use                 ◆ inputchoice
                     sp = input.split /\s+/
                     if valid sp[1]
                         post.emit 'file.class' sp[1]
+                        
+                input.startsWith 'count'
+                    
+                    [start step] = trim(input[5..-1]).split(' ').map((s) -> parseInt(s))
+                    @editor.state.countSelectionsOrCursorLines start step
         else
+            log "macro.applyChoice ▸#{choice}◂"
             switch choice
                 'diff'    ➜ post.emit 'differ.file'
                 'status'  ➜ post.emit 'differ.status'
                 'history' ➜ post.emit 'differ.history'
+                'sort'    ➜ @editor.state.sortSelectionsOrCursorLines()
+                'count'   ➜ @editor.state.countSelectionsOrCursorLines()
                 
         @hide()
         true

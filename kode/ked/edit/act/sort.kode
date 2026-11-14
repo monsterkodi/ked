@@ -1,0 +1,13 @@
+
+use ../tool ◆ belt
+#!sort
+export
+    
+    sortSelectionsOrCursorLines: ->
+        
+        ranges = @selectionsOrCursorLineRanges()
+                 
+        # @setLines lines
+        # @setSelections selections
+        # @setCursors cursors
+        

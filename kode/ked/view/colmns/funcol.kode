@@ -53,9 +53,6 @@ use                 ◆ funtree colorpicker uniko
 
         @active = true
 
-        #  the func column is hidden in a narrow terminal, but an explicit
-        #  color picker needs a width to show up
-
         @cells.cols = max 16 int(@cells.screen.cols / 6) if @cells.cols < 16
 
         @show() if @hidden()
@@ -75,10 +72,7 @@ use                 ◆ funtree colorpicker uniko
         ked_session.set 'funcol▸active' @active
         post.emit 'redraw'
 
-    #  the color picker is only there, when the column is shown
-
     colorpickerVisible: => @visible() and @active and @colorpicker.visible()
-
 
     layout: x y w h ->
         

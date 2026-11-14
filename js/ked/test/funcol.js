@@ -28,7 +28,7 @@ ked_sess = function ()
     }
     return global.ked_session = {get:fakeGet,set:fakeSet}
 }
-toExport["funcol color picker"] = async function ()
+toExport["funcol"] = async function ()
 {
     await section("a cursor on the hash picks the color", async function ()
     {
@@ -163,7 +163,7 @@ toExport["funcol color picker"] = async function ()
         delete global.ked_session
     })
 }
-toExport["funcol color picker"]._section_ = true
+toExport["funcol"]._section_ = true
 toExport._test_ = true
 export default toExport
 

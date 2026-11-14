@@ -53,7 +53,7 @@ use                 ◆ greet inputchoice
         @choices.layout  x+1   y+1+ih   w-2  c
         @cells.layout    x     y        w    h
 
-    show: greet=false ->
+    show: greet=false =>
         
         if greet
             @greet.show() 
@@ -85,7 +85,7 @@ use                 ◆ greet inputchoice
         
         super()
         
-    showRecent: ->
+    showRecent: =>
                 
         recent = frecent.list 'file'
         
@@ -111,7 +111,7 @@ use                 ◆ greet inputchoice
         @hide()
         post.emit 'file.new'       
     
-    applyChoice: choice ->
+    applyChoice: choice =>
         
         # log "applyChoice ▸#{choice}◂"
         
@@ -125,9 +125,9 @@ use                 ◆ greet inputchoice
             
         true
         
-    onWheel: ->
+    onWheel: =>
                             
-    draw: ->
+    draw: =>
 
         ⮐ if @hidden()
         

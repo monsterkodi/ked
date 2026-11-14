@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, trim: function (s,c=' ') {return _k_.ltrim(_k_.rtrim(s,c),c)}, ltrim: function (s,c=' ') { while (_k_.in(s[0],c)) { s = s.slice(1) } return s}, rtrim: function (s,c=' ') {while (_k_.in(s.slice(-1)[0],c)) { s = s.slice(0, s.length - 1) } return s}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
 
 var macro
 
@@ -15,11 +15,13 @@ import inputchoice from "./inputchoice.js"
 macro = (function ()
 {
     _k_.extend(macro, inputchoice)
-    function macro (screen)
+    function macro (screen, editor)
     {
         this.screen = screen
+        this.editor = editor
     
         this["hide"] = this["hide"].bind(this)
+        this["show"] = this["show"].bind(this)
         this["arrange"] = this["arrange"].bind(this)
         macro.__super__.constructor.call(this,this.screen,'macro')
     }
@@ -45,11 +47,18 @@ macro = (function ()
 
     macro.prototype["show"] = function ()
     {
-        var ccol, items
+        var ccol, indices, items, s
 
         items = belt.linesForText(`status
 diff
 history`)
+        s = this.editor.state.s
+        indices = belt.lineIndicesForRangesOrPositions(s.selections,s.cursors)
+        if (indices.length > 1)
+        {
+            items.push('count')
+            items.push('sort')
+        }
         items = items.map(function (i)
         {
             return ' ' + i
@@ -72,11 +81,12 @@ history`)
 
     macro.prototype["applyChoice"] = function (choice)
     {
-        var input, lf, num, sf, sp
+        var input, lf, num, sf, sp, start, step
 
         if (_k_.empty(choice))
         {
             input = this.input.current()
+            console.log(`macro.applyChoice ◯${input}◯`)
             if (input === 'bof')
             {
                 post.emit('goto.bof')
@@ -104,9 +114,19 @@ history`)
                     post.emit('file.class',sp[1])
                 }
             }
+            else if (input.startsWith('count'))
+            {
+                var _a_ = _k_.trim(input.slice(5)).split(' ').map(function (s)
+                {
+                    return parseInt(s)
+                }); start = _a_[0]; step = _a_[1]
+
+                this.editor.state.countSelectionsOrCursorLines(start,step)
+            }
         }
         else
         {
+            console.log(`macro.applyChoice ▸${choice}◂`)
             switch (choice)
             {
                 case 'diff':
@@ -117,6 +137,12 @@ history`)
                     break
                 case 'history':
                     post.emit('differ.history')
+                    break
+                case 'sort':
+                    this.editor.state.sortSelectionsOrCursorLines()
+                    break
+                case 'count':
+                    this.editor.state.countSelectionsOrCursorLines()
                     break
             }
 
@@ -130,5 +156,5 @@ history`)
 
 export default macro;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFjcm8uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvbWVudS9tYWNyby5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsVUFBQTtJQUFTOztPQUNBLFdBQVA7O09BQ08sWUFBWjs7T0FDWSxrQkFBQTs7O0FBQ3JCLFNBQUQ7O3NCQUFPO2FBR0gsT0FBSTs7UUFBRDs7Ozs4Q0FFTyxLQUFDLE9BQU87OztxQkFFbEI7Ozs7UUFFSSxZQUFRLEdBQUcsS0FBQyxRQUFNLElBQUU7UUFDcEIsSUFBSSxLQUFDLFFBQVE7UUFFYixNQUFLLEtBQUMsa0JBQWtCLElBQUk7UUFDNUIsYUFBUyxFQUFFLEtBQUs7UUFFaEIsSUFBSSxJQUFJLElBQUk7UUFDWixlQUFVLEtBQUMsT0FBTyxPQUFLO1FBQ3ZCLGFBQVMsT0FBSyxJQUFFLEtBQUc7UUFDbkIsS0FBSztRQUVMLGVBQVUsS0FBQyxPQUFPLE9BQUs7UUFDdkIsYUFBUyxNQUFNLElBQUU7UUFFakIsS0FBQyxNQUFNLE9BQVUsSUFBRSxFQUFJLElBQUUsRUFBTyxJQUFFLEVBQUc7UUFDckMsS0FBQyxRQUFRLE9BQVEsSUFBRSxFQUFJLElBQUUsSUFBRSxHQUFLLElBQUUsRUFBRztlQUNyQyxLQUFDLE1BQU0sT0FBVSxFQUFNLEVBQVMsRUFBSzs7O3FCQUV6Qzs7OztRQUVJLFFBQVEsS0FBSyxhQUNUOzs7UUFNSixRQUFRLE1BQU0sY0FBSzs7bUJBQU0sTUFBTTs7UUFFL0IsZ0JBQVcsS0FBQyxPQUFPLE9BQUssS0FBSztRQUU3QixLQUFDLFFBQVEsS0FBSyxhQUFhO1FBRTNCLEtBQUMsTUFBTSxJQUFJO1FBQ1gsS0FBQyxNQUFNO1FBQ1AsS0FBQyxRQUFRLElBQUk7UUFDYixLQUFDLFFBQVEsT0FBTztRQUNoQixLQUFDLFFBQVEsTUFBTSxTQUFTLEVBQUU7Ozs7cUJBSTlCOztRQUVJLEtBQUssS0FBSyxRQUFROzs7O3FCQUd0QiwwQkFBYTs7OztzQkFJQTs7WUFDTCxRQUFRLEtBQUMsTUFBTTtnQkFFWCxVQUFTOztnQkFBUyxLQUFLLEtBQUs7O3FCQUM1QixVQUFTOztnQkFBUyxLQUFLLEtBQUs7O3FCQUM1QixlQUFVOztnQkFBUSxLQUFLLEtBQUssWUFBWSxNQUFJLEVBQUU7O3FCQUU5QyxNQUFNLFdBQVc7O2dCQUViLEtBQUssTUFBTSxNQUFNO2dCQUNqQixLQUFLLFdBQVcsR0FBRztnQkFDbkIsT0FBTSxHQUFHLFNBQVMsS0FBSyxXQUFXLEdBQUcsTUFBTTtnQkFDM0MsS0FBSyxLQUFLLGdCQUFnQixHQUFHOztxQkFFakMsTUFBTSxXQUFXOztnQkFFYixLQUFLLE1BQU0sTUFBTTsrQkFDUixHQUFHOztvQkFDUixLQUFLLEtBQUssYUFBYSxHQUFHOzs7Ozs7b0JBRS9COztxQkFDSDtvQkFBWSxLQUFLLEtBQUs7O3FCQUN0QjtvQkFBWSxLQUFLLEtBQUs7O3FCQUN0QjtvQkFBWSxLQUFLLEtBQUs7Ozs7O1FBRTlCLEtBQUM7ZUFDRDs7O1dBckZQOzs7ZUF1Rk0ifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFjcm8uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvbWVudS9tYWNyby5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsVUFBQTtJQUFTOztPQUNBLFdBQVA7O09BQ08sWUFBWjs7T0FDWSxrQkFBQTs7O0FBQ3JCLFNBQUQ7O3NCQUFPO2FBR0gsT0FBSSxRQUFROztRQUFUO1FBQVE7Ozs7OzhDQUVELEtBQUMsT0FBTzs7O3FCQUVsQjs7OztRQUVJLFlBQVEsR0FBRyxLQUFDLFFBQU0sSUFBRTtRQUNwQixJQUFJLEtBQUMsUUFBUTtRQUViLE1BQUssS0FBQyxrQkFBa0IsSUFBSTtRQUM1QixhQUFTLEVBQUUsS0FBSztRQUVoQixJQUFJLElBQUksSUFBSTtRQUNaLGVBQVUsS0FBQyxPQUFPLE9BQUs7UUFDdkIsYUFBUyxPQUFLLElBQUUsS0FBRztRQUNuQixLQUFLO1FBRUwsZUFBVSxLQUFDLE9BQU8sT0FBSztRQUN2QixhQUFTLE1BQU0sSUFBRTtRQUVqQixLQUFDLE1BQU0sT0FBVSxJQUFFLEVBQUksSUFBRSxFQUFPLElBQUUsRUFBRztRQUNyQyxLQUFDLFFBQVEsT0FBUSxJQUFFLEVBQUksSUFBRSxJQUFFLEdBQUssSUFBRSxFQUFHO2VBQ3JDLEtBQUMsTUFBTSxPQUFVLEVBQU0sRUFBUyxFQUFLOzs7cUJBRXpDOzs7O1FBRUksUUFBUSxLQUFLLGFBQ1Q7OztRQU1KLElBQUksS0FBQyxPQUFPLE1BQU07UUFDbEIsVUFBVSxLQUFLLGdDQUFnQyxFQUFFLFdBQVcsRUFBRTtZQUUzRCxRQUFRLFNBQVM7O1lBQ2hCLE1BQU0sS0FBSztZQUNYLE1BQU0sS0FBSzs7UUFFZixRQUFRLE1BQU0sY0FBSzs7bUJBQU0sTUFBTTs7UUFFL0IsZ0JBQVcsS0FBQyxPQUFPLE9BQUssS0FBSztRQUU3QixLQUFDLFFBQVEsS0FBSyxhQUFhO1FBRTNCLEtBQUMsTUFBTSxJQUFJO1FBQ1gsS0FBQyxNQUFNO1FBQ1AsS0FBQyxRQUFRLElBQUk7UUFDYixLQUFDLFFBQVEsT0FBTztRQUNoQixLQUFDLFFBQVEsTUFBTSxTQUFTLEVBQUU7Ozs7cUJBSTlCOztRQUVJLEtBQUssS0FBSyxRQUFROzs7O3FCQUd0QiwwQkFBYTs7OztzQkFFQTs7WUFDTCxRQUFRLEtBQUMsTUFBTTtZQUNmLGtDQUEwQjtnQkFFdEIsVUFBUzs7Z0JBQVMsS0FBSyxLQUFLOztxQkFDNUIsVUFBUzs7Z0JBQVMsS0FBSyxLQUFLOztxQkFDNUIsZUFBVTs7Z0JBQVEsS0FBSyxLQUFLLFlBQVksTUFBSSxFQUFFOztxQkFFOUMsTUFBTSxXQUFXOztnQkFFYixLQUFLLE1BQU0sTUFBTTtnQkFDakIsS0FBSyxXQUFXLEdBQUc7Z0JBQ25CLE9BQU0sR0FBRyxTQUFTLEtBQUssV0FBVyxHQUFHLE1BQU07Z0JBQzNDLEtBQUssS0FBSyxnQkFBZ0IsR0FBRzs7cUJBRWpDLE1BQU0sV0FBVzs7Z0JBRWIsS0FBSyxNQUFNLE1BQU07K0JBQ1IsR0FBRzs7b0JBQ1IsS0FBSyxLQUFLLGFBQWEsR0FBRzs7O3FCQUVsQyxNQUFNLFdBQVc7O21DQUVPLFlBQU0sSUFBUSxNQUFNLEtBQUssY0FBSzs7MkJBQU0sU0FBUztvQkFBaEUsZ0JBQU07O2dCQUNQLEtBQUMsT0FBTyxNQUFNLDZCQUE2QixNQUFNOzs7OztZQUV6RCxrQ0FBMEI7b0JBQ25COztxQkFDSDtvQkFBWSxLQUFLLEtBQUs7O3FCQUN0QjtvQkFBWSxLQUFLLEtBQUs7O3FCQUN0QjtvQkFBWSxLQUFLLEtBQUs7O3FCQUN0QjtvQkFBWSxLQUFDLE9BQU8sTUFBTTs7cUJBQzFCO29CQUFZLEtBQUMsT0FBTyxNQUFNOzs7OztRQUVsQyxLQUFDO2VBQ0Q7OztXQW5HUDs7O2VBcUdNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/menu/macro.kode

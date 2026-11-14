@@ -1,0 +1,21 @@
+
+use ../tool ◆ belt
+#!count
+export
+    
+    countSelectionsOrCursorLines: start=0 step=1 ->
+
+        ranges = @selectionsOrCursorLineRanges()
+         
+        len = "#{start + (ranges.length-1) * step}".length
+        nums = []
+        for i in 0...ranges.length
+            nums.push lpad(len "#{start + i * step}" '0')
+        
+        text = nums.join('\n')
+        
+        [lines cursors] = belt.insertTextAtPositions @s.lines text @s.cursors
+        
+        @setLines lines
+        @setSelections []
+        @setCursors cursors

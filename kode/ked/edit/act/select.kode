@@ -317,7 +317,11 @@ export
     textOfSelection: -> belt.textForLineRanges @s.lines @s.selections
     selectedText:    -> belt.textForLineRanges @s.lines @s.selections
     
-    selectionsOrCursorLineRanges: -> @s.selections ? belt.lineRangesForPositions(@s.lines @s.cursors true)
+    selectionsOrCursorLineRanges: -> 
+        
+        if valid @s.selections ➜ ⮐ @s.selections
+        
+        belt.lineRangesForPositions(@s.lines @s.cursors true)
     
     textOfSelectionOrCursorLines: -> 
         

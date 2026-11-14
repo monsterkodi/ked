@@ -51,11 +51,11 @@ use child_process ▪ spawn exec
         @git      = new git
         
         @menu     = new menu       @screen        
-        @macro    = new macro      @screen        
         @quicky   = new quicky     @screen 
         @browse   = new browse     @screen 
         @saveas   = new saveas     @screen 
         @editor   = new fileeditor @screen 'editor'
+        @macro    = new macro      @screen @editor       
         @droop    = new droop      @screen @editor 
         @dircol   = new dircol     @screen @editor  ['scroll' 'knob']
         @funcol   = new funcol     @screen @editor  ['scroll' 'knob']
