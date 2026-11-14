@@ -612,6 +612,12 @@ use ..           ◆ mode
         text = @state.textOfSelectionOrWordAtCursor()
         text ?= ''
 
+        if @state.s.selections.length
+            sel = @state.s.selections[clamp 0 @state.s.selections.length-1 @state.s.main]
+            @state.setMainCursor sel[0] sel[1]
+        else if rng = belt.rangeOfClosestWordToPos @state.s.lines @state.mainCursor()
+            @state.setMainCursor rng[0] rng[1]
+
         novim.lastVind = text
 
         if empty text

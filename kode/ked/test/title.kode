@@ -161,9 +161,12 @@ use ../view/title ◆ title
         e.grabFocus()
 
         press '/'
+
+        e.state.mainCursor()          ▸ [0 0]
+
         press 'return'
 
-        e.state.mainCursor()          ▸ [8 0]
+        e.state.mainCursor()          ▸ [0 0]
 
         e.state.setMainCursor 0 0
         e.grabFocus()
@@ -173,6 +176,21 @@ use ../view/title ◆ title
 
         e.state.mainCursor()          ▸ [0 0]
 
+        e.state.loadLines belt.linesForText("alpha beta alpha")
+        e.state.setMainCursor 7 0
+        e.grabFocus()
+
+        press '/'
+
+        e.state.mainCursor()          ▸ [6 0]
+
+        for c in 'alpha'
+            press c
+        press 'return'
+
+        e.state.mainCursor()          ▸ [11 0]
+
+        e.state.loadLines belt.linesForText("foo bar foo")
         e.state.setMainCursor 8 0
         e.grabFocus()
 

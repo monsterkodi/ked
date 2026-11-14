@@ -2808,6 +2808,31 @@ mrange = lines x y m -> motion.range lines [x y] m
 
         novim.lastVind = ''
 
+        s.loadLines belt.linesForText("foo bar")
+        s.setMainCursor 1 0
+
+        sm.startSearch()
+
+        cur 0 0
+        novim.lastVind ▸ 'foo'
+
+        s.setMainCursor 6 0
+
+        sm.startSearch()
+
+        cur 4 0
+        novim.lastVind ▸ 'bar'
+
+        s.setSelections [[4 0 7 0]]
+        s.setMainCursor 5 0
+
+        sm.startSearch()
+
+        cur 4 0
+        novim.lastVind ▸ 'bar'
+
+        s.setSelections []
+
         s.loadLines belt.linesForText("foo bar foo")
         s.setMainCursor 2 0
 
