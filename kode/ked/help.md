@@ -99,12 +99,17 @@
     shift+cmd+g     shift+ctrl+g        select word, select prev highlight
     alt+cmd+d       alt+ctrl+d          select word, select all highlights
 
-## modes
+## brckts
+
+    alt+cmd+'                           swap ' and " around cursor
+    alt+cmd+b                           select delimiters or brackets
+
+# modes
     alt+3                               salter mode: ascii art headers
     alt+y                               unype mode: unicode type writer
     alt+n           alt+z               novim mode: vi style commands
-
-### novim (alt+n alt+z)
+        
+## novim
 
     w  b  e                             next word, previous word, end of word
     W  B  E                             same, but a WORD skips punctuation
@@ -136,16 +141,21 @@
     :'<,'>s/old/new/[gic]               substitute in the selected lines
     :5,9s/old/new/[gic]                 substitute in a line range
 
+    [gic]
+        g                               substitute all occurences in line
+        i                               ignore case
+        c                               ask for confirmation
+
 #### global
     
-    :g/pat/cmd                          run cmd on matching lines
-    :g!/pat/cmd       :v/pat/cmd        run cmd on non-matching lines
+    :g/pat/<cmd>                        run cmd on matching lines
+    :g!/pat/<cmd>       :v/pat/<cmd>    run cmd on non-matching lines
 
-        cmd is one of
-            d                               delete the line
-            s/old/new/[gic]                 substitute on the line
-            normal keys                     run normal-mode keys on the line
-            g/pat/cmd  :v/pat/cmd           nest another global
+    <cmd> is one of
+        d                               delete the line
+        s/old/new/[gic]                 substitute on the line
+        normal keys                     run normal-mode keys on the line
+        g/pat/cmd  :v/pat/cmd           nest another global
 
 #### normal
     :[range]normal keys                 run normal keys on each range line
@@ -153,12 +163,7 @@
 #### delete    
     :[range]d                           delete the lines in the range
 
-### brckts
-
-    alt+cmd+'                           swap ' and " around cursor
-    alt+cmd+b                           select delimiters or brackets
-
-#### structure
+# structure
 ```    
 ┬ ked
 ├── edit
