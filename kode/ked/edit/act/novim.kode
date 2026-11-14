@@ -1236,6 +1236,23 @@ export
 
         entries
 
+    selectSubstitutions: entries ->
+
+        rngs    = []
+        cursors = []
+
+        for entry in entries
+            for m in entry.matches
+                rngs.push    [m.x1 entry.y m.x2 entry.y]
+                cursors.push [m.x2 entry.y]
+
+        ⮐ false if empty rngs
+
+        @setSelections rngs
+        @setCursors cursors main:0
+
+        true
+
     applySubstitutions: entries spec ->
 
         lines = @s.lines.map (l) -> kseg.str l

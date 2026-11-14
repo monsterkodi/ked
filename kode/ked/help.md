@@ -141,9 +141,12 @@
     :'<,'>s/old/new/[gic]               substitute in the selected lines
     :5,9s/old/new/[gic]                 substitute in a line range
 
+    :s/old/[gic]  :%s/old/[gic]         select all matches, one cursor per match
+    :%s/old//[gic]                      delete matches (empty replacement)
+
     [gic]
         g                               substitute all occurences in line
-        i                               ignore case
+        i                               ignore case (also when selecting)
         c                               ask for confirmation
 
 #### global

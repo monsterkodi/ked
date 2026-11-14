@@ -2559,6 +2559,77 @@ mrange = lines x y m -> motion.range lines [x y] m
         s.h.length ▸ depth
         errors[-1] ▸ 'pattern not found: zzz'
 
+  ▸ substitute without replacement
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("one two one\nthree one")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/one'
+
+        txt "one two one\nthree one"
+        s.s.selections ▸ [[0 0 3 0] [8 0 11 0] [6 1 9 1]]
+        s.s.cursors ▸ [[3 0] [11 0] [9 1]]
+        cur 3 0
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("one two one\nthree one")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/one/'
+
+        txt "one two one\nthree one"
+        s.s.selections ▸ [[0 0 3 0] [8 0 11 0] [6 1 9 1]]
+        s.s.cursors ▸ [[3 0] [11 0] [9 1]]
+        cur 3 0
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("one two one\nthree one")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/one/g'
+
+        txt "one two one\nthree one"
+        s.s.selections ▸ [[0 0 3 0] [8 0 11 0] [6 1 9 1]]
+        s.s.cursors ▸ [[3 0] [11 0] [9 1]]
+        cur 3 0
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("Find fiND find")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/find/gi'
+
+        txt "Find fiND find"
+        s.s.selections ▸ [[0 0 4 0] [5 0 9 0] [10 0 14 0]]
+        s.s.cursors ▸ [[4 0] [9 0] [14 0]]
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("one\ntwo one")
+        s.setMainCursor 0 1
+
+        nm.runEx 's/one/'
+
+        txt "one\ntwo one"
+        s.s.selections ▸ [[4 1 7 1]]
+        s.s.cursors ▸ [[7 1]]
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("one two one")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/one//g'
+
+        txt " two "
+
+        s.clearHistory()
+        s.loadLines belt.linesForText("one two one")
+        s.setMainCursor 0 0
+
+        nm.runEx '%s/one/1'
+
+        txt "1 two one"
+
   ▸ global and normal
 
         gm = new novim s

@@ -275,11 +275,18 @@ use ..           ◆ mode
             post.emit 'novim.error' 'no visual selection'
             ⮐ false
 
-        entries = @state.collectSubstitutions range[0] range[1] spec
+        searching = not spec.hasReplacement
+        searchSpec = spec
+        searchSpec = { pattern:spec.pattern flags:{ g:true i:spec.flags.i c:false } } if searching
+
+        entries = @state.collectSubstitutions range[0] range[1] searchSpec
 
         if empty entries
             post.emit 'novim.error' "pattern not found: #{spec.pattern}"
             ⮐ false
+
+        if searching
+            ⮐ @state.selectSubstitutions entries
 
         ⮐ @startSubstituteConfirm(range[0] range[1] spec) if spec.flags.c
 

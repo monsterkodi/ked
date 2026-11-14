@@ -97,26 +97,35 @@ use ../../../kxk ▪ kseg
 
         ⮐ { error:'no previous pattern' } if empty p.text
 
-        tokens = []
-        flags  = { g:false i:false c:false }
+        tokens      = []
+        flags       = { g:false i:false c:false }
+        replacement = false
 
         if p.closed
 
             r = @exScan args p.index delim
 
-            rt = @exReplacementTokens r.text delim
-
-            ⮐ { error:rt.error } if rt.error?
-
-            tokens = rt.tokens
+            flagsText = r.text
 
             if r.closed
-                for ch in args[r.index..]
-                    switch ch
-                        'g' ➜ flags.g = true
-                        'i' ➜ flags.i = true
-                        'c' ➜ flags.c = true
-                        ➜ ⮐ { error:"unknown flag: #{ch}" }
+                replacement = true
+                rt = @exReplacementTokens r.text delim
+                ⮐ { error:rt.error } if rt.error?
+                tokens    = rt.tokens
+                flagsText = args[r.index..]
+            else if not empty r.text and not @isSubstituteFlags r.text
+                replacement = true
+                rt = @exReplacementTokens r.text delim
+                ⮐ { error:rt.error } if rt.error?
+                tokens    = rt.tokens
+                flagsText = ''
+
+            for ch in flagsText
+                switch ch
+                    'g' ➜ flags.g = true
+                    'i' ➜ flags.i = true
+                    'c' ➜ flags.c = true
+                    ➜ ⮐ { error:"unknown flag: #{ch}" }
 
         flagsText = 'g'
         flagsText += 'i' if flags.i
@@ -126,7 +135,16 @@ use ../../../kxk ▪ kseg
         catch err
             ⮐ { error:"invalid pattern: #{err.message}" }
 
-        { pattern:p.text tokens:tokens flags:flags }
+        { pattern:p.text tokens:tokens flags:flags hasReplacement:replacement }
+
+    @isSubstituteFlags: text ->
+
+        ⮐ false if empty text
+
+        for ch in text
+            ⮐ false if ch not in 'gic'
+
+        true
 
     @exReplacementTokens: text delim ->
 

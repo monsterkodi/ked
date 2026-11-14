@@ -820,12 +820,14 @@ use ../edit/tool ◆ belt
             pattern:'foo'
             tokens:[{kind:'literal' text:'bar'}]
             flags:{g:true i:false c:false}
+            hasReplacement:true
         }
 
         belt.parseSubstitute('#a/b#c#') ▸ {
             pattern:'a/b'
             tokens:[{kind:'literal' text:'c'}]
             flags:{g:false i:false c:false}
+            hasReplacement:true
         }
 
         belt.parseSubstitute('/a\\/b/c/').pattern ▸ 'a/b'
@@ -857,6 +859,18 @@ use ../edit/tool ◆ belt
         belt.parseSubstitute('/a/b').pattern ▸ 'a'
         belt.parseSubstitute('/a/b').tokens ▸ [{kind:'literal' text:'b'}]
         belt.parseSubstitute('/a').tokens ▸ []
+
+        belt.parseSubstitute('/a/b').hasReplacement ▸ true
+        belt.parseSubstitute('/a/b/').hasReplacement ▸ true
+        belt.parseSubstitute('/a//').hasReplacement ▸ true
+        belt.parseSubstitute('/a//g').hasReplacement ▸ true
+        belt.parseSubstitute('/a').hasReplacement ▸ false
+        belt.parseSubstitute('/a/').hasReplacement ▸ false
+        belt.parseSubstitute('/a/g').hasReplacement ▸ false
+        belt.parseSubstitute('/a/gi').hasReplacement ▸ false
+        belt.parseSubstitute('/a/gi').flags ▸ {g:true i:true c:false}
+        belt.parseSubstitute('/a/i').flags ▸ {g:false i:true c:false}
+        belt.parseSubstitute('/a/g').flags ▸ {g:true i:false c:false}
 
         belt.parseSubstitute('').error ▸ 'argument required'
         belt.parseSubstitute('foo').error ▸ 'invalid delimiter'
