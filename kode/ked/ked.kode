@@ -95,7 +95,7 @@ use child_process ▪ spawn exec
         @contextHandlers = [                                                                                               @editor         @dircol @funcol ]
         @mouseHandlers   = [ @input @context @finder @searcher @replacer @clippo @vinder @differ @quicky @browse @saveas @droop @menu @macro @editor @title  @dircol @funcol ]
         @wheelHandlers   = [                 @finder @searcher @replacer @clippo @vinder @differ @quicky @browse @saveas @droop       @macro @editor         @dircol @funcol ]
-        @keyHandlers     = [ @input @context @finder @searcher @replacer @clippo @vinder @differ @quicky @browse @saveas @droop @menu @macro @editor         @dircol @funcol ]
+        @keyHandlers     = [ @input @title @context @finder @searcher @replacer @clippo @vinder @differ @quicky @browse @saveas @droop @menu @macro @editor         @dircol @funcol ]
         
         @t.on 'key'    @onKey
         @t.on 'mouse'  @onMouse

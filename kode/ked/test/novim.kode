@@ -2245,35 +2245,27 @@ mrange = lines x y m -> motion.range lines [x y] m
   ▸ ex commands
     
         m = new novim s
-    
-        key   = c -> m.handleKey c {combo:c, char:c}
-        keys  = t ->
-            for c in t
-                key c
-        enter = -> m.handleKey 'return'    {combo:'return', char:'\n'}
-        back  = -> m.handleKey 'backspace' {combo:'backspace'}
-        esc   = -> m.handleKey 'esc'       {combo:'esc', char:''}
-    
+
+        starts = []
         quits  = 0
         saves  = []
         writes = []
+        errors = []
     
         clean = -> s.clearHistory()
         dirty = ->
             s.clearHistory()
             s.pushState()
     
+        post.on 'novim.ex.start' (start) -> starts.push start
+        post.on 'novim.error'    (err)   -> errors.push err
         post.on 'quit'                    -> quits += 1
         post.on 'file.saveAndQuit' (file) -> saves.push file ? null
         post.on 'file.save'        (file) -> writes.push file ? null
     
         clean()
     
-        keys ':q'
-    
-        m.ex        ▸ 'q'
-    
-        enter()
+        m.runEx 'q'
     
         quits  ▸ 1
         writes ▸ []
@@ -2282,47 +2274,52 @@ mrange = lines x y m -> motion.range lines [x y] m
     
         dirty()
     
-        keys ':q'
-        enter()
+        m.runEx 'q'
     
-        quits      ▸ 1
+        quits ▸ 1
+        errors[-1] ▸ 'unsaved changes'
     
-        keys ':q!'
-    
-        m.ex        ▸ 'q!'
-    
-        enter()
+        m.runEx 'q!'
     
         quits  ▸ 2
         writes ▸ []
         saves  ▸ []
     
-        keys '3:q'
-    
-        m.ex       ▸ 'q'
-    
-        esc()
-    
-        m.ex ▸ null
-    
-        keys ':wqq'
-        back()
-    
-        m.ex ▸ 'wq'
-    
-        esc()
-    
-        m.ex ▸ null
-    
         clean()
     
-        keys ':w'
-        enter()
+        m.runEx 'w'
     
         writes ▸ [null]
         saves  ▸ []
         quits  ▸ 2
         m.ex   ▸ null
+
+        m.runEx 'w out.txt'
+        writes ▸ [null 'out.txt']
+
+        m.runEx 'wq out.txt'
+        saves ▸ ['out.txt']
+
+        m.runEx 'foo'
+        errors[-1] ▸ 'not an editor command: foo'
+
+        clean()
+        m.startEx()
+        starts[-1] ▸ {state:'test.state' text:''}
+        m.ex       ▸ ''
+        m.cancelEx()
+        m.ex       ▸ null
+
+        s.loadLines belt.linesForText("a\nb")
+        s.startVisual 'line'
+        m.startEx()
+        starts[-1] ▸ {state:'test.state' text:"'<,'>"}
+        m.cancelEx()
+        s.stopVisual()
+        s.visual   ▸ null
+
+        m.runEx "'<,'>s/a/b/"
+        errors[-1] ▸ 'no visual selection'
 
   ▸ substitute
 
@@ -2332,19 +2329,12 @@ mrange = lines x y m -> motion.range lines [x y] m
         nkeys = t ->
             for c in t
                 nkey c
-        nenter = -> nm.handleKey 'return'    {combo:'return', char:'\n'}
-        nesc   = -> nm.handleKey 'esc'       {combo:'esc', char:''}
-
-        errors = []
-        post.on 'novim.error' (err) -> errors.push err
 
         s.clearHistory()
         s.loadLines belt.linesForText("one two one\nthree one")
         s.setMainCursor 8 0
 
-        nkeys ':s/one/1/'
-        nm.ex ▸ 's/one/1/'
-        nenter()
+        nm.runEx 's/one/1/'
 
         txt "1 two one\nthree one"
         cur 0 0
@@ -2354,8 +2344,7 @@ mrange = lines x y m -> motion.range lines [x y] m
         s.loadLines belt.linesForText("one two one\nthree one")
         s.setMainCursor 0 0
 
-        nkeys ':%s/one/1/g'
-        nenter()
+        nm.runEx '%s/one/1/g'
 
         txt "1 two 1\nthree 1"
         cur 6 1
@@ -2367,16 +2356,14 @@ mrange = lines x y m -> motion.range lines [x y] m
         s.loadLines belt.linesForText("One ONE")
         s.setMainCursor 0 0
 
-        nkeys ':s/one/x/i'
-        nenter()
+        nm.runEx 's/one/x/i'
         txt "x ONE"
 
         s.clearHistory()
         s.loadLines belt.linesForText("a\na\na")
         s.setMainCursor 0 0
 
-        nkeys ':2,3s/a/b/g'
-        nenter()
+        nm.runEx '2,3s/a/b/g'
         txt "a\nb\nb"
 
         s.clearHistory()
@@ -2387,9 +2374,8 @@ mrange = lines x y m -> motion.range lines [x y] m
         s.visual ▸ 'line'
 
         nkey ':'
-        nm.ex ▸ ''
-        nkeys 's/b/X/'
-        nenter()
+        nm.ex ▸ "'<,'>"
+        nm.runEx "'<,'>s/b/X/"
 
         txt "a\nX\nc"
         s.visual ▸ null
@@ -2400,8 +2386,7 @@ mrange = lines x y m -> motion.range lines [x y] m
 
         nkeys 'Vj'
         nkey ':'
-        nkeys 's/a/z/'
-        nesc()
+        nm.cancelEx()
 
         txt "a\nb\nc"
         nm.ex ▸ null
@@ -2411,8 +2396,7 @@ mrange = lines x y m -> motion.range lines [x y] m
         s.clearHistory()
         s.loadLines belt.linesForText("a\nb")
         depth = s.h.length
-        nkeys ':s/zzz/x/'
-        nenter()
+        nm.runEx 's/zzz/x/'
 
         txt "a\nb"
         s.h.length ▸ depth

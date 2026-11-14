@@ -1,4 +1,7 @@
-use ../edit       ◆ editor
+use ../../kxk      ▪ kseg
+use ../edit       ◆ editor mode
+use ../edit/mode  ◆ novim
+use ../edit/tool  ◆ belt
 use ../util       ◆ harness
 use ../view/title ◆ title
 
@@ -19,3 +22,67 @@ use ../view/title ◆ title
         row.includes '~'           ▸ true
         row.includes 'kode'        ▸ true
         row.includes 'doesntexist' ▸ true
+
+  ▸ the novim command line is a text input
+
+        ◯ mode.loaded
+
+        h = new harness cols:80 rows:5
+        e = new editor h.screen 'title_novim_editor' []
+        t = new title h.screen e
+
+        t.layout 0 0 80 1
+
+        mode.modes.novim = novim
+        mode.start e.state 'novim'
+
+        press = (c) ->
+            ⮐ true if t.onKey c {combo:c, char:c}
+            e.onKey c {combo:c, char:c}
+
+        e.state.loadLines belt.linesForText('one two')
+        e.state.setMainCursor 0 0
+        e.grabFocus()
+
+        press ':'
+
+        t.titlenovim.input.visible()  ▸ true
+        t.titlenovim.input.hasFocus() ▸ true
+
+        for c in 's/one/1/'
+            press c
+
+        press 'return'
+
+        kseg.str(e.state.s.lines)     ▸ '1 two'
+        t.titlenovim.input.visible()  ▸ false
+        e.state.hasFocus              ▸ true
+
+        press ':'
+        press 's'
+        press 'x'
+        press 'delete'
+
+        t.titlenovim.input.current()  ▸ 's'
+
+        press 'esc'
+
+        t.titlenovim.input.visible()  ▸ false
+        kseg.str(e.state.s.lines)     ▸ '1 two'
+
+        e.state.loadLines belt.linesForText("a\nb\nc")
+        e.state.setMainCursor 0 0
+        e.grabFocus()
+
+        press 'V'
+        press 'j'
+        press ':'
+
+        t.titlenovim.input.current()  ▸ "'<,'>"
+
+        press 'esc'
+
+        t.titlenovim.input.visible()  ▸ false
+        e.state.visual                ▸ 'line'
+
+        mode.stop e.state 'novim'

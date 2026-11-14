@@ -159,8 +159,6 @@ use ../tool      ◆ belt
         op = @operator
         op ?= @find
         op ?= @replace
-        op ?= ":'<,'>#{@ex}" if @ex? and @exRange
-        op ?= ':' + @ex if @ex?
         
         pending = op:op area:@area prefix:@prefix count:@count register:@register
         post.emit 'novim.pending' pending
@@ -208,16 +206,15 @@ use ../tool      ◆ belt
         post.emit 'novim.execute' cmd
         true
 
-    runEx: ->
+    runEx: line ->
 
-        line        = @ex
         visualRange = @exRange
 
         @reset()
 
-        ⮐ true if empty line
-
         line = line.trim()
+
+        ⮐ true if empty line
 
         @state.stopVisual() if @state.visual
 
@@ -284,7 +281,7 @@ use ../tool      ◆ belt
         cursorY = @state.mainCursor()[1]
 
         if not rng
-            ⮐ visualRange ? [cursorY cursorY]
+            ⮐ [cursorY cursorY]
 
         switch rng.kind
             'all'    ➜ [0 lastY]
@@ -318,23 +315,21 @@ use ../tool      ◆ belt
     startEx: ->
 
         @reset()
-        @ex = ''
-        @exRange = @visualLineRange() if @state.visual
-        ⮐ @logPending()
 
-    handleExKey: combo char ->
+        text = ''
+        if @state.visual
+            @exRange = @visualLineRange()
+            text     = "'<,'>"
 
-        switch combo
-            'esc''escape'   ➜ ⮐ @reset()
-            'return''enter' ➜ ⮐ @runEx()
-            'backspace' 'delete' 'ctrl+h'
-                @ex = @ex[0...-1] if @ex.length
-                ⮐ @logPending()
+        @ex = text
 
-        if char.length == 1 and char not in '\n\r\t'
-            @ex += char
-            @logPending()
+        post.emit 'novim.ex.start', state:@state.name text:text
 
+        true
+
+    cancelEx: ->
+
+        @reset()
         true
 
     handleKey: key event ->
@@ -349,10 +344,6 @@ use ../tool      ◆ belt
 
         if combo.includes('alt+') or combo.includes('ctrl+') or combo.includes('cmd+')
             ⮐ 'unhandled'
-
-        if @ex?
-            @handleExKey combo char
-            ⮐ true
 
         if combo in ['esc' 'escape']
             @reset()

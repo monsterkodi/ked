@@ -1,7 +1,17 @@
 var toExport = {}
-var e, h, row, t
+var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
+
+var c, e, h, press, row, t
+
+import kxk from "../../kxk.js"
+let kseg = kxk.kseg
 
 import editor from "../edit/editor.js"
+import mode from "../edit/mode.js"
+
+import novim from "../edit/mode/novim.js"
+
+import belt from "../edit/tool/belt.js"
 
 import harness from "../util/harness.js"
 
@@ -22,11 +32,64 @@ toExport["title"] = async function ()
         compare(row.includes('kode'),true)
         compare(row.includes('doesntexist'),true)
     })
+    await section("the novim command line is a text input", async function ()
+    {
+        await mode.loaded
+        h = new harness({cols:80,rows:5})
+        e = new editor(h.screen,'title_novim_editor',[])
+        t = new title(h.screen,e)
+        t.layout(0,0,80,1)
+        mode.modes.novim = novim
+        mode.start(e.state,'novim')
+        press = function (c)
+        {
+            if (t.onKey(c,{combo:c,char:c}))
+            {
+                return true
+            }
+            return e.onKey(c,{combo:c,char:c})
+        }
+        e.state.loadLines(belt.linesForText('one two'))
+        e.state.setMainCursor(0,0)
+        e.grabFocus()
+        press(':')
+        compare(t.titlenovim.input.visible(),true)
+        compare(t.titlenovim.input.hasFocus(),true)
+        var list = _k_.list('s/one/1/')
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            c = list[_a_]
+            press(c)
+        }
+        press('return')
+        compare(kseg.str(e.state.s.lines),'1 two')
+        compare(t.titlenovim.input.visible(),false)
+        compare(e.state.hasFocus,true)
+        press(':')
+        press('s')
+        press('x')
+        press('delete')
+        compare(t.titlenovim.input.current(),'s')
+        press('esc')
+        compare(t.titlenovim.input.visible(),false)
+        compare(kseg.str(e.state.s.lines),'1 two')
+        e.state.loadLines(belt.linesForText("a\nb\nc"))
+        e.state.setMainCursor(0,0)
+        e.grabFocus()
+        press('V')
+        press('j')
+        press(':')
+        compare(t.titlenovim.input.current(),"'<,'>")
+        press('esc')
+        compare(t.titlenovim.input.visible(),false)
+        compare(e.state.visual,'line')
+        mode.stop(e.state,'novim')
+    })
 }
 toExport["title"]._section_ = true
 toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGl0bGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL3Rlc3QvdGl0bGUua29kZSJdLCJtYXBwaW5ncyI6Ijs7O09BQW9CLGFBQWI7O09BQ2EsY0FBYjs7T0FDYSxZQUFSOzs7Ozs7UUFNSixRQUFRLFNBQVEsS0FBSyxJQUFJLEtBQUs7UUFDOUIsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUN4QixRQUFRLE1BQU0sRUFBRSxPQUFPO1FBRXZCLEVBQUUsUUFBUTtRQUNWLEVBQUUsT0FBTyxFQUFFLEVBQUUsSUFBSTtRQUNqQixFQUFFO1FBRUYsTUFBTSxFQUFFLElBQUk7Z0JBRVosSUFBSSxTQUFTLEtBQWdCO2dCQUM3QixJQUFJLFNBQVMsUUFBZ0I7Z0JBQzdCLElBQUksU0FBUyxlQUFnQiJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGl0bGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL3Rlc3QvdGl0bGUua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7T0FBVSxVQUFBO0lBQVc7O09BQ0QsYUFBYjtPQUFvQixXQUFwQjs7T0FDYSxZQUFQOztPQUNPLFdBQVI7O09BQ1EsY0FBYjs7T0FDYSxZQUFSOzs7Ozs7UUFNSixRQUFRLFNBQVEsS0FBSyxJQUFJLEtBQUs7UUFDOUIsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUN4QixRQUFRLE1BQU0sRUFBRSxPQUFPO1FBRXZCLEVBQUUsUUFBUTtRQUNWLEVBQUUsT0FBTyxFQUFFLEVBQUUsSUFBSTtRQUNqQixFQUFFO1FBRUYsTUFBTSxFQUFFLElBQUk7Z0JBRVosSUFBSSxTQUFTLEtBQWdCO2dCQUM3QixJQUFJLFNBQVMsUUFBZ0I7Z0JBQzdCLElBQUksU0FBUyxlQUFnQjs7OztjQUkzQixLQUFLO1FBRVAsUUFBUSxTQUFRLEtBQUssR0FBRyxLQUFLO1FBQzdCLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFDeEIsUUFBUSxNQUFNLEVBQUUsT0FBTztRQUV2QixFQUFFLE9BQU8sRUFBRSxFQUFFLEdBQUc7UUFFaEIsS0FBSyxNQUFNLFFBQVE7UUFDbkIsS0FBSyxNQUFNLEVBQUUsTUFBTTtRQUVuQixrQkFBUzs7Z0JBQ0ssRUFBRSxNQUFNLEdBQUcsTUFBTSxFQUFHLEtBQUs7O3VCQUFqQzs7bUJBQ0YsRUFBRSxNQUFNLEdBQUcsTUFBTSxFQUFHLEtBQUs7O1FBRTdCLEVBQUUsTUFBTSxVQUFVLEtBQUssYUFBYTtRQUNwQyxFQUFFLE1BQU0sY0FBYyxFQUFFO1FBQ3hCLEVBQUU7UUFFRixNQUFNO2dCQUVOLEVBQUUsV0FBVyxNQUFNLFVBQWE7Z0JBQ2hDLEVBQUUsV0FBVyxNQUFNLFdBQWE7NEJBRXZCOzs7WUFBTDtZQUNBLE1BQU07O1FBRVYsTUFBTTtnQkFFTixLQUFLLElBQUksRUFBRSxNQUFNLEVBQUUsT0FBYTtnQkFDaEMsRUFBRSxXQUFXLE1BQU0sVUFBYTtnQkFDaEMsRUFBRSxNQUFNLFNBQXdCO1FBRWhDLE1BQU07UUFDTixNQUFNO1FBQ04sTUFBTTtRQUNOLE1BQU07Z0JBRU4sRUFBRSxXQUFXLE1BQU0sVUFBYTtRQUVoQyxNQUFNO2dCQUVOLEVBQUUsV0FBVyxNQUFNLFVBQWE7Z0JBQ2hDLEtBQUssSUFBSSxFQUFFLE1BQU0sRUFBRSxPQUFhO1FBRWhDLEVBQUUsTUFBTSxVQUFVLEtBQUssYUFBYTtRQUNwQyxFQUFFLE1BQU0sY0FBYyxFQUFFO1FBQ3hCLEVBQUU7UUFFRixNQUFNO1FBQ04sTUFBTTtRQUNOLE1BQU07Z0JBRU4sRUFBRSxXQUFXLE1BQU0sVUFBYTtRQUVoQyxNQUFNO2dCQUVOLEVBQUUsV0FBVyxNQUFNLFVBQWE7Z0JBQ2hDLEVBQUUsTUFBTSxPQUF3QjtRQUVoQyxLQUFLLEtBQUssRUFBRSxNQUFNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/test/title.kode
