@@ -1,0 +1,245 @@
+use ../../kxk ◆ clip
+■registers
+
+    @: ->
+        @values = {}
+
+    @cloneValue: value ->
+
+        ⮐ null if not value
+
+        cloned =
+            lines: copy(value.lines ? [])
+            linewise: value.linewise ? false
+
+        if value.keys
+            cloned.keys = value.keys.map (event) ->
+                { key: event.key  combo: event.combo  char: event.char }
+
+        cloned
+
+    @textForValue: value ->
+
+        ⮐ '' if not value
+
+        text = value.lines.join '\n'
+        text += '\n' if value.linewise
+
+        text
+
+    @recordForText: text ->
+
+        ⮐ null if empty text
+
+        linewise = text.endsWith '\n'
+        lines    = text.split '\n'
+
+        lines.pop() if linewise
+
+        { lines: lines  linewise: linewise }
+
+    @eventForSpecial: name ->
+
+        switch name.toLowerCase()
+            'esc' 'escape'     ➜ ⮐ { key: 'esc'       combo: 'esc'       char: 'esc'       }
+            'cr' 'return'      ➜ ⮐ { key: 'return'    combo: 'return'    char: '\n'        }
+            'tab'              ➜ ⮐ { key: 'tab'       combo: 'tab'       char: '\t'        }
+            'space'            ➜ ⮐ { key: 'space'     combo: 'space'     char: ' '         }
+            'bs' 'backspace'   ➜ ⮐ { key: 'backspace' combo: 'backspace' char: 'backspace' }
+
+        null
+
+    @keysForText: text ->
+
+        keys = []
+        i    = 0
+
+        while i < text.length
+
+            ch = text[i]
+
+            if ch == '<'
+                close = text.indexOf '>' i+1
+                if close > i
+                    event = registers.eventForSpecial text[i+1...close]
+                    if event
+                        keys.push event
+                        i = close+1
+                        continue
+
+            if ch == '\n'
+                keys.push { key: 'return' combo: 'return' char: '\n' }
+            else
+                keys.push { key: ch combo: ch char: ch }
+
+            i += 1
+
+        keys
+
+    @textForKeys: keys ->
+
+        text = ''
+
+        for event in keys
+
+            key = event.char ? event.key
+
+            if key == 'return' or key == '\n'
+                text += '\n'
+            else if key == 'tab' or key == '\t'
+                text += '\t'
+            else if key == 'space'
+                text += ' '
+            else if key == 'esc'
+                text += '<Esc>'
+            else if key == 'backspace'
+                text += '<BS>'
+            else if key.length == 1
+                text += key
+            else
+                text += '<' + key + '>'
+
+        text
+
+    @target: name ->
+
+        name = '+' if name == 'clipboard'
+
+        ⮐ { name: '"' append: false } if not name or name == '' or name == '"'
+
+        ⮐ null if name.length != 1
+
+        ⮐ { name: name.toLowerCase() append: true } if /^[A-Z]$/.test name
+        ⮐ { name: name append: false } if /^[a-z0-9\-_+*\/:%.=#]$/.test name
+
+        null
+
+    @appendValues: old value ->
+
+        ⮐ registers.cloneValue value if not old
+
+        old   = registers.cloneValue old
+        value = registers.cloneValue value
+
+        if value.linewise
+            old.lines = old.lines.concat value.lines
+        else
+            last = old.lines.length-1
+            old.lines[last] = old.lines[last] + value.lines[0]
+            old.lines = old.lines.concat value.lines[1..]
+
+        old.keys = null
+        old
+
+    macroTarget: name ->
+
+        target = registers.target name
+
+        ⮐ null if not target
+        ⮐ null if target.name not in 'abcdefghijklmnopqrstuvwxyz'
+
+        target
+
+    read: name ->
+
+        target = registers.target name
+
+        ⮐ null if not target
+        ⮐ null if target.name == '_'
+        ⮐ @readClipboard() if target.name in ['+' '*']
+
+        registers.cloneValue @values[target.name]
+
+    write: name value operation='yank' ->
+
+        target = registers.target name
+
+        ⮐ null if not target
+        ⮐ null if target.name == '_'
+
+        value = registers.cloneValue value
+
+        ⮐ null if not value
+
+        @values['"'] = value
+
+        if operation == 'yank'
+            @values['0'] = registers.cloneValue(value) if target.name == '"'
+        else if operation in ['delete' 'change']
+            @shiftNumbered value
+            if not value.linewise and value.lines.length <= 1
+                @values['-'] = registers.cloneValue(value)
+
+        if target.name in ['+' '*']
+            @writeClipboard value
+        else if target.name == '"'
+            # the unnamed register was already set above
+        else if target.append
+            appended = registers.appendValues(@values[target.name], value)
+            @values[target.name] = appended
+        else
+            @values[target.name] = registers.cloneValue(value)
+
+        registers.cloneValue @values['"']
+
+    set: name value ->
+
+        target = registers.target name
+
+        ⮐ false if not target
+        ⮐ false if target.name == '_'
+
+        @values[target.name] = registers.cloneValue value
+
+        true
+
+    setMacro: name keys ->
+
+        target = @macroTarget name
+
+        ⮐ false if not target
+
+        keys = keys.map (event) ->
+            { key: event.key  combo: event.combo  char: event.char }
+
+        if target.append and @values[target.name]
+            old = @values[target.name]
+            if old.keys
+                keys = old.keys.concat keys
+            else
+                keys = registers.keysForText(registers.textForValue(old)).concat keys
+
+        @values[target.name] =
+            lines:    registers.textForKeys(keys).split('\n')
+            linewise: false
+            keys:     keys
+
+        true
+
+    shiftNumbered: value ->
+
+        for i in 9..2
+            source = @values["#{i-1}"]
+            if source
+                @values["#{i}"] = registers.cloneValue source
+            else
+                delete @values["#{i}"]
+
+        @values['1'] = registers.cloneValue value
+
+    readClipboard: ->
+
+        text = clip.detect() == 'none' ? clip.text : clip.paste()
+
+        registers.recordForText text
+
+    writeClipboard: value ->
+
+        text = registers.textForValue value
+
+        if clip.detect() == 'none'
+            clip.text = text
+        else
+            clip.copy text
+
+export registers

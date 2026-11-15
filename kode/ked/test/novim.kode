@@ -474,7 +474,48 @@ mrange = lines x y m -> motion.range lines [x y] m
         s.executeNovim {operator:'repeat', count:1}
         s.novimRegister.lines ▸ ['cd']
         txt ""
-    
+
+  ▸ named registers
+
+        m = new novim s
+        key = c -> m.handleKey c {combo:c, char:c}
+        keys = s x y ->
+            for c in s
+                key c
+            cur x y if x?
+
+        s.loadLines belt.linesForText("one\ntwo")
+        s.setMainCursor 0 0
+
+        keys '"ayy'
+
+        s.registers.read('a').lines  ▸ ['one']
+        s.registers.read('a').linewise ▸ true
+        s.novimRegister.lines        ▸ ['one']
+
+        s.executeNovim {operator:'put', after:true, register:'a'}
+        txt "one\none\ntwo"
+
+        s.loadLines belt.linesForText("one\ntwo")
+        s.setMainCursor 0 0
+
+        keys '"ayy'
+        s.setMainCursor 0 1
+        keys '"Ayy'
+
+        s.registers.read('a').lines  ▸ ['one' 'two']
+
+        b = new state cells 'blackhole'
+        b.loadLines belt.linesForText("one\ntwo")
+        b.setMainCursor 0 0
+
+        b.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+        b.executeNovim {operator:'delete', motion:{kind:'line', count:1}, register:'_'}
+
+        kseg.str(b.s.lines)          ▸ 'two'
+        b.novimRegister.lines        ▸ ['one']
+        b.registers.read('1')        ▸ null
+
   ▸ clipboard registers
     
         copies = []

@@ -247,6 +247,8 @@ use ..           ◆ mode
 
         ⮐ true if empty line
 
+        @state.registers.set ':', { lines: [line], linewise: false }
+
         @state.stopVisual() if @state.visual
 
         parsed = belt.parseEx line
@@ -657,6 +659,7 @@ use ..           ◆ mode
             @state.setMainCursor rng[0] rng[1]
 
         novim.lastVind = text
+        @state.registers.set '/', { lines: [text], linewise: false }
 
         if empty text
             @state.setHighlights []
@@ -670,6 +673,7 @@ use ..           ◆ mode
     searchChanged: text ->
 
         novim.lastVind = text
+        @state.registers.set '/', { lines: [text], linewise: false }
 
         if empty text
             @state.setHighlights []
@@ -846,12 +850,12 @@ use ..           ◆ mode
 
         if @registerPending
             @registerPending = false
-            switch char
-                '+' '*'
-                    @register = 'clipboard'
-                '"' '0'
-                    @register = null
-                ➜ ⮐ @reset()
+            if char == '"'
+                @register = null
+            else if char.length == 1 and char in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_+*/:%.=#'
+                @register = char
+            else
+                ⮐ @reset()
             ⮐ @logPending()
 
         ⮐ 'unhandled' if char.length != 1 # ignore every other non text key

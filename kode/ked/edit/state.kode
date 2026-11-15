@@ -4,6 +4,7 @@ use ../../kxk ◆ clip
 use ../util   ◆ syntax config scaling
 use ./act     ◆ del insert select join indent multi main novim sort count range
 use ./tool    ◆ belt colorspans
+use ./register
 use           ◆ keys mode
 
 ■state□events
@@ -16,8 +17,10 @@ use           ◆ keys mode
     @: @cells name ->
 
         @name = name + '.state'
-        
-        @allowedModes = {}
+
+        @registers      = new register
+        @novimRegister  = null
+        @allowedModes   = {}
 
         for act in [del insert select join indent multi main novim sort count range]
             for k,v of act

@@ -1,5 +1,5 @@
 
-use ../../../kxk ▪ kseg clip post
+use ../../../kxk ▪ kseg post
 use ../mode      ◆ novim
 use ../tool      ◆ belt motion
 use ../../util   ◆ config
@@ -405,7 +405,7 @@ export
         if @visual == 'block'
             blockStarts = @visualPairs().map (p) -> [min(p[0][0] p[1][0]) min(p[0][1] p[1][1])]
 
-        @setNovimRegister rngs linewise register
+        @setNovimRegister rngs linewise register 'delete'
 
         @rememberVisual()
 
@@ -429,7 +429,7 @@ export
 
         linewise = @visual == 'line'
 
-        @setNovimRegister rngs linewise register
+        @setNovimRegister rngs linewise register 'yank'
         @flashYank rngs
 
         if @visual == 'block'
@@ -1020,7 +1020,7 @@ export
 
         if action == 'delete'
 
-            @setNovimRegister rngs change.linewise change.register
+            @setNovimRegister rngs change.linewise change.register 'delete'
 
             @begin()
 
@@ -1107,33 +1107,20 @@ export
 
     usesClipboard: register ->
 
-        ⮐ true  if register == 'clipboard'
+        register = '+' if register == 'clipboard'
+
+        ⮐ true  if register in ['+' '*']
         ⮐ false if register
 
         novim.clipboardEnabled()
 
     copyRegisterToClipboard: reg ->
 
-        text = reg.lines.join '\n'
-        text += '\n' if reg.linewise
-
-        if clip.detect() == 'none'
-            clip.text = text
-        else
-            clip.copy text
+        @registers.writeClipboard reg
 
     registerFromClipboard: ->
 
-        text = clip.detect() == 'none' ? clip.text : clip.paste()
-
-        ⮐ null if empty text
-
-        linewise = text.endsWith '\n'
-        lines    = text.split '\n'
-
-        lines.pop() if linewise
-
-        { lines: lines, linewise: linewise }
+        @registers.readClipboard()
 
     selectByMotion: spec ->
 
@@ -1157,16 +1144,20 @@ export
 
         rngs
 
-    setNovimRegister: rngs linewise register ->
+    setNovimRegister: rngs linewise register operation='yank' ->
 
         texts = []
 
         for rng in rngs
             texts.push belt.textForLineRange(@s.lines, rng)
 
-        @novimRegister = { lines: texts.join('\n').split('\n'), linewise: linewise }
+        value = { lines: texts.join('\n').split('\n'), linewise: linewise }
 
-        @copyRegisterToClipboard @novimRegister if @usesClipboard(register)
+        @novimRegister = value if register != '_'
+
+        @registers.write register value operation
+
+        @copyRegisterToClipboard value if @usesClipboard(register) and not register
 
     deleteByMotion: spec register ->
 
@@ -1176,7 +1167,7 @@ export
 
         linewise = motion.isLinewise spec
 
-        @setNovimRegister rngs linewise register
+        @setNovimRegister rngs linewise register 'delete'
 
         @begin()
 
@@ -1209,7 +1200,7 @@ export
 
         ⮐ if empty rngs
         
-        @setNovimRegister rngs linewise register
+        @setNovimRegister rngs linewise register 'yank'
         @flashYank rngs
 
         if not linewise
@@ -1238,11 +1229,16 @@ export
 
         post.emit 'redraw'
 
+    registerForPut: register ->
+
+        ⮐ @registers.read('+') if @usesClipboard(register)
+        ⮐ @registers.read(register) if register
+
+        @novimRegister
+
     putRegister: count after register ->
 
-        reg = @novimRegister
-
-        reg = @registerFromClipboard() if @usesClipboard(register)
+        reg = @registerForPut register
 
         ⮐ if not reg or empty reg.lines
 
