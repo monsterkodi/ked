@@ -185,6 +185,9 @@ use ..           ◆ mode
 
     completeReplace: char ->
 
+        if @state.visual
+            ⮐ @execute { operator: 'visualReplace', char: char }
+
         @execute novim.commands['r'](@countNumber() char)
 
     repeatFind: reverse=false ->

@@ -1471,6 +1471,70 @@ mrange = lines x y m -> motion.range lines [x y] m
         txt "abcdef"
         m.replace ▸ null
     
+  ▸ visual replace
+
+        s.loadLines belt.linesForText("abcd\nefgh\nijkl")
+        s.setMainCursor 1 0
+
+        m = new novim s
+        key = c -> m.handleKey c {combo:c, char:c}
+        keys = s x y ->
+            for c in s
+                key c
+            cur x y if x?
+
+        keys 'vllrX'
+        txt "aXXd\nefgh\nijkl"
+        s.visual ▸ null
+        cur 1 0
+
+        s.loadLines belt.linesForText("abcd\nefgh\nijkl")
+        s.setMainCursor 0 0
+
+        keys 'VjrX'
+        txt "XXXX\nXXXX\nijkl"
+        s.visual ▸ null
+        cur 0 0
+
+        s.loadLines belt.linesForText("abcd\nefgh\nijkl")
+        s.setMainCursor 1 0
+
+        key 'ctrl+v'
+        keys 'jllrX'
+        txt "aXXd\neXXh\nijkl"
+        s.visual ▸ null
+        cur 1 0
+
+        s.loadLines belt.linesForText("abcd\nefgh\nijkl")
+        s.setMainCursor 1 0
+
+        keys 'vllrXj.'
+        txt "aXXd\neXXh\nijkl"
+        cur 1 1
+
+        s.loadLines belt.linesForText("abcd\nefgh\nijkl")
+        s.setMainCursor 1 0
+
+        key 'ctrl+v'
+        keys 'jllrXj.'
+        txt "aXXd\neXXh\niXXl"
+        cur 1 1
+
+        s.loadLines belt.linesForText("abcd\nefgh")
+        s.setMainCursor 1 0
+
+        keys 'vllrXgv'
+        s.visual ▸ 'char'
+        s.s.selections ▸ [[1 0 3 0]]
+        cur 3 0
+
+        s.loadLines belt.linesForText("abcd\nefgh")
+        s.setMainCursor 1 0
+
+        keys 'vllrX'
+        s.undo()
+        txt "abcd\nefgh"
+
   ▸ toggle case
     
         s.loadLines belt.linesForText("abc")

@@ -13,7 +13,7 @@ export
         if cmd.motion
             cmd.motion.count ?= cmd.count
 
-        if @visual and cmd.operator not in ['move' 'matchBracket' 'visualDelete' 'visualYank' 'visualChange' 'visualSwap' 'visualTextObject' 'visualIndent' 'visualDeindent' 'visualBlockPrepend' 'visualBlockAppend']
+        if @visual and cmd.operator not in ['move' 'matchBracket' 'visualDelete' 'visualYank' 'visualChange' 'visualSwap' 'visualTextObject' 'visualIndent' 'visualDeindent' 'visualReplace' 'visualBlockPrepend' 'visualBlockAppend']
             @stopVisual()
 
         switch cmd.operator
@@ -29,6 +29,7 @@ export
             'openLine'              ➜ @openLine             cmd.count   cmd.after
             'insertAtIndent'        ➜ @insertAtIndent()
             'replace'               ➜ @replaceChars         cmd.char    cmd.count
+            'visualReplace'         ➜ @visualReplace        cmd.char
             'toggleCase'            ➜ @toggleCase           cmd.count
             'joinLinesVim'          ➜ @joinLinesVim         cmd.count
             'visualDelete'          ➜ @visualDelete         cmd.register
@@ -439,6 +440,38 @@ export
         @visual        = null
         @visualAnchors = []
 
+    visualReplace: text ->
+
+        rngs = @s.selections.asMutable()
+
+        ⮐ if empty rngs
+
+        if @visual == 'block'
+            pairs  = @visualPairs()
+            starts = pairs.map (p) -> [min(p[0][0] p[1][0]) min(p[0][1] p[1][1])]
+        else
+            starts = rngs.map (r) -> [r[0] r[1]]
+
+        shapes = @visualRepeatShapes()
+
+        @rememberVisual()
+
+        @begin()
+
+        changed = @replaceRanges rngs text
+
+        @end()
+
+        ⮐ if not changed
+
+        lines  = @s.lines
+        starts = starts.map (p) -> [min(p[0] kseg.width(lines[p[1]])) p[1]]
+
+        @setCursors starts main:@s.main
+        @stopVisual false false
+
+        @lastChange = { operator: 'visualReplace', char: text, shapes: shapes }
+
     visualBlockInsert: after ->
 
         rngs = @s.selections
@@ -671,6 +704,7 @@ export
             'insert'      ➜ @repeatInsert     count
             'put'         ➜ @repeatPut        count
             'visualDelete'➜ @repeatVisual     count 'delete'
+            'visualReplace'➜ @repeatVisual    count 'replace'
             else
                 spec = copy @lastChange.motion
 
@@ -807,6 +841,31 @@ export
             @deleteRanges rngs @allCursors() change.linewise
 
             @end()
+
+        else if action == 'replace'
+
+            @begin()
+
+            changed = @replaceRanges rngs change.char
+
+            @end()
+
+            ⮐ if not changed
+
+            if change.shapes.length and change.shapes[0].block
+                x = Infinity
+                y = Infinity
+                for rng in rngs
+                    x = min x rng[0]
+                    y = min y rng[1]
+                starts = [[x y]]
+            else
+                starts = rngs.map (r) -> [r[0] r[1]]
+
+            lines  = @s.lines
+            starts = starts.map (p) -> [min(p[0] kseg.width(lines[p[1]])) p[1]]
+
+            @setCursors starts main:@s.main
 
         else
 
@@ -1057,6 +1116,48 @@ export
     insertAtIndent: ->
 
         @startNovimInsert kind: 'insertAtIndent'
+
+    replaceRanges: rngs text ->
+
+        lines   = @s.lines.map (l) -> l
+        changed = false
+
+        for rng in rngs
+
+            [x1 y1 x2 y2] = rng
+
+            for y in y1..y2
+
+                continue if y < 0 or y >= lines.length
+
+                line  = lines[y]
+                width = kseg.width line
+
+                from = y == y1 ? x1 : 0
+                to   = y == y2 ? x2 : width
+
+                from = clamp 0 width from
+                to   = clamp 0 width to
+
+                continue if to <= from
+
+                si = kseg.indexAtWidth line from
+                ei = kseg.indexAtWidth line to
+
+                continue if ei <= si
+
+                repl = []
+                for i in 0...ei-si
+                    repl.push text
+
+                lines[y] = line[0...si].concat(repl).concat(line[ei..])
+                changed   = true
+
+        ⮐ false if not changed
+
+        @setLines lines
+
+        true
 
     replaceChars: text count ->
 
