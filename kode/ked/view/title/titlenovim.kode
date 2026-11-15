@@ -42,6 +42,7 @@ use ../base      ◆ view input
         post.on 'novim.error'        @onError
         post.on 'novim.ex.start'     @onExStart
         post.on 'novim.search.start' @onSearchStart
+        post.on 'novim.search.position' @onSearchPosition
 
     onExStart: start =>
         
@@ -134,6 +135,14 @@ use ../base      ◆ view input
                 t += ' ' + execute.motion.kind        
         @novimText = t
  
+    onSearchPosition: position =>
+
+        ⮐ if position.state != @stateName
+
+        @setColor 'bg' theme.novim.execute.bg
+        @setColor 'fg' theme.novim.execute.fg
+        @novimText = "#{position.current}/#{position.total}"
+
     onError: err => 
 
         @setColor 'bg' theme.novim.error.bg

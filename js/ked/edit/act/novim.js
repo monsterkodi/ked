@@ -21,7 +21,7 @@ export default {
         {
             cmd.motion.count = ((_14_29_=cmd.motion.count) != null ? _14_29_ : cmd.count)
         }
-        if (this.visual && !(_k_.in(cmd.operator,['move','matchBracket','visualDelete','visualYank','visualChange','visualSwap','visualTextObject','visualIndent','visualDeindent','visualReplace','visualBlockPrepend','visualBlockAppend'])))
+        if (this.visual && !(_k_.in(cmd.operator,['move','matchBracket','visualDelete','visualYank','visualChange','visualSwap','visualTextObject','visualIndent','visualDeindent','visualReplace','visualCase','visualBlockPrepend','visualBlockAppend'])))
         {
             this.stopVisual()
         }
@@ -43,10 +43,10 @@ export default {
                 return this.moveByMotion(cmd.motion,cmd.count)
     
             case 'searchNext':
-                return this.jumpByHighlight(cmd.count,cmd.text,true)
+                return this.jumpByHighlight(cmd.count,cmd.text,((!_k_.empty(cmd.forward) ? cmd.forward : novim.lastVindForward)))
     
             case 'searchPrev':
-                return this.jumpByHighlight(cmd.count,cmd.text,false)
+                return this.jumpByHighlight(cmd.count,cmd.text,((!_k_.empty(cmd.forward) ? cmd.forward : !novim.lastVindForward)))
     
             case 'searchWord':
                 return this.searchWord(cmd.count,cmd.forward)
@@ -65,6 +65,18 @@ export default {
     
             case 'visualReplace':
                 return this.visualReplace(cmd.char)
+    
+            case 'lowercase':
+                return this.caseByMotion(cmd.motion,'lower')
+    
+            case 'uppercase':
+                return this.caseByMotion(cmd.motion,'upper')
+    
+            case 'toggleCaseMotion':
+                return this.caseByMotion(cmd.motion,'toggle')
+    
+            case 'visualCase':
+                return this.visualCase(cmd.kind)
     
             case 'toggleCase':
                 return this.toggleCase(cmd.count)
@@ -116,6 +128,27 @@ export default {
         }
     
     },
+    searchPosition:function ()
+    {
+        var index, pos, span, spans
+    
+        spans = this.s.highlights
+        if (_k_.empty(spans))
+        {
+            return null
+        }
+        pos = this.mainCursor()
+        var list = _k_.list(spans)
+        for (index = 0; index < list.length; index++)
+        {
+            span = list[index]
+            if (span[0] === pos[0] && span[1] === pos[1])
+            {
+                return [index + 1,spans.length]
+            }
+        }
+        return [0,spans.length]
+    },
     jumpByHighlight:function (count, text, forward)
     {
         var after, before, i, pos, sameStart, span, target
@@ -132,13 +165,13 @@ export default {
             }
         }
         pos = this.mainCursor()
-        for (var _a_ = i = 0, _b_ = count; (_a_ <= _b_ ? i < count : i > count); (_a_ <= _b_ ? ++i : --i))
+        for (var _b_ = i = 0, _c_ = count; (_b_ <= _c_ ? i < count : i > count); (_b_ <= _c_ ? ++i : --i))
         {
             target = null
             var list = _k_.list(this.s.highlights)
-            for (var _c_ = 0; _c_ < list.length; _c_++)
+            for (var _d_ = 0; _d_ < list.length; _d_++)
             {
-                span = list[_c_]
+                span = list[_d_]
                 sameStart = span[1] === pos[1] && span[0] === pos[0]
                 if (sameStart)
                 {
@@ -170,10 +203,10 @@ export default {
     
         spans = []
         var list = _k_.list(belt.lineSpansForText(this.s.lines,text))
-        for (var _d_ = 0; _d_ < list.length; _d_++)
+        for (var _e_ = 0; _e_ < list.length; _e_++)
         {
-            span = list[_d_]
-            var _e_ = span; x1 = _e_[0]; y = _e_[1]; x2 = _e_[2]
+            span = list[_e_]
+            var _f_ = span; x1 = _f_[0]; y = _f_[1]; x2 = _f_[2]
     
             line = kseg.str(this.s.lines[y])
             before = (x1 > 0 ? line[x1 - 1] : '')
@@ -200,6 +233,7 @@ export default {
             return
         }
         novim.lastVind = text
+        novim.lastVindForward = forward
         spans = this.wordSpansForText(text)
         this.setHighlights(spans)
         rng = belt.rangeOfClosestWordToPos(this.s.lines,this.mainCursor())
@@ -211,13 +245,13 @@ export default {
         end = [rng[2],rng[3]]
         pos = this.mainCursor()
         moved = false
-        for (var _f_ = i = 0, _10_ = _k_.max(1,(count != null ? count : 1)); (_f_ <= _10_ ? i < _k_.max(1,(count != null ? count : 1)) : i > _k_.max(1,(count != null ? count : 1))); (_f_ <= _10_ ? ++i : --i))
+        for (var _10_ = i = 0, _11_ = _k_.max(1,(count != null ? count : 1)); (_10_ <= _11_ ? i < _k_.max(1,(count != null ? count : 1)) : i > _k_.max(1,(count != null ? count : 1))); (_10_ <= _11_ ? ++i : --i))
         {
             target = null
             var list = _k_.list(spans)
-            for (var _11_ = 0; _11_ < list.length; _11_++)
+            for (var _12_ = 0; _12_ < list.length; _12_++)
             {
-                span = list[_11_]
+                span = list[_12_]
                 after = span[1] > end[1] || (span[1] === end[1] && span[0] > end[0])
                 before = span[1] < start[1] || (span[1] === start[1] && span[0] < start[0])
                 if (forward && after)
@@ -253,9 +287,9 @@ export default {
         newCursors = []
         moved = false
         var list = _k_.list(cursors)
-        for (var _12_ = 0; _12_ < list.length; _12_++)
+        for (var _13_ = 0; _13_ < list.length; _13_++)
         {
-            c = list[_12_]
+            c = list[_13_]
             line = lines[c[1]]
             segi = kseg.indexAtWidth(line,c[0])
             found = null
@@ -374,9 +408,9 @@ export default {
         lineMap = belt.lineIndexMap(lv.lines,lines)
         mapped = function (pos)
         {
-            var x, y, _248_56_
+            var x, y, _267_56_
     
-            y = _k_.clamp(0,lines.length - 1,(((_248_56_=lineMap[pos[1]]) != null ? _248_56_ : pos[1])))
+            y = _k_.clamp(0,lines.length - 1,(((_267_56_=lineMap[pos[1]]) != null ? _267_56_ : pos[1])))
             x = _k_.clamp(0,kseg.width(lines[y]),pos[0])
             return [x,y]
         }
@@ -400,7 +434,7 @@ export default {
     },
     visualPairs:function ()
     {
-        var anchor, anchors, cursor, cursors, i, pair, pairs, unique, _272_32_
+        var anchor, anchors, cursor, cursors, i, pair, pairs, unique, _291_32_
     
         cursors = this.allCursors()
         anchors = this.visualAnchors
@@ -409,7 +443,7 @@ export default {
         for (i = 0; i < list.length; i++)
         {
             cursor = list[i]
-            anchor = ((_272_32_=anchors[i]) != null ? _272_32_ : [cursor[0],cursor[1]])
+            anchor = ((_291_32_=anchors[i]) != null ? _291_32_ : [cursor[0],cursor[1]])
             pairs.push([[anchor[0],anchor[1]],[cursor[0],cursor[1]]])
         }
         pairs.sort(function (a, b)
@@ -425,9 +459,9 @@ export default {
         })
         unique = []
         var list1 = _k_.list(pairs)
-        for (var _14_ = 0; _14_ < list1.length; _14_++)
+        for (var _15_ = 0; _15_ < list1.length; _15_++)
         {
-            pair = list1[_14_]
+            pair = list1[_15_]
             if (unique.length && belt.samePos(unique.slice(-1)[0][1],pair[1]))
             {
                 continue
@@ -450,7 +484,7 @@ export default {
         b = [cursor[0],cursor[1]]
         if (b[1] < a[1] || b[1] === a[1] && b[0] < a[0])
         {
-            var _15_ = [b,a]; a = _15_[0]; b = _15_[1]
+            var _16_ = [b,a]; a = _16_[0]; b = _16_[1]
     
         }
         return [a[0],a[1],b[0],b[1]]
@@ -488,7 +522,7 @@ export default {
         var rngs, width, xe, y
     
         rngs = []
-        for (var _16_ = y = y1, _17_ = y2; (_16_ <= _17_ ? y <= y2 : y >= y2); (_16_ <= _17_ ? ++y : --y))
+        for (var _17_ = y = y1, _18_ = y2; (_17_ <= _18_ ? y <= y2 : y >= y2); (_17_ <= _18_ ? ++y : --y))
         {
             if (y >= lines.length)
             {
@@ -545,9 +579,9 @@ export default {
         }
         rngs = []
         var list1 = _k_.list(pairs)
-        for (var _19_ = 0; _19_ < list1.length; _19_++)
+        for (var _1a_ = 0; _1a_ < list1.length; _1a_++)
         {
-            pair = list1[_19_]
+            pair = list1[_1a_]
             if (this.visual === 'block')
             {
                 rngs = rngs.concat(this.visualBlockRanges(pair[0],pair[1]))
@@ -705,9 +739,9 @@ export default {
             y1 = Infinity
             y2 = -1
             var list = _k_.list(this.s.selections)
-            for (var _1a_ = 0; _1a_ < list.length; _1a_++)
+            for (var _1b_ = 0; _1b_ < list.length; _1b_++)
             {
-                rng = list[_1a_]
+                rng = list[_1b_]
                 y1 = _k_.min(y1,rng[1])
                 y2 = _k_.max(y2,rng[3])
             }
@@ -722,9 +756,9 @@ export default {
                 y1 = Infinity
                 y2 = -1
                 var list1 = _k_.list(this.s.selections)
-                for (var _1b_ = 0; _1b_ < list1.length; _1b_++)
+                for (var _1c_ = 0; _1c_ < list1.length; _1c_++)
                 {
-                    rng = list1[_1b_]
+                    rng = list1[_1c_]
                     x1 = _k_.min(x1,rng[0])
                     x2 = _k_.max(x2,rng[2])
                     y1 = _k_.min(y1,rng[1])
@@ -736,9 +770,9 @@ export default {
         else
         {
             var list2 = _k_.list(this.s.selections)
-            for (var _1c_ = 0; _1c_ < list2.length; _1c_++)
+            for (var _1d_ = 0; _1d_ < list2.length; _1d_++)
             {
-                rng = list2[_1c_]
+                rng = list2[_1d_]
                 shapes.push({linewise:false,x1:0,y1:0,x2:rng[2] - rng[0],y2:rng[3] - rng[1]})
             }
         }
@@ -780,9 +814,9 @@ export default {
         }
         rngs = []
         var list = _k_.list(this.allCursors())
-        for (var _1e_ = 0; _1e_ < list.length; _1e_++)
+        for (var _1f_ = 0; _1f_ < list.length; _1f_++)
         {
-            cursor = list[_1e_]
+            cursor = list[_1f_]
             rng = motion.range(this.s.lines,cursor,spec)
             if (!rng)
             {
@@ -815,9 +849,9 @@ export default {
     
         indices = []
         var list = _k_.list(this.allCursors())
-        for (var _1f_ = 0; _1f_ < list.length; _1f_++)
+        for (var _20_ = 0; _20_ < list.length; _20_++)
         {
-            cursor = list[_1f_]
+            cursor = list[_20_]
             rng = motion.range(this.s.lines,cursor,spec)
             if (!rng)
             {
@@ -844,17 +878,17 @@ export default {
         indices = Array.from(new Set(indices))
         indents = {}
         var list = _k_.list(indices)
-        for (var _20_ = 0; _20_ < list.length; _20_++)
+        for (var _21_ = 0; _21_ < list.length; _21_++)
         {
-            index = list[_20_]
+            index = list[_21_]
             indents[index] = belt.numIndent(this.s.lines[index])
         }
         this.indentAtIndices(indices,deindent,((count != null ? count : 1)))
         anchors = []
         var list1 = _k_.list(this.visualAnchors)
-        for (var _21_ = 0; _21_ < list1.length; _21_++)
+        for (var _22_ = 0; _22_ < list1.length; _22_++)
         {
-            anchor = list1[_21_]
+            anchor = list1[_22_]
             oldIndent = indents[anchor[1]]
             if ((oldIndent != null))
             {
@@ -885,16 +919,16 @@ export default {
         }
         n = _k_.max(1,((times != null ? times : 1)))
         this.begin()
-        for (var _22_ = i = 0, _23_ = n; (_22_ <= _23_ ? i < n : i > n); (_22_ <= _23_ ? ++i : --i))
+        for (var _23_ = i = 0, _24_ = n; (_23_ <= _24_ ? i < n : i > n); (_23_ <= _24_ ? ++i : --i))
         {
             if (deindent)
             {
-                var _24_ = belt.deindentLineRangesAndPositionsAtIndices(this.s.lines,this.s.selections,this.s.cursors,indices); lines = _24_[0]; selections = _24_[1]; cursors = _24_[2]
+                var _25_ = belt.deindentLineRangesAndPositionsAtIndices(this.s.lines,this.s.selections,this.s.cursors,indices); lines = _25_[0]; selections = _25_[1]; cursors = _25_[2]
     
             }
             else
             {
-                var _25_ = belt.indentLineRangesAndPositionsAtIndices(this.s.lines,this.s.selections,this.s.cursors,indices); lines = _25_[0]; selections = _25_[1]; cursors = _25_[2]
+                var _26_ = belt.indentLineRangesAndPositionsAtIndices(this.s.lines,this.s.selections,this.s.cursors,indices); lines = _26_[0]; selections = _26_[1]; cursors = _26_[2]
     
             }
             this.setLines(lines)
@@ -910,10 +944,10 @@ export default {
     },
     startNovimInsert:function (spec)
     {
-        var _660_26_
+        var _679_26_
     
         this.novimInsert = _k_.copy(spec)
-        this.novimInsert.text = ((_660_26_=this.novimInsert.text) != null ? _660_26_ : '')
+        this.novimInsert.text = ((_679_26_=this.novimInsert.text) != null ? _679_26_ : '')
         switch (spec.kind)
         {
             case 'append':
@@ -936,7 +970,7 @@ export default {
     
         n = _k_.max(1,((count != null ? count : 1)))
         this.novimInsert = {kind:'replace',text:'',count:n,undo:[]}
-        for (var _26_ = i = 0, _27_ = this.s.cursors.length; (_26_ <= _27_ ? i < this.s.cursors.length : i > this.s.cursors.length); (_26_ <= _27_ ? ++i : --i))
+        for (var _27_ = i = 0, _28_ = this.s.cursors.length; (_27_ <= _28_ ? i < this.s.cursors.length : i > this.s.cursors.length); (_27_ <= _28_ ? ++i : --i))
         {
             this.novimInsert.undo.push([])
         }
@@ -998,7 +1032,7 @@ export default {
     },
     replaceNovimBackspace:function ()
     {
-        var c, changed, cursors, hist, i, line, lines, newLine, ni, rec, si, _750_22_
+        var c, changed, cursors, hist, i, line, lines, newLine, ni, rec, si, _769_22_
     
         ni = this.novimInsert
         if (!ni || ni.kind !== 'replace')
@@ -1088,7 +1122,7 @@ export default {
     },
     finishNovimInsert:function ()
     {
-        var i, insert, n, text, _795_36_
+        var i, insert, n, text, _814_36_
     
         if (!this.novimInsert)
         {
@@ -1098,13 +1132,13 @@ export default {
         this.novimInsert = null
         if (insert.kind === 'replace')
         {
-            n = _k_.max(1,(((_795_36_=insert.count) != null ? _795_36_ : 1)))
+            n = _k_.max(1,(((_814_36_=insert.count) != null ? _814_36_ : 1)))
             if (n > 1 && !_k_.empty(insert.text) && !(_k_.in('\n',insert.text)))
             {
                 this.replaceTextAtCursors(insert.text,(n - 1))
             }
             text = ''
-            for (var _2a_ = i = 0, _2b_ = n; (_2a_ <= _2b_ ? i < n : i > n); (_2a_ <= _2b_ ? ++i : --i))
+            for (var _2b_ = i = 0, _2c_ = n; (_2b_ <= _2c_ ? i < n : i > n); (_2b_ <= _2c_ ? ++i : --i))
             {
                 text += insert.text
             }
@@ -1152,8 +1186,14 @@ export default {
             case 'visualReplace':
                 return this.repeatVisual(count,'replace')
     
+            case 'visualCase':
+                return this.repeatVisual(count,'case')
+    
             case 'replaceMode':
                 return this.repeatReplaceMode(count)
+    
+            case 'case':
+                return this.repeatCase(count)
     
             default:
                 spec = _k_.copy(this.lastChange.motion)
@@ -1167,14 +1207,25 @@ export default {
     },
     repeatIndent:function (count, deindent)
     {
-        var spec, _829_40_
+        var spec, _850_40_
     
-        spec = _k_.copy((((_829_40_=this.lastChange.motion) != null ? _829_40_ : {kind:'line',count:1})))
+        spec = _k_.copy((((_850_40_=this.lastChange.motion) != null ? _850_40_ : {kind:'line',count:1})))
         if (count > 1)
         {
             spec.count = count
         }
         return this.indentByMotion(spec,deindent)
+    },
+    repeatCase:function (count)
+    {
+        var spec
+    
+        spec = _k_.copy(this.lastChange.motion)
+        if (count > 1)
+        {
+            spec.count = count
+        }
+        return this.caseByMotion(spec,this.lastChange.kind)
     },
     repeatReplaceMode:function (count)
     {
@@ -1209,10 +1260,10 @@ export default {
         cursors = this.allCursors()
         changed = false
         var list = _k_.list(cursors)
-        for (var _2c_ = 0; _2c_ < list.length; _2c_++)
+        for (var _2d_ = 0; _2d_ < list.length; _2d_++)
         {
-            c = list[_2c_]
-            for (var _2d_ = k = 0, _2e_ = n; (_2d_ <= _2e_ ? k < n : k > n); (_2d_ <= _2e_ ? ++k : --k))
+            c = list[_2d_]
+            for (var _2e_ = k = 0, _2f_ = n; (_2e_ <= _2f_ ? k < n : k > n); (_2e_ <= _2f_ ? ++k : --k))
             {
                 line = lines[c[1]]
                 width = kseg.width(line)
@@ -1246,7 +1297,7 @@ export default {
     
         insert = this.lastChange.insert
         n = _k_.max(1,((count != null ? count : 1)))
-        for (var _2f_ = i = 0, _30_ = n; (_2f_ <= _30_ ? i < n : i > n); (_2f_ <= _30_ ? ++i : --i))
+        for (var _30_ = i = 0, _31_ = n; (_30_ <= _31_ ? i < n : i > n); (_30_ <= _31_ ? ++i : --i))
         {
             this.replayInsert(insert)
         }
@@ -1310,11 +1361,11 @@ export default {
     },
     putOpenLines:function (insert, after)
     {
-        var i, n, _924_32_
+        var i, n, _953_32_
     
-        n = _k_.max(1,(((_924_32_=insert.count) != null ? _924_32_ : 1)))
+        n = _k_.max(1,(((_953_32_=insert.count) != null ? _953_32_ : 1)))
         this.begin()
-        for (var _31_ = i = 0, _32_ = n; (_31_ <= _32_ ? i < n : i > n); (_31_ <= _32_ ? ++i : --i))
+        for (var _32_ = i = 0, _33_ = n; (_32_ <= _33_ ? i < n : i > n); (_32_ <= _33_ ? ++i : --i))
         {
             this.putLines([''],after)
         }
@@ -1352,14 +1403,14 @@ export default {
         var i, n
     
         n = _k_.max(1,((count != null ? count : 1)))
-        for (var _33_ = i = 0, _34_ = n; (_33_ <= _34_ ? i < n : i > n); (_33_ <= _34_ ? ++i : --i))
+        for (var _34_ = i = 0, _35_ = n; (_34_ <= _35_ ? i < n : i > n); (_34_ <= _35_ ? ++i : --i))
         {
             this.replayVisual(this.lastChange,action)
         }
     },
     replayVisual:function (change, action)
     {
-        var changed, cursor, cursors, i, lines, rng, rngs, shape, starts, x, y, _974_66_
+        var changed, cursor, cursors, i, lines, rng, rngs, shape, starts, x, y, _1003_66_
     
         rngs = []
         cursors = this.allCursors()
@@ -1371,7 +1422,7 @@ export default {
         for (i = 0; i < list.length; i++)
         {
             cursor = list[i]
-            shape = ((_974_66_=change.shapes[_k_.min(i,change.shapes.length - 1)]) != null ? _974_66_ : change.shapes[0])
+            shape = ((_1003_66_=change.shapes[_k_.min(i,change.shapes.length - 1)]) != null ? _1003_66_ : change.shapes[0])
             if (!shape)
             {
                 continue
@@ -1379,9 +1430,9 @@ export default {
             if (shape.block)
             {
                 var list1 = _k_.list(this.blockRangesForShape(shape,cursor))
-                for (var _36_ = 0; _36_ < list1.length; _36_++)
+                for (var _37_ = 0; _37_ < list1.length; _37_++)
                 {
-                    rng = list1[_36_]
+                    rng = list1[_37_]
                     rngs.push(rng)
                 }
                 continue
@@ -1422,9 +1473,41 @@ export default {
                 x = Infinity
                 y = Infinity
                 var list2 = _k_.list(rngs)
-                for (var _37_ = 0; _37_ < list2.length; _37_++)
+                for (var _38_ = 0; _38_ < list2.length; _38_++)
                 {
-                    rng = list2[_37_]
+                    rng = list2[_38_]
+                    x = _k_.min(x,rng[0])
+                    y = _k_.min(y,rng[1])
+                }
+                starts = [[x,y]]
+            }
+            else
+            {
+                starts = rngs.map(function (r)
+                {
+                    return [r[0],r[1]]
+                })
+            }
+            lines = this.s.lines
+            starts = starts.map(function (p)
+            {
+                return [_k_.min(p[0],kseg.width(lines[p[1]])),p[1]]
+            })
+            return this.setCursors(starts,{main:this.s.main})
+        }
+        else if (action === 'case')
+        {
+            this.begin()
+            this.changeCaseInRanges(rngs,change.kind)
+            this.end()
+            if (change.shapes.length && change.shapes[0].block)
+            {
+                x = Infinity
+                y = Infinity
+                var list3 = _k_.list(rngs)
+                for (var _39_ = 0; _39_ < list3.length; _39_++)
+                {
+                    rng = list3[_39_]
                     x = _k_.min(x,rng[0])
                     y = _k_.min(y,rng[1])
                 }
@@ -1526,9 +1609,9 @@ export default {
         lines = this.s.lines
         rngs = []
         var list = _k_.list(this.allCursors())
-        for (var _38_ = 0; _38_ < list.length; _38_++)
+        for (var _3a_ = 0; _3a_ < list.length; _3a_++)
         {
-            cursor = list[_38_]
+            cursor = list[_3a_]
             rng = motion.range(lines,cursor,spec)
             if (!rng)
             {
@@ -1554,9 +1637,9 @@ export default {
     
         texts = []
         var list = _k_.list(rngs)
-        for (var _39_ = 0; _39_ < list.length; _39_++)
+        for (var _3b_ = 0; _3b_ < list.length; _3b_++)
         {
-            rng = list[_39_]
+            rng = list[_3b_]
             texts.push(belt.textForLineRange(this.s.lines,rng))
         }
         this.novimRegister = {lines:texts.join('\n').split('\n'),linewise:linewise}
@@ -1632,7 +1715,7 @@ export default {
     },
     flashYank:function (rngs)
     {
-        var flashMs, _1173_29_, _1173_36_, _1173_50_
+        var flashMs, _1225_29_, _1225_36_, _1225_50_
     
         if (_k_.empty(rngs))
         {
@@ -1642,7 +1725,7 @@ export default {
         {
             clearTimeout(this.yankFlashTimer)
         }
-        flashMs = ((_1173_50_=((_1173_29_=config.data) != null ? (_1173_36_=_1173_29_.novim) != null ? _1173_36_.yankFlashMs : undefined : undefined)) != null ? _1173_50_ : 500)
+        flashMs = ((_1225_50_=((_1225_29_=config.data) != null ? (_1225_36_=_1225_29_.novim) != null ? _1225_36_.yankFlashMs : undefined : undefined)) != null ? _1225_50_ : 500)
         this.yankFlash = rngs
         return this.yankFlashTimer = setTimeout(((function ()
         {
@@ -1685,7 +1768,7 @@ export default {
         var i
     
         this.begin()
-        for (var _3b_ = i = 0, _3c_ = count; (_3b_ <= _3c_ ? i < count : i > count); (_3b_ <= _3c_ ? ++i : --i))
+        for (var _3d_ = i = 0, _3e_ = count; (_3d_ <= _3e_ ? i < count : i > count); (_3d_ <= _3e_ ? ++i : --i))
         {
             if (reg.linewise)
             {
@@ -1729,9 +1812,9 @@ export default {
         newCursors = []
         offset = 0
         var list1 = _k_.list(order)
-        for (var _3e_ = 0; _3e_ < list1.length; _3e_++)
+        for (var _40_ = 0; _40_ < list1.length; _40_++)
         {
-            idx = list1[_3e_]
+            idx = list1[_40_]
             y = cursors[idx][1] + offset
             at = (after ? y + 1 : y)
             lines = lines.slice(0, typeof at === 'number' ? at : -1).concat(segls).concat(lines.slice(at))
@@ -1751,9 +1834,9 @@ export default {
         cursors = this.allCursors()
         posl = []
         var list = _k_.list(cursors)
-        for (var _3f_ = 0; _3f_ < list.length; _3f_++)
+        for (var _41_ = 0; _41_ < list.length; _41_++)
         {
-            c = list[_3f_]
+            c = list[_41_]
             width = kseg.width(lines[c[1]])
             x = _k_.min(c[0],width)
             if (!after)
@@ -1762,7 +1845,7 @@ export default {
             }
             posl.push([x,c[1]])
         }
-        var _40_ = belt.insertTextAtPositions(lines,text,posl); newLines = _40_[0]; newPosl = _40_[1]
+        var _42_ = belt.insertTextAtPositions(lines,text,posl); newLines = _42_[0]; newPosl = _42_[1]
     
         this.setLines(newLines)
         return this.setCursors(newPosl)
@@ -1786,12 +1869,12 @@ export default {
         })
         changed = false
         var list = _k_.list(rngs)
-        for (var _41_ = 0; _41_ < list.length; _41_++)
+        for (var _43_ = 0; _43_ < list.length; _43_++)
         {
-            rng = list[_41_]
-            var _42_ = rng; x1 = _42_[0]; y1 = _42_[1]; x2 = _42_[2]; y2 = _42_[3]
+            rng = list[_43_]
+            var _44_ = rng; x1 = _44_[0]; y1 = _44_[1]; x2 = _44_[2]; y2 = _44_[3]
     
-            for (var _43_ = y = y1, _44_ = y2; (_43_ <= _44_ ? y <= y2 : y >= y2); (_43_ <= _44_ ? ++y : --y))
+            for (var _45_ = y = y1, _46_ = y2; (_45_ <= _46_ ? y <= y2 : y >= y2); (_45_ <= _46_ ? ++y : --y))
             {
                 if (y < 0 || y >= lines.length)
                 {
@@ -1814,7 +1897,7 @@ export default {
                     continue
                 }
                 repl = []
-                for (var _45_ = i = 0, _46_ = ei - si; (_45_ <= _46_ ? i < ei - si : i > ei - si); (_45_ <= _46_ ? ++i : --i))
+                for (var _47_ = i = 0, _48_ = ei - si; (_47_ <= _48_ ? i < ei - si : i > ei - si); (_47_ <= _48_ ? ++i : --i))
                 {
                     repl.push(text)
                 }
@@ -1841,9 +1924,9 @@ export default {
         cursors = this.allCursors()
         changed = false
         var list = _k_.list(cursors)
-        for (var _47_ = 0; _47_ < list.length; _47_++)
+        for (var _49_ = 0; _49_ < list.length; _49_++)
         {
-            c = list[_47_]
+            c = list[_49_]
             line = lines[c[1]].asMutable()
             segi = kseg.indexAtWidth(line,c[0])
             if (segi + n > line.length)
@@ -1851,7 +1934,7 @@ export default {
                 continue
             }
             repl = []
-            for (var _48_ = i = 0, _49_ = n; (_48_ <= _49_ ? i < n : i > n); (_48_ <= _49_ ? ++i : --i))
+            for (var _4a_ = i = 0, _4b_ = n; (_4a_ <= _4b_ ? i < n : i > n); (_4a_ <= _4b_ ? ++i : --i))
             {
                 repl.push(text)
             }
@@ -1870,6 +1953,148 @@ export default {
         this.end()
         return this.lastChange = {operator:'replace',char:text,count:n}
     },
+    changeCaseInRanges:function (rngs, kind)
+    {
+        var changed, ei, from, i, line, lines, lower, newSeg, rng, seg, si, to, upper, width, x1, x2, y, y1, y2
+    
+        lines = this.s.lines.map(function (l)
+        {
+            return l
+        })
+        changed = false
+        var list = _k_.list(rngs)
+        for (var _4c_ = 0; _4c_ < list.length; _4c_++)
+        {
+            rng = list[_4c_]
+            var _4d_ = rng; x1 = _4d_[0]; y1 = _4d_[1]; x2 = _4d_[2]; y2 = _4d_[3]
+    
+            for (var _4e_ = y = y1, _4f_ = y2; (_4e_ <= _4f_ ? y <= y2 : y >= y2); (_4e_ <= _4f_ ? ++y : --y))
+            {
+                if (y < 0 || y >= lines.length)
+                {
+                    continue
+                }
+                line = lines[y].asMutable()
+                width = kseg.width(line)
+                from = (y === y1 ? x1 : 0)
+                to = (y === y2 ? x2 : width)
+                from = _k_.clamp(0,width,from)
+                to = _k_.clamp(0,width,to)
+                if (to <= from)
+                {
+                    continue
+                }
+                si = kseg.indexAtWidth(line,from)
+                ei = kseg.indexAtWidth(line,to)
+                if (ei <= si)
+                {
+                    continue
+                }
+                for (var _50_ = i = si, _51_ = ei; (_50_ <= _51_ ? i < ei : i > ei); (_50_ <= _51_ ? ++i : --i))
+                {
+                    seg = line[i]
+                    upper = seg.toUpperCase()
+                    lower = seg.toLowerCase()
+                    if (kind === 'lower')
+                    {
+                        newSeg = lower
+                    }
+                    else if (kind === 'upper')
+                    {
+                        newSeg = upper
+                    }
+                    else
+                    {
+                        newSeg = (upper !== seg ? upper : lower)
+                    }
+                    if (newSeg !== seg)
+                    {
+                        line[i] = newSeg
+                        changed = true
+                    }
+                }
+                lines[y] = line
+            }
+        }
+        if (!changed)
+        {
+            return false
+        }
+        this.setLines(lines)
+        return true
+    },
+    caseByMotion:function (spec, kind)
+    {
+        var cursor, rng, rngs, starts
+    
+        rngs = []
+        var list = _k_.list(this.allCursors())
+        for (var _52_ = 0; _52_ < list.length; _52_++)
+        {
+            cursor = list[_52_]
+            rng = motion.range(this.s.lines,cursor,spec)
+            if (!rng)
+            {
+                continue
+            }
+            if (belt.isEmptyRange(rng))
+            {
+                continue
+            }
+            rngs.push(rng)
+        }
+        if (_k_.empty(rngs))
+        {
+            return
+        }
+        this.begin()
+        this.changeCaseInRanges(rngs,kind)
+        starts = rngs.map(function (r)
+        {
+            return [r[0],r[1]]
+        })
+        this.setCursors(starts,{main:this.s.main})
+        this.end()
+        return this.lastChange = {operator:'case',kind:kind,motion:_k_.copy((spec))}
+    },
+    visualCase:function (kind)
+    {
+        var lines, pairs, rngs, shapes, starts
+    
+        rngs = this.s.selections.asMutable()
+        if (_k_.empty(rngs))
+        {
+            return
+        }
+        if (this.visual === 'block')
+        {
+            pairs = this.visualPairs()
+            starts = pairs.map(function (p)
+            {
+                return [_k_.min(p[0][0],p[1][0]),_k_.min(p[0][1],p[1][1])]
+            })
+        }
+        else
+        {
+            starts = rngs.map(function (r)
+            {
+                return [r[0],r[1]]
+            })
+        }
+        shapes = this.visualRepeatShapes()
+        this.rememberVisual()
+        this.begin()
+        this.changeCaseInRanges(rngs,kind)
+        this.end()
+        lines = this.s.lines
+        starts = starts.map(function (p)
+        {
+            return [_k_.min(p[0],kseg.width(lines[p[1]])),p[1]]
+        })
+        this.setCursors(starts,{main:this.s.main})
+        this.stopVisual(false,false)
+        return this.lastChange = {operator:'visualCase',kind:kind,shapes:shapes}
+    },
     toggleCase:function (count)
     {
         var c, changed, cursors, i, lasti, line, lines, n, seg, segi, upper
@@ -1882,9 +2107,9 @@ export default {
         cursors = this.allCursors()
         changed = false
         var list = _k_.list(cursors)
-        for (var _4a_ = 0; _4a_ < list.length; _4a_++)
+        for (var _53_ = 0; _53_ < list.length; _53_++)
         {
-            c = list[_4a_]
+            c = list[_53_]
             line = lines[c[1]].asMutable()
             segi = kseg.indexAtWidth(line,c[0])
             if (segi >= line.length)
@@ -1892,7 +2117,7 @@ export default {
                 continue
             }
             lasti = _k_.min(line.length - 1,segi + n - 1)
-            for (var _4b_ = i = segi, _4c_ = lasti; (_4b_ <= _4c_ ? i <= lasti : i >= lasti); (_4b_ <= _4c_ ? ++i : --i))
+            for (var _54_ = i = segi, _55_ = lasti; (_54_ <= _55_ ? i <= lasti : i >= lasti); (_54_ <= _55_ ? ++i : --i))
             {
                 seg = line[i]
                 upper = seg.toUpperCase()
@@ -1924,9 +2149,9 @@ export default {
         cursors = this.allCursors()
         starts = []
         var list = _k_.list(cursors)
-        for (var _4d_ = 0; _4d_ < list.length; _4d_++)
+        for (var _56_ = 0; _56_ < list.length; _56_++)
         {
-            c = list[_4d_]
+            c = list[_56_]
             if (c[1] < lines.length - 1 && !(_k_.in(c[1],starts)))
             {
                 starts.push(c[1])
@@ -1942,9 +2167,9 @@ export default {
         })
         blocks = []
         var list1 = _k_.list(starts)
-        for (var _4e_ = 0; _4e_ < list1.length; _4e_++)
+        for (var _57_ = 0; _57_ < list1.length; _57_++)
         {
-            y = list1[_4e_]
+            y = list1[_57_]
             if (blocks.length && y < blocks.slice(-1)[0][0] + blocks.slice(-1)[0][1])
             {
                 continue
@@ -1952,23 +2177,23 @@ export default {
             blocks.push([y,_k_.min(n,lines.length - y),0])
         }
         var list2 = _k_.list(blocks)
-        for (var _4f_ = 0; _4f_ < list2.length; _4f_++)
+        for (var _58_ = 0; _58_ < list2.length; _58_++)
         {
-            block = list2[_4f_]
-            var _50_ = block; y = _50_[0]; take = _50_[1]
+            block = list2[_58_]
+            var _59_ = block; y = _59_[0]; take = _59_[1]
     
             first = kseg.str(lines[y]).replace(/\s+$/,'')
             parts = [first]
-            for (var _51_ = j = 1, _52_ = take; (_51_ <= _52_ ? j < take : j > take); (_51_ <= _52_ ? ++j : --j))
+            for (var _5a_ = j = 1, _5b_ = take; (_5a_ <= _5b_ ? j < take : j > take); (_5a_ <= _5b_ ? ++j : --j))
             {
                 text = kseg.str(lines[y + j]).replace(/^\s+/,'').replace(/\s+$/,'')
                 parts.push(text)
             }
             joined = ''
             var list3 = _k_.list(parts)
-            for (var _53_ = 0; _53_ < list3.length; _53_++)
+            for (var _5c_ = 0; _5c_ < list3.length; _5c_++)
             {
-                part = list3[_53_]
+                part = list3[_5c_]
                 if (_k_.empty(part))
                 {
                     continue
@@ -1980,18 +2205,18 @@ export default {
         }
         newCursors = []
         var list4 = _k_.list(cursors)
-        for (var _54_ = 0; _54_ < list4.length; _54_++)
+        for (var _5d_ = 0; _5d_ < list4.length; _5d_++)
         {
-            c = list4[_54_]
-            var _55_ = c; x = _55_[0]; y = _55_[1]
+            c = list4[_5d_]
+            var _5e_ = c; x = _5e_[0]; y = _5e_[1]
     
             ny = y
             nx = x
             var list5 = _k_.list(blocks)
-            for (var _56_ = 0; _56_ < list5.length; _56_++)
+            for (var _5f_ = 0; _5f_ < list5.length; _5f_++)
             {
-                block = list5[_56_]
-                var _57_ = block; by = _57_[0]; take = _57_[1]; seam = _57_[2]
+                block = list5[_5f_]
+                var _60_ = block; by = _60_[0]; take = _60_[1]; seam = _60_[2]
     
                 if ((by <= y && y < by + take))
                 {
@@ -2014,9 +2239,9 @@ export default {
     },
     moveByMotion:function (spec, count = 1)
     {
-        var i, n, _1463_23_
+        var i, n, _1626_23_
     
-        n = ((_1463_23_=spec.count) != null ? _1463_23_ : count)
+        n = ((_1626_23_=spec.count) != null ? _1626_23_ : count)
         if (spec.kind === 'charFind')
         {
             this.moveByCharFind(spec,n)
@@ -2031,7 +2256,7 @@ export default {
         }
         else
         {
-            for (var _58_ = i = 1, _59_ = n; (_58_ <= _59_ ? i <= n : i >= n); (_58_ <= _59_ ? ++i : --i))
+            for (var _61_ = i = 1, _62_ = n; (_61_ <= _62_ ? i <= n : i >= n); (_61_ <= _62_ ? ++i : --i))
             {
                 this.moveCursors(spec.kind)
             }
@@ -2072,9 +2297,9 @@ export default {
         spans = []
         forward = spec.forward !== false
         var list = _k_.list(motion.charFindLandings(this.s.lines,spec.target,spec.till,forward))
-        for (var _5b_ = 0; _5b_ < list.length; _5b_++)
+        for (var _64_ = 0; _64_ < list.length; _64_++)
         {
-            p = list[_5b_]
+            p = list[_64_]
             width = kseg.width(this.s.lines[p[1]])
             if (p[0] < width)
             {
@@ -2090,9 +2315,9 @@ export default {
         cursors = this.allCursors()
         changed = false
         var list = _k_.list(cursors)
-        for (var _5c_ = 0; _5c_ < list.length; _5c_++)
+        for (var _65_ = 0; _65_ < list.length; _65_++)
         {
-            c = list[_5c_]
+            c = list[_65_]
             width = kseg.width(this.s.lines[c[1]])
             x = _k_.clamp(0,width,c[0])
             if (x !== c[0])
@@ -2111,7 +2336,7 @@ export default {
         var i, n
     
         n = _k_.max(1,((count != null ? count : 1)))
-        for (var _5d_ = i = 0, _5e_ = n; (_5d_ <= _5e_ ? i < n : i > n); (_5d_ <= _5e_ ? ++i : --i))
+        for (var _66_ = i = 0, _67_ = n; (_66_ <= _67_ ? i < n : i > n); (_66_ <= _67_ ? ++i : --i))
         {
             this.undo()
         }
@@ -2121,7 +2346,7 @@ export default {
         var entries, line, res, y
     
         entries = []
-        for (var _5f_ = y = y1, _60_ = y2; (_5f_ <= _60_ ? y <= y2 : y >= y2); (_5f_ <= _60_ ? ++y : --y))
+        for (var _68_ = y = y1, _69_ = y2; (_68_ <= _69_ ? y <= y2 : y >= y2); (_68_ <= _69_ ? ++y : --y))
         {
             if (y < 0 || y >= this.s.lines.length)
             {
@@ -2144,13 +2369,13 @@ export default {
         rngs = []
         cursors = []
         var list = _k_.list(entries)
-        for (var _61_ = 0; _61_ < list.length; _61_++)
+        for (var _6a_ = 0; _6a_ < list.length; _6a_++)
         {
-            entry = list[_61_]
+            entry = list[_6a_]
             var list1 = _k_.list(entry.matches)
-            for (var _62_ = 0; _62_ < list1.length; _62_++)
+            for (var _6b_ = 0; _6b_ < list1.length; _6b_++)
             {
-                m = list1[_62_]
+                m = list1[_6b_]
                 rngs.push([m.x1,entry.y,m.x2,entry.y])
                 cursors.push([m.x2,entry.y])
             }
@@ -2174,14 +2399,14 @@ export default {
         total = 0
         last = null
         var list = _k_.list(entries)
-        for (var _63_ = 0; _63_ < list.length; _63_++)
+        for (var _6c_ = 0; _6c_ < list.length; _6c_++)
         {
-            entry = list[_63_]
+            entry = list[_6c_]
             lines[entry.y] = belt.joinSubstitution(entry.line,entry.matches,spec.tokens)
             var list1 = _k_.list(entry.matches)
-            for (var _64_ = 0; _64_ < list1.length; _64_++)
+            for (var _6d_ = 0; _6d_ < list1.length; _6d_++)
             {
-                m = list1[_64_]
+                m = list1[_6d_]
                 total += 1
                 last = [m.x1,entry.y]
             }
@@ -2214,5 +2439,5 @@ export default {
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibm92aW0uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvYWN0L25vdmltLmtvZGUiXSwibWFwcGluZ3MiOiI7O09BQ2EsVUFBQTtJQUFNO0lBQUs7SUFBSzs7T0FDVixZQUFaOztPQUNZLFdBQVo7T0FBaUIsYUFBakI7O09BQ1ksYUFBUjs7O0lBSVAsdUJBQWM7Ozs7WUFJUCxJQUFJOztZQUNILElBQUksT0FBTyxrQkFBWCxJQUFJLE9BQU8sMkJBQVMsSUFBSTs7WUFFekIsS0FBQyxtQkFBVyxJQUFJLFVBQWlCLE9BQU8sZUFBZSxlQUFlLGFBQWEsZUFBZSxhQUFhLG1CQUFtQixlQUFlLGlCQUFpQixnQkFBZ0IscUJBQXFCOztZQUN0TSxLQUFDOztnQkFFRSxJQUFJOztpQkFDUDt1QkFBMEIsS0FBQyxlQUFxQixJQUFJLE9BQVEsSUFBSTs7aUJBQ2hFO3VCQUEwQixLQUFDLFlBQXFCOztpQkFDaEQ7dUJBQTBCLEtBQUMsYUFBcUIsSUFBSSxPQUFRLElBQUk7O2lCQUNoRTt1QkFBMEIsS0FBQyxZQUFxQixJQUFJLE1BQVEsSUFBSSxNQUFNLElBQUk7O2lCQUMxRTt1QkFBMEIsS0FBQyxhQUFxQixJQUFJLE9BQVEsSUFBSTs7aUJBQ2hFO3VCQUEwQixLQUFDLGdCQUFxQixJQUFJLE1BQVEsSUFBSSxLQUFLOztpQkFDckU7dUJBQTBCLEtBQUMsZ0JBQXFCLElBQUksTUFBUSxJQUFJLEtBQUs7O2lCQUNyRTt1QkFBMEIsS0FBQyxXQUFxQixJQUFJLE1BQVEsSUFBSTs7aUJBQ2hFO3VCQUEwQixLQUFDOztpQkFDM0I7dUJBQTBCLEtBQUMsU0FBcUIsSUFBSSxNQUFRLElBQUk7O2lCQUNoRTt1QkFBMEIsS0FBQzs7aUJBQzNCO3VCQUEwQixLQUFDLGFBQXFCLElBQUksS0FBUSxJQUFJOztpQkFDaEU7dUJBQTBCLEtBQUMsY0FBcUIsSUFBSTs7aUJBQ3BEO3VCQUEwQixLQUFDLFdBQXFCLElBQUk7O2lCQUNwRDt1QkFBMEIsS0FBQyxhQUFxQixJ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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibm92aW0uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvYWN0L25vdmltLmtvZGUiXSwibWFwcGluZ3MiOiI7O09BQ2EsVUFBQTtJQUFNO0lBQUs7SUFBSzs7T0FDVixZQUFaOztPQUNZLFdBQVo7T0FBaUIsYUFBakI7O09BQ1ksYUFBUjs7O0lBSVAsdUJBQWM7Ozs7WUFJUCxJQUFJOztZQUNILElBQUksT0FBTyxrQkFBWCxJQUFJLE9BQU8sMkJBQVMsSUFBSTs7WUFFekIsS0FBQyxtQkFBVyxJQUFJLFVBQWlCLE9BQU8sZUFBZSxlQUFlLGFBQWEsZUFBZSxhQUFhLG1CQUFtQixlQUFlLGlCQUFpQixnQkFBZ0IsYUFBYSxxQkFBcUI7O1lBQ25OLEtBQUM7O2dCQUVFLElBQUk7O2lCQUNQO3VCQUEwQixLQUFDLGVBQXFCLElBQUksT0FBUSxJQUFJOztpQkFDaEU7dUJBQTBCLEtBQUMsWUFBcUI7O2lCQUNoRDt1QkFBMEIsS0FBQyxhQUFxQixJQUFJLE9BQVEsSUFBSTs7aUJBQ2hFO3VCQUEwQixLQUFDLFlBQXFCLElBQUksTUFBUSxJQUFJLE1BQU0sSUFBSTs7aUJBQzFFO3VCQUEwQixLQUFDLGFBQXFCLElBQUksT0FBUSxJQUFJOztpQkFDaEU7dUJBQTBCLEtBQUMsZ0JBQXFCLElBQUksTUFBUSxJQUFJLGtCQUFZLElBQUksV0FBVSxJQUFJLFVBQVUsTUFBTTs7aUJBQzlHO3VCQUEwQixLQUFDLGdCQUFxQixJQUFJLE1BQVEsSUFBSSxrQkFBWSxJQUFJLFdBQVUsSUFBSSxXQUFjLE1BQU07O2lCQUNsSDt1QkFBMEIsS0FBQyxXQUFxQixJQUFJLE1BQVEsSUFBSTs7aUJBQ2hFO3VCQUEwQixLQUFDOztpQkFDM0I7dUJBQTBCLEtBQUMsU0FBcUIsSUFBSSxNQUFRLElBQUk7O2lCQUNoRTt1QkFBMEIsS0FBQzs7aUJBQzNCO3VCQUEwQixLQUFDLGFBQXFCLElBQUksS0FBUSxJQUFJOztpQkFDaEU7dUJBQTBCLEtBQUMsY0FBcUIsSUFBSTs7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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/act/novim.kode

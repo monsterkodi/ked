@@ -127,10 +127,18 @@
 
     R                                   replace characters while typing
 
+#### case
+
+    gu{motion}                          lowercase text
+    gU{motion}                          uppercase text
+    g~{motion}                          toggle case
+    guu  gUU  g~~                       current line
+
 #### search
     
-    /{pattern}                          open the search strip and highlight matches
-    n  N                                jump to the next or previous highlight
+    /{pattern}                          search forward and highlight matches
+    ?{pattern}                          search backward and highlight matches
+    n  N                                jump in or against the search direction
     
 #### write & quit
     :w  :w {file}                       write the buffer to the file

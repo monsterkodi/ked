@@ -13,7 +13,7 @@ export
         if cmd.motion
             cmd.motion.count ?= cmd.count
 
-        if @visual and cmd.operator not in ['move' 'matchBracket' 'visualDelete' 'visualYank' 'visualChange' 'visualSwap' 'visualTextObject' 'visualIndent' 'visualDeindent' 'visualReplace' 'visualBlockPrepend' 'visualBlockAppend']
+        if @visual and cmd.operator not in ['move' 'matchBracket' 'visualDelete' 'visualYank' 'visualChange' 'visualSwap' 'visualTextObject' 'visualIndent' 'visualDeindent' 'visualReplace' 'visualCase' 'visualBlockPrepend' 'visualBlockAppend']
             @stopVisual()
 
         switch cmd.operator
@@ -22,14 +22,18 @@ export
             'yank'                  ➜ @yankByMotion         cmd.motion  cmd.register
             'put'                   ➜ @putRegister          cmd.count   cmd.after cmd.register
             'move'                  ➜ @moveByMotion         cmd.motion  cmd.count
-            'searchNext'            ➜ @jumpByHighlight      cmd.count   cmd.text true
-            'searchPrev'            ➜ @jumpByHighlight      cmd.count   cmd.text false
+            'searchNext'            ➜ @jumpByHighlight      cmd.count   cmd.text (valid cmd.forward ? cmd.forward : novim.lastVindForward)
+            'searchPrev'            ➜ @jumpByHighlight      cmd.count   cmd.text (valid cmd.forward ? cmd.forward : not novim.lastVindForward)
             'searchWord'            ➜ @searchWord           cmd.count   cmd.forward
             'matchBracket'          ➜ @matchBracket()
             'openLine'              ➜ @openLine             cmd.count   cmd.after
             'insertAtIndent'        ➜ @insertAtIndent()
             'replace'               ➜ @replaceChars         cmd.char    cmd.count
             'visualReplace'         ➜ @visualReplace        cmd.char
+            'lowercase'             ➜ @caseByMotion         cmd.motion 'lower'
+            'uppercase'             ➜ @caseByMotion         cmd.motion 'upper'
+            'toggleCaseMotion'      ➜ @caseByMotion         cmd.motion 'toggle'
+            'visualCase'            ➜ @visualCase           cmd.kind
             'toggleCase'            ➜ @toggleCase           cmd.count
             'joinLinesVim'          ➜ @joinLinesVim         cmd.count
             'visualDelete'          ➜ @visualDelete         cmd.register
@@ -46,6 +50,20 @@ export
             'undo'                  ➜ @undoCommand          cmd.count
             'repeat'                ➜ @repeatChange         cmd.count
                                     ➜ log 'novim unknown operator ▸' cmd.operator
+
+    searchPosition: ->
+
+        spans = @s.highlights
+
+        ⮐ null if empty spans
+
+        pos = @mainCursor()
+
+        for span, index in spans
+            if span[0] == pos[0] and span[1] == pos[1]
+                ⮐ [index+1 spans.length]
+
+        [0 spans.length]
 
     jumpByHighlight: count text forward ->
 
@@ -107,6 +125,7 @@ export
         ⮐ if empty text
 
         novim.lastVind = text
+        novim.lastVindForward = forward
 
         spans = @wordSpansForText text
 
@@ -816,7 +835,9 @@ export
             'put'         ➜ @repeatPut        count
             'visualDelete'➜ @repeatVisual     count 'delete'
             'visualReplace'➜ @repeatVisual    count 'replace'
+            'visualCase'  ➜ @repeatVisual     count 'case'
             'replaceMode'➜ @repeatReplaceMode  count
+            'case'        ➜ @repeatCase        count
             else
                 spec = copy @lastChange.motion
 
@@ -831,6 +852,14 @@ export
         spec.count = count if count > 1
 
         @indentByMotion spec deindent
+
+    repeatCase: count ->
+
+        spec = copy @lastChange.motion
+
+        spec.count = count if count > 1
+
+        @caseByMotion spec @lastChange.kind
 
     repeatReplaceMode: count ->
 
@@ -1008,6 +1037,29 @@ export
             @end()
 
             ⮐ if not changed
+
+            if change.shapes.length and change.shapes[0].block
+                x = Infinity
+                y = Infinity
+                for rng in rngs
+                    x = min x rng[0]
+                    y = min y rng[1]
+                starts = [[x y]]
+            else
+                starts = rngs.map (r) -> [r[0] r[1]]
+
+            lines  = @s.lines
+            starts = starts.map (p) -> [min(p[0] kseg.width(lines[p[1]])) p[1]]
+
+            @setCursors starts main:@s.main
+
+        else if action == 'case'
+
+            @begin()
+
+            @changeCaseInRanges rngs change.kind
+
+            @end()
 
             if change.shapes.length and change.shapes[0].block
                 x = Infinity
@@ -1350,6 +1402,117 @@ export
         @end()
 
         @lastChange = { operator: 'replace', char: text, count: n }
+
+    changeCaseInRanges: rngs kind ->
+
+        lines   = @s.lines.map (l) -> l
+        changed = false
+
+        for rng in rngs
+
+            [x1 y1 x2 y2] = rng
+
+            for y in y1..y2
+
+                continue if y < 0 or y >= lines.length
+
+                line  = lines[y].asMutable()
+                width = kseg.width line
+
+                from = y == y1 ? x1 : 0
+                to   = y == y2 ? x2 : width
+
+                from = clamp 0 width from
+                to   = clamp 0 width to
+
+                continue if to <= from
+
+                si = kseg.indexAtWidth line from
+                ei = kseg.indexAtWidth line to
+
+                continue if ei <= si
+
+                for i in si...ei
+
+                    seg   = line[i]
+                    upper = seg.toUpperCase()
+                    lower = seg.toLowerCase()
+
+                    if kind == 'lower'
+                        newSeg = lower
+                    else if kind == 'upper'
+                        newSeg = upper
+                    else
+                        newSeg = upper != seg ? upper : lower
+
+                    if newSeg != seg
+                        line[i] = newSeg
+                        changed = true
+
+                lines[y] = line
+
+        ⮐ false if not changed
+
+        @setLines lines
+
+        true
+
+    caseByMotion: spec kind ->
+
+        rngs = []
+
+        for cursor in @allCursors()
+
+            rng = motion.range @s.lines cursor spec
+
+            continue if not rng
+            continue if belt.isEmptyRange rng
+
+            rngs.push rng
+
+        ⮐ if empty rngs
+
+        @begin()
+
+        @changeCaseInRanges rngs kind
+
+        starts = rngs.map (r) -> [r[0] r[1]]
+
+        @setCursors starts main:@s.main
+
+        @end()
+
+        @lastChange = { operator: 'case', kind: kind, motion: copy(spec) }
+
+    visualCase: kind ->
+
+        rngs = @s.selections.asMutable()
+
+        ⮐ if empty rngs
+
+        if @visual == 'block'
+            pairs  = @visualPairs()
+            starts = pairs.map (p) -> [min(p[0][0] p[1][0]) min(p[0][1] p[1][1])]
+        else
+            starts = rngs.map (r) -> [r[0] r[1]]
+
+        shapes = @visualRepeatShapes()
+
+        @rememberVisual()
+
+        @begin()
+
+        @changeCaseInRanges rngs kind
+
+        @end()
+
+        lines  = @s.lines
+        starts = starts.map (p) -> [min(p[0] kseg.width(lines[p[1]])) p[1]]
+
+        @setCursors starts main:@s.main
+        @stopVisual false false
+
+        @lastChange = { operator: 'visualCase', kind: kind, shapes: shapes }
 
     toggleCase: count ->
 

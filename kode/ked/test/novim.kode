@@ -1680,7 +1680,122 @@ mrange = lines x y m -> motion.range lines [x y] m
         keys '~l.'
         txt "AbCd"
         cur 3 0
-    
+
+  ▸ case operators
+
+        s.loadLines belt.linesForText("Hello World")
+        s.setMainCursor 0 0
+
+        m = new novim s
+        key = c -> m.handleKey c {combo:c, char:c}
+        keys = s x y ->
+            for c in s
+                key c
+            cur x y if x?
+
+        keys 'guw'
+        txt "hello World"
+        cur 0 0
+
+        s.loadLines belt.linesForText("Hello World")
+        s.setMainCursor 0 0
+
+        keys 'gUiw'
+        txt "HELLO World"
+        cur 0 0
+
+        s.loadLines belt.linesForText("Hello World")
+        s.setMainCursor 0 0
+
+        keys 'g~w'
+        txt "hELLO World"
+        cur 0 0
+
+        s.loadLines belt.linesForText("Hello World")
+        s.setMainCursor 0 0
+
+        keys 'guu'
+        txt "hello world"
+        cur 0 0
+
+        s.loadLines belt.linesForText("hello world")
+        s.setMainCursor 0 0
+
+        keys 'gUU'
+        txt "HELLO WORLD"
+        cur 0 0
+
+        s.loadLines belt.linesForText("Hello World")
+        s.setMainCursor 0 0
+
+        keys 'g~~'
+        txt "hELLO wORLD"
+        cur 0 0
+
+        s.loadLines belt.linesForText("hello\nworld\nagain")
+        s.setMainCursor 0 0
+
+        keys '3gUU'
+        txt "HELLO\nWORLD\nAGAIN"
+        cur 0 0
+
+        s.loadLines belt.linesForText("hello\nworld\nagain")
+        s.setMainCursor 0 0
+
+        keys 'gUj'
+        txt "HELLO\nWORLD\nagain"
+        cur 0 0
+
+        s.loadLines belt.linesForText("HELLO WORLD")
+        s.setMainCursor 0 0
+
+        keys 'vllgu'
+        txt "heLLO WORLD"
+        cur 0 0
+
+        s.loadLines belt.linesForText("hello world")
+        s.setMainCursor 0 0
+
+        keys 'vllU'
+        txt "HEllo world"
+        cur 0 0
+
+        s.loadLines belt.linesForText("Hello World")
+        s.setMainCursor 0 0
+
+        keys 'vllg~'
+        txt "hEllo World"
+        cur 0 0
+
+        s.loadLines belt.linesForText("hello world")
+        s.setMainCursor 0 0
+
+        keys 'vllgU'
+        txt "HEllo world"
+        cur 0 0
+
+        s.loadLines belt.linesForText("aBcD\neFgH")
+        s.setMainCursor 0 0
+
+        key 'ctrl+v'
+        keys 'ljgU'
+        txt "ABcD\nEFgH"
+        cur 0 0
+
+        s.loadLines belt.linesForText("HELLO WORLD")
+        s.setMainCursor 0 0
+
+        keys 'vllguw.'
+        txt "heLLO woRLD"
+        cur 6 0
+
+        s.loadLines belt.linesForText("HELLO WORLD")
+        s.setMainCursor 0 0
+
+        keys 'guww.'
+        txt "hello world"
+        cur 6 0
+
   ▸ join lines
     
         s.loadLines belt.linesForText("one\ntwo\nthree")
@@ -2534,6 +2649,66 @@ mrange = lines x y m -> motion.range lines [x y] m
     
         key '/'
         txt "foo\nbar"
+
+  ▸ reverse search
+
+        nav = new state cells 'revsearch'
+
+        mode.modes.novim = novim
+        mode.start nav 'novim'
+
+        nmv       = mode.get nav 'novim'
+        press     = c -> mode.handleKey nav c {combo:c, char:c}
+        positions = []
+
+        post.on 'novim.search.position' (p) -> positions.push p
+
+        nav.loadLines belt.linesForText("foo\nbar\nfoo\nbar\nfoo")
+        nav.setMainCursor 0 1
+
+        nmv.startSearch true
+        nmv.searchChanged 'foo'
+        nmv.commitSearch()
+
+        nav.mainCursor() ▸ [0 2]
+
+        nav.setMainCursor 0 1
+
+        nmv.startSearch false
+        nmv.searchChanged 'foo'
+        nmv.commitSearch()
+
+        nav.mainCursor() ▸ [0 0]
+
+        positions[-1] ▸ {state:'revsearch.state' current:1 total:3}
+
+        nav.setMainCursor 0 4
+
+        press 'n'
+
+        nav.mainCursor() ▸ [0 2]
+        positions[-1] ▸ {state:'revsearch.state' current:2 total:3}
+
+        press 'n'
+
+        nav.mainCursor() ▸ [0 0]
+        positions[-1] ▸ {state:'revsearch.state' current:1 total:3}
+
+        press 'N'
+
+        nav.mainCursor() ▸ [0 2]
+        positions[-1] ▸ {state:'revsearch.state' current:2 total:3}
+
+        nav.setMainCursor 0 0
+
+        nmv.startSearch true
+        nmv.searchChanged 'foo'
+        nmv.commitSearch()
+
+        nav.mainCursor() ▸ [0 0]
+        positions[-1] ▸ {state:'revsearch.state' current:1 total:3}
+
+        mode.stop nav 'novim'
     
   ▸ ex commands
     

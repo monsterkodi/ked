@@ -12,6 +12,9 @@ use ..           ◆ mode
         'y': 'yank'
         '>': 'indent'
         '<': 'deindent'
+        'gu': 'lowercase'
+        'gU': 'uppercase'
+        'g~': 'toggleCaseMotion'
 
     @commands: {
         'C':      -> { operator: 'change'                    motion: { kind: 'eol'      } }
@@ -39,8 +42,8 @@ use ..           ◆ mode
         'E':    n -> { operator: 'move'         count: n     motion: { kind: 'WEND'     } }
         '$':    n -> { operator: 'move'         count: n     motion: { kind: 'eol'      } }
         'G':    n -> { operator: 'move'         count: n     motion: { kind: 'eof'      } }
-        'n':    n -> { operator: 'searchNext'   count: n     text:  novim.lastVind }
-        'N':    n -> { operator: 'searchPrev'   count: n     text:  novim.lastVind }
+        'n':    n -> { operator: 'searchNext'   count: n     text:  novim.lastVind   forward: novim.lastVind ? novim.lastVindForward     : true  }
+        'N':    n -> { operator: 'searchPrev'   count: n     text:  novim.lastVind   forward: novim.lastVind ? not novim.lastVindForward : false }
         'p':    n -> { operator: 'put'          count: n     after: true  }
         'P':    n -> { operator: 'put'          count: n     after: false }
         'u':    n -> { operator: 'undo'         count: n }
@@ -99,6 +102,7 @@ use ..           ◆ mode
         'B':    '{'
 
     @lastVind: ''
+    @lastVindForward: true
     
     @: @state ->
 
@@ -107,6 +111,7 @@ use ..           ◆ mode
         @exRange  = null
         @exConfirms = null
         @exHighlighting = false
+        @searchForward = true
         @reset()
 
     @clipboardSync: null # on in ked, off in a headless editor
@@ -227,6 +232,7 @@ use ..           ◆ mode
         @state.executeNovim cmd
         @reset()
         post.emit 'novim.execute' cmd
+        @emitSearchPosition() if cmd.operator in ['searchNext' 'searchPrev' 'searchWord']
         true
 
     runEx: line ->
@@ -636,7 +642,10 @@ use ..           ◆ mode
 
         true
 
-    startSearch: ->
+    startSearch: forward=true ->
+
+        @searchForward = forward
+        novim.lastVindForward = forward
 
         text = @state.textOfSelectionOrWordAtCursor()
         text ?= ''
@@ -675,6 +684,16 @@ use ..           ◆ mode
 
         true
 
+    emitSearchPosition: ->
+
+        position = @state.searchPosition()
+
+        ⮐ false if not position or position[1] == 0
+
+        post.emit 'novim.search.position' state:@state.name current:position[0] total:position[1]
+
+        true
+
     commitSearch: ->
 
         spans = @state.s.highlights
@@ -684,19 +703,25 @@ use ..           ◆ mode
         pos = @state.mainCursor()
 
         for span in spans
-            ⮐ true if span[0] == pos[0] and span[1] == pos[1]
+            if span[0] == pos[0] and span[1] == pos[1]
+                @emitSearchPosition()
+                ⮐ true
 
         target = null
 
         for span in spans
-            after = span[1] > pos[1] or (span[1] == pos[1] and span[0] > pos[0])
-            if after
+            after  = span[1] > pos[1] or (span[1] == pos[1] and span[0] > pos[0])
+            before = span[1] < pos[1] or (span[1] == pos[1] and span[0] < pos[0])
+            if @searchForward and after
                 target = span
                 break
+            if not @searchForward and before
+                target = span
 
-        target ?= spans[0]
+        target ?= @searchForward ? spans[0] : spans[-1]
 
         @state.setMainCursor [target[0] target[1]]
+        @emitSearchPosition()
 
         true
 
@@ -841,6 +866,9 @@ use ..           ◆ mode
                 'y'     ➜ ⮐ @execute { operator: 'visualYank' }
                 'c' 's' ➜ ⮐ @execute { operator: 'visualChange' }
                 'R'     ➜ ⮐ @execute { operator: 'visualChange' }
+                'u'     ➜ ⮐ @execute { operator: 'visualCase', kind: 'lower' }
+                'U'     ➜ ⮐ @execute { operator: 'visualCase', kind: 'upper' }
+                '~'     ➜ ⮐ @execute { operator: 'visualCase', kind: 'toggle' }
                 'o'     ➜ ⮐ @execute { operator: 'visualSwap' }
                 '>'     ➜ ⮐ @execute { operator: 'visualIndent',   count: @countNumber() }
                 '<'     ➜ ⮐ @execute { operator: 'visualDeindent', count: @countNumber() }
@@ -872,6 +900,14 @@ use ..           ◆ mode
                 if prefix == 'g' and char == 'v'
                     @state.startLastVisual()
                     ⮐ @reset()
+                if prefix == 'g' and char in 'uU~'
+                    kind = 'toggle'
+                    kind = 'lower' if char == 'u'
+                    kind = 'upper' if char == 'U'
+                    if @state.visual
+                        ⮐ @execute { operator: 'visualCase', kind: kind }
+                    @operator = 'g' + char
+                    ⮐ @logPending()
                 ⮐ @reset()
  
             @area
@@ -884,6 +920,11 @@ use ..           ◆ mode
                 ⮐ @reset()
     
             @operator
+
+                doubled = @operator == 'gu' and char == 'u' or @operator == 'gU' and char == 'U' or @operator == 'g~' and char == '~'
+
+                if doubled
+                    ⮐ @execute operator:novim.operators[@operator] motion:{ kind: 'line', count: @countNumber() }
     
                 if build = novim.motions[char]
                     ⮐ @execute operator:novim.operators[@operator] motion:build(@countNumber())
@@ -931,9 +972,9 @@ use ..           ◆ mode
                 @prefix = 'g'
                 ⮐ @logPending()
     
-            '/'
+            '/' '?'
                 @reset()
-                ⮐ @startSearch()
+                ⮐ @startSearch char == '/'
 
             'f' 't' 'F' 'T'
     
