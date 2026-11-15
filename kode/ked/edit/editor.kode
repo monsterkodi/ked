@@ -186,6 +186,11 @@ use                ◆ state draw complete mode
         
         ⮐ if not @hasFocus()
         
+        if key == 'alt+g' and @gutter?
+            if @gutter.toggleAtLine @state.mainCursor()[1]
+                @complete?.hide()
+                ⮐ true
+        
         if @complete?
             ⮐ true if @complete.handleKey(key event) != 'unhandled'
 

@@ -124,6 +124,23 @@ use ../util ◆ gitblock
 
         gitblock.revert block ['a' 'Z' 'c'] ▸ null
 
+  ▸ the first line of a block is its first displayed line
+
+        mod = gitblock.fromDiff(changes:[{line:2 old:['b'] new:['B']}])[0]
+        add = gitblock.fromDiff(changes:[{line:2 new:['X']}])[0]
+        del = gitblock.fromDiff(changes:[{line:2 old:['X']}])[0]
+
+        gitblock.firstLine(mod) ▸ 1
+        gitblock.firstLine(add) ▸ 1
+        gitblock.firstLine(del) ▸ 1
+
+  ▸ the first line of a reverted addition is the line above the gap
+
+        block = gitblock.fromDiff(changes:[{line:2 new:['X']}])[0]
+        entry = gitblock.revert block ['a' 'X' 'b']
+
+        gitblock.firstLine(entry) ▸ 0
+
   ▸ an entry moves with lines inserted above it
 
         lines = ['a' 'B' 'c']

@@ -221,7 +221,9 @@ use ../base        ◆ view
             button = event.button ? 'left'
             ⮐ if button != 'left'
             
-            @toggle mark if mark
+            if mark and @toggle mark
+                @editor.grabFocus()
+                
             ⮐ redraw:true
             
         if event.type == 'move'
@@ -238,6 +240,12 @@ use ../base        ◆ view
             @restoreEntry mark.entry
         else
             @revertBlock mark.block
+            
+    toggleAtLine: line =>
+    
+        mark = @lineMarks[line]
+        ⮐ false if not mark
+        @toggle mark
             
     revertBlock: block =>
     
@@ -260,6 +268,7 @@ use ../base        ◆ view
         
         @hoverBlock = null
         @rebuildMarks()
+        @focusBlock entry
         true
         
     restoreEntry: entry =>
@@ -283,7 +292,13 @@ use ../base        ◆ view
         
         @hoverBlock = null
         @rebuildMarks()
+        @focusBlock block
         true
+        
+    focusBlock: block =>
+    
+        line = clamp 0 @state.s.lines.length-1 (gitblock.firstLine(block))
+        @state.setCursors [[0 line]]
         
     applyEdits: edits =>
     

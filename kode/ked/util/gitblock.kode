@@ -94,6 +94,13 @@
             mods += min hunk.old.length hunk.new.length
         mods
 
+    @firstLine: block ->
+
+        if block.end > block.start
+            block.start
+        else
+            max 0 block.start-1
+
 #!revert
 
     @revert: block lines -> 
