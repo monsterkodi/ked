@@ -405,6 +405,126 @@ use ../../theme  ◆ color
         ins: inserts
         del: deletes
 
+    @lineIndexMap: oldLines newLines ->
+
+        # maps every old line index to a line index in newLines
+        # deleted lines map to the next surviving line, or the last line
+
+        oldCount = oldLines.length
+        newCount = newLines.length
+
+        map = []
+        for i in 0...oldCount
+            map.push -1
+
+        ⮐ map if oldCount == 0 or newCount == 0
+
+        oldTexts = oldLines.map (l) -> kseg.str l
+        newTexts = newLines.map (l) -> kseg.str l
+
+        prefix = 0
+        while prefix < oldCount and prefix < newCount and oldTexts[prefix] == newTexts[prefix]
+            map[prefix] = prefix
+            prefix += 1
+
+        suffix = 0
+        while suffix < oldCount-prefix and suffix < newCount-prefix and oldTexts[oldCount-1-suffix] == newTexts[newCount-1-suffix]
+            map[oldCount-1-suffix] = newCount-1-suffix
+            suffix += 1
+
+        oldEnd = oldCount - suffix
+        newEnd = newCount - suffix
+        om     = oldEnd - prefix
+        nm     = newEnd - prefix
+
+        if om > 0 and nm > 0 and om * nm > 250000
+            # very large rewrite: fall back to positional mapping
+            for k in 0...om
+                nk = min k nm-1
+                map[prefix+k] = prefix + nk
+            for y in 0...oldCount
+                map[y] = clamp 0 newCount-1 map[y]
+            ⮐ map
+
+        anchors = []
+
+        for i in 0...prefix
+            anchors.push [i i]
+
+        if om > 0 and nm > 0
+
+            om1 = om + 1
+            nm1 = nm + 1
+
+            dp = []
+            for i in 0...om1
+                row = []
+                for j in 0...nm1
+                    row.push 0
+                dp.push row
+
+            for i in 1...om1
+                for j in 1...nm1
+                    if oldTexts[prefix+i-1] == newTexts[prefix+j-1]
+                        dp[i][j] = dp[i-1][j-1] + 1
+                    else
+                        dp[i][j] = max dp[i-1][j] dp[i][j-1]
+
+            matches = []
+            i = om
+            j = nm
+
+            while i > 0 and j > 0
+                if oldTexts[prefix+i-1] == newTexts[prefix+j-1]
+                    matches.push [prefix+i-1 prefix+j-1]
+                    i -= 1
+                    j -= 1
+                else if dp[i-1][j] >= dp[i][j-1]
+                    i -= 1
+                else
+                    j -= 1
+
+            for match in matches.reverse()
+                anchors.push match
+
+        for s in 0...suffix
+            anchors.push [oldCount-suffix+s newCount-suffix+s]
+
+        if empty anchors
+            for y in 0...oldCount
+                map[y] = clamp 0 newCount-1 y
+            ⮐ map
+
+        prevOld = -1
+        prevNew = -1
+
+        for anchor in anchors
+
+            [oi ni] = anchor
+
+            map[oi] = ni
+
+            oldGap = oi - prevOld - 1
+            newGap = ni - prevNew - 1
+            paired = min oldGap newGap
+
+            for k in 0...paired
+                map[prevOld+1+k] = prevNew+1+k
+
+            for k in paired...oldGap
+                map[prevOld+1+k] = ni
+
+            prevOld = oi
+            prevNew = ni
+
+        for k in 0...oldCount-prevOld-1
+            map[prevOld+1+k] = newCount-1
+
+        for y in 0...oldCount
+            map[y] = clamp 0 newCount-1 map[y]
+
+        map
+
 #!split
     
     @beforeAndAfterForPos: lines pos ->

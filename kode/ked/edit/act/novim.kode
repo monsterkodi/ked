@@ -206,13 +206,59 @@ export
 
         @updateVisual()
 
-    stopVisual: keepSelections=false ->
+    stopVisual: (keepSelections=false remember=true) ->
+
+        @rememberVisual() if remember
 
         @visual        = null
         @visualAnchors = []
 
         if not keepSelections
             @setSelections []
+
+    rememberVisual: ->
+
+        ⮐ false if not @visual
+
+        pairs = @visualPairs()
+
+        ⮐ false if empty pairs
+
+        main = @mainCursor()
+
+        @lastVisual =
+            kind:  @visual
+            pairs: pairs
+            main:  [main[0] main[1]]
+            lines: @s.lines
+
+        true
+
+    startLastVisual: ->
+
+        lv = @lastVisual
+
+        ⮐ false if not lv or empty lv.pairs
+
+        lines   = @s.lines
+        lineMap = belt.lineIndexMap lv.lines lines
+
+        mapped = (pos) ->
+            y = clamp 0 lines.length-1 (lineMap[pos[1]] ? pos[1])
+            x = clamp 0 kseg.width(lines[y]) pos[0]
+            [x y]
+
+        pairs  = lv.pairs.map (p) -> [mapped(p[0]) mapped(p[1])]
+        main   = mapped lv.main
+        starts = pairs.map (p) -> [p[1][0] p[1][1]]
+
+        @visual        = lv.kind
+        @visualAnchors = pairs.map (p) -> [p[0][0] p[0][1]]
+
+        @setCursors starts main:main
+        @updateVisual()
+
+        true
 
     visualPairs: ->
 
@@ -341,6 +387,8 @@ export
 
         @setNovimRegister rngs linewise register
 
+        @rememberVisual()
+
         @lastChange = { operator: 'visualDelete', linewise: linewise, register: register, shapes: @visualRepeatShapes() }
 
         @begin()
@@ -351,7 +399,7 @@ export
 
         @setCursors(blockStarts main:@s.main) if blockStarts
 
-        @stopVisual()
+        @stopVisual false false
 
     visualYank: register ->
 
@@ -370,15 +418,19 @@ export
         else
             starts = rngs.map (r) -> [r[0] r[1]]
 
+        @rememberVisual()
+
         @setCursors starts main:@mainCursor()
 
-        @stopVisual()
+        @stopVisual false false
 
     visualChange: ->
 
         rngs = @s.selections.asMutable()
 
         ⮐ if empty rngs
+
+        @rememberVisual()
 
         @startNovimInsert { kind: 'visual', linewise: @visual == 'line', shapes: @visualRepeatShapes() }
 
@@ -395,9 +447,11 @@ export
 
         cursors = rngs.map (r) -> [after ? r[2] : r[0] r[1]]
 
+        @rememberVisual()
+
         @startNovimInsert { kind: after ? 'blockAppend' : 'blockPrepend', shapes: @visualRepeatShapes() }
 
-        @stopVisual()
+        @stopVisual false false
 
         @setCursors cursors main:@s.main
 

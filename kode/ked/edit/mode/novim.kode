@@ -806,7 +806,7 @@ use ..           ◆ mode
 
         ⮐ 'unhandled' if char.length != 1 # ignore every other non text key
 
-        if @state.visual and not @operator and not @area
+        if @state.visual and not @operator and not @area and not @prefix
 
             switch char
                 ':'     ➜ ⮐ @startEx()
@@ -825,7 +825,7 @@ use ..           ◆ mode
             @area = char == 'i' ? 'inner' : 'around'
             ⮐ @logPending()
 
-        if not @operator and not @area
+        if not @operator and not @area and not @prefix
             switch char
                 'v'
                     @state.startVisual 'char'
@@ -843,6 +843,9 @@ use ..           ◆ mode
                 @prefix = null
                 if prefix == 'g' and char == 'g'
                     ⮐ @execute { operator: 'move', motion: { kind: 'bof', count: @countNumber() } }
+                if prefix == 'g' and char == 'v'
+                    @state.startLastVisual()
+                    ⮐ @reset()
                 ⮐ @reset()
  
             @area

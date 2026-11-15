@@ -116,7 +116,12 @@
     f{char}  t{char}  ;                 find a character, till before it, repeat
     F{char}  T{char}  ,                 the same, searching backwards
     iw  aw  iW  aW                      inner and around word or WORD text objects
-    
+
+#### visual
+
+    v  V  ctrl+v                       select by char, line, block
+    gv                                  reselect the last visual area
+
 #### search
     
     /{pattern}                          open the search strip and highlight matches

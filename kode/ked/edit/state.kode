@@ -248,6 +248,7 @@ use           ◆ keys mode
     
         @visual        = null
         @visualAnchors = []
+        @lastVisual    = null
         @novimInsert   = null
 
         clearTimeout @yankFlashTimer if @yankFlashTimer
