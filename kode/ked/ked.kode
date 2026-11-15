@@ -690,6 +690,14 @@ use child_process ▪ spawn exec
     
         # log 'ked.onKey' event
 
+        switch key
+
+            "cmd+["                      ➜ ⮐ post.emit 'dircol.show'
+            "cmd+]"                      ➜ ⮐ post.emit 'funcol.show'
+            "alt+cmd+["                  ➜ ⮐ post.emit 'dircol.toggle'
+            "alt+cmd+]"                  ➜ ⮐ post.emit 'funcol.toggle'
+            'shift+cmd+['                ➜ ⮐ post.emit 'dircol.reveal' @currentFile
+
         for handler in @keyHandlers
             continue if handler.hidden()
             result = handler.onKey key event
@@ -723,14 +731,9 @@ use child_process ▪ spawn exec
             'cmd+.' 'ctrl+.'             ➜ ⮐ @browse.gotoDir slash.dir(@currentFile)
             'cmd+o' 'ctrl+o'             ➜ ⮐ post.emit 'browse.dir' process.cwd()
             'cmd+i'                      ➜ ⮐ post.emit 'differ.status'
-            "cmd+["                      ➜ ⮐ post.emit 'dircol.show'
-            "alt+cmd+["                  ➜ ⮐ post.emit 'dircol.toggle'
-            'shift+cmd+['                ➜ ⮐ post.emit 'dircol.reveal' @currentFile
-            "cmd+]"                      ➜ ⮐ post.emit 'funcol.show'
-            "alt+cmd+]"                  ➜ ⮐ post.emit 'funcol.toggle'
             'alt+c'                      ➜ ⮐ post.emit 'colorpicker.show'
             'alt+u'                      ➜ ⮐ post.emit 'uniko.show'
-            'alt+shift+c' 'shift+alt+c'  ➜ ⮐ @editor.state.clearColorsAtCursorOrSelection()
+            'shift+alt+c'                ➜ ⮐ @editor.state.clearColorsAtCursorOrSelection()
                             
     goToPrevFunc: =>
     
