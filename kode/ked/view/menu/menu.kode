@@ -113,8 +113,6 @@ use                 ◆ greet inputchoice
     
     applyChoice: choice =>
         
-        # log "applyChoice ▸#{choice}◂"
-        
         switch choice
             'new'        ➜ @onNewFile()
             'about'      ➜ @show true # reopen with greeting header

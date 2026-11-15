@@ -9,7 +9,6 @@ use ../../edit/tool ◆ belt
 ###
     a choices view with an internal filter input
     the input is hidden until a plain alphanumeric key is pressed
-    while visible it takes three rows from the choices area
 ###
     @: screen name features ->
         
@@ -25,13 +24,6 @@ use ../../edit/tool ◆ belt
         
         @input.hide()
         
-    # setColor: key clr =>
-    #     
-    #     super key clr
-    #     
-    #     if key == 'bg' and @input
-    #         @input.setColor 'bg_blur' @color.bg
-
     toggleFilter: =>
         
         if @input.visible() ➜ @hideFilter()

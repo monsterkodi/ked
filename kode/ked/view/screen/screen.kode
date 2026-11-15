@@ -2,7 +2,6 @@
 use ../../../kxk    ▪ kseg post
 use ../../theme     ◆ color
 use ../../edit/tool ◆ belt
-
 ■screen
     # an array of cells (background|foreground colors and character)
     

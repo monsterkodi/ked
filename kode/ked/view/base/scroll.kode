@@ -4,7 +4,6 @@ use ../../theme    ◆ theme
 use ../../util/img ◆ squares sircels
 use                ◆ view
 
-{pow} = Math
 ■scroll□view
 ###
     scrolls a view

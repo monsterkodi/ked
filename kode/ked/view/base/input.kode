@@ -16,8 +16,6 @@ use ../../edit   ◆ editor
         @setColor 'bg_blur'         theme.quicky.bg
         @setColor 'bg_focus'        theme.editor.bg
                 
-    # hasFocus: -> @state.hasFocus
-
     onMouseLeave: event => 
     
         @emit 'action' 'cancel'
@@ -42,11 +40,7 @@ use ../../edit   ◆ editor
 
     onKey: key event ->
         
-        # log "#{@name} focus #{@hasFocus()}"
-        
         ⮐ false if not @hasFocus()
-        
-        # log "#{@name} onKey #{key}}"
         
         switch event.combo
             
@@ -87,8 +81,6 @@ use ../../edit   ◆ editor
 
         @setColor 'bg' @hasFocus() ? @color.bg_focus : @color.bg_blur
         @setColor 'empty' @color.bg
-        
-        # @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
         
         super()
 

@@ -18,7 +18,7 @@ use ../base      ◆ view
         @syntax = new syntax
         @syntax.setExt 'noon'
         
-        @rounded = '' # ''
+        @rounded = ''
         
         @setColor 'bg'    theme.hover.blur
         @setColor 'hover' theme.hover.bg 

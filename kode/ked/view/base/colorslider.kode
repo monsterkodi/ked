@@ -1,7 +1,7 @@
 
 use ../../../kxk ▪ post
-use ../../theme ◆ color theme
-use             ◆ view
+use ../../theme  ◆ color theme
+use              ◆ view
 ■colorslider□view
     @: @screen @name @max @gradient ->
 
@@ -85,7 +85,7 @@ use             ◆ view
             'right' ➜  1
             'down'  ➜ -1
             'left'  ➜ -1
-            else    ➜  0
+                    ➜  0
 
         ⮐ if not dir
 

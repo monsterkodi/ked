@@ -5,7 +5,6 @@ use ../base      ◆ view input
 
 ■titlenovim□view
     # used by title to display the novim status
-    # an ex command is edited by an input child like any other text input
     
     @: screen name stateName ->
         
@@ -122,7 +121,7 @@ use ../base      ◆ view input
         @novimText = t
         
     onExecute: execute =>
-        # log 'EXECUTE' execute
+
         @setColor 'bg'  theme.novim.execute.bg
         @setColor 'fg'  theme.novim.execute.fg
         t = execute.operator
@@ -136,7 +135,7 @@ use ../base      ◆ view input
         @novimText = t
  
     onError: err => 
-        # log "ERROR" err
+
         @setColor 'bg' theme.novim.error.bg
         @setColor 'fg' theme.novim.error.fg
         @novimText = err

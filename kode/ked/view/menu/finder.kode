@@ -5,6 +5,7 @@ use ../../edit/tool ◆ belt
 use                 ◆ inputchoice
 ■finder□inputchoice
     # searches and highlights in the current fileeditor file 
+    
     @: @screen @editor name='finder' ->
     
         @state = @editor.state
@@ -60,14 +61,10 @@ use                 ◆ inputchoice
         
     show: text =>
         
-        # log "finder.show #{@name} #{text}"
-        
         if empty text 
             cursorLine = @state.mainCursor()[1]
         
         text = @searchText text
-        
-        # log g4("#{r6 'finder.show'} #{m5 @name} '#{text}'")
         
         if empty text
             @choices.clear()
@@ -95,15 +92,12 @@ use                 ◆ inputchoice
         else
             @choices.selectFirst()
 
-        #inputFocus = @input.hasFocus()
         @input.show()
         super()            # this might set focus to choices
         @input.grabFocus() # but in finder and searcher input should always be focused
         
     searchText: text ->
     
-        # log "finder.searchText #{@name} #{text}"
-        
         if empty text 
             text = @state.textOfSelectionOrWordAtCursor()
             if '\n' in text
@@ -130,15 +124,13 @@ use                 ◆ inputchoice
             post.emit 'goto.line' choice.row choice.col
                 
         post.emit 'focus' 'editor'
-        # log "#{@name} applyChoice -> hide"
+
         @hide()
         redraw:true
         
     applyChoice: choice -> @apply choice
     
     onChoicesAction: action choice ->
-    
-        # log "finder.onChoicesAction #{action}"
     
         switch action
             'delete' 
