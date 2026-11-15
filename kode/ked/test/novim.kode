@@ -1559,6 +1559,34 @@ mrange = lines x y m -> motion.range lines [x y] m
         txt "XYXYef\nXYXYkl"
         cur 4 1
 
+        s.loadLines belt.linesForText("one two")
+        s.setMainCursor 0 0
+
+        keys 'vllR'
+        s.visual ▸ null
+        s.s.selections ▸ [[0 0 2 0]]
+
+        s.insert 'X'
+        txt "Xe two"
+
+        s.loadLines belt.linesForText("aaa\nbbb\nccc")
+        s.setMainCursor 0 0
+
+        keys 'VjR'
+        s.insert 'X'
+        txt "Xccc"
+        s.finishNovimInsert()
+
+        s.loadLines belt.linesForText("abcd\nefgh")
+        s.setMainCursor 0 0
+
+        key 'ctrl+v'
+        keys 'ljR'
+        s.insert 'XY'
+        txt "XYbcd\nXYfgh"
+
+        s.finishNovimInsert()
+
   ▸ visual replace
 
         s.loadLines belt.linesForText("abcd\nefgh\nijkl")

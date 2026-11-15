@@ -840,6 +840,7 @@ use ..           ◆ mode
                 'd' 'x' ➜ ⮐ @execute { operator: 'visualDelete' }
                 'y'     ➜ ⮐ @execute { operator: 'visualYank' }
                 'c' 's' ➜ ⮐ @execute { operator: 'visualChange' }
+                'R'     ➜ ⮐ @execute { operator: 'visualChange' }
                 'o'     ➜ ⮐ @execute { operator: 'visualSwap' }
                 '>'     ➜ ⮐ @execute { operator: 'visualIndent',   count: @countNumber() }
                 '<'     ➜ ⮐ @execute { operator: 'visualDeindent', count: @countNumber() }
