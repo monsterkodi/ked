@@ -279,13 +279,17 @@ use                 ◆ searcher searcherfile
         super choice
                                             
     onInputAction: action text ->
-    
+        
         switch action
 
             'submit' 
                 if valid text and text.startsWith '▸'
                     @commit text[1..]
                     ⮐ 
+                    
+            'change'
+                if valid text and not text.startsWith '▸'
+                    log "onInputAction #{action} '#{text}'"
             
         super action text
 
