@@ -667,9 +667,111 @@ export
         @stopMode 'novim'
         @novimInsert
 
+    startNovimReplace: count ->
+
+        n = max 1 (count ? 1)
+
+        @novimInsert = { kind: 'replace', text: '', count: n, undo: [] }
+
+        for i in 0...@s.cursors.length
+            @novimInsert.undo.push []
+
+        @novimInsert
+
+    replaceNovimChar: text ->
+
+        ni = @novimInsert
+
+        ⮐ false if not ni or ni.kind != 'replace'
+
+        lines   = @s.lines.map (l) -> l
+        cursors = @allCursors()
+        changed = false
+
+        for c, i in cursors
+
+            if not ni.undo[i]
+                ni.undo[i] = []
+
+            line  = lines[c[1]]
+            width = kseg.width line
+            x     = min c[0] width
+            si    = kseg.indexAtWidth line x
+
+            old = null
+            old = line[si] if si < line.length
+
+            if old?
+                newLine = line[0...si].concat([text]).concat(line[si+1..])
+            else
+                newLine = line[0...si].concat([text])
+
+            lines[c[1]] = newLine
+            ni.undo[i].push { x: x, y: c[1], old: old }
+
+            c[0]    = kseg.width newLine[0...si+1]
+            changed = true
+
+        ⮐ false if not changed
+
+        @setLines lines
+        @setCursors cursors main:@s.main
+
+        @recordNovimInsert text
+
+        true
+
+    replaceNovimBackspace: ->
+
+        ni = @novimInsert
+
+        ⮐ false if not ni or ni.kind != 'replace'
+
+        lines   = @s.lines.map (l) -> l
+        cursors = @allCursors()
+        changed = false
+
+        for c, i in cursors
+
+            hist = ni.undo[i]
+
+            continue if empty hist
+
+            rec = hist.pop()
+
+            continue if not rec
+            continue if rec.y < 0 or rec.y >= lines.length
+
+            line = lines[rec.y]
+            si   = kseg.indexAtWidth line rec.x
+
+            continue if si >= line.length
+
+            if rec.old?
+                newLine = line[0...si].concat([rec.old]).concat(line[si+1..])
+            else
+                newLine = line[0...si].concat(line[si+1..])
+
+            lines[rec.y] = newLine
+            c[0] = rec.x
+            c[1] = rec.y
+            changed = true
+
+        ⮐ false if not changed
+
+        @setLines lines
+        @setCursors cursors main:@s.main
+
+        @recordNovimBackspace()
+
+        true
+
     recordNovimInsert: text ->
 
         ⮐ if not @novimInsert or @novimReplaying
+
+        if @novimInsert.kind == 'replace' and '\n' in text
+            @novimInsert.undo = @novimInsert.undo.map (h) -> []
 
         @novimInsert.text += text
 
@@ -689,7 +791,16 @@ export
 
         @novimInsert = null
 
-        @lastChange = { operator: 'insert', insert: insert }
+        if insert.kind == 'replace'
+            n = max 1 (insert.count ? 1)
+            if n > 1 and not empty insert.text and '\n' not in insert.text
+                @replaceTextAtCursors insert.text (n-1)
+            text = ''
+            for i in 0...n
+                text += insert.text
+            @lastChange = { operator: 'replaceMode', text: text }
+        else
+            @lastChange = { operator: 'insert', insert: insert }
 
     repeatChange: count ->
 
@@ -705,6 +816,7 @@ export
             'put'         ➜ @repeatPut        count
             'visualDelete'➜ @repeatVisual     count 'delete'
             'visualReplace'➜ @repeatVisual    count 'replace'
+            'replaceMode'➜ @repeatReplaceMode  count
             else
                 spec = copy @lastChange.motion
 
@@ -719,6 +831,51 @@ export
         spec.count = count if count > 1
 
         @indentByMotion spec deindent
+
+    repeatReplaceMode: count ->
+
+        text = @lastChange.text
+
+        ⮐ if empty text
+        ⮐ if '\n' in text
+
+        n = max 1 (count ? 1)
+
+        @replaceTextAtCursors text n
+
+    replaceTextAtCursors: text times ->
+
+        graphemes = kseg text
+
+        ⮐ if empty graphemes
+
+        n       = max 1 (times ? 1)
+        lines   = @s.lines.map (l) -> l
+        cursors = @allCursors()
+        changed = false
+
+        for c in cursors
+
+            for k in 0...n
+
+                line  = lines[c[1]]
+                width = kseg.width line
+                x     = min c[0] width
+                si    = kseg.indexAtWidth line x
+                gone  = min graphemes.length line.length-si
+
+                newLine = line[0...si].concat(graphemes).concat(line[si+gone..])
+
+                lines[c[1]] = newLine
+                c[0]        = kseg.width newLine[0...si+graphemes.length]
+                changed     = true
+
+        ⮐ if not changed
+
+        @setLines lines
+        @setCursors cursors main:@s.main
+
+        true
 
     repeatPut: count ->
 

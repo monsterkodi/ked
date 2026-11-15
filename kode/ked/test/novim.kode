@@ -1470,7 +1470,95 @@ mrange = lines x y m -> motion.range lines [x y] m
         m.handleKey 'esc' {combo:'esc'}
         txt "abcdef"
         m.replace ▸ null
-    
+
+  ▸ replace mode
+
+        s.loadLines belt.linesForText("abcdef")
+        s.setMainCursor 0 0
+
+        m = new novim s
+        key = c -> m.handleKey c {combo:c, char:c}
+        keys = s x y ->
+            for c in s
+                key c
+            cur x y if x?
+
+        keys 'RXY'
+        txt "XYcdef"
+        cur 2 0
+        s.novimInsert.kind ▸ 'replace'
+
+        key 'esc'
+        s.novimInsert ▸ null
+
+        s.loadLines belt.linesForText("abcdef")
+        s.setMainCursor 0 0
+
+        keys 'RXY'
+        key 'delete'
+        txt "Xbcdef"
+        key 'delete'
+        txt "abcdef"
+        key 'delete'
+        txt "abcdef"
+        key 'esc'
+
+        s.loadLines belt.linesForText("abc")
+        s.setMainCursor 2 0
+
+        keys 'RXY'
+        txt "abXY"
+        cur 4 0
+        key 'esc'
+
+        s.loadLines belt.linesForText("abcdef")
+        s.setMainCursor 0 0
+
+        keys '2RXY'
+        key 'esc'
+        txt "XYXYef"
+        cur 4 0
+
+        s.loadLines belt.linesForText("abc\ndef")
+        s.setCursors [[0 0] [0 1]]
+
+        keys 'RX'
+        txt "Xbc\nXef"
+
+        key 'delete'
+        txt "abc\ndef"
+        key 'esc'
+
+        s.loadLines belt.linesForText("abcdef")
+        s.setMainCursor 0 0
+
+        keys 'RXY'
+        s.insert '\n'
+        keys 'ZZ'
+        key 'esc'
+        txt "XY\nZZef"
+        cur 2 1
+
+        s.loadLines belt.linesForText("abcdef\nghijkl")
+        s.setMainCursor 0 0
+
+        keys 'RXY'
+        key 'esc'
+        s.setMainCursor 0 1
+        keys '.'
+        txt "XYcdef\nXYijkl"
+        cur 2 1
+
+        s.loadLines belt.linesForText("abcdef\nghijkl")
+        s.setMainCursor 0 0
+
+        keys '2RXY'
+        key 'esc'
+        s.setMainCursor 0 1
+        keys '.'
+        txt "XYXYef\nXYXYkl"
+        cur 4 1
+
   ▸ visual replace
 
         s.loadLines belt.linesForText("abcd\nefgh\nijkl")

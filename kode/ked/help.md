@@ -123,6 +123,10 @@
     r{char}                             replace the selected chars with char
     gv                                  reselect the last visual area
 
+#### replace
+
+    R                                   replace characters while typing
+
 #### search
     
     /{pattern}                          open the search strip and highlight matches

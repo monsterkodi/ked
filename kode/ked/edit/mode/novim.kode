@@ -190,6 +190,25 @@ use ..           ◆ mode
 
         @execute novim.commands['r'](@countNumber() char)
 
+    handleReplaceKey: combo char ->
+
+        if combo in ['esc' 'escape']
+            @state.finishNovimInsert()
+            ⮐ true
+
+        if combo in ['delete' 'backspace']
+            @state.replaceNovimBackspace()
+            ⮐ true
+
+        ⮐ 'unhandled' if combo == 'return'
+        ⮐ 'unhandled' if combo.includes('alt+') or combo.includes('ctrl+') or combo.includes('cmd+')
+
+        if char.length == 1 and char != '\n'
+            @state.replaceNovimChar char
+            ⮐ true
+
+        'unhandled'
+
     repeatFind: reverse=false ->
 
         ⮐ if not @lastFind
@@ -752,6 +771,9 @@ use ..           ◆ mode
             @handleSubstituteConfirmKey combo char
             ⮐ true
 
+        if @state.novimInsert and @state.novimInsert.kind == 'replace'
+            ⮐ @handleReplaceKey combo char
+
         if combo == 'ctrl+v'
             if not @operator and not @area
                 @state.startVisual 'block'
@@ -890,6 +912,12 @@ use ..           ◆ mode
             'i' ➜ ⮐ @state.startNovimInsert kind:'insert'
             'a' ➜ ⮐ @state.startNovimInsert kind:'append'
             'A' ➜ ⮐ @state.startNovimInsert kind:'appendEol'
+
+            'R'
+                if not @state.visual
+                    count = @countNumber()
+                    @reset()
+                    ⮐ @state.startNovimReplace count
     
             ';' ➜ ⮐ @repeatFind false
             ',' ➜ ⮐ @repeatFind true
