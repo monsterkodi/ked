@@ -131,6 +131,9 @@ use ../../kxk ◆ clip
         old.keys = null
         old
 
+    textForValue: value -> registers.textForValue value
+    keysForText:  text  -> registers.keysForText text
+
     macroTarget: name ->
 
         target = registers.target name

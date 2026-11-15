@@ -4,7 +4,7 @@ use ../edit      ◆ state mode editor
 use ../edit/tool ◆ belt motion
 use ../edit/mode ◆ novim brckts
 use ../theme     ◆ theme
-use ../util      ◆ harness
+use ../util      ◆ harness config
 
 cells = cols:55 rows:66
 s = new state cells 'test'
@@ -515,6 +515,108 @@ mrange = lines x y m -> motion.range lines [x y] m
         kseg.str(b.s.lines)          ▸ 'two'
         b.novimRegister.lines        ▸ ['one']
         b.registers.read('1')        ▸ null
+
+  ▸ macros
+
+        oldConfig = config.data
+        config.data = { novim: { autoEnableOnEscape: true } }
+
+        mac = new state cells 'macros'
+
+        mode.modes.novim = novim
+        mac.allowedModes.novim = true
+        mode.start mac 'novim'
+
+        feed = c -> mac.feedKey c {combo:c, char: (c == 'esc' ? null : c)}
+        mtxt = -> kseg.str mac.s.lines
+
+        mac.loadLines belt.linesForText("one\ntwo")
+        mac.setMainCursor 0 0
+
+        feed 'q'
+        feed 'a'
+        feed 'x'
+        feed 'q'
+
+        mac.registers.read('a').keys.length ▸ 1
+        mtxt() ▸ "ne\ntwo"
+
+        feed '@'
+        feed 'a'
+
+        mtxt() ▸ "e\ntwo"
+
+        feed '@'
+        feed '@'
+
+        mtxt() ▸ "\ntwo"
+
+        mac.loadLines belt.linesForText("abcdef")
+        mac.setMainCursor 0 0
+
+        feed '3'
+        feed '@'
+        feed 'a'
+
+        mtxt() ▸ "def"
+
+        mac.loadLines belt.linesForText("one\ntwo")
+        mac.setMainCursor 0 0
+
+        feed 'q'
+        feed 'b'
+        feed 'A'
+        feed '!'
+        feed 'esc'
+        feed 'j'
+        feed 'q'
+
+        mtxt() ▸ "one!\ntwo"
+
+        feed '@'
+        feed 'b'
+
+        mtxt() ▸ "one!\ntwo!"
+
+        mac.loadLines belt.linesForText("abc")
+        mac.setMainCursor 0 0
+
+        feed 'q'
+        feed 'c'
+        feed 'x'
+        feed 'q'
+
+        feed 'q'
+        feed 'C'
+        feed 'l'
+        feed 'q'
+
+        mac.registers.read('c').keys.length ▸ 2
+
+        feed 'q'
+        feed 'd'
+        feed '@'
+        feed 'a'
+        feed 'q'
+
+        mac.registers.read('d').keys.length ▸ 2
+
+        macroErrors = []
+        post.on 'novim.error' (err) -> macroErrors.push err
+
+        feed '@'
+        feed 'z'
+
+        macroErrors[-1]    ▸ 'register z is empty'
+
+        feed 'q'
+        feed ':'
+
+        macroErrors[-1]    ▸ 'command-line window not implemented'
+        mac.isMacroRecording() ▸ false
+
+        mode.stop mac 'novim'
+        config.data = oldConfig
 
   ▸ clipboard registers
     

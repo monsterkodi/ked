@@ -43,6 +43,8 @@ use ../base      ◆ view input
         post.on 'novim.ex.start'     @onExStart
         post.on 'novim.search.start' @onSearchStart
         post.on 'novim.search.position' @onSearchPosition
+        post.on 'novim.macro.start'   @onMacroStart
+        post.on 'novim.macro.stop'    @onMacroStop
 
     onExStart: start =>
         
@@ -142,6 +144,21 @@ use ../base      ◆ view input
         @setColor 'bg' theme.novim.execute.bg
         @setColor 'fg' theme.novim.execute.fg
         @novimText = "#{position.current}/#{position.total}"
+
+    onMacroStart: macro =>
+
+        ⮐ if macro.state != @stateName
+
+        @setColor 'bg' theme.novim.execute.bg
+        @setColor 'fg' theme.novim.execute.fg
+        @novimText = "recording @#{macro.register}"
+
+    onMacroStop: macro =>
+
+        ⮐ if macro.state != @stateName
+        ⮐ if not @novimText.startsWith 'recording @'
+
+        @novimText = ''
 
     onError: err => 
 

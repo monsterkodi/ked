@@ -147,6 +147,7 @@ use ..           ◆ mode
         @prefix          = null
         @register        = null
         @registerPending = false
+        @macroPending    = null
         @find            = null
         @replace         = null
         @ex              = null
@@ -154,15 +155,18 @@ use ..           ◆ mode
         true
 
     exitNovim: ->
-        
+
         @state.stopMode 'novim'
         true
 
     countNumber: -> empty @count ? 1 : parseInt(@count)
 
     logPending: ->
-        
-        op = @operator
+
+        op = null
+        op = 'q' if @macroPending == 'record'
+        op = '@' if @macroPending == 'play'
+        op ?= @operator
         op ?= @find
         op ?= @replace
         
@@ -811,6 +815,47 @@ use ..           ◆ mode
         if combo.includes('alt+') or combo.includes('ctrl+') or combo.includes('cmd+')
             ⮐ 'unhandled'
 
+        if @macroPending
+
+            pending = @macroPending
+            @macroPending = null
+
+            if combo in ['esc' 'escape']
+                @reset()
+                ⮐ true
+
+            if pending == 'record'
+                @state.markMacroControlKey()
+                if char.length == 1 and /^[a-zA-Z]$/.test char
+                    @state.startMacroRecording char.toLowerCase(), /^[A-Z]$/.test(char)
+                else if char == ':'
+                    post.emit 'novim.error' 'command-line window not implemented'
+                else
+                    post.emit 'novim.error' 'invalid register'
+            else if pending == 'play'
+                count = @countNumber()
+                @count = ''
+                if char == '@'
+                    @state.playLastMacro count
+                else if char.length == 1
+                    @state.playMacro char, count
+                else
+                    post.emit 'novim.error' 'invalid register'
+
+            @reset()
+            ⮐ true
+
+        if char == 'q' and @state.isMacroRecording()
+            @state.markMacroControlKey()
+            @state.stopMacroRecording()
+            @reset()
+            ⮐ true
+
+        if char == 'q' and not @state.visual and not @operator and not @area and not @prefix
+            @state.markMacroControlKey()
+            @macroPending = 'record'
+            ⮐ @logPending()
+
         if combo in ['esc' 'escape']
             @reset()
             if @state.visual
@@ -821,7 +866,7 @@ use ..           ◆ mode
                 @exitNovim()
             ⮐ true
 
-        if not @find and char not in ',;nN0123456789' and key not in keyinfo.modifierNames
+        if not @find and char not in ',;nN0123456789@q' and key not in keyinfo.modifierNames
             @state.setHighlights [] 
 
         if @find
@@ -974,6 +1019,10 @@ use ..           ◆ mode
     
             'g'
                 @prefix = 'g'
+                ⮐ @logPending()
+
+            '@'
+                @macroPending = 'play'
                 ⮐ @logPending()
     
             '/' '?'

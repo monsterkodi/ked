@@ -253,3 +253,35 @@ use ../view/title ◆ title
         t.titlenovim.novimText         ▸ '1/3'
 
         mode.stop e.state 'novim'
+
+  ▸ macro recording indicator
+
+        ◯ mode.loaded
+
+        h = new harness cols:80 rows:5
+        e = new editor h.screen 'title_macro_editor' []
+        t = new title h.screen e
+
+        t.layout 0 0 80 1
+
+        mode.modes.novim = novim
+        mode.start e.state 'novim'
+
+        press = (c) ->
+            ⮐ true if t.onKey c {combo:c, char:c}
+            e.onKey c {combo:c, char:c}
+
+        e.state.loadLines belt.linesForText("one\ntwo")
+        e.state.setMainCursor 0 0
+        e.grabFocus()
+
+        press 'q'
+        press 'a'
+
+        t.titlenovim.novimText         ▸ 'recording @a'
+
+        press 'q'
+
+        t.titlenovim.novimText         ▸ ''
+
+        mode.stop e.state 'novim'

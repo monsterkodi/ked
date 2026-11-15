@@ -2,7 +2,7 @@
 use ../../kxk ▪ immutable kstr kseg events absMin
 use ../../kxk ◆ clip
 use ../util   ◆ syntax config scaling
-use ./act     ◆ del insert select join indent multi main novim sort count range
+use ./act     ◆ del insert select join indent multi main novim sort count range macro
 use ./tool    ◆ belt colorspans
 use ./register
 use           ◆ keys mode
@@ -22,11 +22,17 @@ use           ◆ keys mode
         @novimRegister  = null
         @allowedModes   = {}
 
-        for act in [del insert select join indent multi main novim sort count range]
+        @macroRecording    = null
+        @macroReplaying    = 0
+        @macroSkipKey      = false
+        @macroLastRegister = null
+
+        for act in [del insert select join indent multi main novim sort count range macro]
             for k,v of act
                 @[k] = v.bind @
-                
-        @handleKey = keys.bind @
+
+        @keyHandler = keys.bind @
+        @handleKey  = @handleKeyWithRecording
 
         @syntax   = new syntax @name + '.syntax'
         @hasFocus = false

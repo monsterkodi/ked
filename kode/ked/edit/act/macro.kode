@@ -1,0 +1,141 @@
+use ../../../kxk ▪ post
+#!macro
+export
+
+    handleKeyWithRecording: (key event) ->
+
+        result = @keyHandler key event
+
+        @recordMacroKey key event
+
+        result
+
+    macroEvent: (key event) ->
+
+        combo = event?.combo ? key
+        char  = event?.char
+
+        { key: key  combo: combo  char: char }
+
+    recordMacroKey: (key event) ->
+
+        if @macroSkipKey
+            @macroSkipKey = false
+            ⮐ false
+
+        ⮐ false if @macroReplaying > 0
+        ⮐ false if not @macroRecording
+
+        @macroRecording.keys.push @macroEvent(key event)
+
+        true
+
+    isMacroRecording: -> valid @macroRecording
+
+    markMacroControlKey: -> @macroSkipKey = true
+
+    startMacroRecording: register append ->
+
+        ⮐ false if not register
+
+        name = register.toLowerCase()
+
+        ⮐ false if name.length != 1
+        ⮐ false if name not in 'abcdefghijklmnopqrstuvwxyz'
+
+        @macroRecording =
+            register: name
+            append:   append
+            keys:     []
+
+        post.emit 'novim.macro.start' state:@name register:name append:append
+
+        true
+
+    stopMacroRecording: ->
+
+        recording = @macroRecording
+
+        ⮐ false if not recording
+
+        @macroRecording = null
+
+        name = recording.register
+        name = name.toUpperCase() if recording.append
+
+        @registers.setMacro name recording.keys
+
+        post.emit 'novim.macro.stop' state:@name register:recording.register
+
+        true
+
+    macroError: text ->
+
+        post.emit 'novim.error' text
+
+        false
+
+    playLastMacro: count ->
+
+        ⮐ @macroError('no previous macro') if not @macroLastRegister
+
+        @playMacro @macroLastRegister count
+
+    playMacro: register count ->
+
+        ⮐ @macroError('invalid register') if not register
+
+        value = @registers.read register
+
+        ⮐ @macroError("register #{register} is empty") if not value
+
+        keys = value.keys
+
+        keys ?= @registers.keysForText(@registers.textForValue(value))
+
+        ⮐ @macroError("register #{register} is empty") if empty keys
+
+        @macroLastRegister = register
+
+        n = max 1 (count ? 1)
+
+        for i in 0...n
+            @replayMacroKeys keys
+
+        true
+
+    replayMacroKeys: keys ->
+
+        if @macroReplaying >= 100
+            ⮐ @macroError('macro recursion too deep')
+
+        @macroReplaying += 1
+
+        try
+            for event in keys
+                @feedKey event.key event
+        catch err
+            @macroError "macro failed: #{err.message}"
+        finally
+            @macroReplaying -= 1
+
+        true
+
+    feedKey: (key event) ->
+
+        result = @handleKey key event
+
+        ⮐ 'handled' if result != 'unhandled'
+        ⮐ 'unhandled' if not event
+
+        char  = event.char
+        combo = event.combo ? key
+
+        if valid char and \
+                (char == combo or \
+                combo in ['space' 'shift+space' 'return' 'tab'] or \
+                combo[0..-2] == 'shift+')
+            @insert char
+            ⮐ 'inserted'
+
+        'unhandled'
