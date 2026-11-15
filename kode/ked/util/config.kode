@@ -1,5 +1,5 @@
 
-use ../../kxk ▪ noon slash post watcher
+use ../../kxk ▪ noon slash post watcher sds
 ■config
 
     @data   = null
@@ -19,8 +19,15 @@ use ../../kxk ▪ noon slash post watcher
         
         # log 'config loaded' #@data
         post.emit 'config.loaded' config.data
+        post.on 'config.toggle' config.onConfigToggle
         
         @resolveLoaded()
+        
+    @onConfigToggle: path ->
+        log "onConfigToggle #{path}" config.data
+        sds.set config.data path not(sds.get(config.data path))
+        log "onConfigToggle" config.data
+        post.emit 'config.loaded' config.data
     
     #  remember the file state before reading it,
     #  so that reading it does not look like a change

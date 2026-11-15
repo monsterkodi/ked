@@ -250,7 +250,7 @@ use ../base        ◆ view
     revertBlock: block =>
     
         if not @canRevert
-            log 'gutter: no committed version to revert to' @gitFile
+            # log 'gutter: no committed version to revert to' @gitFile
             ⮐ false
             
         entry = gitblock.revert block @textLines()

@@ -107,7 +107,7 @@ use ../base         ◆ view
 
     setScales: conf =>
 
-        @scaling = conf?.enabled != false
+        @scaling = conf?.enable != false
         @scales  = conf ? {}
         @rowCache = null
         @redraw = true

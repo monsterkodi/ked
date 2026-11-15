@@ -37,6 +37,7 @@ use                 ◆ inputchoice
             status
             diff
             history
+            scale
             """
 
         s = @editor.state.s
@@ -69,7 +70,7 @@ use                 ◆ inputchoice
         
         if empty choice
             input = @input.current()
-            log "macro.applyChoice ◯#{input}◯"
+            # log "macro.applyChoice ◯#{input}◯"
             if 
                 input == 'bof'  ➜ post.emit 'goto.bof'
                 input == 'eof'  ➜ post.emit 'goto.eof'
@@ -93,8 +94,9 @@ use                 ◆ inputchoice
                     [start step] = trim(input[5..-1]).split(' ').map((s) -> parseInt(s))
                     @editor.state.countSelectionsOrCursorLines start step
         else
-            log "macro.applyChoice ▸#{choice}◂"
+            # log "macro.applyChoice ▸#{choice}◂"
             switch choice
+                'scale'   ➜ post.emit 'config.toggle' 'scale.enable'
                 'diff'    ➜ post.emit 'differ.file'
                 'status'  ➜ post.emit 'differ.status'
                 'history' ➜ post.emit 'differ.history'

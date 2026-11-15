@@ -11,7 +11,7 @@ cells = cols:40 rows:20
 tstt = ext='md' -> 
     s = new state cells 'test_scale'
     s.syntax.setExt ext
-    s.applyScales {enabled:true md:{h1:3 h2:2}}
+    s.applyScales {enable:true md:{h1:3 h2:2}}
     s
 
 hed = cols rows ext='md' feats=[]->     
@@ -19,7 +19,7 @@ hed = cols rows ext='md' feats=[]->
         e = new editor h.screen 'test_scale' feats
         e.layout 0 0 cols rows
         e.state.syntax.setExt ext
-        e.state.applyScales {enabled:true md:{h1:3 h2:2}}
+        e.state.applyScales {enable:true md:{h1:3 h2:2}}
         [h e]
 
 ▸ scale
@@ -48,7 +48,7 @@ hed = cols rows ext='md' feats=[]->
         s = tstt()
         s.loadLines ['# one' '## two' '### three' '#### four' '##### five']
 
-        s.applyScales {enabled:true md:{h1:6 h2:5 h3:4 h4:3 h5:2}}
+        s.applyScales {enable:true md:{h1:6 h2:5 h3:4 h4:3 h5:2}}
 
         s.lineHeight 0 ▸ 6
         s.lineHeight 1 ▸ 5
@@ -56,7 +56,7 @@ hed = cols rows ext='md' feats=[]->
         s.lineHeight 3 ▸ 3
         s.lineHeight 4 ▸ 2
 
-        s.applyScales {enabled:false}
+        s.applyScales {enable:false}
 
         s.lineHeight 0 ▸ 1
         s.lineHeight 1 ▸ 1
@@ -66,7 +66,7 @@ hed = cols rows ext='md' feats=[]->
         s.lineHeight 0 ▸ 1
         s.lineHeight 1 ▸ 1
 
-        s.applyScales {enabled:true md:{h1:9}}
+        s.applyScales {enable:true md:{h1:9}}
 
         s.lineHeight 0 ▸ 7
 
@@ -635,7 +635,7 @@ hed = cols rows ext='md' feats=[]->
 
         [h e] = hed  cols:40 rows:10
         e.state.loadLines ['#']
-        e.state.applyScales {enabled:true md:{h1:7}}
+        e.state.applyScales {enable:true md:{h1:7}}
 
         m = new mapscr e
         m.cells.layout 30 0 12 10
@@ -673,7 +673,7 @@ hed = cols rows ext='md' feats=[]->
 
         m = new mapview h.screen e.state
         m.setSyntaxSegls 'md' e.state.s.lines
-        m.setScales {enabled:true md:{h1:3}}
+        m.setScales {enable:true md:{h1:3}}
 
         m.cells.layout 30 0 12 10
         m.csz = [10 20]
@@ -683,7 +683,7 @@ hed = cols rows ext='md' feats=[]->
         m.lineOffsetPixels(6) ▸ 32
         m.lineOffsetPixels(7) ▸ 36
 
-        m.setScales {enabled:false md:{h1:3}}
+        m.setScales {enable:false md:{h1:3}}
 
         m.lineRows(5) ▸ 1
         m.lineOffsetPixels(6) ▸ 24
@@ -695,7 +695,7 @@ hed = cols rows ext='md' feats=[]->
 
         m = new mapview h.screen e.state
         m.setSyntaxSegls 'md' e.state.s.lines
-        m.setScales {enabled:true md:{h1:7}}
+        m.setScales {enable:true md:{h1:7}}
 
         m.cells.layout 30 0 12 10
         m.csz = [10 20]
@@ -722,7 +722,7 @@ hed = cols rows ext='md' feats=[]->
             for j in 0...9
                 lines.push 'text'
         e.state.loadLines lines
-        e.state.applyScales {enabled:true md:{h1:7}}
+        e.state.applyScales {enable:true md:{h1:7}}
 
         m = new mapscr e
         m.cells.layout 30 0 8 10
@@ -749,7 +749,7 @@ hed = cols rows ext='md' feats=[]->
         for i in 0...20
             lines.push '# h1'
         e.state.loadLines lines
-        e.state.applyScales {enabled:true md:{h1:7}}
+        e.state.applyScales {enable:true md:{h1:7}}
 
         m = new mapscr e
         m.cells.layout 30 0 12 10
@@ -783,7 +783,7 @@ hed = cols rows ext='md' feats=[]->
         for i in 0...20
             lines.push '# h1'
         e.state.loadLines lines
-        e.state.applyScales {enabled:true md:{h1:7}}
+        e.state.applyScales {enable:true md:{h1:7}}
 
         m = new mapscr e
         m.cells.layout 30 0 12 10
@@ -811,7 +811,7 @@ hed = cols rows ext='md' feats=[]->
 
         [h e] = hed 40 10
         e.state.loadLines ['a' 'b' 'c' '# h1' 'd']
-        e.state.applyScales {enabled:true md:{h1:3}}
+        e.state.applyScales {enable:true md:{h1:3}}
 
         m = new mapscr e
         m.cells.layout 30 0 12 10
@@ -866,7 +866,7 @@ hed = cols rows ext='md' feats=[]->
         for i in 0...110
             lines.push (i == 104) ? '# h1' : 'x'
         e.state.loadLines lines
-        e.state.applyScales {enabled:true md:{h1:3}}
+        e.state.applyScales {enable:true md:{h1:3}}
 
         m = new mapscr e
         m.cells.layout 30 0 12 10
@@ -896,7 +896,7 @@ hed = cols rows ext='md' feats=[]->
 
         [h e] = hed 40 10
         e.state.loadLines ['a' 'b' '# h1' '## h2']
-        e.state.applyScales {enabled:true md:{h1:3 h2:2}}
+        e.state.applyScales {enable:true md:{h1:3 h2:2}}
 
         m = new mapscr e
         m.cells.layout 30 0 12 10
@@ -1018,7 +1018,7 @@ hed = cols rows ext='md' feats=[]->
         small = cols:20 rows:3
         s = new state small 'test_scale_scroll_offset'
         s.syntax.setExt 'md'
-        s.applyScales {enabled:true md:{h1:3 h2:2}}
+        s.applyScales {enable:true md:{h1:3 h2:2}}
         s.loadLines ['# a' 'b' '## c' 'd']
 
         s.setScrollTop 2
@@ -1038,7 +1038,7 @@ hed = cols rows ext='md' feats=[]->
         small = cols:20 rows:3
         s = new state small 'test_scale_wheel_rows'
         s.syntax.setExt 'md'
-        s.applyScales {enabled:true md:{h1:3 h2:2}}
+        s.applyScales {enable:true md:{h1:3 h2:2}}
         s.loadLines ['# abc' 'a' 'b' 'c']
 
         s.scrollView 'down'
@@ -1142,7 +1142,7 @@ hed = cols rows ext='md' feats=[]->
         for i in 0...10
             lines.push 'text'
         e.state.loadLines lines
-        e.state.applyScales {enabled:true md:{h1:7}}
+        e.state.applyScales {enable:true md:{h1:7}}
 
         e.state.setView [0 0]
         e.state.setCursors [[0 9]] main:0 adjust:'topBotDeltaGrow' mc:[0 8]

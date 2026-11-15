@@ -9,7 +9,7 @@ hed = cols=40 rows=10 ext='md' feats=[]->
         e = new editor h.screen 'editor' feats
         e.layout 0 0 cols rows
         e.state.syntax.setExt ext
-        e.state.applyScales {enabled:true md:{h1:3 h2:2}}
+        e.state.applyScales {enable:true md:{h1:3 h2:2}}
         e.grabFocus()
         [h e]
         
