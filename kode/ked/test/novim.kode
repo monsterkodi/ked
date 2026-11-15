@@ -581,6 +581,15 @@ mrange = lines x y m -> motion.range lines [x y] m
         mac.loadLines belt.linesForText("abc")
         mac.setMainCursor 0 0
 
+        feed '"'
+        feed 'b'
+        feed 'p'
+
+        mtxt() ▸ "A!<Esc>jabc"
+
+        mac.loadLines belt.linesForText("abc")
+        mac.setMainCursor 0 0
+
         feed 'q'
         feed 'c'
         feed 'x'
@@ -600,6 +609,26 @@ mrange = lines x y m -> motion.range lines [x y] m
         feed 'q'
 
         mac.registers.read('d').keys.length ▸ 2
+
+        mac.loadLines belt.linesForText("a\nb\nc")
+        mac.setMainCursor 0 0
+
+        mode.get(mac, 'novim').runEx 'd'
+
+        feed '@'
+        feed ':'
+
+        mtxt() ▸ "c"
+
+        mac.loadLines belt.linesForText("abc")
+        mac.setMainCursor 0 0
+
+        mac.registers.write 'e' { lines: ['x'], linewise: false } 'yank'
+
+        feed '@'
+        feed 'e'
+
+        mtxt() ▸ "bc"
 
         macroErrors = []
         post.on 'novim.error' (err) -> macroErrors.push err
@@ -2877,7 +2906,9 @@ mrange = lines x y m -> motion.range lines [x y] m
         clean()
     
         m.runEx 'q'
-    
+
+        s.registers.read(':').lines ▸ ['q']
+
         quits  ▸ 1
         writes ▸ []
         saves  ▸ []
@@ -3478,6 +3509,7 @@ mrange = lines x y m -> motion.range lines [x y] m
 
         sm.searchChanged 'bar'
         novim.lastVind ▸ 'bar'
+        s.registers.read('/').lines ▸ ['bar']
         s.s.highlights ▸ [[4 0 7] [3 1 6]]
 
         sm.searchChanged ''

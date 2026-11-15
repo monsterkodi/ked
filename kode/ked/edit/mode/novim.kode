@@ -172,7 +172,24 @@ use ..           ◆ mode
         
         pending = op:op area:@area prefix:@prefix count:@count register:@register
         post.emit 'novim.pending' pending
-        true        
+        true
+
+    playLastExCommand: count ->
+
+        value = @state.registers.read ':'
+
+        ⮐ false if not value
+
+        line = @state.registers.textForValue value
+
+        @state.macroLastRegister = ':'
+
+        n = max 1 (count ? 1)
+
+        for i in 0...n
+            @runEx line
+
+        true
 
     completeTextObject: target ->
 
@@ -239,7 +256,7 @@ use ..           ◆ mode
         @emitSearchPosition() if cmd.operator in ['searchNext' 'searchPrev' 'searchWord']
         true
 
-    runEx: line ->
+    runEx: line record=true ->
 
         @clearExHighlight()
 
@@ -251,7 +268,7 @@ use ..           ◆ mode
 
         ⮐ true if empty line
 
-        @state.registers.set ':', { lines: [line], linewise: false }
+        @state.registers.set ':', { lines: [line], linewise: false } if record
 
         @state.stopVisual() if @state.visual
 
@@ -372,7 +389,7 @@ use ..           ◆ mode
             before = @state.s.lines.length
             line   = "#{target+1},#{target+1}#{spec.command}"
 
-            break if @runEx(line) == false
+            break if @runEx(line, false) == false
 
             if @exConfirms
                 @finishSubstituteConfirm()
@@ -835,8 +852,13 @@ use ..           ◆ mode
             else if pending == 'play'
                 count = @countNumber()
                 @count = ''
-                if char == '@'
-                    @state.playLastMacro count
+                if char == ':'
+                    @playLastExCommand count
+                else if char == '@'
+                    if @state.macroLastRegister == ':'
+                        @playLastExCommand count
+                    else
+                        @state.playLastMacro count
                 else if char.length == 1
                     @state.playMacro char, count
                 else

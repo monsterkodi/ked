@@ -139,6 +139,25 @@
     /{pattern}                          search forward and highlight matches
     ?{pattern}                          search backward and highlight matches
     n  N                                jump in or against the search direction
+
+#### registers
+
+    "{register}                         use a register for the next yank, delete, or put
+    "a ... "z                           named registers
+    "A ... "Z                           uppercase names append
+    "0  "1-"9                           last yank, delete history
+    "-  "_                              small delete, black hole
+    "+  "*                              system clipboard
+    "/  ":                              last search, last ex command
+
+#### macros
+
+    q{register}                         start recording into a named register
+    q{Register}                         append to an existing macro
+    q                                   stop recording
+    @{register}                         execute a register as keys
+    @@                                  repeat the last executed register
+    3@a                                 execute a macro three times
     
 #### write & quit
     :w  :w {file}                       write the buffer to the file
