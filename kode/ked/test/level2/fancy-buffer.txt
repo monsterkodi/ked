@@ -1,75 +1,448 @@
-fancy-buffer -- unicode payload storage test
+fancy-buffer -- unicode payload ranges
 
-this file is plain text. everything you can read is meant to be read.
-the decoration is carried in invisible codepoints, so an editor, git or a
-pipe that preserves unknown codepoints preserves the decoration, and one
-that strips them loses only the decoration, never the text.
+one invisible character per line, each line prefixed with the codepoint and
+its unicode name. the character sits between two bars, so both questions
+are answered at a glance:
 
-tag characters   U+E0001 open, U+E0020 + ascii body, U+E007F close
-vs supplement    U+E0100 + digit, base 240, first digit is byte count
+  |x|   the character is invisible and has no width, the bars touch
+  | |   the character is invisible but counted as one column
+  |?|   the character is drawn as a glyph, box or replacement char
 
-section A   anchor after the run: open body close, then the run before it
-            the run length is part of the body, this is the cheap form
-section B   wrap around the run: open body text close
-section C   variation selector supplement, no open/close at all
-section D   mixed and dense
+section A  U+E0000..U+E007F  tag characters      128 chars
+section B  U+E0100..U+E01EF  variation selectors  240 chars
+section C  the same characters attached to a base char, the realistic case
+section D  payloads: open body close, the shape a real file would use
 
-decode a line with node, tags only:
-  node -e 'let o="";for(const c of process.argv[1]){const n=c.codePointAt(0);
-    o += n>=0xE0020&&n<=0xE007E ? String.fromCharCode(n-0xE0000)
-       : n>=0xE0000&&n<=0xE007F ? (n===0xE0001?"<":"")+(n===0xE007F?">":"")
-       : (n>=0xE0100?"{"+(n-0xE0100)+"}":c)}
-    console.log(o)' "$(sed -n Np this-file)"
+what to look for
+  all lines in a group should read the same. a line that reads differently
+  from its neighbours is a character this terminal or editor mishandles.
 
-A1  anchor after a single word
+============================================================
+
+SECTION A  tag characters, one per line
+
+U+E0000  unassigned     |󠀀|
+U+E0001  LANGUAGE TAG   |󠀁|
+U+E0002  unassigned     |󠀂|
+U+E0003  unassigned     |󠀃|
+U+E0004  unassigned     |󠀄|
+U+E0005  unassigned     |󠀅|
+U+E0006  unassigned     |󠀆|
+U+E0007  unassigned     |󠀇|
+U+E0008  unassigned     |󠀈|
+U+E0009  unassigned     |󠀉|
+U+E000A  unassigned     |󠀊|
+U+E000B  unassigned     |󠀋|
+U+E000C  unassigned     |󠀌|
+U+E000D  unassigned     |󠀍|
+U+E000E  unassigned     |󠀎|
+U+E000F  unassigned     |󠀏|
+U+E0010  unassigned     |󠀐|
+U+E0011  unassigned     |󠀑|
+U+E0012  unassigned     |󠀒|
+U+E0013  unassigned     |󠀓|
+U+E0014  unassigned     |󠀔|
+U+E0015  unassigned     |󠀕|
+U+E0016  unassigned     |󠀖|
+U+E0017  unassigned     |󠀗|
+U+E0018  unassigned     |󠀘|
+U+E0019  unassigned     |󠀙|
+U+E001A  unassigned     |󠀚|
+U+E001B  unassigned     |󠀛|
+U+E001C  unassigned     |󠀜|
+U+E001D  unassigned     |󠀝|
+U+E001E  unassigned     |󠀞|
+U+E001F  unassigned     |󠀟|
+U+E0020  TAG SPACE      |󠀠|
+U+E0021  TAG '!'        |󠀡|
+U+E0022  TAG '"'        |󠀢|
+U+E0023  TAG '#'        |󠀣|
+U+E0024  TAG '$'        |󠀤|
+U+E0025  TAG '%'        |󠀥|
+U+E0026  TAG '&'        |󠀦|
+U+E0027  TAG '''        |󠀧|
+U+E0028  TAG '('        |󠀨|
+U+E0029  TAG ')'        |󠀩|
+U+E002A  TAG '*'        |󠀪|
+U+E002B  TAG '+'        |󠀫|
+U+E002C  TAG ','        |󠀬|
+U+E002D  TAG '-'        |󠀭|
+U+E002E  TAG '.'        |󠀮|
+U+E002F  TAG '/'        |󠀯|
+U+E0030  TAG '0'        |󠀰|
+U+E0031  TAG '1'        |󠀱|
+U+E0032  TAG '2'        |󠀲|
+U+E0033  TAG '3'        |󠀳|
+U+E0034  TAG '4'        |󠀴|
+U+E0035  TAG '5'        |󠀵|
+U+E0036  TAG '6'        |󠀶|
+U+E0037  TAG '7'        |󠀷|
+U+E0038  TAG '8'        |󠀸|
+U+E0039  TAG '9'        |󠀹|
+U+E003A  TAG ':'        |󠀺|
+U+E003B  TAG ';'        |󠀻|
+U+E003C  TAG '<'        |󠀼|
+U+E003D  TAG '='        |󠀽|
+U+E003E  TAG '>'        |󠀾|
+U+E003F  TAG '?'        |󠀿|
+U+E0040  TAG '@'        |󠁀|
+U+E0041  TAG 'A'        |󠁁|
+U+E0042  TAG 'B'        |󠁂|
+U+E0043  TAG 'C'        |󠁃|
+U+E0044  TAG 'D'        |󠁄|
+U+E0045  TAG 'E'        |󠁅|
+U+E0046  TAG 'F'        |󠁆|
+U+E0047  TAG 'G'        |󠁇|
+U+E0048  TAG 'H'        |󠁈|
+U+E0049  TAG 'I'        |󠁉|
+U+E004A  TAG 'J'        |󠁊|
+U+E004B  TAG 'K'        |󠁋|
+U+E004C  TAG 'L'        |󠁌|
+U+E004D  TAG 'M'        |󠁍|
+U+E004E  TAG 'N'        |󠁎|
+U+E004F  TAG 'O'        |󠁏|
+U+E0050  TAG 'P'        |󠁐|
+U+E0051  TAG 'Q'        |󠁑|
+U+E0052  TAG 'R'        |󠁒|
+U+E0053  TAG 'S'        |󠁓|
+U+E0054  TAG 'T'        |󠁔|
+U+E0055  TAG 'U'        |󠁕|
+U+E0056  TAG 'V'        |󠁖|
+U+E0057  TAG 'W'        |󠁗|
+U+E0058  TAG 'X'        |󠁘|
+U+E0059  TAG 'Y'        |󠁙|
+U+E005A  TAG 'Z'        |󠁚|
+U+E005B  TAG '['        |󠁛|
+U+E005C  TAG '\'        |󠁜|
+U+E005D  TAG ']'        |󠁝|
+U+E005E  TAG '^'        |󠁞|
+U+E005F  TAG '_'        |󠁟|
+U+E0060  TAG '`'        |󠁠|
+U+E0061  TAG 'a'        |󠁡|
+U+E0062  TAG 'b'        |󠁢|
+U+E0063  TAG 'c'        |󠁣|
+U+E0064  TAG 'd'        |󠁤|
+U+E0065  TAG 'e'        |󠁥|
+U+E0066  TAG 'f'        |󠁦|
+U+E0067  TAG 'g'        |󠁧|
+U+E0068  TAG 'h'        |󠁨|
+U+E0069  TAG 'i'        |󠁩|
+U+E006A  TAG 'j'        |󠁪|
+U+E006B  TAG 'k'        |󠁫|
+U+E006C  TAG 'l'        |󠁬|
+U+E006D  TAG 'm'        |󠁭|
+U+E006E  TAG 'n'        |󠁮|
+U+E006F  TAG 'o'        |󠁯|
+U+E0070  TAG 'p'        |󠁰|
+U+E0071  TAG 'q'        |󠁱|
+U+E0072  TAG 'r'        |󠁲|
+U+E0073  TAG 's'        |󠁳|
+U+E0074  TAG 't'        |󠁴|
+U+E0075  TAG 'u'        |󠁵|
+U+E0076  TAG 'v'        |󠁶|
+U+E0077  TAG 'w'        |󠁷|
+U+E0078  TAG 'x'        |󠁸|
+U+E0079  TAG 'y'        |󠁹|
+U+E007A  TAG 'z'        |󠁺|
+U+E007B  TAG '{'        |󠁻|
+U+E007C  TAG '|'        |󠁼|
+U+E007D  TAG '}'        |󠁽|
+U+E007E  TAG '~'        |󠁾|
+U+E007F  CANCEL TAG     |󠁿|
+
+============================================================
+
+SECTION B  variation selectors, one per line
+
+U+E0100  VS-17          |󠄀|
+U+E0101  VS-18          |󠄁|
+U+E0102  VS-19          |󠄂|
+U+E0103  VS-20          |󠄃|
+U+E0104  VS-21          |󠄄|
+U+E0105  VS-22          |󠄅|
+U+E0106  VS-23          |󠄆|
+U+E0107  VS-24          |󠄇|
+U+E0108  VS-25          |󠄈|
+U+E0109  VS-26          |󠄉|
+U+E010A  VS-27          |󠄊|
+U+E010B  VS-28          |󠄋|
+U+E010C  VS-29          |󠄌|
+U+E010D  VS-30          |󠄍|
+U+E010E  VS-31          |󠄎|
+U+E010F  VS-32          |󠄏|
+U+E0110  VS-33          |󠄐|
+U+E0111  VS-34          |󠄑|
+U+E0112  VS-35          |󠄒|
+U+E0113  VS-36          |󠄓|
+U+E0114  VS-37          |󠄔|
+U+E0115  VS-38          |󠄕|
+U+E0116  VS-39          |󠄖|
+U+E0117  VS-40          |󠄗|
+U+E0118  VS-41          |󠄘|
+U+E0119  VS-42          |󠄙|
+U+E011A  VS-43          |󠄚|
+U+E011B  VS-44          |󠄛|
+U+E011C  VS-45          |󠄜|
+U+E011D  VS-46          |󠄝|
+U+E011E  VS-47          |󠄞|
+U+E011F  VS-48          |󠄟|
+U+E0120  VS-49          |󠄠|
+U+E0121  VS-50          |󠄡|
+U+E0122  VS-51          |󠄢|
+U+E0123  VS-52          |󠄣|
+U+E0124  VS-53          |󠄤|
+U+E0125  VS-54          |󠄥|
+U+E0126  VS-55          |󠄦|
+U+E0127  VS-56          |󠄧|
+U+E0128  VS-57          |󠄨|
+U+E0129  VS-58          |󠄩|
+U+E012A  VS-59          |󠄪|
+U+E012B  VS-60          |󠄫|
+U+E012C  VS-61          |󠄬|
+U+E012D  VS-62          |󠄭|
+U+E012E  VS-63          |󠄮|
+U+E012F  VS-64          |󠄯|
+U+E0130  VS-65          |󠄰|
+U+E0131  VS-66          |󠄱|
+U+E0132  VS-67          |󠄲|
+U+E0133  VS-68          |󠄳|
+U+E0134  VS-69          |󠄴|
+U+E0135  VS-70          |󠄵|
+U+E0136  VS-71          |󠄶|
+U+E0137  VS-72          |󠄷|
+U+E0138  VS-73          |󠄸|
+U+E0139  VS-74          |󠄹|
+U+E013A  VS-75          |󠄺|
+U+E013B  VS-76          |󠄻|
+U+E013C  VS-77          |󠄼|
+U+E013D  VS-78          |󠄽|
+U+E013E  VS-79          |󠄾|
+U+E013F  VS-80          |󠄿|
+U+E0140  VS-81          |󠅀|
+U+E0141  VS-82          |󠅁|
+U+E0142  VS-83          |󠅂|
+U+E0143  VS-84          |󠅃|
+U+E0144  VS-85          |󠅄|
+U+E0145  VS-86          |󠅅|
+U+E0146  VS-87          |󠅆|
+U+E0147  VS-88          |󠅇|
+U+E0148  VS-89          |󠅈|
+U+E0149  VS-90          |󠅉|
+U+E014A  VS-91          |󠅊|
+U+E014B  VS-92          |󠅋|
+U+E014C  VS-93          |󠅌|
+U+E014D  VS-94          |󠅍|
+U+E014E  VS-95          |󠅎|
+U+E014F  VS-96          |󠅏|
+U+E0150  VS-97          |󠅐|
+U+E0151  VS-98          |󠅑|
+U+E0152  VS-99          |󠅒|
+U+E0153  VS-100         |󠅓|
+U+E0154  VS-101         |󠅔|
+U+E0155  VS-102         |󠅕|
+U+E0156  VS-103         |󠅖|
+U+E0157  VS-104         |󠅗|
+U+E0158  VS-105         |󠅘|
+U+E0159  VS-106         |󠅙|
+U+E015A  VS-107         |󠅚|
+U+E015B  VS-108         |󠅛|
+U+E015C  VS-109         |󠅜|
+U+E015D  VS-110         |󠅝|
+U+E015E  VS-111         |󠅞|
+U+E015F  VS-112         |󠅟|
+U+E0160  VS-113         |󠅠|
+U+E0161  VS-114         |󠅡|
+U+E0162  VS-115         |󠅢|
+U+E0163  VS-116         |󠅣|
+U+E0164  VS-117         |󠅤|
+U+E0165  VS-118         |󠅥|
+U+E0166  VS-119         |󠅦|
+U+E0167  VS-120         |󠅧|
+U+E0168  VS-121         |󠅨|
+U+E0169  VS-122         |󠅩|
+U+E016A  VS-123         |󠅪|
+U+E016B  VS-124         |󠅫|
+U+E016C  VS-125         |󠅬|
+U+E016D  VS-126         |󠅭|
+U+E016E  VS-127         |󠅮|
+U+E016F  VS-128         |󠅯|
+U+E0170  VS-129         |󠅰|
+U+E0171  VS-130         |󠅱|
+U+E0172  VS-131         |󠅲|
+U+E0173  VS-132         |󠅳|
+U+E0174  VS-133         |󠅴|
+U+E0175  VS-134         |󠅵|
+U+E0176  VS-135         |󠅶|
+U+E0177  VS-136         |󠅷|
+U+E0178  VS-137         |󠅸|
+U+E0179  VS-138         |󠅹|
+U+E017A  VS-139         |󠅺|
+U+E017B  VS-140         |󠅻|
+U+E017C  VS-141         |󠅼|
+U+E017D  VS-142         |󠅽|
+U+E017E  VS-143         |󠅾|
+U+E017F  VS-144         |󠅿|
+U+E0180  VS-145         |󠆀|
+U+E0181  VS-146         |󠆁|
+U+E0182  VS-147         |󠆂|
+U+E0183  VS-148         |󠆃|
+U+E0184  VS-149         |󠆄|
+U+E0185  VS-150         |󠆅|
+U+E0186  VS-151         |󠆆|
+U+E0187  VS-152         |󠆇|
+U+E0188  VS-153         |󠆈|
+U+E0189  VS-154         |󠆉|
+U+E018A  VS-155         |󠆊|
+U+E018B  VS-156         |󠆋|
+U+E018C  VS-157         |󠆌|
+U+E018D  VS-158         |󠆍|
+U+E018E  VS-159         |󠆎|
+U+E018F  VS-160         |󠆏|
+U+E0190  VS-161         |󠆐|
+U+E0191  VS-162         |󠆑|
+U+E0192  VS-163         |󠆒|
+U+E0193  VS-164         |󠆓|
+U+E0194  VS-165         |󠆔|
+U+E0195  VS-166         |󠆕|
+U+E0196  VS-167         |󠆖|
+U+E0197  VS-168         |󠆗|
+U+E0198  VS-169         |󠆘|
+U+E0199  VS-170         |󠆙|
+U+E019A  VS-171         |󠆚|
+U+E019B  VS-172         |󠆛|
+U+E019C  VS-173         |󠆜|
+U+E019D  VS-174         |󠆝|
+U+E019E  VS-175         |󠆞|
+U+E019F  VS-176         |󠆟|
+U+E01A0  VS-177         |󠆠|
+U+E01A1  VS-178         |󠆡|
+U+E01A2  VS-179         |󠆢|
+U+E01A3  VS-180         |󠆣|
+U+E01A4  VS-181         |󠆤|
+U+E01A5  VS-182         |󠆥|
+U+E01A6  VS-183         |󠆦|
+U+E01A7  VS-184         |󠆧|
+U+E01A8  VS-185         |󠆨|
+U+E01A9  VS-186         |󠆩|
+U+E01AA  VS-187         |󠆪|
+U+E01AB  VS-188         |󠆫|
+U+E01AC  VS-189         |󠆬|
+U+E01AD  VS-190         |󠆭|
+U+E01AE  VS-191         |󠆮|
+U+E01AF  VS-192         |󠆯|
+U+E01B0  VS-193         |󠆰|
+U+E01B1  VS-194         |󠆱|
+U+E01B2  VS-195         |󠆲|
+U+E01B3  VS-196         |󠆳|
+U+E01B4  VS-197         |󠆴|
+U+E01B5  VS-198         |󠆵|
+U+E01B6  VS-199         |󠆶|
+U+E01B7  VS-200         |󠆷|
+U+E01B8  VS-201         |󠆸|
+U+E01B9  VS-202         |󠆹|
+U+E01BA  VS-203         |󠆺|
+U+E01BB  VS-204         |󠆻|
+U+E01BC  VS-205         |󠆼|
+U+E01BD  VS-206         |󠆽|
+U+E01BE  VS-207         |󠆾|
+U+E01BF  VS-208         |󠆿|
+U+E01C0  VS-209         |󠇀|
+U+E01C1  VS-210         |󠇁|
+U+E01C2  VS-211         |󠇂|
+U+E01C3  VS-212         |󠇃|
+U+E01C4  VS-213         |󠇄|
+U+E01C5  VS-214         |󠇅|
+U+E01C6  VS-215         |󠇆|
+U+E01C7  VS-216         |󠇇|
+U+E01C8  VS-217         |󠇈|
+U+E01C9  VS-218         |󠇉|
+U+E01CA  VS-219         |󠇊|
+U+E01CB  VS-220         |󠇋|
+U+E01CC  VS-221         |󠇌|
+U+E01CD  VS-222         |󠇍|
+U+E01CE  VS-223         |󠇎|
+U+E01CF  VS-224         |󠇏|
+U+E01D0  VS-225         |󠇐|
+U+E01D1  VS-226         |󠇑|
+U+E01D2  VS-227         |󠇒|
+U+E01D3  VS-228         |󠇓|
+U+E01D4  VS-229         |󠇔|
+U+E01D5  VS-230         |󠇕|
+U+E01D6  VS-231         |󠇖|
+U+E01D7  VS-232         |󠇗|
+U+E01D8  VS-233         |󠇘|
+U+E01D9  VS-234         |󠇙|
+U+E01DA  VS-235         |󠇚|
+U+E01DB  VS-236         |󠇛|
+U+E01DC  VS-237         |󠇜|
+U+E01DD  VS-238         |󠇝|
+U+E01DE  VS-239         |󠇞|
+U+E01DF  VS-240         |󠇟|
+U+E01E0  VS-241         |󠇠|
+U+E01E1  VS-242         |󠇡|
+U+E01E2  VS-243         |󠇢|
+U+E01E3  VS-244         |󠇣|
+U+E01E4  VS-245         |󠇤|
+U+E01E5  VS-246         |󠇥|
+U+E01E6  VS-247         |󠇦|
+U+E01E7  VS-248         |󠇧|
+U+E01E8  VS-249         |󠇨|
+U+E01E9  VS-250         |󠇩|
+U+E01EA  VS-251         |󠇪|
+U+E01EB  VS-252         |󠇫|
+U+E01EC  VS-253         |󠇬|
+U+E01ED  VS-254         |󠇭|
+U+E01EE  VS-255         |󠇮|
+U+E01EF  VS-256         |󠇯|
+
+============================================================
+
+SECTION C  attached to a base character
+
+a terminal can only hide a character that it agrees has no width. a
+standalone one may be split off, an attached one may not. each group below
+is a base character followed by the invisible one.
+
+U+E0000  unassigned     |a󠀀|
+U+E0001  LANGUAGE TAG   |a󠀁|
+U+E0020  TAG SPACE      |a󠀠|
+U+E0041  TAG 'A'        |a󠁁|
+U+E0061  TAG 'a'        |a󠁡|
+U+E007E  TAG '~'        |a󠁾|
+U+E007F  CANCEL TAG     |a󠁿|
+
+U+E0100  VS-17          |a󠄀| |x󠄀| |1󠄀|
+U+E0101  VS-18          |a󠄁| |x󠄁| |1󠄁|
+U+E0110  VS-33          |a󠄐| |x󠄐| |1󠄐|
+U+E017F  VS-144         |a󠅿| |x󠅿| |1󠅿|
+U+E01EF  VS-256         |a󠇯| |x󠇯| |1󠇯|
+
+============================================================
+
+SECTION D  payloads
+
+tag payload   U+E0001 open, U+E0020 + ascii body, U+E007F close
+vs payload    U+E0100 + digit, base 240, first digit is the byte count
+
+anchor after a run
 hello󠀁󠁬󠁥󠁮󠀽󠀵󠁿
-
-A2  anchor after a phrase, one payload for the whole phrase
 red words󠀁󠁬󠁥󠁮󠀽󠀹󠀻󠁦󠁧󠀽󠁦󠁦󠀲󠀲󠀰󠀰󠁿
-
-A3  anchor with several attributes
 a long run of ordinary text󠀁󠁬󠁥󠁮󠀽󠀲󠀴󠀻󠁢󠁧󠀽󠀰󠀰󠀳󠀳󠀶󠀶󠀻󠁦󠁧󠀽󠁦󠁦󠁦󠁦󠁦󠁦󠀻󠁳󠀽󠀲󠁿
-
-A4  anchor at the very end of a line, nothing visible after it󠀁󠁬󠁥󠁮󠀽󠀹󠀹󠀻󠁮󠁯󠁴󠁥󠀽󠁥󠁮󠁤󠀭󠁯󠁦󠀭󠁬󠁩󠁮󠁥󠁿
-
-A5  anchors after non-ascii bases
 café󠀁󠁬󠁥󠁮󠀽󠀴󠀻󠁦󠁧󠀽󠁦󠁦󠁡󠁡󠀰󠀰󠁿
 漢字󠀁󠁬󠁥󠁮󠀽󠀲󠀻󠁳󠀽󠀳󠁿
 🐈󠀁󠁬󠁥󠁮󠀽󠀱󠀻󠁢󠁧󠀽󠀲󠀲󠀰󠀰󠀴󠀴󠁿
-éclair󠀁󠁬󠁥󠁮󠀽󠀶󠀻󠁮󠁯󠁴󠁥󠀽󠁣󠁯󠁭󠁢󠁩󠁮󠁩󠁮󠁧󠁿
 
-A6  a long body, 300 ascii chars of payload after one word
-word󠀁󠁬󠁥󠁮󠀽󠀴󠀻󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁿
-
-B1  wrap around a run
+wrap around a run
 󠀁󠁬󠁥󠁮󠀽󠀸󠀻󠁦󠁧󠀽󠀰󠀰󠁦󠁦󠀸󠀸wrapped!󠁿
-
-B2  wrap around a run that itself contains a tag payload
-󠀁󠁬󠁥󠁮󠀽󠀵󠀻󠁳󠀽󠀲abc󠀁󠁬󠁥󠁮󠀽󠀳󠀻󠁦󠁧󠀽󠁦󠁦󠀰󠀰󠀰󠀰󠁿de󠁿
-
-B3  two wraps side by side, no visible char between them
 󠀁󠁬󠁥󠁮󠀽󠀳one󠁿󠀁󠁬󠁥󠁮󠀽󠀳two󠁿
 
-C1  vs supplement after ascii, body decodes to "s=2"
+vs payload after a run
 small text󠄃󠄀󠆃󠄛󠇢
-
-C2  vs supplement after combining marks
-éclair󠄉󠄀󠆫󠆒󠅸󠅇󠇏󠄫󠅟󠅧󠆠
-
-C3  vs supplement after an emoji
-🐈󠄉󠄀󠆤󠇙󠆨󠇜󠆺󠇐󠅞󠆠󠄴
-
-C4  vs supplement with a longer body
 longer text󠄚󠄂󠅀󠄨󠄓󠄭󠇨󠄢󠇪󠅀󠆻󠇚󠄩󠅞󠆮󠇘󠄵󠄰󠆻󠅦󠅯󠇕󠆀󠆼󠇓󠆶󠆩󠇈
 
-D1  tag anchor and vs supplement on the same run
+both kinds, and a payload after every character
 both kinds󠀁󠁬󠁥󠁮󠀽󠀱󠀰󠀻󠁳󠀽󠀲󠁿󠄉󠄀󠆫󠆒󠅸󠅇󠇎󠇩󠅪󠆠󠄰
-
-D2  a payload after every character
 d󠀁󠁣󠀽󠀶󠀴󠁿e󠀁󠁣󠀽󠀶󠀵󠁿n󠀁󠁣󠀽󠀶󠁥󠁿s󠀁󠁣󠀽󠀷󠀳󠁿e󠀁󠁣󠀽󠀶󠀵󠁿
 
-D3  bare tags, no open or close marker at all, this is noise
-noise󠁯󠁲󠁰󠁨󠁡󠁮
-
-D4  plain control line, no invisibles anywhere
+plain control line, no invisibles anywhere
 plain control line
