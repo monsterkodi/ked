@@ -160,7 +160,7 @@ ked_sess = ->
 
         delete global.ked_session
 
-  ▸ an explicit color picker gets a width in a narrow terminal
+  ▸ an explicit 󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁥󠁥󠁦󠁦󠀰󠀰󠀢󠀬󠀢󠀣󠁦󠀵󠀱󠀱󠀱󠀱󠀢󠀬󠀵󠀬󠀱󠁝󠁝color picker gets a width in a narrow terminal
 
         ked_sess()
         

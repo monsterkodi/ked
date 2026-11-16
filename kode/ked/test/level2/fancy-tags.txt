@@ -5,34 +5,34 @@ the tag block that nvim handles without trouble. nothing below is above
 U+E007F, so U+E0000..U+E001F never appear here.
 
 the mapping is ascii plus 0xE0000:
-  U+E0020 = tag space        U+E0041 = tag A        U+E0061 = tag a
-  U+E0021 = tag !            U+E005A = tag Z        U+E007E = tag ~
-  U+E007F = cancel tag, it has no ascii value and terminates a payload
+  U+E0020 = tag space        U+E0041 = tag 󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝A        U+E0061 = tag a
+  U+E0021 = tag !            U+E005A = tag 󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝Z        U+E007E = tag ~
+  U+E007F = cancel tag, it has no ascii val󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝ue and terminates a payload
 
-a payload is a maximal run of tag characters ending in the first cancel
-tag. a literal 0x7f byte inside the body is written as two cancel tags.
-there is no open marker: the run after visible text is the payload, and
-U+E0001 would be the natural opener but it is out of range here.
+a payload is a maximal run of tag 󠀡󠀰󠀰󠀳󠀱󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠁥󠁣󠁣󠀢󠀬󠀲󠀱󠀬󠀱󠁝󠁝character󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝s ending in the first cancel
+tag. a literal 0x7f byte inside th󠀡󠀰󠀰󠀳󠀱󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠁥󠁣󠁣󠀢󠀬󠀲󠀱󠀬󠀱󠁝󠁝e 󠀡󠀰󠀰󠀳󠀱󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠁤󠀵󠀰󠀰󠀢󠀬󠀢󠀣󠀶󠀶󠀰󠀰󠀴󠁢󠀢󠀬󠀱󠀵󠀬󠀱󠁝󠁝body is󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝 written as two cancel tags.
+there is no open marker: the run a󠀡󠀰󠀰󠀳󠀱󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠁥󠁣󠁣󠀢󠀬󠀲󠀱󠀬󠀱󠁝󠁝ft󠀡󠀰󠀰󠀳󠀱󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠁤󠀵󠀰󠀰󠀢󠀬󠀢󠀣󠀶󠀶󠀰󠀰󠀴󠁢󠀢󠀬󠀱󠀵󠀬󠀱󠁝󠁝er visi󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝ble text is the payload, and
+U+E0001 would be the natural opene󠀡󠀰󠀰󠀳󠀱󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠁥󠁣󠁣󠀢󠀬󠀲󠀱󠀬󠀱󠁝󠁝r but it 󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝is out of range here.
 
 ============================================================
 
 SECTION A  one tag per line, between bars, the width check
 
 U+E0020  TAG SPACE    |󠀠|
-U+E0021  TAG '!'      |󠀡|
-U+E0030  TAG '0'      |󠀰|
-U+E0041  TAG 'A'      |󠁁|
-U+E005A  TAG 'Z'      |󠁚|
-U+E0061  TAG 'a'      |󠁡|
-U+E0076  TAG 'v'      |󠁶|
-U+E007E  TAG '~'      |󠁾|
+U+E0021  TAG '!'      ||
+U+E0030  TAG '0'      ||
+U+E0041  TAG 'A'      ||
+U+E005A  TAG 'Z'      ||
+U+E0061  TAG 'a'      ||
+U+E0076  TAG 'v'      ||
+U+E007E  TAG '~'      ||
 U+E007F  CANCEL TAG   |󠁿|
 
 the same attached to a base character
 
 U+E0020  attached     |a󠀠|  |x󠀠|  |1󠀠|
-U+E0041  attached     |a󠁁|  |x󠁁|  |1󠁁|
-U+E0061  attached     |a󠁡|  |x󠁡|  |1󠁡|
+U+E0041  attached     |a|  |x|  |1|
+U+E0061  attached     |a|  |x|  |1|
 U+E007F  attached     |a󠁿|  |x󠁿|  |1󠁿|
 
 ============================================================
@@ -41,28 +41,28 @@ SECTION B  runs of tag characters, all in a row
 
 a run of n tag letters after a word, then a bar. the bar should stay put.
 
-run   1  word󠁡|  <- bar at column 14
-run   2  word󠁡󠁡|  <- bar at column 14
-run   3  word󠁡󠁡󠁡|  <- bar at column 14
-run   4  word󠁡󠁡󠁡󠁡|  <- bar at column 14
-run   8  word󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡|  <- bar at column 14
-run  16  word󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡|  <- bar at column 14
-run  32  word󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡|  <- bar at column 14
-run  64  word󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡|  <- bar at column 14
-run  96  word󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡|  <- bar at column 14
+run   1  word|  <- bar at column 14
+run   2  word|  <- bar at column 14
+run   3  word|  <- bar at column 14
+run   4  word|  <- bar at column 14
+run   8  word|  <- bar at column 14
+run  16  word|  <- bar at column 14
+run  32  word|  <- bar at column 14
+run  64  word|  <- bar at column 14
+run  96  word|  <- bar at column 14
 
 the same runs before the word
 
-pre   1  |󠁡word  <- word starts after the bar
-pre   2  |󠁡󠁡word  <- word starts after the bar
-pre   4  |󠁡󠁡󠁡󠁡word  <- word starts after the bar
-pre  16  |󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡word  <- word starts after the bar
-pre  96  |󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡word  <- word starts after the bar
+pre   1  |word  <- word starts after the bar
+pre   2  |word  <- word starts after the bar
+pre   4  |word  <- word starts after the bar
+pre  16  |word  <- word starts after the bar
+pre  96  |word  <- word starts after the bar
 
 a run in the middle of a sentence
 
-this sentence has󠁍󠁉󠁄󠁄󠁌󠁅 seven invisible characters after the word has.
-this one has󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸 forty, and the words after it still wrap normally.
+this sentence has seven invisible characters after the word has.
+this one has forty, and the words after it still wrap normally.
 
 ============================================================
 
@@ -73,19 +73,19 @@ editor that drops them shows the next line as blank. an editor that counts
 them shows it as indented. an editor that draws them shows junk.
 
 next line: 1 tag letters and nothing else
-󠁡
+
 
 next line: 2 tag letters and nothing else
-󠁡󠁡
+
 
 next line: 4 tag letters and nothing else
-󠁡󠁡󠁡󠁡
+
 
 next line: 16 tag letters and nothing else
-󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡
+
 
 next line: 96 tag letters and nothing else
-󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡󠁡
+
 
 next line: one tag space and nothing else
 󠀠
@@ -130,26 +130,26 @@ after the text󠁡󠀽󠀱󠁿󠁢󠀽󠀲󠁿󠁣󠀽󠀳󠁿
 SECTION F  crowded
 
 a tag after every character:
-c󠁡r󠁡o󠁡w󠁡d󠁡e󠁡d󠁡
+crowded
 
 a payload after every character:
 d󠁣󠀽󠀶󠀴󠁿e󠁣󠀽󠀶󠀵󠁿n󠁣󠀽󠀶󠁥󠁿s󠁣󠀽󠀷󠀳󠁿e󠁣󠀽󠀶󠀵󠁿
 
 alternating tag and space:
-󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡
+󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠
 
 one long line, 300 interleaved tags:
-a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡a󠁡b󠁡c󠁡d󠁡e󠁡f󠁡g󠁡h󠁡i󠁡j󠁡| <- bar at column 301
+abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij| <- bar at column 301
 
 ============================================================
 
 SECTION G  neighbours
 
-after non-ascii: café󠁸 漢字󠁹 🐈󠁺 éclair󠁷
-before punctuation: word󠁸, word󠁹. (word󠁺) [word󠁶]
-inside a word: in󠁸vis󠁹ible
-at a tab: 	󠁸after a tab
-around quotes: "󠁸quoted󠁹"
+after non-ascii: café 漢字 🐈 éclair
+before punctuation: word, word. (word) [word]
+inside a word: invisible
+at a tab:   after a tab
+around quotes: "quoted"
 
 ============================================================
 
