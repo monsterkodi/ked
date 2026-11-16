@@ -26,6 +26,19 @@ use ◆ colorspans
 #  line and y the line index, both counted in the text that follows the
 #  payload. value is whatever JSON.parse makes of the body.
 
+#  style areas carry flags, a string of b i u s
+#  two areas over the same cells stack, so flags are joined, not replaced
+
+addFlags = (have add) ->
+
+    have ?= ''
+    add  ?= ''
+
+    for ch in Array.from(add)
+        have += ch if not have.includes ch
+
+    have
+
 #  the codes of the features that use sue
 #  a value is [code, data], the code says which feature it belongs to
 
@@ -142,6 +155,86 @@ collect = (pending y x areas) ->
     @FG_BG_COLOR: FG_BG_COLOR
     @STYLE:       STYLE
     @LINE_SCALE:  LINE_SCALE
+
+    @addFlags: (have add) -> addFlags(have add)
+
+    #  the values of a style area are [flags] or [ul, flags]
+
+    @styleOfValues: values ->
+
+        values ?= []
+
+        if values.length > 1
+            [values[0] values[1]]
+        else
+            [values[0] null]
+
+    #  the flags and underline color in effect at a cell, from all areas
+
+    @styleFlagsAt: (areas lines x y) ->
+
+        flags = ''
+        ul    = null
+
+        for area in areas
+
+            continue if area.value[0] != STYLE
+
+            box = @boxForAreaAndLines(area lines)
+            continue if not box?
+
+            continue if y < box.y or y >= box.y + box.h
+            continue if x < box.x or x >= box.x + box.w
+
+            [f u] = @styleOfValues(box.values)
+
+            flags = addFlags(flags f)
+            ul    = u if u?
+
+        [flags ul]
+
+    #  toggle one flag over the ranges
+    #
+    #  the style areas are cut out of the ranges first and the range is
+    #  then covered by a single area with the joined flags, so applying a
+    #  flag a second time takes it away again
+
+    @rangesWithToggledFlag: (ranges areas lines flag) ->
+
+        styles = []
+        keep   = []
+
+        for area in areas
+            if area.value[0] == STYLE
+                styles.push area
+            else
+                keep.push area
+
+        styles = @rangesCutFromAreasInLines(ranges styles lines)
+
+        add = []
+
+        for rng in ranges
+
+            [flags ul] = @styleFlagsAt(areas lines rng[0] rng[1])
+
+            if flags.includes flag
+                flags = flags.replace(flag, '')
+            else
+                flags += flag
+
+            continue if empty flags
+
+            w = max 1 (rng[2] - rng[0])
+            h = rng[3] - rng[1] + 1
+
+            values = [flags]
+            values = [ul flags] if ul?
+
+            add.push {x: rng[0] y: rng[1] value: [STYLE values.concat([w h])]}
+
+        next = keep.concat(styles)
+        next.concat(add)
 
     @sueAscii: symbols ->
         out = ''

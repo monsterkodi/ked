@@ -74,7 +74,7 @@ use           ◆ keys mode
         @h = [@s] # undo states (history)
         @r = []   # redo states
 
-󠀡󠀰󠀰󠀰󠀸󠁛󠀴󠀰󠀬󠁛󠀷󠁝󠁝#!set
+#!set
 
     set: item arg =>
 
@@ -206,6 +206,21 @@ use           ◆ keys mode
             w = max 1 (rng[2] - rng[0])
             h = rng[3] - rng[1] + 1
             @setSue rng[0] rng[1] [code values.concat([w h])]
+
+    toggleSueFlag: flag =>
+
+        ranges = @decorationRanges()
+        ⮐ if empty ranges
+
+        next = sue.rangesWithToggledFlag(ranges (@s.sue ? []) @s.lines flag)
+
+        ⮐ if next eql @s.sue
+
+        @s = @s.set 'sue' next
+        @rowCache = null
+        @r = []
+        @pushState()
+        @emit 'sue.changed'
 
     setLineScale: (y scale) =>
 

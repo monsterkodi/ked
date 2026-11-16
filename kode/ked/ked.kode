@@ -553,11 +553,9 @@ use child_process ▪ spawn exec
 
 #!save
     
-    styleSelection: flags =>
+    toggleStyle: flag =>
 
-        ranges = @editor.state.decorationRanges()
-
-        @editor.state.addSueForRanges(ranges susan.STYLE [flags])
+        @editor.state.toggleSueFlag flag
 
         @redraw()
 
@@ -776,10 +774,10 @@ use child_process ▪ spawn exec
             'alt+c'                      ➜ ⮐ post.emit 'colorpicker.show'
             'alt+u'                      ➜ ⮐ post.emit 'uniko.show'
             'shift+alt+c'                ➜ ⮐ @clearDecoration()
-            'shift+alt+u'                ➜ ⮐ @styleSelection 'u'
-            'shift+alt+s'                ➜ ⮐ @styleSelection 's'
-            'shift+alt+b'                ➜ ⮐ @styleSelection 'b'
-            'shift+alt+i'                ➜ ⮐ @styleSelection 'i'
+            'shift+alt+u'                ➜ ⮐ @toggleStyle 'u'
+            'shift+alt+s'                ➜ ⮐ @toggleStyle 's'
+            'shift+alt+b'                ➜ ⮐ @toggleStyle 'b'
+            'shift+alt+i'                ➜ ⮐ @toggleStyle 'i'
             'shift+alt+='                ➜ ⮐ @scaleLine 1
             'shift+alt+-'                ➜ ⮐ @scaleLine -1
                             

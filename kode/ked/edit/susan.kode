@@ -16,6 +16,9 @@ use ./tool  ◆ sue
         file written by a newer ked still loads. the codes themselves
         live in sue.
 
+        style areas stack: their flags are joined per cell, so a bold
+        area and an underlined area over the same text give both.
+
         not yet: overlapping areas, areas in views other than the editor
     ###
 
@@ -65,8 +68,7 @@ use ./tool  ◆ sue
             scale = @state.lineHeight y
             continue if row + scale > @cells.rows
 
-            code   = area.value[0]
-            values = box.values
+            code = area.value[0]
 
             fg   = null
             bg   = null
@@ -74,18 +76,14 @@ use ./tool  ◆ sue
             ul   = null
 
             if code == sue.FG_COLOR
-                fg = values[0]
+                fg = box.values[0]
             else if code == sue.BG_COLOR
-                bg = values[0]
+                bg = box.values[0]
             else if code == sue.FG_BG_COLOR
-                fg = values[0]
-                bg = values[1]
+                fg = box.values[0]
+                bg = box.values[1]
             else if code == sue.STYLE
-                if values.length > 1
-                    ul   = values[0]
-                    attr = values[1]
-                else
-                    attr = values[0]
+                [attr ul] = sue.styleOfValues(box.values)
             else
                 continue
 
@@ -104,6 +102,7 @@ use ./tool  ◆ sue
                         @cells.set_fg x r fg
                 if attr? or ul?
                     for x in x1...x2
-                        @cells.set_attr x r attr ul
+                        [have hul] = @cells.get_attr x r
+                        @cells.set_attr x r (sue.addFlags(have attr)) (ul ? hul)
 
 export susan

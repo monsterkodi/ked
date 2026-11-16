@@ -16,20 +16,20 @@ susan = (function ()
     susan["LINE_SCALE"] = sue.LINE_SCALE
     susan["fromColors"] = function (colors)
     {
-        var areas, span, _36_31_, _39_31_
+        var areas, span, _39_31_, _42_31_
 
         areas = []
         if (!(colors != null))
         {
             return areas
         }
-        var list = _k_.list((((_36_31_=colors.fg) != null ? _36_31_ : [])))
+        var list = _k_.list((((_39_31_=colors.fg) != null ? _39_31_ : [])))
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             span = list[_a_]
             areas.push({x:span[0],y:span[1],value:[sue.FG_COLOR,[span[3],span[2] - span[0],1]]})
         }
-        var list1 = _k_.list((((_39_31_=colors.bg) != null ? _39_31_ : [])))
+        var list1 = _k_.list((((_42_31_=colors.bg) != null ? _42_31_ : [])))
         for (var _b_ = 0; _b_ < list1.length; _b_++)
         {
             span = list1[_b_]
@@ -48,9 +48,9 @@ susan = (function ()
 
     susan.prototype["draw"] = function ()
     {
-        var area, areas, attr, bg, box, code, fg, lines, r, row, scale, ul, values, view, x, x1, x2, y, _48_29_
+        var area, areas, attr, bg, box, code, fg, have, hul, lines, r, row, scale, ul, view, x, x1, x2, y, _51_29_
 
-        areas = ((_48_29_=this.state.s.sue) != null ? _48_29_ : [])
+        areas = ((_51_29_=this.state.s.sue) != null ? _51_29_ : [])
         if (_k_.empty(areas))
         {
             return
@@ -82,35 +82,27 @@ susan = (function ()
                 continue
             }
             code = area.value[0]
-            values = box.values
             fg = null
             bg = null
             attr = null
             ul = null
             if (code === sue.FG_COLOR)
             {
-                fg = values[0]
+                fg = box.values[0]
             }
             else if (code === sue.BG_COLOR)
             {
-                bg = values[0]
+                bg = box.values[0]
             }
             else if (code === sue.FG_BG_COLOR)
             {
-                fg = values[0]
-                bg = values[1]
+                fg = box.values[0]
+                bg = box.values[1]
             }
             else if (code === sue.STYLE)
             {
-                if (values.length > 1)
-                {
-                    ul = values[0]
-                    attr = values[1]
-                }
-                else
-                {
-                    attr = values[0]
-                }
+                var _b_ = sue.styleOfValues(box.values); attr = _b_[0]; ul = _b_[1]
+
             }
             else
             {
@@ -134,7 +126,7 @@ susan = (function ()
             {
                 ul = color.values(ul)
             }
-            for (var _b_ = r = row, _c_ = _k_.min(this.cells.rows,row + box.h * scale); (_b_ <= _c_ ? r < _k_.min(this.cells.rows,row + box.h * scale) : r > _k_.min(this.cells.rows,row + box.h * scale)); (_b_ <= _c_ ? ++r : --r))
+            for (var _c_ = r = row, _d_ = _k_.min(this.cells.rows,row + box.h * scale); (_c_ <= _d_ ? r < _k_.min(this.cells.rows,row + box.h * scale) : r > _k_.min(this.cells.rows,row + box.h * scale)); (_c_ <= _d_ ? ++r : --r))
             {
                 if ((bg != null))
                 {
@@ -142,16 +134,18 @@ susan = (function ()
                 }
                 if ((fg != null))
                 {
-                    for (var _d_ = x = x1, _e_ = x2; (_d_ <= _e_ ? x < x2 : x > x2); (_d_ <= _e_ ? ++x : --x))
+                    for (var _e_ = x = x1, _f_ = x2; (_e_ <= _f_ ? x < x2 : x > x2); (_e_ <= _f_ ? ++x : --x))
                     {
                         this.cells.set_fg(x,r,fg)
                     }
                 }
                 if ((attr != null) || (ul != null))
                 {
-                    for (var _f_ = x = x1, _10_ = x2; (_f_ <= _10_ ? x < x2 : x > x2); (_f_ <= _10_ ? ++x : --x))
+                    for (var _10_ = x = x1, _11_ = x2; (_10_ <= _11_ ? x < x2 : x > x2); (_10_ <= _11_ ? ++x : --x))
                     {
-                        this.cells.set_attr(x,r,attr,ul)
+                        var _12_ = this.cells.get_attr(x,r); have = _12_[0]; hul = _12_[1]
+
+                        this.cells.set_attr(x,r,(sue.addFlags(have,attr)),((ul != null ? ul : hul)))
                     }
                 }
             }
@@ -163,5 +157,5 @@ susan = (function ()
 
 export default susan;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3VzYW4uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2VkaXQvc3VzYW4ua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUFlLFlBQVI7O09BQ08sVUFBUjs7O0FBRUwsU0FBRDs7SUFrQkksT0FBQyxhQUFhLElBQUk7SUFDbEIsT0FBQyxhQUFhLElBQUk7SUFDbEIsT0FBQyxnQkFBYSxJQUFJO0lBQ2xCLE9BQUMsVUFBYSxJQUFJO0lBQ2xCLE9BQUMsZUFBYSxJQUFJO0lBSWxCLE9BQUMseUJBQVk7Ozs7UUFFVDtjQUVlOzttQkFBYjs7dUNBRVcsT0FBTzs7O1lBQWhCO1lBQ0EsTUFBTSxNQUFNLEVBQUcsS0FBSyxHQUFHLEVBQUcsS0FBSyxHQUFHLE9BQVEsSUFBSSxVQUFVLEtBQUssR0FBRyxLQUFLLEtBQUcsS0FBSyxHQUFHOzt3Q0FFdkUsT0FBTzs7O1lBQWhCO1lBQ0EsTUFBTSxNQUFNLEVBQUcsS0FBSyxHQUFHLEVBQUcsS0FBSyxHQUFHLE9BQVEsSUFBSSxVQUFVLEtBQUssR0FBRyxLQUFLLEtBQUcsS0FBSyxHQUFHOztlQUVwRjs7O2FBRUosT0FBSSxPQUFPOztRQUFSO1FBQU87Ozs7O3FCQUVWOzs7O1FBRUksa0JBQVEsS0FBQyxNQUFNLEVBQUU7c0JBQ047Ozs7UUFFWCxPQUFRLEtBQUMsTUFBTSxFQUFFO1FBQ2pCLFFBQVEsS0FBQyxNQUFNLEVBQUU7NEJBRUw7OztZQUFSO1lBRUEsTUFBTSxJQUFJLG1CQUFtQixLQUFLO2tCQUNsQjs7Z0JBQWhCOztZQUVBLElBQUksSUFBSTtnQkFDSSxJQUFJLEtBQUssS0FBSyxNQUFNOztnQkFBaEM7O1lBRUEsTUFBTSxLQUFDLE1BQU0sVUFBVTtnQkFDWCxNQUFNOztnQkFBbEI7O1lBRUEsUUFBUSxLQUFDLE1BQU0sV0FBVztnQkFDZCxNQUFNLFFBQVEsS0FBQyxNQUFNOztnQkFBakM7O1lBRUEsT0FBUyxLQUFLLE1BQU07WUFDcEIsU0FBUyxJQUFJO1lBRWIsS0FBTztZQUNQLEtBQU87WUFDUCxPQUFPO1lBQ1AsS0FBTztnQkFFSixTQUFRLElBQUk7O2dCQUNYLEtBQUssT0FBTzs7cUJBQ1IsU0FBUSxJQUFJOztnQkFDaEIsS0FBSyxPQUFPOztxQkFDUixTQUFRLElBQUk7O2dCQUNoQixLQUFLLE9BQU87Z0JBQ1osS0FBSyxPQUFPOztxQkFDUixTQUFRLElBQUk7O29CQUNiLE9BQU8sU0FBUzs7b0JBQ2YsS0FBTyxPQUFPO29CQUNkLE9BQU8sT0FBTzs7OztvQkFFZCxPQUFPLE9BQU87Ozs7O2dCQUVsQjs7WUFFSixhQUFTLEdBQUcsSUFBSSxJQUFFLFFBQVEsS0FBSztZQUMvQixhQUFTLEtBQUMsTUFBTSxPQUFPLElBQUksSUFBSSxJQUFJLEtBQUcsUUFBUSxLQUFLO2dCQUN2QyxNQUFNOztnQkFBbEI7O2lCQUV3Qjs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOztpQkFDTTs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOztpQkFDTTs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOzsyQkFFZCxJQUFLLG1CQUFVLEtBQUMsTUFBTSxLQUFLLE1BQU0sSUFBSSxJQUFFLGtDQUF4QixLQUFDLE1BQU0sS0FBSyxNQUFNLElBQUksSUFBRSxxQkFBeEIsS0FBQyxNQUFNLEtBQUssTUFBTSxJQUFJLElBQUU7O3FCQUNKOztvQkFBbkMsS0FBQyxNQUFNLFFBQVEsR0FBRyxHQUFHLEtBQUcsR0FBRyxFQUFFOztxQkFDMUI7O21DQUNLLElBQUssVUFBSyxzQkFBQSxTQUFBOzt3QkFDVixLQUFDLE1BQU0sT0FBTyxFQUFFLEVBQUU7OztxQkFDdkIsa0JBQVM7O21DQUNKLElBQUssV0FBSyx1QkFBQSxTQUFBOzt3QkFDVixLQUFDLE1BQU0sU0FBUyxFQUFFLEVBQUUsS0FBSzs7Ozs7OztXQXZHaEQ7OztlQXlHTSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3VzYW4uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2VkaXQvc3VzYW4ua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUFlLFlBQVI7O09BQ08sVUFBUjs7O0FBRUwsU0FBRDs7SUFxQkksT0FBQyxhQUFhLElBQUk7SUFDbEIsT0FBQyxhQUFhLElBQUk7SUFDbEIsT0FBQyxnQkFBYSxJQUFJO0lBQ2xCLE9BQUMsVUFBYSxJQUFJO0lBQ2xCLE9BQUMsZUFBYSxJQUFJO0lBSWxCLE9BQUMseUJBQVk7Ozs7UUFFVDtjQUVlOzttQkFBYjs7dUNBRVcsT0FBTzs7O1lBQWhCO1lBQ0EsTUFBTSxNQUFNLEVBQUcsS0FBSyxHQUFHLEVBQUcsS0FBSyxHQUFHLE9BQVEsSUFBSSxVQUFVLEtBQUssR0FBRyxLQUFLLEtBQUcsS0FBSyxHQUFHOzt3Q0FFdkUsT0FBTzs7O1lBQWhCO1lBQ0EsTUFBTSxNQUFNLEVBQUcsS0FBSyxHQUFHLEVBQUcsS0FBSyxHQUFHLE9BQVEsSUFBSSxVQUFVLEtBQUssR0FBRyxLQUFLLEtBQUcsS0FBSyxHQUFHOztlQUVwRjs7O2FBRUosT0FBSSxPQUFPOztRQUFSO1FBQU87Ozs7O3FCQUVWOzs7O1FBRUksa0JBQVEsS0FBQyxNQUFNLEVBQUU7c0JBQ047Ozs7UUFFWCxPQUFRLEtBQUMsTUFBTSxFQUFFO1FBQ2pCLFFBQVEsS0FBQyxNQUFNLEVBQUU7NEJBRUw7OztZQUFSO1lBRUEsTUFBTSxJQUFJLG1CQUFtQixLQUFLO2tCQUNsQjs7Z0JBQWhCOztZQUVBLElBQUksSUFBSTtnQkFDSSxJQUFJLEtBQUssS0FBSyxNQUFNOztnQkFBaEM7O1lBRUEsTUFBTSxLQUFDLE1BQU0sVUFBVTtnQkFDWCxNQUFNOztnQkFBbEI7O1lBRUEsUUFBUSxLQUFDLE1BQU0sV0FBVztnQkFDZCxNQUFNLFFBQVEsS0FBQyxNQUFNOztnQkFBakM7O1lBRUEsT0FBTyxLQUFLLE1BQU07WUFFbEIsS0FBTztZQUNQLEtBQU87WUFDUCxPQUFPO1lBQ1AsS0FBTztnQkFFSixTQUFRLElBQUk7O2dCQUNYLEtBQUssSUFBSSxPQUFPOztxQkFDWixTQUFRLElBQUk7O2dCQUNoQixLQUFLLElBQUksT0FBTzs7cUJBQ1osU0FBUSxJQUFJOztnQkFDaEIsS0FBSyxJQUFJLE9BQU87Z0JBQ2hCLEtBQUssSUFBSSxPQUFPOztxQkFDWixTQUFRLElBQUk7OzBCQUNKLElBQUksY0FBYyxJQUFJLFNBQWpDLGVBQUs7Ozs7O2dCQUVOOztZQUVKLGFBQVMsR0FBRyxJQUFJLElBQUUsUUFBUSxLQUFLO1lBQy9CLGFBQVMsS0FBQyxNQUFNLE9BQU8sSUFBSSxJQUFJLElBQUksS0FBRyxRQUFRLEtBQUs7Z0JBQ3ZDLE1BQU07O2dCQUFsQjs7aUJBRXdCOztnQkFBeEIsS0FBSyxNQUFNLE9BQU87O2lCQUNNOztnQkFBeEIsS0FBSyxNQUFNLE9BQU87O2lCQUNNOztnQkFBeEIsS0FBSyxNQUFNLE9BQU87OzJCQUVkLElBQUssbUJBQVUsS0FBQyxNQUFNLEtBQUssTUFBTSxJQUFJLElBQUUsa0NBQXhCLEtBQUMsTUFBTSxLQUFLLE1BQU0sSUFBSSxJQUFFLHFCQUF4QixLQUFDLE1BQU0sS0FBSyxNQUFNLElBQUksSUFBRTs7cUJBQ0o7O29CQUFuQyxLQUFDLE1BQU0sUUFBUSxHQUFHLEdBQUcsS0FBRyxHQUFHLEVBQUU7O3FCQUMxQjs7bUNBQ0ssSUFBSyxVQUFLLHNCQUFBLFNBQUE7O3dCQUNWLEtBQUMsTUFBTSxPQUFPLEVBQUUsRUFBRTs7O3FCQUN2QixrQkFBUzs7b0NBQ0osSUFBSyxXQUFLLHdCQUFBLFNBQUE7O21DQUNHLEtBQUMsTUFBTSxTQUFTLEVBQUUsSUFBOUIsZ0JBQUs7O3dCQUNOLEtBQUMsTUFBTSxTQUFTLEVBQUUsR0FBRyxJQUFJLFNBQVMsS0FBSyxTQUFRLGFBQUEsS0FBSzs7Ozs7OztXQXRHM0U7OztlQXdHTSJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/susan.kode

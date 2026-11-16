@@ -143,6 +143,13 @@ use ../../edit/tool ◆ belt
         if 0 <= x < @cols and 0 <= y < @rows
             @c[y][x].attr = attr
             @c[y][x].ul   = ul
+
+    get_attr: x y =>
+
+        if 0 <= x < @cols and 0 <= y < @rows
+            ⮐ [@c[y][x].attr @c[y][x].ul]
+
+        [null null]
             
     #  fill the background of every cell of the screen
     
