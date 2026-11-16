@@ -553,6 +553,11 @@ use child_process ▪ spawn exec
 
 #!save
     
+    clearDecoration: =>
+
+        @editor.state.clearColorsAtCursorOrSelection()
+        @editor.state.clearSueAtCursorOrSelection()
+
     saveFile: file ◯=>
         
         text = kseg.str @editor.state.s.lines
@@ -753,7 +758,7 @@ use child_process ▪ spawn exec
             'cmd+i'                      ➜ ⮐ post.emit 'differ.status'
             'alt+c'                      ➜ ⮐ post.emit 'colorpicker.show'
             'alt+u'                      ➜ ⮐ post.emit 'uniko.show'
-            'shift+alt+c'                ➜ ⮐ @editor.state.clearColorsAtCursorOrSelection()
+            'shift+alt+c'                ➜ ⮐ @clearDecoration()
                             
     goToPrevFunc: =>
     

@@ -5,6 +5,7 @@ use ../util   ◆ syntax config scaling
 use ./act     ◆ del insert select join indent multi main novim sort count range macro
 use ./tool    ◆ belt colorspans jumplist changelist motion sue
 use ./register
+use ◆ susan
 use           ◆ keys mode
 
 ■state□events
@@ -150,7 +151,7 @@ use           ◆ keys mode
 
         colorspans.colorAtPos (colors[layer] ? []) pos
 
-    #!sue
+#!sue
 
     setSue: (x y value) =>
 
@@ -179,23 +180,26 @@ use           ◆ keys mode
     clearSueForRanges: ranges =>
 
         areas = @s.sue ? []
-        ⮐ if empty areas
+        ⮐ if empty areas or empty ranges
 
-        keep = []
+        cut = susan.cut(areas ranges @s.lines)
 
-        for area in areas
-            inside = false
-            for rng in ranges
-                if rng[0] <= area.x <= rng[2] and rng[1] <= area.y <= rng[3]
-                    inside = true
-            keep.push area if not inside
+        ⮐ if cut eql areas
 
-        ⮐ if keep.length == areas.length
-
-        @s = @s.set 'sue' keep
+        @s = @s.set 'sue' cut
         @r = []
         @pushState()
         @emit 'sue.changed'
+
+    clearSueAtCursorOrSelection: =>
+
+        ranges = @s.selections
+
+        if empty ranges
+            if rng = belt.rangeOfClosestWordToPos @s.lines @mainCursor()
+                ranges = [rng]
+
+        @clearSueForRanges ranges if not empty ranges
 
     loadSue: areas =>
 
