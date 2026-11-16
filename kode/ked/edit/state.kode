@@ -237,6 +237,23 @@ use           ◆ keys mode
         @r = []
         @pushState()
         @emit 'sue.changed'
+        
+    clearLineScale: y =>
+
+        areas = @s.sue ? []
+        keep  = []
+
+        for area in areas
+            continue if area.y == y and area.value[0] == sue.LINE_SCALE
+            keep.push area
+
+        ⮐ if keep.length == areas.length
+
+        @s = @s.set 'sue' keep
+        @rowCache = null
+        @r = []
+        @pushState()
+        @emit 'sue.changed'
 
     clearSueAtCursorOrSelection: =>
 

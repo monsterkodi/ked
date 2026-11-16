@@ -567,6 +567,14 @@ use child_process ▪ spawn exec
         @editor.state.setLineScale y n
 
         @redraw()
+        
+    unscaleLine: =>
+
+        y = @editor.state.mainCursor()[1]
+
+        @editor.state.clearLineScale y
+
+        @redraw()
 
     clearDecoration: =>
 
@@ -780,6 +788,7 @@ use child_process ▪ spawn exec
             'shift+alt+i'                ➜ ⮐ @toggleStyle 'i'
             'shift+alt+='                ➜ ⮐ @scaleLine 1
             'shift+alt+-'                ➜ ⮐ @scaleLine -1
+            'shift+alt+0'                ➜ ⮐ @unscaleLine()
                             
     goToPrevFunc: =>
     
