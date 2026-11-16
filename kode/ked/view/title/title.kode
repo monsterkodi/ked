@@ -131,6 +131,10 @@ use                 ◆ titlefile titlenovim
                 novim?.cancelEx()
             'change'
                 novim?.exChanged text
+            'historyUp'
+                novim?.historyUp 'ex' text
+            'historyDown'
+                novim?.historyDown 'ex' text
 
     onVinderAction: action text =>
 
@@ -145,6 +149,10 @@ use                 ◆ titlefile titlenovim
                 novim?.cancelSearch()
             'change'
                 novim?.searchChanged text
+            'historyUp'
+                novim?.historyUp 'search' text
+            'historyDown'
+                novim?.historyDown 'search' text
 
     onKey: (key event) =>
 

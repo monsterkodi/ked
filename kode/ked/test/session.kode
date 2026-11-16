@@ -1,5 +1,5 @@
 
-use ../../kxk ◆ slash
+use ../../kxk ◆ nfs slash
 use ../util   ◆ session
 
 ▸ session
@@ -26,3 +26,33 @@ use ../util   ◆ session
 
         s.headless ▸ true
         s.dir ▸ slash.absolute("~/.config/ked/headless-sessions/")
+
+  ▸ novim command line history is loaded again
+
+        dir = '/tmp/opencode/ked-session-history-test'
+
+        ◯ nfs.remove dir
+
+        s = new session fresh:true
+
+        s.dir  = dir
+        s.file = slash.path dir 'history.noon'
+
+        s.set 'novim▸history▸ex', ['w' 'foo']
+        s.set 'novim▸history▸search', ['bar']
+
+        ◯ s.save()
+
+        s2 = new session fresh:true
+
+        s2.dir  = dir
+        s2.file = slash.path dir 'other.noon'
+
+        ◯ s2.loadAndMerge()
+
+        s2.get('novim▸history▸ex')     ▸ ['w' 'foo']
+        s2.get('novim▸history▸search') ▸ ['bar']
+
+        s2.clear()
+
+        ◯ nfs.remove dir

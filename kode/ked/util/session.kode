@@ -120,6 +120,7 @@ use ◆ frecent
             
             @set 'files'  recent.files # probably should actually merge here instead of overriding!
             @set 'editor' recent.editor
+            @set 'novim'  recent.novim
         
         @emit 'loaded'
         post.emit 'session.loaded' @

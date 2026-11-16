@@ -1,0 +1,136 @@
+use ../../kxk    ▪ post
+use ../edit      ◆ state
+use ../edit/tool ◆ belt
+use ../edit/mode ◆ novim
+
+cells = cols:55 rows:66
+
+fakeGet = (key def) -> clone(store[key] ? def)
+fakeSet = (key value) -> store[key] = clone value
+
+▸ novim history
+
+  ▸ ex commands go to the ex history
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimhistory_ex'
+        m = new novim s
+
+        m.runEx 'foo'
+
+        ked_session.get('novim▸history▸ex') ▸ ['foo']
+
+        delete global.ked_session
+
+  ▸ internal ex runs are not recorded
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimhistory_internal'
+        m = new novim s
+
+        m.runEx 'foo', false
+
+        ked_session.get('novim▸history▸ex') ▸ undefined
+
+        delete global.ked_session
+
+  ▸ committed searches go to the search history
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimhistory_search'
+        s.loadLines belt.linesForText("foo bar")
+
+        m = new novim s
+        m.startSearch()
+        m.searchChanged 'bar'
+        m.commitSearch()
+
+        ked_session.get('novim▸history▸search') ▸ ['bar']
+
+        delete global.ked_session
+
+  ▸ up and down navigate the ex history
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimhistory_exnav'
+        m = new novim s
+
+        texts = []
+        post.on 'novim.ex.text' (e) -> texts.push e.text
+
+        m.runEx 'foo'
+        m.startEx()
+
+        m.historyUp 'ex'   ▸ true
+        m.ex               ▸ 'foo'
+        texts              ▸ ['foo']
+
+        m.historyDown 'ex' ▸ true
+        m.ex               ▸ ''
+        texts              ▸ ['foo' '']
+
+        m.historyUp 'ex'   ▸ true
+        m.historyUp 'ex'   ▸ false
+        m.ex               ▸ 'foo'
+
+        delete global.ked_session
+
+  ▸ up and down navigate the search history
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimhistory_searchnav'
+        s.loadLines belt.linesForText("alpha beta")
+
+        m = new novim s
+
+        texts = []
+        post.on 'novim.search.text' (e) -> texts.push e.text
+
+        m.startSearch()
+        m.searchChanged 'beta'
+        m.commitSearch()
+
+        s.setMainCursor 0 0
+
+        m.startSearch()
+
+        m.historyUp 'search'   ▸ true
+        m.searchText           ▸ 'beta'
+        texts                  ▸ ['beta']
+
+        m.historyDown 'search' ▸ true
+        m.searchText           ▸ 'alpha'
+        texts                  ▸ ['beta' 'alpha']
+
+        delete global.ked_session
+
+  ▸ the histories do not share entries
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimhistory_separate'
+        s.loadLines belt.linesForText("alpha beta")
+
+        m = new novim s
+
+        m.runEx 'foo'
+
+        m.startSearch()
+        m.searchChanged 'beta'
+        m.commitSearch()
+
+        ked_session.get('novim▸history▸ex')     ▸ ['foo']
+        ked_session.get('novim▸history▸search') ▸ ['beta']
+
+        delete global.ked_session

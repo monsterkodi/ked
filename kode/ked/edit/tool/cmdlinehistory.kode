@@ -1,0 +1,107 @@
+■cmdlinehistory
+###
+    keeps a list of command line inputs in the ked_session store
+
+    navigation starts at the newest entry and moves backwards with prev,
+    forward with next, until the draft typed before navigating is restored
+###
+    @: kind ->
+
+        @kind  = kind
+        @key   = "novim▸history▸#{kind}"
+        @limit = 100
+        @index = 0
+        @draft = ''
+        @active = false
+
+    session: ->
+
+        session = global.ked_session
+
+        ⮐ null if not valid session
+        ⮐ null if not valid session.get
+        ⮐ null if not valid session.set
+
+        session
+
+    list: ->
+
+        session = @session()
+
+        ⮐ [] if not session
+
+        entries = session.get @key
+
+        ⮐ [] if not valid entries
+        ⮐ [] if not Array.isArray entries
+
+        entries
+
+    store: entries ->
+
+        session = @session()
+
+        ⮐ false if not session
+
+        session.set @key entries
+
+        true
+
+    add: text ->
+
+        ⮐ false if not valid text
+
+        entries = @list()
+
+        old = entries.indexOf text
+
+        entries.splice old 1 if old >= 0
+
+        entries.push text
+
+        entries.splice 0 entries.length-@limit if entries.length > @limit
+
+        stored = @store entries
+
+        @reset()
+
+        stored
+
+    reset: ->
+
+        @active = false
+        @draft  = ''
+        @index  = @list().length
+
+        true
+
+    prev: text ->
+
+        entries = @list()
+
+        ⮐ null if empty entries
+
+        if not @active
+            @draft  = text ? ''
+            @index  = entries.length
+            @active = true
+
+        ⮐ null if @index <= 0
+
+        @index -= 1
+
+        entries[@index]
+
+    next: text ->
+
+        ⮐ null if not @active
+
+        entries = @list()
+
+        @index += 1 if @index < entries.length
+
+        ⮐ @draft if @index == entries.length
+
+        entries[@index]
+
+export cmdlinehistory

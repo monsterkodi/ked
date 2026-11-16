@@ -139,6 +139,7 @@
     /{pattern}                          search forward and highlight matches
     ?{pattern}                          search backward and highlight matches
     n  N                                jump in or against the search direction
+    up  down                            previous and next search history entry
 
 #### registers
 
@@ -164,6 +165,7 @@
     :q!                                 quit discarding pending changes
     :wq                                 write then quit
     :x                                  write only if changed, then quit
+    up  down                            previous and next ex command history entry
 
 #### edit
     

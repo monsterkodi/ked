@@ -1,7 +1,7 @@
 
 use ../../../kxk ◆ post keyinfo kseg
 use ../../theme  ◆ theme
-use ../tool      ◆ belt
+use ../tool      ◆ belt cmdlinehistory
 use ..           ◆ mode
 ■novim
 # maps keys to actions which are executed by edit▸act▸novim
@@ -112,6 +112,9 @@ use ..           ◆ mode
         @exConfirms = null
         @exHighlighting = false
         @searchForward = true
+        @searchText = ''
+        @searchHistory = new cmdlinehistory 'search'
+        @exHistory     = new cmdlinehistory 'ex'
         @reset()
 
     @clipboardSync: null # on in ked, off in a headless editor
@@ -152,6 +155,8 @@ use ..           ◆ mode
         @replace         = null
         @ex              = null
         @exRange         = null
+        @searchHistory.reset()
+        @exHistory.reset()
         true
 
     exitNovim: ->
@@ -160,6 +165,35 @@ use ..           ◆ mode
         true
 
     countNumber: -> empty @count ? 1 : parseInt(@count)
+
+    history: kind -> kind == 'search' ? @searchHistory : @exHistory
+
+    historyUp: kind text ->
+
+        @navigateHistory kind 'prev' text
+
+    historyDown: kind text ->
+
+        @navigateHistory kind 'next' text
+
+    navigateHistory: kind direction text ->
+
+        history = @history kind
+
+        current = text ? (kind == 'search' ? @searchText : @ex)
+
+        value = direction == 'prev' ? history.prev(current) : history.next(current)
+
+        ⮐ false if not value?
+
+        if kind == 'search'
+            @searchChanged value
+            post.emit 'novim.search.text' state:@state.name text:value
+        else
+            @exChanged value
+            post.emit 'novim.ex.text' state:@state.name text:value
+
+        true
 
     logPending: ->
 
@@ -267,6 +301,8 @@ use ..           ◆ mode
         line = belt.exTrimLeft line
 
         ⮐ true if empty line
+
+        @exHistory.add line if record
 
         @state.registers.set ':', { lines: [line], linewise: false } if record
 
@@ -673,6 +709,8 @@ use ..           ◆ mode
         text = @state.textOfSelectionOrWordAtCursor()
         text ?= ''
 
+        @searchText = text
+
         if @state.s.selections.length
             sel = @state.s.selections[clamp 0 @state.s.selections.length-1 @state.s.main]
             @state.setMainCursor sel[0] sel[1]
@@ -693,6 +731,7 @@ use ..           ◆ mode
 
     searchChanged: text ->
 
+        @searchText = text
         novim.lastVind = text
         @state.registers.set '/', { lines: [text], linewise: false }
 
@@ -707,6 +746,8 @@ use ..           ◆ mode
 
         @state.setHighlights []
 
+        @searchHistory.reset()
+
         true
 
     emitSearchPosition: ->
@@ -720,6 +761,8 @@ use ..           ◆ mode
         true
 
     commitSearch: ->
+
+        @searchHistory.add @searchText
 
         spans = @state.s.highlights
 

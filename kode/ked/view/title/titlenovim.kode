@@ -42,6 +42,8 @@ use ../base      ◆ view input
         post.on 'novim.error'        @onError
         post.on 'novim.ex.start'     @onExStart
         post.on 'novim.search.start' @onSearchStart
+        post.on 'novim.ex.text'      @onExText
+        post.on 'novim.search.text'  @onSearchText
         post.on 'novim.search.position' @onSearchPosition
         post.on 'novim.macro.start'   @onMacroStart
         post.on 'novim.macro.stop'    @onMacroStop
@@ -84,6 +86,24 @@ use ../base      ◆ view input
 
         @layoutInput @vinder
         post.emit 'redraw'
+
+        true
+
+    onExText: update =>
+
+        ⮐ if update.state != @stateName
+
+        @input.set update.text
+        @input.state.moveCursors 'eol'
+
+        true
+
+    onSearchText: update =>
+
+        ⮐ if update.state != @stateName
+
+        @vinder.set update.text
+        @vinder.state.moveCursors 'eol'
 
         true
 
@@ -174,6 +194,17 @@ use ../base      ◆ view input
         @input.onMouse event
 
     onKey: (key event) =>
+
+        combo = event.combo ? key
+
+        if combo in ['up' 'down']
+            action = combo == 'up' ? 'historyUp' : 'historyDown'
+            if @vinder.visible()
+                @emit 'vinder' action @vinder.current()
+                ⮐ true
+            if @input.visible()
+                @emit 'action' action @input.current()
+                ⮐ true
 
         ⮐ @vinder.onKey(key event) if @vinder.visible()
 

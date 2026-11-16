@@ -285,3 +285,74 @@ use ../view/title ◆ title
         t.titlenovim.novimText         ▸ ''
 
         mode.stop e.state 'novim'
+
+  ▸ novim history is navigated with up and down
+
+        ◯ mode.loaded
+
+        store = {}
+        fakeGet = (key def) -> clone(store[key] ? def)
+        fakeSet = (key value) -> store[key] = clone value
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new harness cols:80 rows:5
+        e = new editor h.screen 'title_history_editor' []
+        t = new title h.screen e
+
+        t.layout 0 0 80 1
+
+        mode.modes.novim = novim
+        mode.start e.state 'novim'
+
+        press = (c) ->
+            ⮐ true if t.onKey c {combo:c, char:c}
+            e.onKey c {combo:c, char:c}
+
+        e.state.loadLines belt.linesForText('alpha beta alpha')
+        e.state.setMainCursor 0 0
+        e.grabFocus()
+
+        press '/'
+        for c in 'beta'
+            press c
+        press 'return'
+
+        e.state.setMainCursor 0 0
+        e.grabFocus()
+
+        press '/'
+
+        t.titlenovim.vinder.current() ▸ 'alpha'
+
+        press 'up'
+
+        t.titlenovim.vinder.current() ▸ 'beta'
+
+        press 'down'
+
+        t.titlenovim.vinder.current() ▸ 'alpha'
+
+        press 'esc'
+
+        press ':'
+        for c in 'foo'
+            press c
+        press 'return'
+
+        press ':'
+
+        t.titlenovim.input.current() ▸ ''
+
+        press 'up'
+
+        t.titlenovim.input.current() ▸ 'foo'
+
+        press 'down'
+
+        t.titlenovim.input.current() ▸ ''
+
+        press 'esc'
+
+        delete global.ked_session
+
+        mode.stop e.state 'novim'
