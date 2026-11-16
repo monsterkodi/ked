@@ -78,6 +78,7 @@
     ctrl+k                              delete to end of line
 
 ## edit
+
     tab                                 insert tab
     shift+tab                           deindent selected or cursor lines
     cmd+j                               join lines
@@ -91,6 +92,7 @@
     alt+cmd+/       ctrl+alt+/          toggle comment type
 
 ## highlights
+
     cmd+e           ctrl+e              highlight word, go to next highlight
     shift+cmd+e     shift+ctrl+e        highlight word, go to prev highlight
     cmd+d           ctrl+d              select word, add next highlight
@@ -146,9 +148,6 @@
     ctrl+o                              older cursor position in the jump list
     ctrl+i  tab                         newer cursor position in the jump list
 
-    G  gg  %  ( ) { }                   add a jump position
-    /  ?  n  N  *  #  :s  :e            also add a jump position
-
 #### changes
 
     g;                                  older position in the change list
@@ -178,6 +177,7 @@
     3@a                                 execute a macro three times
     
 #### write & quit
+
     :w  :w {file}                       write the buffer to the file
     :q                                  quit, fail if there are pending changes
     :q!                                 quit discarding pending changes
@@ -217,9 +217,11 @@
         g/pat/cmd  :v/pat/cmd           nest another global
 
 #### normal
+
     :[range]normal keys                 run normal keys on each range line
     
 #### delete    
+
     :[range]d                           delete the lines in the range
 
 # structure

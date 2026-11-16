@@ -50,6 +50,8 @@ use child_process ▪ spawn exec
         @indexer  = new indexer
         @git      = new git
         
+        watchingClipboard = not (@args.headless or @args.headless_colors)
+        
         @menu     = new menu       @screen        
         @quicky   = new quicky     @screen 
         @browse   = new browse     @screen 
@@ -62,7 +64,6 @@ use child_process ▪ spawn exec
         @finder   = new finder     @screen @editor
         @searcher = new searcher   @screen @editor
         @replacer = new replacer   @screen @editor
-        watchingClipboard = not (@args.headless or @args.headless_colors)
         @clippo   = new clippo     @screen @editor 'clippo' watch:watchingClipboard
         @differ   = new differ     @screen @editor
         @title    = new title      @screen @editor
@@ -92,10 +93,10 @@ use child_process ▪ spawn exec
         post.on 'git.status'        @onGitStatus
         # post.on 'focus'         (name) -> log "focus: '#{name}'"
         
-        @contextHandlers = [                                                                                               @editor         @dircol @funcol ]
-        @mouseHandlers   = [ @input @context @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop @menu @macro @editor @title  @dircol @funcol ]
-        @wheelHandlers   = [                 @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop       @macro @editor         @dircol @funcol ]
-        @keyHandlers     = [ @input @title @context @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop @menu @macro @editor         @dircol @funcol ]
+        @contextHandlers = [                                                                                                         @editor        @dircol @funcol ]
+        @mouseHandlers   = [ @input @context @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop @menu @macro @editor @title @dircol @funcol ]
+        @wheelHandlers   = [                 @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop       @macro @editor        @dircol @funcol ]
+        @keyHandlers     = [ @input @context @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop @menu @macro @editor @title @dircol @funcol ]
         
         @t.on 'key'    @onKey
         @t.on 'mouse'  @onMouse
@@ -163,9 +164,6 @@ use child_process ▪ spawn exec
         if @t.input
             ◯ ended
         
-        #  wait for the startup work the editor needs, instead of guessing
-        #  how long it takes
-        
         ◯ @starting if @starting
         ◯ config.loaded if config.loaded
         ◯ mode.loaded
@@ -187,8 +185,6 @@ use child_process ▪ spawn exec
     settle: ◯=>
         
         ◯ @currentLoad if @currentLoad
-        
-        #  a reload is not recorded in currentLoad, so wait for the loader
         
         waited = 0
         while @loadingFile and waited < 5000
@@ -223,7 +219,6 @@ use child_process ▪ spawn exec
         
         if empty @currentFile and empty @loadingFile
             if file = ked_session.get "editor▸file"
-                # log "no current or loading file ... loading last session #{file}"
                 ◯ @loadFile file
             else
                 @hideEditor()
@@ -403,7 +398,7 @@ use child_process ▪ spawn exec
         else
             absFile = slash.path process.cwd() p
 
-        #  a reload keeps what is on screen instead of what was last stored in the session
+        # a reload keeps what is on screen instead of what was last stored in the session
         reload = valid @currentFile and not row? and slash.samePath absFile @currentFile
 
         if reload
@@ -415,9 +410,6 @@ use child_process ▪ spawn exec
         # log "ked.loadFile absFile #{absFile}"
         
         @loadingFile = absFile
-        
-        #  the file is opened once the config and the modes are there:
-        #  both decide what happens to it, and neither is loaded yet
         
         ◯ config.loaded if config.loaded
         ◯ mode.loaded
@@ -510,7 +502,6 @@ use child_process ▪ spawn exec
             
         @
                     
-    # a missing target starts as an empty buffer that is already bound to its path
     loadMissingFile: path =>
 
         @currentFile = path
