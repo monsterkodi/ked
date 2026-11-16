@@ -18,6 +18,15 @@ str = o -> # converts anything into a string in noon syntax
 
 LINES_REGEXP = /\r?\n/
 
+#  the tag block is invisible and carries sue payloads
+#  tooling strips it so a decorated file behaves like an undecorated one
+
+str.stripTags = s ->
+
+    ⮐ s if not s is str
+
+    s.replace(/[\u{E0000}-\u{E007F}]/gu, '')
+
 str.lines = s -> s.split LINES_REGEXP
 
 str.graphemes = s ->

@@ -1,0 +1,20 @@
+use ./utils ▪ kc
+
+tag = String.fromCodePoint(0xE0041)
+
+▸ source
+
+  ▸ tag characters are stripped before compiling
+
+        plain = 'x = 1\n'
+        decorated = "x" + tag + " = 1\n"
+
+        kc(plain 'x.kode') ▸ kc(decorated 'x.kode')
+
+  ▸ tag characters do not reach the output
+
+        text = "s = 'a" + tag + "b'\n"
+
+        js = kc(text 'x.kode')
+
+        js.includes(tag) ▸ false

@@ -1,5 +1,5 @@
 
-use ../kxk ◆ slash karg ansi nfs
+use ../kxk ◆ slash karg ansi nfs kstr
 use ◆ lexer print parser scoper stripol returner operator renderer
 use ../kolor ◆ kulur
 
@@ -90,6 +90,8 @@ use ../kolor ◆ kulur
     @compile: text opt={} -> (new Kode(opt)).compile text
     
     compile: @text @file @target ->
+
+        @text = kstr.stripTags @text
 
         ⮐ '' if empty trim @text
         

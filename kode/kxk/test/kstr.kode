@@ -424,3 +424,14 @@ use .. ◆ kstr
         kstr.scaleColor 'ffff00' 0.1  ▸ '#191900'
         kstr.scaleColor 'ffff00' 0    ▸ '#000000'
         
+    ▸ stripTags
+
+        kstr.stripTags 'plain' ▸ 'plain'
+
+        tag = String.fromCodePoint(0xE0041)
+        now = String.fromCodePoint(0xE0000)
+        end = String.fromCodePoint(0xE007F)
+
+        kstr.stripTags("a" + tag + "b") ▸ 'ab'
+        kstr.stripTags("a" + now + tag + end + "b") ▸ 'ab'
+        kstr.stripTags(tag) ▸ ''

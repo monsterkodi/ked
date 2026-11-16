@@ -1,5 +1,5 @@
 use ../kode ◆ kode
-use ../kxk  ◆ nfs slash noon
+use ../kxk  ◆ nfs slash noon kstr
 use crypto
 #!knrd
 ###
@@ -308,6 +308,7 @@ knrd = files=[] opt={} ◯->
             dirs.push dir if dir not in dirs
             
             srcText  =◯ nfs.read srcFile
+            srcText  = kstr.stripTags srcText
             
             if ◯ isCurrent cache, srcFile, tgtFile, srcText
                 log g2('▸') m3(slash.tilde(tgtFile)) w4('cached') if opt.verbose

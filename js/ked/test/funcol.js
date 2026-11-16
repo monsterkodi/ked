@@ -135,7 +135,7 @@ toExport["funcol"] = async function ()
         compare(e.state.s.colors.bg,[[0,0,5,'#0000ff']])
         delete global.ked_session
     })
-    await section("an explicit 󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁥󠁥󠁦󠁦󠀰󠀰󠀢󠀬󠀢󠀣󠁦󠀵󠀱󠀱󠀱󠀱󠀢󠀬󠀵󠀬󠀱󠁝󠁝color picker gets a width in a narrow terminal", async function ()
+    await section("an explicit color picker gets a width in a narrow terminal", async function ()
     {
         ked_sess()
         h = new harness({cols:80,rows:24})
@@ -149,7 +149,7 @@ toExport["funcol"] = async function ()
         compare(f.colorpicker.cells.cols,16)
         delete global.ked_session
     })
-    await section("the 󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠁦󠁦󠀳󠁣󠀢󠀬󠀢󠀣󠀸󠀰󠀰󠀰󠀰󠀰󠀢󠀬󠀵󠀬󠀱󠁝󠁝color picker grows when the palette is not empty", async function ()
+    await section("the color picker grows when the palette is not empty", async function ()
     {
         ked_sess()
         h = new harness({cols:100,rows:30})

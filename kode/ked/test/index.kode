@@ -428,4 +428,29 @@ waitFor = (cond) ◯->
         fs.rmSync root recursive:true force:true
 
         (idx.files[file]?) ▸ true
+  ▸ tag characters do not change what is indexed
+
+        root = '/tmp/opencode/ked-index-tags'
+        plain = slash.path root 'plain.kode'
+        decorated = slash.path root 'decor.kode'
+        tag = String.fromCodePoint(0xE0041)
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync plain, '■Foo\n    method: -> 1\n'
+
+        content = '■' + tag + 'Foo\n    method: -> 1\n'
+        fs.writeFileSync decorated, content
+
+        idx = new indexer
+        ◯ idx.index plain
+        ◯ idx.index decorated
+
+        info = idx.files[decorated]
+
+        fs.rmSync root recursive:true force:true
+
+        info.classes.length ▸ 1
+        info.classes[0].name ▸ 'Foo'
+
 ###

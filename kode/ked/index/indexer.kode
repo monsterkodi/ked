@@ -142,7 +142,7 @@ use           ◆ prjcts index_utils index_kode index_noon index_json index_styl
     applyIndexer: file fileInfo text indexerClass ->
                 
         indexr = new indexerClass
-        parsed = indexr.parse text
+        parsed = indexr.parse(kstr.stripTags(text))
         
         # log "indexer.applyIndexer #{file}" parsed
         
