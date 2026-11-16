@@ -687,3 +687,25 @@ sel = r... -> s.allSelections() ▸ r
 
         s.s.sue.length ▸ 1
         s.lineHeight(0) ▸ 2
+
+  ▸ scaling steps every line it is given
+
+        s.loadLines ['a' 'b' 'c']
+        s.stepLineScales [0 2] 1
+
+        s.lineHeight(0) ▸ 2
+        s.lineHeight(2) ▸ 2
+        s.lineHeight(1) ▸ 1
+        s.s.sue.length ▸ 2
+
+        s.clearLineScales [0 2]
+
+        s.s.sue ▸ []
+
+  ▸ a step below one leaves no area behind
+
+        s.loadLines ['a' 'b' 'c']
+        s.stepLineScales [0 1 2] -1
+
+        s.lineHeight(0) ▸ 1
+        s.s.sue ▸ []

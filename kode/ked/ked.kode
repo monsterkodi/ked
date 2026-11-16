@@ -561,18 +561,17 @@ use child_process ▪ spawn exec
 
     scaleLine: delta =>
 
-        y = @editor.state.mainCursor()[1]
-        n = clamp(1 7 (@editor.state.lineHeight(y) + delta))
+        indices = belt.lineIndicesForRangesOrPositions @editor.state.s.selections @editor.state.s.cursors
 
-        @editor.state.setLineScale y n
+        @editor.state.stepLineScales(indices delta)
 
         @redraw()
         
     unscaleLine: =>
 
-        y = @editor.state.mainCursor()[1]
+        indices = belt.lineIndicesForRangesOrPositions @editor.state.s.selections @editor.state.s.cursors
 
-        @editor.state.clearLineScale y
+        @editor.state.clearLineScales indices
 
         @redraw()
 

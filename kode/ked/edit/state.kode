@@ -238,6 +238,52 @@ use           ◆ keys mode
         @pushState()
         @emit 'sue.changed'
         
+    stepLineScales: (indices delta) =>
+
+        ⮐ if empty indices
+
+        areas  = @s.sue ? []
+        scales = []
+
+        for y in indices
+            scales.push clamp(1 7 (@lineHeight(y) + delta))
+
+        keep = []
+
+        for area in areas
+            continue if area.y in indices and area.value[0] == sue.LINE_SCALE
+            keep.push area
+
+        for y,i in indices
+            keep.push {x: 0 y: y value: [sue.LINE_SCALE [scales[i]]]} if scales[i] > 1
+
+        ⮐ if keep eql areas
+
+        @s = @s.set 'sue' keep
+        @rowCache = null
+        @r = []
+        @pushState()
+        @emit 'sue.changed'
+
+    clearLineScales: indices =>
+
+        ⮐ if empty indices
+
+        areas = @s.sue ? []
+        keep  = []
+
+        for area in areas
+            continue if area.y in indices and area.value[0] == sue.LINE_SCALE
+            keep.push area
+
+        ⮐ if keep.length == areas.length
+
+        @s = @s.set 'sue' keep
+        @rowCache = null
+        @r = []
+        @pushState()
+        @emit 'sue.changed'
+
     clearLineScale: y =>
 
         areas = @s.sue ? []
