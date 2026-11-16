@@ -709,3 +709,31 @@ sel = r... -> s.allSelections() ▸ r
 
         s.lineHeight(0) ▸ 1
         s.s.sue ▸ []
+
+  ▸ styling a multi line selection covers every line
+
+        s.loadLines ['abcd' 'efgh' 'ijkl']
+        s.setSelections [[2 0 2 2]]
+        s.toggleSueFlag 'u'
+
+        s.s.sue.length ▸ 3
+        s.s.sue[0].value ▸ [34 ['u' 2 1]]
+        s.s.sue[1].value ▸ [34 ['u' 4 1]]
+        s.s.sue[2].value ▸ [34 ['u' 2 1]]
+
+        s.toggleSueFlag 'u'
+
+        s.s.sue ▸ []
+
+  ▸ styling with several cursors styles every word
+
+        s.loadLines ['one two three']
+        s.setSelections []
+        s.setCursors [[0 0] [8 0]]
+        s.toggleSueFlag 's'
+
+        s.s.sue.length ▸ 2
+        s.s.sue[0].x ▸ 0
+        s.s.sue[0].value ▸ [34 ['s' 3 1]]
+        s.s.sue[1].x ▸ 8
+        s.s.sue[1].value ▸ [34 ['s' 5 1]]

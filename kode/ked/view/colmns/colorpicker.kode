@@ -376,6 +376,8 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
     submitSue: (ranges fg bg voided) =>
 
+        ranges = belt.splitLineRanges(@editor.state.s.lines ranges false)
+
         if not empty voided
             @editor.state.clearSueForRanges ranges
 

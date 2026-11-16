@@ -190,11 +190,12 @@ use           ◆ keys mode
 
     decorationRanges: =>
 
-        ranges = @s.selections
+        ranges = clone @s.selections
 
         if empty ranges
-            if rng = belt.rangeOfClosestWordToPos @s.lines @mainCursor()
-                ranges = [rng]
+            for pos in @s.cursors
+                if rng = belt.rangeOfClosestWordToPos @s.lines pos
+                    ranges.push rng
 
         ranges
 
@@ -211,6 +212,8 @@ use           ◆ keys mode
 
         ranges = @decorationRanges()
         ⮐ if empty ranges
+
+        ranges = belt.splitLineRanges(@s.lines ranges false)
 
         next = sue.rangesWithToggledFlag(ranges (@s.sue ? []) @s.lines flag)
 
