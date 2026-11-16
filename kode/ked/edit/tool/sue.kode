@@ -26,6 +26,15 @@ use ◆ colorspans
 #  line and y the line index, both counted in the text that follows the
 #  payload. value is whatever JSON.parse makes of the body.
 
+#  the codes of the features that use sue
+#  a value is [code, data], the code says which feature it belongs to
+
+FG_COLOR    = 31
+BG_COLOR    = 32
+FG_BG_COLOR = 33
+STYLE       = 34
+LINE_SCALE  = 40
+
 TAG   = 0xE0000
 MAGIC = 0x21
 DIGIT = 0x30
@@ -127,6 +136,12 @@ collect = (pending y x areas) ->
         i += total
 
 ■sue
+
+    @FG_COLOR:    FG_COLOR
+    @BG_COLOR:    BG_COLOR
+    @FG_BG_COLOR: FG_BG_COLOR
+    @STYLE:       STYLE
+    @LINE_SCALE:  LINE_SCALE
 
     @sueAscii: symbols ->
         out = ''

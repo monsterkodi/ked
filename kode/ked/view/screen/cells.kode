@@ -30,6 +30,7 @@ use ../../util/img  ◆ rounded
     set_bg:     x y bg         => if @inside(x y) ➜ @screen.set_bg    @wx(x) @wy(y) bg
     set_fg:     x y fg         => if @inside(x y) ➜ @screen.set_fg    @wx(x) @wy(y) fg
     set_fg_bg:  x y fg bg      => if @inside(x y) ➜ @screen.set_fg_bg @wx(x) @wy(y) fg bg
+    set_attr:   x y attr ul    => if @inside(x y) ➜ @screen.set_attr  @wx(x) @wy(y) attr ul
     
     get_char: x y => @screen.get_char @wx(x) @wy(y)
     get_bg:   x y => @screen.get_bg   @wx(x) @wy(y)

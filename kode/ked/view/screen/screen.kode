@@ -3,7 +3,7 @@ use ../../../kxk    ▪ kseg post
 use ../../theme     ◆ color
 use ../../edit/tool ◆ belt
 ■screen
-    # an array of cells (background|foreground colors and character)
+    # an array of cells (background|foreground colors, attributes and character)
     
     @MAIN_MARK:   '\x1b[4:1m'
     @MULTI_MARK:  '\x1b[4:5m'
@@ -137,6 +137,12 @@ use ../../edit/tool ◆ belt
         if 0 <= x < @cols and 0 <= y < @rows
             @c[y][x].fg = fg
             @c[y][x].bg = bg
+
+    set_attr: x y attr ul =>
+
+        if 0 <= x < @cols and 0 <= y < @rows
+            @c[y][x].attr = attr
+            @c[y][x].ul   = ul
             
     #  fill the background of every cell of the screen
     
@@ -223,12 +229,22 @@ use ../../edit/tool ◆ belt
             line = ''
             pbg = ''
             pfg = ''
+            pattr = null
+            pul   = null
             
             for x in 0...@cols
                 
                 cell = @c[y][x]
                 ch = cell.char
                 ch = ' ' if not valid ch
+
+                if cell.attr != pattr or cell.ul != pul
+                    line += screen.END_MARK
+                    pattr = cell.attr
+                    pul   = cell.ul
+                    pbg   = ''
+                    pfg   = ''
+                    line += attrCodes(cell.attr cell.ul)
                 
                 bg = color.bg_rgb cell.bg
                 if bg != pbg
@@ -272,6 +288,8 @@ use ../../edit/tool ◆ belt
         s = ''
         pbg = ''
         pfg = ''
+        pattr = null
+        pul   = null
 
         for [bx by scale width] in @lastRuns ? []
             for r in by...by+scale
@@ -293,6 +311,17 @@ use ../../edit/tool ◆ belt
             
                 char = @c[y][x].char
                 continue if char == null
+
+                attr = @c[y][x].attr
+                ul   = @c[y][x].ul
+
+                if attr != pattr or ul != pul
+                    s += '\x1b[0m'
+                    pattr = attr
+                    pul   = ul
+                    pbg   = ''
+                    pfg   = ''
+                    s += attrCodes(attr ul)
                                     
                 bg = color.bg_rgb @c[y][x].bg
                 if bg != pbg
@@ -309,4 +338,24 @@ use ../../edit/tool ◆ belt
 
         s
         
+###
+    the escape codes for the attributes of a cell
+    attr is a string of flags: b bold, i italic, u underline, s strikethrough
+###
+
+attrCodes = (attr ul) ->
+
+    codes = ''
+
+    if valid attr and not empty attr
+        codes += '\x1b[1m' if attr.includes 'b'
+        codes += '\x1b[3m' if attr.includes 'i'
+        codes += '\x1b[4m' if attr.includes 'u'
+        codes += '\x1b[9m' if attr.includes 's'
+
+    if valid ul
+        codes += "\x1b[58:2::#{ul[0]}:#{ul[1]}:#{ul[2]}m"
+
+    codes
+
 export screen

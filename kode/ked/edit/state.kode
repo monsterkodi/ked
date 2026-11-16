@@ -135,12 +135,7 @@ use           ◆ keys mode
 
     clearColorsAtCursorOrSelection: =>
 
-        ranges = @s.selections
-
-        if empty ranges
-            if rng = belt.rangeOfClosestWordToPos @s.lines @mainCursor()
-                ranges = [rng]
-
+        ranges = @decorationRanges()
         @clearColorsForRanges ranges if not empty ranges
 
     colorAtPos: (pos layer) =>
@@ -157,6 +152,7 @@ use           ◆ keys mode
         areas = @s.sue ? []
 
         @s = @s.set 'sue' areas.concat([{x: x y: y value: value}])
+        @rowCache = null
         @r = []
         @pushState()
         @emit 'sue.changed'
@@ -172,6 +168,7 @@ use           ◆ keys mode
             add.push {x: rng[0] y: rng[1] value: value}
 
         @s = @s.set 'sue' areas.concat(add)
+        @rowCache = null
         @r = []
         @pushState()
         @emit 'sue.changed'
@@ -186,11 +183,12 @@ use           ◆ keys mode
         ⮐ if cut eql areas
 
         @s = @s.set 'sue' cut
+        @rowCache = null
         @r = []
         @pushState()
         @emit 'sue.changed'
 
-    clearSueAtCursorOrSelection: =>
+    decorationRanges: =>
 
         ranges = @s.selections
 
@@ -198,11 +196,26 @@ use           ◆ keys mode
             if rng = belt.rangeOfClosestWordToPos @s.lines @mainCursor()
                 ranges = [rng]
 
+        ranges
+
+    addSueForRanges: (ranges code values) =>
+
+        ⮐ if empty ranges
+
+        for rng in ranges
+            w = max 1 (rng[2] - rng[0])
+            h = rng[3] - rng[1] + 1
+            @setSue rng[0] rng[1] [code values.concat([w h])]
+
+    clearSueAtCursorOrSelection: =>
+
+        ranges = @decorationRanges()
         @clearSueForRanges ranges if not empty ranges
 
     loadSue: areas =>
 
         @s = @s.set 'sue' (areas ? [])
+        @rowCache = null
         @clearHistory()
         @emit 'sue.changed'
 

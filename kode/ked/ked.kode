@@ -553,6 +553,14 @@ use child_process ▪ spawn exec
 
 #!save
     
+    styleSelection: flags =>
+
+        ranges = @editor.state.decorationRanges()
+
+        @editor.state.addSueForRanges(ranges susan.STYLE [flags])
+
+        @redraw()
+
     clearDecoration: =>
 
         @editor.state.clearColorsAtCursorOrSelection()
@@ -759,6 +767,10 @@ use child_process ▪ spawn exec
             'alt+c'                      ➜ ⮐ post.emit 'colorpicker.show'
             'alt+u'                      ➜ ⮐ post.emit 'uniko.show'
             'shift+alt+c'                ➜ ⮐ @clearDecoration()
+            'shift+alt+u'                ➜ ⮐ @styleSelection 'u'
+            'shift+alt+s'                ➜ ⮐ @styleSelection 's'
+            'shift+alt+b'                ➜ ⮐ @styleSelection 'b'
+            'shift+alt+i'                ➜ ⮐ @styleSelection 'i'
                             
     goToPrevFunc: =>
     
