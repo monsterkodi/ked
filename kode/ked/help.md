@@ -154,6 +154,11 @@
     g;                                  older position in the change list
     g,                                  newer position in the change list
 
+#### window
+
+    H  M  L                             top, middle, bottom of the window
+    3H  3L                              third line from top or bottom
+
 #### registers
 
     "{register}                         use a register for the next yank, delete, or put

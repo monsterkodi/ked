@@ -78,6 +78,9 @@ use ..           ◆ mode
         'l':    n -> { kind: 'char'             count: n }
         'j':    n -> { kind: 'lineDown'         count: n }
         'k':    n -> { kind: 'lineUp'           count: n }
+        'H':    n -> { kind: 'windowTop'        count: n }
+        'M':    n -> { kind: 'windowMiddle'     count: n }
+        'L':    n -> { kind: 'windowBottom'     count: n }
         '(':    n -> { kind: 'sentenceBack'     count: n }
         ')':    n -> { kind: 'sentence'         count: n }
         '{':    n -> { kind: 'paragraphBack'    count: n }
@@ -1097,6 +1100,13 @@ use ..           ◆ mode
                 ⮐ @execute command(@countNumber())
             
         switch char       
+
+            'H'
+                ⮐ @execute { operator: 'move', motion: { kind: 'windowTop',    count: @countNumber() } }
+            'M'
+                ⮐ @execute { operator: 'move', motion: { kind: 'windowMiddle', count: @countNumber() } }
+            'L'
+                ⮐ @execute { operator: 'move', motion: { kind: 'windowBottom', count: @countNumber() } }
     
             'i' ➜ ⮐ @state.startNovimInsert kind:'insert'
             'a' ➜ ⮐ @state.startNovimInsert kind:'append'

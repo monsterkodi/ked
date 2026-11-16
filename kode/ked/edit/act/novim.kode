@@ -604,7 +604,7 @@ export
 
         for cursor in @allCursors()
 
-            rng = motion.range @s.lines cursor spec
+            rng = @rangeForMotion cursor spec
 
             continue if not rng
 
@@ -1134,12 +1134,11 @@ export
 
     selectByMotion: spec ->
 
-        lines = @s.lines
         rngs  = []
 
         for cursor in @allCursors()
 
-            rng = motion.range lines cursor spec
+            rng = @rangeForMotion cursor spec
             continue if not rng
 
             continue if belt.isEmptyRange(rng) and not motion.isLinewise(spec)
@@ -1206,7 +1205,7 @@ export
         rngs = []
         for cursor,idx in cursors
 
-            rng = motion.range @s.lines cursor spec
+            rng = @rangeForMotion cursor spec
             continue if not rng
             continue if belt.isEmptyRange(rng) and not linewise
             rngs.push rng
@@ -1473,7 +1472,7 @@ export
 
         for cursor in @allCursors()
 
-            rng = motion.range @s.lines cursor spec
+            rng = @rangeForMotion cursor spec
 
             continue if not rng
             continue if belt.isEmptyRange rng
@@ -1635,7 +1634,7 @@ export
     
         n = spec.count ? count
 
-        jump   = spec.kind in ['eof' 'bof' 'sentence' 'sentenceBack' 'paragraph' 'paragraphBack']
+        jump   = spec.kind in ['eof' 'bof' 'sentence' 'sentenceBack' 'paragraph' 'paragraphBack' 'windowTop' 'windowMiddle' 'windowBottom']
         origin = jump ? @mainCursor() : null
 
         if spec.kind == 'charFind'
@@ -1643,6 +1642,8 @@ export
         else if spec.kind == 'lineFirst'
             @moveCursors 'down', { count: n-1 } if n > 1
             @moveCursors 'ind'
+        else if spec.kind in ['windowTop' 'windowMiddle' 'windowBottom']
+            @moveCursorsToWindowLine spec.kind n
         else
             for i in 1..n
                 @moveCursors spec.kind

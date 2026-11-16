@@ -3,7 +3,7 @@ use ../../kxk ▪ immutable kstr kseg events absMin post
 use ../../kxk ◆ clip
 use ../util   ◆ syntax config scaling
 use ./act     ◆ del insert select join indent multi main novim sort count range macro
-use ./tool    ◆ belt colorspans jumplist changelist
+use ./tool    ◆ belt colorspans jumplist changelist motion
 use ./register
 use           ◆ keys mode
 
@@ -461,6 +461,47 @@ use           ◆ keys mode
 
     isValidLineIndex:   li => 0 <= li < @s.lines.length
     isInvalidLineIndex: li => not @isValidLineIndex li
+
+#!window
+
+    windowLine: kind count=1 ->
+
+        rows   = max 1 @cells.rows
+        top    = @lineAtRow 0
+        bottom = @lineAtRow rows-1
+        n      = max 1 (count ? 1)
+
+        switch kind
+            'windowTop'    ➜ clamp top bottom (top+n-1)
+            'windowBottom' ➜ clamp top bottom (bottom-n+1)
+            ➜ @lineAtRow int((rows-1)/2)
+
+    moveCursorsToWindowLine: kind count=1 ->
+
+        line = @windowLine kind count
+        x    = belt.lineIndentAtPos @s.lines [0 line]
+        cursors = @allCursors()
+
+        for c in cursors
+            c[0] = x
+            c[1] = line
+
+        @setCursors cursors main:@s.main
+
+    windowMotionRange: cursor spec ->
+
+        line = @windowLine spec.kind (spec.count ? 1)
+        y1   = min cursor[1] line
+        y2   = max cursor[1] line
+
+        [0 y1 kseg.width(@s.lines[y2]) y2]
+
+    rangeForMotion: cursor spec ->
+
+        if spec.kind in ['windowTop' 'windowMiddle' 'windowBottom']
+            ⮐ @windowMotionRange cursor spec
+
+        motion.range @s.lines cursor spec
 
 #!changes
 

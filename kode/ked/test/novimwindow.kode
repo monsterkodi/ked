@@ -1,0 +1,144 @@
+use ../../kxk    ▪ kseg
+use ../edit      ◆ state mode
+use ../edit/tool ◆ belt
+use ../edit/mode ◆ novim
+
+cells = cols:40 rows:20
+
+lines = []
+for i in 0...30
+    lines.push "  #{i}"
+
+setup = (name) ->
+    store = {'editor▸file':'/tmp/novimwindow'}
+    fakeGet = (key def) -> clone(store[key] ? def)
+    fakeSet = (key value) -> store[key] = clone value
+    global.ked_session = get:fakeGet set:fakeSet
+    s = new state cells name
+    mode.modes.novim = novim
+    mode.start s 'novim'
+    s.loadLines lines
+    s.setView [0 0]
+    s.setMainCursor 0 8
+    s
+
+press = (s c) -> mode.handleKey s c {combo:c, char:c}
+
+reset = (s) ->
+    s.setView [0 0]
+    s.setMainCursor 0 8
+
+▸ novim window motions
+
+  ▸ H goes to the first non blank of the top line
+
+        s = setup 'novimwindow_h'
+
+        top = s.lineAtRow 0
+
+        press s 'H'
+
+        s.mainCursor() ▸ [2 top]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ M goes to the first non blank of the middle line
+
+        s = setup 'novimwindow_m'
+
+        mid = s.lineAtRow int((s.cells.rows-1)/2)
+
+        press s 'M'
+
+        s.mainCursor() ▸ [2 mid]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ L goes to the first non blank of the bottom line
+
+        s = setup 'novimwindow_l'
+
+        bottom = s.lineAtRow s.cells.rows-1
+
+        press s 'L'
+
+        s.mainCursor() ▸ [2 bottom]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ counts make H and L count lines from the window edge
+
+        s = setup 'novimwindow_count'
+
+        top    = s.lineAtRow 0
+        bottom = s.lineAtRow s.cells.rows-1
+
+        press s '3'
+        press s 'H'
+
+        s.mainCursor() ▸ [2 top+2]
+
+        reset s
+
+        press s '3'
+        press s 'L'
+
+        s.mainCursor() ▸ [2 bottom-2]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ M ignores a count
+
+        s = setup 'novimwindow_mcount'
+
+        mid = s.lineAtRow int((s.cells.rows-1)/2)
+
+        press s '2'
+        press s 'M'
+
+        s.mainCursor() ▸ [2 mid]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ dH deletes up to the top of the window
+
+        s = setup 'novimwindow_dh'
+
+        press s 'd'
+        press s 'H'
+
+        s.s.lines.length ▸ 21
+        kseg.str(s.s.lines[0]) ▸ '  9'
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ dL deletes down to the bottom of the window
+
+        s = setup 'novimwindow_dl'
+
+        press s 'd'
+        press s 'L'
+
+        s.s.lines.length ▸ 18
+        kseg.str(s.s.lines[8]) ▸ '  20'
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ H M and L are jumps
+
+        s = setup 'novimwindow_jump'
+
+        press s 'L'
+        press s 'ctrl+o'
+
+        s.mainCursor() ▸ [0 8]
+
+        mode.stop s 'novim'
+        delete global.ked_session

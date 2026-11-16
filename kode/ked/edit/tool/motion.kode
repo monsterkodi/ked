@@ -32,7 +32,7 @@ use              ◆ belt
         textObject      an inner or around word, quoted string or bracket pair
 ###
 
-    @isLinewise: spec -> spec.kind in ['line' 'lineDown' 'lineUp' 'lineFirst' 'lineFirstDown' 'lineFirstUp']
+    @isLinewise: spec -> spec.kind in ['line' 'lineDown' 'lineUp' 'lineFirst' 'lineFirstDown' 'lineFirstUp' 'windowTop' 'windowMiddle' 'windowBottom']
 
     @mergeRanges: rngs ->
 
