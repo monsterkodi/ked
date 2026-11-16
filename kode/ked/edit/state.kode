@@ -5,7 +5,6 @@ use ../util   ◆ syntax config scaling
 use ./act     ◆ del insert select join indent multi main novim sort count range macro
 use ./tool    ◆ belt colorspans jumplist changelist motion sue
 use ./register
-use ◆ susan
 use           ◆ keys mode
 
 ■state□events
@@ -182,7 +181,7 @@ use           ◆ keys mode
         areas = @s.sue ? []
         ⮐ if empty areas or empty ranges
 
-        cut = susan.cut(areas ranges @s.lines)
+        cut = sue.rangesCutFromAreasInLines(ranges areas @s.lines)
 
         ⮐ if cut eql areas
 

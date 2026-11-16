@@ -180,6 +180,101 @@ collect = (pending y x areas) ->
 
         result
 
+    #  geometry
+    #
+    #  the leading values of a value's data are the feature's own, the
+    #  trailing numbers are geometry: width in cells, then height in rows.
+    #  a null width means the box reaches to the end of its line.
+    #
+    #  data that starts with a number has no way to tell values from
+    #  geometry, so such an area has no box and is never cut.
+
+    @boxForAreaAndLines: (area lines) ->
+
+        data = area.value[1] ? []
+
+        n = 0
+        while n < data.length and not (data[n] is num) and data[n] != null
+            n += 1
+
+        ⮐ null if n == 0 and not empty data
+
+        w = data[n]
+        h = data[n+1] ? 1
+
+        if not valid w
+            line = lines[area.y] ? []
+            w    = max 0 (kseg.width(line) - area.x)
+            open = true
+        else
+            open = false
+
+        {x: area.x y: area.y w: w h: h values: data[0...n] open: open}
+
+    @areaWithBoxGeometry: (area box) ->
+        w = box.open ? null : box.w
+        {x: box.x y: box.y value: [area.value[0] box.values.concat([w box.h])]}
+
+    #  the parts of a box that a range does not cover
+    #  a range is [x1 y1 x2 y2] with x2 exclusive and y2 inclusive
+
+    @boxMinusRange: (box rng) ->
+
+        [rx1 ry1 rx2 ry2] = rng
+
+        x1 = box.x
+        x2 = box.x + box.w
+        y1 = box.y
+        y2 = box.y + box.h - 1
+
+        ⮐ [box] if rx2 <= x1 or rx1 >= x2 or ry2 < y1 or ry1 > y2
+
+        parts = []
+
+        if ry1 > y1
+            parts.push {x: x1 y: y1 w: box.w h: ry1-y1 values: box.values open: box.open}
+
+        if ry2 < y2
+            parts.push {x: x1 y: ry2+1 w: box.w h: y2-ry2 values: box.values open: box.open}
+
+        my1 = max(y1 ry1)
+        my2 = min(y2 ry2)
+
+        if my2 >= my1
+            mh = my2 - my1 + 1
+            if rx1 > x1
+                parts.push {x: x1 y: my1 w: rx1-x1 h: mh values: box.values open: false}
+            if rx2 < x2
+                parts.push {x: rx2 y: my1 w: x2-rx2 h: mh values: box.values open: box.open}
+
+        parts
+
+    @rangesCutFromAreasInLines: (ranges areas lines) ->
+
+        result = []
+
+        for area in areas
+
+            box = @boxForAreaAndLines(area lines)
+
+            if not box?
+                result.push area
+                continue
+
+            parts = [box]
+
+            for rng in ranges
+                next = []
+                for part in parts
+                    next = next.concat(@boxMinusRange(part rng))
+                parts = next
+                break if empty parts
+
+            for part in parts
+                result.push @areaWithBoxGeometry(area part)
+
+        result
+
     @desue: text ->
         lines = text.split('\n')
         clean = []

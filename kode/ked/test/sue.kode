@@ -193,3 +193,41 @@ sym = (ascii) -> Array.from(ascii).map((c) -> String.fromCodePoint(0xE0000 + c.c
         rects = [{x: 0 y: 0 value: 1}]
 
         sue.ensue '' rects ▸ sue.sueEncode(1)
+
+  ▸ a range cuts an area in two
+
+        lines = [['a' 'b' 'c' 'd' 'e' 'f' 'g' 'h']]
+        areas = [{x: 0 y: 0 value: [31 ['#f00' 8 1]]}]
+        ranges = [[3 0 6 0]]
+
+        cut = sue.rangesCutFromAreasInLines ranges areas lines
+
+        cut.length ▸ 2
+        cut[0] ▸ {x: 0 y: 0 value: [31 ['#f00' 3 1]]}
+        cut[1] ▸ {x: 6 y: 0 value: [31 ['#f00' 2 1]]}
+
+  ▸ a range removes an area it covers
+
+        lines = [['a' 'b' 'c']]
+        areas = [{x: 0 y: 0 value: [31 ['#f00' 3 1]]}]
+        ranges = [[0 0 3 0]]
+
+        sue.rangesCutFromAreasInLines(ranges areas lines) ▸ []
+
+  ▸ a cut keeps the end of line of an open area
+
+        lines = [['a' 'b' 'c' 'd' 'e' 'f']]
+        areas = [{x: 2 y: 0 value: [32 ['#00f']]}]
+        ranges = [[0 0 4 0]]
+
+        cut = sue.rangesCutFromAreasInLines ranges areas lines
+
+        cut ▸ [{x: 4 y: 0 value: [32 ['#00f' null 1]]}]
+
+  ▸ an area whose data starts with a number is left alone
+
+        lines = [['a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j']]
+        areas = [{x: 0 y: 0 value: [41 [7 10 4 20 8]]}]
+        ranges = [[0 0 10 0]]
+
+        sue.rangesCutFromAreasInLines ranges areas lines ▸ areas
