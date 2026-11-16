@@ -188,14 +188,18 @@ use           ◆ keys mode
         @pushState()
         @emit 'sue.changed'
 
+    #  the ranges to decorate: the selections, or the word at every cursor
+    #  the selections are immutable, so they are only read, never changed
+
     decorationRanges: =>
 
-        ranges = clone @s.selections
+        ⮐ @s.selections if not empty @s.selections
 
-        if empty ranges
-            for pos in @s.cursors
-                if rng = belt.rangeOfClosestWordToPos @s.lines pos
-                    ranges.push rng
+        ranges = []
+
+        for pos in @s.cursors
+            if rng = belt.rangeOfClosestWordToPos @s.lines pos
+                ranges.push rng
 
         ranges
 
