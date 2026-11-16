@@ -120,6 +120,11 @@ use ../base         ◆ view
         
         t = @cells.screen.t
         ⮐ if empty t.cellsz
+
+        #  rows depend on the line heights, and the areas can change them,
+        #  so a rebuild always recomputes them
+
+        @rowCache = null
         
         @csz = t.cellsz
         

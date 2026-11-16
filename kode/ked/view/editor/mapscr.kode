@@ -43,6 +43,7 @@ use                 ◆ mapview
         
         @editor.state.on 'lines.changed' @onLinesChanged
         @editor.state.on 'colors.changed' (=> @reload())
+        @editor.state.on 'sue.changed'    (=> @reload())
         
         @calcView()
         @linesCount = @state.s.lines.length

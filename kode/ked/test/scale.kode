@@ -1178,3 +1178,24 @@ hed = cols rows ext='md' feats=[]->
         h.screen.get_char(0 2) ▸ 'a'
 
         config.data = saved
+
+  ▸ a sue line scale rebuilds the map with font images
+
+        [h e] = hed  cols:40 rows:10
+        e.state.loadLines ['aaa' 'bbb' 'ccc']
+
+        m = new mapscr e
+        m.cells.layout 30 0 12 10
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+        m.reload()
+
+        m.textLine(0) ▸ false
+        m.imageHeight(0) ▸ 1
+
+        h.screen.t.out = []
+        e.state.setLineScale 0 5
+
+        m.textLine(0) ▸ true
+        m.imageHeight(0) ▸ 20
+        h.screen.t.written().includes('v=20') ▸ true
