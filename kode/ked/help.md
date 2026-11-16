@@ -149,6 +149,11 @@
     G  gg  %  ( ) { }                   add a jump position
     /  ?  n  N  *  #  :s  :e            also add a jump position
 
+#### changes
+
+    g;                                  older position in the change list
+    g,                                  newer position in the change list
+
 #### registers
 
     "{register}                         use a register for the next yank, delete, or put

@@ -1,0 +1,181 @@
+use ../edit      ◆ state mode
+use ../edit/tool ◆ belt
+use ../edit/mode ◆ novim
+
+cells = cols:55 rows:66
+
+fakeGet = (key def) -> clone(store[key] ? def)
+fakeSet = (key value) -> store[key] = clone value
+
+▸ novim changes
+
+  ▸ g; and g, walk change positions
+
+        store = {'editor▸file':'/tmp/novimchange'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimchange_walk'
+        mode.modes.novim = novim
+        mode.start s 'novim'
+
+        press = (c) -> mode.handleKey s c {combo:c, char:c}
+
+        s.loadLines belt.linesForText("one\ntwo\nthree")
+        s.setMainCursor 0 0
+
+        press 'x'
+        s.mainCursor() ▸ [0 0]
+
+        press 'j'
+        press 'x'
+        s.mainCursor() ▸ [0 1]
+
+        press 'g'
+        press ';'
+        s.mainCursor() ▸ [0 1]
+
+        press 'g'
+        press ';'
+        s.mainCursor() ▸ [0 0]
+
+        press 'g'
+        press ','
+        s.mainCursor() ▸ [0 1]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ a count walks several changes
+
+        store = {'editor▸file':'/tmp/novimchange'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimchange_count'
+        mode.modes.novim = novim
+        mode.start s 'novim'
+
+        press = (c) -> mode.handleKey s c {combo:c, char:c}
+
+        s.loadLines belt.linesForText("1\n2\n3\n4\n5")
+        s.setMainCursor 0 0
+
+        press 'x'
+        press 'j'
+        press 'x'
+        press 'j'
+        press 'x'
+
+        press '2'
+        press 'g'
+        press ';'
+        s.mainCursor() ▸ [0 1]
+
+        press '2'
+        press 'g'
+        press ','
+        s.mainCursor() ▸ [0 2]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ typing on one line is one change
+
+        store = {'editor▸file':'/tmp/novimchange'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimchange_typing'
+
+        s.loadLines ['abc']
+        s.setMainCursor 0 0
+
+        s.insert 'x'
+        s.insert 'y'
+
+        s.changes.entries.length ▸ 1
+        s.changes.entries[0]     ▸ [1 0]
+
+        delete global.ked_session
+
+  ▸ motion does not add a change
+
+        store = {'editor▸file':'/tmp/novimchange'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimchange_motion'
+        mode.modes.novim = novim
+        mode.start s 'novim'
+
+        press = (c) -> mode.handleKey s c {combo:c, char:c}
+
+        s.loadLines belt.linesForText("one two")
+        s.setMainCursor 0 0
+
+        press 'w'
+        press 'l'
+
+        s.changes.entries.length ▸ 0
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ undo keeps the change position
+
+        store = {'editor▸file':'/tmp/novimchange'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimchange_undo'
+
+        s.loadLines ['abc']
+        s.setMainCursor 0 0
+
+        s.insert 'x'
+
+        s.changes.entries.length ▸ 1
+
+        s.undo()
+
+        s.changes.entries.length ▸ 1
+        s.changes.older()        ▸ [0 0]
+
+        delete global.ked_session
+
+  ▸ substitute adds a change
+
+        store = {'editor▸file':'/tmp/novimchange'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimchange_substitute'
+        mode.modes.novim = novim
+        mode.start s 'novim'
+
+        s.loadLines belt.linesForText("one\ntwo")
+        s.setMainCursor 0 0
+
+        nmv = mode.get s 'novim'
+        nmv.runEx 's/one/x/'
+
+        s.changes.entries.length ▸ 1
+        s.changes.entries[0]     ▸ [0 0]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ loading a file forgets the changes
+
+        store = {'editor▸file':'/tmp/novimchange'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimchange_load'
+
+        s.loadLines ['abc']
+        s.setMainCursor 0 0
+
+        s.insert 'x'
+
+        s.changes.entries.length ▸ 1
+
+        s.loadLines ['new']
+
+        s.changes.entries.length ▸ 0
+
+        delete global.ked_session

@@ -1,0 +1,77 @@
+use ../edit/tool ◆ changelist
+
+▸ changelist
+
+  ▸ an empty change list has no older or newer position
+
+        c = new changelist
+
+        c.older() ▸ null
+        c.newer() ▸ null
+
+  ▸ g; starts at the newest change
+
+        c = new changelist
+
+        c.record [0 0]
+
+        c.older() ▸ [0 0]
+        c.older() ▸ null
+
+  ▸ changes are walked backwards and forwards
+
+        c = new changelist
+
+        c.record [0 0]
+        c.record [0 1]
+        c.record [0 2]
+
+        c.older() ▸ [0 2]
+        c.older() ▸ [0 1]
+        c.older() ▸ [0 0]
+        c.older() ▸ null
+
+        c.newer() ▸ [0 1]
+        c.newer() ▸ [0 2]
+        c.newer() ▸ null
+
+  ▸ close changes on the same line keep only the last position
+
+        c = new changelist
+
+        c.record [10 0]
+        c.record [20 0]
+
+        c.entries.length ▸ 1
+        c.entries[0]     ▸ [20 0]
+
+  ▸ changes far apart on the same line are kept
+
+        c = new changelist
+
+        c.record [10 0]
+        c.record [95 0]
+
+        c.entries.length ▸ 2
+
+  ▸ only the newest 100 changes are kept
+
+        c = new changelist
+
+        for y in 1..105
+            c.record [0 y]
+
+        c.entries.length ▸ 100
+        c.entries[0][1]  ▸ 6
+        c.entries[-1][1] ▸ 105
+
+  ▸ reset forgets the changes
+
+        c = new changelist
+
+        c.record [0 0]
+
+        c.reset()
+
+        c.entries.length ▸ 0
+        c.older()        ▸ null

@@ -3,7 +3,7 @@ use ../../kxk ▪ immutable kstr kseg events absMin post
 use ../../kxk ◆ clip
 use ../util   ◆ syntax config scaling
 use ./act     ◆ del insert select join indent multi main novim sort count range macro
-use ./tool    ◆ belt colorspans jumplist
+use ./tool    ◆ belt colorspans jumplist changelist
 use ./register
 use           ◆ keys mode
 
@@ -51,6 +51,7 @@ use           ◆ keys mode
         @gutterWidthOverride = null
 
         @jumps = new jumplist
+        @changes = new changelist
         @keepJumps = 0
 
         @clearSingle()
@@ -285,6 +286,8 @@ use           ◆ keys mode
         @h = []
         @r = []
 
+        @changes.reset()
+
         @beginIndices = []
         delete @beginIndex
         
@@ -316,6 +319,8 @@ use           ◆ keys mode
         @rowCache = null
         
         if oldLines != @s.lines
+
+            @changes.record @mainCursor() if @h.length
 
             colors = @s.colors
 
@@ -456,6 +461,34 @@ use           ◆ keys mode
 
     isValidLineIndex:   li => 0 <= li < @s.lines.length
     isInvalidLineIndex: li => not @isValidLineIndex li
+
+#!changes
+
+    jumpChangeOlder: (count=1) ->
+
+        n = max 1 (count ? 1)
+        moved = false
+
+        for i in 0...n
+            pos = @changes.older()
+            break if not pos
+            @setMainCursor pos[0] pos[1]
+            moved = true
+
+        moved
+
+    jumpChangeNewer: (count=1) ->
+
+        n = max 1 (count ? 1)
+        moved = false
+
+        for i in 0...n
+            pos = @changes.newer()
+            break if not pos
+            @setMainCursor pos[0] pos[1]
+            moved = true
+
+        moved
 
 #!jumps
 

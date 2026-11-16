@@ -1032,6 +1032,16 @@ use ..           ◆ mode
             
                 prefix  = @prefix
                 @prefix = null
+                if prefix == 'g' and char in [';' ',']
+                    if @operator or @area or @state.visual
+                        ⮐ @reset()
+                    count = @countNumber()
+                    @reset()
+                    if char == ';'
+                        @state.jumpChangeOlder count
+                    else
+                        @state.jumpChangeNewer count
+                    ⮐ true
                 if prefix == 'g' and char == 'g'
                     ⮐ @execute { operator: 'move', motion: { kind: 'bof', count: @countNumber() } }
                 if prefix == 'g' and char == 'v'

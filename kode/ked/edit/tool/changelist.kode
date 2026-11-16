@@ -1,0 +1,62 @@
+■changelist
+###
+    remembers the cursor positions of text changes
+
+    older and newer walk the list for g; and g,
+
+    changes close to each other on the same line keep only the last position
+###
+    @: ->
+
+        @max      = 100
+        @distance = 79
+        @entries  = []
+        @index    = @entries.length
+
+    tooClose: a b ->
+
+        ⮐ false if not valid a or not valid b
+
+        a[1] == b[1] and abs(a[0]-b[0]) < @distance
+
+    record: pos ->
+
+        ⮐ false if not valid pos
+
+        previous = @entries[-1]
+
+        if @tooClose previous pos
+            previous[0] = pos[0]
+            previous[1] = pos[1]
+        else
+            @entries.push [pos[0] pos[1]]
+            @entries.splice 0 @entries.length-@max if @entries.length > @max
+
+        @index = @entries.length
+
+        true
+
+    older: ->
+
+        ⮐ null if @index <= 0
+
+        @index -= 1
+
+        @entries[@index]
+
+    newer: ->
+
+        ⮐ null if @index >= @entries.length-1
+
+        @index += 1
+
+        @entries[@index]
+
+    reset: ->
+
+        @entries = []
+        @index   = 0
+
+        true
+
+export changelist
