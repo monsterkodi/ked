@@ -316,7 +316,12 @@ use ..           ◆ mode
 
         ⮐ @runSubstitute(parsed visualRange) if parsed.name in ['s' 'substitute']
 
-        ⮐ @runGlobal(parsed visualRange)   if parsed.name in ['g' 'v' 'global' 'vglobal']
+        if parsed.name in ['g' 'v' 'global' 'vglobal']
+            @state.keepJumps += 1
+            result = @runGlobal parsed visualRange
+            @state.keepJumps -= 1
+            ⮐ result
+
         ⮐ @runNormal(parsed visualRange)   if parsed.name in ['normal' 'norm']
         ⮐ @deleteExRange(parsed visualRange) if parsed.name in ['d' 'delete']
         ⮐ @runEdit(parsed)                 if parsed.name in ['e' 'edit']
@@ -371,6 +376,8 @@ use ..           ◆ mode
         if empty entries
             post.emit 'novim.error' "pattern not found: #{spec.pattern}"
             ⮐ false
+
+        @state.pushJump()
 
         if searching
             ⮐ @state.selectSubstitutions entries
@@ -506,6 +513,8 @@ use ..           ◆ mode
         if not parsed.bang and @state.isDirty()
             post.emit 'novim.error' 'unsaved changes (add ! to override)'
             ⮐ false
+
+        @state.pushJump()
 
         post.emit 'file.edit' file parsed.bang
 
@@ -788,7 +797,12 @@ use ..           ◆ mode
 
         target ?= @searchForward ? spans[0] : spans[-1]
 
-        @state.setMainCursor [target[0] target[1]]
+        before = @state.mainCursor()
+
+        if not (before eql [target[0] target[1]])
+            @state.pushJump before
+            @state.setMainCursor [target[0] target[1]]
+
         @emitSearchPosition()
 
         true
@@ -871,6 +885,15 @@ use ..           ◆ mode
             if not @operator and not @area
                 @state.startVisual 'block'
             ⮐ @reset()
+
+        if combo in ['ctrl+o' 'ctrl+i' 'tab'] and not @state.novimInsert and not @state.visual
+            count = @countNumber()
+            @reset()
+            if combo == 'ctrl+o'
+                @state.jumpOlder count
+            else
+                @state.jumpNewer count
+            ⮐ true
 
         if combo.includes('alt+') or combo.includes('ctrl+') or combo.includes('cmd+')
             ⮐ 'unhandled'

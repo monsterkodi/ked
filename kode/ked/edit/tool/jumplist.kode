@@ -1,0 +1,76 @@
+■jumplist
+###
+    remembers cursor positions before jumps
+
+    older and newer walk the list for ctrl+o and ctrl+i
+
+    a position on a line that is already in the list replaces the old one
+###
+    @: ->
+
+        @max     = 100
+        @entries = []
+        @index   = @entries.length
+
+    sameLine: a b ->
+
+        ⮐ false if not valid a or not valid b
+
+        a.file == b.file and a.y == b.y
+
+    removeLine: entry ->
+
+        for e,i in @entries
+            if @sameLine e entry
+                @entries.splice i 1
+                ⮐ i
+
+        -1
+
+    trim: ->
+
+        if @entries.length > @max
+            @entries.splice 0 @entries.length-@max
+
+    record: entry ->
+
+        ⮐ false if not valid entry
+
+        @entries = @entries[0..@index] if @index < @entries.length
+
+        @removeLine entry
+
+        @entries.push entry
+        @trim()
+
+        @index = @entries.length
+
+        true
+
+    older: current ->
+
+        ⮐ null if empty @entries
+
+        if @index >= @entries.length
+            @removeLine current
+            @entries.push current
+            @trim()
+            @index = @entries.length - 2
+            ⮐ null if @index < 0
+            ⮐ @entries[@index]
+
+        ⮐ null if @index <= 0
+
+        @index -= 1
+
+        @entries[@index]
+
+    newer: ->
+
+        ⮐ null if @index >= @entries.length-1
+
+        @index += 1
+
+        @entries[@index]
+
+export jumplist

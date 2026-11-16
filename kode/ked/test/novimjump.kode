@@ -1,0 +1,201 @@
+use ../../kxk    ▪ post
+use ../edit      ◆ state mode
+use ../edit/tool ◆ belt
+use ../edit/mode ◆ novim
+
+cells = cols:55 rows:66
+
+fakeGet = (key def) -> clone(store[key] ? def)
+fakeSet = (key value) -> store[key] = clone value
+
+▸ novim jumps
+
+  ▸ G and gg make jump positions navigable
+
+        store = {'editor▸file':'/tmp/novimjump'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimjump_gg'
+        mode.modes.novim = novim
+        mode.start s 'novim'
+
+        press = (c) -> mode.handleKey s c {combo:c, char:c}
+        tab   = -> mode.handleKey s 'tab' {combo:'tab', char:'\t'}
+
+        s.loadLines belt.linesForText("one\ntwo\nthree")
+        s.setMainCursor 0 0
+
+        press 'G'
+        s.mainCursor() ▸ [3 2]
+
+        press 'g'
+        press 'g'
+        s.mainCursor() ▸ [0 0]
+
+        press 'ctrl+o'
+        s.mainCursor() ▸ [3 2]
+
+        tab()
+        s.mainCursor() ▸ [0 0]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ a count walks several jumps
+
+        store = {'editor▸file':'/tmp/novimjump'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimjump_count'
+        mode.modes.novim = novim
+        mode.start s 'novim'
+
+        press = (c) -> mode.handleKey s c {combo:c, char:c}
+
+        s.loadLines belt.linesForText("a\n\nb\n\nc")
+        s.setMainCursor 0 0
+
+        press '}'
+        s.mainCursor() ▸ [0 1]
+
+        press '}'
+        s.mainCursor() ▸ [0 3]
+
+        press '2'
+        press 'ctrl+o'
+        s.mainCursor() ▸ [0 0]
+
+        press '2'
+        press 'ctrl+i'
+        s.mainCursor() ▸ [0 3]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ a committed search is a jump
+
+        store = {'editor▸file':'/tmp/novimjump'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimjump_search'
+        mode.modes.novim = novim
+        mode.start s 'novim'
+
+        press = (c) -> mode.handleKey s c {combo:c, char:c}
+
+        s.loadLines belt.linesForText("foo\nbar\nfoo")
+        s.setMainCursor 0 1
+
+        nmv = mode.get s 'novim'
+        nmv.startSearch()
+        nmv.searchChanged 'foo'
+        nmv.commitSearch()
+
+        s.mainCursor() ▸ [0 2]
+
+        press 'ctrl+o'
+        s.mainCursor() ▸ [0 1]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ percent is a jump
+
+        store = {'editor▸file':'/tmp/novimjump'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimjump_percent'
+        mode.modes.novim = novim
+        mode.start s 'novim'
+
+        press = (c) -> mode.handleKey s c {combo:c, char:c}
+
+        s.loadLines belt.linesForText("call(\n  x\n)")
+        s.setMainCursor 4 0
+
+        press '%'
+
+        s.mainCursor() ▸ [0 2]
+
+        press 'ctrl+o'
+        s.mainCursor() ▸ [4 0]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ a jump to another file opens it
+
+        store = {'editor▸file':'/tmp/novimjump-a'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimjump_files'
+        mode.modes.novim = novim
+        mode.start s 'novim'
+
+        press = (c) -> mode.handleKey s c {combo:c, char:c}
+
+        opens = []
+        post.on 'file.open' (file row col) -> opens.push [file row col]
+
+        s.loadLines belt.linesForText("one\ntwo\nthree")
+        s.setMainCursor 2 0
+
+        press 'G'
+
+        store['editor▸file'] = '/tmp/novimjump-b'
+        s.setMainCursor 0 0
+
+        press 'ctrl+o'
+
+        opens[-1] ▸ ['/tmp/novimjump-a' 2 0]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ a global command does not add jumps
+
+        store = {'editor▸file':'/tmp/novimjump'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimjump_global'
+        mode.modes.novim = novim
+        mode.start s 'novim'
+
+        s.loadLines belt.linesForText("a\nb\nc")
+
+        nmv = mode.get s 'novim'
+        nmv.runEx 'g/./normal G'
+
+        s.jumps.entries.length ▸ 0
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ substitute and edit add jumps
+
+        store = {'editor▸file':'/tmp/novimjump'}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        s = new state cells 'novimjump_ex'
+        mode.modes.novim = novim
+        mode.start s 'novim'
+
+        s.loadLines belt.linesForText("one\ntwo")
+        s.setMainCursor 0 1
+
+        nmv = mode.get s 'novim'
+
+        nmv.runEx 'e'
+
+        s.jumps.entries.length ▸ 1
+        s.jumps.entries[0].y   ▸ 1
+
+        s.setMainCursor 0 0
+
+        nmv.runEx 's/one/x/'
+
+        s.jumps.entries.length ▸ 2
+        s.jumps.entries[1].y   ▸ 0
+
+        mode.stop s 'novim'
+        delete global.ked_session

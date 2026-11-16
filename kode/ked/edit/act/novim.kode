@@ -73,7 +73,8 @@ export
             else
                 ⮐ 
 
-        pos = @mainCursor()
+        pos    = @mainCursor()
+        origin = @mainCursor()
 
         for i in 0...count
 
@@ -98,6 +99,7 @@ export
 
             pos = [target[0] target[1]]
 
+        @pushJump(origin) if not (origin eql pos)
         @setMainCursor pos
 
     wordSpansForText: text ->
@@ -138,6 +140,7 @@ export
         start = [rng[0] rng[1]]
         end   = [rng[2] rng[3]]
         pos   = @mainCursor()
+        origin = pos
         moved = false
 
         for i in 0...max(1, count ? 1)
@@ -162,7 +165,9 @@ export
             pos   = [target[0] target[1]]
             moved = true
 
-        @setMainCursor pos[0] pos[1] if moved
+        if moved
+            @pushJump origin
+            @setMainCursor pos[0] pos[1]
 
     matchBracket: ->
 
@@ -210,6 +215,7 @@ export
             moved = true
 
         if moved
+            @pushJump()
             @setCursors newCursors main:@s.main
             
         @updateVisual() if @visual
@@ -1629,6 +1635,9 @@ export
     
         n = spec.count ? count
 
+        jump   = spec.kind in ['eof' 'bof' 'sentence' 'sentenceBack' 'paragraph' 'paragraphBack']
+        origin = jump ? @mainCursor() : null
+
         if spec.kind == 'charFind'
             @moveByCharFind spec n
         else if spec.kind == 'lineFirst'
@@ -1639,6 +1648,8 @@ export
                 @moveCursors spec.kind
                 
         @updateVisual() if @visual
+
+        @pushJump(origin) if jump and not (origin eql @mainCursor())
 
     moveByCharFind: spec n ->
 

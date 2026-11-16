@@ -141,6 +141,14 @@
     n  N                                jump in or against the search direction
     up  down                            previous and next search history entry
 
+#### jumps
+
+    ctrl+o                              older cursor position in the jump list
+    ctrl+i  tab                         newer cursor position in the jump list
+
+    G  gg  %  ( ) { }                   add a jump position
+    /  ?  n  N  *  #  :s  :e            also add a jump position
+
 #### registers
 
     "{register}                         use a register for the next yank, delete, or put
