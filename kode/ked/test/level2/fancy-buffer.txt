@@ -1,0 +1,75 @@
+fancy-buffer -- unicode payload storage test
+
+this file is plain text. everything you can read is meant to be read.
+the decoration is carried in invisible codepoints, so an editor, git or a
+pipe that preserves unknown codepoints preserves the decoration, and one
+that strips them loses only the decoration, never the text.
+
+tag characters   U+E0001 open, U+E0020 + ascii body, U+E007F close
+vs supplement    U+E0100 + digit, base 240, first digit is byte count
+
+section A   anchor after the run: open body close, then the run before it
+            the run length is part of the body, this is the cheap form
+section B   wrap around the run: open body text close
+section C   variation selector supplement, no open/close at all
+section D   mixed and dense
+
+decode a line with node, tags only:
+  node -e 'let o="";for(const c of process.argv[1]){const n=c.codePointAt(0);
+    o += n>=0xE0020&&n<=0xE007E ? String.fromCharCode(n-0xE0000)
+       : n>=0xE0000&&n<=0xE007F ? (n===0xE0001?"<":"")+(n===0xE007F?">":"")
+       : (n>=0xE0100?"{"+(n-0xE0100)+"}":c)}
+    console.log(o)' "$(sed -n Np this-file)"
+
+A1  anchor after a single word
+hello󠀁󠁬󠁥󠁮󠀽󠀵󠁿
+
+A2  anchor after a phrase, one payload for the whole phrase
+red words󠀁󠁬󠁥󠁮󠀽󠀹󠀻󠁦󠁧󠀽󠁦󠁦󠀲󠀲󠀰󠀰󠁿
+
+A3  anchor with several attributes
+a long run of ordinary text󠀁󠁬󠁥󠁮󠀽󠀲󠀴󠀻󠁢󠁧󠀽󠀰󠀰󠀳󠀳󠀶󠀶󠀻󠁦󠁧󠀽󠁦󠁦󠁦󠁦󠁦󠁦󠀻󠁳󠀽󠀲󠁿
+
+A4  anchor at the very end of a line, nothing visible after it󠀁󠁬󠁥󠁮󠀽󠀹󠀹󠀻󠁮󠁯󠁴󠁥󠀽󠁥󠁮󠁤󠀭󠁯󠁦󠀭󠁬󠁩󠁮󠁥󠁿
+
+A5  anchors after non-ascii bases
+café󠀁󠁬󠁥󠁮󠀽󠀴󠀻󠁦󠁧󠀽󠁦󠁦󠁡󠁡󠀰󠀰󠁿
+漢字󠀁󠁬󠁥󠁮󠀽󠀲󠀻󠁳󠀽󠀳󠁿
+🐈󠀁󠁬󠁥󠁮󠀽󠀱󠀻󠁢󠁧󠀽󠀲󠀲󠀰󠀰󠀴󠀴󠁿
+éclair󠀁󠁬󠁥󠁮󠀽󠀶󠀻󠁮󠁯󠁴󠁥󠀽󠁣󠁯󠁭󠁢󠁩󠁮󠁩󠁮󠁧󠁿
+
+A6  a long body, 300 ascii chars of payload after one word
+word󠀁󠁬󠁥󠁮󠀽󠀴󠀻󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁿
+
+B1  wrap around a run
+󠀁󠁬󠁥󠁮󠀽󠀸󠀻󠁦󠁧󠀽󠀰󠀰󠁦󠁦󠀸󠀸wrapped!󠁿
+
+B2  wrap around a run that itself contains a tag payload
+󠀁󠁬󠁥󠁮󠀽󠀵󠀻󠁳󠀽󠀲abc󠀁󠁬󠁥󠁮󠀽󠀳󠀻󠁦󠁧󠀽󠁦󠁦󠀰󠀰󠀰󠀰󠁿de󠁿
+
+B3  two wraps side by side, no visible char between them
+󠀁󠁬󠁥󠁮󠀽󠀳one󠁿󠀁󠁬󠁥󠁮󠀽󠀳two󠁿
+
+C1  vs supplement after ascii, body decodes to "s=2"
+small text󠄃󠄀󠆃󠄛󠇢
+
+C2  vs supplement after combining marks
+éclair󠄉󠄀󠆫󠆒󠅸󠅇󠇏󠄫󠅟󠅧󠆠
+
+C3  vs supplement after an emoji
+🐈󠄉󠄀󠆤󠇙󠆨󠇜󠆺󠇐󠅞󠆠󠄴
+
+C4  vs supplement with a longer body
+longer text󠄚󠄂󠅀󠄨󠄓󠄭󠇨󠄢󠇪󠅀󠆻󠇚󠄩󠅞󠆮󠇘󠄵󠄰󠆻󠅦󠅯󠇕󠆀󠆼󠇓󠆶󠆩󠇈
+
+D1  tag anchor and vs supplement on the same run
+both kinds󠀁󠁬󠁥󠁮󠀽󠀱󠀰󠀻󠁳󠀽󠀲󠁿󠄉󠄀󠆫󠆒󠅸󠅇󠇎󠇩󠅪󠆠󠄰
+
+D2  a payload after every character
+d󠀁󠁣󠀽󠀶󠀴󠁿e󠀁󠁣󠀽󠀶󠀵󠁿n󠀁󠁣󠀽󠀶󠁥󠁿s󠀁󠁣󠀽󠀷󠀳󠁿e󠀁󠁣󠀽󠀶󠀵󠁿
+
+D3  bare tags, no open or close marker at all, this is noise
+noise󠁯󠁲󠁰󠁨󠁡󠁮
+
+D4  plain control line, no invisibles anywhere
+plain control line
