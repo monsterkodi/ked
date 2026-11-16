@@ -740,14 +740,15 @@ use child_process ▪ spawn exec
         if @searcher.visible() ➜ ⮐ @searcher.selectPrevFileHeader()
         if @replacer.visible() ➜ ⮐ @replacer.selectPrevFileHeader()
             
-        @editor.singleCursorAtLine @funcol.funtree.lineIndexOfPrevFunc()
+        post.emit 'goto.line' @funcol.funtree.lineIndexOfPrevFunc() 'ind' 'topDelta'
         
     goToNextFunc: =>
     
         if @searcher.visible() ➜ ⮐ @searcher.selectNextFileHeader()
         if @replacer.visible() ➜ ⮐ @replacer.selectNextFileHeader()
             
-        @editor.singleCursorAtLine @funcol.funtree.lineIndexOfNextFunc()
+        if nextFuncLine = @funcol.funtree.lineIndexOfNextFunc()
+            post.emit 'goto.line' nextFuncLine 'ind' 'topDelta'
         
     onViewSize: name side delta =>
         
