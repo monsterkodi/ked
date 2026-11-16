@@ -1013,7 +1013,8 @@ mrange = lines x y m -> motion.range lines [x y] m
             txt "one two three"
             s.s.selections ▸ [[4 0 7 0]]
             cur 7 0
-            s.novimRegister.lines ▸ ['keep']
+            s.novimRegister.lines ▸ ['two']
+            s.registers.read('-').lines ▸ ['two']
         
             s.loadLines belt.linesForText("one two three")
             s.setMainCursor 5 0
@@ -1061,7 +1062,36 @@ mrange = lines x y m -> motion.range lines [x y] m
         
             txt "one X three"
     
-    ▸ change does not touch history
+    ▸ change fills registers
+
+        cr = new state cells 'changereg'
+
+        cr.loadLines belt.linesForText("one two")
+        cr.setMainCursor 4 0
+
+        cr.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+
+        cr.registers.read('-').lines   ▸ ['two']
+        cr.registers.read('1')         ▸ null
+        cr.novimRegister.lines         ▸ ['two']
+
+        cr.loadLines belt.linesForText("one two")
+        cr.setMainCursor 0 0
+
+        cr.executeNovim {operator:'change', motion:{kind:'word', count:1}, register:'a'}
+
+        cr.registers.read('a').lines   ▸ ['one ']
+
+        cr.loadLines belt.linesForText("one\ntwo")
+        cr.setMainCursor 0 0
+        cr.registers.set '-', { lines: ['old'], linewise: false }
+
+        cr.executeNovim {operator:'change', motion:{kind:'line', count:1}}
+
+        cr.registers.read('1').lines   ▸ ['one']
+        cr.registers.read('-').lines   ▸ ['old']
+
+  ▸ change does not touch history
     
             s.loadLines belt.linesForText("alpha beta")
             s.setMainCursor 0 0

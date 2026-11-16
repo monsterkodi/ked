@@ -169,9 +169,10 @@ use ../../kxk ◆ clip
         if operation == 'yank'
             @values['0'] = registers.cloneValue(value) if target.name == '"'
         else if operation in ['delete' 'change']
-            @shiftNumbered value
             if not value.linewise and value.lines.length <= 1
                 @values['-'] = registers.cloneValue(value)
+            else
+                @shiftNumbered value
 
         if target.name in ['+' '*']
             @writeClipboard value

@@ -38,6 +38,7 @@ use ../edit/register
         r.write 'x' { lines: ['small'] linewise: false } 'delete'
 
         r.read('-').lines  ▸ ['small']
+        r.read('1').lines  ▸ ['second']
 
   ▸ black hole
 

@@ -944,6 +944,10 @@ export
 
         ⮐ if empty rngs
 
+        linewise = motion.isLinewise spec
+
+        @setNovimRegister rngs linewise insert.register 'change'
+
         @setCursors belt.endPositionsOfRanges(rngs) main:@s.main
 
         @insertForRepeat insert.text
@@ -1181,9 +1185,13 @@ export
 
         ⮐ if empty rngs
 
+        linewise = motion.isLinewise spec
+
+        @setNovimRegister rngs linewise register 'change'
+
         @setCursors belt.endPositionsOfRanges(rngs)
 
-        @startNovimInsert { kind: 'change', motion: copy(spec) }
+        @startNovimInsert { kind: 'change', motion: copy(spec), register: register }
 
     yankByMotion: spec register ->
 

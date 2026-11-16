@@ -147,7 +147,6 @@
     "A ... "Z                           uppercase names append
     "0  "1-"9                           last yank, delete history
     "-  "_                              small delete, black hole
-    "+  "*                              system clipboard
     "/  ":                              last search, last ex command
 
 #### macros
