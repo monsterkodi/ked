@@ -10,6 +10,7 @@
         ◆ misc            completion, comments, etc
         ◆ pair            string delimiters and brackets
         ◆ salt            salter utilities
+        ◆ sue             encoding of invisible sue areas
         ◆ text            string operations
 
 #### rules

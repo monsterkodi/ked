@@ -1,6 +1,6 @@
 
 use ../../../kxk ▪ kseg
-use ◆ text cell edit misc pair salt ex
+use ◆ text cell edit misc pair salt ex sue
 
 ■belt
 
@@ -377,7 +377,7 @@ use ◆ text cell edit misc pair salt ex
 
 # merge methods of sibling modules into tool/belt 
         
-for mod in [text cell edit misc pair salt ex]
+for mod in [text cell edit misc pair salt ex sue]
     for key,val of mod
         belt[key] = val
 

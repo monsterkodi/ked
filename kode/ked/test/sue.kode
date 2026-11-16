@@ -1,0 +1,195 @@
+use ../edit/tool ◆ sue
+
+sym = (ascii) -> Array.from(ascii).map((c) -> String.fromCodePoint(0xE0000 + c.codePointAt(0))).join ''
+
+▸ sue
+
+  ▸ a payload is magic, four decimal length digits and a json body
+
+        sue.sueAscii(sue.sueEncode({a: 1})) ▸ '!0007{"a":1}'
+
+  ▸ the length reads as the number of body symbols
+
+        sue.sueAscii(sue.sueEncode('x')) ▸ '!0003"x"'
+
+  ▸ sueAscii leaves ordinary text alone
+
+        sue.sueAscii 'plain text' ▸ 'plain text'
+
+  ▸ encode and decode round trip a nested value
+
+        value = {a: [1 2 [3 4]] b: {c: 'x'}}
+
+        sue.sueDecode(sue.sueEncode(value)) ▸ value
+
+  ▸ values keep their keys and their types
+
+        value = {s: 2 fg: 16711680 t: ['a' 'b'] n: null}
+
+        back = sue.sueDecode(sue.sueEncode(value))
+
+        back.s ▸ 2
+        back.fg ▸ 16711680
+        back.t ▸ ['a' 'b']
+        back.n ▸ null
+
+  ▸ the symbols stay inside the alphabet
+
+        value = {t: 'a b🐈'}
+
+        symbols = sue.sueEncode value
+
+        ok = true
+
+        for c in Array.from(symbols)
+            cp = c.codePointAt(0)
+            if cp < 0xE0021 or cp > 0xE007E
+                ok = false
+
+        ok ▸ true
+        sue.sueDecode(symbols) ▸ value
+
+  ▸ decode rejects a broken or a truncated payload
+
+        sue.sueDecode ''             ▸ null
+        sue.sueDecode(sym('!'))      ▸ null
+        sue.sueDecode(sym('!0001x')) ▸ null
+
+        trunc = sym '!0007{"a":'
+        sue.sueDecode trunc ▸ null
+
+  ▸ text without payloads is left alone
+
+        back = sue.desue 'hello world'
+
+        back.text ▸ 'hello world'
+        back.sue  ▸ []
+
+  ▸ a payload is stripped and anchored where the text follows
+
+        text = 'ab' + sue.sueEncode({s: 2}) + 'cd'
+
+        back = sue.desue text
+
+        back.text ▸ 'abcd'
+        back.sue.length ▸ 1
+        back.sue[0].x ▸ 2
+        back.sue[0].y ▸ 0
+        back.sue[0].value ▸ {s: 2}
+
+  ▸ a payload at the start of a line anchors at zero
+
+        text = sue.sueEncode(1) + 'abc'
+
+        back = sue.desue text
+
+        back.text ▸ 'abc'
+        back.sue[0].x ▸ 0
+
+  ▸ a payload at the end of a line anchors at the line length
+
+        text = 'abc' + sue.sueEncode(1)
+
+        back = sue.desue text
+
+        back.text ▸ 'abc'
+        back.sue[0].x ▸ 3
+
+  ▸ payloads on several lines carry their line
+
+        text = 'a' + sue.sueEncode(1) + '\nb' + sue.sueEncode(2)
+
+        back = sue.desue text
+
+        back.text ▸ 'a\nb'
+        back.sue.length ▸ 2
+        back.sue[0].y ▸ 0
+        back.sue[0].x ▸ 1
+        back.sue[1].y ▸ 1
+        back.sue[1].x ▸ 1
+
+  ▸ adjacent payloads keep their order and share an anchor
+
+        text = 'a' + sue.sueEncode(1) + sue.sueEncode(2) + 'b'
+
+        back = sue.desue text
+
+        back.text ▸ 'ab'
+        back.sue.length ▸ 2
+        back.sue[0].x ▸ 1
+        back.sue[1].x ▸ 1
+        back.sue[0].value ▸ 1
+        back.sue[1].value ▸ 2
+
+  ▸ a payload between graphemes does not split them
+
+        text = 'café' + sue.sueEncode(1) + '漢字'
+
+        back = sue.desue text
+
+        back.text ▸ 'café漢字'
+        back.sue[0].x ▸ 4
+
+  ▸ a broken payload is dropped and its symbols are removed
+
+        text = 'a' + sym('!0001x') + 'b'
+
+        back = sue.desue text
+
+        back.text ▸ 'ab'
+        back.sue ▸ []
+
+  ▸ no payloads means no change
+
+        sue.ensue 'abc' [] ▸ 'abc'
+
+  ▸ desue and ensue round trip
+
+        text = 'ab' + sue.sueEncode({s: 2}) + 'cd'
+
+        back = sue.desue text
+
+        sue.ensue(back.text back.sue) ▸ text
+
+  ▸ two payloads at the same anchor keep their order
+
+        rects = [{x: 1 y: 0 value: 1} {x: 1 y: 0 value: 2}]
+
+        sue.ensue 'ab' rects ▸ 'a' + sue.sueEncode(1) + sue.sueEncode(2) + 'b'
+
+  ▸ a payload at the end of a line
+
+        rects = [{x: 2 y: 0 value: 1}]
+
+        sue.ensue 'ab' rects ▸ 'ab' + sue.sueEncode(1)
+
+  ▸ a payload on a later line
+
+        rects = [{x: 1 y: 1 value: 1}]
+
+        sue.ensue 'a\nb' rects ▸ 'a\nb' + sue.sueEncode(1)
+
+  ▸ non ascii text keeps its graphemes
+
+        text = 'café' + sue.sueEncode(1) + '漢字'
+
+        back = sue.desue text
+
+        sue.ensue(back.text back.sue) ▸ text
+
+  ▸ several lines with several payloads round trip
+
+        text = sue.sueEncode(1) + 'one' + sue.sueEncode(2) + '\ntwo' + sue.sueEncode(3) + '\n' + sue.sueEncode(4)
+
+        back = sue.desue text
+
+        back.text ▸ 'one\ntwo\n'
+        back.sue.length ▸ 4
+
+        sue.ensue(back.text back.sue) ▸ text
+
+  ▸ an empty text with a payload at zero
+
+        rects = [{x: 0 y: 0 value: 1}]
+
+        sue.ensue '' rects ▸ sue.sueEncode(1)

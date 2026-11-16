@@ -1,0 +1,194 @@
+
+use ../../../kxk ▪ kseg
+
+#  sue areas
+#
+#  a sue area is a rectangle of cells described by a payload hidden in the
+#  text. the payload is placed before the text it describes.
+#
+#  the payload is written in the tag block U+E0021..U+E007E, which is plain
+#  ascii plus 0xE0000, so it is invisible and harmless everywhere else:
+#
+#      '!' four decimal length digits json body
+#
+#  the length is the number of symbols of the body, which makes the body
+#  opaque: it needs no escaping and a run can hold several payloads in a row.
+#  the digits are plain decimal, so the ascii view of a payload reads as
+#  '!0007{"a":1}' and the length needs no mental arithmetic.
+#
+#      desue    text       -> { text, sue }
+#      ensue    text sue   -> text
+#      sueAscii symbols    -> ascii, for looking at a payload
+#      sueEncode value     -> symbols
+#
+#  a sue area is { x, y, value } where x is the grapheme index inside the
+#  line and y the line index, both counted in the text that follows the
+#  payload. value is whatever JSON.parse makes of the body.
+
+TAG   = 0xE0000
+MAGIC = 0x21
+DIGIT = 0x30
+LO    = 0xE0021
+HI    = 0xE007E
+LEN   = 4
+MAX   = 9999
+
+isTag = (ch) ->
+    cp = ch.codePointAt(0)
+    LO <= cp and cp <= HI
+
+tagOf = (ch) -> String.fromCodePoint(TAG + ch.codePointAt(0))
+
+plainOf = (ch) -> String.fromCodePoint(ch.codePointAt(0) - TAG)
+
+textOf = (symbols) ->
+    out = ''
+    for ch in Array.from(symbols)
+        out += plainOf ch
+    out
+
+fromString = (text) ->
+    out = ''
+    for ch in Array.from(text)
+        out += tagOf ch
+    out
+
+hex4 = (n) ->
+    s = n.toString(16)
+    while s.length < 4
+        s = '0' + s
+    s
+
+#  the body is ascii, a space or anything above 0x7E is written as an
+#  escape so that the symbol alphabet stays free of whitespace
+
+escape = (body) ->
+    out = ''
+    for i in 0...body.length
+        c = body.charCodeAt(i)
+        if c > 0x20 and c < 0x7F
+            out += body[i]
+        else
+            out += '\\u' + hex4(c)
+    out
+
+digits = (n) ->
+    n = clamp(0 MAX n)
+    out = ''
+    for k in 0...LEN
+        out = String.fromCharCode(DIGIT + n % 10) + out
+        n = floor(n / 10)
+    out
+
+#  total number of symbols of the payload starting at arr[i], zero if there
+#  is no payload there
+
+payloadTotal = (arr i) ->
+    ⮐ 0 if i + 1 + LEN > arr.length
+    ⮐ 0 if arr[i].codePointAt(0) - TAG != MAGIC
+    n = 0
+    for k in 1..LEN
+        d = arr[i+k].codePointAt(0) - TAG - DIGIT
+        ⮐ 0 if d < 0 or d > 9
+        n = n*10 + d
+    1 + LEN + n
+
+#  a grapheme is a visible base plus the tag characters that attached to it
+
+splitTags = (seg) ->
+    cps = Array.from(seg)
+    i = cps.length
+    while i > 0 and isTag(cps[i-1])
+        i -= 1
+    [cps[0...i].join('') cps[i...cps.length].join('')]
+
+#  collect the payloads of one line
+#
+#  pending holds the tag symbols seen so far, the anchor is the position of
+#  the next visible grapheme, which is exactly the index of the payload
+
+collect = (pending y x areas) ->
+    arr = Array.from(pending)
+    i = 0
+    while i < arr.length
+        total = payloadTotal(arr i)
+        if total == 0
+            i += 1
+            continue
+        break if i + total > arr.length
+        body = textOf arr[i+1+LEN...i+total]
+        value = null
+        try
+            value = JSON.parse body
+        catch err
+            value = null
+        areas.push({x: x y: y value: value}) if value != null
+        i += total
+
+■sue
+
+    @sueAscii: symbols ->
+        out = ''
+        for ch in Array.from(symbols)
+            if isTag(ch)
+                out += plainOf(ch)
+            else
+                out += ch
+        out
+
+    @sueEncode: value ->
+        body = escape(JSON.stringify(value))
+        fromString('!' + digits(body.length) + body)
+
+    @sueDecode: symbols ->
+        arr = Array.from(symbols)
+        ⮐ null if empty arr
+        total = payloadTotal arr 0
+        ⮐ null if total == 0 or total != arr.length
+        try
+            ⮐ JSON.parse(textOf(arr[1+LEN...total]))
+        catch err
+            ⮐ null
+
+    @desue: text ->
+        lines = text.split('\n')
+        clean = []
+        areas = []
+        for y in 0...lines.length
+            line    = []
+            pending = ''
+            for seg in kseg(lines[y])
+                [visible tags] = splitTags seg
+                if not empty visible
+                    collect(pending y line.length areas) if not empty pending
+                    pending = ''
+                    line.push visible
+                pending += tags
+            collect(pending y line.length areas) if not empty pending
+            clean.push(line.join(''))
+        {text: clean.join('\n') sue: areas}
+
+    @ensue: text sue ->
+        ⮐ text if empty sue
+        lines = text.split('\n')
+        for y in 0...lines.length
+            mine = []
+            for area in sue
+                mine.push(area) if area.y == y
+            continue if empty mine
+            mine.sort (a b) -> a.x - b.x
+            segs = kseg(lines[y])
+            out = ''
+            i = 0
+            for x in 0..segs.length
+                while i < mine.length and mine[i].x <= x
+                    out += @sueEncode(mine[i].value)
+                    i += 1
+                out += segs[x] if x < segs.length
+            while i < mine.length
+                out += @sueEncode(mine[i].value)
+                i += 1
+            lines[y] = out
+        lines.join('\n')
+
+export sue

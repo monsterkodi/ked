@@ -1,0 +1,29 @@
+■susan
+    ###
+        the renderer for sue areas
+
+        a sue area is a rectangle of cells plus a value that says how to
+        render it. sue keeps them in the state, susan turns them into
+        cells: scale, colors, alignment, content, links, images.
+
+        dormant for now: nothing constructs a susan and draw does not
+        call her. the stable part is that she reads @state.s.sue, which
+        is already { x, y, value } per area.
+    ###
+
+    @: @screen @state ->
+
+        @rects = []
+
+    sync: =>
+
+        @rects = @state.s.sue ? []
+
+    draw: =>
+
+        ⮐ if empty @rects
+
+        #  areas whose value contains w, h, fg, bg, s, t, img
+        #  are painted into the cells, in order, later ones on top
+
+export susan
