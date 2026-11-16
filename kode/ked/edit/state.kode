@@ -207,6 +207,22 @@ use           ◆ keys mode
             h = rng[3] - rng[1] + 1
             @setSue rng[0] rng[1] [code values.concat([w h])]
 
+    setLineScale: (y scale) =>
+
+        areas = []
+
+        for area in (@s.sue ? [])
+            continue if area.y == y and area.value[0] == sue.LINE_SCALE
+            areas.push area
+
+        areas.push {x: 0 y: y value: [sue.LINE_SCALE [scale]]} if scale > 1
+
+        @s = @s.set 'sue' areas
+        @rowCache = null
+        @r = []
+        @pushState()
+        @emit 'sue.changed'
+
     clearSueAtCursorOrSelection: =>
 
         ranges = @decorationRanges()
@@ -437,7 +453,13 @@ use           ◆ keys mode
         @scales  = conf ? {}
         @rowCache = null
 
-    lineHeight: li => scaling.scaleOfLine @syntax @scales @scaling li
+    lineHeight: li =>
+
+        for area in (@s.sue ? [])
+            if area.y == li and area.value[0] == sue.LINE_SCALE
+                ⮐ clamp 1 7 int(area.value[1][0] ? 1)
+
+        scaling.scaleOfLine @syntax @scales @scaling li
 
     rowPrefix: =>
 
