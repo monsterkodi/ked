@@ -74,7 +74,7 @@ use           ◆ keys mode
         @h = [@s] # undo states (history)
         @r = []   # redo states
 
-#!set
+󠀡󠀰󠀰󠀰󠀸󠁛󠀴󠀰󠀬󠁛󠀷󠁝󠁝#!set
 
     set: item arg =>
 

@@ -780,8 +780,8 @@ use child_process ▪ spawn exec
             'shift+alt+s'                ➜ ⮐ @styleSelection 's'
             'shift+alt+b'                ➜ ⮐ @styleSelection 'b'
             'shift+alt+i'                ➜ ⮐ @styleSelection 'i'
-            'alt+='                     ➜ ⮐ @scaleLine 1
-            'alt+-'                     ➜ ⮐ @scaleLine -1
+            'shift+alt+='                ➜ ⮐ @scaleLine 1
+            'shift+alt+-'                ➜ ⮐ @scaleLine -1
                             
     goToPrevFunc: =>
     
