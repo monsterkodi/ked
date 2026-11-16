@@ -51,6 +51,9 @@ use              ◆ mode
             y   += 1
             
         @drawTrailingRows row        
+
+        @susan?.draw()
+
         @drawHighlights()
         @drawSelections()
         @drawYank()

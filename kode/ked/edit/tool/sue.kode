@@ -1,5 +1,6 @@
 
 use ../../../kxk ▪ kseg
+use ◆ colorspans
 
 #  sue areas
 #
@@ -149,6 +150,35 @@ collect = (pending y x areas) ->
             ⮐ JSON.parse(textOf(arr[1+LEN...total]))
         catch err
             ⮐ null
+
+    #  keep the anchors of areas attached to the text
+    #  a one cell span is enough to find the new x and y, the value is
+    #  never rewritten, so open ended areas stay open ended
+
+    @adjust: areas oldLines newLines ->
+        ⮐ areas if empty areas
+
+        map = colorspans.lineMap oldLines newLines
+        result = []
+
+        for area in areas
+
+            ny = map[area.y]
+            continue if not valid ny or ny < 0
+
+            oldLine = oldLines[area.y] ? []
+            newLine = newLines[ny] ? []
+
+            x = area.x
+
+            if not (oldLine eql newLine)
+                adj = colorspans.adjustSegment [area.x area.y area.x+1 area] oldLine newLine
+                continue if not adj?
+                x = adj[0]
+
+            result.push {x: x y: ny value: area.value}
+
+        result
 
     @desue: text ->
         lines = text.split('\n')

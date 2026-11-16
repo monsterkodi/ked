@@ -1,29 +1,109 @@
+use ../../kxk ▪ kseg
+use ../theme     ◆ color
+
+FG_COLOR    = 31
+BG_COLOR    = 32
+FG_BG_COLOR = 33
+
 ■susan
     ###
-        the renderer for sue areas
+        renders sue areas into the cells of an editor
 
-        a sue area is a rectangle of cells plus a value that says how to
-        render it. sue keeps them in the state, susan turns them into
-        cells: scale, colors, alignment, content, links, images.
+        an area is { x, y, value } where value is [code, data]
+        the code says which feature the area belongs to, the data is
+        whatever that feature needs. trailing numbers of the data are
+        geometry: width in cells, then height in rows, both optional.
+        an area without a width reaches to the end of its line, one
+        without a height is one row tall.
 
-        dormant for now: nothing constructs a susan and draw does not
-        call her. the stable part is that she reads @state.s.sue, which
-        is already { x, y, value } per area.
+        the codes live here because susan is the one who has to know them.
+        a code susan does not know is left alone, so a file written by a
+        newer ked still loads.
+
+        not yet: overlapping areas, areas in views other than the editor
     ###
 
-    @: @screen @state ->
+    @FG_COLOR:    FG_COLOR
+    @BG_COLOR:    BG_COLOR
+    @FG_BG_COLOR: FG_BG_COLOR
 
-        @rects = []
+    #  a color span is [x1 y x2 color], the sue form is a fixed width area
 
-    sync: =>
+    @fromColors: colors ->
 
-        @rects = @state.s.sue ? []
+        areas = []
+
+        ⮐ areas if not colors?
+
+        for span in (colors.fg ? [])
+            areas.push {x: span[0] y: span[1] value: [FG_COLOR [span[3] span[2]-span[0] 1]]}
+
+        for span in (colors.bg ? [])
+            areas.push {x: span[0] y: span[1] value: [BG_COLOR [span[3] span[2]-span[0] 1]]}
+
+        areas
+
+    @: @cells @state ->
 
     draw: =>
 
-        ⮐ if empty @rects
+        areas = @state.s.sue ? []
+        ⮐ if empty areas
 
-        #  areas whose value contains w, h, fg, bg, s, t, img
-        #  are painted into the cells, in order, later ones on top
+        view  = @state.s.view
+        lines = @state.s.lines
+
+        for area in areas
+
+            y = area.y
+            continue if y < 0 or y >= lines.length
+
+            row = @state.rowOfLine y
+            continue if row < 0
+
+            scale = @state.lineHeight y
+            continue if row + scale > @cells.rows
+
+            [code data] = area.value
+            data ?= []
+
+            fg = null
+            bg = null
+            w  = null
+            h  = null
+
+            if code == FG_COLOR
+                fg = data[0]
+                w  = data[1]
+                h  = data[2]
+            else if code == BG_COLOR
+                bg = data[0]
+                w  = data[1]
+                h  = data[2]
+            else if code == FG_BG_COLOR
+                fg = data[0]
+                bg = data[1]
+                w  = data[2]
+                h  = data[3]
+            else
+                continue
+
+            if not valid w
+                w = max 0 (kseg.width(lines[y]) - area.x)
+
+            h ?= 1
+
+            x1 = max 0 (area.x*scale - view[0])
+            x2 = min @cells.cols ((area.x + w)*scale - view[0])
+            continue if x1 >= x2
+
+            fg = color.values fg if fg?
+            bg = color.values bg if bg?
+
+            for r in row...min(@cells.rows row + h*scale)
+                @cells.bg_rect x1 r (x2-1) r bg if bg?
+                if fg?
+                    for x in x1...x2
+                        @cells.set_fg x r fg
 
 export susan

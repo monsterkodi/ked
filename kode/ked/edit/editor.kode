@@ -5,7 +5,7 @@ use ../view/editor ◆ gutter mapview
 use ../util        ◆ config
 use ../theme       ◆ color
 use ./tool         ◆ belt
-use                ◆ state draw complete mode
+use                ◆ state draw complete mode susan
 
 ■editor□draw
 ###
@@ -21,7 +21,8 @@ use                ◆ state draw complete mode
         
         @focusable = true
         
-        @state = new state @cells @name
+        @state  = new state @cells @name
+        @susan  = new susan @cells @state
         
         post.on 'focus' @onFocus
                 

@@ -1,6 +1,7 @@
 
 use ../../../kxk    ▪ post kseg kutil clip
 use ../../theme     ◆ color theme
+use ../../edit      ◆ susan
 use ../../edit/tool ◆ belt
 use ../base         ◆ view colorslider rgbinput radio palette
 ■colorpicker□view
@@ -275,9 +276,30 @@ use ../base         ◆ view colorslider rgbinput radio palette
         
     colorAtSelection: layer =>
 
+        if @editor.state.colorMethod == 'sue'
+            if c = @sueColorAtSelection layer
+                ⮐ c
+
         for rng in @editor.state.s.selections
             if c = @editor.state.colorAtPos [rng[0] rng[1]] layer
                 ⮐ c
+        null
+
+    sueColorAtSelection: layer =>
+
+        fg = layer == 'fg'
+
+        for rng in @editor.state.s.selections
+            if area = @editor.state.sueAt [rng[0] rng[1]]
+                [code data] = area.value
+                data ?= []
+                if code == susan.FG_BG_COLOR
+                    ⮐ data[fg ? 0 : 1]
+                if fg and code == susan.FG_COLOR
+                    ⮐ data[0]
+                if not fg and code == susan.BG_COLOR
+                    ⮐ data[0]
+
         null
         
     hexAtCursor: =>
@@ -345,9 +367,49 @@ use ../base         ◆ view colorslider rgbinput radio palette
             voided.push 'fg' if @colorVoided 0
             voided.push 'bg' if @colorVoided 1
 
-            @editor.state.setColorsForRanges ranges fg bg voided
+            if @editor.state.colorMethod == 'sue'
+                @submitSue ranges fg bg voided
+            else
+                @editor.state.setColorsForRanges ranges fg bg voided
 
         @hide()
+
+    submitSue: (ranges fg bg voided) =>
+
+        if not empty voided
+            @editor.state.clearSueForRanges ranges
+
+        if 'fg' in voided
+            fg = null
+            bg ?= @backgroundHex()
+
+        if 'bg' in voided
+            bg = null
+            fg ?= @foregroundHex()
+
+        for rng in ranges
+
+            w = rng[2] - rng[0]
+            h = rng[3] - rng[1] + 1
+
+            value = null
+
+            if fg? and bg?
+                value = [susan.FG_BG_COLOR [fg bg w h]]
+            else if fg?
+                value = [susan.FG_COLOR [fg w h]]
+            else if bg?
+                value = [susan.BG_COLOR [bg w h]]
+
+            @editor.state.setSue rng[0] rng[1] value if value?
+
+    toggleMethod: =>
+
+        @editor.state.colorMethod = @editor.state.colorMethod == 'sue' ? 'trailer' : 'sue'
+
+        post.emit 'redraw'
+
+        true
 
     replaceColor: hex =>
 
@@ -431,6 +493,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
             'ctrl+c' 'cmd+c' ➜   clip.copy @hex() ; ⮐ true
             'ctrl+v' 'cmd+v' ➜   @setHex(clip.paste()) ; @syncAll() ; ⮐ true
             'ctrl+s' 'cmd+s' ➜ ⮐ @addCurrentColor()
+            'alt+m'          ➜ ⮐ @toggleMethod()
         
         false
 
@@ -483,5 +546,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
                 child.draw()
 
         super()
+
+        @cells.set -1 0 (@editor.state.colorMethod == 'sue' ? 's' : 't') @color.fg @color.bg
 
 export colorpicker

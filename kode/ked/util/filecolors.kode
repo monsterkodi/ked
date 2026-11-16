@@ -85,6 +85,40 @@ use ../edit/tool ◆ colorspans
         text: clean
         colors: colors
 
+    #  drop a ked-colors trailer, even when its hash no longer matches
+    #  a file saved with sue areas must not keep a stale trailer around
+
+    @remove: path text ->
+
+        style = @commentStyle path
+
+        ⮐ text if not style?
+
+        end = text.endsWith('\n') ? text.length-1 : text.length
+        ⮐ text if end <= 0
+
+        start = text.lastIndexOf '\n' end-1
+        start += 1
+
+        trailer = text[start...end]
+        trailer = trailer[0...trailer.length-1] if trailer.endsWith '\r'
+
+        ⮐ text if empty trailer
+        ⮐ text if not trailer.startsWith(style.start)
+
+        innerEnd = trailer.length
+        innerEnd -= style.end.length if not empty style.end
+
+        ⮐ text if not empty style.end and not trailer.endsWith(style.end)
+
+        body = trailer[style.start.length...innerEnd].trim()
+
+        ⮐ text if not body.startsWith 'ked-colors'
+
+        rest = start > 0 ? text[0...start-1] : ''
+        rest += '\n' if text.endsWith '\n'
+        rest
+
     @join: path text colors ->
 
         style = @commentStyle path

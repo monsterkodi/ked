@@ -4,7 +4,8 @@ use ./index       ◆ prjcts indexer
 use ./util        ◆ logfile session help frecent git config dumpstate filecolors leak fileutil
 use ./util/img    ◆ rounded squares sircels
 use ./edit/tool   ◆ belt
-use ./edit        ◆ mode
+use ./edit        ◆ mode susan
+use ./edit/tool   ◆ sue
 use ./edit/mode   ◆ filepos
 use ./view/base   ◆ view input
 use ./view/title  ◆ title 
@@ -451,6 +452,11 @@ use child_process ▪ spawn exec
         text          = fileColorData.text
         fileColors    = fileColorData.colors
 
+        text = filecolors.remove @currentFile text
+
+        sueData = sue.desue text
+        text    = sueData.text
+
         [colors segls] = belt.colorSeglsForText text
         
         if valid colors
@@ -465,6 +471,14 @@ use child_process ▪ spawn exec
         
         @editor.state.loadSegls segls
         @editor.state.loadColors fileColors
+        @editor.state.loadSue sueData.sue
+
+        if not empty sueData.sue
+            @editor.state.colorMethod = 'sue'
+        else if not empty fileColors.fg or not empty fileColors.bg
+            @editor.state.colorMethod = 'trailer'
+        else
+            @editor.state.colorMethod = 'sue'
         @editor.setCurrentFile @currentFile     
         ked_session.set "editor▸file" @currentFile
         
@@ -548,7 +562,7 @@ use child_process ▪ spawn exec
             post.emit 'novim.error' 'no file name'
             ⮐ false
 
-        text = filecolors.join path text @editor.state.s.colors
+        text = @textForSave path text
 
         result = ◯ nfs.write path text
         
@@ -563,6 +577,21 @@ use child_process ▪ spawn exec
             
         true
     
+    textForSave: (path text) =>
+
+        if @editor.state.colorMethod == 'sue'
+
+            text = filecolors.remove path text
+
+            areas = @editor.state.s.sue ? []
+            areas = areas.concat(susan.fromColors(@editor.state.s.colors))
+
+            sue.ensue text areas
+
+        else
+
+            filecolors.join path text @editor.state.s.colors
+
     saveAndQuit: file ◯=>
         
         saved = ◯ @saveFile file
@@ -591,7 +620,7 @@ use child_process ▪ spawn exec
     onSaveAs: path ◯=>
         
         text = kseg.str @editor.state.s.lines
-        text = filecolors.join path text @editor.state.s.colors
+        text = @textForSave path text
         
         ◯ nfs.write path text
         

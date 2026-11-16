@@ -3,7 +3,7 @@ use ../../kxk ▪ immutable kstr kseg events absMin post
 use ../../kxk ◆ clip
 use ../util   ◆ syntax config scaling
 use ./act     ◆ del insert select join indent multi main novim sort count range macro
-use ./tool    ◆ belt colorspans jumplist changelist motion
+use ./tool    ◆ belt colorspans jumplist changelist motion sue
 use ./register
 use           ◆ keys mode
 
@@ -21,6 +21,8 @@ use           ◆ keys mode
         @registers      = new register
         @novimRegister  = null
         @allowedModes   = {}
+
+        @colorMethod = 'sue'
 
         @macroRecording    = null
         @macroReplaying    = 0
@@ -147,6 +149,73 @@ use           ◆ keys mode
         ⮐ null if not colors?
 
         colorspans.colorAtPos (colors[layer] ? []) pos
+
+    #!sue
+
+    setSue: (x y value) =>
+
+        areas = @s.sue ? []
+
+        @s = @s.set 'sue' areas.concat([{x: x y: y value: value}])
+        @r = []
+        @pushState()
+        @emit 'sue.changed'
+
+    setSueForRanges: (ranges value) =>
+
+        ⮐ if empty ranges
+
+        areas = @s.sue ? []
+        add   = []
+
+        for rng in ranges
+            add.push {x: rng[0] y: rng[1] value: value}
+
+        @s = @s.set 'sue' areas.concat(add)
+        @r = []
+        @pushState()
+        @emit 'sue.changed'
+
+    clearSueForRanges: ranges =>
+
+        areas = @s.sue ? []
+        ⮐ if empty areas
+
+        keep = []
+
+        for area in areas
+            inside = false
+            for rng in ranges
+                if rng[0] <= area.x <= rng[2] and rng[1] <= area.y <= rng[3]
+                    inside = true
+            keep.push area if not inside
+
+        ⮐ if keep.length == areas.length
+
+        @s = @s.set 'sue' keep
+        @r = []
+        @pushState()
+        @emit 'sue.changed'
+
+    loadSue: areas =>
+
+        @s = @s.set 'sue' (areas ? [])
+        @clearHistory()
+        @emit 'sue.changed'
+
+    sueAt: pos =>
+
+        areas = @s.sue ? []
+        ⮐ null if empty areas
+
+        [x y] = pos
+
+        for i in areas.length-1..0
+            area = areas[i]
+            if area.y == y and area.x <= x
+                ⮐ area
+
+        null
 
     loadColors: colors =>
 
@@ -278,6 +347,7 @@ use           ◆ keys mode
             view:        [0 0]
             scrollOffset: 0
             colors:      {fg: [], bg: []}
+            sue:         []
             
         @syntax.clear()
 
@@ -334,6 +404,11 @@ use           ◆ keys mode
                     bg: bgSpans
 
                 @s = @s.set 'colors' next
+
+            areas = @s.sue
+
+            if not empty areas
+                @s = @s.set 'sue' sue.adjust(areas oldLines @s.lines)
 
             diff = belt.diffLines oldLines @s.lines            
             @emit 'lines.changed' diff
