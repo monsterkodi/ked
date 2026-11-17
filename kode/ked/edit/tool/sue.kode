@@ -341,6 +341,22 @@ collect = (pending y x areas) ->
     #  a one cell span is enough to find the new x and y, the value is
     #  never rewritten, so open ended areas stay open ended
 
+    #  a color span is [x1 y x2 color], the sue form is a fixed width area
+
+    @areasForColors: colors ->
+
+        areas = []
+
+        ⮐ areas if not colors?
+
+        for span in (colors.fg ? [])
+            areas.push {x: span[0] y: span[1] value: [FG_COLOR [span[3] span[2]-span[0] 1]]}
+
+        for span in (colors.bg ? [])
+            areas.push {x: span[0] y: span[1] value: [BG_COLOR [span[3] span[2]-span[0] 1]]}
+
+        areas
+
     @adjust: areas oldLines newLines ->
         ⮐ areas if empty areas
 

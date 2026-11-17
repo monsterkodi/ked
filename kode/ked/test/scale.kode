@@ -1349,3 +1349,22 @@ hed = cols rows ext='md' feats=[]->
 
         e.state.setCursors [[7 0]]
         e.complete.hasScaledTextAfterCursor() ▸ false
+
+  ▸ a colour on a covered line does not paint the block
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+        e = new editor scr 'test_run_tint' []
+        e.state.loadLines ['aaaaaaaa' 'bbb' 'xx BIG yy']
+        e.layout 0 0 40 10
+        e.state.setSelections [[3 2 6 2]]
+        e.state.stepScales 1
+        e.state.stepScales 1
+        e.state.setSelections []
+        e.state.setSue 3 0 [32 ['#00ff00' 6 1]]
+
+        scr.init()
+        e.draw()
+
+        scr.get_bg(3 0) ▸ scr.get_bg(0 2)
+        scr.get_bg(6 0) ▸ scr.get_bg(0 2)

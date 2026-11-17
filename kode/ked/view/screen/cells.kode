@@ -32,6 +32,15 @@ use ../../util/img  ◆ rounded
     set_fg_bg:  x y fg bg      => if @inside(x y) ➜ @screen.set_fg_bg @wx(x) @wy(y) fg bg
     set_attr:   x y attr ul    => if @inside(x y) ➜ @screen.set_attr  @wx(x) @wy(y) attr ul
     get_attr:   x y            => @screen.get_attr @wx(x) @wy(y)
+
+    #  a cell that carries a scaled block belongs to the block, not to the
+    #  text of its row, so decorations must leave it alone
+
+    isScaled: x y =>
+
+        ch = @get_char x y
+
+        valid ch and ch.startsWith('\x1b]66')
     
     get_char: x y => @screen.get_char @wx(x) @wy(y)
     get_bg:   x y => @screen.get_bg   @wx(x) @wy(y)

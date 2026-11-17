@@ -1,4 +1,4 @@
-var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }}
+var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }}
 
 var susan
 
@@ -14,30 +14,6 @@ susan = (function ()
     susan["FG_BG_COLOR"] = sue.FG_BG_COLOR
     susan["STYLE"] = sue.STYLE
     susan["LINE_SCALE"] = sue.LINE_SCALE
-    susan["fromColors"] = function (colors)
-    {
-        var areas, span, _39_31_, _42_31_
-
-        areas = []
-        if (!(colors != null))
-        {
-            return areas
-        }
-        var list = _k_.list((((_39_31_=colors.fg) != null ? _39_31_ : [])))
-        for (var _a_ = 0; _a_ < list.length; _a_++)
-        {
-            span = list[_a_]
-            areas.push({x:span[0],y:span[1],value:[sue.FG_COLOR,[span[3],span[2] - span[0],1]]})
-        }
-        var list1 = _k_.list((((_42_31_=colors.bg) != null ? _42_31_ : [])))
-        for (var _b_ = 0; _b_ < list1.length; _b_++)
-        {
-            span = list1[_b_]
-            areas.push({x:span[0],y:span[1],value:[sue.BG_COLOR,[span[3],span[2] - span[0],1]]})
-        }
-        return areas
-    }
-
     susan.prototype["runsForLine"] = function (y)
     {
         if (!this.cells.screen.t.textSizing)
@@ -62,9 +38,9 @@ susan = (function ()
 
     susan.prototype["draw"] = function ()
     {
-        var area, areas, attr, bg, box, cells, code, fg, have, hul, last, lines, r, row, runs, scale, ul, view, x, x1, x2, y, _60_29_
+        var area, areas, attr, bg, box, cells, code, fg, have, hul, last, lines, r, row, runs, scale, ul, view, x, x1, x2, y, _44_29_
 
-        areas = ((_60_29_=this.state.s.sue) != null ? _60_29_ : [])
+        areas = ((_44_29_=this.state.s.sue) != null ? _44_29_ : [])
         if (_k_.empty(areas))
         {
             return
@@ -145,22 +121,23 @@ susan = (function ()
             }
             for (var _c_ = r = row, _d_ = _k_.min(this.cells.rows,row + box.h * scale); (_c_ <= _d_ ? r < _k_.min(this.cells.rows,row + box.h * scale) : r > _k_.min(this.cells.rows,row + box.h * scale)); (_c_ <= _d_ ? ++r : --r))
             {
-                if ((bg != null))
+                for (var _e_ = x = x1, _f_ = x2; (_e_ <= _f_ ? x < x2 : x > x2); (_e_ <= _f_ ? ++x : --x))
                 {
-                    this.cells.bg_rect(x1,r,(x2 - 1),r,bg)
-                }
-                if ((fg != null))
-                {
-                    for (var _e_ = x = x1, _f_ = x2; (_e_ <= _f_ ? x < x2 : x > x2); (_e_ <= _f_ ? ++x : --x))
+                    if (this.cells.isScaled(x,r))
+                    {
+                        continue
+                    }
+                    if ((bg != null))
+                    {
+                        this.cells.set_bg(x,r,bg)
+                    }
+                    if ((fg != null))
                     {
                         this.cells.set_fg(x,r,fg)
                     }
-                }
-                if ((attr != null) || (ul != null))
-                {
-                    for (var _10_ = x = x1, _11_ = x2; (_10_ <= _11_ ? x < x2 : x > x2); (_10_ <= _11_ ? ++x : --x))
+                    if ((attr != null) || (ul != null))
                     {
-                        var _12_ = this.cells.get_attr(x,r); have = _12_[0]; hul = _12_[1]
+                        var _10_ = this.cells.get_attr(x,r); have = _10_[0]; hul = _10_[1]
 
                         this.cells.set_attr(x,r,(sue.addFlags(have,attr)),((ul != null ? ul : hul)))
                     }
@@ -174,5 +151,5 @@ susan = (function ()
 
 export default susan;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3VzYW4uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2VkaXQvc3VzYW4ua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUFlLFlBQVI7O09BQ08sVUFBUjs7O0FBRUwsU0FBRDs7SUFxQkksT0FBQyxhQUFhLElBQUk7SUFDbEIsT0FBQyxhQUFhLElBQUk7SUFDbEIsT0FBQyxnQkFBYSxJQUFJO0lBQ2xCLE9BQUMsVUFBYSxJQUFJO0lBQ2xCLE9BQUMsZUFBYSxJQUFJO0lBSWxCLE9BQUMseUJBQVk7Ozs7UUFFVDtjQUVlOzttQkFBYjs7dUNBRVcsT0FBTzs7O1lBQWhCO1lBQ0EsTUFBTSxNQUFNLEVBQUcsS0FBSyxHQUFHLEVBQUcsS0FBSyxHQUFHLE9BQVEsSUFBSSxVQUFVLEtBQUssR0FBRyxLQUFLLEtBQUcsS0FBSyxHQUFHOzt3Q0FFdkUsT0FBTzs7O1lBQWhCO1lBQ0EsTUFBTSxNQUFNLEVBQUcsS0FBSyxHQUFHLEVBQUcsS0FBSyxHQUFHLE9BQVEsSUFBSSxVQUFVLEtBQUssR0FBRyxLQUFLLEtBQUcsS0FBSyxHQUFHOztlQUVwRjs7O3FCQUlKLDBCQUFhOzthQUVHLEtBQUMsTUFBTSxPQUFPLEVBQUU7Ozs7WUFDcEIsS0FBQyxNQUFNLFdBQVcsT0FBTTs7OztlQUVoQyxLQUFDLE1BQU0saUJBQWlCOzs7YUFFNUIsT0FBSSxPQUFPOztRQUFSO1FBQU87Ozs7OztxQkFFVjs7OztRQUVJLGtCQUFRLEtBQUMsTUFBTSxFQUFFO3NCQUNOOzs7O1FBRVgsT0FBUSxLQUFDLE1BQU0sRUFBRTtRQUNqQixRQUFRLEtBQUMsTUFBTSxFQUFFOzRCQUVMOzs7WUFBUjtZQUVBLE1BQU0sSUFBSSxtQkFBbUIsS0FBSztrQkFDbEI7O2dCQUFoQjs7WUFFQSxJQUFJLElBQUk7Z0JBQ0ksSUFBSSxLQUFLLEtBQUssTUFBTTs7Z0JBQWhDOztZQUVBLE1BQU0sS0FBQyxNQUFNLFVBQVU7Z0JBQ1gsTUFBTTs7Z0JBQWxCOztZQUVBLFFBQVEsS0FBQyxNQUFNLFdBQVc7Z0JBQ2QsTUFBTSxRQUFRLEtBQUMsTUFBTTs7Z0JBQWpDOztZQUVBLE9BQU8sS0FBSyxNQUFNO1lBRWxCLEtBQU87WUFDUCxLQUFPO1lBQ1AsT0FBTztZQUNQLEtBQU87Z0JBRUosU0FBUSxJQUFJOztnQkFDWCxLQUFLLElBQUksT0FBTzs7cUJBQ1osU0FBUSxJQUFJOztnQkFDaEIsS0FBSyxJQUFJLE9BQU87O3FCQUNaLFNBQVEsSUFBSTs7Z0JBQ2hCLEtBQUssSUFBSSxPQUFPO2dCQUNoQixLQUFLLElBQUksT0FBTzs7cUJBQ1osU0FBUSxJQUFJOzswQkFDSixJQUFJLGNBQWMsSUFBSSxTQUFqQyxlQUFLOzs7OztnQkFFTjs7WUFFSixPQUFRLEtBQUMsWUFBWTtZQUNyQixRQUFRLElBQUkscUJBQXFCLE1BQU0sRUFBRTtZQUN6QyxPQUFRLE1BQU0sU0FBTztZQUVyQixhQUFTLEdBQUcsY0FBVSxJQUFJLEVBQUUsU0FBTyxRQUFRLEtBQUs7WUFDaEQsYUFBUyxLQUFDLE1BQU0sTUFBTSxjQUFVLElBQUksSUFBSSxJQUFJLEVBQUUsU0FBTyxRQUFRLEtBQUs7Z0JBQ3RELE1BQU07O2dCQUFsQjs7aUJBRXdCOztnQkFBeEIsS0FBSyxNQUFNLE9BQU87O2lCQUNNOztnQkFBeEIsS0FBSyxNQUFNLE9BQU87O2lCQUNNOztnQkFBeEIsS0FBSyxNQUFNLE9BQU87OzJCQUVkLElBQUssbUJBQVUsS0FBQyxNQUFNLEtBQUssTUFBTSxJQUFJLElBQUUsa0NBQXhCLEtBQUMsTUFBTSxLQUFLLE1BQU0sSUFBSSxJQUFFLHFCQUF4QixLQUFDLE1BQU0sS0FBSyxNQUFNLElBQUksSUFBRTs7cUJBQ0o7O29CQUFuQyxLQUFDLE1BQU0sUUFBUSxHQUFHLEdBQUcsS0FBRyxHQUFHLEVBQUU7O3FCQUMxQjs7bUNBQ0ssSUFBSyxVQUFLLHNCQUFBLFNBQUE7O3dCQUNWLEtBQUMsTUFBTSxPQUFPLEVBQUUsRUFBRTs7O3FCQUN2QixrQkFBUzs7b0NBQ0osSUFBSyxXQUFLLHdCQUFBLFNBQUE7O21DQUNHLEtBQUMsTUFBTSxTQUFTLEVBQUUsSUFBOUIsZ0JBQUs7O3dCQUNOLEtBQUMsTUFBTSxTQUFTLEVBQUUsR0FBRyxJQUFJLFNBQVMsS0FBSyxTQUFRLGFBQUEsS0FBSzs7Ozs7OztXQW5IM0U7OztlQXFITSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3VzYW4uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2VkaXQvc3VzYW4ua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUFlLFlBQVI7O09BQ08sVUFBUjs7O0FBRUwsU0FBRDs7SUFxQkksT0FBQyxhQUFhLElBQUk7SUFDbEIsT0FBQyxhQUFhLElBQUk7SUFDbEIsT0FBQyxnQkFBYSxJQUFJO0lBQ2xCLE9BQUMsVUFBYSxJQUFJO0lBQ2xCLE9BQUMsZUFBYSxJQUFJO3FCQUlsQiwwQkFBYTs7YUFFRyxLQUFDLE1BQU0sT0FBTyxFQUFFOzs7O1lBQ3BCLEtBQUMsTUFBTSxXQUFXLE9BQU07Ozs7ZUFFaEMsS0FBQyxNQUFNLGlCQUFpQjs7O2FBRTVCLE9BQUksT0FBTzs7UUFBUjtRQUFPOzs7Ozs7cUJBRVY7Ozs7UUFFSSxrQkFBUSxLQUFDLE1BQU0sRUFBRTtzQkFDTjs7OztRQUVYLE9BQVEsS0FBQyxNQUFNLEVBQUU7UUFDakIsUUFBUSxLQUFDLE1BQU0sRUFBRTs0QkFFTDs7O1lBQVI7WUFFQSxNQUFNLElBQUksbUJBQW1CLEtBQUs7a0JBQ2xCOztnQkFBaEI7O1lBRUEsSUFBSSxJQUFJO2dCQUNJLElBQUksS0FBSyxLQUFLLE1BQU07O2dCQUFoQzs7WUFFQSxNQUFNLEtBQUMsTUFBTSxVQUFVO2dCQUNYLE1BQU07O2dCQUFsQjs7WUFFQSxRQUFRLEtBQUMsTUFBTSxXQUFXO2dCQUNkLE1BQU0sUUFBUSxLQUFDLE1BQU07O2dCQUFqQzs7WUFFQSxPQUFPLEtBQUssTUFBTTtZQUVsQixLQUFPO1lBQ1AsS0FBTztZQUNQLE9BQU87WUFDUCxLQUFPO2dCQUVKLFNBQVEsSUFBSTs7Z0JBQ1gsS0FBSyxJQUFJLE9BQU87O3FCQUNaLFNBQVEsSUFBSTs7Z0JBQ2hCLEtBQUssSUFBSSxPQUFPOztxQkFDWixTQUFRLElBQUk7O2dCQUNoQixLQUFLLElBQUksT0FBTztnQkFDaEIsS0FBSyxJQUFJLE9BQU87O3FCQUNaLFNBQVEsSUFBSTs7MEJBQ0osSUFBSSxjQUFjLElBQUksU0FBakMsZUFBSzs7Ozs7Z0JBRU47O1lBRUosT0FBUSxLQUFDLFlBQVk7WUFDckIsUUFBUSxJQUFJLHFCQUFxQixNQUFNLEVBQUU7WUFDekMsT0FBUSxNQUFNLFNBQU87WUFFckIsYUFBUyxHQUFHLGNBQVUsSUFBSSxFQUFFLFNBQU8sUUFBUSxLQUFLO1lBQ2hELGFBQVMsS0FBQyxNQUFNLE1BQU0sY0FBVSxJQUFJLElBQUksSUFBSSxFQUFFLFNBQU8sUUFBUSxLQUFLO2dCQUN0RCxNQUFNOztnQkFBbEI7O2lCQUV3Qjs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOztpQkFDTTs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOztpQkFDTTs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOzsyQkFFZCxJQUFLLG1CQUFVLEtBQUMsTUFBTSxLQUFLLE1BQU0sSUFBSSxJQUFFLGtDQUF4QixLQUFDLE1BQU0sS0FBSyxNQUFNLElBQUksSUFBRSxxQkFBeEIsS0FBQyxNQUFNLEtBQUssTUFBTSxJQUFJLElBQUU7OytCQUNuQyxJQUFLLFVBQUssc0JBQUEsU0FBQTs7d0JBQ0UsS0FBQyxNQUFNLFNBQVMsRUFBRTs7d0JBQTlCOzt5QkFDd0I7O3dCQUF4QixLQUFDLE1BQU0sT0FBTyxFQUFFLEVBQUU7O3lCQUNNOzt3QkFBeEIsS0FBQyxNQUFNLE9BQU8sRUFBRSxFQUFFOzt5QkFDZixrQkFBUzs7bUNBQ0ssS0FBQyxNQUFNLFNBQVMsRUFBRSxJQUE5QixnQkFBSzs7d0JBQ04sS0FBQyxNQUFNLFNBQVMsRUFBRSxHQUFHLElBQUksU0FBUyxLQUFLLFNBQVEsYUFBQSxLQUFLOzs7Ozs7O1dBbEczRTs7O2VBb0dNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/susan.kode

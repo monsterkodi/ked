@@ -607,7 +607,7 @@ use child_process ▪ spawn exec
             text = filecolors.remove path text
 
             areas = @editor.state.s.sue ? []
-            areas = areas.concat(susan.fromColors(@editor.state.s.colors))
+            areas = areas.concat(sue.areasForColors(@editor.state.s.colors))
 
             sue.ensue text areas
 

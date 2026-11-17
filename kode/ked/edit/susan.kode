@@ -28,22 +28,6 @@ use ./tool  ◆ sue
     @STYLE:       sue.STYLE
     @LINE_SCALE:  sue.LINE_SCALE
 
-    #  a color span is [x1 y x2 color], the sue form is a fixed width area
-
-    @fromColors: colors ->
-
-        areas = []
-
-        ⮐ areas if not colors?
-
-        for span in (colors.fg ? [])
-            areas.push {x: span[0] y: span[1] value: [sue.FG_COLOR [span[3] span[2]-span[0] 1]]}
-
-        for span in (colors.bg ? [])
-            areas.push {x: span[0] y: span[1] value: [sue.BG_COLOR [span[3] span[2]-span[0] 1]]}
-
-        areas
-
     #  runs are only honoured on unscaled lines of a terminal with text sizing
 
     runsForLine: y =>
@@ -109,12 +93,11 @@ use ./tool  ◆ sue
             ul = color.values ul if ul?
 
             for r in row...min(@cells.rows row + box.h*scale)
-                @cells.bg_rect x1 r (x2-1) r bg if bg?
-                if fg?
-                    for x in x1...x2
-                        @cells.set_fg x r fg
-                if attr? or ul?
-                    for x in x1...x2
+                for x in x1...x2
+                    continue if @cells.isScaled(x r)
+                    @cells.set_bg x r bg if bg?
+                    @cells.set_fg x r fg if fg?
+                    if attr? or ul?
                         [have hul] = @cells.get_attr x r
                         @cells.set_attr x r (sue.addFlags(have attr)) (ul ? hul)
 
