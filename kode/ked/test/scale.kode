@@ -1265,3 +1265,64 @@ hed = cols rows ext='md' feats=[]->
         scr.get_fg(9 0)  ▸ [255 255 255]
         scr.get_fg(10 0) ▸ [255 0 0]
         scr.get_fg(11 0) ▸ [255 0 0]
+
+  ▸ a cursor in a run grows with it, only inside the markers
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+        e = new editor scr 'test_run_cursor' []
+        e.state.loadLines ['aaa' 'bbb' 'xx BIG yy']
+        e.layout 0 0 40 10
+        e.state.setSelections [[3 2 6 2]]
+        e.state.stepScales 1
+        e.state.stepScales 1
+        e.state.setSelections []
+
+        e.cursorRunScale([2 2]) ▸ 1
+        e.cursorRunScale([3 2]) ▸ 1
+        e.cursorRunScale([4 2]) ▸ 3
+        e.cursorRunScale([6 2]) ▸ 3
+        e.cursorRunScale([7 2]) ▸ 1
+
+        e.cursorRowAndScale([3 2]) ▸ [2 1]
+        e.cursorRowAndScale([5 2]) ▸ [0 3]
+
+        e.state.setCursors [[5 2]]
+        scr.init()
+        e.draw()
+
+        scr.c[0][9].mark ▸ 'main'
+
+  ▸ a selection over a run shows on the scaled text
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+        e = new editor scr 'test_run_selection' []
+        e.state.loadLines ['aaa' 'bbb' 'xx BIG yy']
+        e.layout 0 0 40 10
+        e.state.setSelections [[3 2 6 2]]
+        e.state.stepScales 1
+        e.state.stepScales 1
+
+        scr.init()
+        e.draw()
+
+        scr.get_bg(3 0) ▸ scr.get_bg(3 2)
+        scr.get_bg(9 0) ▸ scr.get_bg(3 2)
+
+  ▸ a selection on a covered line does not paint the block
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+        e = new editor scr 'test_run_covered' []
+        e.state.loadLines ['aaa' 'bbb' 'xx BIG yy']
+        e.layout 0 0 40 10
+        e.state.setSelections [[3 2 6 2]]
+        e.state.stepScales 1
+        e.state.stepScales 1
+        e.state.setSelections [[0 0 3 0]]
+
+        scr.init()
+        e.draw()
+
+        scr.get_bg(3 0) ▸ scr.get_bg(0 2)
