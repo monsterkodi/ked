@@ -1,6 +1,7 @@
 use fs
-use ../../kxk ▪ slash sleep post
+use ../../kxk ▪ nfs slash sleep post
 use ../index ◆ index_kode index_hpp index_noon index_json index_utils indexer
+use ../util  ◆ fileutil walker
 
 waitFor = (cond) ◯->
 
@@ -453,4 +454,194 @@ waitFor = (cond) ◯->
         info.classes.length ▸ 1
         info.classes[0].name ▸ 'Foo'
 
+###
+
+▸ walker
+
+  ▸ maxDepth zero lists only the root
+
+        root = '/tmp/opencode/ked-walker-depth'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync slash.path(root 'one' 'two') recursive:true
+        fs.writeFileSync slash.path(root 'a.md') ''
+        fs.writeFileSync slash.path(root 'one' 'b.md') ''
+        fs.writeFileSync slash.path(root 'one' 'two' 'c.md') ''
+
+        walk = new walker
+            root:       root
+            maxDepth:   0
+            ignore:     []
+            includeExt: ['md']
+
+        result =◯ walk.start()
+
+        fs.rmSync root recursive:true force:true
+
+        result.files.includes(slash.path(root 'a.md')) ▸ true
+        result.files.includes(slash.path(root 'one' 'b.md')) ▸ false
+        result.files.includes(slash.path(root 'one' 'two' 'c.md')) ▸ false
+
+  ▸ maxDepth one descends one level
+
+        root = '/tmp/opencode/ked-walker-depth'
+
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync slash.path(root 'one' 'two') recursive:true
+        fs.writeFileSync slash.path(root 'a.md') ''
+        fs.writeFileSync slash.path(root 'one' 'b.md') ''
+        fs.writeFileSync slash.path(root 'one' 'two' 'c.md') ''
+
+        walk = new walker
+            root:       root
+            maxDepth:   1
+            ignore:     []
+            includeExt: ['md']
+
+        result =◯ walk.start()
+
+        fs.rmSync root recursive:true force:true
+
+        result.files.includes(slash.path(root 'a.md')) ▸ true
+        result.files.includes(slash.path(root 'one' 'b.md')) ▸ true
+        result.files.includes(slash.path(root 'one' 'two' 'c.md')) ▸ false
+
+▸ fileutil
+
+  ▸ existing files are absolute, resolved and unique
+
+        first  = slash.tmpfile 'txt'
+        second = slash.tmpfile 'txt'
+        gone   = slash.tmpfile 'txt'
+
+        ◯ nfs.write first,  'first'
+        ◯ nfs.write second, 'second'
+
+        names = [slash.file(first), slash.file(second), slash.file(gone), slash.file(first)]
+
+        files =◯ fileutil.existingFiles names slash.dir(first)
+
+        files ▸ [first, second]
+
+        ◯ nfs.remove first
+        ◯ nfs.remove second
+
+###
+▸ prjcts
+
+  ▸ created files join an indexed project
+
+        root = '/tmp/opencode/ked-prjcts-create'
+        a = slash.path root 'a.kode'
+        b = slash.path root 'b.kode'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync a 'a = 1\n'
+        fs.writeFileSync b 'b = 2\n'
+
+        prjcts.projects[root] = dir:root files:[a]
+        prjcts.allFiles[a] = root
+
+        post.emit 'file.change' path:b change:'create'
+        ◯ waitFor -> b in prjcts.projects[root].files
+
+        files = prjcts.projects[root].files
+        mapping = prjcts.allFiles[b]
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[a]
+        delete prjcts.allFiles[b]
+        fs.rmSync root recursive:true force:true
+
+        (b in files) ▸ true
+        mapping ▸ root
+
+  ▸ deleted files leave an indexed project
+
+        root = '/tmp/opencode/ked-prjcts-delete'
+        a = slash.path root 'a.kode'
+        b = slash.path root 'b.kode'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync a 'a = 1\n'
+        fs.writeFileSync b 'b = 2\n'
+
+        prjcts.projects[root] = dir:root files:[a b]
+        prjcts.allFiles[a] = root
+        prjcts.allFiles[b] = root
+
+        fs.rmSync b
+        post.emit 'file.change' path:b change:'delete'
+        ◯ waitFor -> b not in prjcts.projects[root].files
+
+        files = prjcts.projects[root].files
+        mapping = prjcts.allFiles[b]
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[a]
+        fs.rmSync root recursive:true force:true
+
+        (b in files) ▸ false
+        (a in files) ▸ true
+        (mapping?) ▸ false
+
+  ▸ renamed files move inside an indexed project
+
+        root = '/tmp/opencode/ked-prjcts-rename'
+        a = slash.path root 'a.kode'
+        c = slash.path root 'c.kode'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync root recursive:true
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync a 'a = 1\n'
+
+        prjcts.projects[root] = dir:root files:[a]
+        prjcts.allFiles[a] = root
+
+        fs.renameSync a c
+        post.emit 'file.change' path:c oldPath:a change:'rename'
+        ◯ waitFor -> c in prjcts.projects[root].files
+
+        files = prjcts.projects[root].files
+        oldMapping = prjcts.allFiles[a]
+        newMapping = prjcts.allFiles[c]
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[c]
+        fs.rmSync root recursive:true force:true
+
+        (a in files) ▸ false
+        (c in files) ▸ true
+        (oldMapping?) ▸ false
+        newMapping ▸ root
+
+  ▸ renamed folders move their files inside an indexed project
+
+        root = '/tmp/opencode/ked-prjcts-folder-rename'
+        oldDir = slash.path root 'old'
+        newDir = slash.path root 'new'
+        oldFile = slash.path oldDir 'a.kode'
+        newFile = slash.path newDir 'a.kode'
+        fs.rmSync root recursive:true force:true
+        fs.mkdirSync oldDir recursive:true
+        fs.writeFileSync slash.path(root 'package.json') '{}'
+        fs.writeFileSync oldFile 'a = 1\n'
+
+        prjcts.projects[root] = dir:root files:[oldFile]
+        prjcts.allFiles[oldFile] = root
+
+        fs.renameSync oldDir newDir
+        post.emit 'file.change' path:newDir oldPath:oldDir change:'rename'
+        ◯ waitFor -> newFile in prjcts.projects[root].files
+
+        files = prjcts.projects[root].files
+
+        delete prjcts.projects[root]
+        delete prjcts.allFiles[newFile]
+        fs.rmSync root recursive:true force:true
+
+        (oldFile in files) ▸ false
+        (newFile in files) ▸ true
 ###
