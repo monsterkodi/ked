@@ -1,6 +1,6 @@
 use ../../kxk ▪ kseg
 use ../edit   ◆ editor
-use ../util   ◆ harness
+use ../util   ◆ harness gitblock
 
 setup = ->
 
@@ -324,3 +324,183 @@ text = (e) -> kseg.str(e.state.segls)
         e.gutter.entries.length ▸ 0
         e.gutter.blocks.length ▸ 1
         text(e) ▸ 'aa\nB\ncc\ndd'
+
+▸ gitblock
+
+  ▸ a modified line becomes one block
+
+        blocks = gitblock.fromDiff changes:[{line:2 old:['b'] new:['B']}]
+
+        blocks.length ▸ 1
+        blocks[0].start ▸ 1
+        blocks[0].end ▸ 2
+        blocks[0].marks ▸ {'1':'mod'}
+
+  ▸ an added line becomes one block
+
+        blocks = gitblock.fromDiff changes:[{line:2 new:['X']}]
+
+        blocks.length ▸ 1
+        blocks[0].start ▸ 1
+        blocks[0].end ▸ 2
+        blocks[0].marks ▸ {'1':'add'}
+
+  ▸ a deleted line is marked on the line above the gap
+
+        blocks = gitblock.fromDiff changes:[{line:2 old:['X']}]
+
+        blocks.length ▸ 1
+        blocks[0].start ▸ 2
+        blocks[0].end ▸ 2
+        blocks[0].marks ▸ {'1':'del'}
+
+  ▸ modified lines followed by deletions are one block
+
+        blocks = gitblock.fromDiff changes:[{line:2 old:['b' 'x' 'y'] new:['B']}]
+
+        blocks.length ▸ 1
+        blocks[0].end ▸ 2
+        blocks[0].marks ▸ {'1':'mod'}
+
+  ▸ adjacent changes are one block
+
+        blocks = gitblock.fromDiff changes:[
+            {line:2 old:['b'] new:['B']}
+            {line:3 old:['c'] new:['C']}
+            ]
+
+        blocks.length ▸ 1
+        blocks[0].marks ▸ {'1':'mod' '2':'mod'}
+
+  ▸ one unchanged line separates blocks
+
+        blocks = gitblock.fromDiff changes:[
+            {line:2 old:['b'] new:['B']}
+            {line:4 old:['d'] new:['D']}
+            ]
+
+        blocks.length ▸ 2
+        blocks[0].marks ▸ {'1':'mod'}
+        blocks[1].marks ▸ {'3':'mod'}
+
+  ▸ a deletion directly after a change joins its block
+
+        blocks = gitblock.fromDiff changes:[
+            {line:2 old:['b'] new:['B']}
+            {line:2 old:['x']}
+            ]
+
+        blocks.length ▸ 1
+        blocks[0].end ▸ 2
+
+  ▸ deletions around one unchanged line join their block
+
+        blocks = gitblock.fromDiff changes:[
+            {line:1 old:['b']}
+            {line:2 old:['c']}
+            ]
+
+        blocks.length ▸ 1
+        blocks[0].start ▸ 1
+        blocks[0].end ▸ 2
+
+  ▸ reverting a modification restores the committed line
+
+        lines = ['a' 'B' 'c']
+        block = gitblock.fromDiff(changes:[{line:2 old:['b'] new:['B']}])[0]
+        entry = gitblock.revert block lines
+
+        gitblock.applyRevert entry lines ▸ ['a' 'b' 'c']
+        gitblock.applyRestore entry (gitblock.applyRevert(entry lines)) ▸ ['a' 'B' 'c']
+
+  ▸ reverting an addition removes its lines and restoring re-adds them
+
+        lines = ['a' 'X' 'b']
+        block = gitblock.fromDiff(changes:[{line:2 new:['X']}])[0]
+        entry = gitblock.revert block lines
+
+        gitblock.applyRevert entry lines ▸ ['a' 'b']
+        gitblock.applyRestore entry (gitblock.applyRevert(entry lines)) ▸ ['a' 'X' 'b']
+
+  ▸ reverting a deletion inserts its lines and restoring removes them
+
+        lines = ['a' 'b']
+        block = gitblock.fromDiff(changes:[{line:1 old:['X']}])[0]
+        entry = gitblock.revert block lines
+
+        gitblock.applyRevert entry lines ▸ ['a' 'X' 'b']
+        gitblock.applyRestore entry (gitblock.applyRevert(entry lines)) ▸ ['a' 'b']
+
+  ▸ reverting a block with a gap keeps the line between the hunks
+
+        lines = ['a' 'X' 'd']
+        blocks = gitblock.fromDiff changes:[
+            {line:1 old:['b']}
+            {line:2 old:['c']}
+            ]
+        entry = gitblock.revert blocks[0] lines
+
+        gitblock.applyRevert entry lines ▸ ['a' 'b' 'X' 'c' 'd']
+        gitblock.applyRestore entry (gitblock.applyRevert(entry lines)) ▸ ['a' 'X' 'd']
+
+  ▸ a stale block cannot be reverted
+
+        block = gitblock.fromDiff(changes:[{line:2 old:['b'] new:['B']}])[0]
+
+        gitblock.revert block ['a' 'Z' 'c'] ▸ null
+
+  ▸ the first line of a block is its first displayed line
+
+        mod = gitblock.fromDiff(changes:[{line:2 old:['b'] new:['B']}])[0]
+        add = gitblock.fromDiff(changes:[{line:2 new:['X']}])[0]
+        del = gitblock.fromDiff(changes:[{line:2 old:['X']}])[0]
+
+        gitblock.firstLine(mod) ▸ 1
+        gitblock.firstLine(add) ▸ 1
+        gitblock.firstLine(del) ▸ 1
+
+  ▸ the first line of a reverted addition is the line above the gap
+
+        block = gitblock.fromDiff(changes:[{line:2 new:['X']}])[0]
+        entry = gitblock.revert block ['a' 'X' 'b']
+
+        gitblock.firstLine(entry) ▸ 0
+
+  ▸ an entry moves with lines inserted above it
+
+        lines = ['a' 'B' 'c']
+        block = gitblock.fromDiff(changes:[{line:2 old:['b'] new:['B']}])[0]
+        entry = gitblock.revert block lines
+
+        reverted = gitblock.applyRevert entry lines
+        withNew  = ['new'].concat reverted
+        moved = gitblock.reanchorEntry entry withNew
+
+        moved.start ▸ 2
+        moved.ops[0].oldStart ▸ 2
+
+  ▸ a reverted entry becomes a block again when its revert is undone
+
+        lines = ['a' 'B' 'c']
+        block = gitblock.fromDiff(changes:[{line:2 old:['b'] new:['B']}])[0]
+        entry = gitblock.revert block lines
+
+        reverted = gitblock.applyRevert entry lines
+        back = gitblock.applyRestore entry reverted
+        again = gitblock.undoneBlock entry back
+
+        again.start ▸ 1
+        again.marks ▸ {'1':'mod'}
+
+  ▸ a reverted deletion becomes a block again when its revert is undone
+
+        lines = ['a' 'b']
+        block = gitblock.fromDiff(changes:[{line:1 old:['X']}])[0]
+        entry = gitblock.revert block lines
+
+        reverted = gitblock.applyRevert entry lines
+        back = gitblock.applyRestore entry reverted
+        again = gitblock.undoneBlock entry back
+
+        again.start ▸ 1
+        again.marks ▸ {'0':'del'}

@@ -1,6 +1,39 @@
 
-use ../../kxk ◆ nfs slash
-use ../util   ◆ session
+use ../../kxk ◆ nfs slash watcher
+use ../edit   ◆ mode
+use ../util   ◆ config session
+
+▸ startup
+
+  ▸ the modes announce when they are loaded
+
+        (mode.loaded instanceof Promise) ▸ true
+
+        ◯ mode.loaded
+
+        mode.names().includes('novim') ▸ true
+        mode.pending.length ▸ 0
+
+  ▸ the config announces when it is loaded
+
+        loading = config.load()
+
+        (config.loaded instanceof Promise) ▸ true
+
+        ◯ loading
+        ◯ config.loaded
+
+        (config.data != null) ▸ true
+
+        watcher.close()
+
+  ▸ the session announces when it is loaded
+
+        s = new session fresh:true
+
+        (s.loaded instanceof Promise) ▸ true
+
+        ◯ s.loaded
 
 ▸ session
 
