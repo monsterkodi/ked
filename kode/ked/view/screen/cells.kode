@@ -21,7 +21,7 @@ use ../../util/img  ◆ rounded
     outside: x y -> not @inside x y
     
     add:        x y char fg bg => if @inside(x y) ➜ @screen.add       @wx(x) @wy(y) char fg bg else Infinity
-    add_scaled: x y char fg bg scale => if @inside(x y) ➜ @screen.add_scaled @wx(x) @wy(y) char fg bg scale else Infinity
+    add_scaled: x y char fg bg scale line=null => if @inside(x y) ➜ @screen.add_scaled @wx(x) @wy(y) char fg bg scale line else Infinity
     erase_scaled: x1 y1 x2 y2 bg=null => @screen.erase_scaled @wx(x1) @wy(y1) @wx(x2) @wy(y2) bg
     set:        x y char fg bg => if @inside(x y) ➜ @screen.set       @wx(x) @wy(y) char fg bg
     set_unsafe: x y char fg bg =>                   @screen.set        @x+x   @y+y  char fg bg
@@ -34,9 +34,20 @@ use ../../util/img  ◆ rounded
     get_attr:   x y            => @screen.get_attr @wx(x) @wy(y)
 
     #  a cell of a scaled block belongs to the block, not to the text of the
-    #  row it covers, so decorations must leave the whole area alone
+    #  row it covers, so a decoration of another line must leave it alone
 
     isScaled: x y => @screen.isBlock @wx(x) @wy(y)
+
+    #  the block a cell belongs to, in cells coordinates:
+    #  [x y scale w line] of its top left cell, or null
+
+    blockAt: x y =>
+
+        block = @screen.blockAt @wx(x) @wy(y)
+
+        ⮐ null if not block?
+
+        [block[0]-@x block[1]-@y block[2] block[3] block[4]]
     
     get_char: x y => @screen.get_char @wx(x) @wy(y)
     get_bg:   x y => @screen.get_bg   @wx(x) @wy(y)

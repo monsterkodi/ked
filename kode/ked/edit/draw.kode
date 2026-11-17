@@ -183,7 +183,7 @@ use              ◆ mode
                                 break
                         ch = syntax.getChar gi y line[gi] clss
                         selbg = @selectionBackgroundFor(gi y)
-                        @cells.add_scaled px top ch fg (selbg ? bg) rs
+                        @cells.add_scaled px top ch fg (selbg ? bg) rs y
 
                     sw += cw*rs
 
@@ -215,7 +215,7 @@ use              ◆ mode
                 else if ch in '0█'
                     if clss.endsWith('header') ➜ headerClass = clss
 
-                @cells.add_scaled px row ch fg bg scale
+                @cells.add_scaled px row ch fg bg scale y
 
                 if clss == 'invert_bg'
                     bg = @color.bg
@@ -431,7 +431,14 @@ use              ◆ mode
                     cx = cells[min(x last)]*scale - vx
                     continue if cx < 0
                     continue if cx+scale > @cells.cols
-                    continue if @cells.isScaled(cx row)
+
+                    block = @cells.blockAt(cx row)
+
+                    if block?
+                        continue if block[4] != li
+                        @cells.set_bg block[0] block[1] bg
+                        @cells.adjustContrastForHighlight block[0] block[1] bg
+
                     for r in row...min(@cells.rows, row+scale)
                         for i in 0...scale
                             @cells.set_bg cx+i r bg

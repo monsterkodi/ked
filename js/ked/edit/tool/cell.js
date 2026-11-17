@@ -12,7 +12,7 @@ cell = (function ()
     {
         return this.matrix(cols,rows,(function ()
         {
-            return {char:' ',fg:[],bg:[],attr:null,ul:null,block:false}
+            return {char:' ',fg:[],bg:[],attr:null,ul:null,block:null}
         }))
     }
 

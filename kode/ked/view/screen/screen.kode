@@ -52,7 +52,7 @@ use ../../edit/tool ◆ belt
 
     scaled_char: char scale width -> "\x1b]66;s=#{scale}:w=#{width};#{char}\x07"
 
-    add_scaled: x y char fg bg scale =>
+    add_scaled: x y char fg bg scale line=null =>
 
         ⮐ @add x y char fg bg if scale <= 1
 
@@ -74,25 +74,35 @@ use ../../edit/tool ◆ belt
                     else
                         @set x+i y+j null null null
 
-        @markBlock x y scale w if @t.textSizing
+        @markBlock x y scale w line if @t.textSizing
 
         scale*w
 
     #  every cell of a scaled block belongs to the block: the glyph itself
     #  only lives in the top left cell, the rest is filled to reserve its area
+    #  the block remembers its line, so a decoration of that line may paint it
 
-    markBlock: x y scale w =>
+    markBlock: x y scale w line =>
+
+        block = [x y scale w line]
 
         for r in max(0 y)...min(@rows, y+scale)
             for c in max(0 x)...min(@cols, x+scale*w)
-                @c[r][c].block = true
+                @c[r][c].block = block
 
     isBlock: x y =>
 
         if 0 <= x < @cols and 0 <= y < @rows
-            ⮐ @c[y][x].block
+            ⮐ valid @c[y][x].block
 
         false
+
+    blockAt: x y =>
+
+        if 0 <= x < @cols and 0 <= y < @rows
+            ⮐ @c[y][x].block
+
+        null
         
     erase_scaled: x1 y1 x2 y2 bg=null =>
 
@@ -112,7 +122,7 @@ use ../../edit/tool ◆ belt
             for x in x1..x2
                 @c[y][x].char = ' '
                 @c[y][x].bg   = bg if bg?
-                @c[y][x].block = false
+                @c[y][x].block = null
 
         for [bx by scale w] in @frameBlocks ? []
             continue if bx > x2 or bx + scale*w - 1 < x1
@@ -120,7 +130,7 @@ use ../../edit/tool ◆ belt
             for yy in by..min(@rows-1 by+scale-1)
                 for xx in bx..min(@cols-1 bx+scale*w-1)
                     @c[yy][xx].char = ' '
-                    @c[yy][xx].block = false
+                    @c[yy][xx].block = null
     
     set: x y char fg bg =>
         
@@ -128,20 +138,20 @@ use ../../edit/tool ◆ belt
             @c[y][x].char = char
             @c[y][x].fg = fg ? []
             @c[y][x].bg = bg ? []
-            @c[y][x].block = false
+            @c[y][x].block = null
             
     set_char: x y char =>
         
         if 0 <= x < @cols and 0 <= y < @rows
             @c[y][x].char = char
-            @c[y][x].block = false
+            @c[y][x].block = null
 
     set_ch_fg: x y char fg =>
         
         if 0 <= x < @cols and 0 <= y < @rows
             @c[y][x].char = char
             @c[y][x].fg   = fg
-            @c[y][x].block = false
+            @c[y][x].block = null
             
     set_bg: x y bg =>
         
