@@ -26,6 +26,7 @@ syntax = (function ()
         this["getClass"] = this["getClass"].bind(this)
         this["appendSegls"] = this["appendSegls"].bind(this)
         this["addSegl"] = this["addSegl"].bind(this)
+        this["pruneLineDiss"] = this["pruneLineDiss"].bind(this)
         this["partialUpdate"] = this["partialUpdate"].bind(this)
         this["setSegls"] = this["setSegls"].bind(this)
         this["setColors"] = this["setColors"].bind(this)
@@ -40,9 +41,7 @@ syntax = (function ()
     syntax.prototype["clear"] = function ()
     {
         this.diss = []
-        this.hash = {}
-        this.liha = {}
-        return this.seen = null
+        return this.lineDiss = new Map()
     }
 
     syntax.prototype["setExt"] = function (ext)
@@ -69,9 +68,9 @@ syntax = (function ()
         return this.ansi = true
     }
 
-    syntax.prototype["setSegls"] = function (segls, oldSegls = null)
+    syntax.prototype["setSegls"] = function (segls)
     {
-        var ds, dss, hsh, idx, segl, segs
+        var ds, dss, idx, segl, segs
 
         if (!_k_.empty(this.config))
         {
@@ -96,9 +95,8 @@ syntax = (function ()
         }
         else
         {
-            if (this.partialUpdate(segls,oldSegls))
+            if (this.partialUpdate(segls))
             {
-                this.seen = segls
                 return
             }
             this.clear()
@@ -107,59 +105,64 @@ syntax = (function ()
             for (idx = 0; idx < list2.length; idx++)
             {
                 segl = list2[idx]
-                hsh = kseg.hash(segl)
-                this.hash[hsh] = this.diss[idx]
-                this.liha[idx] = hsh
+                this.lineDiss.set(segl,this.diss[idx])
             }
         }
-        return this.seen = segls
     }
 
-    syntax.prototype["partialUpdate"] = function (segls, oldSegls)
+    syntax.prototype["partialUpdate"] = function (segls)
     {
-        var hsh, idx, newHash, segl
+        var diss, dss, idx, segl
 
-        if (this.diss.length !== segls.length)
+        if (this.lineDiss.size === 0)
         {
             return
         }
-        if (_k_.empty(this.hash))
-        {
-            return
-        }
-        newHash = {}
+        diss = []
         var list = _k_.list(segls)
         for (idx = 0; idx < list.length; idx++)
         {
             segl = list[idx]
-            if (oldSegls && this.seen && oldSegls[idx] === segl && this.seen[idx] === segl)
+            dss = this.lineDiss.get(segl)
+            if (!(dss != null))
             {
-                hsh = this.liha[idx]
-                newHash[hsh] = this.diss[idx]
-                continue
+                dss = kulur.dissect([segl],this.ext)[0]
+                this.lineDiss.set(segl,dss)
+                if (this.lineDiss.size > 2 * segls.length + 100)
+                {
+                    this.pruneLineDiss(segls)
+                }
             }
-            hsh = kseg.hash(segl)
-            if (this.hash[hsh])
+            diss.push(dss)
+        }
+        return this.diss = diss
+    }
+
+    syntax.prototype["pruneLineDiss"] = function (segls)
+    {
+        var dss, idx, keep, line
+
+        keep = new Map()
+        var list = _k_.list(segls)
+        for (idx = 0; idx < list.length; idx++)
+        {
+            line = list[idx]
+            dss = this.lineDiss.get(line)
+            if ((dss != null))
             {
-                newHash[hsh] = this.hash[hsh]
-            }
-            else
-            {
-                newHash[hsh] = kulur.dissect([segl],this.ext)[0]
-            }
-            if (this.liha[idx] !== hsh)
-            {
-                this.diss.splice(idx,1,newHash[hsh])
-                this.liha[idx] = hsh
+                keep.set(line,dss)
             }
         }
-        return this.hash = newHash
+        return this.lineDiss = keep
     }
 
     syntax.prototype["addSegl"] = function (segl, ext)
     {
-        this.seen = null
-        return this.diss = this.diss.concat(kulur.dissect([segl],ext))
+        var dss
+
+        dss = kulur.dissect([segl],ext)[0]
+        this.diss = this.diss.concat([dss])
+        return this.lineDiss.set(segl,dss)
     }
 
     syntax.prototype["appendSegls"] = function (segls, ext)
@@ -209,10 +212,10 @@ syntax = (function ()
 
     syntax.prototype["hasPureClass"] = function (y, clss)
     {
-        var dss, pclss, _108_28_
+        var dss, pclss, _107_28_
 
         pclss = [clss,"text " + clss,"punct " + clss,"comment " + clss]
-        var list = ((_108_28_=this.diss[y]) != null ? _108_28_ : [])
+        var list = ((_107_28_=this.diss[y]) != null ? _107_28_ : [])
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             dss = list[_a_]
@@ -226,9 +229,9 @@ syntax = (function ()
 
     syntax.prototype["hasClass"] = function (y, clss)
     {
-        var dss, _114_28_, _115_30_
+        var dss, _113_28_, _114_30_
 
-        var list = ((_114_28_=this.diss[y]) != null ? _114_28_ : [])
+        var list = ((_113_28_=this.diss[y]) != null ? _113_28_ : [])
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             dss = list[_a_]
@@ -242,7 +245,7 @@ syntax = (function ()
 
     syntax.prototype["getColor"] = function (x, y, clss)
     {
-        var _128_27_
+        var _127_27_
 
         if (this.ansi)
         {
@@ -259,12 +262,12 @@ syntax = (function ()
                 clss = x
             }
         }
-        return ((_128_27_=theme.syntax[clss]) != null ? _128_27_ : [255,0,0])
+        return ((_127_27_=theme.syntax[clss]) != null ? _127_27_ : [255,0,0])
     }
 
     syntax.prototype["getAnsiColor"] = function (x, y)
     {
-        var clr, _134_24_
+        var clr, _133_24_
 
         var list = _k_.list(this.colors[y])
         for (var _a_ = 0; _a_ < list.length; _a_++)
@@ -303,5 +306,5 @@ syntax = (function ()
 
 export default syntax;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3ludGF4LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL3N5bnRheC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2tCLGFBQVI7T0FBZSxXQUFmO09BQW9CLFdBQXBCOztPQUNRLFlBQVI7O09BQ1EsWUFBWDs7O0FBQ04sVUFBRDs7YUFDSSxRQUFJOztRQUFEOzs7Ozs7Ozs7Ozs7Ozs7Ozs7UUFFQyxLQUFDLE1BQU87UUFDUixLQUFDOzs7c0JBRUw7O1FBRUksS0FBQztRQUNELEtBQUM7UUFDRCxLQUFDO2VBQ0QsS0FBQyxPQUFPOzs7c0JBRVoscUJBQVM7O1FBQUQ7O2VBQVEsS0FBQyxPQUFPOzs7c0JBRXhCLHNCQUFTOztlQUFRLEtBQUMsU0FBUyxPQUFPLE9BQU8sS0FBSzs7O3NCQUU5Qyx1QkFBVTs7ZUFBUyxLQUFDLFNBQVMsS0FBSyxNQUFNOzs7c0JBRXhDLHdCQUFZOztRQUFEOztlQUFXLEtBQUMsT0FBTzs7O3NCQUU5Qix1QkFBVyxPQUFNLFdBQVM7Ozs7dUJBRWIsS0FBQzs7WUFDTixLQUFDO1lBQ0QsS0FBQztnQ0FDVzs7O2dCQUFSO2dCQUNBLE1BQU0sT0FBTyxPQUFPLEtBQUMsT0FBTyxLQUFLLElBQUksTUFBTTtxQ0FDakM7OztvQkFBTjt3QkFDYyxVQUFYLEdBQUc7O3dCQUNGLEdBQUcsZ0JBQVksR0FBRyxLQUFLLElBQUksS0FBSyxNQUFNLEtBQUs7OztnQkFDbkQsS0FBQyxLQUFLLEtBQUs7Ozs7O2dCQUVaLEtBQUMsY0FBYyxNQUFNOztnQkFDcEIsS0FBQyxPQUFPOzs7WUFHWixLQUFDO1lBRUQsS0FBQyxPQUFPLE1BQU0sUUFBUSxNQUFNLEtBQUM7aUNBQ2I7aUJBQVA7O2dCQUFMO2dCQUNBLE1BQU0sS0FBSyxLQUFLO2dCQUNoQixLQUFDLEtBQUssT0FBTyxLQUFDLEtBQUs7Z0JBQ25CLEtBQUMsS0FBSyxPQUFPOzs7ZUFFckIsS0FBQyxPQUFPOzs7c0JBRVosNEJBQWdCLE9BQU07Ozs7WUFFYixLQUFDLEtBQUssV0FBVSxNQUFNOzs7O3NCQUNoQixLQUFDOzs7O1FBRVo7NEJBRWdCO2FBQVA7O1lBQUw7Z0JBS0csWUFBYSxLQUFDLFFBQVMsU0FBUyxTQUFRLFFBQVMsS0FBQyxLQUFLLFNBQVE7O2dCQUM5RCxNQUFNLEtBQUMsS0FBSztnQkFDWixRQUFRLE9BQU8sS0FBQyxLQUFLO2dCQUNyQjs7WUFFSixNQUFNLEtBQUssS0FBSztnQkFDYixLQUFDLEtBQUs7O2dCQUNMLFFBQVEsT0FBTyxLQUFDLEtBQUs7Ozs7Z0JBRXJCLFFBQVEsT0FBTyxNQUFNLFNBQVMsTUFBTSxLQUFDLEtBQUs7O2dCQUUzQyxLQUFDLEtBQUssU0FBUTs7Z0JBQ2IsS0FBQyxLQUFLLE9BQU8sSUFBSSxFQUFFLFFBQVE7Z0JBQzNCLEtBQUMsS0FBSyxPQUFPOzs7ZUFFckIsS0FBQyxPQUFPOzs7c0JBRVosc0JBQVMsTUFBSzs7UUFFVixLQUFDLE9BQU87ZUFDUixLQUFDLE9BQU8sS0FBQyxLQUFLLE9BQU8sTUFBTSxTQUFTLE1BQU07OztzQkFFOUMsMEJBQWEsT0FBTTs7Ozs0QkFFSDs7O1lBQVI7WUFDQSxLQUFDLFFBQVEsS0FBSzs7OztzQkFFdEIsdUJBQVUsR0FBRTs7Ozs0QkFFRyxLQUFDLEtBQUs7OztZQUFiO2lCQUNHLElBQUksU0FBUyxLQUFBLElBQUksSUFBSSxRQUFNLElBQUk7O3VCQUM1QixJQUFJOzs7ZUFDZDs7O3NCQUVKLHlCQUFZOzs7O1FBRVI7NEJBQ1csS0FBQyxLQUFLOzs7WUFBYjsyQkFDSSxJQUFLLElBQUksYUFBUSxJQUFJLFFBQU0sSUFBSSwwQkFBZCxJQUFJLFFBQU0sSUFBSSxhQUFkLElBQUksUUFBTSxJQUFJOztnQkFDL0IsUUFBUSxLQUFLLElBQUk7OztlQUN6Qjs7O3NCQUVKLDJCQUFjLEdBQUU7Ozs7UUFDWixTQUFTLEtBQUssVUFBUSxLQUFLLFdBQVMsS0FBSyxhQUFXOzhCQUN6QyxLQUFDLEtBQUs7OztZQUFiO3VCQUNVLElBQUksS0FBUTs7dUJBQXBCOzs7ZUFDTjs7O3NCQUVKLHVCQUFVLEdBQUU7Ozs7OEJBRUcsS0FBQyxLQUFLOzs7WUFBYjtpQkFDVSxJQUFJLGVBQUosSUFBSSxLQUFNLE1BQU0sS0FBSyxTQUFTOzt1QkFBdEM7OztlQUNOOzs7c0JBRUosdUJBQVUsR0FBRSxHQUFFOzs7O1lBRVAsS0FBQzs7bUJBQVMsS0FBQyxhQUFhLEVBQUU7O2NBRXRCOztnQkFDSyxVQUFMOztnQkFDQyxPQUFPLEtBQUMsU0FBUyxFQUFFOzs7O2dCQUVuQixPQUFPOzs7MEJBRWYsTUFBTSxPQUFPLDZCQUFTLElBQUksRUFBRTs7O3NCQUVoQywyQkFBYyxHQUFFOzs7OzRCQUVELEtBQUMsT0FBTzs7O1lBQWY7Z0JBQ0csSUFBSSxLQUFLOztxQkFDTCxJQUFJOzt3QkFDQSxJQUFJLElBQUksSUFBSSxJQUFJOzsrQkFDYixJQUFJOzs7OzsyQkFFUixJQUFJOzs7O2dCQUVqQixJQUFJLEVBQUU7OztzQkFFWCxzQkFBUyxHQUFFLEdBQUUsTUFBSzs7UUFFZCxRQUFBLGVBQUEsT0FBUSxLQUFDLFNBQVMsRUFBRTttQkFDWCxTQUFZOzttQkFBbkI7O2VBQ0Y7OztXQTdJUDs7O2VBK0lNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3ludGF4LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL3N5bnRheC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2tCLGFBQVI7T0FBZSxXQUFmO09BQW9CLFdBQXBCOztPQUNRLFlBQVI7O09BQ1EsWUFBWDs7O0FBQ04sVUFBRDs7YUFDSSxRQUFJOztRQUFEOzs7Ozs7Ozs7Ozs7Ozs7Ozs7O1FBRUMsS0FBQyxNQUFPO1FBQ1IsS0FBQzs7O3NCQUVMOztRQUVJLEtBQUM7ZUFDRCxLQUFDLGVBQWU7OztzQkFFcEIscUJBQVM7O1FBQUQ7O2VBQVEsS0FBQyxPQUFPOzs7c0JBRXhCLHNCQUFTOztlQUFRLEtBQUMsU0FBUyxPQUFPLE9BQU8sS0FBSzs7O3NCQUU5Qyx1QkFBVTs7ZUFBUyxLQUFDLFNBQVMsS0FBSyxNQUFNOzs7c0JBRXhDLHdCQUFZOztRQUFEOztlQUFXLEtBQUMsT0FBTzs7O3NCQUU5Qix1QkFBVTs7Ozt1QkFFRyxLQUFDOztZQUNOLEtBQUM7WUFDRCxLQUFDO2dDQUNXOzs7Z0JBQVI7Z0JBQ0EsTUFBTSxPQUFPLE9BQU8sS0FBQyxPQUFPLEtBQUssSUFBSSxNQUFNO3FDQUNqQzs7O29CQUFOO3dCQUNjLFVBQVgsR0FBRzs7d0JBQ0YsR0FBRyxnQkFBWSxHQUFHLEtBQUssSUFBSSxLQUFLLE1BQU0sS0FBSzs7O2dCQUNuRCxLQUFDLEtBQUssS0FBSzs7Ozs7Z0JBRVYsS0FBQyxjQUFjOzs7O1lBRXBCLEtBQUM7WUFFRCxLQUFDLE9BQU8sTUFBTSxRQUFRLE1BQU0sS0FBQztpQ0FFYjtpQkFBUDs7Z0JBQUw7Z0JBQ0EsS0FBQyxTQUFTLElBQUksS0FBSyxLQUFDLEtBQUs7Ozs7O3NCQU1yQyw0QkFBZTs7OztZQUVOLEtBQUMsU0FBUyxTQUFROzs7O1FBRXZCOzRCQUVnQjthQUFQOztZQUFMO1lBRUEsTUFBTSxLQUFDLFNBQVMsSUFBSTtrQkFFYjs7Z0JBQ0gsTUFBTSxNQUFNLFNBQVMsTUFBTSxLQUFDLEtBQUs7Z0JBQ2pDLEtBQUMsU0FBUyxJQUFJLEtBQUs7b0JBRUssS0FBQyxTQUFTLE9BQU8sSUFBRSxNQUFNLFNBQVM7O29CQUExRCxLQUFDLGNBQWM7OztZQUVuQixLQUFLLEtBQUs7O2VBRWQsS0FBQyxPQUFPOzs7c0JBRVosNEJBQWU7Ozs7UUFFWCxXQUFXOzRCQUVLO2FBQVA7O1lBQUw7WUFDQSxNQUFNLEtBQUMsU0FBUyxJQUFJO2lCQUNDOztnQkFBckIsS0FBSyxJQUFJLEtBQUs7OztlQUVsQixLQUFDLFdBQVc7OztzQkFFaEIsc0JBQVMsTUFBSzs7OztRQUVWLE1BQU0sTUFBTSxTQUFTLE1BQU0sS0FBSztRQUNoQyxLQUFDLE9BQU8sS0FBQyxLQUFLLFFBQVE7ZUFDdEIsS0FBQyxTQUFTLElBQUksS0FBSzs7O3NCQUV2QiwwQkFBYSxPQUFNOzs7OzRCQUVIOzs7WUFBUjtZQUNBLEtBQUMsUUFBUSxLQUFLOzs7O3NCQUV0Qix1QkFBVSxHQUFFOzs7OzRCQUVHLEtBQUMsS0FBSzs7O1lBQWI7aUJBQ0csSUFBSSxTQUFTLEtBQUEsSUFBSSxJQUFJLFFBQU0sSUFBSTs7dUJBQzVCLElBQUk7OztlQUNkOzs7c0JBRUoseUJBQVk7Ozs7UUFFUjs0QkFDVyxLQUFDLEtBQUs7OztZQUFiOzJCQUNJLElBQUssSUFBSSxhQUFRLElBQUksUUFBTSxJQUFJLDBCQUFkLElBQUksUUFBTSxJQUFJLGFBQWQsSUFBSSxRQUFNLElBQUk7O2dCQUMvQixRQUFRLEtBQUssSUFBSTs7O2VBQ3pCOzs7c0JBRUosMkJBQWMsR0FBRTs7OztRQUNaLFNBQVMsS0FBSyxVQUFRLEtBQUssV0FBUyxLQUFLLGFBQVc7OEJBQ3pDLEtBQUMsS0FBSzs7O1lBQWI7dUJBQ1UsSUFBSSxLQUFROzt1QkFBcEI7OztlQUNOOzs7c0JBRUosdUJBQVUsR0FBRTs7Ozs4QkFFRyxLQUFDLEtBQUs7OztZQUFiO2lCQUNVLElBQUksZUFBSixJQUFJLEtBQU0sTUFBTSxLQUFLLFNBQVM7O3VCQUF0Qzs7O2VBQ047OztzQkFFSix1QkFBVSxHQUFFLEdBQUU7Ozs7WUFFUCxLQUFDOzttQkFBUyxLQUFDLGFBQWEsRUFBRTs7Y0FFdEI7O2dCQUNLLFVBQUw7O2dCQUNDLE9BQU8sS0FBQyxTQUFTLEVBQUU7Ozs7Z0JBRW5CLE9BQU87OzswQkFFZixNQUFNLE9BQU8sNkJBQVMsSUFBSSxFQUFFOzs7c0JBRWhDLDJCQUFjLEdBQUU7Ozs7NEJBRUQsS0FBQyxPQUFPOzs7WUFBZjtnQkFDRyxJQUFJLEtBQUs7O3FCQUNMLElBQUk7O3dCQUNBLElBQUksSUFBSSxJQUFJLElBQUk7OytCQUNiLElBQUk7Ozs7OzJCQUVSLElBQUk7Ozs7Z0JBRWpCLElBQUksRUFBRTs7O3NCQUVYLHNCQUFTLEdBQUUsR0FBRSxNQUFLOztRQUVkLFFBQUEsZUFBQSxPQUFRLEtBQUMsU0FBUyxFQUFFO21CQUNYLFNBQVk7O21CQUFuQjs7ZUFDRjs7O1dBNUlQOzs7ZUE4SU0ifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/util/syntax.kode

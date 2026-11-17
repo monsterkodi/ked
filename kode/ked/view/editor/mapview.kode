@@ -19,7 +19,9 @@ use ../base         ◆ view
         
         @imgId  = kstr.hash(@state.name) & ~0xffff
         @rowOffset  = 0
-        @images     = []
+        @imageCache = new Map()
+        @imgSeq     = 0
+        @placedImages = []
         @cells.cols = 12
         @colors     = null
         
@@ -38,13 +40,15 @@ use ../base         ◆ view
             
 ##show    
     reload: => 
-
+        
         if @suspended
             @redraw = true
             ⮐
 
-        @createImages()
-        @drawImages()
+        @clearImages()
+        @redraw = true
+        
+        post.emit 'redraw'
     
     suspend: => @suspended = true
     
@@ -63,17 +67,22 @@ use ../base         ◆ view
         
         ⮐ if @hidden()
         
-        @cells.screen.t.hideImagesInRange @images[0] @images[-1]
+        @hideUnplacedImages []
         
         super()
         
     clearImages: =>
         
-        ⮐ if empty @images
-
-        @cells.screen.t.deleteImagesInRange @images[0] @images[-1]
-
-        @images = []
+        ⮐ if not @imgSeq
+        
+        t = @cells?.screen?.t
+        ⮐ if not t
+        
+        t.deleteImagesInRange @imgId @imgId+@imgSeq
+        
+        @imageCache.clear()
+        @placedImages = []
+        @imgSeq = 0
         
     layout: x y w h => 
     
@@ -83,7 +92,7 @@ use ../base         ◆ view
         ⮐ if @hidden()
         
         if @redraw or resized
-            @createImages() if @redraw
+            @createImages() if @redraw or resized
             delete @redraw
             @drawImages()
                 
@@ -94,6 +103,7 @@ use ../base         ◆ view
     setColors: colors =>
 
         @colors = colors
+        @clearImages()
         @redraw = true
 
     setSyntaxSegls: ext @segls => 
@@ -103,6 +113,7 @@ use ../base         ◆ view
         @syntax.setSegls @segls
         @rowCache = null
         
+        @clearImages()
         @redraw = true        
 
     setScales: conf =>
@@ -110,48 +121,84 @@ use ../base         ◆ view
         @scaling = conf?.enable != false
         @scales  = conf ? {}
         @rowCache = null
+        @clearImages()
         @redraw = true
         
 ##images
     
-    maxRowsToLoad: => (@cells.rows-@rowOffset) * @csz[1] / @pixelsPerRow
+    imageWidth: => @cells.cols * @csz[0]
+    
+    #  an image is cached by line, not by line index, a line keeps its image
+    #  when lines are inserted or removed around it
+    
+    imageKey: (line h) -> (line is str) ? "#{h}:#{line}" : line
+    
+    nextImageId: =>
+        
+        @imgSeq += 1
+        
+        if @imgSeq > 60000
+            @clearImages()
+            @imgSeq = 1
+            
+        @imgId + @imgSeq
     
     createImages: =>
         
         t = @cells.screen.t
         ⮐ if empty t.cellsz
-
-        #  rows depend on the line heights, and the areas can change them,
-        #  so a rebuild always recomputes them
-
+        
+        #  the pixel size of every image depends on the size of a cell
+        
+        @clearImages() if not empty @csz and not (@csz eql t.cellsz)
+        
         @rowCache = null
+        @csz      = t.cellsz
+    
+    ensureImage: (y) =>
         
-        @csz = t.cellsz
+        t    = @cells.screen.t
+        line = @getSegls()[y]
         
-        @clearImages()
-
-        # prof.start @state.name+'.map'
+        ⮐ if not line?
         
-        w = @cells.cols * @csz[0]
+        h   = @imageHeight y
+        w   = @imageWidth()
+        key = @imageKey line h
+        img = @imageCache.get key
         
-        ⮐ if w <= 0
+        if img and img.h == h and img.w == w
+            img.y = y
+            ⮐ img.id
         
-        lines = @getSegls()
-        maxRows = @maxRowsToLoad()
+        if img
+            @imageCache.delete key
+            t.deleteImage img.id
         
-        for line,y in lines
+        data = @lineData y
+        ⮐ if empty data
+        
+        @imageForLine data line y h
+        
+        id = @nextImageId()
+        
+        t.sendImageData data id w h
+        
+        @imageCache.set key {id: id h: h w: w y: y}
+        
+        id
+        
+    hideUnplacedImages: (placed) =>
+        
+        keep = {}
+        
+        for id in placed
+            keep[id] = true
             
-            break if @rowOfLine(y) >= maxRows
+        for id in @placedImages ? []
+            @cells.screen.t.hideImage id if not keep[id]
             
-            h    = @imageHeight y
-            data = Buffer.alloc w*h*3
-            
-            @imageForLine data line y h
-            id = @imgId+y
-            @images.push id
-            t.sendImageData data id w h
-                
-        # prof.end @state.name+'.map'
+        @placedImages = placed
         
 ##update
 
@@ -192,41 +239,6 @@ use ../base         ◆ view
 
     lineOffsetPixels: y -> @rowOfLine(y)*@pixelsPerRow
 
-    updateLine: y data => 
-    
-        data ?= @lineData(y)        
-        ⮐ if empty data
-
-        csz = @cells.screen.t.cellsz
-        ⮐ if empty csz
-        @csz = csz
-
-        id = @imgId+y
-        h  = @imageHeight y
-        @imageForLine data @getSegls()[y] y h
-        w  = int(data.length/(3*h))
-        t  = @cells.screen.t
-        t.deleteImage id
-        t.sendImageData data id w h
-        @images[y] = id
-
-        py = @lineOffsetPixels y
-        rh = @lineRows(y) * @pixelsPerRow
-
-        if py >= 0 and py+rh <= (@cells.rows-@rowOffset)*csz[1]
-            if @textLine(y)
-                t.placeImageSlice id @cells.x @cells.y+@rowOffset py 0 rh w
-            else
-                t.placeLineImage id @cells.x @cells.y+@rowOffset py rh
-        
-    updateFromLine: y =>
-        
-        for li in y...@state.s.lines.length
-            @updateLine li
-                
-        while @images.length > @state.s.lines.length
-            @cells.screen.t.deleteImage @images.pop()
-            
     imageForLine: data line y h ->
     
         scale   = @lineRows y
@@ -320,14 +332,17 @@ use ../base         ◆ view
         ⮐ if empty t.pixels or @hidden() or @collapsed()
         ⮐ if empty @csz
         
-        # @csz = t.cellsz # should have been set in createImages 
+        w    = @imageWidth()
+        mapH = (@cells.rows-@rowOffset) * @csz[1]
         
-        w     = @cells.cols * @csz[0]
-        mapH  = (@cells.rows-@rowOffset) * @csz[1]
+        placed = []
         
-        for id,y in @images
+        for y in 0...@getSegls().length
             
             py = @lineOffsetPixels y
+            
+            break if py >= mapH
+            
             rh = @lineRows(y) * @pixelsPerRow
             
             y1 = max 0 py
@@ -335,11 +350,17 @@ use ../base         ◆ view
             
             continue if y2 <= y1
             
+            id = @ensureImage y
+            continue if not id
+            
             if @textLine(y)
                 t.placeImageSlice id @cells.x @cells.y+@rowOffset y1 (y1-py) (y2-y1) w
             else
                 t.placeLineImage id @cells.x @cells.y+@rowOffset y1 (y2-y1)
-        @
+                
+            placed.push id
+        
+        @hideUnplacedImages placed
         
     draw: =>
         

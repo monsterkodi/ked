@@ -25,7 +25,6 @@ use                 ◆ mapview
         @mapWidth   = 0 # width of the map in pixels
         @mapHeight  = 0 # height of the map in pixels
         @linesInMap = 0 # number of display rows that fit into map
-        @linesCount = 0 # number of lines at the last change
         
         @setColor 'bg'        theme.editor.mapscr
         @setColor 'highlight' theme.highlight.map
@@ -41,37 +40,45 @@ use                 ◆ mapview
             @hide() if name in ['differ' 'searcher' 'replacer']
             @show() if name in ['finder']
         
-        @editor.state.on 'lines.changed' @onLinesChanged
-        @editor.state.on 'colors.changed' (=> @reload())
-        @editor.state.on 'sue.changed'    (=> @reload())
+        @editor.state.on 'lines.changed'  @onLinesChanged
+        @editor.state.on 'colors.changed' @onColorsChanged
+        @editor.state.on 'sue.changed'    @onSueChanged
         
         @calcView()
-        @linesCount = @state.s.lines.length
         
     onLinesChanged: diff =>
         
-        sameCount = @state.s.lines.length == @linesCount
-        @linesCount = @state.s.lines.length
-        
         ⮐ if @suspended
-
-        if diff.del.length == 0 == diff.chg.length
-            @reload()
-        else
-            if diff.chg.length and diff.del.length == 0 == diff.ins.length and sameCount
-                for cli in diff.chg
-                    @updateLine cli
-            else
-                minLine = @state.s.lines.length
-                minLine = min minLine diff.ins[0] if diff.ins.length
-                minLine = min minLine diff.del[0] if diff.del.length
-                minLine = min minLine diff.chg[0] if diff.chg.length
-                for cli in diff.chg
-                    break if cli >= minLine
-                    @updateLine cli
-                @updateFromLine minLine
         
-    getSegls:  => @state.segls
+        #  an image belongs to a line, so inserting or removing lines needs no
+        #  image work at all. only a color span is tied to the line position.
+        
+        if diff.ins.length or diff.del.length
+            colors = @state.s.colors
+            if colors? and (not empty colors.fg or not empty colors.bg)
+                @clearImages()
+    
+    #  undo emits colors.changed even when no line carries a color span,
+    #  only rebuild the images when a color can really have changed
+    
+    onColorsChanged: =>
+        
+        colors = @state.s.colors
+        
+        ⮐ if not colors? or (empty colors.fg and empty colors.bg)
+        
+        @clearImages()
+        post.emit 'redraw'
+        
+    onSueChanged: =>
+        
+        #  an area can scale a line, so the row heights are stale
+        #  the images themselves are keyed by line height
+        
+        @rowCache = null
+        post.emit 'redraw'
+    
+    getSegls:  => @state.s.lines
     getSyntax: => @state.syntax
     getColors: => @state.s.colors
     
@@ -191,8 +198,6 @@ use                 ◆ mapview
            @mapY + @lineOffset(pos[1])
        ]
     
-    maxRowsToLoad: => 10000
-    
     draw: =>
     
         ⮐ if @hidden() or @collapsed()
@@ -209,31 +214,57 @@ use                 ◆ mapview
         t = @cells.screen.t
         
         ⮐ if empty t.pixels or @hidden() or @collapsed()
-
+        ⮐ if empty @csz
+        
         @calcView()
-
+        
+        placed = []
+        
         if @botLine >= @topLine
+            
             py = (@state.rowsBeforeLine(@topLine) - @topRow) * @pixelsPerRow
 
             for y in @topLine..@botLine
-                id = @images[y]
-                break if not valid id
+                
                 rh = @state.lineHeight(y) * @pixelsPerRow
                 y1 = max 0 py
                 y2 = min @mapHeight (py+rh)
+                
                 if y2 > y1
-                    if @textLine(y)
-                        t.placeImageSlice id @cells.x @cells.y y1 (y1-py) (y2-y1) @mapWidth
-                    else
-                        t.placeLineImage id @cells.x @cells.y y1 (y2-y1)
+                    if id = @ensureImage y
+                        if @textLine(y)
+                            t.placeImageSlice id @cells.x @cells.y y1 (y1-py) (y2-y1) @mapWidth
+                        else
+                            t.placeLineImage id @cells.x @cells.y y1 (y2-y1)
+                        placed.push id
+                        
                 py += rh
-            
-        if @topLine > 0 and @topLine <= @images.length
-            t.hideImagesInRange @images[0] @images[@topLine-1]
-        if @botLine >= @topLine and @botLine+1 < @images.length
-            t.hideImagesInRange @images[@botLine+1] @images[-1]
+        
+        @hideUnplacedImages placed
+        @pruneImages()
         
         @drawKnob()
+        
+    #  the map only ever shows its window, keeping images for other lines
+    #  would make the terminal hold a picture of the whole file
+    
+    pruneImages: =>
+        
+        cache = @imageCache
+        ⮐ if not cache or cache.size == 0
+        
+        t     = @cells.screen.t
+        lines = @getSegls()
+        keep  = new Set()
+        
+        for y in @topLine..@botLine
+            key = @imageKey lines[y] @imageHeight(y)
+            keep.add key
+            
+        cache.forEach (img key) ->
+            if not keep.has(key)
+                t.deleteImage img.id
+                cache.delete key
                 
     drawKnob: =>
     

@@ -11,9 +11,7 @@ use ../theme    ◆ theme
     clear: => 
         
         @diss = []  
-        @hash = {}  
-        @liha = {}
-        @seen = null
+        @lineDiss = new Map()
         
     setExt: @ext => @ansi = false
     
@@ -23,7 +21,7 @@ use ../theme    ◆ theme
     
     setColors: @colors => @ansi = true
         
-    setSegls: (segls oldSegls=null) =>
+    setSegls: segls =>
         
         if valid @config
             @clear()
@@ -35,53 +33,54 @@ use ../theme    ◆ theme
                         ds.clss = trim ds.clss.map(kstr.trim).join(' ') 
                 @diss.push dss
         else
-            if @partialUpdate segls oldSegls
-                @seen = segls
-                ⮐
+            ⮐ if @partialUpdate segls
         
             @clear()
             
             @diss = kulur.dissect segls @ext
-            for segl,idx in segls
-                hsh = kseg.hash(segl)
-                @hash[hsh] = @diss[idx]
-                @liha[idx] = hsh
-                
-        @seen = segls
             
-    partialUpdate: (segls oldSegls) =>
+            for segl,idx in segls
+                @lineDiss.set segl @diss[idx]
+    
+    #  the dissection of a line only depends on the line itself, so it is kept
+    #  by line reference. lines are immutable: a line keeps its dissection when
+    #  other lines are inserted, removed or changed.
+    
+    partialUpdate: segls =>
         
-        ⮐ if @diss.length != segls.length
-        ⮐ if empty @hash
+        ⮐ if @lineDiss.size == 0
         
-        newHash = {}
+        diss = []
         
         for segl,idx in segls
+            
+            dss = @lineDiss.get segl
+            
+            if not dss?
+                dss = kulur.dissect([segl] @ext)[0]
+                @lineDiss.set segl dss
+                
+                @pruneLineDiss segls if @lineDiss.size > 2*segls.length + 100
+                
+            diss.push dss
+            
+        @diss = diss
         
-            #  a line keeps its dissection when it is unchanged both in the
-            #  document and in the lines we dissected last
+    pruneLineDiss: segls =>
+        
+        keep = new Map()
+        
+        for line,idx in segls
+            dss = @lineDiss.get line
+            keep.set line dss if dss?
             
-            if oldSegls and @seen and oldSegls[idx] == segl and @seen[idx] == segl
-                hsh = @liha[idx]
-                newHash[hsh] = @diss[idx]
-                continue
-            
-            hsh = kseg.hash segl
-            if @hash[hsh]
-                newHash[hsh] = @hash[hsh]
-            else
-                newHash[hsh] = kulur.dissect([segl] @ext)[0]
-            
-            if @liha[idx] != hsh
-                @diss.splice idx 1 newHash[hsh]
-                @liha[idx] = hsh
-
-        @hash = newHash
+        @lineDiss = keep
             
     addSegl: segl ext =>
     
-        @seen = null
-        @diss = @diss.concat kulur.dissect([segl] ext)
+        dss = kulur.dissect([segl] ext)[0]
+        @diss = @diss.concat [dss]
+        @lineDiss.set segl dss
         
     appendSegls: segls ext =>
     

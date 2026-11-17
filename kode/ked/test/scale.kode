@@ -602,46 +602,56 @@ blockArea = scr ->
 
         m = new mapscr e
         m.cells.layout 30 0 12 10
+        m.show()
         h.screen.t.pixels = [400 200]
         h.screen.t.cellsz = [10 20]
 
+        m.createImages()
         m.reload()
+        m.calcView()
+        m.drawImages()
 
-        m.images.length ▸ 3
+        m.imageCache.size ▸ 3
         kseg.str(m.getSegls()[1]) ▸ 'bbb'
 
-  ▸ a reload after inserting lines clears the old map images
+  ▸ the map follows inserted and removed lines
 
         [h e] = hed  cols:40 rows:10
         e.state.loadLines ['aaa' 'bbb' 'ccc']
 
         m = new mapscr e
         m.cells.layout 30 0 12 10
+        m.show()
         h.screen.t.pixels = [400 200]
         h.screen.t.cellsz = [10 20]
-        m.reload()
+        m.createImages()
+
+        m.calcView()
+        m.drawImages()
+
+        m.imageCache.size ▸ 3
 
         e.state.setLines ['aaa' 'bbb' 'foo' 'bar' 'ccc']
 
-        m.images.length ▸ 5
+        m.calcView()
+        m.drawImages()
 
-        h.screen.t.out = []
+        m.imageCache.size ▸ 5
+        kseg.str(m.getSegls()[4]) ▸ 'ccc'
+
         e.state.loadLines ['aaa' 'bbb' 'ccc']
 
-        out = h.screen.t.written()
+        m.calcView()
+        m.drawImages()
 
-        m.images.length ▸ 3
-        out.includes("a=d,d=R,x=#{m.imgId},y=#{m.imgId+4}") ▸ true
-
-        e.state.setLines ['aaa' 'bbb' 'NEW' 'NEW' 'ccc']
-
-        m.images.length ▸ 5
+        m.imageCache.size ▸ 3
 
   ▸ a suspended map waits for the restored view
 
         [h e] = hed cols:40 rows:20
         m = new mapscr e
         m.cells.layout 30 0 12 20
+        m.show()
         h.screen.t.pixels = [400 400]
         h.screen.t.cellsz = [10 20]
 
@@ -664,10 +674,76 @@ blockArea = scr ->
 
         out = h.screen.t.written()
 
-        m.images.length ▸ 2000
         (m.topLine > 0) ▸ true
-        out.includes("a=p,i=#{m.imgId},") ▸ false
-        out.includes("a=p,i=#{m.imgId + m.topLine},") ▸ true
+        (m.imageCache.size <= 100) ▸ true
+        out.includes('a=p,') ▸ true
+
+  ▸ the map only renders the lines it can show
+
+        [h e] = hed cols:40 rows:10
+        e.state.loadLines [("line #{i}") for i in 0...2000]
+
+        m = new mapscr e
+        m.cells.layout 30 0 12 10
+        m.show()
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+        m.createImages()
+
+        e.state.setView [0 0]
+        m.calcView()
+        m.drawImages()
+
+        (m.imageCache.size < 60) ▸ true
+
+  ▸ inserting and undoing a line does not blank or re-upload the map
+
+        [h e] = hed cols:40 rows:10
+        e.state.loadLines [("line #{i}") for i in 0...20]
+
+        m = new mapscr e
+        m.cells.layout 30 0 12 10
+        m.show()
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+        m.createImages()
+        m.calcView()
+        m.drawImages()
+
+        m.imageCache.size ▸ 20
+
+        uploads   = 0
+        removals  = 0
+        send      = h.screen.t.sendImageData
+        remove    = h.screen.t.deleteImagesInRange
+
+        h.screen.t.sendImageData = (args...) ->
+            uploads += 1
+            send.apply h.screen.t args
+
+        h.screen.t.deleteImagesInRange = (args...) ->
+            removals += 1
+            remove.apply h.screen.t args
+
+        e.state.setMainCursor 0 10
+        e.state.insert '\n'
+
+        m.calcView()
+        m.drawImages()
+
+        removals ▸ 0
+        (uploads < 5) ▸ true
+        (m.imageCache.size <= 22) ▸ true
+
+        uploads  = 0
+        e.state.undo()
+
+        m.calcView()
+        m.drawImages()
+
+        removals ▸ 0
+        (uploads < 4) ▸ true
+        m.imageCache.size ▸ 20
 
   ▸ a scaled line gets a taller stripe in the map
 
@@ -676,11 +752,13 @@ blockArea = scr ->
 
         m = new mapscr e
         m.cells.layout 30 0 12 10
-        m.csz = [10 20]
-        m.images = [100 101 102 103 104]
-
         h.screen.t.pixels = [400 200]
         h.screen.t.cellsz = [10 20]
+        m.createImages()
+
+        id0 = m.ensureImage 0
+        id2 = m.ensureImage 2
+
         h.screen.t.out = []
 
         e.state.setView [0 0]
@@ -688,7 +766,8 @@ blockArea = scr ->
 
         out = h.screen.t.written()
 
-        (out.split('i=100,').length - 1) ▸ 4
+        (out.split("i=#{id0},").length - 1) ▸ 4
+        (out.split("i=#{id2},").length - 1) ▸ 12
 
   ▸ a scaled line is also wider in the map
 
@@ -757,18 +836,20 @@ blockArea = scr ->
         m.setScales {enable:true md:{h1:7}}
 
         m.cells.layout 30 0 12 10
-        m.csz = [10 20]
-        m.images = [100 101]
 
         h.screen.t.pixels = [400 200]
         h.screen.t.cellsz = [10 20]
+        m.createImages()
+
+        id = m.ensureImage 0
+
         h.screen.t.out = []
 
         m.drawImages()
 
         out = h.screen.t.written()
 
-        (out.split('i=100,').length - 1) ▸ 1
+        (out.split("i=#{id},").length - 1) ▸ 1
         out.includes('w=120,h=28') ▸ true
 
   ▸ the browse map does not place lines below its last row
@@ -792,7 +873,7 @@ blockArea = scr ->
 
         out = h.screen.t.written()
 
-        m.images.length ▸ 45
+        m.imageCache.size ▸ 45
         out.includes('\x1b[11;') ▸ false
 
   ▸ the browse map cuts a scaled line at its bottom edge
@@ -866,10 +947,9 @@ blockArea = scr ->
 
         m = new mapscr e
         m.cells.layout 30 0 12 10
-        m.csz = [10 20]
-        m.images = []
-        for i in 0...20
-            m.images.push 100+i
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+        m.createImages()
 
         e.state.setView [0 10]
         m.calcView()
@@ -878,15 +958,15 @@ blockArea = scr ->
         m.topLine ▸ 6
         m.lineOffset(6) ▸ -24
 
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
+        id = m.ensureImage 6
+
         h.screen.t.out = []
 
         m.drawImages()
 
         out = h.screen.t.written()
 
-        (out.split('i=106,').length - 1) ▸ 1
+        (out.split("i=#{id},").length - 1) ▸ 1
         out.includes('y=24,w=120,h=4') ▸ true
 
   ▸ the map cuts a line at its bottom edge
@@ -900,24 +980,23 @@ blockArea = scr ->
 
         m = new mapscr e
         m.cells.layout 30 0 12 10
-        m.csz = [10 20]
-        m.images = []
-        for i in 0...20
-            m.images.push 100+i
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+        m.createImages()
 
         e.state.setView [0 0]
         m.calcView()
         m.lineOffset(7) ▸ 196
 
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
+        id = m.ensureImage 7
+
         h.screen.t.out = []
 
         m.drawImages()
 
         out = h.screen.t.written()
 
-        (out.split('i=107,').length - 1) ▸ 1
+        (out.split("i=#{id},").length - 1) ▸ 1
         out.includes('y=0,w=120,h=4') ▸ true
 
   ▸ the map cursors scale vertically with their line
@@ -1301,16 +1380,20 @@ blockArea = scr ->
         m.cells.layout 30 0 12 10
         h.screen.t.pixels = [400 200]
         h.screen.t.cellsz = [10 20]
-        m.reload()
+        m.createImages()
 
         m.textLine(0) ▸ false
         m.imageHeight(0) ▸ 1
 
-        h.screen.t.out = []
         e.state.stepScales 4
 
         m.textLine(0) ▸ true
         m.imageHeight(0) ▸ 20
+
+        h.screen.t.out = []
+        m.calcView()
+        m.drawImages()
+
         h.screen.t.written().includes('v=20') ▸ true
 
   ▸ a sue scale run grows upwards from its line

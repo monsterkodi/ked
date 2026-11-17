@@ -380,8 +380,8 @@ use ../edit        ◆ mode
         s = new syntax 'test'
         s.setExt 'kode'
 
-        lines = ['a = 1' 'b = 2' 'c = 3']
-        s.setLines lines
+        lines = kseg.segls ['a = 1' 'b = 2' 'c = 3']
+        s.setSegls lines
 
         keep = s.diss[0]
 

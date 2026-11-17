@@ -412,9 +412,12 @@ use           ◆ keys mode
         
         if empty @segls ➜ @segls = [[]]
         
-        @syntax.setSegls @segls @s.lines
-                    
         @changeLinesSegls()
+        
+        #  the syntax caches the dissection by line, so it has to see the same
+        #  line objects the editor keeps in @s.lines, not the incoming array
+        
+        @syntax.setSegls @s.lines
         
         @r = []
         
