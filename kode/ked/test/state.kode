@@ -633,6 +633,28 @@ sel = r... -> s.allSelections() ▸ r
         s.undo()
         s.totalRows() ▸ 4
 
+  ▸ the widest line follows edits
+
+        s.syntax.ext = 'txt'
+        s.loadLines ['a' 'bb']
+
+        s.rowPrefix()
+        s.maxWidthCache ▸ 2
+
+        s.setMainCursor 1 0
+        s.insert 'xx'
+
+        s.rowPrefix()
+        s.maxWidthCache ▸ 3
+
+        s.setMainCursor 2 1
+        s.insert 'yyyyyyyy'
+
+        s.rowPrefix()
+        s.maxWidthCache ▸ 10
+
+        txt 'axx\nbbyyyyyyyy'
+
   ▸ replaceLineRanges applies all edits in one undo step
 
         s.loadLines ['a' 'b' 'c' 'd' 'e']

@@ -41,7 +41,8 @@ syntax = (function ()
     {
         this.diss = []
         this.hash = {}
-        return this.liha = {}
+        this.liha = {}
+        return this.seen = null
     }
 
     syntax.prototype["setExt"] = function (ext)
@@ -68,12 +69,13 @@ syntax = (function ()
         return this.ansi = true
     }
 
-    syntax.prototype["setSegls"] = function (segls)
+    syntax.prototype["setSegls"] = function (segls, oldSegls = null)
     {
         var ds, dss, hsh, idx, segl, segs
 
         if (!_k_.empty(this.config))
         {
+            this.clear()
             this.diss = []
             var list = _k_.list(segls)
             for (var _a_ = 0; _a_ < list.length; _a_++)
@@ -94,8 +96,9 @@ syntax = (function ()
         }
         else
         {
-            if (this.partialUpdate(segls))
+            if (this.partialUpdate(segls,oldSegls))
             {
+                this.seen = segls
                 return
             }
             this.clear()
@@ -109,9 +112,10 @@ syntax = (function ()
                 this.liha[idx] = hsh
             }
         }
+        return this.seen = segls
     }
 
-    syntax.prototype["partialUpdate"] = function (segls)
+    syntax.prototype["partialUpdate"] = function (segls, oldSegls)
     {
         var hsh, idx, newHash, segl
 
@@ -128,6 +132,12 @@ syntax = (function ()
         for (idx = 0; idx < list.length; idx++)
         {
             segl = list[idx]
+            if (oldSegls && this.seen && oldSegls[idx] === segl && this.seen[idx] === segl)
+            {
+                hsh = this.liha[idx]
+                newHash[hsh] = this.diss[idx]
+                continue
+            }
             hsh = kseg.hash(segl)
             if (this.hash[hsh])
             {
@@ -148,6 +158,7 @@ syntax = (function ()
 
     syntax.prototype["addSegl"] = function (segl, ext)
     {
+        this.seen = null
         return this.diss = this.diss.concat(kulur.dissect([segl],ext))
     }
 
@@ -198,10 +209,10 @@ syntax = (function ()
 
     syntax.prototype["hasPureClass"] = function (y, clss)
     {
-        var dss, pclss, _93_28_
+        var dss, pclss, _108_28_
 
         pclss = [clss,"text " + clss,"punct " + clss,"comment " + clss]
-        var list = ((_93_28_=this.diss[y]) != null ? _93_28_ : [])
+        var list = ((_108_28_=this.diss[y]) != null ? _108_28_ : [])
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             dss = list[_a_]
@@ -215,9 +226,9 @@ syntax = (function ()
 
     syntax.prototype["hasClass"] = function (y, clss)
     {
-        var dss, _100_30_, _99_28_
+        var dss, _114_28_, _115_30_
 
-        var list = ((_99_28_=this.diss[y]) != null ? _99_28_ : [])
+        var list = ((_114_28_=this.diss[y]) != null ? _114_28_ : [])
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             dss = list[_a_]
@@ -231,7 +242,7 @@ syntax = (function ()
 
     syntax.prototype["getColor"] = function (x, y, clss)
     {
-        var _113_27_
+        var _128_27_
 
         if (this.ansi)
         {
@@ -248,12 +259,12 @@ syntax = (function ()
                 clss = x
             }
         }
-        return ((_113_27_=theme.syntax[clss]) != null ? _113_27_ : [255,0,0])
+        return ((_128_27_=theme.syntax[clss]) != null ? _128_27_ : [255,0,0])
     }
 
     syntax.prototype["getAnsiColor"] = function (x, y)
     {
-        var clr, _119_24_
+        var clr, _134_24_
 
         var list = _k_.list(this.colors[y])
         for (var _a_ = 0; _a_ < list.length; _a_++)
@@ -292,5 +303,5 @@ syntax = (function ()
 
 export default syntax;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3ludGF4LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL3N5bnRheC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2tCLGFBQVI7T0FBZSxXQUFmO09BQW9CLFdBQXBCOztPQUNRLFlBQVI7O09BQ1EsWUFBWDs7O0FBQ04sVUFBRDs7YUFDSSxRQUFJOztRQUFEOzs7Ozs7Ozs7Ozs7Ozs7Ozs7UUFFQyxLQUFDLE1BQU87UUFDUixLQUFDOzs7c0JBRUw7O1FBRUksS0FBQztRQUNELEtBQUM7ZUFDRCxLQUFDOzs7c0JBRUwscUJBQVM7O1FBQUQ7O2VBQVEsS0FBQyxPQUFPOzs7c0JBRXhCLHNCQUFTOztlQUFRLEtBQUMsU0FBUyxPQUFPLE9BQU8sS0FBSzs7O3NCQUU5Qyx1QkFBVTs7ZUFBUyxLQUFDLFNBQVMsS0FBSyxNQUFNOzs7c0JBRXhDLHdCQUFZOztRQUFEOztlQUFXLEtBQUMsT0FBTzs7O3NCQUU5Qix1QkFBVTs7Ozt1QkFFRyxLQUFDOztZQUNOLEtBQUM7Z0NBQ1c7OztnQkFBUjtnQkFDQSxNQUFNLE9BQU8sT0FBTyxLQUFDLE9BQU8sS0FBSyxJQUFJLE1BQU07cUNBQ2pDOzs7b0JBQU47d0JBQ2MsVUFBWCxHQUFHOzt3QkFDRixHQUFHLGdCQUFZLEdBQUcsS0FBSyxJQUFJLEtBQUssTUFBTSxLQUFLOzs7Z0JBQ25ELEtBQUMsS0FBSyxLQUFLOzs7OztnQkFFVixLQUFDLGNBQWM7Ozs7WUFFcEIsS0FBQztZQUVELEtBQUMsT0FBTyxNQUFNLFFBQVEsTUFBTSxLQUFDO2lDQUNiO2lCQUFQOztnQkFBTDtnQkFDQSxNQUFNLEtBQUssS0FBSztnQkFDaEIsS0FBQyxLQUFLLE9BQU8sS0FBQyxLQUFLO2dCQUNuQixLQUFDLEtBQUssT0FBTzs7Ozs7c0JBRXpCLDRCQUFlOzs7O1lBRU4sS0FBQyxLQUFLLFdBQVUsTUFBTTs7OztzQkFDaEIsS0FBQzs7OztRQUVaOzRCQUVnQjthQUFQOztZQUFMO1lBRUEsTUFBTSxLQUFLLEtBQUs7Z0JBQ2IsS0FBQyxLQUFLOztnQkFDTCxRQUFRLE9BQU8sS0FBQyxLQUFLOzs7O2dCQUVyQixRQUFRLE9BQU8sTUFBTSxTQUFTLE1BQU0sS0FBQyxLQUFLOztnQkFFM0MsS0FBQyxLQUFLLFNBQVE7O2dCQUNiLEtBQUMsS0FBSyxPQUFPLElBQUksRUFBRSxRQUFRO2dCQUMzQixLQUFDLEtBQUssT0FBTzs7O2VBRXJCLEtBQUMsT0FBTzs7O3NCQUVaLHNCQUFTLE1BQUs7O2VBRVYsS0FBQyxPQUFPLEtBQUMsS0FBSyxPQUFPLE1BQU0sU0FBUyxNQUFNOzs7c0JBRTlDLDBCQUFhLE9BQU07Ozs7NEJBRUg7OztZQUFSO1lBQ0EsS0FBQyxRQUFRLEtBQUs7Ozs7c0JBRXRCLHVCQUFVLEdBQUU7Ozs7NEJBRUcsS0FBQyxLQUFLOzs7WUFBYjtpQkFDRyxJQUFJLFNBQVMsS0FBQSxJQUFJLElBQUksUUFBTSxJQUFJOzt1QkFDNUIsSUFBSTs7O2VBQ2Q7OztzQkFFSix5QkFBWTs7OztRQUVSOzRCQUNXLEtBQUMsS0FBSzs7O1lBQWI7MkJBQ0ksSUFBSyxJQUFJLGFBQVEsSUFBSSxRQUFNLElBQUksMEJBQWQsSUFBSSxRQUFNLElBQUksYUFBZCxJQUFJLFFBQU0sSUFBSTs7Z0JBQy9CLFFBQVEsS0FBSyxJQUFJOzs7ZUFDekI7OztzQkFFSiwyQkFBYyxHQUFFOzs7O1FBQ1osU0FBUyxLQUFLLFVBQVEsS0FBSyxXQUFTLEtBQUssYUFBVzs2QkFDekMsS0FBQyxLQUFLOzs7WUFBYjt1QkFDVSxJQUFJLEtBQVE7O3VCQUFwQjs7O2VBQ047OztzQkFFSix1QkFBVSxHQUFFOzs7OzZCQUVHLEtBQUMsS0FBSzs7O1lBQWI7aUJBQ1UsSUFBSSxlQUFKLElBQUksS0FBTSxNQUFNLEtBQUssU0FBUzs7dUJBQXRDOzs7ZUFDTjs7O3NCQUVKLHVCQUFVLEdBQUUsR0FBRTs7OztZQUVQLEtBQUM7O21CQUFTLEtBQUMsYUFBYSxFQUFFOztjQUV0Qjs7Z0JBQ0ssVUFBTDs7Z0JBQ0MsT0FBTyxLQUFDLFNBQVMsRUFBRTs7OztnQkFFbkIsT0FBTzs7OzBCQUVmLE1BQU0sT0FBTyw2QkFBUyxJQUFJLEVBQUU7OztzQkFFaEMsMkJBQWMsR0FBRTs7Ozs0QkFFRCxLQUFDLE9BQU87OztZQUFmO2dCQUNHLElBQUksS0FBSzs7cUJBQ0wsSUFBSTs7d0JBQ0EsSUFBSSxJQUFJLElBQUksSUFBSTs7K0JBQ2IsSUFBSTs7Ozs7MkJBRVIsSUFBSTs7OztnQkFFakIsSUFBSSxFQUFFOzs7c0JBRVgsc0JBQVMsR0FBRSxHQUFFLE1BQUs7O1FBRWQsUUFBQSxlQUFBLE9BQVEsS0FBQyxTQUFTLEVBQUU7bUJBQ1gsU0FBWTs7bUJBQW5COztlQUNGOzs7V0E5SFA7OztlQWdJTSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3ludGF4LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL3N5bnRheC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2tCLGFBQVI7T0FBZSxXQUFmO09BQW9CLFdBQXBCOztPQUNRLFlBQVI7O09BQ1EsWUFBWDs7O0FBQ04sVUFBRDs7YUFDSSxRQUFJOztRQUFEOzs7Ozs7Ozs7Ozs7Ozs7Ozs7UUFFQyxLQUFDLE1BQU87UUFDUixLQUFDOzs7c0JBRUw7O1FBRUksS0FBQztRQUNELEtBQUM7UUFDRCxLQUFDO2VBQ0QsS0FBQyxPQUFPOzs7c0JBRVoscUJBQVM7O1FBQUQ7O2VBQVEsS0FBQyxPQUFPOzs7c0JBRXhCLHNCQUFTOztlQUFRLEtBQUMsU0FBUyxPQUFPLE9BQU8sS0FBSzs7O3NCQUU5Qyx1QkFBVTs7ZUFBUyxLQUFDLFNBQVMsS0FBSyxNQUFNOzs7c0JBRXhDLHdCQUFZOztRQUFEOztlQUFXLEtBQUMsT0FBTzs7O3NCQUU5Qix1QkFBVyxPQUFNLFdBQVM7Ozs7dUJBRWIsS0FBQzs7WUFDTixLQUFDO1lBQ0QsS0FBQztnQ0FDVzs7O2dCQUFSO2dCQUNBLE1BQU0sT0FBTyxPQUFPLEtBQUMsT0FBTyxLQUFLLElBQUksTUFBTTtxQ0FDakM7OztvQkFBTjt3QkFDYyxVQUFYLEdBQUc7O3dCQUNGLEdBQUcsZ0JBQVksR0FBRyxLQUFLLElBQUksS0FBSyxNQUFNLEtBQUs7OztnQkFDbkQsS0FBQyxLQUFLLEtBQUs7Ozs7O2dCQUVaLEtBQUMsY0FBYyxNQUFNOztnQkFDcEIsS0FBQyxPQUFPOzs7WUFHWixLQUFDO1lBRUQsS0FBQyxPQUFPLE1BQU0sUUFBUSxNQUFNLEtBQUM7aUNBQ2I7aUJBQVA7O2dCQUFMO2dCQUNBLE1BQU0sS0FBSyxLQUFLO2dCQUNoQixLQUFDLEtBQUssT0FBTyxLQUFDLEtBQUs7Z0JBQ25CLEtBQUMsS0FBSyxPQUFPOzs7ZUFFckIsS0FBQyxPQUFPOzs7c0JBRVosNEJBQWdCLE9BQU07Ozs7WUFFYixLQUFDLEtBQUssV0FBVSxNQUFNOzs7O3NCQUNoQixLQUFDOzs7O1FBRVo7NEJBRWdCO2FBQVA7O1lBQUw7Z0JBS0csWUFBYSxLQUFDLFFBQVMsU0FBUyxTQUFRLFFBQVMsS0FBQyxLQUFLLFNBQVE7O2dCQUM5RCxNQUFNLEtBQUMsS0FBSztnQkFDWixRQUFRLE9BQU8sS0FBQyxLQUFLO2dCQUNyQjs7WUFFSixNQUFNLEtBQUssS0FBSztnQkFDYixLQUFDLEtBQUs7O2dCQUNMLFFBQVEsT0FBTyxLQUFDLEtBQUs7Ozs7Z0JBRXJCLFFBQVEsT0FBTyxNQUFNLFNBQVMsTUFBTSxLQUFDLEtBQUs7O2dCQUUzQyxLQUFDLEtBQUssU0FBUTs7Z0JBQ2IsS0FBQyxLQUFLLE9BQU8sSUFBSSxFQUFFLFFBQVE7Z0JBQzNCLEtBQUMsS0FBSyxPQUFPOzs7ZUFFckIsS0FBQyxPQUFPOzs7c0JBRVosc0JBQVMsTUFBSzs7UUFFVixLQUFDLE9BQU87ZUFDUixLQUFDLE9BQU8sS0FBQyxLQUFLLE9BQU8sTUFBTSxTQUFTLE1BQU07OztzQkFFOUMsMEJBQWEsT0FBTTs7Ozs0QkFFSDs7O1lBQVI7WUFDQSxLQUFDLFFBQVEsS0FBSzs7OztzQkFFdEIsdUJBQVUsR0FBRTs7Ozs0QkFFRyxLQUFDLEtBQUs7OztZQUFiO2lCQUNHLElBQUksU0FBUyxLQUFBLElBQUksSUFBSSxRQUFNLElBQUk7O3VCQUM1QixJQUFJOzs7ZUFDZDs7O3NCQUVKLHlCQUFZOzs7O1FBRVI7NEJBQ1csS0FBQyxLQUFLOzs7WUFBYjsyQkFDSSxJQUFLLElBQUksYUFBUSxJQUFJLFFBQU0sSUFBSSwwQkFBZCxJQUFJLFFBQU0sSUFBSSxhQUFkLElBQUksUUFBTSxJQUFJOztnQkFDL0IsUUFBUSxLQUFLLElBQUk7OztlQUN6Qjs7O3NCQUVKLDJCQUFjLEdBQUU7Ozs7UUFDWixTQUFTLEtBQUssVUFBUSxLQUFLLFdBQVMsS0FBSyxhQUFXOzhCQUN6QyxLQUFDLEtBQUs7OztZQUFiO3VCQUNVLElBQUksS0FBUTs7dUJBQXBCOzs7ZUFDTjs7O3NCQUVKLHVCQUFVLEdBQUU7Ozs7OEJBRUcsS0FBQyxLQUFLOzs7WUFBYjtpQkFDVSxJQUFJLGVBQUosSUFBSSxLQUFNLE1BQU0sS0FBSyxTQUFTOzt1QkFBdEM7OztlQUNOOzs7c0JBRUosdUJBQVUsR0FBRSxHQUFFOzs7O1lBRVAsS0FBQzs7bUJBQVMsS0FBQyxhQUFhLEVBQUU7O2NBRXRCOztnQkFDSyxVQUFMOztnQkFDQyxPQUFPLEtBQUMsU0FBUyxFQUFFOzs7O2dCQUVuQixPQUFPOzs7MEJBRWYsTUFBTSxPQUFPLDZCQUFTLElBQUksRUFBRTs7O3NCQUVoQywyQkFBYyxHQUFFOzs7OzRCQUVELEtBQUMsT0FBTzs7O1lBQWY7Z0JBQ0csSUFBSSxLQUFLOztxQkFDTCxJQUFJOzt3QkFDQSxJQUFJLElBQUksSUFBSSxJQUFJOzsrQkFDYixJQUFJOzs7OzsyQkFFUixJQUFJOzs7O2dCQUVqQixJQUFJLEVBQUU7OztzQkFFWCxzQkFBUyxHQUFFLEdBQUUsTUFBSzs7UUFFZCxRQUFBLGVBQUEsT0FBUSxLQUFDLFNBQVMsRUFBRTttQkFDWCxTQUFZOzttQkFBbkI7O2VBQ0Y7OztXQTdJUDs7O2VBK0lNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/util/syntax.kode

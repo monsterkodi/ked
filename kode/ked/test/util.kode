@@ -4,6 +4,7 @@ use ../util ◆ leak logfile syntax harness config session
 use ../view/base   ◆ input crumbs
 use ../view/menu   ◆ choices greet
 use ../view/screen ◆ screen
+use ../../kxk      ▪ kseg
 use ../../kxk      ◆ nfs slash watcher
 use ../edit        ◆ mode
 
@@ -373,4 +374,48 @@ use ../edit        ◆ mode
         hole = s.getClasses(0)[1]
         hole ?= 'text'
         hole ▸ 'text'
+
+  ▸ setSegls reuses the dissection of unchanged lines
+
+        s = new syntax 'test'
+        s.setExt 'kode'
+
+        lines = ['a = 1' 'b = 2' 'c = 3']
+        s.setLines lines
+
+        keep = s.diss[0]
+
+        next = [lines[0] (kseg 'bee = 22') (kseg 'c = 333')]
+        s.setSegls next lines
+
+        s.diss[0] == keep ▸ true
+
+        fresh = new syntax 'test'
+        fresh.setExt 'kode'
+        fresh.setLines next
+
+        for y in 0...next.length
+            for x in 0...8
+                s.getClass(x y) ▸ fresh.getClass(x y)
+
+  ▸ setSegls falls back to a full dissection when lines are added
+
+        s = new syntax 'test'
+        s.setExt 'kode'
+
+        lines = ['a = 1' 'b = 2']
+        s.setLines lines
+
+        next = [lines[0] lines[1] (kseg 'c = 3')]
+        s.setSegls next lines
+
+        fresh = new syntax 'test'
+        fresh.setExt 'kode'
+        fresh.setLines next
+
+        s.diss.length ▸ 3
+
+        for y in 0...next.length
+            for x in 0...8
+                s.getClass(x y) ▸ fresh.getClass(x y)
         

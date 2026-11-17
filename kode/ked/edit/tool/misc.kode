@@ -2,7 +2,28 @@
 use ../../../kxk ▪ kutil kseg
 use ../../../kxk ◆ pepe
 
+#  the words of a chunk, cached because completion splits the same
+#  chunks again on every keystroke
+
+chunkWords = new Map()
+
+cachedWords = w ->
+    
+    if chunkWords.size > 20000
+        chunkWords.clear()
+    
+    ws = chunkWords.get w
+    
+    if not ws?
+        ws = kseg.words w
+        chunkWords.set w ws
+        
+    ws
+
 ■misc
+
+    @cachedWords: w -> cachedWords w
+
 ##completion        
     ###
     args:
@@ -36,7 +57,7 @@ use ../../../kxk ◆ pepe
                         fix = p.mismatch[0].content[0]
                         #◂ #{w} #{fix}"
                         filtered.push fix
-                        if valid (wds = kseg.words fix)
+                        if valid (wds = cachedWords fix)
                             fst = fix[0..wds[0].index+wds[0].word.length]
                             if fst != fix
                                 #▴ #{w} #{fst}"
@@ -53,7 +74,7 @@ use ../../../kxk ◆ pepe
                 if 0 <= w.indexOf '\n'
                     w = w[0...w.indexOf('\n')]
                     
-                if valid (wds = kseg.words w)
+                if valid (wds = cachedWords w)
                     lst = wds[0].index+wds[0].word.length
                     if lst < w.length-1
                         if lst > before.length
@@ -75,7 +96,7 @@ use ../../../kxk ◆ pepe
                 continue                        
             
             continue if w.indexOf(turd) < 0 # a subword can only start with turd if it contains turd
-            wds = kseg.words w
+            wds = cachedWords w
             for subw,idx in wds          # split chunk into words and 
                 if subw.word.startsWith turd  # add any that starts with turd 
                     #◆ #{w} #{before} |#{subw.word}|"
@@ -113,7 +134,7 @@ use ../../../kxk ◆ pepe
             
             ⮐ if kseg.str(s) == turd # don't include what we are trying to complete
             
-            ws = kseg.words s
+            ws = cachedWords s
             ws = ws.filter (w) -> w.index+w.segl.length > turd.length
             
             if valid ws[0] 

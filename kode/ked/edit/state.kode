@@ -412,13 +412,11 @@ use           ◆ keys mode
         
         if empty @segls ➜ @segls = [[]]
         
-        @syntax.setSegls @segls
+        @syntax.setSegls @segls @s.lines
                     
         @changeLinesSegls()
         
         @r = []
-        
-        @maxLineWidth = belt.widthOfLines @s.lines
         
         @pushState()
         
@@ -542,12 +540,31 @@ use           ◆ keys mode
 
         ⮐ @rowCache if @rowCache and @rowCacheExt == @syntax.ext
 
-        rows = scaling.rowPrefix @s.lines @lineHeight
+        #  the width of every line is cached by line reference,
+        #  a line is immutable, so unchanged lines keep their width
 
+        @lineWidths ?= new WeakMap()
+
+        rows     = [0]
         maxWidth = 0
 
         for li in 0...@s.lines.length
-            maxWidth = max maxWidth (kseg.width(@s.lines[li]) * @lineHeight li)
+
+            line   = @s.lines[li]
+            height = @lineHeight li
+
+            width = null
+
+            if line is arr
+                width = @lineWidths.get line
+
+            if not width?
+                width = kseg.width line
+                @lineWidths.set line width if line is arr
+
+            width = width * height
+            maxWidth = width if width > maxWidth
+            rows.push rows[li] + height
 
         @maxWidthCache = maxWidth
         @rowCacheExt   = @syntax.ext

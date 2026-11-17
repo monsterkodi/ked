@@ -126,11 +126,14 @@ use           ◆ specs
         
         for line in lines
             
-            lineChunks = @lineChunks.get line
+            lineChunks = null
+            
+            if line is arr
+                lineChunks = @lineChunks.get line
             
             if not lineChunks?
                 lineChunks = kseg.chunks(line).map (chunk) -> chunk.chunk
-                @lineChunks.set line lineChunks
+                @lineChunks.set line lineChunks if line is arr
             
             for chunk in lineChunks
                 chunks.push chunk
