@@ -281,29 +281,29 @@ use ../edit/tool ◆ belt
         
   ▸ line index map
 
-        belt.lineIndexMap(['a' 'b' 'c'] ['a' 'b' 'c']) ▸ [0 1 2]
-        belt.lineIndexMap(['a' 'b' 'c'] ['x' 'a' 'b' 'c']) ▸ [1 2 3]
-        belt.lineIndexMap(['a' 'b' 'c'] ['a' 'x' 'b' 'c']) ▸ [0 2 3]
-        belt.lineIndexMap(['a' 'b' 'c'] ['a' 'x' 'y' 'b' 'c']) ▸ [0 3 4]
-        belt.lineIndexMap(['a' 'b' 'c'] ['b' 'c']) ▸ [0 0 1]
-        belt.lineIndexMap(['a' 'b' 'c' 'd'] ['a' 'c' 'd']) ▸ [0 1 1 2]
-        belt.lineIndexMap(['a' 'b' 'c'] ['a']) ▸ [0 0 0]
-        belt.lineIndexMap(['a' 'b' 'c'] ['a' 'B' 'c']) ▸ [0 1 2]
-        belt.lineIndexMap(['a' 'b'] ['x' 'y' 'z']) ▸ [0 1]
-        belt.lineIndexMap(['c' 'a' 'c' 'd' 'a' 'c'] ['a' 'd' 'd']) ▸ [0 0 1 2 2 2]
-        belt.lineIndexMap([] ['a']) ▸ []
+        belt.lineIndexMap(['a' 'b' 'c'] ['a' 'b' 'c'])              ▸ [0 1 2]
+        belt.lineIndexMap(['a' 'b' 'c'] ['x' 'a' 'b' 'c'])          ▸ [1 2 3]
+        belt.lineIndexMap(['a' 'b' 'c'] ['a' 'x' 'b' 'c'])          ▸ [0 2 3]
+        belt.lineIndexMap(['a' 'b' 'c'] ['a' 'x' 'y' 'b' 'c'])      ▸ [0 3 4]
+        belt.lineIndexMap(['a' 'b' 'c'] ['b' 'c'])                  ▸ [0 0 1]
+        belt.lineIndexMap(['a' 'b' 'c' 'd'] ['a' 'c' 'd'])          ▸ [0 1 1 2]
+        belt.lineIndexMap(['a' 'b' 'c'] ['a'])                      ▸ [0 0 0]
+        belt.lineIndexMap(['a' 'b' 'c'] ['a' 'B' 'c'])              ▸ [0 1 2]
+        belt.lineIndexMap(['a' 'b'] ['x' 'y' 'z'])                  ▸ [0 1]
+        belt.lineIndexMap(['c' 'a' 'c' 'd' 'a' 'c'] ['a' 'd' 'd'])  ▸ [0 0 1 2 2 2]
+        belt.lineIndexMap([] ['a'])                                 ▸ []
 
   ▸ lineIndicesForRangesAndPositions
     
-        belt.lineIndicesForRangesAndPositions [] [[1 1] [1 2] [1 3]] ▸ [1 2 3]
+        belt.lineIndicesForRangesAndPositions [] [[1 1] [1 2] [1 3]]            ▸ [1 2 3]
         belt.lineIndicesForRangesAndPositions [[ 0 0 2 0 ]] [[1 1] [1 2] [1 3]] ▸ [0 1 2 3]
         belt.lineIndicesForRangesAndPositions [[ 0 1 2 2 ]] [[1 6] [1 5] [1 4]] ▸ [1 2 4 5 6]
         
   ▸ linesIndicesForSpans
     
-        belt.lineIndicesForSpans [] ▸ []
-        belt.lineIndicesForSpans [[0 1 0]] ▸ [1]
-        belt.lineIndicesForSpans [[0 1 0] [1 1 1]] ▸ [1]
+        belt.lineIndicesForSpans []                 ▸ []
+        belt.lineIndicesForSpans [[0 1 0]]          ▸ [1]
+        belt.lineIndicesForSpans [[0 1 0] [1 1 1]]  ▸ [1]
     
   ▸ blockRangesForRangesAndPositions
     
@@ -773,7 +773,7 @@ use ../edit/tool ◆ belt
             """
             
         belt.openCloseSpansForPositions segls [[10 0]] ▸ [[9 0 10] [11 0 12]]
-        belt.openCloseSpansForPositions segls [[0 0]] ▸ [[0 0 1] [20 0 21]]
+        belt.openCloseSpansForPositions segls [[0 0]]  ▸ [[0 0 1] [20 0 21]]
         belt.openCloseSpansForPositions segls [[20 0]] ▸ [[0 0 1] [20 0 21]]
         
         segls = kseg.segls """
@@ -793,9 +793,9 @@ use ../edit/tool ◆ belt
         
   ▸ bracketIndex
         
-        belt.bracketIndex kseg.segls('abc') ▸ []
-        belt.bracketIndex kseg.segls('') ▸ []
-        belt.bracketIndex kseg.segls('()[]{}') ▸ [
+        belt.bracketIndex kseg.segls('abc')     ▸ []
+        belt.bracketIndex kseg.segls('')        ▸ []
+        belt.bracketIndex kseg.segls('()[]{}')  ▸ [
             [0 0 '('] [0 1 ')'] [0 2 '['] [0 3 ']'] [0 4 '{'] [0 5 '}']
         ]
         
@@ -812,8 +812,8 @@ use ../edit/tool ◆ belt
         
   ▸ positionColumns
     
-        belt.positionColumns         [[0 0] [0 1]] ▸ [[[0 0] [0 1]]]
-        belt.positionColumns         [[0 0] [0 1] [1 1]] ▸ [[[0 0] [0 1]] [[1 1]]]
+        belt.positionColumns [[0 0] [0 1]]          ▸ [[[0 0] [0 1]]]
+        belt.positionColumns [[0 0] [0 1] [1 1]]    ▸ [[[0 0] [0 1]] [[1 1]]]
         
   ▸ indexOfExtremePositionInDirection
     
@@ -890,11 +890,10 @@ use ../edit/tool ◆ belt
             {kind:'group' index:1}
         ]
 
-        belt.parseSubstitute('/a/b/ig').flags ▸ {g:true i:true c:false}
-        belt.parseSubstitute('/a/b/igi').flags ▸ {g:true i:true c:false}
-
-        belt.parseSubstitute('/a/b/c').flags ▸ {g:false i:false c:true}
-        belt.parseSubstitute('/a/b/gci').flags ▸ {g:true i:true c:true}
+        belt.parseSubstitute('/a/b/ig').flags   ▸ {g:true i:true c:false}
+        belt.parseSubstitute('/a/b/igi').flags  ▸ {g:true i:true c:false}
+        belt.parseSubstitute('/a/b/c').flags    ▸ {g:false i:false c:true}
+        belt.parseSubstitute('/a/b/gci').flags  ▸ {g:true i:true c:true}
 
         belt.parseSubstitutePattern('/foo')       ▸ {pattern:'foo' open:true}
         belt.parseSubstitutePattern('/')          ▸ {pattern:'' open:true}
@@ -907,17 +906,17 @@ use ../edit/tool ◆ belt
         belt.parseSubstitute('/a/b').tokens ▸ [{kind:'literal' text:'b'}]
         belt.parseSubstitute('/a').tokens ▸ []
 
-        belt.parseSubstitute('/a/b').hasReplacement ▸ true
-        belt.parseSubstitute('/a/b/').hasReplacement ▸ true
-        belt.parseSubstitute('/a//').hasReplacement ▸ true
-        belt.parseSubstitute('/a//g').hasReplacement ▸ true
-        belt.parseSubstitute('/a').hasReplacement ▸ false
-        belt.parseSubstitute('/a/').hasReplacement ▸ false
-        belt.parseSubstitute('/a/g').hasReplacement ▸ false
-        belt.parseSubstitute('/a/gi').hasReplacement ▸ false
+        belt.parseSubstitute('/a/b').hasReplacement     ▸ true
+        belt.parseSubstitute('/a/b/').hasReplacement    ▸ true
+        belt.parseSubstitute('/a//').hasReplacement     ▸ true
+        belt.parseSubstitute('/a//g').hasReplacement    ▸ true
+        belt.parseSubstitute('/a').hasReplacement       ▸ false
+        belt.parseSubstitute('/a/').hasReplacement      ▸ false
+        belt.parseSubstitute('/a/g').hasReplacement     ▸ false
+        belt.parseSubstitute('/a/gi').hasReplacement    ▸ false
         belt.parseSubstitute('/a/gi').flags ▸ {g:true i:true c:false}
-        belt.parseSubstitute('/a/i').flags ▸ {g:false i:true c:false}
-        belt.parseSubstitute('/a/g').flags ▸ {g:true i:false c:false}
+        belt.parseSubstitute('/a/i').flags  ▸ {g:false i:true c:false}
+        belt.parseSubstitute('/a/g').flags  ▸ {g:true i:false c:false}
 
         belt.parseSubstitute('').error ▸ 'argument required'
         belt.parseSubstitute('foo').error ▸ 'invalid delimiter'
