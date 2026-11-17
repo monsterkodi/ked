@@ -1245,3 +1245,23 @@ hed = cols rows ext='md' feats=[]->
         e.draw()
 
         scr.get_fg(15 0) ▸ plain
+
+  ▸ a colour after a run lands on its grapheme
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+        e = new editor scr 'test_run_colour' []
+        e.state.loadLines ['aa FOO bb']
+        e.layout 0 0 40 10
+        e.state.setMainCursor 0 8
+        e.state.setSelections [[3 0 6 0]]
+        e.state.stepScales 1
+        e.state.setSelections []
+        e.state.setSue 7 0 [31 ['#ff0000' 2 1]]
+
+        scr.init()
+        e.draw()
+
+        scr.get_fg(9 0)  ▸ [255 255 255]
+        scr.get_fg(10 0) ▸ [255 0 0]
+        scr.get_fg(11 0) ▸ [255 0 0]

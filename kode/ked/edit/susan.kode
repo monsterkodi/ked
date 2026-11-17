@@ -44,6 +44,15 @@ use ./tool  ◆ sue
 
         areas
 
+    #  runs are only honoured on unscaled lines of a terminal with text sizing
+
+    runsForLine: y =>
+
+        ⮐ [] if not @cells.screen.t.textSizing
+        ⮐ [] if @state.lineHeight(y) != 1
+
+        @state.scaleRunsForLine y
+
     @: @cells @state ->
 
     draw: =>
@@ -87,8 +96,12 @@ use ./tool  ◆ sue
             else
                 continue
 
-            x1 = max 0 (box.x*scale - view[0])
-            x2 = min @cells.cols ((box.x + box.w)*scale - view[0])
+            runs  = @runsForLine y
+            cells = sue.cellPositionsForLine(lines y runs)
+            last  = cells.length-1
+
+            x1 = max 0 (cells[min(box.x last)]*scale - view[0])
+            x2 = min @cells.cols (cells[min(box.x + box.w last)]*scale - view[0])
             continue if x1 >= x2
 
             fg = color.values fg if fg?

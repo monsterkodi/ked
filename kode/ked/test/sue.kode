@@ -259,3 +259,17 @@ sym = (ascii) -> Array.from(ascii).map((c) -> String.fromCodePoint(0xE0000 + c.c
         areas = [{x: 1 y: 0 value: [41 [2]]} {x: 2 y: 0 value: [41 [3]]} {x: 4 y: 0 value: [99 [41]]}]
 
         sue.runsForLine(areas lines 0) ▸ [[1 4 2]]
+
+  ▸ cell positions follow the runs
+
+        lines = [['a' 'a' ' ' 'b' 'b']]
+
+        sue.cellPositionsForLine(lines 0 []) ▸ [0 1 2 3 4 5]
+        sue.cellPositionsForLine(lines 0 [[0 2 3]]) ▸ [0 3 6 7 8 9]
+        sue.cellPositionsForLine(lines 0 [[2 4 2]]) ▸ [0 1 2 4 6 7]
+
+  ▸ cell positions count the width of wide graphemes
+
+        lines = [['漢' 'a' 'b']]
+
+        sue.cellPositionsForLine(lines 0 []) ▸ [0 2 3 4]

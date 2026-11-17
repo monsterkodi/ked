@@ -286,6 +286,34 @@ collect = (pending y x areas) ->
 
         runs
 
+    #  the cell column each grapheme of a line starts at
+    #  a run makes its graphemes take scale cells, the rest takes their width
+
+    @cellPositionsForLine: (lines y runs) ->
+
+        line  = lines[y] ? []
+        cells = [0]
+        cell  = 0
+        scale = 1
+        ri    = 0
+
+        for gi in 0...line.length
+
+            if ri < runs.length and gi == runs[ri][0]
+                scale = runs[ri][2]
+
+            cw = kseg.segWidth(line[gi])
+            cw = max(1 cw)
+
+            cell += cw*scale
+            cells.push cell
+
+            if ri < runs.length and gi + 1 == runs[ri][1]
+                scale = 1
+                ri += 1
+
+        cells
+
     @sueAscii: symbols ->
         out = ''
         for ch in Array.from(symbols)
@@ -362,7 +390,7 @@ collect = (pending y x areas) ->
 
         if not valid w
             line = lines[area.y] ? []
-            w    = max 0 (kseg.width(line) - area.x)
+            w    = max 0 (line.length - area.x)
             open = true
         else
             open = false

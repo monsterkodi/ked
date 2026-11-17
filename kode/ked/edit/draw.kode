@@ -4,7 +4,7 @@ use ../util      ◆ prof
 use ../util/img  ◆ rounded
 use ../theme     ◆ color theme 
 use ../view/base ◆ view
-use ./tool       ◆ belt colorspans
+use ./tool       ◆ belt colorspans sue
 use              ◆ mode
 ■draw□view
 
@@ -73,6 +73,22 @@ use              ◆ mode
         super()
         
 #!line
+
+    #  runs are only honoured on unscaled lines of a terminal with text sizing
+
+    runsForLine: y =>
+
+        ⮐ [] if not @cells.screen.t.textSizing
+        ⮐ [] if @state.lineHeight(y) != 1
+
+        @state.scaleRunsForLine y
+
+    cellsForLine: y =>
+
+        lines = @state.s.lines
+        runs  = @runsForLine y
+
+        sue.cellPositionsForLine(lines y runs)
 
     drawLine: line y row scale=1, classes=null ->
     
@@ -186,16 +202,18 @@ use              ◆ mode
                 
         @drawColorPills  line row linel scale       if checkColor
         @drawAsciiHeader line row headerClass y scale if headerClass
-        @drawColorBackgrounds row bgSpans scale
+        @drawColorBackgrounds y row bgSpans scale
 
-    drawColorBackgrounds: row spans scale=1 ->
+    drawColorBackgrounds: y row spans scale=1 ->
 
-        view = @state.s.view
+        view  = @state.s.view
+        cells = @cellsForLine y
+        last  = cells.length-1
 
         for span in spans
 
-            x1 = max 0 (span[0]*scale - view[0])
-            x2 = min @cells.cols (span[1]*scale - view[0])
+            x1 = max 0 (cells[min(span[0] last)]*scale - view[0])
+            x2 = min @cells.cols (cells[min(span[1] last)]*scale - view[0])
 
             continue if x1 >= x2
 
@@ -236,12 +254,16 @@ use              ◆ mode
             # clip the span to the visible columns - a bracket pair spanning
             xs = max highlight[0] int(vx/scale)
             xe = min highlight[2] (int((vx+@cells.cols-1)/scale)+1)
+            xe = min xe (@state.s.lines[li] ? []).length
 
             continue if xs >= xe
 
+            cells = @cellsForLine li
+            last  = cells.length-1
+
             for x in xs...xe
 
-                cx = x*scale - vx
+                cx = cells[min(x last)]*scale - vx
                 continue if cx < 0
                 continue if cx+scale > @cells.cols
 
@@ -305,7 +327,7 @@ use              ◆ mode
                 if li == selection[3]
                     xe = selection[2]
                 else
-                    xe = kseg.width(@state.s.lines[li])
+                    xe = (@state.s.lines[li] ? []).length
                 
                 xs = max xs int(vx/scale)
                 xe = min xe (int((vx+@cells.cols-1)/scale)+1)
@@ -314,8 +336,11 @@ use              ◆ mode
                     row += scale
                     continue
 
+                cells = @cellsForLine li
+                last  = cells.length-1
+
                 for x in xs...xe
-                    cx = x*scale - vx
+                    cx = cells[min(x last)]*scale - vx
                     continue if cx < 0
                     continue if cx+scale > @cells.cols
                     for r in row...min(@cells.rows, row+scale)
@@ -362,7 +387,7 @@ use              ◆ mode
                 if li == rng[3]
                     xe = rng[2]
                 else
-                    xe = kseg.width(@state.s.lines[li])
+                    xe = (@state.s.lines[li] ? []).length
 
                 xs = max xs int(vx/scale)
                 xe = min xe (int((vx+@cells.cols-1)/scale)+1)
@@ -371,8 +396,11 @@ use              ◆ mode
                     row += scale
                     continue
 
+                cells = @cellsForLine li
+                last  = cells.length-1
+
                 for x in xs...xe
-                    cx = x*scale - vx
+                    cx = cells[min(x last)]*scale - vx
                     continue if cx < 0
                     continue if cx+scale > @cells.cols
                     for r in row...min(@cells.rows, row+scale)
@@ -408,7 +436,8 @@ use              ◆ mode
             if @isCursorVisible cursor
              
                 scale = @state.lineHeight cursor[1]
-                cx = cursor[0]*scale - s.view[0]
+                cells = @cellsForLine cursor[1]
+                cx = cells[min(cursor[0] cells.length-1)]*scale - s.view[0]
                 @cursorIds[idx] = @cells.draw_rounded_multi_cursor(cx @state.rowOfLine(cursor[1]) bg scale)
                         
         if @isCursorVisible mainCursor
@@ -420,7 +449,9 @@ use              ◆ mode
             if not @hasFocus() ➜ bg = color.darken bg 
              
             scale = @state.lineHeight mainCursor[1]
-            [x y] = [ mainCursor[0]*scale - s.view[0], @state.rowOfLine(mainCursor[1]) ]
+            cells = @cellsForLine mainCursor[1]
+            x = cells[min(mainCursor[0] cells.length-1)]*scale - s.view[0]
+            y = @state.rowOfLine(mainCursor[1])
              
             if s.cursors.length <= 1
                 if @isCursorInEmpty()
