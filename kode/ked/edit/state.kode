@@ -22,8 +22,6 @@ use           ◆ keys mode
         @novimRegister  = null
         @allowedModes   = {}
 
-        @colorMethod = 'sue'
-
         @macroRecording    = null
         @macroReplaying    = 0
         @macroSkipKey      = false
@@ -84,59 +82,6 @@ use           ◆ keys mode
 
     setSelections: (selections keepEmpty) => @set 'selections' belt.mergeLineRanges(@s.lines selections keepEmpty)
     setHighlights: highlights => @set 'highlights' belt.normalizeSpans(highlights)
-
-    setColorsForRanges: (ranges fg bg voided=[]) =>
-
-        colors = @s.colors
-        colors ?= {fg: [], bg: []}
-
-        fgSpans = colors.fg ? []
-        bgSpans = colors.bg ? []
-
-        if 'fg' in voided
-            fgSpans = colorspans.clear fgSpans ranges
-        else if valid fg and not empty fg
-            fgSpans = colorspans.overlay fgSpans ranges fg @s.lines
-
-        if 'bg' in voided
-            bgSpans = colorspans.clear bgSpans ranges
-        else if valid bg and not empty bg
-            bgSpans = colorspans.overlay bgSpans ranges bg @s.lines
-
-        next =
-            fg: fgSpans
-            bg: bgSpans
-
-        ⮐ if @s.colors? and @s.colors eql next
-
-        @s = @s.set 'colors' next
-        @r = []
-        @pushState()
-        @emit 'colors.changed'
-
-    clearColorsForRanges: ranges =>
-
-        colors = @s.colors
-        ⮐ if not colors?
-
-        fgSpans = colorspans.clear (colors.fg ? []) ranges
-        bgSpans = colorspans.clear (colors.bg ? []) ranges
-
-        next =
-            fg: fgSpans
-            bg: bgSpans
-
-        ⮐ if colors eql next
-
-        @s = @s.set 'colors' next
-        @r = []
-        @pushState()
-        @emit 'colors.changed'
-
-    clearColorsAtCursorOrSelection: =>
-
-        ranges = @decorationRanges()
-        @clearColorsForRanges ranges if not empty ranges
 
     colorAtPos: (pos layer) =>
 
@@ -400,26 +345,6 @@ use           ◆ keys mode
                 ⮐ area
 
         null
-
-    loadColors: colors =>
-
-        fgSpans = []
-        bgSpans = []
-
-        if colors?
-            fgSpans = colors.fg ? []
-            bgSpans = colors.bg ? []
-
-        next =
-            fg: fgSpans
-            bg: bgSpans
-
-        changed = not (@s.colors? and @s.colors eql next)
-
-        @s = @s.set 'colors' next
-        @clearHistory()
-        
-        @emit 'colors.changed' if changed
 
 #!cursors
 

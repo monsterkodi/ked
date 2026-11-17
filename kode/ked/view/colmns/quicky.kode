@@ -1,7 +1,7 @@
 
 use ../../../kxk    ▪ kstr slash post kutil nfs
 use ../../index     ◆ prjcts
-use ../../util      ◆ fileutil frecent filecolors config
+use ../../util      ◆ fileutil frecent config
 use ../../edit/tool ◆ belt
 use ../../theme     ◆ icons
 use ../base         ◆ crumbs 
@@ -193,12 +193,9 @@ import rgxs from './quicky.json' with { type: "json" }
         
         if item.type == 'file' and ext in config.data.sourceFileExtensions
             text =◯ nfs.read item.path
-            fileColorData = filecolors.split item.path text
-            text = fileColorData.text
             segls = belt.seglsForText text
             @choices.mapscr.show()
             @choices.mapscr.setSyntaxSegls slash.ext(item.path) segls
-            @choices.mapscr.setColors fileColorData.colors
         else
             @hideMap()
             

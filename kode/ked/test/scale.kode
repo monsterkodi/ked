@@ -623,7 +623,6 @@ blockArea = scr ->
         m.suspend()
 
         e.state.loadSegls kseg.segls([("new #{i}") for i in 0...2000])
-        e.state.loadColors {fg: [], bg: []}
         e.state.setView [0 1200]
 
         m.resume()

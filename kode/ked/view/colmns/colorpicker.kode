@@ -276,9 +276,8 @@ use ../base         ◆ view colorslider rgbinput radio palette
         
     colorAtSelection: layer =>
 
-        if @editor.state.colorMethod == 'sue'
-            if c = @sueColorAtSelection layer
-                ⮐ c
+        if c = @sueColorAtSelection layer
+            ⮐ c
 
         for rng in @editor.state.s.selections
             if c = @editor.state.colorAtPos [rng[0] rng[1]] layer
@@ -366,10 +365,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
             voided.push 'fg' if @colorVoided 0
             voided.push 'bg' if @colorVoided 1
 
-            if @editor.state.colorMethod == 'sue'
-                @submitSue ranges fg bg voided
-            else
-                @editor.state.setColorsForRanges ranges fg bg voided
+            @submitSue ranges fg bg voided
 
         @hide()
 
@@ -403,14 +399,6 @@ use ../base         ◆ view colorslider rgbinput radio palette
                 value = [susan.BG_COLOR w h bg]
 
             @editor.state.setSue rng[0] rng[1] value if value?
-
-    toggleMethod: =>
-
-        @editor.state.colorMethod = @editor.state.colorMethod == 'sue' ? 'trailer' : 'sue'
-
-        post.emit 'redraw'
-
-        true
 
     replaceColor: hex =>
 
@@ -494,7 +482,6 @@ use ../base         ◆ view colorslider rgbinput radio palette
             'ctrl+c' 'cmd+c' ➜   clip.copy @hex() ; ⮐ true
             'ctrl+v' 'cmd+v' ➜   @setHex(clip.paste()) ; @syncAll() ; ⮐ true
             'ctrl+s' 'cmd+s' ➜ ⮐ @addCurrentColor()
-            'alt+m'          ➜ ⮐ @toggleMethod()
         
         false
 
@@ -548,6 +535,6 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         super()
 
-        @cells.set -1 0 (@editor.state.colorMethod == 'sue' ? 's' : 't') @color.fg @color.bg
+        @cells.set -1 0 's' @color.fg @color.bg
 
 export colorpicker

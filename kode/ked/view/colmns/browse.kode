@@ -1,6 +1,6 @@
 
 use ../../../kxk    ▪ kstr slash post nfs
-use ../../util      ◆ config filecolors
+use ../../util      ◆ config
 use ../../edit/tool ◆ belt
 use ../../theme     ◆ color theme icons
 use                 ◆ quicky brocol diritem dirlist
@@ -128,11 +128,8 @@ import rgxs from './quicky.json' with { type: "json" }
             if slash.ext(item.path) in config.data.sourceFileExtensions
                 text =◯ nfs.read item.path
                 ⮐ if @brocol.visible()
-                fileColorData = filecolors.split item.path text
-                text = fileColorData.text
                 segls = belt.seglsForText text
                 @choices.mapscr.setSyntaxSegls slash.ext(item.path) segls
-                @choices.mapscr.setColors fileColorData.colors
                 @choices.mapscr.show()
             else
                 @hideMap()

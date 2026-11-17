@@ -1,7 +1,7 @@
 
 use ../kxk        ▪ karg kstr kseg slash post nfs sleep watcher
 use ./index       ◆ prjcts indexer
-use ./util        ◆ logfile session help frecent git config dumpstate filecolors leak fileutil
+use ./util        ◆ logfile session help frecent git config dumpstate leak fileutil
 use ./util/img    ◆ rounded squares sircels
 use ./edit/tool   ◆ belt
 use ./edit        ◆ mode susan
@@ -448,12 +448,6 @@ use child_process ▪ spawn exec
         if text == undefined
             text = '◯ binary ◯'
 
-        fileColorData = filecolors.split @currentFile text
-        text          = fileColorData.text
-        fileColors    = fileColorData.colors
-
-        text = filecolors.remove @currentFile text
-
         sueData = sue.desue text
         text    = sueData.text
 
@@ -470,15 +464,8 @@ use child_process ▪ spawn exec
         mapsc?.suspend()
         
         @editor.state.loadSegls segls
-        @editor.state.loadColors fileColors
         @editor.state.loadSue sueData.sue
 
-        if not empty sueData.sue
-            @editor.state.colorMethod = 'sue'
-        else if not empty fileColors.fg or not empty fileColors.bg
-            @editor.state.colorMethod = 'trailer'
-        else
-            @editor.state.colorMethod = 'sue'
         @editor.setCurrentFile @currentFile     
         ked_session.set "editor▸file" @currentFile
         
@@ -573,7 +560,6 @@ use child_process ▪ spawn exec
 
     clearDecoration: =>
 
-        @editor.state.clearColorsAtCursorOrSelection()
         @editor.state.clearSueAtCursorOrSelection()
 
     saveFile: file ◯=>
@@ -602,18 +588,10 @@ use child_process ▪ spawn exec
     
     textForSave: (path text) =>
 
-        if @editor.state.colorMethod == 'sue'
+        areas = @editor.state.s.sue ? []
+        areas = areas.concat(sue.areasForColors(@editor.state.s.colors))
 
-            text = filecolors.remove path text
-
-            areas = @editor.state.s.sue ? []
-            areas = areas.concat(sue.areasForColors(@editor.state.s.colors))
-
-            sue.ensue text areas
-
-        else
-
-            filecolors.join path text @editor.state.s.colors
+        sue.ensue text areas
 
     saveAndQuit: file ◯=>
         
