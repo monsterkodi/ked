@@ -1,16 +1,14 @@
 use ../theme ◆ color
 use ./tool  ◆ sue
 
-■󠀡󠀰󠀰󠀱󠀴󠁛󠀳󠀴󠀬󠁛󠀢󠁩󠀢󠀬󠀱󠀬󠀱󠁝󠁝s󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀶󠀶󠀰󠀰󠁣󠁣󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠀰󠀰󠀰󠀢󠀬󠀱󠀬󠀱󠁝󠁝󠀡󠀰󠀰󠀱󠀵󠁛󠀳󠀴󠀬󠁛󠀢󠁳󠁢󠀢󠀬󠀱󠀬󠀱󠁝󠁝u󠀡󠀰󠀰󠀱󠀵󠁛󠀳󠀴󠀬󠁛󠀢󠁵󠁩󠀢󠀬󠀱󠀬󠀱󠁝󠁝s󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀸󠀸󠀹󠀱󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠀰󠀰󠀰󠀢󠀬󠀲󠀬󠀱󠁝󠁝󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀹󠀱󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠀰󠀰󠀰󠀢󠀬󠀱󠀬󠀱󠁝󠁝an
+■󠀡󠀰󠀰󠀱󠀲󠁛󠀳󠀴󠀬󠀱󠀬󠀱󠀬󠀢󠁩󠀢󠁝s󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀱󠀬󠀱󠀬󠀢󠀣󠀶󠀶󠀰󠀰󠁣󠁣󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠀰󠀰󠀰󠀢󠁝󠀡󠀰󠀰󠀱󠀳󠁛󠀳󠀴󠀬󠀱󠀬󠀱󠀬󠀢󠁳󠁢󠀢󠁝u󠀡󠀰󠀰󠀱󠀳󠁛󠀳󠀴󠀬󠀱󠀬󠀱󠀬󠀢󠁵󠁩󠀢󠁝s󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀲󠀬󠀱󠀬󠀢󠀣󠀸󠀸󠀹󠀱󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠀰󠀰󠀰󠀢󠁝󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀱󠀬󠀱󠀬󠀢󠀣󠀹󠀱󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠀰󠀰󠀰󠀢󠁝an
     ###
         renders sue areas into the cells of an editor
 
-        an area is { x, y, value } where value is [code, data]
-        the code says which feature the area belongs to, the data is
-        whatever that feature needs. trailing numbers of the data are
-        geometry: width in cells, then height in rows, both optional.
-        an area without a width reaches to the end of its line, one
-        without a height is one row tall.
+        an area is { x, y, value } where value is [code, cols, lines, data...]
+        the code says which feature the area belongs to, cols and lines are
+        its box in graphemes and rows, and a negative cols reaches to the
+        end of its line. the data after the geometry is the feature's own.
 
         susan renders the codes it knows and leaves the rest alone, so a
         file written by a newer ked still loads. the codes themselves

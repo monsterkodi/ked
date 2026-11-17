@@ -24,7 +24,9 @@ use ◆ colorspans
 #
 #  a sue area is { x, y, value } where x is the grapheme index inside the
 #  line and y the line index, both counted in the text that follows the
-#  payload. value is whatever JSON.parse makes of the body.
+#  payload. value is [code, cols, lines, data...]: the code says which
+#  feature the area belongs to, cols and lines are its box in graphemes and
+#  rows, and data is whatever that feature needs.
 
 #  style areas carry flags, a string of b i u s
 #  two areas over the same cells stack, so flags are joined, not replaced
@@ -40,7 +42,8 @@ addFlags = (have add) ->
     have
 
 #  the codes of the features that use sue
-#  a value is [code, data], the code says which feature it belongs to
+#  a value is [code, cols, lines, data...], the code says which feature it
+#  belongs to, the geometry is never part of data
 
 FG_COLOR    = 31
 BG_COLOR    = 32
@@ -49,6 +52,12 @@ STYLE       = 34
 LINE_SCALE  = 40
 SCALE       = 41
 CLOSE       = 99
+
+#  marks are single positions, not boxes, so their geometry means nothing
+#  they write -1 cols and 1 line to keep every payload the same shape
+
+isMark = (value) ->
+    value[0] in [LINE_SCALE SCALE CLOSE]
 
 TAG   = 0xE0000
 MAGIC = 0x21
@@ -163,13 +172,14 @@ collect = (pending y x areas) ->
     @addFlags: (have add) -> addFlags(have add)
 
     #  the values of a style area are [flags] or [ul, flags]
+    #  the flag string comes first in the result, the underline colour second
 
     @styleOfValues: values ->
 
         values ?= []
 
         if values.length > 1
-            [values[0] values[1]]
+            [values[1] values[0]]
         else
             [values[0] null]
 
@@ -235,16 +245,17 @@ collect = (pending y x areas) ->
             values = [flags]
             values = [ul flags] if ul?
 
-            add.push {x: rng[0] y: rng[1] value: [STYLE values.concat([w h])]}
+            add.push {x: rng[0] y: rng[1] value: [STYLE w h].concat(values)}
 
         next = keep.concat(styles)
         next.concat(add)
 
     #  scale runs
     #
-    #  [SCALE, [n]] opens a run of n times scaled characters, [CLOSE, [SCALE]]
-    #  closes it. a close without an open is ignored, an open without a close
-    #  runs to the end of the line, an open inside an open is ignored.
+    #  [SCALE, -1, 1, n] opens a run of n times scaled characters,
+    #  [CLOSE, -1, 1, SCALE] closes it. a close without an open is ignored,
+    #  an open without a close runs to the end of the line, an open inside
+    #  an open is ignored.
 
     @runsForLine: (areas lines y) ->
 
@@ -272,16 +283,16 @@ collect = (pending y x areas) ->
                 open = mark if not open?
                 continue
 
-            data = mark.value[1] ? []
+            data = @dataOf(mark.value ? [])
             continue if valid data[0] and data[0] != SCALE
             continue if not open?
 
-            scale = clamp(1 7 int((open.value[1] ? [])[0] ? 2))
+            scale = clamp(1 7 int(open.value[3] ? 2))
             runs.push [open.x mark.x scale] if mark.x > open.x and scale > 1
             open = null
 
         if open?
-            scale = clamp(1 7 int((open.value[1] ? [])[0] ? 2))
+            scale = clamp(1 7 int(open.value[3] ? 2))
             runs.push [open.x width scale] if width > open.x and scale > 1
 
         runs
@@ -313,6 +324,11 @@ collect = (pending y x areas) ->
                 ri += 1
 
         cells
+
+    #  the feature's own values are everything after code, cols and lines
+
+    @dataOf: value ->
+        value.slice(3)
 
     @sueAscii: symbols ->
         out = ''
@@ -350,10 +366,10 @@ collect = (pending y x areas) ->
         ⮐ areas if not colors?
 
         for span in (colors.fg ? [])
-            areas.push {x: span[0] y: span[1] value: [FG_COLOR [span[3] span[2]-span[0] 1]]}
+            areas.push {x: span[0] y: span[1] value: [FG_COLOR (span[2]-span[0]) 1 span[3]]}
 
         for span in (colors.bg ? [])
-            areas.push {x: span[0] y: span[1] value: [BG_COLOR [span[3] span[2]-span[0] 1]]}
+            areas.push {x: span[0] y: span[1] value: [BG_COLOR (span[2]-span[0]) 1 span[3]]}
 
         areas
 
@@ -384,38 +400,37 @@ collect = (pending y x areas) ->
 
     #  geometry
     #
-    #  the leading values of a value's data are the feature's own, the
-    #  trailing numbers are geometry: width in cells, then height in rows.
-    #  a null width means the box reaches to the end of its line.
+    #  the box of an area is its cols and lines, both explicit in the value.
+    #  a negative cols reaches to the end of its line. the rest of the value
+    #  after the geometry is the feature's own data.
     #
-    #  data that starts with a number has no way to tell values from
-    #  geometry, so such an area has no box and is never cut.
+    #  marks are positions, not boxes, and are never cut.
 
     @boxForAreaAndLines: (area lines) ->
 
-        data = area.value[1] ? []
+        value = area.value
 
-        n = 0
-        while n < data.length and not (data[n] is num) and data[n] != null
-            n += 1
+        ⮐ null if not (value is arr)
+        ⮐ null if value.length < 3
+        ⮐ null if not (value[1] is num)
+        ⮐ null if isMark value
 
-        ⮐ null if n == 0 and not empty data
+        cols = value[1]
+        h    = value[2] ? 1
 
-        w = data[n]
-        h = data[n+1] ? 1
-
-        if not valid w
+        if cols < 0
             line = lines[area.y] ? []
             w    = max 0 (line.length - area.x)
             open = true
         else
+            w    = cols
             open = false
 
-        {x: area.x y: area.y w: w h: h values: data[0...n] open: open}
+        {x: area.x y: area.y w: w h: h values: @dataOf(value) open: open}
 
     @areaWithBoxGeometry: (area box) ->
-        w = box.open ? null : box.w
-        {x: box.x y: box.y value: [area.value[0] box.values.concat([w box.h])]}
+        cols = box.open ? -1 : box.w
+        {x: box.x y: box.y value: [area.value[0] cols box.h].concat(box.values)}
 
     #  the parts of a box that a range does not cover
     #  a range is [x1 y1 x2 y2] with x2 exclusive and y2 inclusive

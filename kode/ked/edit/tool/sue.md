@@ -21,25 +21,29 @@
 
     x, y    grapheme index in the line, line index, of the text that
             follows the payload, i.e. the top left of the area
-    value   [code, data]
+    value   [code, cols, lines, data...]
 
 #### codes
 
-    31  fg colour     [31, ["#ff8", 10, 2]]
-    32  bg colour     [32, ["#0f0f0f"]]
-    33  fg and bg     [33, ["#ff0", "#00f", 5]]
-    34  style         [34, ["u", 5, 1]]             flags b i u s
-                      [34, ["#ff0", "u", 3, 1]]    coloured underline
-    40  line scale    [40, [3]]                     the line at 3x
-    41  open run      [41, [3]]                     text after it at 3x
-    99  close run     [99, [41]]                    closes a 41
+    31  fg colour     [31, 10, 2, "#ff8"]
+    32  bg colour     [32, -1, 1, "#0f0f0f"]
+    33  fg and bg     [33, 5, 1, "#ff0", "#00f"]
+    34  style         [34, 5, 1, "u"]                flags b i u s
+                      [34, 3, 1, "#ff0", "u"]       coloured underline
+    40  line scale    [40, -1, 1, 3]                the line at 3x
+    41  open run      [41, -1, 1, 3]                text after it at 3x
+    99  close run     [99, -1, 1, 41]               closes a 41
 
 #### geometry
 
-    the leading values of data belong to the feature, the trailing
-    numbers are geometry: width in graphemes, then height in rows.
-    no width reaches to the end of the line, no height is one row.
-    data that starts with a number has no box and is never cut.
+    a value always starts with the code, then the explicit geometry:
+    cols is the width in graphemes, lines the height in rows. a negative
+    cols reaches to the end of the line, lines is 1 unless the feature
+    spans rows. everything after the geometry is the feature's own data.
+
+    marks (40, 41, 99) are positions, not boxes. they write -1 for cols
+    and 1 for lines to keep the shape uniform, and the geometry is
+    ignored when they are read. marks are never cut by a range.
 
 #### units
 
@@ -61,6 +65,7 @@
     sueEncode    value      -> symbols
     sueDecode    symbols    -> value
     sueAscii     symbols    -> ascii
+    dataOf       value      -> data
 
     boxForAreaAndLines        area lines        -> box
     boxMinusRange             box range         -> boxes

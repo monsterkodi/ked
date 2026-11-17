@@ -9,7 +9,7 @@ use           ◆ keys mode
 
 ■state□events
     ###
-  󠀡󠀰󠀰󠀰󠀸󠁛󠀴󠀰󠀬󠁛󠀲󠁝󠁝handles basic text editing for the 󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠁦󠁦󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠀰󠀰󠀰󠀢󠀬󠀶󠀬󠀱󠁝󠁝editor
+  󠀡󠀰󠀰󠀱󠀱󠁛󠀴󠀰󠀬󠀭󠀱󠀬󠀱󠀬󠀲󠁝handles basic text editing for the 󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀶󠀬󠀱󠀬󠀢󠀣󠁦󠁦󠁦󠁦󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠀰󠀰󠀰󠀢󠁝editor
     wraps text and editor state like cursors and selections in an immutable to simplify undo
     delegates almost all text manipulation to pure functions in tool▸belt to simplify testing
     ###
@@ -210,7 +210,7 @@ use           ◆ keys mode
         for rng in ranges
             w = max 1 (rng[2] - rng[0])
             h = rng[3] - rng[1] + 1
-            @setSue rng[0] rng[1] [code values.concat([w h])]
+            @setSue rng[0] rng[1] [code w h].concat(values)
 
     toggleSueFlag: flag =>
 
@@ -237,7 +237,7 @@ use           ◆ keys mode
             continue if area.y == y and area.value[0] == sue.LINE_SCALE
             areas.push area
 
-        areas.push {x: 0 y: y value: [sue.LINE_SCALE [scale]]} if scale > 1
+        areas.push {x: 0 y: y value: [sue.LINE_SCALE -1 1 scale]} if scale > 1
 
         @s = @s.set 'sue' areas
         @rowCache = null
@@ -269,7 +269,7 @@ use           ◆ keys mode
         keep = @areasWithoutLineScales(areas indices)
 
         for y,i in indices
-            keep.push {x: 0 y: y value: [sue.LINE_SCALE [scales[i]]]} if scales[i] > 1
+            keep.push {x: 0 y: y value: [sue.LINE_SCALE -1 1 scales[i]]} if scales[i] > 1
 
         keep
 
@@ -316,8 +316,8 @@ use           ◆ keys mode
 
     areasWithRun: (areas y x1 x2 scale) =>
 
-        open  = {x: x1 y: y value: [sue.SCALE [scale]]}
-        close = {x: x2 y: y value: [sue.CLOSE [sue.SCALE]]}
+        open  = {x: x1 y: y value: [sue.SCALE -1 1 scale]}
+        close = {x: x2 y: y value: [sue.CLOSE -1 1 sue.SCALE]}
 
         areas.concat([open close])
 
@@ -327,7 +327,7 @@ use           ◆ keys mode
 
         for area in areas
             if area.y == y and area.x == x1 and area.value[0] == sue.SCALE
-                out.push {x: area.x y: area.y value: [sue.SCALE [scale]]}
+                out.push {x: area.x y: area.y value: [sue.SCALE -1 1 scale]}
             else
                 out.push area
 
@@ -343,7 +343,7 @@ use           ◆ keys mode
                 continue
 
             if area.y == y and area.x == x2 and area.value[0] == sue.CLOSE
-                data = area.value[1] ? []
+                data = sue.dataOf(area.value)
                 continue if empty data or data[0] == sue.SCALE
 
             out.push area
@@ -674,7 +674,7 @@ use           ◆ keys mode
 
         for area in (@s.sue ? [])
             if area.y == li and area.value[0] == sue.LINE_SCALE
-                ⮐ clamp 1 7 int(area.value[1][0] ? 1)
+                ⮐ clamp 1 7 int(area.value[3] ? 1)
 
         scaling.scaleOfLine @syntax @scales @scaling li
 

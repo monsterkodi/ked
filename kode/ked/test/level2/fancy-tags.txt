@@ -5,14 +5,14 @@ the tag block that nvim handles without trouble. nothing below is above
 U+E007F, so U+E0000..U+E001F never appear here.
 
 the mapping is ascii plus 0xE0000:
-  U+E0020 = tag space        U+E0041 = tag 󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝A        U+E0061 = tag a
-  U+E0021 = tag !            U+E005A = tag 󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝Z        U+E007E = tag ~
-  U+E007F = cancel tag, it has no ascii val󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝ue and terminates a payload
+  U+E0020 = tag space        U+E0041 = tag 󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀴󠀬󠀱󠀬󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠁝A        U+E0061 = tag a
+  U+E0021 = tag !            U+E005A = tag 󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀴󠀬󠀱󠀬󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠁝Z        U+E007E = tag ~
+  U+E007F = cancel tag, it has no ascii val󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀴󠀬󠀱󠀬󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠁝ue and terminates a payload
 
-a payload is a maximal run of tag 󠀡󠀰󠀰󠀳󠀱󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠁥󠁣󠁣󠀢󠀬󠀲󠀱󠀬󠀱󠁝󠁝character󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝s ending in the first cancel
-tag. a literal 0x7f byte inside th󠀡󠀰󠀰󠀳󠀱󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠁥󠁣󠁣󠀢󠀬󠀲󠀱󠀬󠀱󠁝󠁝e 󠀡󠀰󠀰󠀳󠀱󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠁤󠀵󠀰󠀰󠀢󠀬󠀢󠀣󠀶󠀶󠀰󠀰󠀴󠁢󠀢󠀬󠀱󠀵󠀬󠀱󠁝󠁝body is󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝 written as two cancel tags.
-there is no open marker: the run a󠀡󠀰󠀰󠀳󠀱󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠁥󠁣󠁣󠀢󠀬󠀲󠀱󠀬󠀱󠁝󠁝ft󠀡󠀰󠀰󠀳󠀱󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠁤󠀵󠀰󠀰󠀢󠀬󠀢󠀣󠀶󠀶󠀰󠀰󠀴󠁢󠀢󠀬󠀱󠀵󠀬󠀱󠁝󠁝er visi󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝ble text is the payload, and
-U+E0001 would be the natural opene󠀡󠀰󠀰󠀳󠀱󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠁦󠁦󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠁥󠁣󠁣󠀢󠀬󠀲󠀱󠀬󠀱󠁝󠁝r but it 󠀡󠀰󠀰󠀳󠀰󠁛󠀳󠀳󠀬󠁛󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠀬󠀴󠀬󠀱󠁝󠁝is out of range here.
+a payload is a maximal run of tag 󠀡󠀰󠀰󠀲󠀹󠁛󠀳󠀳󠀬󠀲󠀱󠀬󠀱󠀬󠀢󠀣󠁦󠁦󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠁥󠁣󠁣󠀢󠁝character󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀴󠀬󠀱󠀬󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠁝s ending in the first cancel
+tag. a literal 0x7f byte inside th󠀡󠀰󠀰󠀲󠀹󠁛󠀳󠀳󠀬󠀲󠀱󠀬󠀱󠀬󠀢󠀣󠁦󠁦󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠁥󠁣󠁣󠀢󠁝e 󠀡󠀰󠀰󠀲󠀹󠁛󠀳󠀳󠀬󠀱󠀵󠀬󠀱󠀬󠀢󠀣󠁦󠁦󠁤󠀵󠀰󠀰󠀢󠀬󠀢󠀣󠀶󠀶󠀰󠀰󠀴󠁢󠀢󠁝body is󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀴󠀬󠀱󠀬󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠁝 written as two cancel tags.
+there is no open marker: the run a󠀡󠀰󠀰󠀲󠀹󠁛󠀳󠀳󠀬󠀲󠀱󠀬󠀱󠀬󠀢󠀣󠁦󠁦󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠁥󠁣󠁣󠀢󠁝ft󠀡󠀰󠀰󠀲󠀹󠁛󠀳󠀳󠀬󠀱󠀵󠀬󠀱󠀬󠀢󠀣󠁦󠁦󠁤󠀵󠀰󠀰󠀢󠀬󠀢󠀣󠀶󠀶󠀰󠀰󠀴󠁢󠀢󠁝er visi󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀴󠀬󠀱󠀬󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠁝ble text is the payload, and
+U+E0001 would be the natural opene󠀡󠀰󠀰󠀲󠀹󠁛󠀳󠀳󠀬󠀲󠀱󠀬󠀱󠀬󠀢󠀣󠁦󠁦󠀰󠀰󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠁥󠁣󠁣󠀢󠁝r but it 󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀴󠀬󠀱󠀬󠀢󠀣󠀰󠀰󠀸󠀰󠀱󠀵󠀢󠀬󠀢󠀣󠀴󠀳󠀲󠀹󠀶󠀶󠀢󠁝is out of range here.
 
 ============================================================
 

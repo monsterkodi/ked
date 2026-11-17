@@ -1257,7 +1257,7 @@ hed = cols rows ext='md' feats=[]->
         e.state.setSelections [[3 0 6 0]]
         e.state.stepScales 1
         e.state.setSelections []
-        e.state.setSue 7 0 [31 ['#ff0000' 2 1]]
+        e.state.setSue 7 0 [31 2 1 '#ff0000']
 
         scr.init()
         e.draw()
@@ -1361,7 +1361,7 @@ hed = cols rows ext='md' feats=[]->
         e.state.stepScales 1
         e.state.stepScales 1
         e.state.setSelections []
-        e.state.setSue 3 0 [32 ['#00ff00' 6 1]]
+        e.state.setSue 3 0 [32 6 1 '#00ff00']
 
         scr.init()
         e.draw()

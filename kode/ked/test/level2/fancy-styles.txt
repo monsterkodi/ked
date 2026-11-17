@@ -1,0 +1,34 @@
+sue styles -- flags and coloured underline
+
+plain text carries no payload
+
+one flag at a time
+bold: 󠀡󠀰󠀰󠀱󠀳󠁛󠀳󠀴󠀬󠀳󠀴󠀬󠀱󠀬󠀢󠁢󠀢󠁝the phrase after the colon is bold
+italic: 󠀡󠀰󠀰󠀱󠀳󠁛󠀳󠀴󠀬󠀳󠀶󠀬󠀱󠀬󠀢󠁩󠀢󠁝the phrase after the colon is italic
+underlined: 󠀡󠀰󠀰󠀱󠀳󠁛󠀳󠀴󠀬󠀴󠀰󠀬󠀱󠀬󠀢󠁵󠀢󠁝the phrase after the colon is underlined
+struck: 󠀡󠀰󠀰󠀱󠀳󠁛󠀳󠀴󠀬󠀴󠀴󠀬󠀱󠀬󠀢󠁳󠀢󠁝the phrase after the colon is struck through
+
+two flags at once
+󠀡󠀰󠀰󠀱󠀴󠁛󠀳󠀴󠀬󠀱󠀵󠀬󠀱󠀬󠀢󠁢󠁩󠀢󠁝bold and italic
+󠀡󠀰󠀰󠀱󠀴󠁛󠀳󠀴󠀬󠀱󠀹󠀬󠀱󠀬󠀢󠁢󠁵󠀢󠁝bold and underlined
+󠀡󠀰󠀰󠀱󠀴󠁛󠀳󠀴󠀬󠀲󠀵󠀬󠀱󠀬󠀢󠁩󠁳󠀢󠁝italic and struck through
+󠀡󠀰󠀰󠀱󠀴󠁛󠀳󠀴󠀬󠀲󠀹󠀬󠀱󠀬󠀢󠁵󠁳󠀢󠁝underlined and struck through
+
+all four flags at once
+󠀡󠀰󠀰󠀱󠀶󠁛󠀳󠀴󠀬󠀳󠀷󠀬󠀱󠀬󠀢󠁢󠁩󠁵󠁳󠀢󠁝bold italic underlined struck through
+
+areas stack, so their flags join over the same cells
+󠀡󠀰󠀰󠀱󠀳󠁛󠀳󠀴󠀬󠀴󠀱󠀬󠀱󠀬󠀢󠁢󠀢󠁝a bold line with an 󠀡󠀰󠀰󠀱󠀲󠁛󠀳󠀴󠀬󠀶󠀬󠀱󠀬󠀢󠁩󠀢󠁝italic word inside it
+󠀡󠀰󠀰󠀱󠀳󠁛󠀳󠀴󠀬󠀴󠀵󠀬󠀱󠀬󠀢󠁵󠀢󠁝an underlined line with a 󠀡󠀰󠀰󠀱󠀲󠁛󠀳󠀴󠀬󠀴󠀬󠀱󠀬󠀢󠁢󠀢󠁝bold word inside it
+
+a coloured underline keeps its colour while the flags stack
+󠀡󠀰󠀰󠀲󠀲󠁛󠀳󠀴󠀬󠀱󠀳󠀬󠀱󠀬󠀢󠀣󠁦󠁦󠀵󠀵󠀵󠀵󠀢󠀬󠀢󠀢󠁝red underline
+󠀡󠀰󠀰󠀲󠀲󠁛󠀳󠀴󠀬󠀱󠀵󠀬󠀱󠀬󠀢󠀣󠀵󠀵󠁦󠁦󠀵󠀵󠀢󠀬󠀢󠀢󠁝green underline
+󠀡󠀰󠀰󠀲󠀲󠁛󠀳󠀴󠀬󠀱󠀴󠀬󠀱󠀬󠀢󠀣󠀵󠀵󠀹󠀹󠁦󠁦󠀢󠀬󠀢󠀢󠁝blue underline
+󠀡󠀰󠀰󠀲󠀳󠁛󠀳󠀴󠀬󠀱󠀸󠀬󠀱󠀬󠀢󠀣󠁦󠁦󠀵󠀵󠀵󠀵󠀢󠀬󠀢󠁢󠀢󠁝bold red underline
+󠀡󠀰󠀰󠀲󠀳󠁛󠀳󠀴󠀬󠀲󠀲󠀬󠀱󠀬󠀢󠀣󠀵󠀵󠁦󠁦󠀵󠀵󠀢󠀬󠀢󠁩󠀢󠁝italic green underline
+󠀡󠀰󠀰󠀲󠀳󠁛󠀳󠀴󠀬󠀲󠀱󠀬󠀱󠀬󠀢󠀣󠀵󠀵󠀹󠀹󠁦󠁦󠀢󠀬󠀢󠁳󠀢󠁝struck blue underline
+󠀡󠀰󠀰󠀲󠀵󠁛󠀳󠀴󠀬󠀳󠀶󠀬󠀱󠀬󠀢󠀣󠁦󠁦󠀵󠀵󠀵󠀵󠀢󠀬󠀢󠁢󠁩󠁵󠀢󠁝bold italic 󠀡󠀰󠀰󠀲󠀹󠁛󠀳󠀳󠀬󠀱󠀰󠀬󠀱󠀬󠀢󠀣󠀰󠀰󠁦󠁦󠀲󠁡󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠀰󠀰󠀰󠀢󠁝un󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀶󠀬󠀱󠀬󠀢󠀣󠀲󠁢󠀰󠀰󠁦󠁦󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠀰󠀰󠀰󠀢󠁝derlined red underline
+
+a colour and all four flags at once
+󠀡󠀰󠀰󠀲󠀶󠁛󠀳󠀴󠀬󠀴󠀱󠀬󠀱󠀬󠀢󠀣󠁦󠁦󠀵󠀵󠀵󠀵󠀢󠀬󠀢󠁢󠁩󠁵󠁳󠀢󠁝red bold italic underlined struck through
