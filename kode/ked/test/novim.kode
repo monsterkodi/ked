@@ -14,6 +14,12 @@ cur = x y -> s.mainCursor() ▸ [x y]
 
 mrange = lines x y m -> motion.range lines [x y] m
 
+ked_sess = (store = {}) ->
+    fakeGet = (key def) -> clone(store[key] ? def)
+    fakeSet = (key value) -> store[key] = clone value
+    global.ked_session = get:fakeGet set:fakeSet
+    store
+
 windowCells = cols:40 rows:20
 
 windowLines = []
@@ -21,10 +27,7 @@ for i in 0...30
     windowLines.push "  #{i}"
 
 windowSetup = (name) ->
-    store = {'editor▸file':'/tmp/novimwindow'}
-    fakeGet = (key def) -> clone(store[key] ? def)
-    fakeSet = (key value) -> store[key] = clone value
-    global.ked_session = get:fakeGet set:fakeSet
+    store = ked_sess {'editor▸file':'/tmp/novimwindow'}
     s = new state windowCells name
     mode.modes.novim = novim
     mode.start s 'novim'
@@ -39,15 +42,11 @@ windowReset = (s) ->
     s.setView [0 0]
     s.setMainCursor 0 8
 
-fakeGet = (key def) -> clone(store[key] ? def)
-fakeSet = (key value) -> store[key] = clone value
-
 ▸ novim history
 
   ▸ ex commands go to the ex history
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         ns = new state cells 'novimhistory_ex'
         m = new novim ns
@@ -60,8 +59,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ internal ex runs are not recorded
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         ns = new state cells 'novimhistory_internal'
         m = new novim ns
@@ -74,8 +72,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ committed searches go to the search history
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         ns = new state cells 'novimhistory_search'
         ns.loadLines belt.linesForText("foo bar")
@@ -91,8 +88,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ up and down navigate the ex history
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         ns = new state cells 'novimhistory_exnav'
         m = new novim ns
@@ -119,8 +115,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ up and down navigate the search history
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         ns = new state cells 'novimhistory_searchnav'
         ns.loadLines belt.linesForText("alpha beta")
@@ -150,8 +145,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ the histories do not share entries
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         ns = new state cells 'novimhistory_separate'
         ns.loadLines belt.linesForText("alpha beta")
@@ -173,8 +167,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ a new history is empty
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         h = new cmdlinehistory 'ex'
 
@@ -185,8 +178,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ added entries are stored in the session
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         h = new cmdlinehistory 'ex'
 
@@ -200,8 +192,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ search and ex histories are separate
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         search = new cmdlinehistory 'search'
         ex     = new cmdlinehistory 'ex'
@@ -219,8 +210,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ an entry is not repeated but moved to the newest position
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         h = new cmdlinehistory 'ex'
 
@@ -234,8 +224,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ old entries fall off at the limit
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         h = new cmdlinehistory 'ex'
         h.limit = 3
@@ -249,8 +238,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ navigation goes back and forward through the entries
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         h = new cmdlinehistory 'ex'
 
@@ -271,8 +259,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ adding an entry resets the navigation position
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         h = new cmdlinehistory 'ex'
 
@@ -287,8 +274,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ a new instance sees the stored history
 
-        store = {}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess()
 
         h1 = new cmdlinehistory 'ex'
         h1.add 'one'
@@ -313,8 +299,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ g; and g, walk change positions
 
-        store = {'editor▸file':'/tmp/novimchange'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_walk'
         mode.modes.novim = novim
@@ -349,8 +334,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ a count walks several changes
 
-        store = {'editor▸file':'/tmp/novimchange'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_count'
         mode.modes.novim = novim
@@ -382,8 +366,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ typing on one line is one change
 
-        store = {'editor▸file':'/tmp/novimchange'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_typing'
 
@@ -400,8 +383,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ motion does not add a change
 
-        store = {'editor▸file':'/tmp/novimchange'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_motion'
         mode.modes.novim = novim
@@ -422,8 +404,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ undo keeps the change position
 
-        store = {'editor▸file':'/tmp/novimchange'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_undo'
 
@@ -443,8 +424,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ substitute adds a change
 
-        store = {'editor▸file':'/tmp/novimchange'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_substitute'
         mode.modes.novim = novim
@@ -464,8 +444,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ loading a file forgets the changes
 
-        store = {'editor▸file':'/tmp/novimchange'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_load'
 
@@ -486,8 +465,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ G and gg make jump positions navigable
 
-        store = {'editor▸file':'/tmp/novimjump'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_gg'
         mode.modes.novim = novim
@@ -517,8 +495,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ a count walks several jumps
 
-        store = {'editor▸file':'/tmp/novimjump'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_count'
         mode.modes.novim = novim
@@ -548,8 +525,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ a committed search is a jump
 
-        store = {'editor▸file':'/tmp/novimjump'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_search'
         mode.modes.novim = novim
@@ -575,8 +551,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ percent is a jump
 
-        store = {'editor▸file':'/tmp/novimjump'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_percent'
         mode.modes.novim = novim
@@ -599,8 +574,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ a jump to another file opens it
 
-        store = {'editor▸file':'/tmp/novimjump-a'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimjump-a'}
 
         ns = new state cells 'novimjump_files'
         mode.modes.novim = novim
@@ -628,8 +602,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ a global command does not add jumps
 
-        store = {'editor▸file':'/tmp/novimjump'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_global'
         mode.modes.novim = novim
@@ -647,8 +620,7 @@ fakeSet = (key value) -> store[key] = clone value
 
   ▸ substitute and edit add jumps
 
-        store = {'editor▸file':'/tmp/novimjump'}
-        global.ked_session = get:fakeGet set:fakeSet
+        store = ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_ex'
         mode.modes.novim = novim
