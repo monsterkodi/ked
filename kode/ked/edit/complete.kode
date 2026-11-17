@@ -28,7 +28,21 @@ use           ◆ specs
         
         @visible = false
 
+    #  a run after the cursor moves the text that follows, and the popup
+    #  cannot follow it, so completion is skipped there
+
+    hasScaledTextAfterCursor: =>
+
+        [x y] = @editor.state.mainCursor()
+
+        for run in @editor.runsForLine y
+            ⮐ true if run[1] > x
+
+        false
+
     complete: -> 
+
+        ⮐ @hide() if @hasScaledTextAfterCursor()
         
         before = @editor.state.chunkBeforeCursor()
         after  = @editor.state.chunkAfterCursor()
@@ -54,8 +68,10 @@ use           ◆ specs
 
         state = @editor.state
         scale = state.lineHeight cursor[1]
+        cells = @editor.cellsForLine cursor[1]
+        last  = cells.length-1
 
-        [cursor[0]*scale - state.s.view[0], state.rowOfLine(cursor[1])]
+        [cells[min(cursor[0] last)]*scale - state.s.view[0], state.rowOfLine(cursor[1])]
 #!word
     word: @turd ->
     
