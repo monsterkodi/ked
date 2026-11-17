@@ -482,6 +482,19 @@ use              ◆ mode
         else
             [@state.rowOfLine(pos[1]) linescale]
 
+    #  the cell column of a cursor, mapped through wide graphemes and runs
+    #  past the end of the line every further grapheme takes one more cell
+
+    cursorCellX: (x y) ->
+
+        cells = @cellsForLine y
+        scale = @state.lineHeight y
+        last  = cells.length-1
+
+        ⮐ (cells[x] * scale) if x <= last
+
+        ⮐ (cells[last] + (x - last)) * scale
+
     drawCursors: ->
         
         s = @state.s
@@ -506,8 +519,7 @@ use              ◆ mode
             if @isCursorVisible cursor
              
                 [row scale] = @cursorRowAndScale cursor
-                cells = @cellsForLine cursor[1]
-                cx = cells[min(cursor[0] cells.length-1)]*@state.lineHeight(cursor[1]) - s.view[0]
+                cx = @cursorCellX(cursor[0] cursor[1]) - s.view[0]
                 @cursorIds[idx] = @cells.draw_rounded_multi_cursor(cx row bg scale)
                         
         if @isCursorVisible mainCursor
@@ -519,8 +531,7 @@ use              ◆ mode
             if not @hasFocus() ➜ bg = color.darken bg 
              
             [y scale] = @cursorRowAndScale mainCursor
-            cells = @cellsForLine mainCursor[1]
-            x = cells[min(mainCursor[0] cells.length-1)]*@state.lineHeight(mainCursor[1]) - s.view[0]
+            x = @cursorCellX(mainCursor[0] mainCursor[1]) - s.view[0]
              
             if s.cursors.length <= 1
                 if @isCursorInEmpty()

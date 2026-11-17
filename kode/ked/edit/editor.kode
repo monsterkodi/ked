@@ -130,7 +130,7 @@ use                ◆ state draw complete mode susan
 
         scale = @state.lineHeight cursor[1]
         row   = @state.rowOfLine cursor[1]
-        x     = cursor[0]*scale - v[0]
+        x     = @cursorCellX(cursor[0] cursor[1]) - v[0]
         
         rect[0] <= x and x + scale <= rect[2] and rect[1] <= row and row + scale <= rect[3]
         

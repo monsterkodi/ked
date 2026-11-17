@@ -1322,6 +1322,25 @@ blockArea = scr ->
 
         scr.c[0][9].mark ▸ 'main'
 
+  ▸ cursors past the end of a line are drawn there
+
+        t = new ttio headless:true input:false cols:40 rows:8
+        scr = new screen t
+        e = new editor scr 'test_cursor_past_end' []
+        e.state.loadLines ['abcdef' 'ab' 'abcd']
+        e.layout 0 0 40 8
+        e.state.setCursors [[5 0] [5 1] [5 2]] main:0
+
+        scr.init()
+        e.draw()
+
+        scr.c[0][5].mark ▸ 'main'
+        scr.c[1][5].mark ▸ 'multi'
+        scr.c[2][5].mark ▸ 'multi'
+
+        (valid scr.c[1][2].mark) ▸ false
+        (valid scr.c[2][4].mark) ▸ false
+
   ▸ a selection over a run shows on the scaled text
 
         t = new ttio headless:true input:false textSizing:true cols:40 rows:10
