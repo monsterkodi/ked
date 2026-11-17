@@ -302,7 +302,7 @@ use ../base        ◆ view
         
     applyEdits: edits =>
     
-        segls = edits.map (edit) -> [edit[0] edit[1] edit[2].map((line) -> kseg line)]
+        segls = edits.map (edit) -> [edit[0] edit[1] edit[2].map((line) -> kseg(line))]
         
         @busy = true
         @state.replaceLineRanges segls
