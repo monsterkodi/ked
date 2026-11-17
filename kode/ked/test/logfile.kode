@@ -1,5 +1,5 @@
 
-use ../util ◆ logfile
+use ../util ◆ leak logfile
 
 ▸ logfile
 
@@ -27,3 +27,35 @@ use ../util ◆ logfile
         log.close -> closed = true
 
         closed ▸ true
+
+▸ leak
+
+  ▸ a headless run samples nothing
+
+        lines = []
+        keep = console.log
+        console.log = (args...) -> lines.push args
+
+        leak.start headless:true
+
+        clearInterval leak.timer if leak.timer
+        leak.timer = null
+
+        console.log = keep
+
+        lines.length ▸ 0
+
+  ▸ a colored headless run samples nothing
+
+        lines = []
+        keep = console.log
+        console.log = (args...) -> lines.push args
+
+        leak.start headless_colors:true
+
+        clearInterval leak.timer if leak.timer
+        leak.timer = null
+
+        console.log = keep
+
+        lines.length ▸ 0
