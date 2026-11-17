@@ -14,6 +14,15 @@ cur = x y -> s.mainCursor() ▸ [x y]
 
 mrange = lines x y m -> motion.range lines [x y] m
 
+novimKeysFor = (state) ->
+    m = new novim state
+    key = c -> m.handleKey c {combo:c, char:c}
+    keys = cs x y ->
+        for c in cs
+            key c
+        cur x y if x?
+    [m key keys]
+
 ked_sess = (store = {}) ->
     fakeGet = (key def) -> clone(store[key] ? def)
     fakeSet = (key value) -> store[key] = clone value
@@ -1113,12 +1122,7 @@ windowReset = (s) ->
             
     ▸ yank line command
     
-            m = new novim s
-            key = c -> m.handleKey c {combo:c, char:c}
-            keys = s x y -> 
-                for c in s
-                    key c
-                cur x y if x?
+            [m key keys] = novimKeysFor s
     
             s.loadLines belt.linesForText("one\ntwo\nthree")
             s.setMainCursor 1 1
@@ -1268,12 +1272,7 @@ windowReset = (s) ->
 
   ▸ named registers
 
-        m = new novim s
-        key = c -> m.handleKey c {combo:c, char:c}
-        keys = s x y ->
-            for c in s
-                key c
-            cur x y if x?
+        [m key keys] = novimKeysFor s
 
         s.loadLines belt.linesForText("one\ntwo")
         s.setMainCursor 0 0
@@ -1517,12 +1516,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
         s.novimRegister.lines ▸ ['a']
     
-        m = new novim s
-        key = c -> m.handleKey c {combo:c, char:c}
-        keys = s x y -> 
-            for c in s
-                key c
-            cur x y if x?
+        [m key keys] = novimKeysFor s
     
         s.loadLines belt.linesForText("one\ntwo")
         s.setMainCursor 0 0
@@ -2234,13 +2228,7 @@ windowReset = (s) ->
     
         s.loadLines belt.linesForText(text)
     
-        m = new novim s
-    
-        key = c -> m.handleKey c {combo:c, char:c}
-        keys = s x y -> 
-            for c in s
-                key c
-            cur x y if x?
+        [m key keys] = novimKeysFor s
     
         keys 'd2w'
         txt """
@@ -2469,12 +2457,7 @@ windowReset = (s) ->
         s.loadLines belt.linesForText("abcdef")
         s.setMainCursor 0 0
 
-        m = new novim s
-        key = c -> m.handleKey c {combo:c, char:c}
-        keys = s x y ->
-            for c in s
-                key c
-            cur x y if x?
+        [m key keys] = novimKeysFor s
 
         keys 'RXY'
         txt "XYcdef"
@@ -2585,12 +2568,7 @@ windowReset = (s) ->
         s.loadLines belt.linesForText("abcd\nefgh\nijkl")
         s.setMainCursor 1 0
 
-        m = new novim s
-        key = c -> m.handleKey c {combo:c, char:c}
-        keys = s x y ->
-            for c in s
-                key c
-            cur x y if x?
+        [m key keys] = novimKeysFor s
 
         keys 'vllrX'
         txt "aXXd\nefgh\nijkl"
@@ -2679,12 +2657,7 @@ windowReset = (s) ->
         s.loadLines belt.linesForText("Hello World")
         s.setMainCursor 0 0
 
-        m = new novim s
-        key = c -> m.handleKey c {combo:c, char:c}
-        keys = s x y ->
-            for c in s
-                key c
-            cur x y if x?
+        [m key keys] = novimKeysFor s
 
         keys 'guw'
         txt "hello World"
@@ -3045,12 +3018,7 @@ windowReset = (s) ->
         s.loadLines belt.linesForText("one two\nthree four")
         s.setMainCursor 0 0
 
-        m = new novim s
-        key = c -> m.handleKey c {combo:c, char:c}
-        keys = s x y ->
-            for c in s
-                key c
-            cur x y if x?
+        [m key keys] = novimKeysFor s
 
         keys 'gv'
         s.visual ▸ null
@@ -3786,12 +3754,7 @@ windowReset = (s) ->
 
   ▸ substitute
 
-        nm = new novim s
-
-        nkey  = c -> nm.handleKey c {combo:c, char:c}
-        nkeys = t ->
-            for c in t
-                nkey c
+        [nm nkey nkeys] = novimKeysFor s
 
         s.clearHistory()
         s.loadLines belt.linesForText("one two one\nthree one")
