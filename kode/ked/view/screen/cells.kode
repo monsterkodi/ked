@@ -81,6 +81,15 @@ use ../../util/img  ◆ rounded
                     if col < @cols
                         @set_bg col row bg
 
+    #  fill the cells of a block, in cells coordinates, with a background
+    #  a block is [x y scale w line], as returned by blockAt
+
+    bg_block: block bg =>
+
+        for r in block[1]...min(@rows, block[1]+block[2])
+            for c in block[0]...min(@cols, block[0]+block[2]*block[3])
+                @set_bg c r bg
+
     bg_fill: x1 y1 x2 y2 bg =>
     
         x1 = @cols + x1 if x1 < 0

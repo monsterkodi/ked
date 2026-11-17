@@ -90,27 +90,34 @@ use ./tool  ◆ sue
             bg = color.values bg if bg?
             ul = color.values ul if ul?
 
+            seen = {}
+
             for r in row...min(@cells.rows row + box.h*scale)
+
                 for x in x1...x2
 
-                    #  a block of this line is painted at its top left cell,
-                    #  where the glyph lives. a block of another line, grown
-                    #  into this row by a run, is left alone.
-
-                    ax = x
-                    ay = r
+                    #  a block gets the colour over its whole area, the glyph
+                    #  itself takes the foreground and the flags at its top
+                    #  left cell. a block of another line is left alone.
 
                     block = @cells.blockAt(x r)
 
                     if block?
                         continue if block[4] != y
-                        ax = block[0]
-                        ay = block[1]
+                        key = "#{block[0]},#{block[1]}"
+                        continue if seen[key]
+                        seen[key] = true
+                        @cells.bg_block block bg if bg?
+                        @cells.set_fg block[0] block[1] fg if fg?
+                        if attr? or ul?
+                            [have hul] = @cells.get_attr block[0] block[1]
+                            @cells.set_attr block[0] block[1] (sue.addFlags(have attr)) (ul ? hul)
+                        continue
 
-                    @cells.set_bg ax ay bg if bg?
-                    @cells.set_fg ax ay fg if fg?
+                    @cells.set_bg x r bg if bg?
+                    @cells.set_fg x r fg if fg?
                     if attr? or ul?
-                        [have hul] = @cells.get_attr ax ay
-                        @cells.set_attr ax ay (sue.addFlags(have attr)) (ul ? hul)
+                        [have hul] = @cells.get_attr x r
+                        @cells.set_attr x r (sue.addFlags(have attr)) (ul ? hul)
 
 export susan

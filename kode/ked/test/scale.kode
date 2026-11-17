@@ -1486,6 +1486,65 @@ blockArea = scr ->
 
         blockArea(scr) ▸ before
 
+  ▸ a selection reaches the blocks of a scaled line
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+        e = new editor scr 'test_selection_line_scale' []
+        e.state.loadLines ['aaaa' 'bbbb']
+        e.layout 0 0 40 10
+        e.state.setCursors [[0 0]]
+        e.state.stepScales 2
+        e.state.setSelections [[0 0 2 0]]
+        e.state.setCursors [[0 1]]
+
+        scr.init()
+        e.draw()
+
+        scr.get_bg(0 0) ▸ e.color.selection.span
+        scr.get_bg(1 0) ▸ e.color.selection.span
+        scr.get_bg(3 0) ▸ e.color.selection.span
+        scr.get_bg(6 0) ▸ e.color.bg
+
+  ▸ a selection reaches the blocks of a run
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+        e = new editor scr 'test_selection_run_blocks' []
+        e.state.loadLines ['a' 'b' 'c' 'xx BIG yy']
+        e.layout 0 0 40 10
+        e.state.setSelections [[3 3 6 3]]
+        e.state.stepScales 1
+        e.state.stepScales 1
+        e.state.setCursors [[0 2]]
+
+        scr.init()
+        e.draw()
+
+        scr.get_bg(3 1) ▸ e.color.selection.span
+        scr.get_bg(4 1) ▸ e.color.selection.span
+        scr.get_bg(6 1) ▸ e.color.selection.span
+
+  ▸ a background colour fills the blocks of a scaled line
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+        e = new editor scr 'test_bg_line_scale' []
+        e.state.loadLines ['aaaa' 'bbbb']
+        e.layout 0 0 40 10
+        e.state.setCursors [[0 0]]
+        e.state.stepScales 2
+        e.state.setSue 0 0 [32 2 1 '#00ff00']
+        e.state.setCursors [[0 1]]
+
+        scr.init()
+        e.draw()
+
+        scr.get_bg(0 0) ▸ [0 255 0]
+        scr.get_bg(1 0) ▸ [0 255 0]
+        scr.get_bg(3 0) ▸ [0 255 0]
+        scr.get_bg(6 0) ▸ e.color.bg
+
   ▸ a colour reaches the blocks of a scaled line
 
         t = new ttio headless:true input:false textSizing:true cols:40 rows:10
@@ -1524,7 +1583,9 @@ blockArea = scr ->
         e.draw()
 
         scr.get_bg(3 1) ▸ [0 255 0]
+        scr.get_bg(4 1) ▸ [0 255 0]
         scr.get_bg(6 1) ▸ [0 255 0]
+        scr.get_bg(7 1) ▸ [0 255 0]
         scr.get_bg(9 1) ▸ [0 255 0]
 
   ▸ a yank flash reaches the blocks of a scaled line
@@ -1564,5 +1625,6 @@ blockArea = scr ->
         e.draw()
 
         scr.get_bg(3 1) ▸ e.color.yank
+        scr.get_bg(4 1) ▸ e.color.yank
         scr.get_bg(6 1) ▸ e.color.yank
         scr.get_bg(9 1) ▸ e.color.yank

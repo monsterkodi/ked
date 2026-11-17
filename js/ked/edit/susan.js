@@ -38,7 +38,7 @@ susan = (function ()
 
     susan.prototype["draw"] = function ()
     {
-        var area, areas, attr, ax, ay, bg, block, box, cells, code, fg, have, hul, last, lines, r, row, runs, scale, ul, view, x, x1, x2, y, _42_29_
+        var area, areas, attr, bg, block, box, cells, code, fg, have, hul, key, last, lines, r, row, runs, scale, seen, ul, view, x, x1, x2, y, _42_29_
 
         areas = ((_42_29_=this.state.s.sue) != null ? _42_29_ : [])
         if (_k_.empty(areas))
@@ -119,12 +119,11 @@ susan = (function ()
             {
                 ul = color.values(ul)
             }
+            seen = {}
             for (var _c_ = r = row, _d_ = _k_.min(this.cells.rows,row + box.h * scale); (_c_ <= _d_ ? r < _k_.min(this.cells.rows,row + box.h * scale) : r > _k_.min(this.cells.rows,row + box.h * scale)); (_c_ <= _d_ ? ++r : --r))
             {
                 for (var _e_ = x = x1, _f_ = x2; (_e_ <= _f_ ? x < x2 : x > x2); (_e_ <= _f_ ? ++x : --x))
                 {
-                    ax = x
-                    ay = r
                     block = this.cells.blockAt(x,r)
                     if ((block != null))
                     {
@@ -132,22 +131,41 @@ susan = (function ()
                         {
                             continue
                         }
-                        ax = block[0]
-                        ay = block[1]
+                        key = `${block[0]},${block[1]}`
+                        if (seen[key])
+                        {
+                            continue
+                        }
+                        seen[key] = true
+                        if ((bg != null))
+                        {
+                            this.cells.bg_block(block,bg)
+                        }
+                        if ((fg != null))
+                        {
+                            this.cells.set_fg(block[0],block[1],fg)
+                        }
+                        if ((attr != null) || (ul != null))
+                        {
+                            var _10_ = this.cells.get_attr(block[0],block[1]); have = _10_[0]; hul = _10_[1]
+
+                            this.cells.set_attr(block[0],block[1],(sue.addFlags(have,attr)),((ul != null ? ul : hul)))
+                        }
+                        continue
                     }
                     if ((bg != null))
                     {
-                        this.cells.set_bg(ax,ay,bg)
+                        this.cells.set_bg(x,r,bg)
                     }
                     if ((fg != null))
                     {
-                        this.cells.set_fg(ax,ay,fg)
+                        this.cells.set_fg(x,r,fg)
                     }
                     if ((attr != null) || (ul != null))
                     {
-                        var _10_ = this.cells.get_attr(ax,ay); have = _10_[0]; hul = _10_[1]
+                        var _11_ = this.cells.get_attr(x,r); have = _11_[0]; hul = _11_[1]
 
-                        this.cells.set_attr(ax,ay,(sue.addFlags(have,attr)),((ul != null ? ul : hul)))
+                        this.cells.set_attr(x,r,(sue.addFlags(have,attr)),((ul != null ? ul : hul)))
                     }
                 }
             }
@@ -159,5 +177,5 @@ susan = (function ()
 
 export default susan;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3VzYW4uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2VkaXQvc3VzYW4ua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUFlLFlBQVI7O09BQ08sVUFBUjs7O0FBRUwsU0FBRDs7SUFtQkksT0FBQyxhQUFhLElBQUk7SUFDbEIsT0FBQyxhQUFhLElBQUk7SUFDbEIsT0FBQyxnQkFBYSxJQUFJO0lBQ2xCLE9BQUMsVUFBYSxJQUFJO0lBQ2xCLE9BQUMsZUFBYSxJQUFJO3FCQUlsQiwwQkFBYTs7YUFFRyxLQUFDLE1BQU0sT0FBTyxFQUFFOzs7O1lBQ3BCLEtBQUMsTUFBTSxXQUFXLE9BQU07Ozs7ZUFFaEMsS0FBQyxNQUFNLGlCQUFpQjs7O2FBRTVCLE9BQUksT0FBTzs7UUFBUjtRQUFPOzs7Ozs7cUJBRVY7Ozs7UUFFSSxrQkFBUSxLQUFDLE1BQU0sRUFBRTtzQkFDTjs7OztRQUVYLE9BQVEsS0FBQyxNQUFNLEVBQUU7UUFDakIsUUFBUSxLQUFDLE1BQU0sRUFBRTs0QkFFTDs7O1lBQVI7WUFFQSxNQUFNLElBQUksbUJBQW1CLEtBQUs7a0JBQ2xCOztnQkFBaEI7O1lBRUEsSUFBSSxJQUFJO2dCQUNJLElBQUksS0FBSyxLQUFLLE1BQU07O2dCQUFoQzs7WUFFQSxNQUFNLEtBQUMsTUFBTSxVQUFVO2dCQUNYLE1BQU07O2dCQUFsQjs7WUFFQSxRQUFRLEtBQUMsTUFBTSxXQUFXO2dCQUNkLE1BQU0sUUFBUSxLQUFDLE1BQU07O2dCQUFqQzs7WUFFQSxPQUFPLEtBQUssTUFBTTtZQUVsQixLQUFPO1lBQ1AsS0FBTztZQUNQLE9BQU87WUFDUCxLQUFPO2dCQUVKLFNBQVEsSUFBSTs7Z0JBQ1gsS0FBSyxJQUFJLE9BQU87O3FCQUNaLFNBQVEsSUFBSTs7Z0JBQ2hCLEtBQUssSUFBSSxPQUFPOztxQkFDWixTQUFRLElBQUk7O2dCQUNoQixLQUFLLElBQUksT0FBTztnQkFDaEIsS0FBSyxJQUFJLE9BQU87O3FCQUNaLFNBQVEsSUFBSTs7MEJBQ0osSUFBSSxjQUFjLElBQUksU0FBakMsZUFBSzs7Ozs7Z0JBRU47O1lBRUosT0FBUSxLQUFDLFlBQVk7WUFDckIsUUFBUSxJQUFJLHFCQUFxQixNQUFNLEVBQUU7WUFDekMsT0FBUSxNQUFNLFNBQU87WUFFckIsYUFBUyxHQUFHLGNBQVUsSUFBSSxFQUFFLFNBQU8sUUFBUSxLQUFLO1lBQ2hELGFBQVMsS0FBQyxNQUFNLE1BQU0sY0FBVSxJQUFJLElBQUksSUFBSSxFQUFFLFNBQU8sUUFBUSxLQUFLO2dCQUN0RCxNQUFNOztnQkFBbEI7O2lCQUV3Qjs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOztpQkFDTTs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOztpQkFDTTs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOzsyQkFFZCxJQUFLLG1CQUFVLEtBQUMsTUFBTSxLQUFLLE1BQU0sSUFBSSxJQUFFLGtDQUF4QixLQUFDLE1BQU0sS0FBSyxNQUFNLElBQUksSUFBRSxxQkFBeEIsS0FBQyxNQUFNLEtBQUssTUFBTSxJQUFJLElBQUU7OytCQUNuQyxJQUFLLFVBQUssc0JBQUEsU0FBQTs7b0JBTVYsS0FBSztvQkFDTCxLQUFLO29CQUVMLFFBQVEsS0FBQyxNQUFNLFFBQVEsRUFBRTt5QkFFdEI7OzRCQUNhLE1BQU0sT0FBTTs7NEJBQXhCOzt3QkFDQSxLQUFLLE1BQU07d0JBQ1gsS0FBSyxNQUFNOzt5QkFFVzs7d0JBQTFCLEtBQUMsTUFBTSxPQUFPLEdBQUcsR0FBRzs7eUJBQ007O3dCQUExQixLQUFDLE1BQU0sT0FBTyxHQUFHLEdBQUc7O3lCQUNqQixrQkFBUzs7bUNBQ0ssS0FBQyxNQUFNLFNBQVMsR0FBRyxLQUEvQixnQkFBSzs7d0JBQ04sS0FBQyxNQUFNLFNBQVMsR0FBRyxJQUFJLElBQUksU0FBUyxLQUFLLFNBQVEsYUFBQSxLQUFLOzs7Ozs7O1dBOUc3RTs7O2VBZ0hNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3VzYW4uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2VkaXQvc3VzYW4ua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUFlLFlBQVI7O09BQ08sVUFBUjs7O0FBRUwsU0FBRDs7SUFtQkksT0FBQyxhQUFhLElBQUk7SUFDbEIsT0FBQyxhQUFhLElBQUk7SUFDbEIsT0FBQyxnQkFBYSxJQUFJO0lBQ2xCLE9BQUMsVUFBYSxJQUFJO0lBQ2xCLE9BQUMsZUFBYSxJQUFJO3FCQUlsQiwwQkFBYTs7YUFFRyxLQUFDLE1BQU0sT0FBTyxFQUFFOzs7O1lBQ3BCLEtBQUMsTUFBTSxXQUFXLE9BQU07Ozs7ZUFFaEMsS0FBQyxNQUFNLGlCQUFpQjs7O2FBRTVCLE9BQUksT0FBTzs7UUFBUjtRQUFPOzs7Ozs7cUJBRVY7Ozs7UUFFSSxrQkFBUSxLQUFDLE1BQU0sRUFBRTtzQkFDTjs7OztRQUVYLE9BQVEsS0FBQyxNQUFNLEVBQUU7UUFDakIsUUFBUSxLQUFDLE1BQU0sRUFBRTs0QkFFTDs7O1lBQVI7WUFFQSxNQUFNLElBQUksbUJBQW1CLEtBQUs7a0JBQ2xCOztnQkFBaEI7O1lBRUEsSUFBSSxJQUFJO2dCQUNJLElBQUksS0FBSyxLQUFLLE1BQU07O2dCQUFoQzs7WUFFQSxNQUFNLEtBQUMsTUFBTSxVQUFVO2dCQUNYLE1BQU07O2dCQUFsQjs7WUFFQSxRQUFRLEtBQUMsTUFBTSxXQUFXO2dCQUNkLE1BQU0sUUFBUSxLQUFDLE1BQU07O2dCQUFqQzs7WUFFQSxPQUFPLEtBQUssTUFBTTtZQUVsQixLQUFPO1lBQ1AsS0FBTztZQUNQLE9BQU87WUFDUCxLQUFPO2dCQUVKLFNBQVEsSUFBSTs7Z0JBQ1gsS0FBSyxJQUFJLE9BQU87O3FCQUNaLFNBQVEsSUFBSTs7Z0JBQ2hCLEtBQUssSUFBSSxPQUFPOztxQkFDWixTQUFRLElBQUk7O2dCQUNoQixLQUFLLElBQUksT0FBTztnQkFDaEIsS0FBSyxJQUFJLE9BQU87O3FCQUNaLFNBQVEsSUFBSTs7MEJBQ0osSUFBSSxjQUFjLElBQUksU0FBakMsZUFBSzs7Ozs7Z0JBRU47O1lBRUosT0FBUSxLQUFDLFlBQVk7WUFDckIsUUFBUSxJQUFJLHFCQUFxQixNQUFNLEVBQUU7WUFDekMsT0FBUSxNQUFNLFNBQU87WUFFckIsYUFBUyxHQUFHLGNBQVUsSUFBSSxFQUFFLFNBQU8sUUFBUSxLQUFLO1lBQ2hELGFBQVMsS0FBQyxNQUFNLE1BQU0sY0FBVSxJQUFJLElBQUksSUFBSSxFQUFFLFNBQU8sUUFBUSxLQUFLO2dCQUN0RCxNQUFNOztnQkFBbEI7O2lCQUV3Qjs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOztpQkFDTTs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOztpQkFDTTs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOztZQUVsQjsyQkFFSSxJQUFLLG1CQUFVLEtBQUMsTUFBTSxLQUFLLE1BQU0sSUFBSSxJQUFFLGtDQUF4QixLQUFDLE1BQU0sS0FBSyxNQUFNLElBQUksSUFBRSxxQkFBeEIsS0FBQyxNQUFNLEtBQUssTUFBTSxJQUFJLElBQUU7OytCQUVuQyxJQUFLLFVBQUssc0JBQUEsU0FBQTs7b0JBTVYsUUFBUSxLQUFDLE1BQU0sUUFBUSxFQUFFO3lCQUV0Qjs7NEJBQ2EsTUFBTSxPQUFNOzs0QkFBeEI7O3dCQUNBLFNBQVMsTUFBTSxNQUFNLE1BQU07NEJBQ2YsS0FBSzs7NEJBQWpCOzt3QkFDQSxLQUFLLE9BQU87NkJBQ2dCOzs0QkFBNUIsS0FBQyxNQUFNLFNBQVMsTUFBTTs7NkJBQ2dCOzs0QkFBdEMsS0FBQyxNQUFNLE9BQU8sTUFBTSxHQUFHLE1BQU0sR0FBRzs7NkJBQzdCLGtCQUFTOzt1Q0FDSyxLQUFDLE1BQU0sU0FBUyxNQUFNLEdBQUcsTUFBTSxLQUEzQyxnQkFBSzs7NEJBQ04sS0FBQyxNQUFNLFNBQVMsTUFBTSxHQUFHLE1BQU0sSUFBSSxJQUFJLFNBQVMsS0FBSyxTQUFRLGFBQUEsS0FBSzs7d0JBQ3RFOzt5QkFFb0I7O3dCQUF4QixLQUFDLE1BQU0sT0FBTyxFQUFFLEVBQUU7O3lCQUNNOzt3QkFBeEIsS0FBQyxNQUFNLE9BQU8sRUFBRSxFQUFFOzt5QkFDZixrQkFBUzs7bUNBQ0ssS0FBQyxNQUFNLFNBQVMsRUFBRSxJQUE5QixnQkFBSzs7d0JBQ04sS0FBQyxNQUFNLFNBQVMsRUFBRSxHQUFHLElBQUksU0FBUyxLQUFLLFNBQVEsYUFBQSxLQUFLOzs7Ozs7O1dBckgzRTs7O2VBdUhNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/susan.kode
