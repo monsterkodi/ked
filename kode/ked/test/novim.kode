@@ -29,6 +29,28 @@ ked_sess = (store = {}) ->
     global.ked_session = get:fakeGet set:fakeSet
     store
 
+loadTextOn = (state text x=0 y=0) ->
+    state.loadLines belt.linesForText(text)
+    state.setMainCursor x y
+
+loadText = (text x=0 y=0) -> loadTextOn s text x y
+
+freshText = (text x=0 y=0) ->
+    s.clearHistory()
+    loadText text x y
+
+endSess = -> delete global.ked_session
+
+startNovim = (state) ->
+    mode.modes.novim = novim
+    mode.start state 'novim'
+
+stopNovim = (state) -> mode.stop state 'novim'
+
+pressKey = (state c) -> mode.handleKey state c {combo:c, char:c}
+
+pressFor = (state) -> (c) -> pressKey state c
+
 windowCells = cols:40 rows:20
 
 windowLines = []
@@ -38,14 +60,13 @@ for i in 0...30
 windowSetup = (name) ->
     store = ked_sess {'editor▸file':'/tmp/novimwindow'}
     s = new state windowCells name
-    mode.modes.novim = novim
-    mode.start s 'novim'
+    startNovim s
     s.loadLines windowLines
     s.setView [0 0]
     s.setMainCursor 0 8
     s
 
-windowPress = (s c) -> mode.handleKey s c {combo:c, char:c}
+windowPress = pressKey
 
 windowReset = (s) ->
     s.setView [0 0]
@@ -64,7 +85,7 @@ windowReset = (s) ->
 
         ked_session.get('novim▸history▸ex') ▸ ['foo']
 
-        delete global.ked_session
+        endSess()
 
   ▸ internal ex runs are not recorded
 
@@ -77,7 +98,7 @@ windowReset = (s) ->
 
         ked_session.get('novim▸history▸ex') ▸ undefined
 
-        delete global.ked_session
+        endSess()
 
   ▸ committed searches go to the search history
 
@@ -93,7 +114,7 @@ windowReset = (s) ->
 
         ked_session.get('novim▸history▸search') ▸ ['bar']
 
-        delete global.ked_session
+        endSess()
 
   ▸ up and down navigate the ex history
 
@@ -120,7 +141,7 @@ windowReset = (s) ->
         m.historyUp 'ex'   ▸ false
         m.ex               ▸ 'foo'
 
-        delete global.ked_session
+        endSess()
 
   ▸ up and down navigate the search history
 
@@ -150,7 +171,7 @@ windowReset = (s) ->
         m.searchText           ▸ 'alpha'
         texts                  ▸ ['beta' 'alpha']
 
-        delete global.ked_session
+        endSess()
 
   ▸ the histories do not share entries
 
@@ -170,7 +191,7 @@ windowReset = (s) ->
         ked_session.get('novim▸history▸ex')     ▸ ['foo']
         ked_session.get('novim▸history▸search') ▸ ['beta']
 
-        delete global.ked_session
+        endSess()
 
 ▸ cmdlinehistory
 
@@ -183,7 +204,7 @@ windowReset = (s) ->
         h.list()        ▸ []
         h.prev('draft') ▸ null
 
-        delete global.ked_session
+        endSess()
 
   ▸ added entries are stored in the session
 
@@ -197,7 +218,7 @@ windowReset = (s) ->
         h.list() ▸ ['w' 'q']
         ked_session.get('novim▸history▸ex') ▸ ['w' 'q']
 
-        delete global.ked_session
+        endSess()
 
   ▸ search and ex histories are separate
 
@@ -215,7 +236,7 @@ windowReset = (s) ->
         ked_session.get('novim▸history▸search') ▸ ['foo']
         ked_session.get('novim▸history▸ex')     ▸ ['w']
 
-        delete global.ked_session
+        endSess()
 
   ▸ an entry is not repeated but moved to the newest position
 
@@ -229,7 +250,7 @@ windowReset = (s) ->
 
         h.list() ▸ ['q' 'w']
 
-        delete global.ked_session
+        endSess()
 
   ▸ old entries fall off at the limit
 
@@ -243,7 +264,7 @@ windowReset = (s) ->
 
         h.list() ▸ ['3' '4' '5']
 
-        delete global.ked_session
+        endSess()
 
   ▸ navigation goes back and forward through the entries
 
@@ -264,7 +285,7 @@ windowReset = (s) ->
 
         h.prev('draft') ▸ 'two'
 
-        delete global.ked_session
+        endSess()
 
   ▸ adding an entry resets the navigation position
 
@@ -279,7 +300,7 @@ windowReset = (s) ->
         h.add 'three'
         h.prev('draft') ▸ 'three'
 
-        delete global.ked_session
+        endSess()
 
   ▸ a new instance sees the stored history
 
@@ -293,7 +314,7 @@ windowReset = (s) ->
         h2.list()      ▸ ['one']
         h2.prev('')    ▸ 'one'
 
-        delete global.ked_session
+        endSess()
 
   ▸ without a session entries are not added
 
@@ -311,13 +332,11 @@ windowReset = (s) ->
         store = ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_walk'
-        mode.modes.novim = novim
-        mode.start ns 'novim'
+        startNovim ns
 
-        press = (c) -> mode.handleKey ns c {combo:c, char:c}
+        press = pressFor ns
 
-        ns.loadLines belt.linesForText("one\ntwo\nthree")
-        ns.setMainCursor 0 0
+        loadTextOn ns "one\ntwo\nthree"
 
         press 'x'
         ns.mainCursor() ▸ [0 0]
@@ -338,21 +357,19 @@ windowReset = (s) ->
         press ','
         ns.mainCursor() ▸ [0 1]
 
-        mode.stop ns 'novim'
-        delete global.ked_session
+        stopNovim ns
+        endSess()
 
   ▸ a count walks several changes
 
         store = ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_count'
-        mode.modes.novim = novim
-        mode.start ns 'novim'
+        startNovim ns
 
-        press = (c) -> mode.handleKey ns c {combo:c, char:c}
+        press = pressFor ns
 
-        ns.loadLines belt.linesForText("1\n2\n3\n4\n5")
-        ns.setMainCursor 0 0
+        loadTextOn ns "1\n2\n3\n4\n5"
 
         press 'x'
         press 'j'
@@ -370,8 +387,8 @@ windowReset = (s) ->
         press ','
         ns.mainCursor() ▸ [0 2]
 
-        mode.stop ns 'novim'
-        delete global.ked_session
+        stopNovim ns
+        endSess()
 
   ▸ typing on one line is one change
 
@@ -388,28 +405,26 @@ windowReset = (s) ->
         ns.changes.entries.length ▸ 1
         ns.changes.entries[0]     ▸ [1 0]
 
-        delete global.ked_session
+        endSess()
 
   ▸ motion does not add a change
 
         store = ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_motion'
-        mode.modes.novim = novim
-        mode.start ns 'novim'
+        startNovim ns
 
-        press = (c) -> mode.handleKey ns c {combo:c, char:c}
+        press = pressFor ns
 
-        ns.loadLines belt.linesForText("one two")
-        ns.setMainCursor 0 0
+        loadTextOn ns "one two"
 
         press 'w'
         press 'l'
 
         ns.changes.entries.length ▸ 0
 
-        mode.stop ns 'novim'
-        delete global.ked_session
+        stopNovim ns
+        endSess()
 
   ▸ undo keeps the change position
 
@@ -429,18 +444,16 @@ windowReset = (s) ->
         ns.changes.entries.length ▸ 1
         ns.changes.older()        ▸ [0 0]
 
-        delete global.ked_session
+        endSess()
 
   ▸ substitute adds a change
 
         store = ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_substitute'
-        mode.modes.novim = novim
-        mode.start ns 'novim'
+        startNovim ns
 
-        ns.loadLines belt.linesForText("one\ntwo")
-        ns.setMainCursor 0 0
+        loadTextOn ns "one\ntwo"
 
         nmv = mode.get ns 'novim'
         nmv.runEx 's/one/x/'
@@ -448,8 +461,8 @@ windowReset = (s) ->
         ns.changes.entries.length ▸ 1
         ns.changes.entries[0]     ▸ [0 0]
 
-        mode.stop ns 'novim'
-        delete global.ked_session
+        stopNovim ns
+        endSess()
 
   ▸ loading a file forgets the changes
 
@@ -468,7 +481,7 @@ windowReset = (s) ->
 
         ns.changes.entries.length ▸ 0
 
-        delete global.ked_session
+        endSess()
 
 ▸ novim jumps
 
@@ -477,14 +490,12 @@ windowReset = (s) ->
         store = ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_gg'
-        mode.modes.novim = novim
-        mode.start ns 'novim'
+        startNovim ns
 
-        press = (c) -> mode.handleKey ns c {combo:c, char:c}
+        press = pressFor ns
         tab   = -> mode.handleKey ns 'tab' {combo:'tab', char:'\t'}
 
-        ns.loadLines belt.linesForText("one\ntwo\nthree")
-        ns.setMainCursor 0 0
+        loadTextOn ns "one\ntwo\nthree"
 
         press 'G'
         ns.mainCursor() ▸ [3 2]
@@ -499,21 +510,19 @@ windowReset = (s) ->
         tab()
         ns.mainCursor() ▸ [0 0]
 
-        mode.stop ns 'novim'
-        delete global.ked_session
+        stopNovim ns
+        endSess()
 
   ▸ a count walks several jumps
 
         store = ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_count'
-        mode.modes.novim = novim
-        mode.start ns 'novim'
+        startNovim ns
 
-        press = (c) -> mode.handleKey ns c {combo:c, char:c}
+        press = pressFor ns
 
-        ns.loadLines belt.linesForText("a\n\nb\n\nc")
-        ns.setMainCursor 0 0
+        loadTextOn ns "a\n\nb\n\nc"
 
         press '}'
         ns.mainCursor() ▸ [0 1]
@@ -529,21 +538,19 @@ windowReset = (s) ->
         press 'ctrl+i'
         ns.mainCursor() ▸ [0 3]
 
-        mode.stop ns 'novim'
-        delete global.ked_session
+        stopNovim ns
+        endSess()
 
   ▸ a committed search is a jump
 
         store = ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_search'
-        mode.modes.novim = novim
-        mode.start ns 'novim'
+        startNovim ns
 
-        press = (c) -> mode.handleKey ns c {combo:c, char:c}
+        press = pressFor ns
 
-        ns.loadLines belt.linesForText("foo\nbar\nfoo")
-        ns.setMainCursor 0 1
+        loadTextOn ns "foo\nbar\nfoo" 0 1
 
         nmv = mode.get ns 'novim'
         nmv.startSearch()
@@ -555,21 +562,19 @@ windowReset = (s) ->
         press 'ctrl+o'
         ns.mainCursor() ▸ [0 1]
 
-        mode.stop ns 'novim'
-        delete global.ked_session
+        stopNovim ns
+        endSess()
 
   ▸ percent is a jump
 
         store = ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_percent'
-        mode.modes.novim = novim
-        mode.start ns 'novim'
+        startNovim ns
 
-        press = (c) -> mode.handleKey ns c {combo:c, char:c}
+        press = pressFor ns
 
-        ns.loadLines belt.linesForText("call(\n  x\n)")
-        ns.setMainCursor 4 0
+        loadTextOn ns "call(\n  x\n)" 4 0
 
         press '%'
 
@@ -578,24 +583,22 @@ windowReset = (s) ->
         press 'ctrl+o'
         ns.mainCursor() ▸ [4 0]
 
-        mode.stop ns 'novim'
-        delete global.ked_session
+        stopNovim ns
+        endSess()
 
   ▸ a jump to another file opens it
 
         store = ked_sess {'editor▸file':'/tmp/novimjump-a'}
 
         ns = new state cells 'novimjump_files'
-        mode.modes.novim = novim
-        mode.start ns 'novim'
+        startNovim ns
 
-        press = (c) -> mode.handleKey ns c {combo:c, char:c}
+        press = pressFor ns
 
         opens = []
         post.on 'file.open' (file row col) -> opens.push [file row col]
 
-        ns.loadLines belt.linesForText("one\ntwo\nthree")
-        ns.setMainCursor 2 0
+        loadTextOn ns "one\ntwo\nthree" 2 0
 
         press 'G'
 
@@ -606,16 +609,15 @@ windowReset = (s) ->
 
         opens[-1] ▸ ['/tmp/novimjump-a' 2 0]
 
-        mode.stop ns 'novim'
-        delete global.ked_session
+        stopNovim ns
+        endSess()
 
   ▸ a global command does not add jumps
 
         store = ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_global'
-        mode.modes.novim = novim
-        mode.start ns 'novim'
+        startNovim ns
 
         ns.loadLines belt.linesForText("a\nb\nc")
 
@@ -624,19 +626,17 @@ windowReset = (s) ->
 
         ns.jumps.entries.length ▸ 0
 
-        mode.stop ns 'novim'
-        delete global.ked_session
+        stopNovim ns
+        endSess()
 
   ▸ substitute and edit add jumps
 
         store = ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_ex'
-        mode.modes.novim = novim
-        mode.start ns 'novim'
+        startNovim ns
 
-        ns.loadLines belt.linesForText("one\ntwo")
-        ns.setMainCursor 0 1
+        loadTextOn ns "one\ntwo" 0 1
 
         nmv = mode.get ns 'novim'
 
@@ -652,8 +652,8 @@ windowReset = (s) ->
         ns.jumps.entries.length ▸ 2
         ns.jumps.entries[1].y   ▸ 0
 
-        mode.stop ns 'novim'
-        delete global.ked_session
+        stopNovim ns
+        endSess()
 
 ▸ changelist
 
@@ -1020,8 +1020,7 @@ windowReset = (s) ->
     
   ▸ cursor to start and end of line
     
-        s.loadLines belt.linesForText("one two\nfour")
-        s.setMainCursor 0 0
+        loadText "one two\nfour"
     
         s.executeNovim {operator:'move', motion:{kind:'eol'}}
         cur 7 0
@@ -1030,8 +1029,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'move', motion:{kind:'bol'}}
         cur 0 0
     
-        s.loadLines belt.linesForText("\nabc")
-        s.setMainCursor 0 0
+        loadText "\nabc"
         s.executeNovim {operator:'move', motion:{kind:'eol'}}
         cur 0 0
         
@@ -1039,8 +1037,7 @@ windowReset = (s) ->
     
     ▸ yank motions
         
-            s.loadLines belt.linesForText("one two three\nfour five")
-            s.setMainCursor 0 0
+            loadText "one two three\nfour five"
         
             s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
             s.novimRegister.lines ▸ ['one ']
@@ -1052,8 +1049,7 @@ windowReset = (s) ->
             s.novimRegister.lines ▸ ['two ']
             cur 4 0
         
-            s.loadLines belt.linesForText("alpha\nbeta\ngamma")
-            s.setMainCursor 3 1
+            loadText "alpha\nbeta\ngamma" 3 1
         
             s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
             s.novimRegister.lines ▸ ['beta']
@@ -1070,8 +1066,7 @@ windowReset = (s) ->
         
     ▸ yank flash
         
-            s.loadLines belt.linesForText("one two three\nfour five")
-            s.setMainCursor 0 0
+            loadText "one two three\nfour five"
         
             s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
             s.yankFlash ▸ [[0 0 4 0]]
@@ -1079,8 +1074,7 @@ windowReset = (s) ->
             s.clearYankFlash()
             s.yankFlash ▸ null
         
-            s.loadLines belt.linesForText("one two")
-            s.setMainCursor 0 0
+            loadText "one two"
             s.startVisual 'char'
             s.setMainCursor 2 0
             s.updateVisual()
@@ -1094,8 +1088,7 @@ windowReset = (s) ->
         
     ▸ yank flash fades
         
-            s.loadLines belt.linesForText("one two")
-            s.setMainCursor 0 0
+            loadText "one two"
         
             s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
             s.yankFlash ▸ [[0 0 4 0]]
@@ -1124,8 +1117,7 @@ windowReset = (s) ->
     
             [m key keys] = novimKeysFor s
     
-            s.loadLines belt.linesForText("one\ntwo\nthree")
-            s.setMainCursor 1 1
+            loadText "one\ntwo\nthree" 1 1
             
             key 'Y'
             s.novimRegister.lines ▸ ['two']
@@ -1139,8 +1131,7 @@ windowReset = (s) ->
     
   ▸ put
     
-        s.loadLines belt.linesForText("alpha\nbeta")
-        s.setMainCursor 0 0
+        loadText "alpha\nbeta"
     
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
     
@@ -1152,32 +1143,28 @@ windowReset = (s) ->
         txt "alpha\nalpha\nalpha\nbeta"
         cur 0 1
     
-        s.loadLines belt.linesForText("  alpha\nbeta")
-        s.setMainCursor 2 0
+        loadText "  alpha\nbeta" 2 0
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
         s.setMainCursor 0 1
         s.executeNovim {operator:'put', after:false}
         txt "  alpha\n  alpha\nbeta"
         cur 2 1
     
-        s.loadLines belt.linesForText("x\ny")
-        s.setMainCursor 0 0
+        loadText "x\ny"
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
         s.setMainCursor 0 1
         s.executeNovim {operator:'put', after:true, count:2}
         txt "x\ny\nx\nx"
         cur 0 3
     
-        s.loadLines belt.linesForText("abc\ndef")
-        s.setMainCursor 0 0
+        loadText "abc\ndef"
         s.executeNovim {operator:'yank', motion:{kind:'eol'}}
         s.setMainCursor 3 1
         s.executeNovim {operator:'put', after:true}
         txt "abc\ndefabc"
         cur 6 1
     
-        s.loadLines belt.linesForText("abc\ndef")
-        s.setMainCursor 0 0
+        loadText "abc\ndef"
         s.executeNovim {operator:'yank', motion:{kind:'eol'}}
         s.setMainCursor 1 1
         s.executeNovim {operator:'put', after:false}
@@ -1185,15 +1172,13 @@ windowReset = (s) ->
         cur 3 1
     
         s.novimRegister = { lines: ['one' 'two'], linewise: false }
-        s.loadLines belt.linesForText("ab")
-        s.setMainCursor 0 0
+        loadText "ab"
         s.executeNovim {operator:'put', after:true}
         txt "one\ntwo\nab"
         cur 0 2
     
         s.novimRegister = null
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 0 0
+        loadText "abc"
         s.executeNovim {operator:'put', after:true}
         txt "abc"
     
@@ -1201,32 +1186,27 @@ windowReset = (s) ->
     
             s.novimRegister = { lines: ['X'], linewise: false }
         
-            s.loadLines belt.linesForText("abc")
-            s.setMainCursor 0 0
+            loadText "abc"
             s.executeNovim {operator:'put', after:true}
             txt "Xabc"
             cur 1 0
         
-            s.loadLines belt.linesForText("abc")
-            s.setMainCursor 1 0
+            loadText "abc" 1 0
             s.executeNovim {operator:'put', after:true}
             txt "aXbc"
             cur 2 0
         
-            s.loadLines belt.linesForText("abc")
-            s.setMainCursor 1 0
+            loadText "abc" 1 0
             s.executeNovim {operator:'put', after:false}
             txt "Xabc"
             cur 1 0
         
-            s.loadLines belt.linesForText("abc")
-            s.setMainCursor 3 0
+            loadText "abc" 3 0
             s.executeNovim {operator:'put', after:true}
             txt "abcX"
             cur 4 0
         
-            s.loadLines belt.linesForText("abc\ndef")
-            s.setMainCursor 0 0
+            loadText "abc\ndef"
             before = s.h.length
         
             s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
@@ -1238,8 +1218,7 @@ windowReset = (s) ->
     
   ▸ delete fills the register
     
-        s.loadLines belt.linesForText("one two\nthree")
-        s.setMainCursor 0 0
+        loadText "one two\nthree"
     
         s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
         s.novimRegister.lines ▸ ['one two']
@@ -1249,22 +1228,19 @@ windowReset = (s) ->
         s.executeNovim {operator:'put', after:false}
         txt "one two\nthree"
     
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 1 0
+        loadText "abc" 1 0
         s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
         s.novimRegister.lines ▸ ['b']
         s.novimRegister.linewise ▸ false
         txt "ac"
     
-        s.loadLines belt.linesForText("one two")
-        s.setMainCursor 3 0
+        loadText "one two" 3 0
         s.executeNovim {operator:'delete', motion:{kind:'eol'}}
         s.novimRegister.lines ▸ [' two']
         s.novimRegister.linewise ▸ false
         txt "one"
     
-        s.loadLines belt.linesForText("abcd")
-        s.setMainCursor 0 0
+        loadText "abcd"
         s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
         s.executeNovim {operator:'repeat', count:1}
         s.novimRegister.lines ▸ ['cd']
@@ -1274,8 +1250,7 @@ windowReset = (s) ->
 
         [m key keys] = novimKeysFor s
 
-        s.loadLines belt.linesForText("one\ntwo")
-        s.setMainCursor 0 0
+        loadText "one\ntwo"
 
         keys '"ayy'
 
@@ -1286,8 +1261,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'put', after:true, register:'a'}
         txt "one\none\ntwo"
 
-        s.loadLines belt.linesForText("one\ntwo")
-        s.setMainCursor 0 0
+        loadText "one\ntwo"
 
         keys '"ayy'
         s.setMainCursor 0 1
@@ -1296,8 +1270,7 @@ windowReset = (s) ->
         s.registers.read('a').lines  ▸ ['one' 'two']
 
         b = new state cells 'blackhole'
-        b.loadLines belt.linesForText("one\ntwo")
-        b.setMainCursor 0 0
+        loadTextOn b "one\ntwo"
 
         b.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
         b.executeNovim {operator:'delete', motion:{kind:'line', count:1}, register:'_'}
@@ -1313,15 +1286,13 @@ windowReset = (s) ->
 
         mac = new state cells 'macros'
 
-        mode.modes.novim = novim
         mac.allowedModes.novim = true
-        mode.start mac 'novim'
+        startNovim mac
 
         feed = c -> mac.feedKey c {combo:c, char: (c == 'esc' ? null : c)}
         mtxt = -> kseg.str mac.s.lines
 
-        mac.loadLines belt.linesForText("one\ntwo")
-        mac.setMainCursor 0 0
+        loadTextOn mac "one\ntwo"
 
         feed 'q'
         feed 'a'
@@ -1341,8 +1312,7 @@ windowReset = (s) ->
 
         mtxt() ▸ "\ntwo"
 
-        mac.loadLines belt.linesForText("abcdef")
-        mac.setMainCursor 0 0
+        loadTextOn mac "abcdef"
 
         feed '3'
         feed '@'
@@ -1350,8 +1320,7 @@ windowReset = (s) ->
 
         mtxt() ▸ "def"
 
-        mac.loadLines belt.linesForText("one\ntwo")
-        mac.setMainCursor 0 0
+        loadTextOn mac "one\ntwo"
 
         feed 'q'
         feed 'b'
@@ -1368,8 +1337,7 @@ windowReset = (s) ->
 
         mtxt() ▸ "one!\ntwo!"
 
-        mac.loadLines belt.linesForText("abc")
-        mac.setMainCursor 0 0
+        loadTextOn mac "abc"
 
         feed '"'
         feed 'b'
@@ -1377,8 +1345,7 @@ windowReset = (s) ->
 
         mtxt() ▸ "A!<Esc>jabc"
 
-        mac.loadLines belt.linesForText("abc")
-        mac.setMainCursor 0 0
+        loadTextOn mac "abc"
 
         feed 'q'
         feed 'c'
@@ -1400,8 +1367,7 @@ windowReset = (s) ->
 
         mac.registers.read('d').keys.length ▸ 2
 
-        mac.loadLines belt.linesForText("a\nb\nc")
-        mac.setMainCursor 0 0
+        loadTextOn mac "a\nb\nc"
 
         mode.get(mac, 'novim').runEx 'd'
 
@@ -1410,8 +1376,7 @@ windowReset = (s) ->
 
         mtxt() ▸ "c"
 
-        mac.loadLines belt.linesForText("abc")
-        mac.setMainCursor 0 0
+        loadTextOn mac "abc"
 
         mac.registers.write 'e' { lines: ['x'], linewise: false } 'yank'
 
@@ -1434,7 +1399,7 @@ windowReset = (s) ->
         macroErrors[-1]    ▸ 'command-line window not implemented'
         mac.isMacroRecording() ▸ false
 
-        mode.stop mac 'novim'
+        stopNovim mac
         config.data = oldConfig
 
   ▸ clipboard registers
@@ -1459,8 +1424,7 @@ windowReset = (s) ->
         novim.isHeadless() ▸ true
         novim.clipboardEnabled() ▸ false
     
-        s.loadLines belt.linesForText("one\ntwo")
-        s.setMainCursor 0 0
+        loadText "one\ntwo"
     
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
         copies ▸ []
@@ -1471,8 +1435,7 @@ windowReset = (s) ->
         novim.toggleClipboard() ▸ true
         novim.clipboardEnabled() ▸ true
     
-        s.loadLines belt.linesForText("one\ntwo")
-        s.setMainCursor 0 0
+        loadText "one\ntwo"
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
         copies ▸ ['one\n']
     
@@ -1481,21 +1444,18 @@ windowReset = (s) ->
         txt "one\nshared\ntwo"
     
         pasted = "XYZ"
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 1 0
+        loadText "abc" 1 0
         s.executeNovim {operator:'put', after:true}
         txt "aXYZbc"
     
-        s.loadLines belt.linesForText("gone\nkept")
-        s.setMainCursor 0 0
+        loadText "gone\nkept"
         s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
         copies[-1] ▸ 'gone\n'
     
         novim.clipboardSync = false
         novim.clipboardEnabled() ▸ false
     
-        s.loadLines belt.linesForText("alpha\nbeta")
-        s.setMainCursor 0 0
+        loadText "alpha\nbeta"
     
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}, register:'clipboard'}
         copies[-1] ▸ 'alpha\n'
@@ -1506,20 +1466,17 @@ windowReset = (s) ->
         txt "alpha\nplus\nbeta"
     
         pasted = "star"
-        s.loadLines belt.linesForText("ab")
-        s.setMainCursor 0 0
+        loadText "ab"
         s.executeNovim {operator:'put', after:true, register:'clipboard'}
         txt "starab"
     
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 0 0
+        loadText "abc"
         s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
         s.novimRegister.lines ▸ ['a']
     
         [m key keys] = novimKeysFor s
     
-        s.loadLines belt.linesForText("one\ntwo")
-        s.setMainCursor 0 0
+        loadText "one\ntwo"
     
         keys '"+yy'
         copies[-1] ▸ 'one\n'
@@ -1532,8 +1489,7 @@ windowReset = (s) ->
         keys '""yy'
         copies.length ▸ before
     
-        s.loadLines belt.linesForText("one\ntwo")
-        s.setMainCursor 0 0
+        loadText "one\ntwo"
         key '"'
         m.handleKey 'esc' {combo:'esc'}
         key 'x'
@@ -1542,13 +1498,11 @@ windowReset = (s) ->
         clip.tool = 'none'
         clip.text = ''
     
-        s.loadLines belt.linesForText("fall\nback")
-        s.setMainCursor 0 0
+        loadText "fall\nback"
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}, register:'clipboard'}
         clip.text ▸ 'fall\n'
     
-        s.loadLines belt.linesForText("fall\nback")
-        s.setMainCursor 0 0
+        loadText "fall\nback"
         s.executeNovim {operator:'put', after:true, register:'clipboard'}
         txt "fall\nfall\nback"
     
@@ -1643,8 +1597,7 @@ windowReset = (s) ->
     
     ▸ undo command
     
-            s.loadLines belt.linesForText("alpha beta\ngamma delta")
-            s.setMainCursor 0 0
+            loadText "alpha beta\ngamma delta"
         
             s.executeNovim {operator:'delete', motion:{kind:'word', count:1}}
             txt "beta\ngamma delta"
@@ -1689,8 +1642,7 @@ windowReset = (s) ->
         
             txt " def"
         
-            s.loadLines belt.linesForText("\nalpha\nbeta")
-            s.setMainCursor 0 0
+            loadText "\nalpha\nbeta"
         
             s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
         
@@ -1698,68 +1650,57 @@ windowReset = (s) ->
     
   ▸ execute text objects
     
-        s.loadLines belt.linesForText("one two three four")
-        s.setMainCursor 5 0
+        loadText "one two three four" 5 0
     
         s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
         txt "one  three four"
     
-        s.loadLines belt.linesForText("one two three four")
-        s.setMainCursor 5 0
+        loadText "one two three four" 5 0
     
         s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}}
         txt "one three four"
     
-        s.loadLines belt.linesForText("one two")
-        s.setMainCursor 7 0
+        loadText "one two" 7 0
     
         s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
         txt "one "
     
-        s.loadLines belt.linesForText('say "hello there" ok')
-        s.setMainCursor 7 0
+        loadText 'say "hello there" ok' 7 0
     
         s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'"', count:1}}
         txt 'say "" ok'
     
-        s.loadLines belt.linesForText('say "hello there" ok')
-        s.setMainCursor 7 0
+        loadText 'say "hello there" ok' 7 0
     
         s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'"', count:1}}
         txt 'say ok'
     
-        s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
-        s.setMainCursor 21 0
+        loadText "if seg not in ['', undefined, ' ', '}', ']', ')']" 21 0
     
         s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'[', count:1}}
         txt "if seg not in []"
     
-        s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
-        s.setMainCursor 21 0
+        loadText "if seg not in ['', undefined, ' ', '}', ']', ')']" 21 0
     
         s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'[', count:1}}
         txt "if seg not in "
     
-        s.loadLines belt.linesForText("foo(\n  bar\n)")
-        s.setMainCursor 3 1
+        loadText "foo(\n  bar\n)" 3 1
     
         s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'(', count:1}}
         txt "foo"
     
-        s.loadLines belt.linesForText("alpha")
-        s.setMainCursor 3 0
+        loadText "alpha" 3 0
     
         s.executeNovim {operator:'delete', motion:{kind:'charBack', count:1}}
         txt "alha"
     
-        s.loadLines belt.linesForText("alpha")
-        s.setMainCursor 0 0
+        loadText "alpha"
     
         s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
         txt "lpha"
     
-        s.loadLines belt.linesForText("alpha")
-        s.setMainCursor 0 0
+        loadText "alpha"
     
         s.executeNovim {operator:'delete', motion:{kind:'charBack', count:1}}
         txt "alpha"
@@ -1768,8 +1709,7 @@ windowReset = (s) ->
       
     ▸ change selects by motion
     
-            s.loadLines belt.linesForText("one two three")
-            s.setMainCursor 5 0
+            loadText "one two three" 5 0
         
             s.selectByMotion {kind:'textObject', area:'inner', target:'word', count:1}
         
@@ -1790,8 +1730,7 @@ windowReset = (s) ->
     
             s.novimRegister = { lines: ['keep'], linewise: false }
         
-            s.loadLines belt.linesForText("one two three")
-            s.setMainCursor 5 0
+            loadText "one two three" 5 0
         
             s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
         
@@ -1801,8 +1740,7 @@ windowReset = (s) ->
             s.novimRegister.lines ▸ ['two']
             s.registers.read('-').lines ▸ ['two']
         
-            s.loadLines belt.linesForText("one two three")
-            s.setMainCursor 5 0
+            loadText "one two three" 5 0
         
             s.executeNovim {operator:'change', motion:{kind:'textObject', area:'around', target:'word', count:1}}
         
@@ -1819,8 +1757,7 @@ windowReset = (s) ->
             s.s.selections ▸ [[0 0 4 0] [0 1 6 1]]
             s.allCursors() ▸ [[4 0] [6 1]]
         
-            s.loadLines belt.linesForText("one two")
-            s.setMainCursor 4 0
+            loadText "one two" 4 0
         
             s.executeNovim {operator:'change', motion:{kind:'eol'}}
         
@@ -1828,8 +1765,7 @@ windowReset = (s) ->
             s.s.selections ▸ [[4 0 7 0]]
             cur 7 0
         
-            s.loadLines belt.linesForText("one\ntwo")
-            s.setMainCursor 0 1
+            loadText "one\ntwo" 0 1
         
             s.executeNovim {operator:'change', motion:{kind:'line', count:1}}
         
@@ -1839,8 +1775,7 @@ windowReset = (s) ->
     
     ▸ typing replaces the change selection
     
-            s.loadLines belt.linesForText("one two three")
-            s.setMainCursor 5 0
+            loadText "one two three" 5 0
         
             s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
             s.insert 'X'
@@ -1851,8 +1786,7 @@ windowReset = (s) ->
 
         cr = new state cells 'changereg'
 
-        cr.loadLines belt.linesForText("one two")
-        cr.setMainCursor 4 0
+        loadTextOn cr "one two" 4 0
 
         cr.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
 
@@ -1860,15 +1794,13 @@ windowReset = (s) ->
         cr.registers.read('1')         ▸ null
         cr.novimRegister.lines         ▸ ['two']
 
-        cr.loadLines belt.linesForText("one two")
-        cr.setMainCursor 0 0
+        loadTextOn cr "one two"
 
         cr.executeNovim {operator:'change', motion:{kind:'word', count:1}, register:'a'}
 
         cr.registers.read('a').lines   ▸ ['one ']
 
-        cr.loadLines belt.linesForText("one\ntwo")
-        cr.setMainCursor 0 0
+        loadTextOn cr "one\ntwo"
         cr.registers.set '-', { lines: ['old'], linewise: false }
 
         cr.executeNovim {operator:'change', motion:{kind:'line', count:1}}
@@ -1878,8 +1810,7 @@ windowReset = (s) ->
 
   ▸ change does not touch history
     
-            s.loadLines belt.linesForText("alpha beta")
-            s.setMainCursor 0 0
+            loadText "alpha beta"
             before = s.h.length
         
             s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
@@ -1890,62 +1821,53 @@ windowReset = (s) ->
     
     ▸ change commands and keys
     
-            s.loadLines belt.linesForText("one two three")
-            s.setMainCursor 5 0
+            loadText "one two three" 5 0
             keys 'ciw'
             txt "one two three"
             s.s.selections ▸ [[4 0 7 0]]
             cur 7 0
             m.operator ▸ null
         
-            s.loadLines belt.linesForText("one two three")
-            s.setMainCursor 5 0
+            loadText "one two three" 5 0
             keys 'caw'
             txt "one two three"
             s.s.selections ▸ [[4 0 8 0]]
         
-            s.loadLines belt.linesForText("one two")
-            s.setMainCursor 4 0
+            loadText "one two" 4 0
             keys 'C'
             txt "one two"
             s.s.selections ▸ [[4 0 7 0]]
             cur 7 0
         
-            s.loadLines belt.linesForText("one\ntwo")
-            s.setMainCursor 0 0
+            loadText "one\ntwo"
             keys 'S'
             txt "one\ntwo"
             s.s.selections ▸ [[0 0 3 0]]
             cur 3 0
         
-            s.loadLines belt.linesForText("abcdef")
-            s.setMainCursor 0 0
+            loadText "abcdef"
             keys 's'
             txt "abcdef"
             s.s.selections ▸ [[0 0 1 0]]
             cur 1 0
         
-            s.loadLines belt.linesForText("abcdef")
-            s.setMainCursor 0 0
+            loadText "abcdef"
             keys '2s'
             txt "abcdef"
             s.s.selections ▸ [[0 0 2 0]]
             cur 2 0
         
-            s.loadLines belt.linesForText("one\ntwo")
-            s.setMainCursor 0 0
+            loadText "one\ntwo"
             keys 'cc'
             txt "one\ntwo"
             s.s.selections ▸ [[0 0 3 0]]
             cur 3 0
         
-            s.loadLines belt.linesForText("one two three")
-            s.setMainCursor 0 0
+            loadText "one two three"
             keys 'dw'
             txt "two three"
         
-            s.loadLines belt.linesForText("one two three")
-            s.setMainCursor 0 0
+            loadText "one two three"
             keys 'ciw'
             txt "one two three"
             s.s.selections ▸ [[0 0 3 0]]
@@ -1959,12 +1881,10 @@ windowReset = (s) ->
         
     ▸ change exits novim
         
-            s.loadLines belt.linesForText("one two three")
-            s.setMainCursor 5 0
+            loadText "one two three" 5 0
         
             s.allowedModes.novim = true
-            mode.modes.novim = novim
-            mode.start s 'novim'
+            startNovim s
         
             mode.isActive s 'novim' ▸ true
         
@@ -1981,8 +1901,7 @@ windowReset = (s) ->
     
     ▸ repeat command
     
-            s.loadLines belt.linesForText("abcdef")
-            s.setMainCursor 0 0
+            loadText "abcdef"
         
             s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
             txt "bcdef"
@@ -1993,8 +1912,7 @@ windowReset = (s) ->
             s.executeNovim {operator:'repeat', count:2}
             txt "ef"
         
-            s.loadLines belt.linesForText("abcdef")
-            s.setMainCursor 0 0
+            loadText "abcdef"
         
             s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
             txt "cdef"
@@ -2002,16 +1920,14 @@ windowReset = (s) ->
             s.executeNovim {operator:'repeat', count:1}
             txt "ef"
         
-            s.loadLines belt.linesForText("abcdef")
-            s.setMainCursor 0 0
+            loadText "abcdef"
         
             s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
             s.executeNovim {operator:'move', motion:{kind:'right', count:1}}
             s.executeNovim {operator:'repeat', count:1}
             txt "bdef"
         
-            s.loadLines belt.linesForText("abcdef")
-            s.setMainCursor 0 0
+            loadText "abcdef"
         
             s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
             s.executeNovim {operator:'undo', count:1}
@@ -2020,8 +1936,7 @@ windowReset = (s) ->
             s.executeNovim {operator:'repeat', count:1}
             txt "bcdef"
         
-            s.loadLines belt.linesForText("one two three")
-            s.setMainCursor 0 0
+            loadText "one two three"
         
             s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}}
             txt "two three"
@@ -2030,16 +1945,14 @@ windowReset = (s) ->
             txt "three"
         
             s.lastChange = null
-            s.loadLines belt.linesForText("abc")
-            s.setMainCursor 0 0
+            loadText "abc"
         
             s.executeNovim {operator:'repeat', count:1}
             txt "abc"
         
     ▸ repeat insert
         
-            s.loadLines belt.linesForText("abc\ndef")
-            s.setMainCursor 0 0
+            loadText "abc\ndef"
         
             keys 'i'
             s.novimInsert.kind ▸ 'insert'
@@ -2051,8 +1964,7 @@ windowReset = (s) ->
             s.executeNovim {operator:'repeat', count:1}
             txt "Xabc\nXdef"
         
-            s.loadLines belt.linesForText("one two")
-            s.setMainCursor 0 0
+            loadText "one two"
         
             keys 'i'
             s.insert 'new '
@@ -2065,8 +1977,7 @@ windowReset = (s) ->
         
     ▸ repeat insert with backspace
         
-            s.loadLines belt.linesForText("abc\ndef")
-            s.setMainCursor 0 0
+            loadText "abc\ndef"
         
             keys 'i'
             s.insert 'XY'
@@ -2081,8 +1992,7 @@ windowReset = (s) ->
         
     ▸ repeat append
         
-            s.loadLines belt.linesForText("abc\ndef")
-            s.setMainCursor 0 1
+            loadText "abc\ndef" 0 1
         
             keys 'A'
             s.insert 'Z'
@@ -2093,8 +2003,7 @@ windowReset = (s) ->
             s.executeNovim {operator:'repeat', count:1}
             txt "abcZ\ndefZ"
         
-            s.loadLines belt.linesForText("abc")
-            s.setMainCursor 0 0
+            loadText "abc"
         
             keys 'a'
             s.insert 'X'
@@ -2107,8 +2016,7 @@ windowReset = (s) ->
         
     ▸ repeat open line
         
-            s.loadLines belt.linesForText("abc\ndef")
-            s.setMainCursor 0 0
+            loadText "abc\ndef"
         
             keys 'o'
             s.insert 'new'
@@ -2121,8 +2029,7 @@ windowReset = (s) ->
         
     ▸ repeat change with text
         
-            s.loadLines belt.linesForText("one two three")
-            s.setMainCursor 4 0
+            loadText "one two three" 4 0
         
             keys 'ciw'
             s.insert 'X'
@@ -2135,8 +2042,7 @@ windowReset = (s) ->
         
     ▸ repeat change without text
         
-            s.loadLines belt.linesForText("one two")
-            s.setMainCursor 0 0
+            loadText "one two"
         
             keys 'ciw'
             s.finishNovimInsert()
@@ -2148,8 +2054,7 @@ windowReset = (s) ->
         
     ▸ repeat put
         
-            s.loadLines belt.linesForText("one\ntwo")
-            s.setMainCursor 0 0
+            loadText "one\ntwo"
             s.novimRegister = { lines: ['new'], linewise: true }
         
             keys 'p'
@@ -2159,8 +2064,7 @@ windowReset = (s) ->
             s.executeNovim {operator:'repeat', count:1}
             txt "one\nnew\ntwo\nnew"
         
-            s.loadLines belt.linesForText("one two")
-            s.setMainCursor 0 0
+            loadText "one two"
             s.novimRegister = { lines: ['X'], linewise: false }
         
             keys 'p'
@@ -2172,8 +2076,7 @@ windowReset = (s) ->
         
     ▸ repeat visual delete
         
-            s.loadLines belt.linesForText("abcdefg")
-            s.setMainCursor 0 0
+            loadText "abcdefg"
         
             keys 'vlld'
             txt "cdefg"
@@ -2184,8 +2087,7 @@ windowReset = (s) ->
             s.executeNovim {operator:'repeat', count:1}
             txt "g"
         
-            s.loadLines belt.linesForText("one\ntwo\nthree")
-            s.setMainCursor 0 0
+            loadText "one\ntwo\nthree"
         
             keys 'Vd'
             txt "two\nthree"
@@ -2195,8 +2097,7 @@ windowReset = (s) ->
         
     ▸ repeat visual change
         
-            s.loadLines belt.linesForText("abcdef")
-            s.setMainCursor 0 0
+            loadText "abcdef"
         
             keys 'vllc'
             s.insert 'XY'
@@ -2207,8 +2108,7 @@ windowReset = (s) ->
             s.executeNovim {operator:'repeat', count:1}
             txt "XYXYef"
         
-            s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
-            s.setMainCursor 0 0
+            loadText "one\ntwo\nthree\nfour"
         
             keys 'Vc'
             s.insert 'X'
@@ -2235,8 +2135,7 @@ windowReset = (s) ->
             gamma delta
             """
     
-        s.loadLines belt.linesForText(text)
-        s.setMainCursor 0 0
+        loadText text
     
         key 'd'
         m.handleKey 'esc' {combo:'esc'}
@@ -2251,8 +2150,7 @@ windowReset = (s) ->
             gamma delta
             """
     
-        s.loadLines belt.linesForText(text)
-        s.setMainCursor 0 0
+        loadText text
     
         keys 'dw'
         txt """
@@ -2263,67 +2161,57 @@ windowReset = (s) ->
         key 'u'
         txt text
     
-        s.loadLines belt.linesForText("abc def")
-        s.setMainCursor 4 0
+        loadText "abc def" 4 0
     
         key 'd'
         m.handleKey 'left' {combo:'left'}
         txt "abcdef"
     
-        s.loadLines belt.linesForText("abc def")
-        s.setMainCursor 4 0
+        loadText "abc def" 4 0
     
         key 'd'
         m.handleKey 'right' {combo:'right'}
         txt "abc ef"
     
-        s.loadLines belt.linesForText("abc\ndef\nghi")
-        s.setMainCursor 0 1
+        loadText "abc\ndef\nghi" 0 1
     
         key 'd'
         m.handleKey 'down' {combo:'down'}
         txt "abc"
     
-        s.loadLines belt.linesForText("abc\ndef\nghi")
-        s.setMainCursor 0 1
+        loadText "abc\ndef\nghi" 0 1
     
         key 'd'
         m.handleKey 'up' {combo:'up'}
         txt "ghi"
     
-        s.loadLines belt.linesForText("alpha")
-        s.setMainCursor 3 0
+        loadText "alpha" 3 0
     
         keys 'dh'
         txt "alha"
     
-        s.loadLines belt.linesForText("alpha")
-        s.setMainCursor 0 0
+        loadText "alpha"
     
         keys 'dl'
         txt "lpha"
     
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 5 0
+        loadText "one two three" 5 0
     
         keys 'diw'
         txt "one  three"
         m.operator ▸ null
     
-        s.loadLines belt.linesForText('say "hello there" ok')
-        s.setMainCursor 7 0
+        loadText 'say "hello there" ok' 7 0
     
         keys 'da"'
         txt "say ok"
     
-        s.loadLines belt.linesForText("if seg not in ['', undefined, ' ', '}', ']', ')']")
-        s.setMainCursor 21 0
+        loadText "if seg not in ['', undefined, ' ', '}', ']', ')']" 21 0
     
         keys 'di['
         txt "if seg not in []"
     
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 0 0
+        loadText "one two three"
     
         keys 'd2iw'
         txt " three"
@@ -2335,8 +2223,7 @@ windowReset = (s) ->
         txt "abc"
         m.area ▸ null
     
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
+        loadText "abcdef"
     
         key 'x'
         txt "bcdef"
@@ -2347,14 +2234,12 @@ windowReset = (s) ->
         keys '2.'
         txt "ef"
     
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
+        loadText "abcdef"
     
         keys 'xl.'
         txt "bdef"
     
-        s.loadLines belt.linesForText("one two three")
-        s.setMainCursor 0 0
+        loadText "one two three"
     
         keys 'daw'
         txt "two three"
@@ -2362,35 +2247,30 @@ windowReset = (s) ->
         key '.'
         txt "three"
     
-        s.loadLines belt.linesForText("one\n  two\n  three")
-        s.setMainCursor 0 0
+        loadText "one\n  two\n  three"
         keys 'gg'   0 0
     
   ▸ open lines
     
-        s.loadLines belt.linesForText("abc\ndef")
-        s.setMainCursor 0 1
+        loadText "abc\ndef" 0 1
     
         key 'o'
         txt "abc\ndef\n"
         cur 0 2
     
-        s.loadLines belt.linesForText("abc\ndef")
-        s.setMainCursor 0 1
+        loadText "abc\ndef" 0 1
     
         key 'O'
         txt "abc\n\ndef"
         cur 0 1
     
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 0 0
+        loadText "abc"
     
         keys '2o'
         txt "abc\n\n"
         cur 0 2
     
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 0 0
+        loadText "abc"
     
         keys '2O'
         txt "\n\nabc"
@@ -2398,12 +2278,10 @@ windowReset = (s) ->
     
   ▸ insert at first non blank
     
-        s.loadLines belt.linesForText("    abc")
-        s.setMainCursor 6 0
+        loadText "    abc" 6 0
     
         s.allowedModes.novim = true
-        mode.modes.novim = novim
-        mode.start s 'novim'
+        startNovim s
     
         key 'I'
         cur 4 0
@@ -2413,8 +2291,7 @@ windowReset = (s) ->
     
   ▸ replace chars
     
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 1 0
+        loadText "abcdef" 1 0
     
         key 'r'
         m.replace ▸ true
@@ -2423,29 +2300,25 @@ windowReset = (s) ->
         cur 2 0
         m.replace ▸ null
     
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
+        loadText "abcdef"
     
         keys '3rx'
         txt "xxxdef"
         cur 3 0
     
-        s.loadLines belt.linesForText("ab")
-        s.setMainCursor 1 0
+        loadText "ab" 1 0
     
         keys '3rx'
         txt "ab"
         cur 1 0
     
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 0 0
+        loadText "abc"
     
         keys 'rX.'
         txt "XXc"
         cur 2 0
     
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
+        loadText "abcdef"
     
         key 'r'
         m.handleKey 'esc' {combo:'esc'}
@@ -2454,8 +2327,7 @@ windowReset = (s) ->
 
   ▸ replace mode
 
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
+        loadText "abcdef"
 
         [m key keys] = novimKeysFor s
 
@@ -2467,8 +2339,7 @@ windowReset = (s) ->
         key 'esc'
         s.novimInsert ▸ null
 
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
+        loadText "abcdef"
 
         keys 'RXY'
         key 'delete'
@@ -2479,16 +2350,14 @@ windowReset = (s) ->
         txt "abcdef"
         key 'esc'
 
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 2 0
+        loadText "abc" 2 0
 
         keys 'RXY'
         txt "abXY"
         cur 4 0
         key 'esc'
 
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
+        loadText "abcdef"
 
         keys '2RXY'
         key 'esc'
@@ -2505,8 +2374,7 @@ windowReset = (s) ->
         txt "abc\ndef"
         key 'esc'
 
-        s.loadLines belt.linesForText("abcdef")
-        s.setMainCursor 0 0
+        loadText "abcdef"
 
         keys 'RXY'
         s.insert '\n'
@@ -2515,8 +2383,7 @@ windowReset = (s) ->
         txt "XY\nZZef"
         cur 2 1
 
-        s.loadLines belt.linesForText("abcdef\nghijkl")
-        s.setMainCursor 0 0
+        loadText "abcdef\nghijkl"
 
         keys 'RXY'
         key 'esc'
@@ -2525,8 +2392,7 @@ windowReset = (s) ->
         txt "XYcdef\nXYijkl"
         cur 2 1
 
-        s.loadLines belt.linesForText("abcdef\nghijkl")
-        s.setMainCursor 0 0
+        loadText "abcdef\nghijkl"
 
         keys '2RXY'
         key 'esc'
@@ -2535,8 +2401,7 @@ windowReset = (s) ->
         txt "XYXYef\nXYXYkl"
         cur 4 1
 
-        s.loadLines belt.linesForText("one two")
-        s.setMainCursor 0 0
+        loadText "one two"
 
         keys 'vllR'
         s.visual ▸ null
@@ -2545,16 +2410,14 @@ windowReset = (s) ->
         s.insert 'X'
         txt "Xe two"
 
-        s.loadLines belt.linesForText("aaa\nbbb\nccc")
-        s.setMainCursor 0 0
+        loadText "aaa\nbbb\nccc"
 
         keys 'VjR'
         s.insert 'X'
         txt "Xccc"
         s.finishNovimInsert()
 
-        s.loadLines belt.linesForText("abcd\nefgh")
-        s.setMainCursor 0 0
+        loadText "abcd\nefgh"
 
         key 'ctrl+v'
         keys 'ljR'
@@ -2565,8 +2428,7 @@ windowReset = (s) ->
 
   ▸ visual replace
 
-        s.loadLines belt.linesForText("abcd\nefgh\nijkl")
-        s.setMainCursor 1 0
+        loadText "abcd\nefgh\nijkl" 1 0
 
         [m key keys] = novimKeysFor s
 
@@ -2575,16 +2437,14 @@ windowReset = (s) ->
         s.visual ▸ null
         cur 1 0
 
-        s.loadLines belt.linesForText("abcd\nefgh\nijkl")
-        s.setMainCursor 0 0
+        loadText "abcd\nefgh\nijkl"
 
         keys 'VjrX'
         txt "XXXX\nXXXX\nijkl"
         s.visual ▸ null
         cur 0 0
 
-        s.loadLines belt.linesForText("abcd\nefgh\nijkl")
-        s.setMainCursor 1 0
+        loadText "abcd\nefgh\nijkl" 1 0
 
         key 'ctrl+v'
         keys 'jllrX'
@@ -2592,31 +2452,27 @@ windowReset = (s) ->
         s.visual ▸ null
         cur 1 0
 
-        s.loadLines belt.linesForText("abcd\nefgh\nijkl")
-        s.setMainCursor 1 0
+        loadText "abcd\nefgh\nijkl" 1 0
 
         keys 'vllrXj.'
         txt "aXXd\neXXh\nijkl"
         cur 1 1
 
-        s.loadLines belt.linesForText("abcd\nefgh\nijkl")
-        s.setMainCursor 1 0
+        loadText "abcd\nefgh\nijkl" 1 0
 
         key 'ctrl+v'
         keys 'jllrXj.'
         txt "aXXd\neXXh\niXXl"
         cur 1 1
 
-        s.loadLines belt.linesForText("abcd\nefgh")
-        s.setMainCursor 1 0
+        loadText "abcd\nefgh" 1 0
 
         keys 'vllrXgv'
         s.visual ▸ 'char'
         s.s.selections ▸ [[1 0 3 0]]
         cur 3 0
 
-        s.loadLines belt.linesForText("abcd\nefgh")
-        s.setMainCursor 1 0
+        loadText "abcd\nefgh" 1 0
 
         keys 'vllrX'
         s.undo()
@@ -2624,29 +2480,25 @@ windowReset = (s) ->
 
   ▸ toggle case
     
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 0 0
+        loadText "abc"
     
         key '~'
         txt "Abc"
         cur 1 0
     
-        s.loadLines belt.linesForText("aBc")
-        s.setMainCursor 0 0
+        loadText "aBc"
     
         keys '3~'
         txt "AbC"
         cur 2 0
     
-        s.loadLines belt.linesForText("abc")
-        s.setMainCursor 2 0
+        loadText "abc" 2 0
     
         key '~'
         txt "abC"
         cur 2 0
     
-        s.loadLines belt.linesForText("abcd")
-        s.setMainCursor 0 0
+        loadText "abcd"
     
         keys '~l.'
         txt "AbCd"
@@ -2654,8 +2506,7 @@ windowReset = (s) ->
 
   ▸ case operators
 
-        s.loadLines belt.linesForText("Hello World")
-        s.setMainCursor 0 0
+        loadText "Hello World"
 
         [m key keys] = novimKeysFor s
 
@@ -2663,100 +2514,86 @@ windowReset = (s) ->
         txt "hello World"
         cur 0 0
 
-        s.loadLines belt.linesForText("Hello World")
-        s.setMainCursor 0 0
+        loadText "Hello World"
 
         keys 'gUiw'
         txt "HELLO World"
         cur 0 0
 
-        s.loadLines belt.linesForText("Hello World")
-        s.setMainCursor 0 0
+        loadText "Hello World"
 
         keys 'g~w'
         txt "hELLO World"
         cur 0 0
 
-        s.loadLines belt.linesForText("Hello World")
-        s.setMainCursor 0 0
+        loadText "Hello World"
 
         keys 'guu'
         txt "hello world"
         cur 0 0
 
-        s.loadLines belt.linesForText("hello world")
-        s.setMainCursor 0 0
+        loadText "hello world"
 
         keys 'gUU'
         txt "HELLO WORLD"
         cur 0 0
 
-        s.loadLines belt.linesForText("Hello World")
-        s.setMainCursor 0 0
+        loadText "Hello World"
 
         keys 'g~~'
         txt "hELLO wORLD"
         cur 0 0
 
-        s.loadLines belt.linesForText("hello\nworld\nagain")
-        s.setMainCursor 0 0
+        loadText "hello\nworld\nagain"
 
         keys '3gUU'
         txt "HELLO\nWORLD\nAGAIN"
         cur 0 0
 
-        s.loadLines belt.linesForText("hello\nworld\nagain")
-        s.setMainCursor 0 0
+        loadText "hello\nworld\nagain"
 
         keys 'gUj'
         txt "HELLO\nWORLD\nagain"
         cur 0 0
 
-        s.loadLines belt.linesForText("HELLO WORLD")
-        s.setMainCursor 0 0
+        loadText "HELLO WORLD"
 
         keys 'vllgu'
         txt "heLLO WORLD"
         cur 0 0
 
-        s.loadLines belt.linesForText("hello world")
-        s.setMainCursor 0 0
+        loadText "hello world"
 
         keys 'vllU'
         txt "HEllo world"
         cur 0 0
 
-        s.loadLines belt.linesForText("Hello World")
-        s.setMainCursor 0 0
+        loadText "Hello World"
 
         keys 'vllg~'
         txt "hEllo World"
         cur 0 0
 
-        s.loadLines belt.linesForText("hello world")
-        s.setMainCursor 0 0
+        loadText "hello world"
 
         keys 'vllgU'
         txt "HEllo world"
         cur 0 0
 
-        s.loadLines belt.linesForText("aBcD\neFgH")
-        s.setMainCursor 0 0
+        loadText "aBcD\neFgH"
 
         key 'ctrl+v'
         keys 'ljgU'
         txt "ABcD\nEFgH"
         cur 0 0
 
-        s.loadLines belt.linesForText("HELLO WORLD")
-        s.setMainCursor 0 0
+        loadText "HELLO WORLD"
 
         keys 'vllguw.'
         txt "heLLO woRLD"
         cur 6 0
 
-        s.loadLines belt.linesForText("HELLO WORLD")
-        s.setMainCursor 0 0
+        loadText "HELLO WORLD"
 
         keys 'guww.'
         txt "hello world"
@@ -2764,36 +2601,31 @@ windowReset = (s) ->
 
   ▸ join lines
     
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 0 0
+        loadText "one\ntwo\nthree"
     
         key 'J'
         txt "one two\nthree"
         cur 3 0
     
-        s.loadLines belt.linesForText("one  \n   two\nthree")
-        s.setMainCursor 0 0
+        loadText "one  \n   two\nthree"
     
         key 'J'
         txt "one two\nthree"
         cur 3 0
     
-        s.loadLines belt.linesForText("  one\n    two")
-        s.setMainCursor 0 0
+        loadText "  one\n    two"
     
         key 'J'
         txt "  one two"
         cur 5 0
     
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 0 0
+        loadText "one\ntwo\nthree"
     
         keys '3J'
         txt "one two three"
         cur 3 0
     
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 0 1
+        loadText "one\ntwo\nthree" 0 1
     
         key 'J'
         txt "one\ntwo three"
@@ -2801,8 +2633,7 @@ windowReset = (s) ->
     
   ▸ match bracket
     
-        s.loadLines belt.linesForText("if (a[b]) { c }")
-        s.setMainCursor 3 0
+        loadText "if (a[b]) { c }" 3 0
     
         key '%'
         cur 8 0
@@ -2818,15 +2649,13 @@ windowReset = (s) ->
         key '%'
         cur 8 0
     
-        s.loadLines belt.linesForText("call(\n  x\n)")
-        s.setMainCursor 4 0
+        loadText "call(\n  x\n)" 4 0
         key '%'
         cur 0 2
     
   ▸ sentence motions by keys
     
-        s.loadLines belt.linesForText("one two. three four. five six.")
-        s.setMainCursor 0 0
+        loadText "one two. three four. five six."
     
         key ')'
         cur 9 0
@@ -2847,18 +2676,15 @@ windowReset = (s) ->
         key '('
         cur 9 0
     
-        s.loadLines belt.linesForText("one two. three four.")
-        s.setMainCursor 0 0
+        loadText "one two. three four."
         keys 'd)'
         txt "three four."
     
-        s.loadLines belt.linesForText("one two. three four.")
-        s.setMainCursor 9 0
+        loadText "one two. three four." 9 0
         keys 'd('
         txt "three four."
     
-        s.loadLines belt.linesForText("one two. three four.")
-        s.setMainCursor 0 0
+        loadText "one two. three four."
         keys 'v)'
         s.s.selections ▸ [[0 0 9 0]]
         cur 9 0
@@ -2866,8 +2692,7 @@ windowReset = (s) ->
     
   ▸ paragraph motions by keys
     
-        s.loadLines belt.linesForText("a\n\nb\nc\n\nd")
-        s.setMainCursor 0 0
+        loadText "a\n\nb\nc\n\nd"
     
         key '}'
         cur 0 1
@@ -2891,14 +2716,12 @@ windowReset = (s) ->
         keys 'd}'
         txt "a\n\nd"
     
-        s.loadLines belt.linesForText("hello world\nfoo bar\n\nbaz")
-        s.setMainCursor 6 0
+        loadText "hello world\nfoo bar\n\nbaz" 6 0
         keys 'd}'
         txt "hello \n\nbaz"
         cur 6 0
     
-        s.loadLines belt.linesForText("a\n\nb")
-        s.setMainCursor 0 0
+        loadText "a\n\nb"
         keys 'v}'
         s.s.selections ▸ [[0 0 0 1]]
         cur 0 1
@@ -2906,8 +2729,7 @@ windowReset = (s) ->
     
   ▸ line first motions by keys
     
-        s.loadLines belt.linesForText("  one\n    two\n three")
-        s.setMainCursor 0 0
+        loadText "  one\n    two\n three"
     
         key '+'
         cur 4 1
@@ -2928,30 +2750,25 @@ windowReset = (s) ->
         keys '5_'
         cur 1 2
     
-        s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
-        s.setMainCursor 0 1
+        loadText "one\ntwo\nthree\nfour" 0 1
         keys 'd+'
         txt "one\nfour"
     
-        s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
-        s.setMainCursor 0 2
+        loadText "one\ntwo\nthree\nfour" 0 2
         keys 'd-'
         txt "one\nfour"
     
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 3 1
+        loadText "one\ntwo\nthree" 3 1
         keys 'd_'
         txt "one\nthree"
     
-        s.loadLines belt.linesForText("one\ntwo\nthree\nfour")
-        s.setMainCursor 3 0
+        loadText "one\ntwo\nthree\nfour" 3 0
         keys '2d_'
         txt "three\nfour"
     
   ▸ search word under cursor
     
-        s.loadLines belt.linesForText("foo bar foo\nfoobar foo")
-        s.setMainCursor 0 0
+        loadText "foo bar foo\nfoobar foo"
     
         key '*'
         cur 8 0
@@ -2965,8 +2782,7 @@ windowReset = (s) ->
         key '#'
         cur 8 0
     
-        s.loadLines belt.linesForText("foo bar foo\nfoobar foo")
-        s.setMainCursor 0 0
+        loadText "foo bar foo\nfoobar foo"
     
         key '#'
         cur 0 0
@@ -2975,8 +2791,7 @@ windowReset = (s) ->
     
   ▸ visual mode
     
-        s.loadLines belt.linesForText("one two\nthree four")
-        s.setMainCursor 0 0
+        loadText "one two\nthree four"
     
         key 'v'
         s.visual ▸ 'char'
@@ -3015,8 +2830,7 @@ windowReset = (s) ->
 
   ▸ gv
 
-        s.loadLines belt.linesForText("one two\nthree four")
-        s.setMainCursor 0 0
+        loadText "one two\nthree four"
 
         [m key keys] = novimKeysFor s
 
@@ -3024,8 +2838,7 @@ windowReset = (s) ->
         s.visual ▸ null
         s.s.selections ▸ []
 
-        s.loadLines belt.linesForText("one two\nthree four")
-        s.setMainCursor 0 0
+        loadText "one two\nthree four"
 
         keys 'vll'
         key 'esc'
@@ -3044,8 +2857,7 @@ windowReset = (s) ->
         s.s.selections ▸ [[0 0 1 0] [0 2 1 2]]
         s.allCursors() ▸ [[1 0] [1 2]]
 
-        s.loadLines belt.linesForText("one two\nthree four")
-        s.setMainCursor 0 0
+        loadText "one two\nthree four"
 
         keys 'vll'
         key 'y'
@@ -3054,8 +2866,7 @@ windowReset = (s) ->
         s.s.selections ▸ [[0 0 2 0]]
         cur 2 0
 
-        s.loadLines belt.linesForText("one two\nthree four")
-        s.setMainCursor 4 0
+        loadText "one two\nthree four" 4 0
 
         keys 'vl'
         key 'esc'
@@ -3065,8 +2876,7 @@ windowReset = (s) ->
         s.s.selections ▸ [[4 0 5 0]]
         cur 5 0
 
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 0 1
+        loadText "one\ntwo\nthree" 0 1
 
         keys 'Vj'
         key 'esc'
@@ -3076,8 +2886,7 @@ windowReset = (s) ->
         s.s.selections ▸ [[0 2 5 3]]
         cur 0 3
 
-        s.loadLines belt.linesForText("aaa\nbbb\nccc\nddd")
-        s.setMainCursor 0 1
+        loadText "aaa\nbbb\nccc\nddd" 0 1
 
         keys 'Vj'
         key 'd'
@@ -3087,8 +2896,7 @@ windowReset = (s) ->
         s.s.selections ▸ [[0 1 3 1]]
         cur 0 1
 
-        s.loadLines belt.linesForText("abcd\nefgh\nijkl")
-        s.setMainCursor 0 0
+        loadText "abcd\nefgh\nijkl"
 
         key 'ctrl+v'
         keys 'lj'
@@ -3098,8 +2906,7 @@ windowReset = (s) ->
         s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
         cur 1 1
 
-        s.loadLines belt.linesForText("aaa bbb ccc\nsecond")
-        s.setMainCursor 4 0
+        loadText "aaa bbb ccc\nsecond" 4 0
 
         keys 'vll'
         key 'esc'
@@ -3109,8 +2916,7 @@ windowReset = (s) ->
         s.s.selections ▸ [[4 0 6 0]]
         cur 6 0
 
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 0 1
+        loadText "one\ntwo\nthree" 0 1
 
         keys 'Vj'
         key 'esc'
@@ -3137,8 +2943,7 @@ windowReset = (s) ->
         
     ▸ visual vertical
         
-            s.loadLines belt.linesForText("abcd\nefgh")
-            s.setMainCursor 1 0
+            loadText "abcd\nefgh" 1 0
         
             key 'v'
             key 'j'
@@ -3153,8 +2958,7 @@ windowReset = (s) ->
         
     ▸ visual line mode
         
-            s.loadLines belt.linesForText("one\ntwo\nthree")
-            s.setMainCursor 1 1
+            loadText "one\ntwo\nthree" 1 1
         
             keys 'Vj'
             s.visual ▸ 'line'
@@ -3167,8 +2971,7 @@ windowReset = (s) ->
         
     ▸ visual block starts empty
         
-            s.loadLines belt.linesForText("abcd\nefgh")
-            s.setMainCursor 0 0
+            loadText "abcd\nefgh"
         
             key 'ctrl+v'
             s.visual ▸ 'block'
@@ -3214,8 +3017,7 @@ windowReset = (s) ->
         
     ▸ visual block toggles and switches
         
-            s.loadLines belt.linesForText("abcd\nefgh")
-            s.setMainCursor 0 0
+            loadText "abcd\nefgh"
         
             key 'ctrl+v'
             key 'ctrl+v'
@@ -3235,8 +3037,7 @@ windowReset = (s) ->
         
     ▸ visual block delete
         
-            s.loadLines belt.linesForText("abcd\nefgh")
-            s.setMainCursor 0 0
+            loadText "abcd\nefgh"
         
             key 'ctrl+v'
             keys 'lj'
@@ -3253,8 +3054,7 @@ windowReset = (s) ->
         
     ▸ visual block yank
         
-            s.loadLines belt.linesForText("abcd\nefgh")
-            s.setMainCursor 0 0
+            loadText "abcd\nefgh"
         
             key 'ctrl+v'
             keys 'lj'
@@ -3269,8 +3069,7 @@ windowReset = (s) ->
         
     ▸ visual block change
         
-            s.loadLines belt.linesForText("abcd\nefgh")
-            s.setMainCursor 0 0
+            loadText "abcd\nefgh"
         
             key 'ctrl+v'
             keys 'lj'
@@ -3291,8 +3090,7 @@ windowReset = (s) ->
         
     ▸ visual block prepend and append
         
-            s.loadLines belt.linesForText("abcd\nefgh")
-            s.setMainCursor 0 0
+            loadText "abcd\nefgh"
         
             key 'ctrl+v'
             keys 'lj'
@@ -3306,8 +3104,7 @@ windowReset = (s) ->
             s.finishNovimInsert()
             txt "XYabcd\nXYefgh"
         
-            s.loadLines belt.linesForText("abcd\nefgh")
-            s.setMainCursor 0 0
+            loadText "abcd\nefgh"
         
             key 'ctrl+v'
             keys 'lj'
@@ -3320,8 +3117,7 @@ windowReset = (s) ->
             s.insert 'XY'
             txt "aXYbcd\neXYfgh"
         
-            s.loadLines belt.linesForText("abcd\nefgh\nijkl")
-            s.setMainCursor 0 0
+            loadText "abcd\nefgh\nijkl"
         
             key 'ctrl+v'
             keys 'lj'
@@ -3345,8 +3141,7 @@ windowReset = (s) ->
     ▸ visual yank
         
             s.novimRegister = null
-            s.loadLines belt.linesForText("one two")
-            s.setMainCursor 0 0
+            loadText "one two"
         
             keys 'vlly'
             s.novimRegister.lines ▸ ['on']
@@ -3356,8 +3151,7 @@ windowReset = (s) ->
             cur 0 0
             txt "one two"
         
-            s.loadLines belt.linesForText("one\ntwo\nthree")
-            s.setMainCursor 1 1
+            loadText "one\ntwo\nthree" 1 1
         
             keys 'Vy'
             s.novimRegister.lines ▸ ['two']
@@ -3365,8 +3159,7 @@ windowReset = (s) ->
         
     ▸ visual delete
         
-            s.loadLines belt.linesForText("one two")
-            s.setMainCursor 0 0
+            loadText "one two"
         
             keys 'vlld'
             txt "e two"
@@ -3374,8 +3167,7 @@ windowReset = (s) ->
             s.visual ▸ null
             cur 0 0
         
-            s.loadLines belt.linesForText("one\ntwo\nthree")
-            s.setMainCursor 0 1
+            loadText "one\ntwo\nthree" 0 1
         
             keys 'Vd'
             txt "one\nthree"
@@ -3385,8 +3177,7 @@ windowReset = (s) ->
         
     ▸ visual change
         
-            s.loadLines belt.linesForText("one two")
-            s.setMainCursor 0 0
+            loadText "one two"
         
             keys 'vllc'
             txt "one two"
@@ -3399,8 +3190,7 @@ windowReset = (s) ->
         
     ▸ visual swap ends
         
-            s.loadLines belt.linesForText("abcdef")
-            s.setMainCursor 1 0
+            loadText "abcdef" 1 0
         
             keys 'vll'
             s.s.selections ▸ [[1 0 3 0]]
@@ -3417,8 +3207,7 @@ windowReset = (s) ->
         
     ▸ visual counts and find
         
-            s.loadLines belt.linesForText("a b c d")
-            s.setMainCursor 0 0
+            loadText "a b c d"
         
             keys 'v2l'
             s.s.selections ▸ [[0 0 2 0]]
@@ -3426,8 +3215,7 @@ windowReset = (s) ->
         
             key 'esc'
         
-            s.loadLines belt.linesForText("a b c d")
-            s.setMainCursor 0 0
+            loadText "a b c d"
         
             keys 'vf '
             s.s.selections ▸ [[0 0 1 0]]
@@ -3437,8 +3225,7 @@ windowReset = (s) ->
         
       ▸ visual bracket
         
-            s.loadLines belt.linesForText("if (a[b]) c")
-            s.setMainCursor 3 0
+            loadText "if (a[b]) c" 3 0
         
             keys 'v%'
             s.s.selections ▸ [[3 0 8 0]]
@@ -3448,12 +3235,10 @@ windowReset = (s) ->
         
     ▸ visual escape stays in novim
         
-            s.loadLines belt.linesForText("abc")
-            s.setMainCursor 0 0
+            loadText "abc"
         
             s.allowedModes.novim = true
-            mode.modes.novim = novim
-            mode.start s 'novim'
+            startNovim s
         
             key 'v'
             key 'esc'
@@ -3462,65 +3247,57 @@ windowReset = (s) ->
             s.s.selections ▸ []
             mode.isActive s 'novim' ▸ true
         
-            mode.stop s 'novim'
+            stopNovim s
             delete s.allowedModes.novim
     
   ▸ indent
     
     ▸ indent lines
         
-            s.loadLines belt.linesForText("one\ntwo\nthree")
-            s.setMainCursor 0 0
+            loadText "one\ntwo\nthree"
         
             keys '>>'
             txt "    one\ntwo\nthree"
             cur 4 0
         
-            s.loadLines belt.linesForText("one\ntwo\nthree")
-            s.setMainCursor 0 0
+            loadText "one\ntwo\nthree"
         
             keys '2>>'
             txt "    one\n    two\nthree"
             cur 4 0
         
-            s.loadLines belt.linesForText("one\ntwo\nthree")
-            s.setMainCursor 0 0
+            loadText "one\ntwo\nthree"
         
             keys '>j'
             txt "    one\n    two\nthree"
         
-            s.loadLines belt.linesForText("one\ntwo\nthree")
-            s.setMainCursor 0 0
+            loadText "one\ntwo\nthree"
         
             keys '>>j.'
             txt "    one\n    two\nthree"
         
     ▸ deindent lines
         
-            s.loadLines belt.linesForText("    one\n        two\n            three")
-            s.setMainCursor 0 0
+            loadText "    one\n        two\n            three"
         
             keys '<<'
             txt "one\n        two\n            three"
             cur 0 0
         
-            s.loadLines belt.linesForText("    one\n        two\n            three")
-            s.setMainCursor 0 0
+            loadText "    one\n        two\n            three"
         
             keys '2<<'
             txt "one\n    two\n            three"
             cur 0 0
         
-            s.loadLines belt.linesForText("    one\n        two\n            three")
-            s.setMainCursor 0 0
+            loadText "    one\n        two\n            three"
         
             keys '<j'
             txt "one\n    two\n            three"
         
     ▸ visual indent
         
-            s.loadLines belt.linesForText("one\ntwo\nthree")
-            s.setMainCursor 1 1
+            loadText "one\ntwo\nthree" 1 1
         
             keys 'Vj>'
             txt "one\n    two\n    three"
@@ -3534,8 +3311,7 @@ windowReset = (s) ->
             s.s.selections ▸ [[0 1 13 2]]
             cur 9 2
         
-            s.loadLines belt.linesForText("    one\n        two\n            three")
-            s.setMainCursor 1 1
+            loadText "    one\n        two\n            three" 1 1
         
             keys 'Vj<'
             txt "    one\n    two\n        three"
@@ -3543,8 +3319,7 @@ windowReset = (s) ->
             s.s.selections ▸ [[0 1 13 2]]
             cur 0 2
         
-            s.loadLines belt.linesForText("one\ntwo\nthree")
-            s.setMainCursor 0 1
+            loadText "one\ntwo\nthree" 0 1
         
             keys 'vlj>'
             txt "one\n    two\n    three"
@@ -3554,8 +3329,7 @@ windowReset = (s) ->
     
   ▸ search highlights
     
-        s.loadLines belt.linesForText("foo\nbar\nfoo\nbar\nfoo")
-        s.setMainCursor 0 0
+        loadText "foo\nbar\nfoo\nbar\nfoo"
     
         s.setHighlights [[0 0 3 0] [0 2 3 2] [0 4 3 4]]
     
@@ -3605,8 +3379,7 @@ windowReset = (s) ->
         key 'N'
         cur 0 0
     
-        s.loadLines belt.linesForText("foo\nbar")
-        s.setMainCursor 0 0
+        loadText "foo\nbar"
     
         key '/'
         txt "foo\nbar"
@@ -3615,17 +3388,15 @@ windowReset = (s) ->
 
         nav = new state cells 'revsearch'
 
-        mode.modes.novim = novim
-        mode.start nav 'novim'
+        startNovim nav
 
         nmv       = mode.get nav 'novim'
-        press     = c -> mode.handleKey nav c {combo:c, char:c}
+        press = pressFor nav
         positions = []
 
         post.on 'novim.search.position' (p) -> positions.push p
 
-        nav.loadLines belt.linesForText("foo\nbar\nfoo\nbar\nfoo")
-        nav.setMainCursor 0 1
+        loadTextOn nav "foo\nbar\nfoo\nbar\nfoo" 0 1
 
         nmv.startSearch true
         nmv.searchChanged 'foo'
@@ -3669,7 +3440,7 @@ windowReset = (s) ->
         nav.mainCursor() ▸ [0 0]
         positions[-1] ▸ {state:'revsearch.state' current:1 total:3}
 
-        mode.stop nav 'novim'
+        stopNovim nav
     
   ▸ ex commands
     
@@ -3756,9 +3527,7 @@ windowReset = (s) ->
 
         [nm nkey nkeys] = novimKeysFor s
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("one two one\nthree one")
-        s.setMainCursor 8 0
+        freshText "one two one\nthree one" 8 0
 
         nm.runEx 's/one/1/'
 
@@ -3766,9 +3535,7 @@ windowReset = (s) ->
         cur 0 0
         nm.ex ▸ null
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("one two one\nthree one")
-        s.setMainCursor 0 0
+        freshText "one two one\nthree one"
 
         nm.runEx '%s/one/1/g'
 
@@ -3778,23 +3545,17 @@ windowReset = (s) ->
         s.executeNovim {operator:'undo', count:1}
         txt "one two one\nthree one"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("One ONE")
-        s.setMainCursor 0 0
+        freshText "One ONE"
 
         nm.runEx 's/one/x/i'
         txt "x ONE"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("a\na\na")
-        s.setMainCursor 0 0
+        freshText "a\na\na"
 
         nm.runEx '2,3s/a/b/g'
         txt "a\nb\nb"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("a\nb\nc")
-        s.setMainCursor 0 0
+        freshText "a\nb\nc"
 
         nkeys 'Vj'
         s.visual ▸ 'line'
@@ -3806,9 +3567,7 @@ windowReset = (s) ->
         txt "a\nX\nc"
         s.visual ▸ null
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("a\nb\nc")
-        s.setMainCursor 0 0
+        freshText "a\nb\nc"
 
         nkeys 'Vj'
         nkey ':'
@@ -3819,9 +3578,7 @@ windowReset = (s) ->
         s.visual ▸ 'line'
         s.stopVisual()
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("one two one\nthree one")
-        s.setMainCursor 0 0
+        freshText "one two one\nthree one"
 
         nm.exChanged 's/one'
 
@@ -3847,9 +3604,7 @@ windowReset = (s) ->
         s.s.highlights ▸ []
         nm.ex         ▸ null
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("aa aa")
-        s.setMainCursor 0 0
+        freshText "aa aa"
 
         nm.runEx '%s/aa/b/gc'
 
@@ -3874,9 +3629,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'undo', count:1}
         txt "aa aa"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("aa aa")
-        s.setMainCursor 0 0
+        freshText "aa aa"
 
         nm.runEx '%s/aa/b/gc'
         nkey 'n'
@@ -3889,9 +3642,7 @@ windowReset = (s) ->
         nkey 'n'
         nm.exConfirms ▸ null
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("aa aa aa")
-        s.setMainCursor 0 0
+        freshText "aa aa aa"
 
         nm.runEx '%s/aa/X/gc'
         nkey 'a'
@@ -3899,9 +3650,7 @@ windowReset = (s) ->
         txt "X X X"
         nm.exConfirms ▸ null
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("aa aa")
-        s.setMainCursor 0 0
+        freshText "aa aa"
 
         nm.runEx '%s/aa/b/gc'
         nkey 'l'
@@ -3909,9 +3658,7 @@ windowReset = (s) ->
         txt "b aa"
         nm.exConfirms ▸ null
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("aa aa")
-        s.setMainCursor 0 0
+        freshText "aa aa"
 
         nm.runEx '%s/aa/b/gc'
         nkey 'q'
@@ -3919,9 +3666,7 @@ windowReset = (s) ->
         txt "aa aa"
         nm.exConfirms ▸ null
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("aa aa")
-        s.setMainCursor 0 0
+        freshText "aa aa"
 
         nm.runEx '%s/aa/b/gc'
         nkey 'esc'
@@ -3929,9 +3674,7 @@ windowReset = (s) ->
         txt "aa aa"
         nm.exConfirms ▸ null
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("aa aa")
-        s.setMainCursor 0 0
+        freshText "aa aa"
 
         nm.runEx '%s/aa/b/gc'
         nkey 'y'
@@ -3941,9 +3684,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'undo', count:1}
         txt "aa aa"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("aa aa\naa")
-        s.setMainCursor 0 0
+        freshText "aa aa\naa"
 
         nm.runEx '%s/aa/b/c'
 
@@ -3963,9 +3704,7 @@ windowReset = (s) ->
         txt "b aa\naa"
         nm.exConfirms ▸ null
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("a\nb")
-        s.setMainCursor 0 0
+        freshText "a\nb"
 
         nm.runEx '%s/^/>/gc'
 
@@ -3987,9 +3726,7 @@ windowReset = (s) ->
 
   ▸ substitute without replacement
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("one two one\nthree one")
-        s.setMainCursor 0 0
+        freshText "one two one\nthree one"
 
         nm.runEx '%s/one'
 
@@ -3998,9 +3735,7 @@ windowReset = (s) ->
         s.s.cursors ▸ [[3 0] [11 0] [9 1]]
         cur 3 0
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("one two one\nthree one")
-        s.setMainCursor 0 0
+        freshText "one two one\nthree one"
 
         nm.runEx '%s/one/'
 
@@ -4009,9 +3744,7 @@ windowReset = (s) ->
         s.s.cursors ▸ [[3 0] [11 0] [9 1]]
         cur 3 0
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("one two one\nthree one")
-        s.setMainCursor 0 0
+        freshText "one two one\nthree one"
 
         nm.runEx '%s/one/g'
 
@@ -4020,9 +3753,7 @@ windowReset = (s) ->
         s.s.cursors ▸ [[3 0] [11 0] [9 1]]
         cur 3 0
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("Find fiND find")
-        s.setMainCursor 0 0
+        freshText "Find fiND find"
 
         nm.runEx '%s/find/gi'
 
@@ -4030,9 +3761,7 @@ windowReset = (s) ->
         s.s.selections ▸ [[0 0 4 0] [5 0 9 0] [10 0 14 0]]
         s.s.cursors ▸ [[4 0] [9 0] [14 0]]
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("one\ntwo one")
-        s.setMainCursor 0 1
+        freshText "one\ntwo one" 0 1
 
         nm.runEx 's/one/'
 
@@ -4040,17 +3769,13 @@ windowReset = (s) ->
         s.s.selections ▸ [[4 1 7 1]]
         s.s.cursors ▸ [[7 1]]
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("one two one")
-        s.setMainCursor 0 0
+        freshText "one two one"
 
         nm.runEx '%s/one//g'
 
         txt " two "
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("one two one")
-        s.setMainCursor 0 0
+        freshText "one two one"
 
         nm.runEx '%s/one/1'
 
@@ -4060,44 +3785,32 @@ windowReset = (s) ->
 
         gm = new novim s
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("keep\ndrop\ndrop\nkeep")
-        s.setMainCursor 0 0
+        freshText "keep\ndrop\ndrop\nkeep"
 
         gm.runEx 'g/drop/d'
         txt "keep\nkeep"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("keep\ndrop\ndrop\nkeep")
-        s.setMainCursor 0 0
+        freshText "keep\ndrop\ndrop\nkeep"
 
         gm.runEx 'v/keep/d'
         txt "keep\nkeep"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("keep\ndrop\ndrop\nkeep")
-        s.setMainCursor 0 0
+        freshText "keep\ndrop\ndrop\nkeep"
 
         gm.runEx 'g!/keep/d'
         txt "keep\nkeep"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("x=1\nx=2\ny=3")
-        s.setMainCursor 0 0
+        freshText "x=1\nx=2\ny=3"
 
         gm.runEx 'g/^x/s/=/ = /'
         txt "x = 1\nx = 2\ny=3"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("aaa\nbbb\nccc")
-        s.setMainCursor 0 0
+        freshText "aaa\nbbb\nccc"
 
         gm.runEx 'g/^b/normal x'
         txt "aaa\nbb\nccc"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("one\ntwo\nthree")
-        s.setMainCursor 0 0
+        freshText "one\ntwo\nthree"
 
         gm.runEx '%normal x'
         txt "ne\nwo\nhree"
@@ -4105,9 +3818,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'undo', count:1}
         txt "one\ntwo\nthree"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("abc\ndef")
-        s.setMainCursor 0 0
+        freshText "abc\ndef"
 
         gm.runEx '%normal rX'
         txt "Xbc\nXef"
@@ -4115,9 +3826,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'undo', count:1}
         txt "abc\ndef"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("a\nb")
-        s.setMainCursor 0 0
+        freshText "a\nb"
 
         gm.runEx '%normal A!'
         txt "a!\nb!"
@@ -4125,44 +3834,32 @@ windowReset = (s) ->
         s.executeNovim {operator:'undo', count:1}
         txt "a\nb"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("a\nb\nc")
-        s.setMainCursor 0 0
+        freshText "a\nb\nc"
 
         gm.runEx '2normal A!'
         txt "a\nb!\nc"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("one\ntwo")
-        s.setMainCursor 0 0
+        freshText "one\ntwo"
 
         gm.runEx 'g/^t/normal I# '
         txt "one\n# two"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("ta\ntb\nx")
-        s.setMainCursor 0 0
+        freshText "ta\ntb\nx"
 
         gm.runEx 'g/^t/normal I# '
         txt "# ta\n# tb\nx"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("abcd")
-        s.setMainCursor 0 0
+        freshText "abcd"
 
         gm.runEx 'normal 2x'
         txt "cd"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("a\nb\na")
-        s.setMainCursor 0 0
+        freshText "a\nb\na"
 
         gm.runEx '2,3g/a/d'
         txt "a\nb"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("keep\ndrop\ndrop\nkeep")
-        s.setMainCursor 0 0
+        freshText "keep\ndrop\ndrop\nkeep"
 
         gm.runEx 'g/drop/d'
         txt "keep\nkeep"
@@ -4170,9 +3867,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'undo', count:1}
         txt "keep\ndrop\ndrop\nkeep"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("x=1\nx=2\ny=3")
-        s.setMainCursor 0 0
+        freshText "x=1\nx=2\ny=3"
 
         gm.runEx 'g/^x/s/=/ = /'
         txt "x = 1\nx = 2\ny=3"
@@ -4180,9 +3875,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'undo', count:1}
         txt "x=1\nx=2\ny=3"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("ta\ntb\nx")
-        s.setMainCursor 0 0
+        freshText "ta\ntb\nx"
 
         gm.runEx 'g/^t/normal I# '
         txt "# ta\n# tb\nx"
@@ -4190,9 +3883,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'undo', count:1}
         txt "ta\ntb\nx"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("a\na")
-        s.setMainCursor 0 0
+        freshText "a\na"
 
         gm.runEx 'g/a/s/a/b/c'
 
@@ -4200,23 +3891,17 @@ windowReset = (s) ->
         txt "a\na"
         errors[-1]   ▸ 'confirm not supported in :g'
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("a\nb\nc")
-        s.setMainCursor 0 0
+        freshText "a\nb\nc"
 
         gm.runEx '2d'
         txt "a\nc"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("a\nb\nc")
-        s.setMainCursor 0 0
+        freshText "a\nb\nc"
 
         gm.runEx '2,3d'
         txt "a"
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("a\nb")
-        s.setMainCursor 0 0
+        freshText "a\nb"
 
         gm.runEx '%d'
         txt ""
@@ -4281,9 +3966,7 @@ windowReset = (s) ->
 
         post.on 'novim.search.start' (start) -> starts.push start
 
-        s.clearHistory()
-        s.loadLines belt.linesForText("foo bar foo\nfoobar foo")
-        s.setMainCursor 0 0
+        freshText "foo bar foo\nfoobar foo"
 
         sm.startSearch()
 
@@ -4306,8 +3989,7 @@ windowReset = (s) ->
 
         novim.lastVind = ''
 
-        s.loadLines belt.linesForText("foo bar")
-        s.setMainCursor 1 0
+        loadText "foo bar" 1 0
 
         sm.startSearch()
 
@@ -4331,8 +4013,7 @@ windowReset = (s) ->
 
         s.setSelections []
 
-        s.loadLines belt.linesForText("foo bar foo")
-        s.setMainCursor 2 0
+        loadText "foo bar foo" 2 0
 
         sm.searchChanged 'foo'
         sm.commitSearch()
@@ -4355,13 +4036,11 @@ windowReset = (s) ->
 
         nav = new state cells 'searchnav'
 
-        mode.modes.novim  = novim
         mode.modes.brckts = brckts
         mode.start nav 'brckts'
-        mode.start nav 'novim'
+        startNovim nav
 
-        nav.loadLines belt.linesForText("foo bar foo\nfoobar")
-        nav.setMainCursor 0 0
+        loadTextOn nav "foo bar foo\nfoobar"
 
         nmv = mode.get nav 'novim'
         nmv.startSearch()
@@ -4369,7 +4048,7 @@ windowReset = (s) ->
 
         nav.s.highlights ▸ [[4 0 7] [3 1 6]]
 
-        press = c -> mode.handleKey nav c {combo:c, char:c}
+        press = pressFor nav
 
         press 'n'
 
@@ -4390,26 +4069,24 @@ windowReset = (s) ->
 
         nav.s.highlights   ▸ [[4 0 7] [3 1 6]]
 
-        mode.stop nav 'novim'
+        stopNovim nav
         mode.stop nav 'brckts'
 
   ▸ brckts lets novim handle text keys
     
         stack = new state cells 'stack'
     
-        mode.modes.novim  = novim
         mode.modes.brckts = brckts
         mode.start stack 'brckts'
-        mode.start stack 'novim'
+        startNovim stack
     
-        press = c -> mode.handleKey stack c {combo:c, char:c}
+        press = pressFor stack
         stxt  = t -> kseg.str(stack.s.lines) ▸ t
     
         onKeys = (text x y keys) ->
-            stack.loadLines belt.linesForText(text)
-            stack.setMainCursor x y
-            mode.stop  stack 'novim'
-            mode.start stack 'novim'
+            loadTextOn stack text x y
+            stopNovim stack
+            startNovim stack
             for c in keys
                 press c
     
@@ -4434,7 +4111,7 @@ windowReset = (s) ->
         onKeys 'a {b} c' 4 0 ['d' 'a' '}']
         stxt 'a  c'
     
-        mode.stop stack 'novim'
+        stopNovim stack
         mode.stop stack 'brckts'
     
   ▸ brckts still types without novim
@@ -4444,17 +4121,15 @@ windowReset = (s) ->
         mode.modes.brckts = brckts
         mode.start plain 'brckts'
     
-        pkey = c -> mode.handleKey plain c {combo:c, char:c}
+        pkey = pressFor plain
     
-        plain.loadLines belt.linesForText('say "hi" ok')
-        plain.setMainCursor 4 0
+        loadTextOn plain 'say "hi" ok' 4 0
         pkey '"'
     
         plain.mainCursor() ▸ [5 0]
         kseg.str(plain.s.lines) ▸ 'say "hi" ok'
     
-        plain.loadLines belt.linesForText('x = ')
-        plain.setMainCursor 4 0
+        loadTextOn plain 'x = ' 4 0
         pkey '"'
     
         plain.mainCursor() ▸ [5 0]
@@ -4474,8 +4149,8 @@ windowReset = (s) ->
 
         s.mainCursor() ▸ [2 top]
 
-        mode.stop s 'novim'
-        delete global.ked_session
+        stopNovim s
+        endSess()
 
   ▸ M goes to the first non blank of the middle line
 
@@ -4487,8 +4162,8 @@ windowReset = (s) ->
 
         s.mainCursor() ▸ [2 mid]
 
-        mode.stop s 'novim'
-        delete global.ked_session
+        stopNovim s
+        endSess()
 
   ▸ L goes to the first non blank of the bottom line
 
@@ -4500,8 +4175,8 @@ windowReset = (s) ->
 
         s.mainCursor() ▸ [2 bottom]
 
-        mode.stop s 'novim'
-        delete global.ked_session
+        stopNovim s
+        endSess()
 
   ▸ counts make H and L count lines from the window edge
 
@@ -4522,8 +4197,8 @@ windowReset = (s) ->
 
         s.mainCursor() ▸ [2 bottom-2]
 
-        mode.stop s 'novim'
-        delete global.ked_session
+        stopNovim s
+        endSess()
 
   ▸ M ignores a count
 
@@ -4536,8 +4211,8 @@ windowReset = (s) ->
 
         s.mainCursor() ▸ [2 mid]
 
-        mode.stop s 'novim'
-        delete global.ked_session
+        stopNovim s
+        endSess()
 
   ▸ dH deletes up to the top of the window
 
@@ -4549,8 +4224,8 @@ windowReset = (s) ->
         s.s.lines.length ▸ 21
         kseg.str(s.s.lines[0]) ▸ '  9'
 
-        mode.stop s 'novim'
-        delete global.ked_session
+        stopNovim s
+        endSess()
 
   ▸ dL deletes down to the bottom of the window
 
@@ -4562,8 +4237,8 @@ windowReset = (s) ->
         s.s.lines.length ▸ 18
         kseg.str(s.s.lines[8]) ▸ '  20'
 
-        mode.stop s 'novim'
-        delete global.ked_session
+        stopNovim s
+        endSess()
 
   ▸ H M and L are jumps
 
@@ -4574,5 +4249,5 @@ windowReset = (s) ->
 
         s.mainCursor() ▸ [0 8]
 
-        mode.stop s 'novim'
-        delete global.ked_session
+        stopNovim s
+        endSess()
