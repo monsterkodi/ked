@@ -114,7 +114,7 @@ use ../base         ◆ view
         
 ##images
     
-    maxLinesToLoad: => (@cells.rows-@rowOffset) * @csz[1] / @pixelsPerRow
+    maxRowsToLoad: => (@cells.rows-@rowOffset) * @csz[1] / @pixelsPerRow
     
     createImages: =>
         
@@ -137,9 +137,11 @@ use ../base         ◆ view
         ⮐ if w <= 0
         
         lines = @getSegls()
-        maxY  = @maxLinesToLoad()
+        maxRows = @maxRowsToLoad()
         
         for line,y in lines
+            
+            break if @rowOfLine(y) >= maxRows
             
             h    = @imageHeight y
             data = Buffer.alloc w*h*3
@@ -148,7 +150,6 @@ use ../base         ◆ view
             id = @imgId+y
             @images.push id
             t.sendImageData data id w h
-            break if y > maxY
                 
         # prof.end @state.name+'.map'
         
@@ -212,7 +213,7 @@ use ../base         ◆ view
         py = @lineOffsetPixels y
         rh = @lineRows(y) * @pixelsPerRow
 
-        if py >= 0 and py+rh <= @cells.rows*csz[1]
+        if py >= 0 and py+rh <= (@cells.rows-@rowOffset)*csz[1]
             if @textLine(y)
                 t.placeImageSlice id @cells.x @cells.y+@rowOffset py 0 rh w
             else
@@ -322,19 +323,22 @@ use ../base         ◆ view
         # @csz = t.cellsz # should have been set in createImages 
         
         w     = @cells.cols * @csz[0]
-        mapH  = @cells.rows * @csz[1]
+        mapH  = (@cells.rows-@rowOffset) * @csz[1]
         
         for id,y in @images
             
             py = @lineOffsetPixels y
             rh = @lineRows(y) * @pixelsPerRow
             
-            continue if py >= mapH or py+rh <= 0
+            y1 = max 0 py
+            y2 = min mapH (py+rh)
+            
+            continue if y2 <= y1
             
             if @textLine(y)
-                t.placeImageSlice id @cells.x @cells.y+@rowOffset py 0 rh w
+                t.placeImageSlice id @cells.x @cells.y+@rowOffset y1 (y1-py) (y2-y1) w
             else
-                t.placeLineImage id @cells.x @cells.y+@rowOffset py rh
+                t.placeLineImage id @cells.x @cells.y+@rowOffset y1 (y2-y1)
         @
         
     draw: =>

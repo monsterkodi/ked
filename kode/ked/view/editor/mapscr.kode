@@ -191,7 +191,7 @@ use                 ◆ mapview
            @mapY + @lineOffset(pos[1])
        ]
     
-    maxLinesToLoad: => 10000
+    maxRowsToLoad: => 10000
     
     draw: =>
     

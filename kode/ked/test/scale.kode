@@ -742,6 +742,60 @@ blockArea = scr ->
         (out.split('i=100,').length - 1) ▸ 1
         out.includes('w=120,h=28') ▸ true
 
+  ▸ the browse map does not place lines below its last row
+
+        [h e] = hed  cols:40 rows:10
+        e.state.loadLines [("line #{i}") for i in 0...100]
+
+        m = new mapview h.screen e.state
+        m.setSyntaxSegls 'txt' e.state.s.lines
+        m.rowOffset = 1
+
+        m.cells.layout 30 0 12 10
+        m.csz = [10 20]
+
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+        h.screen.t.out = []
+
+        m.createImages()
+        m.drawImages()
+
+        out = h.screen.t.written()
+
+        m.images.length ▸ 45
+        out.includes('\x1b[11;') ▸ false
+
+  ▸ the browse map cuts a scaled line at its bottom edge
+
+        [h e] = hed  cols:40 rows:10
+
+        lines = []
+        for i in 0...44
+            lines.push 'text'
+        lines.push '# h1'
+        e.state.loadLines lines
+        e.state.applyScales {enable:true md:{h1:7}}
+
+        m = new mapview h.screen e.state
+        m.setSyntaxSegls 'md' e.state.s.lines
+        m.setScales {enable:true md:{h1:7}}
+        m.rowOffset = 1
+
+        m.cells.layout 30 0 12 10
+        m.csz = [10 20]
+
+        h.screen.t.pixels = [400 200]
+        h.screen.t.cellsz = [10 20]
+        h.screen.t.out = []
+
+        m.createImages()
+        m.drawImages()
+
+        out = h.screen.t.written()
+
+        out.includes('y=0,w=120,h=4') ▸ true
+
   ▸ clicking a cut line in the map keeps the row offset
 
         [h e] = hed 40 10
