@@ -1,7 +1,7 @@
 
 use ../../kxk    ▪ kseg immutable
 use ../edit/tool ◆ belt
-
+#!tool belt
 ▸ tool belt
 
   ▸ cells

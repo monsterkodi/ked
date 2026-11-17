@@ -1,0 +1,376 @@
+
+use ../util ◆ leak logfile syntax harness config session
+
+use ../view/base   ◆ input crumbs
+use ../view/menu   ◆ choices greet
+use ../view/screen ◆ screen
+use ../../kxk      ◆ nfs slash watcher
+use ../edit        ◆ mode
+
+#!startup
+▸ startup
+
+  ▸ the modes announce when they are loaded
+
+        (mode.loaded instanceof Promise) ▸ true
+
+        ◯ mode.loaded
+
+        mode.names().includes('novim') ▸ true
+        mode.pending.length ▸ 0
+
+  ▸ the config announces when it is loaded
+
+        loading = config.load()
+
+        (config.loaded instanceof Promise) ▸ true
+
+        ◯ loading
+        ◯ config.loaded
+
+        (config.data != null) ▸ true
+
+        watcher.close()
+
+  ▸ the session announces when it is loaded
+
+        s = new session fresh:true
+
+        (s.loaded instanceof Promise) ▸ true
+
+        ◯ s.loaded
+
+▸ session
+
+  ▸ a terminal session uses the terminal session directory
+
+        s = new session fresh:true
+
+        s.headless ▸ false
+        s.dir ▸ slash.absolute("~/.config/ked/sessions/")
+        s.file ▸ slash.path(s.dir "#{s.name}.noon")
+
+  ▸ a headless session uses its own directory
+
+        s = new session fresh:true headless:true
+
+        s.headless ▸ true
+        s.dir ▸ slash.absolute("~/.config/ked/headless-sessions/")
+        s.file ▸ slash.path(s.dir "#{s.name}.noon")
+
+  ▸ a colored headless session uses the headless directory
+
+        s = new session fresh:true headless_colors:true
+
+        s.headless ▸ true
+        s.dir ▸ slash.absolute("~/.config/ked/headless-sessions/")
+
+  ▸ novim command line history is loaded again
+
+        dir = '/tmp/opencode/ked-session-history-test'
+
+        ◯ nfs.remove dir
+
+        s = new session fresh:true
+
+        s.dir  = dir
+        s.file = slash.path dir 'history.noon'
+
+        s.set 'novim▸history▸ex', ['w' 'foo']
+        s.set 'novim▸history▸search', ['bar']
+
+        ◯ s.save()
+
+        s2 = new session fresh:true
+
+        s2.dir  = dir
+        s2.file = slash.path dir 'other.noon'
+
+        ◯ s2.loadAndMerge()
+
+        s2.get('novim▸history▸ex')     ▸ ['w' 'foo']
+        s2.get('novim▸history▸search') ▸ ['bar']
+
+        s2.clear()
+
+        ◯ nfs.remove dir
+
+#!harness
+▸ harness
+
+  ▸ write and written
+
+        h = new harness
+
+        h.t.written() ▸ ''
+
+        h.t.write 'hello'
+
+        h.t.written() ▸ 'hello'
+
+  ▸ crumbs are shown
+
+        h = new harness
+
+        c = new crumbs h.screen 'test_crumbs'
+        c.layout 0 0 30 1
+        c.set '/home/kodi/s'
+        c.draw()
+
+        row = h.row 0
+
+        row.includes 'kodi' ▸ true
+        row.includes 's' ▸ true
+
+        h.row 1 ▸ ''
+
+  ▸ key presses
+
+        h = new harness
+
+        c = new choices h.screen 'test_choices'
+        c.layout 0 0 20 3
+        c.set ['one' 'two' 'three']
+        c.select 0
+
+        c.currentIndex() ▸ 0
+
+        h.key c 'down'
+
+        c.currentIndex() ▸ 1
+
+  ▸ view focus
+
+        h = new harness
+
+        i = new input h.screen 'test_input'
+        i.layout 0 0 20 1
+
+        h.focus i
+
+        i.hasFocus() ▸ true
+
+  ▸ view typing
+
+        h = new harness
+
+        i = new input h.screen 'test_input'
+        i.layout 0 0 20 1
+
+        h.focus i
+
+        h.type i 'xyz'
+
+        i.current() ▸ 'xyz'
+
+  ▸ the cursor is marked
+
+        h = new harness
+
+        i = new input h.screen 'test_input'
+        i.layout 0 0 20 1
+        i.state.loadLines ['abc']
+
+        h.focus i
+        i.state.setMainCursor 1 0
+        i.draw()
+
+        h.row 0 ▸ 'abc'
+        h.rowMarked 0 ▸ "a#{screen.MAIN_MARK}b#{screen.END_MARK}c"
+
+  ▸ selection is marked
+
+        h = new harness
+
+        h.screen.set 0 0 'a'
+        h.screen.set_mark 0 0 'selection'
+
+        h.rowMarked 0 ▸ "#{screen.SELECT_MARK}a#{screen.END_MARK}"
+
+  ▸ highlight is marked
+
+        h = new harness
+
+        h.screen.set 0 0 'a'
+        h.screen.set_mark 0 0 'highlight'
+
+        h.rowMarked 0 ▸ "#{screen.HILGHT_MARK}a#{screen.END_MARK}"
+
+  ▸ greeter blacks out the window
+
+        h = new harness
+
+        g = new greet h.screen
+        g.show()
+        g.layout 0 0
+        g.draw()
+
+        h.screen.get_bg 0  23 ▸ [0 0 0]
+        h.screen.get_bg 79 0  ▸ [0 0 0]
+
+  ▸ colored screen 
+    
+    ▸ draws colors
+
+            h = new harness
+    
+            h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+    
+            line = h.screen.textColored()[0]
+    
+            line.includes '\x1b[48;2;1;2;3m'   ▸ true
+            line.includes '\x1b[38;2;10;20;30m'  ▸ true
+            line.includes 'a'                  ▸ true
+            line.endsWith '\x1b[0m'            ▸ true
+    
+    ▸ marks the cursor
+    
+            h = new harness
+    
+            h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+            h.screen.set_mark 0 0 'main'
+    
+            line = h.screen.textColored()[0]
+    
+            line.includes "#{screen.MAIN_MARK}a#{screen.END_MARK}" ▸ true
+    
+    ▸ marks the selection
+    
+            h = new harness
+    
+            h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+            h.screen.set_mark 0 0 'selection'
+    
+            line = h.screen.textColored()[0]
+    
+            line.includes "#{screen.SELECT_MARK}a#{screen.END_MARK}" ▸ true
+    
+    ▸ marks the highlight
+    
+            h = new harness
+    
+            h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+            h.screen.set_mark 0 0 'highlight'
+    
+            line = h.screen.textColored()[0]
+    
+            line.includes "#{screen.HILGHT_MARK}a#{screen.END_MARK}" ▸ true
+
+#!logfile
+▸ logfile
+
+  ▸ a headless logfile leaves the console alone
+
+        before = [console.log console.warn console.error]
+        log = new logfile 'test' true
+
+        log.stream ▸ undefined
+        (console.log == before[0]) ▸ true
+        (console.warn == before[1]) ▸ true
+        (console.error == before[2]) ▸ true
+
+  ▸ a headless logfile writes nowhere
+
+        log = new logfile 'test' true
+
+        log.write 'nothing happens'
+
+  ▸ a headless logfile still closes
+
+        log = new logfile 'test' true
+        closed = false
+
+        log.close -> closed = true
+
+        closed ▸ true
+
+▸ leak
+
+  ▸ a headless run samples nothing
+
+        lines = []
+        keep = console.log
+        console.log = (args...) -> lines.push args
+
+        leak.start headless:true
+
+        clearInterval leak.timer if leak.timer
+        leak.timer = null
+
+        console.log = keep
+
+        lines.length ▸ 0
+
+  ▸ a colored headless run samples nothing
+
+        lines = []
+        keep = console.log
+        console.log = (args...) -> lines.push args
+
+        leak.start headless_colors:true
+
+        clearInterval leak.timer if leak.timer
+        leak.timer = null
+
+        console.log = keep
+
+        lines.length ▸ 0
+#!syntax
+▸ syntax
+
+  ▸ getClass argument
+
+        s = new syntax 'test'
+        s.setExt 'kode'
+        s.setLines ['class Foo']
+
+        x = 0
+        y = 0
+        clss = s.getClass x y
+        ch   = 'F'
+
+        s.getColor(x y clss) ▸ s.getColor(x y)
+        s.getChar(x y ch clss) ▸ s.getChar(x y ch)
+
+        origGetClass = s.getClass
+        calls = 0
+        s.getClass = (cx cy) ->
+            calls += 1
+            origGetClass cx cy
+
+        s.getColor x y clss
+        s.getChar x y ch clss
+        calls ▸ 0
+
+        s.getColor x y
+        s.getChar x y ch
+        calls ▸ 2
+        
+  ▸ getClasses
+
+        s = new syntax 'test'
+        s.setExt 'kode'
+        lines = ['# header' 'f = (a) -> a + 1' '   indented' "u = '🌈'" '']
+        s.setLines lines
+
+        lim = 40
+
+        for y in 0...lines.length
+            classes = s.getClasses y
+            for x in 0...lim
+                clss = classes[x]
+                clss ?= 'text'
+                exp = s.getClass x y
+                clss ▸ exp
+
+        s.getClasses(4).length ▸ 0
+
+        s.diss[0] = [start:0 length:1 clss:'']
+
+        blank = s.getClasses(0)[0]
+        blank ▸ ''
+
+        hole = s.getClasses(0)[1]
+        hole ?= 'text'
+        hole ▸ 'text'
+        
