@@ -1,7 +1,9 @@
 
-use ../util        ◆ harness
+use ../util        ◆ harness filecolors
 use ../edit        ◆ state editor
+use ../edit/tool   ◆ colorspans
 use ../theme       ◆ color theme
+use ../view/editor ◆ mapview
 use ../view/colmns ◆ colorpicker
 
 pickr = ->
@@ -197,3 +199,310 @@ pickr = ->
 
         p.focusRing.includes(p.paletteView) ▸ true
 
+▸ colorspans
+
+  ▸ overlay adds a span
+
+        lines = [['a' 'b' 'c' 'd' 'e']]
+
+        spans = colorspans.overlay [] [[1 0 4 0]] '#f00' lines
+
+        spans ▸ [[1 0 4 '#f00']]
+
+  ▸ overlay splits an existing span
+
+        lines = [['a' 'b' 'c' 'd' 'e']]
+
+        spans = colorspans.overlay [[0 0 5 '#00f']] [[2 0 3 0]] '#f00' lines
+
+        spans ▸ [[0 0 2 '#00f'] [2 0 3 '#f00'] [3 0 5 '#00f']]
+
+  ▸ overlay turns a multiline range into lines
+
+        lines = [['a' 'b' 'c' 'd' 'e'] ['a' 'b' 'c' 'd' 'e'] ['a' 'b' 'c' 'd' 'e']]
+
+        spans = colorspans.overlay [] [[2 0 3 2]] '#f00' lines
+
+        spans ▸ [[2 0 5 '#f00'] [0 1 5 '#f00'] [0 2 3 '#f00']]
+
+  ▸ normalize merges touching spans of the same color
+
+        spans = colorspans.normalize [[0 0 2 '#f00'] [2 0 4 '#f00'] [5 0 6 '#0f0']]
+
+        spans ▸ [[0 0 4 '#f00'] [5 0 6 '#0f0']]
+
+  ▸ clear removes and splits
+
+        spans = colorspans.clear [[0 0 5 '#00f'] [6 0 9 '#00f']] [[2 0 7 0]]
+
+        spans ▸ [[0 0 2 '#00f'] [7 0 9 '#00f']]
+
+  ▸ an insertion inside a span stretches it
+
+        oldLines = [['a' 'b' 'c' 'd']]
+        newLines = [['a' 'b' 'X' 'c' 'd']]
+
+        spans = colorspans.adjust [[0 0 4 '#f00']] oldLines newLines
+
+        spans ▸ [[0 0 5 '#f00']]
+
+  ▸ an insertion before a span moves it
+
+        oldLines = [['a' 'b' 'c' 'd']]
+        newLines = [['a' 'b' 'X' 'c' 'd']]
+
+        spans = colorspans.adjust [[2 0 4 '#f00']] oldLines newLines
+
+        spans ▸ [[3 0 5 '#f00']]
+
+  ▸ a deletion inside a span shrinks it
+
+        oldLines = [['a' 'b' 'c' 'd' 'e']]
+        newLines = [['a' 'b' 'e']]
+
+        spans = colorspans.adjust [[0 0 5 '#f00']] oldLines newLines
+
+        spans ▸ [[0 0 3 '#f00']]
+
+  ▸ inserting a line moves spans below
+
+        oldLines = [['a'] ['b'] ['c']]
+        newLines = [['a'] ['x'] ['b'] ['c']]
+
+        spans = colorspans.adjust [[0 1 1 '#f00'] [0 2 1 '#0f0']] oldLines newLines
+
+        spans ▸ [[0 2 1 '#f00'] [0 3 1 '#0f0']]
+
+  ▸ deleting a line moves spans below
+
+        oldLines = [['a'] ['x'] ['b'] ['c']]
+        newLines = [['a'] ['b'] ['c']]
+
+        spans = colorspans.adjust [[0 2 1 '#f00'] [0 3 1 '#0f0']] oldLines newLines
+
+        spans ▸ [[0 1 1 '#f00'] [0 2 1 '#0f0']]
+
+  ▸ colorAtPos finds the span at a position
+
+        spans = [[1 2 4 '#f00'] [6 2 9 '#0f0']]
+
+        colorspans.colorAtPos spans [2 2] ▸ '#f00'
+        colorspans.colorAtPos spans [5 2] ▸ null
+        colorspans.colorAtPos spans [6 2] ▸ '#0f0'
+
+▸ colorstate
+
+  ▸ foreground and background are independent layers
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        s.setColorsForRanges [[0 0 3 0]] '#ff0000' null
+
+        s.s.colors.fg ▸ [[0 0 3 '#ff0000']]
+        s.s.colors.bg ▸ []
+
+        s.setColorsForRanges [[1 0 5 0]] null '#0000ff'
+
+        s.s.colors.fg ▸ [[0 0 3 '#ff0000']]
+        s.s.colors.bg ▸ [[1 0 5 '#0000ff']]
+
+  ▸ clearing splits both layers
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        s.setColorsForRanges [[0 0 3 0]] '#ff0000' null
+        s.setColorsForRanges [[1 0 5 0]] null '#0000ff'
+
+        s.clearColorsForRanges [[1 0 4 0]]
+
+        s.s.colors.fg ▸ [[0 0 1 '#ff0000']]
+        s.s.colors.bg ▸ [[4 0 5 '#0000ff']]
+
+  ▸ editing adjusts the spans
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        s.setColorsForRanges [[0 0 6 0]] '#ff0000' null
+
+        s.setLines ['abXcdef']
+
+        s.s.colors.fg ▸ [[0 0 7 '#ff0000']]
+
+  ▸ clearing at the selection clears both layers
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        s.setColorsForRanges [[0 0 6 0]] '#ff0000' '#0000ff'
+        s.setSelections [[0 0 6 0]]
+
+        s.clearColorsAtCursorOrSelection()
+
+        s.s.colors.fg ▸ []
+        s.s.colors.bg ▸ []
+
+  ▸ colors can be undone
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        s.setColorsForRanges [[0 0 3 0]] '#ff0000' null
+
+        s.s.colors.fg ▸ [[0 0 3 '#ff0000']]
+
+        s.undo()
+
+        s.s.colors.fg ▸ []
+
+  ▸ colors are drawn over syntax
+
+        h = new harness cols:20 rows:5
+        e = new editor h.screen 'test_color_draw' []
+
+        e.layout 0 0 20 5
+        e.state.loadLines ['abcdef']
+
+        e.state.setColorsForRanges [[1 0 4 0]] '#ff0000' '#0000ff'
+
+        e.draw()
+
+        h.screen.get_fg(2 0) ▸ [255 0 0]
+        h.screen.get_bg(2 0) ▸ [0 0 255]
+
+  ▸ a saved background survives a load
+
+        colors =
+            fg: []
+            bg: [[1 0 4 '#0000ff']]
+
+        text = filecolors.join 'test.js' 'abcdef' colors
+        data = filecolors.split 'test.js' text
+
+        h = new harness cols:20 rows:5
+        e = new editor h.screen 'test_color_load' []
+
+        e.layout 0 0 20 5
+        e.state.loadLines data.text.split('\n')
+        e.state.loadColors data.colors
+
+        e.draw()
+
+        h.screen.get_bg(2 0) ▸ [0 0 255]
+
+  ▸ loading unchanged colors is not announced
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        changes = 0
+        s.on 'colors.changed' -> changes += 1
+
+        s.loadColors {fg: [], bg: []}
+        changes ▸ 0
+
+        s.loadColors {fg: [[0 0 2 '#ff0000']], bg: []}
+        changes ▸ 1
+
+        s.loadColors {fg: [[0 0 2 '#ff0000']], bg: []}
+        changes ▸ 1
+
+  ▸ the map uses custom colors
+
+        h = new harness cols:20 rows:5
+        e = new editor h.screen 'test_color_map' []
+
+        e.layout 0 0 20 5
+        e.state.loadLines ['abcdef']
+
+        e.state.setColorsForRanges [[1 0 2 0]] '#ff0000' null
+
+        m = new mapview h.screen e.state
+        m.setSyntaxSegls 'txt' e.state.s.lines
+
+        data = Buffer.alloc 120
+        m.imageForLine data e.state.s.lines[0] 0
+
+        data[6]  ▸ 255
+        data[7]  ▸ 0
+        data[8]  ▸ 0
+
+  ▸ the map uses custom backgrounds for spaces
+
+        h = new harness cols:20 rows:5
+        e = new editor h.screen 'test_color_map' []
+
+        e.layout 0 0 20 5
+        e.state.loadLines ['a b']
+
+        e.state.setColorsForRanges [[1 0 2 0]] null '#0000ff'
+
+        m = new mapview h.screen e.state
+        m.setSyntaxSegls 'txt' e.state.s.lines
+
+        data = Buffer.alloc 120
+        m.imageForLine data e.state.s.lines[0] 0
+
+        data[6]  ▸ 0
+        data[7]  ▸ 0
+        data[8]  ▸ 255
+
+  ▸ the map can use colors passed in for a preview
+
+        h = new harness cols:20 rows:5
+        e = new editor h.screen 'test_color_map' []
+
+        e.layout 0 0 20 5
+        e.state.loadLines ['abcdef']
+
+        m = new mapview h.screen e.state
+        m.setSyntaxSegls 'txt' e.state.s.lines
+        m.setColors
+            fg: [[1 0 2 '#00ff00']]
+            bg: []
+
+        data = Buffer.alloc 120
+        m.imageForLine data e.state.s.lines[0] 0
+
+        data[6]  ▸ 0
+        data[7]  ▸ 255
+        data[8]  ▸ 0
+
+  ▸ custom colors keep ascii header edges plain
+
+        h = new harness cols:20 rows:5
+        e = new editor h.screen 'test_color_ascii' []
+
+        e.layout 0 0 20 5
+        e.state.loadLines ['████']
+        e.state.setMainCursor 10 0
+
+        e.state.setColorsForRanges [[0 0 1 0]] '#ff0000' null
+
+        e.draw()
+        e.drawAsciiHeader e.state.s.lines[0] 0 'comment triple header'
+
+        h.screen.get_char(0 0) ▸ '█'
+        h.screen.get_fg(0 0) ▸ [255 0 0]
+        h.screen.get_char(3 0) ▸ '▋'
+
+  ▸ setting colors can void a layer
+
+        cells = cols:40 rows:10
+        s = new state cells 'test_color_state'
+        s.loadLines ['abcdef']
+
+        s.setColorsForRanges [[0 0 6 0]] '#ff0000' '#0000ff'
+
+        s.setColorsForRanges [[1 0 4 0]] '#00ff00' null ['bg']
+
+        s.s.colors.fg ▸ [[0 0 1 '#ff0000'] [1 0 4 '#00ff00'] [4 0 6 '#ff0000']]
+        s.s.colors.bg ▸ [[0 0 1 '#0000ff'] [4 0 6 '#0000ff']]
