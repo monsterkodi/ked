@@ -14,6 +14,32 @@ cur = x y -> s.mainCursor() ▸ [x y]
 
 mrange = lines x y m -> motion.range lines [x y] m
 
+windowCells = cols:40 rows:20
+
+windowLines = []
+for i in 0...30
+    windowLines.push "  #{i}"
+
+windowSetup = (name) ->
+    store = {'editor▸file':'/tmp/novimwindow'}
+    fakeGet = (key def) -> clone(store[key] ? def)
+    fakeSet = (key value) -> store[key] = clone value
+    global.ked_session = get:fakeGet set:fakeSet
+    s = new state windowCells name
+    mode.modes.novim = novim
+    mode.start s 'novim'
+    s.loadLines windowLines
+    s.setView [0 0]
+    s.setMainCursor 0 8
+    s
+
+windowPress = (s c) -> mode.handleKey s c {combo:c, char:c}
+
+windowReset = (s) ->
+    s.setView [0 0]
+    s.setMainCursor 0 8
+
+
 ▸ novim
 
   segls  = kseg.segls """
@@ -3708,3 +3734,117 @@ mrange = lines x y m -> motion.range lines [x y] m
     
         mode.stop plain 'brckts'
     
+▸ novim window motions
+
+  ▸ H goes to the first non blank of the top line
+
+        s = windowSetup 'novimwindow_h'
+
+        top = s.lineAtRow 0
+
+        windowPress s 'H'
+
+        s.mainCursor() ▸ [2 top]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ M goes to the first non blank of the middle line
+
+        s = windowSetup 'novimwindow_m'
+
+        mid = s.lineAtRow int((s.cells.rows-1)/2)
+
+        windowPress s 'M'
+
+        s.mainCursor() ▸ [2 mid]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ L goes to the first non blank of the bottom line
+
+        s = windowSetup 'novimwindow_l'
+
+        bottom = s.lineAtRow s.cells.rows-1
+
+        windowPress s 'L'
+
+        s.mainCursor() ▸ [2 bottom]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ counts make H and L count lines from the window edge
+
+        s = windowSetup 'novimwindow_count'
+
+        top    = s.lineAtRow 0
+        bottom = s.lineAtRow s.cells.rows-1
+
+        windowPress s '3'
+        windowPress s 'H'
+
+        s.mainCursor() ▸ [2 top+2]
+
+        windowReset s
+
+        windowPress s '3'
+        windowPress s 'L'
+
+        s.mainCursor() ▸ [2 bottom-2]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ M ignores a count
+
+        s = windowSetup 'novimwindow_mcount'
+
+        mid = s.lineAtRow int((s.cells.rows-1)/2)
+
+        windowPress s '2'
+        windowPress s 'M'
+
+        s.mainCursor() ▸ [2 mid]
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ dH deletes up to the top of the window
+
+        s = windowSetup 'novimwindow_dh'
+
+        windowPress s 'd'
+        windowPress s 'H'
+
+        s.s.lines.length ▸ 21
+        kseg.str(s.s.lines[0]) ▸ '  9'
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ dL deletes down to the bottom of the window
+
+        s = windowSetup 'novimwindow_dl'
+
+        windowPress s 'd'
+        windowPress s 'L'
+
+        s.s.lines.length ▸ 18
+        kseg.str(s.s.lines[8]) ▸ '  20'
+
+        mode.stop s 'novim'
+        delete global.ked_session
+
+  ▸ H M and L are jumps
+
+        s = windowSetup 'novimwindow_jump'
+
+        windowPress s 'L'
+        windowPress s 'ctrl+o'
+
+        s.mainCursor() ▸ [0 8]
+
+        mode.stop s 'novim'
+        delete global.ked_session
