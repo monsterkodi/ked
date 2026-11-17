@@ -170,7 +170,8 @@ mk = (history current) ->
 
         c.hidden() ▸ true
         kseg.str(e.state.s.lines) ▸ 'alphabetstart'
-
+        
+#!detector
 ▸ detector
 
   ▸ the language of a snippet is detected
@@ -401,7 +402,7 @@ mk = (history current) ->
         h.key u 'cmd+down' ''
 
         u.matrix.scale ▸ 1
-
+#!matrix
 ▸ matrix
 
   ▸ selection moves through the items in reading order
