@@ -83,7 +83,7 @@ use           ◆ specs
             
         before = @editor.state.chunkBeforeCursor()
                 
-        @words = kseg.chunks(@editor.state.s.lines).map (chunk) -> chunk.chunk        
+        @words = @chunksForLines @editor.state.s.lines        
         @words = belt.prepareWordsForCompletion before @turd @words
         
         if @turd.length == 1 
@@ -114,6 +114,28 @@ use           ◆ specs
             @choices.layout x y mlw+3 h
             @choices.set @words.map((w) -> ' '+w)
             @choices.selectFirst()
+    
+    #  lines are immutable, so unchanged lines keep their reference and
+    #  only the edited line has to be split into chunks again
+    
+    chunksForLines: lines ->
+        
+        @lineChunks ?= new WeakMap()
+        
+        chunks = []
+        
+        for line in lines
+            
+            lineChunks = @lineChunks.get line
+            
+            if not lineChunks?
+                lineChunks = kseg.chunks(line).map (chunk) -> chunk.chunk
+                @lineChunks.set line lineChunks
+            
+            for chunk in lineChunks
+                chunks.push chunk
+                
+        chunks
         
     hide: -> 
         ⮐ if not @visible

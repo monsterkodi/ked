@@ -319,6 +319,36 @@ blockArea = scr ->
         h.screen.get_bg(4 2) ▸ theme.selection.span
         h.screen.get_bg(5 2) ▸ theme.selection.span
 
+  ▸ completion chunks are rebuilt for edited lines only
+
+        [h e] = hed 40 12 'kode' ['complete']
+        e.state.loadLines ['funky1 = 1' 'funky2 = 2' 'fun']
+
+        e.complete.chunksForLines(e.state.s.lines) ▸ ['funky1' '=' '1' 'funky2' '=' '2' 'fun']
+
+        e.state.setMainCursor 10 0
+        e.state.insert ' funky3'
+
+        kseg.str e.state.s.lines[0] ▸ 'funky1 = 1 funky3'
+        e.complete.chunksForLines(e.state.s.lines) ▸ ['funky1' '=' '1' 'funky3' 'funky2' '=' '2' 'fun']
+
+  ▸ completion follows edits in the document
+
+        [h e] = hed 40 12 'kode' ['complete']
+        e.state.loadLines ['funky1 = 1' 'funky2 = 2' 'fun']
+
+        e.state.setMainCursor 3 2
+        e.complete.complete()
+
+        e.complete.words ▸ ['funky1' 'funky2']
+
+        e.state.setMainCursor 10 0
+        e.state.insert ' funky3'
+        e.state.setMainCursor 3 2
+        e.complete.complete()
+
+        e.complete.words ▸ ['funky1' 'funky2' 'funky3']
+
   ▸ the completion frame fits at the edges of the editor
 
         [h e] = hed 30 12 'kode' ['complete']

@@ -74,6 +74,7 @@ use ../../../kxk ◆ pepe
                 filtered.push w
                 continue                        
             
+            continue if w.indexOf(turd) < 0 # a subword can only start with turd if it contains turd
             wds = kseg.words w
             for subw,idx in wds          # split chunk into words and 
                 if subw.word.startsWith turd  # add any that starts with turd 

@@ -22,6 +22,17 @@ use .. ◆ kstr kseg
             bbb
             """ ▸ [['a' 'a' 'a'] [] ['b' 'b' 'b']]
             
+    ▸ segl
+    
+        kseg.segl 'ab'                        ▸ kseg('ab')
+        kseg.segl ['ab' 'cd']                 ▸ ['ab' 'cd']
+        kseg.segl [kseg('ab') kseg('cd')]     ▸ kseg("ab\ncd")
+        kseg.segl [kseg('a') kseg('') kseg('c')] ▸ kseg("a\n\nc")
+        kseg.segl [kseg('ab')]                ▸ kseg('ab')
+        
+        many = [kseg('ab') kseg('cd') kseg('ef')]
+        kseg.segl many ▸ kseg("ab\ncd\nef")
+        
     ▸ str
     
         kseg.str kseg('hello') ▸ 'hello'

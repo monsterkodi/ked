@@ -51,7 +51,8 @@ kseg.segl = any ->
     else
         segls = []
         for a in any
-            segls = segls.concat a
+            for g in a
+                segls.push g
             segls.push '\n'
         segls.pop()
         segls
