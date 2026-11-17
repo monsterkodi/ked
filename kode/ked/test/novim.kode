@@ -40,6 +40,12 @@ freshText = (text x=0 y=0) ->
     s.clearHistory()
     loadText text x y
 
+runEx = (text ex x=0 y=0 nvm=null) ->
+    gm = nvm ? new novim s
+    freshText text x y
+    gm.runEx ex
+    kseg.str s.s.lines
+
 endSess = -> delete global.ked_session
 
 startNovim = (state) ->
@@ -3528,33 +3534,19 @@ windowReset = (s) ->
 
         [nm nkey nkeys] = novimKeysFor s
 
-        freshText "one two one\nthree one" 8 0
-
-        nm.runEx 's/one/1/'
-
-        txt "1 two one\nthree one"
+        runEx "one two one\nthree one" 's/one/1/' 8 0 ▸ "1 two one\nthree one"
         cur 0 0
-        nm.ex ▸ null
+        gm.ex ▸ null
 
-        freshText "one two one\nthree one"
-
-        nm.runEx '%s/one/1/g'
-
-        txt "1 two 1\nthree 1"
+        runEx "one two one\nthree one" '%s/one/1/g' ▸ "1 two 1\nthree 1"
         cur 6 1
 
         s.executeNovim {operator:'undo', count:1}
         txt "one two one\nthree one"
 
-        freshText "One ONE"
+        runEx "One ONE" 's/one/x/i' ▸ "x ONE"
 
-        nm.runEx 's/one/x/i'
-        txt "x ONE"
-
-        freshText "a\na\na"
-
-        nm.runEx '2,3s/a/b/g'
-        txt "a\nb\nb"
+        runEx "a\na\na" '2,3s/a/b/g' ▸ "a\nb\nb"
 
         freshText "a\nb\nc"
 
@@ -3605,9 +3597,7 @@ windowReset = (s) ->
         s.s.highlights ▸ []
         nm.ex         ▸ null
 
-        freshText "aa aa"
-
-        nm.runEx '%s/aa/b/gc'
+        runEx "aa aa" '%s/aa/b/gc' 0 0 nm
 
         s.s.highlights ▸ [[0 0 2] [3 0 5]]
         s.s.selections ▸ [[0 0 2 0]]
@@ -3630,9 +3620,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'undo', count:1}
         txt "aa aa"
 
-        freshText "aa aa"
-
-        nm.runEx '%s/aa/b/gc'
+        runEx "aa aa" '%s/aa/b/gc' 0 0 nm
         nkey 'n'
 
         txt "aa aa"
@@ -3643,41 +3631,31 @@ windowReset = (s) ->
         nkey 'n'
         nm.exConfirms ▸ null
 
-        freshText "aa aa aa"
-
-        nm.runEx '%s/aa/X/gc'
+        runEx "aa aa aa" '%s/aa/X/gc' 0 0 nm
         nkey 'a'
 
         txt "X X X"
         nm.exConfirms ▸ null
 
-        freshText "aa aa"
-
-        nm.runEx '%s/aa/b/gc'
+        runEx "aa aa" '%s/aa/b/gc' 0 0 nm
         nkey 'l'
 
         txt "b aa"
         nm.exConfirms ▸ null
 
-        freshText "aa aa"
-
-        nm.runEx '%s/aa/b/gc'
+        runEx "aa aa" '%s/aa/b/gc' 0 0 nm
         nkey 'q'
 
         txt "aa aa"
         nm.exConfirms ▸ null
 
-        freshText "aa aa"
-
-        nm.runEx '%s/aa/b/gc'
+        runEx "aa aa" '%s/aa/b/gc' 0 0 nm
         nkey 'esc'
 
         txt "aa aa"
         nm.exConfirms ▸ null
 
-        freshText "aa aa"
-
-        nm.runEx '%s/aa/b/gc'
+        runEx "aa aa" '%s/aa/b/gc' 0 0 nm
         nkey 'y'
         nkey 'q'
 
@@ -3685,9 +3663,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'undo', count:1}
         txt "aa aa"
 
-        freshText "aa aa\naa"
-
-        nm.runEx '%s/aa/b/c'
+        runEx "aa aa\naa" '%s/aa/b/c' 0 0 nm
 
         s.s.highlights ▸ [[0 0 2] [0 1 2]]
         s.s.selections ▸ [[0 0 2 0]]
@@ -3705,9 +3681,7 @@ windowReset = (s) ->
         txt "b aa\naa"
         nm.exConfirms ▸ null
 
-        freshText "a\nb"
-
-        nm.runEx '%s/^/>/gc'
+        runEx "a\nb" '%s/^/>/gc' 0 0 nm
 
         nkey 'y'
         txt ">a\nb"
@@ -3727,77 +3701,40 @@ windowReset = (s) ->
 
   ▸ substitute without replacement
 
-        freshText "one two one\nthree one"
-
-        nm.runEx '%s/one'
-
-        txt "one two one\nthree one"
+        runEx "one two one\nthree one" '%s/one' ▸ "one two one\nthree one"
         s.s.selections ▸ [[0 0 3 0] [8 0 11 0] [6 1 9 1]]
         s.s.cursors ▸ [[3 0] [11 0] [9 1]]
         cur 3 0
 
-        freshText "one two one\nthree one"
-
-        nm.runEx '%s/one/'
-
-        txt "one two one\nthree one"
+        runEx "one two one\nthree one" '%s/one/' ▸ "one two one\nthree one"
         s.s.selections ▸ [[0 0 3 0] [8 0 11 0] [6 1 9 1]]
         s.s.cursors ▸ [[3 0] [11 0] [9 1]]
         cur 3 0
 
-        freshText "one two one\nthree one"
-
-        nm.runEx '%s/one/g'
-
-        txt "one two one\nthree one"
+        runEx "one two one\nthree one" '%s/one/g' ▸ "one two one\nthree one"
         s.s.selections ▸ [[0 0 3 0] [8 0 11 0] [6 1 9 1]]
         s.s.cursors ▸ [[3 0] [11 0] [9 1]]
         cur 3 0
 
-        freshText "Find fiND find"
-
-        nm.runEx '%s/find/gi'
-
-        txt "Find fiND find"
+        runEx "Find fiND find" '%s/find/gi' ▸ "Find fiND find"
         s.s.selections ▸ [[0 0 4 0] [5 0 9 0] [10 0 14 0]]
         s.s.cursors ▸ [[4 0] [9 0] [14 0]]
 
-        freshText "one\ntwo one" 0 1
-
-        nm.runEx 's/one/'
-
-        txt "one\ntwo one"
+        runEx "one\ntwo one" 's/one/' 0 1 ▸ "one\ntwo one"
         s.s.selections ▸ [[4 1 7 1]]
         s.s.cursors ▸ [[7 1]]
 
-        freshText "one two one"
+        runEx "one two one" '%s/one//g' ▸ " two "
 
-        nm.runEx '%s/one//g'
-
-        txt " two "
-
-        freshText "one two one"
-
-        nm.runEx '%s/one/1'
-
-        txt "1 two one"
+        runEx "one two one" '%s/one/1' ▸ "1 two one"
 
   ▸ global and normal
 
-        runEx = text ex ->
-            gm = new novim s
-            freshText text
-            gm.runEx ex
-            kseg.str s.s.lines
-        
         runEx "keep\ndrop\ndrop\nkeep" 'g/drop/d'  ▸ "keep\nkeep"
         runEx "keep\ndrop\ndrop\nkeep" 'v/keep/d'  ▸ "keep\nkeep"
         runEx "keep\ndrop\ndrop\nkeep" 'g!/keep/d' ▸ "keep\nkeep"
-
         runEx "x=1\nx=2\ny=3" 'g/^x/s/=/ = /' ▸ "x = 1\nx = 2\ny=3"
-
         runEx "aaa\nbbb\nccc" 'g/^b/normal x' ▸ "aaa\nbb\nccc"
-
         runEx "one\ntwo\nthree" '%normal x' ▸ "ne\nwo\nhree"
 
         s.executeNovim {operator:'undo', count:1}
@@ -3814,15 +3751,10 @@ windowReset = (s) ->
         txt "a\nb"
 
         runEx "a\nb\nc" '2normal A!' ▸ "a\nb!\nc"
-
         runEx "one\ntwo" 'g/^t/normal I# ' ▸ "one\n# two"
-
         runEx "ta\ntb\nx" 'g/^t/normal I# ' ▸ "# ta\n# tb\nx"
-
         runEx "abcd" 'normal 2x' ▸ "cd"
-
         runEx "a\nb\na" '2,3g/a/d' ▸ "a\nb"
-
         runEx "keep\ndrop\ndrop\nkeep" 'g/drop/d' ▸ "keep\nkeep"
 
         s.executeNovim {operator:'undo', count:1}
@@ -3845,9 +3777,7 @@ windowReset = (s) ->
         errors[-1]   ▸ 'confirm not supported in :g'
 
         runEx "a\nb\nc" '2d' ▸ "a\nc"
-
         runEx "a\nb\nc" '2,3d' ▸ "a"
-
         runEx "a\nb" '%d' ▸ ""
 
         gm.runEx 'g/[/d'
