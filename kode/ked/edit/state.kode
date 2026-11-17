@@ -157,22 +157,6 @@ use           ◆ keys mode
         @pushState()
         @emit 'sue.changed'
 
-    setSueForRanges: (ranges value) =>
-
-        ⮐ if empty ranges
-
-        areas = @s.sue ? []
-        add   = []
-
-        for rng in ranges
-            add.push {x: rng[0] y: rng[1] value: value}
-
-        @s = @s.set 'sue' areas.concat(add)
-        @rowCache = null
-        @r = []
-        @pushState()
-        @emit 'sue.changed'
-
     clearSueForRanges: ranges =>
 
         areas = @s.sue ? []
@@ -203,15 +187,6 @@ use           ◆ keys mode
 
         ranges
 
-    addSueForRanges: (ranges code values) =>
-
-        ⮐ if empty ranges
-
-        for rng in ranges
-            w = max 1 (rng[2] - rng[0])
-            h = rng[3] - rng[1] + 1
-            @setSue rng[0] rng[1] [code w h].concat(values)
-
     toggleSueFlag: flag =>
 
         ranges = @decorationRanges()
@@ -228,34 +203,6 @@ use           ◆ keys mode
         @r = []
         @pushState()
         @emit 'sue.changed'
-
-    setLineScale: (y scale) =>
-
-        areas = []
-
-        for area in (@s.sue ? [])
-            continue if area.y == y and area.value[0] == sue.LINE_SCALE
-            areas.push area
-
-        areas.push {x: 0 y: y value: [sue.LINE_SCALE -1 1 scale]} if scale > 1
-
-        @s = @s.set 'sue' areas
-        @rowCache = null
-        @r = []
-        @pushState()
-        @emit 'sue.changed'
-        
-    stepLineScales: (indices delta) =>
-
-        ⮐ if empty indices
-
-        @applySueAreas(@areasWithSteppedLineScales(@s.sue ? [] indices delta))
-
-    clearLineScales: indices =>
-
-        ⮐ if empty indices
-
-        @applySueAreas(@areasWithoutLineScales(@s.sue ? [] indices))
 
     areasWithSteppedLineScales: (areas indices delta) =>
 
@@ -422,23 +369,6 @@ use           ◆ keys mode
         ⮐ [] if empty areas
 
         sue.runsForLine(areas @s.lines y)
-
-    clearLineScale: y =>
-
-        areas = @s.sue ? []
-        keep  = []
-
-        for area in areas
-            continue if area.y == y and area.value[0] == sue.LINE_SCALE
-            keep.push area
-
-        ⮐ if keep.length == areas.length
-
-        @s = @s.set 'sue' keep
-        @rowCache = null
-        @r = []
-        @pushState()
-        @emit 'sue.changed'
 
     clearSueAtCursorOrSelection: =>
 

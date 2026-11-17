@@ -1195,7 +1195,7 @@ hed = cols rows ext='md' feats=[]->
         m.imageHeight(0) ▸ 1
 
         h.screen.t.out = []
-        e.state.setLineScale 0 5
+        e.state.stepScales 4
 
         m.textLine(0) ▸ true
         m.imageHeight(0) ▸ 20
