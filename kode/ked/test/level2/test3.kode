@@ -4,9 +4,9 @@
 # font scaling test                 test
 # font scaling test                 test
 # font 󠀡󠀰󠀰󠀱󠀱󠁛󠀴󠀱󠀬󠀭󠀱󠀬󠀱󠀬󠀴󠁝scaling󠀡󠀰󠀰󠀱󠀲󠁛󠀹󠀹󠀬󠀭󠀱󠀬󠀱󠀬󠀴󠀱󠁝 test
-# font scaling test          test
-# font scaling test          test
-# font󠀡󠀰󠀰󠀱󠀱󠁛󠀴󠀱󠀬󠀭󠀱󠀬󠀱󠀬󠀳󠁝acalinga󠀡󠀰󠀰󠀱󠀲󠁛󠀹󠀹󠀬󠀭󠀱󠀬󠀱󠀬󠀴󠀱󠁝test
+# font scaling test        test
+# font scaling test        test
+󠀡󠀰󠀰󠀲󠀹󠁛󠀳󠀳󠀬󠀱󠀸󠀬󠀱󠀬󠀢󠀣󠀲󠁢󠁦󠁦󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠀰󠀰󠀰󠀢󠁝# font󠀡󠀰󠀰󠀱󠀱󠁛󠀴󠀱󠀬󠀭󠀱󠀬󠀱󠀬󠀳󠁝scaling󠀡󠀰󠀰󠀱󠀲󠁛󠀹󠀹󠀬󠀭󠀱󠀬󠀱󠀬󠀴󠀱󠁝test
 # font scaling test
 # font scaling test
 # font scaling test
@@ -19,4 +19,4 @@
 # font scaling test
 # font scaling test
 # font scaling test
-s = '󠀡󠀰󠀰󠀱󠀱󠁛󠀴󠀱󠀬󠀭󠀱󠀬󠀱󠀬󠀴󠁝🧑‍🌾🧑‍🌾󠀡󠀰󠀰󠀱󠀲󠁛󠀹󠀹󠀬󠀭󠀱󠀬󠀱󠀬󠀴󠀱󠁝'
+s =     '󠀡󠀰󠀰󠀱󠀱󠁛󠀴󠀱󠀬󠀭󠀱󠀬󠀱󠀬󠀴󠁝🧑‍🌾🧑‍🌾󠀡󠀰󠀰󠀱󠀲󠁛󠀹󠀹󠀬󠀭󠀱󠀬󠀱󠀬󠀴󠀱󠁝'

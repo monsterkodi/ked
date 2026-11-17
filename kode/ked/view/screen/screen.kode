@@ -74,7 +74,25 @@ use ../../edit/tool ◆ belt
                     else
                         @set x+i y+j null null null
 
+        @markBlock x y scale w if @t.textSizing
+
         scale*w
+
+    #  every cell of a scaled block belongs to the block: the glyph itself
+    #  only lives in the top left cell, the rest is filled to reserve its area
+
+    markBlock: x y scale w =>
+
+        for r in max(0 y)...min(@rows, y+scale)
+            for c in max(0 x)...min(@cols, x+scale*w)
+                @c[r][c].block = true
+
+    isBlock: x y =>
+
+        if 0 <= x < @cols and 0 <= y < @rows
+            ⮐ @c[y][x].block
+
+        false
         
     erase_scaled: x1 y1 x2 y2 bg=null =>
 
@@ -94,6 +112,7 @@ use ../../edit/tool ◆ belt
             for x in x1..x2
                 @c[y][x].char = ' '
                 @c[y][x].bg   = bg if bg?
+                @c[y][x].block = false
 
         for [bx by scale w] in @frameBlocks ? []
             continue if bx > x2 or bx + scale*w - 1 < x1
@@ -101,6 +120,7 @@ use ../../edit/tool ◆ belt
             for yy in by..min(@rows-1 by+scale-1)
                 for xx in bx..min(@cols-1 bx+scale*w-1)
                     @c[yy][xx].char = ' '
+                    @c[yy][xx].block = false
     
     set: x y char fg bg =>
         
@@ -108,17 +128,20 @@ use ../../edit/tool ◆ belt
             @c[y][x].char = char
             @c[y][x].fg = fg ? []
             @c[y][x].bg = bg ? []
+            @c[y][x].block = false
             
     set_char: x y char =>
-
+        
         if 0 <= x < @cols and 0 <= y < @rows
             @c[y][x].char = char
+            @c[y][x].block = false
 
     set_ch_fg: x y char fg =>
-
+        
         if 0 <= x < @cols and 0 <= y < @rows
             @c[y][x].char = char
             @c[y][x].fg   = fg
+            @c[y][x].block = false
             
     set_bg: x y bg =>
         

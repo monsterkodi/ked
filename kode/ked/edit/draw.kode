@@ -104,13 +104,8 @@ use              ◆ mode
         null
 
     #  a cell carrying a scaled block belongs to the block, not to the text
-    #  that the decorations of its row would paint over
-
-    isScaledCell: (cx y) ->
-
-        ch = @cells.get_char cx y
-
-        valid ch and ch.startsWith(']66')
+    #  that the decorations of its row would paint over, so every decoration
+    #  pass consults @cells.isScaled
 
     cellsForLine: y =>
 
@@ -299,7 +294,7 @@ use              ◆ mode
 
                 hlc = @cells.get_char cx row
 
-                continue if @isScaledCell(cx row)
+                continue if @cells.isScaled(cx row)
 
                 switch hlc
                     '{' '[' '(' ')' ']' '}' ➜ ulc = @color.highlight.bracket_ul ; bgc = @color.highlight.bracket
@@ -375,7 +370,7 @@ use              ◆ mode
                     cx = cells[min(x last)]*scale - vx
                     continue if cx < 0
                     continue if cx+scale > @cells.cols
-                    continue if @isScaledCell(cx row)
+                    continue if @cells.isScaled(cx row)
                     for r in row...min(@cells.rows, row+scale)
                         for i in 0...scale
                             @cells.set_bg cx+i r bg 
@@ -436,7 +431,7 @@ use              ◆ mode
                     cx = cells[min(x last)]*scale - vx
                     continue if cx < 0
                     continue if cx+scale > @cells.cols
-                    continue if @isScaledCell(cx row)
+                    continue if @cells.isScaled(cx row)
                     for r in row...min(@cells.rows, row+scale)
                         for i in 0...scale
                             @cells.set_bg cx+i r bg

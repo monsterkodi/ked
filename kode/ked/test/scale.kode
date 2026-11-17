@@ -23,6 +23,18 @@ hed = cols rows ext='md' feats=[]->
         e.state.applyScales {enable:true md:{h1:3 h2:2}}
         [h e]
 
+#  the cells of the three 3x blocks in the run tests below: BIG after xx
+#  and before yy, so columns 3..11 on the three rows the run grows into
+
+blockArea = scr ->
+    rows = []
+    for r in 0...3
+        row = []
+        for x in 3...12
+            row.push [scr.get_char(x r) scr.get_fg(x r) scr.get_bg(x r)]
+        rows.push row
+    rows
+
 ▸ scale
 
   ▸ markdown headings scale by level
@@ -429,6 +441,23 @@ hed = cols rows ext='md' feats=[]->
                 for xx in bx..bx+scale*w-1
                     for yy in by..by+scale-1
                         (valid h.screen.get_char(xx yy)) ▸ true
+
+  ▸ an erased block is no longer a block
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+
+        scr.init()
+        scr.add_scaled 3 0 'B' null null 3
+
+        scr.isBlock(3 0) ▸ true
+        scr.isBlock(5 2) ▸ true
+
+        scr.erase_scaled 3 2 5 2
+
+        scr.isBlock(3 0) ▸ false
+        scr.isBlock(5 2) ▸ false
+        scr.get_char(3 0) ▸ ' '
 
   ▸ the view scrolls so a tall line fits above the bottom
 
@@ -1307,25 +1336,57 @@ hed = cols rows ext='md' feats=[]->
         scr.init()
         e.draw()
 
-        scr.get_bg(3 0) ▸ scr.get_bg(3 2)
-        scr.get_bg(9 0) ▸ scr.get_bg(3 2)
+        scr.get_bg(3 0) ▸ e.color.selection.span
+        scr.get_bg(9 0) ▸ e.color.selection.span
 
   ▸ a selection on a covered line does not paint the block
 
         t = new ttio headless:true input:false textSizing:true cols:40 rows:10
         scr = new screen t
         e = new editor scr 'test_run_covered' []
-        e.state.loadLines ['aaa' 'bbb' 'xx BIG yy']
+        e.state.loadLines ['aaaaaaaa' 'bbb' 'xx BIG yy']
         e.layout 0 0 40 10
         e.state.setSelections [[3 2 6 2]]
         e.state.stepScales 1
         e.state.stepScales 1
-        e.state.setSelections [[0 0 3 0]]
+        e.state.setSelections []
+        e.state.setCursors [[0 2]]
 
         scr.init()
         e.draw()
 
-        scr.get_bg(3 0) ▸ scr.get_bg(0 2)
+        before = blockArea scr
+
+        e.state.setSelections [[0 0 8 0]]
+
+        scr.init()
+        e.draw()
+
+        blockArea(scr) ▸ before
+
+  ▸ every cell of a block belongs to the block
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+        e = new editor scr 'test_block_area' []
+        e.state.loadLines ['aaaaaaaa' 'bbb' 'xx BIG yy']
+        e.layout 0 0 40 10
+        e.state.setSelections [[3 2 6 2]]
+        e.state.stepScales 1
+        e.state.stepScales 1
+        e.state.setSelections []
+
+        scr.init()
+        e.draw()
+
+        e.cells.isScaled(3 0) ▸ true
+        e.cells.isScaled(4 0) ▸ true
+        e.cells.isScaled(5 0) ▸ true
+        e.cells.isScaled(6 0) ▸ true
+        e.cells.isScaled(8 0) ▸ true
+        e.cells.isScaled(3 1) ▸ true
+        e.cells.isScaled(12 0) ▸ false
+        e.cells.isScaled(3 3) ▸ false
 
   ▸ completion is skipped when a run follows the cursor
 
@@ -1361,10 +1422,66 @@ hed = cols rows ext='md' feats=[]->
         e.state.stepScales 1
         e.state.stepScales 1
         e.state.setSelections []
+        e.state.setCursors [[0 2]]
+
+        scr.init()
+        e.draw()
+
+        before = blockArea scr
+
         e.state.setSue 3 0 [32 6 1 '#00ff00']
 
         scr.init()
         e.draw()
 
-        scr.get_bg(3 0) ▸ scr.get_bg(0 2)
-        scr.get_bg(6 0) ▸ scr.get_bg(0 2)
+        blockArea(scr) ▸ before
+
+  ▸ a highlight on a covered line does not paint the block
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+        e = new editor scr 'test_run_highlight' []
+        e.state.loadLines ['aaaaaaaa' 'bbb' 'xx BIG yy']
+        e.layout 0 0 40 10
+        e.state.setSelections [[3 2 6 2]]
+        e.state.stepScales 1
+        e.state.stepScales 1
+        e.state.setSelections []
+        e.state.setCursors [[0 2]]
+
+        scr.init()
+        e.draw()
+
+        before = blockArea scr
+
+        e.state.setHighlights [[0 0 8 0]]
+
+        scr.init()
+        e.draw()
+
+        blockArea(scr) ▸ before
+
+  ▸ a yank flash on a covered line does not paint the block
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+        e = new editor scr 'test_run_yank' []
+        e.state.loadLines ['aaaaaaaa' 'bbb' 'xx BIG yy']
+        e.layout 0 0 40 10
+        e.state.setSelections [[3 2 6 2]]
+        e.state.stepScales 1
+        e.state.stepScales 1
+        e.state.setSelections []
+        e.state.setCursors [[0 2]]
+
+        scr.init()
+        e.draw()
+
+        before = blockArea scr
+
+        e.state.yankFlash = [[0 0 8 0]]
+
+        scr.init()
+        e.draw()
+
+        blockArea(scr) ▸ before

@@ -1,7 +1,7 @@
 
 ■cell
     
-    @cells: cols rows -> @matrix(cols, rows, (() -> {char:' ' fg:[] bg:[] attr:null ul:null}))
+    @cells: cols rows -> @matrix(cols, rows, (() -> {char:' ' fg:[] bg:[] attr:null ul:null block:false}))
     @metas: cols rows -> @matrix(cols, rows, (() -> {pre:[] pst:[]}))
         
     @matrix: cols rows cb ->
