@@ -2,12 +2,19 @@ use ../../kxk      ▪ slash sleep
 use ../edit        ◆ editor
 use ../util        ◆ harness
 use ../view/colmns ◆ dircol
-###
+
+ked_sess = ->
+    store = {}
+    fakeGet = (key def) -> store[key] ? def
+    fakeSet = (key value) -> store[key] = value
+    global.ked_session = get:fakeGet set:fakeSet
+
 ▸ dircol crumbs
 
   ▸ a relative root shows the absolute folder path
 
         ked_sess()
+        
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_editor' []
         d = new dircol h.screen e []
@@ -23,11 +30,8 @@ use ../view/colmns ◆ dircol
 
   ▸ a dot relative root shows the absolute folder path
 
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
+        ked_sess()
+        
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_editor' []
         d = new dircol h.screen e []
@@ -43,11 +47,8 @@ use ../view/colmns ◆ dircol
 
   ▸ a tilde root stays where it is
 
-        store = {}
-        fakeGet = (key def) -> store[key] ? def
-        fakeSet = (key value) -> store[key] = value
-        global.ked_session = get:fakeGet set:fakeSet
-
+        ked_sess()
+        
         h = new harness cols:100 rows:30
         e = new editor h.screen 'test_editor' []
         d = new dircol h.screen e []
@@ -60,4 +61,4 @@ use ../view/colmns ◆ dircol
 
         ◯ sleep 10
         delete global.ked_session
-###
+        
