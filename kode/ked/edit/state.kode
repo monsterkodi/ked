@@ -162,6 +162,11 @@ use           ◆ keys mode
         areas = @s.sue ? []
         ⮐ if empty areas or empty ranges
 
+        #  the cut works on rectangles, a multiline range covers a different
+        #  part of every line, so it is split into one range per line
+
+        ranges = belt.splitLineRanges(@s.lines ranges false)
+
         cut = sue.rangesCutFromAreasInLines(ranges areas @s.lines)
 
         ⮐ if cut eql areas

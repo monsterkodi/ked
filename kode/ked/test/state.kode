@@ -734,3 +734,27 @@ sel = r... -> s.allSelections() ▸ r
         s.clearScales()
 
         s.s.sue ▸ []
+
+  ▸ clearing decoration on a multiline selection clears every line
+
+        s.loadLines ['aaaa' 'bbbb' 'cccc']
+        s.setSue 0 0 [31 4 1 '#f00']
+        s.setSue 0 1 [31 4 1 '#f00']
+        s.setSue 0 2 [31 4 1 '#f00']
+        s.setSelections [[2 0 2 2]]
+
+        s.clearSueAtCursorOrSelection()
+
+        s.s.sue ▸ [{x: 0 y: 0 value: [31 2 1 '#f00']} {x: 2 y: 2 value: [31 2 1 '#f00']}]
+
+  ▸ clearing decoration on full lines takes whole areas away
+
+        s.loadLines ['aaaa' 'bbbb' 'cccc']
+        s.setSue 0 0 [31 4 1 '#f00']
+        s.setSue 0 1 [31 4 1 '#f00']
+        s.setSue 0 2 [31 4 1 '#f00']
+        s.setSelections [[0 0 0 2]]
+
+        s.clearSueAtCursorOrSelection()
+
+        s.s.sue ▸ [{x: 0 y: 2 value: [31 4 1 '#f00']}]
