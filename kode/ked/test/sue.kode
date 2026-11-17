@@ -231,3 +231,31 @@ sym = (ascii) -> Array.from(ascii).map((c) -> String.fromCodePoint(0xE0000 + c.c
         ranges = [[0 0 10 0]]
 
         sue.rangesCutFromAreasInLines ranges areas lines ▸ areas
+
+  ▸ a scale run needs its markers
+
+        lines = [['a' 'b' 'c' 'd' 'e' 'f']]
+        areas = [{x: 1 y: 0 value: [41 [3]]} {x: 4 y: 0 value: [99 [41]]}]
+
+        sue.runsForLine(areas lines 0) ▸ [[1 4 3]]
+
+  ▸ a run without a close reaches the end of the line
+
+        lines = [['a' 'b' 'c' 'd' 'e' 'f']]
+        areas = [{x: 1 y: 0 value: [41 [2]]}]
+
+        sue.runsForLine(areas lines 0) ▸ [[1 6 2]]
+
+  ▸ a close without an open is ignored
+
+        lines = [['a' 'b' 'c']]
+        areas = [{x: 2 y: 0 value: [99 [41]]}]
+
+        sue.runsForLine(areas lines 0) ▸ []
+
+  ▸ an open inside an open is ignored
+
+        lines = [['a' 'b' 'c' 'd' 'e']]
+        areas = [{x: 1 y: 0 value: [41 [2]]} {x: 2 y: 0 value: [41 [3]]} {x: 4 y: 0 value: [99 [41]]}]
+
+        sue.runsForLine(areas lines 0) ▸ [[1 4 2]]

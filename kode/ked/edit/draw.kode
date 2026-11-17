@@ -96,13 +96,58 @@ use              ◆ mode
                 bgSpans.push [span[0] span[1] color.values(span[2])]
     
         classes ?= syntax.getClasses y # one scan per line, not per column
-    
+
+        #  partially scaled runs are only laid out on unscaled lines
+        #  a run is emitted at the row it ends on minus its own height, so it
+        #  grows upwards and sits on the baseline of its line
+
+        #  without text sizing a run would land on the wrong row, so it is
+        #  drawn like normal text instead
+
+        runs = []
+        runs = @state.scaleRunsForLine y if scale == 1 and @cells.screen.t.textSizing
+
         linel = kseg.width(line)*scale - view[0]
+
+        for run in runs
+            x2 = min(run[1] line.length)
+            linel += kseg.width(line[run[0]...x2])*(run[2]-1)
 
         si = 0
         sw = 0
+        ri = 0
 
         while si < line.length
+
+            if ri < runs.length and si >= runs[ri][0]
+
+                [x1 x2 rs] = runs[ri]
+                ri += 1
+
+                top  = row - (rs - 1)
+                stop = min(x2 line.length)
+
+                for gi in si...stop
+
+                    cw = kseg.segWidth(line[gi])
+                    cw = max(1 cw)
+                    px = sw - view[0]
+
+                    if top >= 0 and px >= 0 and px < @cells.cols
+                        clss = classes[gi]
+                        clss ?= 'text'
+                        fg = syntax.getColor gi y clss
+                        for span in fgSpans
+                            if span[0] <= gi < span[1]
+                                fg = span[2]
+                                break
+                        ch = syntax.getChar gi y line[gi] clss
+                        @cells.add_scaled px top ch fg bg rs
+
+                    sw += cw*rs
+
+                si = stop
+                continue
 
             cw = kseg.segWidth line[si]
             cw = max 1 cw # todo: this is to prevent endless loop with zero width characters, should be fixed eventually

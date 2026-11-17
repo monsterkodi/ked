@@ -249,11 +249,31 @@ use           ◆ keys mode
 
         ⮐ if empty indices
 
-        areas  = @s.sue ? []
+        @applySueAreas(@areasWithSteppedLineScales(@s.sue ? [] indices delta))
+
+    clearLineScales: indices =>
+
+        ⮐ if empty indices
+
+        @applySueAreas(@areasWithoutLineScales(@s.sue ? [] indices))
+
+    areasWithSteppedLineScales: (areas indices delta) =>
+
+        ⮐ areas if empty indices
+
         scales = []
 
         for y in indices
             scales.push clamp(1 7 (@lineHeight(y) + delta))
+
+        keep = @areasWithoutLineScales(areas indices)
+
+        for y,i in indices
+            keep.push {x: 0 y: y value: [sue.LINE_SCALE [scales[i]]]} if scales[i] > 1
+
+        keep
+
+    areasWithoutLineScales: (areas indices) =>
 
         keep = []
 
@@ -261,35 +281,147 @@ use           ◆ keys mode
             continue if area.y in indices and area.value[0] == sue.LINE_SCALE
             keep.push area
 
-        for y,i in indices
-            keep.push {x: 0 y: y value: [sue.LINE_SCALE [scales[i]]]} if scales[i] > 1
+        keep
 
-        ⮐ if keep eql areas
-
-        @s = @s.set 'sue' keep
-        @rowCache = null
-        @r = []
-        @pushState()
-        @emit 'sue.changed'
-
-    clearLineScales: indices =>
-
-        ⮐ if empty indices
+    applySueAreas: next =>
 
         areas = @s.sue ? []
-        keep  = []
+        ⮐ if next eql areas
 
-        for area in areas
-            continue if area.y in indices and area.value[0] == sue.LINE_SCALE
-            keep.push area
-
-        ⮐ if keep.length == areas.length
-
-        @s = @s.set 'sue' keep
+        @s = @s.set 'sue' next
         @rowCache = null
         @r = []
         @pushState()
         @emit 'sue.changed'
+
+    #  the selections split into single line pieces
+    #  a piece that covers a whole line is scaled by the line, a partial
+    #  piece by wrapping it in a run
+
+    selectionPieces: =>
+
+        pieces = []
+
+        for rng in @s.selections
+            rngs = [rng]
+            pieces = pieces.concat(belt.splitLineRanges(@s.lines rngs false))
+
+        pieces
+
+    isFullLinePiece: piece =>
+
+        [x1 y x2] = piece
+
+        x1 == 0 and (kseg.width(@s.lines[y] ? []) <= x2 or (@s.lines[y] ? []).length <= x2)
+
+    areasWithRun: (areas y x1 x2 scale) =>
+
+        open  = {x: x1 y: y value: [sue.SCALE [scale]]}
+        close = {x: x2 y: y value: [sue.CLOSE [sue.SCALE]]}
+
+        areas.concat([open close])
+
+    areasWithRunScale: (areas y x1 scale) =>
+
+        out = []
+
+        for area in areas
+            if area.y == y and area.x == x1 and area.value[0] == sue.SCALE
+                out.push {x: area.x y: area.y value: [sue.SCALE [scale]]}
+            else
+                out.push area
+
+        out
+
+    areasWithoutRun: (areas y x1 x2) =>
+
+        out = []
+
+        for area in areas
+
+            if area.y == y and area.x == x1 and area.value[0] == sue.SCALE
+                continue
+
+            if area.y == y and area.x == x2 and area.value[0] == sue.CLOSE
+                data = area.value[1] ? []
+                continue if empty data or data[0] == sue.SCALE
+
+            out.push area
+
+        out
+
+    areasWithSteppedRuns: (areas pieces delta) =>
+
+        for piece in pieces
+
+            [x1 y x2] = piece
+
+            continue if x1 >= x2
+
+            run = null
+
+            for r in sue.runsForLine(areas @s.lines y)
+                if r[0] <= x1 and x2 <= r[1]
+                    run = r
+                    break
+
+            if run?
+                scale = clamp(1 7 (run[2] + delta))
+                if scale <= 1
+                    areas = @areasWithoutRun(areas y run[0] run[1])
+                else
+                    areas = @areasWithRunScale(areas y run[0] scale)
+            else if delta > 0
+                scale = clamp(1 7 (1 + delta))
+                areas = @areasWithRun(areas y x1 x2 scale) if scale > 1
+
+        areas
+
+    stepScales: delta =>
+
+        areas = @s.sue ? []
+        next  = areas
+
+        if empty @s.selections
+            indices = belt.lineIndicesForPositions @s.cursors
+            next = @areasWithSteppedLineScales(areas indices delta)
+        else
+            lines = []
+            runs  = []
+
+            for piece in @selectionPieces()
+                if @isFullLinePiece piece
+                    lines.push piece[1] if piece[1] not in lines
+                else
+                    runs.push piece
+
+            next = @areasWithSteppedLineScales(next lines delta)
+            next = @areasWithSteppedRuns(next runs delta)
+
+        @applySueAreas next
+
+    clearScales: =>
+
+        areas = @s.sue ? []
+        indices = belt.lineIndicesForRangesOrPositions @s.selections @s.cursors
+
+        next = @areasWithoutLineScales(areas indices)
+
+        for piece in @selectionPieces()
+            continue if @isFullLinePiece piece
+            for run in sue.runsForLine(next @s.lines piece[1])
+                if run[0] <= piece[0] and piece[2] <= run[1]
+                    next = @areasWithoutRun(next piece[1] run[0] run[1])
+                    break
+
+        @applySueAreas next
+
+    scaleRunsForLine: y =>
+
+        areas = @s.sue ? []
+        ⮐ [] if empty areas
+
+        sue.runsForLine(areas @s.lines y)
 
     clearLineScale: y =>
 

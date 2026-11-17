@@ -737,3 +737,45 @@ sel = r... -> s.allSelections() ▸ r
         s.s.sue[0].value ▸ [34 ['s' 3 1]]
         s.s.sue[1].x ▸ 8
         s.s.sue[1].value ▸ [34 ['s' 5 1]]
+
+  ▸ a partial selection is scaled by a run
+
+        s.loadLines ['xx BIG yy']
+        s.setSelections [[3 0 6 0]]
+        s.stepScales 1
+
+        s.s.sue ▸ [{x: 3 y: 0 value: [41 [2]]} {x: 6 y: 0 value: [99 [41]]}]
+
+        s.stepScales 1
+        s.s.sue[0].value ▸ [41 [3]]
+
+        s.stepScales -1
+        s.stepScales -1
+        s.s.sue ▸ []
+
+  ▸ a whole line selection scales the line
+
+        s.loadLines ['abcd']
+        s.setSelections [[0 0 4 0]]
+        s.stepScales 1
+
+        s.s.sue ▸ [{x: 0 y: 0 value: [40 [2]]}]
+
+  ▸ cursors scale their lines
+
+        s.loadLines ['a' 'b']
+        s.setSelections []
+        s.setCursors [[0 0] [0 1]]
+        s.stepScales 1
+
+        s.s.sue.length ▸ 2
+        s.s.sue[0].value ▸ [40 [2]]
+
+  ▸ clearing takes the runs away too
+
+        s.loadLines ['xx BIG yy']
+        s.setSelections [[3 0 6 0]]
+        s.stepScales 1
+        s.clearScales()
+
+        s.s.sue ▸ []

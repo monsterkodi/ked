@@ -4,6 +4,7 @@ use ../theme       ◆ theme
 use ../util        ◆ harness config
 use ../view/menu   ◆ choices context
 use ../view/editor ◆ mapscr mapview
+use ../view/screen ◆ screen ttio
 use ../view/base   ◆ scroll
 use ../util/img    ◆ squares
 
@@ -1199,3 +1200,24 @@ hed = cols rows ext='md' feats=[]->
         m.textLine(0) ▸ true
         m.imageHeight(0) ▸ 20
         h.screen.t.written().includes('v=20') ▸ true
+
+  ▸ a sue scale run grows upwards from its line
+
+        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
+        scr = new screen t
+        e = new editor scr 'test_run' []
+        e.state.loadLines ['aaa' 'bbb' 'xx BIG yy']
+        e.layout 0 0 40 10
+        e.state.setSelections [[3 2 6 2]]
+        e.state.stepScales 1
+        e.state.stepScales 1
+        e.state.setSelections []
+
+        scr.init()
+        e.draw()
+
+        scr.get_char(3 0).includes(']66;s=3') ▸ true
+        scr.get_char(4 0) ▸ null
+        scr.get_char(9 0).includes(']66;s=3') ▸ true
+        scr.get_char(3 2) ▸ "\x1b[3C"
+        scr.get_char(12 2) ▸ ' '

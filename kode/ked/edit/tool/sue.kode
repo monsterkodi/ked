@@ -47,6 +47,8 @@ BG_COLOR    = 32
 FG_BG_COLOR = 33
 STYLE       = 34
 LINE_SCALE  = 40
+SCALE       = 41
+CLOSE       = 99
 
 TAG   = 0xE0000
 MAGIC = 0x21
@@ -155,6 +157,8 @@ collect = (pending y x areas) ->
     @FG_BG_COLOR: FG_BG_COLOR
     @STYLE:       STYLE
     @LINE_SCALE:  LINE_SCALE
+    @SCALE:       SCALE
+    @CLOSE:       CLOSE
 
     @addFlags: (have add) -> addFlags(have add)
 
@@ -235,6 +239,52 @@ collect = (pending y x areas) ->
 
         next = keep.concat(styles)
         next.concat(add)
+
+    #  scale runs
+    #
+    #  [SCALE, [n]] opens a run of n times scaled characters, [CLOSE, [SCALE]]
+    #  closes it. a close without an open is ignored, an open without a close
+    #  runs to the end of the line, an open inside an open is ignored.
+
+    @runsForLine: (areas lines y) ->
+
+        ⮐ [] if y < 0 or y >= lines.length
+
+        marks = []
+
+        for area in areas
+            continue if area.y != y
+            code = area.value[0]
+            continue if code != SCALE and code != CLOSE
+            marks.push area
+
+        ⮐ [] if empty marks
+
+        marks.sort (a b) -> a.x - b.x
+
+        width = (lines[y] ? []).length
+        runs  = []
+        open  = null
+
+        for mark in marks
+
+            if mark.value[0] == SCALE
+                open = mark if not open?
+                continue
+
+            data = mark.value[1] ? []
+            continue if valid data[0] and data[0] != SCALE
+            continue if not open?
+
+            scale = clamp(1 7 int((open.value[1] ? [])[0] ? 2))
+            runs.push [open.x mark.x scale] if mark.x > open.x and scale > 1
+            open = null
+
+        if open?
+            scale = clamp(1 7 int((open.value[1] ? [])[0] ? 2))
+            runs.push [open.x width scale] if width > open.x and scale > 1
+
+        runs
 
     @sueAscii: symbols ->
         out = ''
