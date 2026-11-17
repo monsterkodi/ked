@@ -8,6 +8,7 @@ use ../util      ◆ harness config
 
 cells = cols:55 rows:66
 s = new state cells 'test'
+gm = null
 
 txt = t -> kseg.str(s.s.lines) ▸ t
 cur = x y -> s.mainCursor() ▸ [x y]
@@ -3783,128 +3784,71 @@ windowReset = (s) ->
 
   ▸ global and normal
 
-        gm = new novim s
+        runEx = text ex ->
+            gm = new novim s
+            freshText text
+            gm.runEx ex
+            kseg.str s.s.lines
+        
+        runEx "keep\ndrop\ndrop\nkeep" 'g/drop/d'  ▸ "keep\nkeep"
+        runEx "keep\ndrop\ndrop\nkeep" 'v/keep/d'  ▸ "keep\nkeep"
+        runEx "keep\ndrop\ndrop\nkeep" 'g!/keep/d' ▸ "keep\nkeep"
 
-        freshText "keep\ndrop\ndrop\nkeep"
+        runEx "x=1\nx=2\ny=3" 'g/^x/s/=/ = /' ▸ "x = 1\nx = 2\ny=3"
 
-        gm.runEx 'g/drop/d'
-        txt "keep\nkeep"
+        runEx "aaa\nbbb\nccc" 'g/^b/normal x' ▸ "aaa\nbb\nccc"
 
-        freshText "keep\ndrop\ndrop\nkeep"
-
-        gm.runEx 'v/keep/d'
-        txt "keep\nkeep"
-
-        freshText "keep\ndrop\ndrop\nkeep"
-
-        gm.runEx 'g!/keep/d'
-        txt "keep\nkeep"
-
-        freshText "x=1\nx=2\ny=3"
-
-        gm.runEx 'g/^x/s/=/ = /'
-        txt "x = 1\nx = 2\ny=3"
-
-        freshText "aaa\nbbb\nccc"
-
-        gm.runEx 'g/^b/normal x'
-        txt "aaa\nbb\nccc"
-
-        freshText "one\ntwo\nthree"
-
-        gm.runEx '%normal x'
-        txt "ne\nwo\nhree"
+        runEx "one\ntwo\nthree" '%normal x' ▸ "ne\nwo\nhree"
 
         s.executeNovim {operator:'undo', count:1}
         txt "one\ntwo\nthree"
 
-        freshText "abc\ndef"
-
-        gm.runEx '%normal rX'
-        txt "Xbc\nXef"
+        runEx "abc\ndef" '%normal rX' ▸ "Xbc\nXef"
 
         s.executeNovim {operator:'undo', count:1}
         txt "abc\ndef"
 
-        freshText "a\nb"
-
-        gm.runEx '%normal A!'
-        txt "a!\nb!"
+        runEx "a\nb" '%normal A!' ▸ "a!\nb!"
 
         s.executeNovim {operator:'undo', count:1}
         txt "a\nb"
 
-        freshText "a\nb\nc"
+        runEx "a\nb\nc" '2normal A!' ▸ "a\nb!\nc"
 
-        gm.runEx '2normal A!'
-        txt "a\nb!\nc"
+        runEx "one\ntwo" 'g/^t/normal I# ' ▸ "one\n# two"
 
-        freshText "one\ntwo"
+        runEx "ta\ntb\nx" 'g/^t/normal I# ' ▸ "# ta\n# tb\nx"
 
-        gm.runEx 'g/^t/normal I# '
-        txt "one\n# two"
+        runEx "abcd" 'normal 2x' ▸ "cd"
 
-        freshText "ta\ntb\nx"
+        runEx "a\nb\na" '2,3g/a/d' ▸ "a\nb"
 
-        gm.runEx 'g/^t/normal I# '
-        txt "# ta\n# tb\nx"
-
-        freshText "abcd"
-
-        gm.runEx 'normal 2x'
-        txt "cd"
-
-        freshText "a\nb\na"
-
-        gm.runEx '2,3g/a/d'
-        txt "a\nb"
-
-        freshText "keep\ndrop\ndrop\nkeep"
-
-        gm.runEx 'g/drop/d'
-        txt "keep\nkeep"
+        runEx "keep\ndrop\ndrop\nkeep" 'g/drop/d' ▸ "keep\nkeep"
 
         s.executeNovim {operator:'undo', count:1}
         txt "keep\ndrop\ndrop\nkeep"
 
-        freshText "x=1\nx=2\ny=3"
-
-        gm.runEx 'g/^x/s/=/ = /'
-        txt "x = 1\nx = 2\ny=3"
+        runEx "x=1\nx=2\ny=3" 'g/^x/s/=/ = /' ▸ "x = 1\nx = 2\ny=3"
 
         s.executeNovim {operator:'undo', count:1}
         txt "x=1\nx=2\ny=3"
 
-        freshText "ta\ntb\nx"
-
-        gm.runEx 'g/^t/normal I# '
-        txt "# ta\n# tb\nx"
+        runEx "ta\ntb\nx" 'g/^t/normal I# ' ▸ "# ta\n# tb\nx"
 
         s.executeNovim {operator:'undo', count:1}
         txt "ta\ntb\nx"
 
-        freshText "a\na"
-
-        gm.runEx 'g/a/s/a/b/c'
+        runEx "a\na" 'g/a/s/a/b/c'
 
         gm.exConfirms ▸ null
         txt "a\na"
         errors[-1]   ▸ 'confirm not supported in :g'
 
-        freshText "a\nb\nc"
+        runEx "a\nb\nc" '2d' ▸ "a\nc"
 
-        gm.runEx '2d'
-        txt "a\nc"
+        runEx "a\nb\nc" '2,3d' ▸ "a"
 
-        freshText "a\nb\nc"
-
-        gm.runEx '2,3d'
-        txt "a"
-
-        freshText "a\nb"
-
-        gm.runEx '%d'
-        txt ""
+        runEx "a\nb" '%d' ▸ ""
 
         gm.runEx 'g/[/d'
         err = errors[-1]
