@@ -1,6 +1,6 @@
 use ../../kxk    ▪ post
 use ../edit      ◆ state
-use ../edit/tool ◆ belt
+use ../edit/tool ◆ belt cmdlinehistory
 use ../edit/mode ◆ novim
 
 cells = cols:55 rows:66
@@ -134,3 +134,143 @@ fakeSet = (key value) -> store[key] = clone value
         ked_session.get('novim▸history▸search') ▸ ['beta']
 
         delete global.ked_session
+
+▸ cmdlinehistory
+
+  ▸ a new history is empty
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new cmdlinehistory 'ex'
+
+        h.list()        ▸ []
+        h.prev('draft') ▸ null
+
+        delete global.ked_session
+
+  ▸ added entries are stored in the session
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new cmdlinehistory 'ex'
+
+        h.add 'w'
+        h.add 'q'
+
+        h.list() ▸ ['w' 'q']
+        ked_session.get('novim▸history▸ex') ▸ ['w' 'q']
+
+        delete global.ked_session
+
+  ▸ search and ex histories are separate
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        search = new cmdlinehistory 'search'
+        ex     = new cmdlinehistory 'ex'
+
+        search.add 'foo'
+        ex.add 'w'
+
+        search.list() ▸ ['foo']
+        ex.list()     ▸ ['w']
+
+        ked_session.get('novim▸history▸search') ▸ ['foo']
+        ked_session.get('novim▸history▸ex')     ▸ ['w']
+
+        delete global.ked_session
+
+  ▸ an entry is not repeated but moved to the newest position
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new cmdlinehistory 'ex'
+
+        h.add 'w'
+        h.add 'q'
+        h.add 'w'
+
+        h.list() ▸ ['q' 'w']
+
+        delete global.ked_session
+
+  ▸ old entries fall off at the limit
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new cmdlinehistory 'ex'
+        h.limit = 3
+
+        for text in ['1' '2' '3' '4' '5']
+            h.add text
+
+        h.list() ▸ ['3' '4' '5']
+
+        delete global.ked_session
+
+  ▸ navigation goes back and forward through the entries
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new cmdlinehistory 'ex'
+
+        h.add 'one'
+        h.add 'two'
+
+        h.prev('draft') ▸ 'two'
+        h.prev('two')   ▸ 'one'
+        h.prev('one')   ▸ null
+
+        h.next('one')   ▸ 'two'
+        h.next('two')   ▸ 'draft'
+        h.next('draft') ▸ 'draft'
+
+        h.prev('draft') ▸ 'two'
+
+        delete global.ked_session
+
+  ▸ adding an entry resets the navigation position
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h = new cmdlinehistory 'ex'
+
+        h.add 'one'
+        h.add 'two'
+        h.prev('draft') ▸ 'two'
+
+        h.add 'three'
+        h.prev('draft') ▸ 'three'
+
+        delete global.ked_session
+
+  ▸ a new instance sees the stored history
+
+        store = {}
+        global.ked_session = get:fakeGet set:fakeSet
+
+        h1 = new cmdlinehistory 'ex'
+        h1.add 'one'
+
+        h2 = new cmdlinehistory 'ex'
+
+        h2.list()      ▸ ['one']
+        h2.prev('')    ▸ 'one'
+
+        delete global.ked_session
+
+  ▸ without a session entries are not added
+
+        global.ked_session = null
+
+        h = new cmdlinehistory 'ex'
+
+        h.add 'one' ▸ false
+        h.list()    ▸ []
