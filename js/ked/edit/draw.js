@@ -182,7 +182,7 @@ draw = (function ()
             }
             if (px >= 0 && px + cw * scale <= this.cells.cols)
             {
-                ci = sw
+                ci = si
                 clss = classes[ci]
                 clss = (clss != null ? clss : 'text')
                 fg = syntax.getColor(ci,y,clss)

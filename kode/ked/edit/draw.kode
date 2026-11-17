@@ -158,7 +158,7 @@ use              ◆ mode
 
             if px >= 0 and px+cw*scale <= @cells.cols
 
-                ci = sw
+                ci = si
                 clss = classes[ci]
                 clss ?= 'text'
 

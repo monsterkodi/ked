@@ -1221,3 +1221,27 @@ hed = cols rows ext='md' feats=[]->
         scr.get_char(9 0).includes(']66;s=3') ▸ true
         scr.get_char(3 2) ▸ "\x1b[3C"
         scr.get_char(12 2) ▸ ' '
+
+  ▸ a run does not shift the syntax after it
+
+        t = new ttio headless:true input:false textSizing:true cols:60 rows:10
+        scr = new screen t
+        e = new editor scr 'test_run_syntax' []
+        e.state.syntax.setExt 'kode'
+        e.state.loadLines ["x = 'hi' # note"]
+        e.layout 0 0 60 10
+        e.state.setMainCursor 0 8
+
+        scr.init()
+        e.draw()
+
+        plain = scr.get_fg(14 0)
+
+        e.state.setSelections [[0 0 1 0]]
+        e.state.stepScales 1
+        e.state.setSelections []
+
+        scr.init()
+        e.draw()
+
+        scr.get_fg(15 0) ▸ plain
