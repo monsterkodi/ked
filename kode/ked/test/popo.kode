@@ -23,7 +23,6 @@ use ../popo   ◆ layout
             layout.absolutize {cols:100 rows:50} {x:3 y:4 r:7 b:6}           ▸ {x:3 y:4 w:90 h:40}
             layout.absolutize {cols:100 rows:50} {x:'3' y:'4' w:'20' h:'10'} ▸ {x:3 y:4 w:20 h:10}
             layout.absolutize {cols:100 rows:50} {x:3 y:'10%' w:20 h:'20%'}  ▸ {x:3 y:5 w:20 h:10}
-            layout.absolutize {cols:100 rows:50} {x:3 y:4 w:20 h:10 r:7 b:6} ▸ {x:3 y:4 w:20 h:10}
             
       ▸ nesting
     
@@ -62,3 +61,27 @@ use ../popo   ◆ layout
             layout.absolutize {cols:10 rows:10} tree ▸ { x:2 y:2 w:6 h:4 children:[{x:2 y:2 w:6 h:4}]}
             
             layout.absolutize {cols:10 rows:5} {x:0 y:0 w:5 h:5 children:[]} ▸ {x:0 y:0 w:5 h:5 children:[]}
+            
+      #  the four ways to give a rect - w+h, w+b, r+h, r+b - one per level,
+      #  with w h r b and x y each written in cells once and in percent once.
+      #  the last level has no room left and nullsizes.
+            
+      ▸ permutations
+    
+            tree = { x:'10%' y:'10%' r:'10%' b:10 children:[{ x:4 y:2 w:'50%' b:'20%' children:[{ x:'25%' y:3 r:6 h:'25%' children:[{ x:2 y:'50%' w:12 h:2 children:[{ x:0 y:0 r:'100%' b:'100%' }] }] }] }] }
+            
+            layout.absolutize {cols:100 rows:50} tree ▸ { x:10 y:5 w:80 h:35 children:[{ x:14 y:7 w:40 h:26 children:[{ x:24 y:10 w:24 h:6 children:[{ x:26 y:13 w:12 h:2 children:[{ x:26 y:13 w:0 h:0 }] }] }] }] }
+            
+      ▸ errors
+    
+            try
+                layout.absolutize {cols:10 rows:5} {x:0 y:0 w:1 r:1}
+                true ▸ false
+            catch err
+                "#{err}".indexOf('w and r are both given') >= 0 ▸ true
+            
+            try
+                layout.absolutize {cols:10 rows:5} {x:0 y:0 h:1 b:1}
+                true ▸ false
+            catch err
+                "#{err}".indexOf('h and b are both given') >= 0 ▸ true

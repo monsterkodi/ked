@@ -9,7 +9,9 @@
     #      w h   extent
     #      r b   offset from the right or bottom edge of the box
     #
-    #  w and h win over r and b, a node with neither fills the box.
+    #  a node gives x and y, one of w or r, one of h or b. a node with
+    #  neither w nor r fills the box in width, the same holds for height.
+    #  giving both w and r (or h and b) is an error, not a silent choice.
     #  the result is clipped to the box and has no percentages or offsets
     #  left, its children are resolved inside the new box.
 
@@ -24,6 +26,12 @@
     @inBox: box node ->
 
         ⮐ node if not node?
+
+        if node.w? and node.r?
+            throw new Error "layout: w and r are both given"
+
+        if node.h? and node.b?
+            throw new Error "layout: h and b are both given"
 
         x = clamp 0 box.w (@offset(box.w node.x))
         y = clamp 0 box.h (@offset(box.h node.y))
@@ -59,7 +67,7 @@
 
         value
 
-    #  the extent of a node: w wins over r, a node with neither fills
+    #  the extent of a node: w or r, a node with neither fills
 
     @extent: total start w r ->
 
