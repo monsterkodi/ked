@@ -20,10 +20,10 @@ use ../../kxk ▪ noon slash post watcher sds
         
         @resolveLoaded()
         
-    @onConfigToggle: path ->
-
-        sds.set config.data path not(sds.get(config.data path))
-        noon.save config.file config.data
+    @onConfigToggle: path -> config.set path not sds.get(config.data path)
+    
+    @get: path value -> sds.get config.data path value
+    @set: path value -> sds.set config.data path value; noon.save config.file config.data
     
     @read: ◯->
         

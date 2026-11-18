@@ -1,10 +1,20 @@
 
 use ../../../kxk ▪ kseg
 use ../tool      ◆ belt motion
+use ../../util   ◆ config
 #!multi
 export
 
     allCursors: -> @s.cursors.asMutable()
+    
+    scaleAdjustedColumn: pos dir -> 
+        
+        if config.get 'cursor.scaleAdjustCol'
+            oline = pos[1] - dir
+            if oline
+                ocol = @lineHeight(oline) * pos[0]
+                ⮐ int(ocol / @lineHeight(pos[1]))
+        pos[0]
     
     expandCursors: dir ->
         
@@ -15,7 +25,8 @@ export
         newCursors = []
         for c in cursors
             newCursors.push c
-            newCursors.push [c[0] c[1]+dy]
+            cn = @scaleAdjustedColumn [c[0] c[1]+dy] dy
+            newCursors.push [cn c[1]+dy]
 
         mc = belt.traversePositionsInDirection newCursors @mainCursor() dir
         @setCursors newCursors main:mc adjust:'topBotDelta'
@@ -53,7 +64,7 @@ export
         outside = belt.positionsOutsideRange @allCursors() rng
         outside.push belt.endOfRange(rng)
         @setCursors outside main:-1
-        
+                
     moveCursors: dir opt ->
 
         if dir is arr
@@ -81,8 +92,8 @@ export
             switch dir
                 'left'  
                 'right'     ➜ c[0] += belt.numCharsFromPosToWordOrPunctInDirection(lines c dir opt)
-                'up'        ➜ c[1] -= opt.count
-                'down'      ➜ c[1] += opt.count
+                'up'        ➜ c[1] -= opt.count; c[0] = @scaleAdjustedColumn(c -opt.count)
+                'down'      ➜ c[1] += opt.count; c[0] = @scaleAdjustedColumn(c  opt.count)
                 'eol'       ➜ c[0] = kseg.width(@s.lines[c[1]])
                 'bol'       ➜ c[0] = 0
                 'bof'       ➜ c[0] = 0; c[1] = 0

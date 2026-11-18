@@ -99,4 +99,4 @@ sourceFileExtensions
                         gitignore
                         plist
 zen
-                        enable  true
+                        enable  false
