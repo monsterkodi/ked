@@ -1,3 +1,5 @@
+use ◆ fill
+
 ■layout
 
     #  absolutize a rectree against the cells of its view
@@ -89,10 +91,189 @@
 
         out
         
+    #  resolve the rects and give every node the cells its content may use:
+    #  its rect, minus the blockers that overlap it.
+    #
+    #  a node with content (text, pattern, image) is a flow and is cut by
+    #  blockers, a node that only paints colours keeps its whole rect, and
+    #  flows:false opts any node out.
+    #
+    #  a blocker is a node with blocks:true. it cuts every flow it overlaps,
+    #  except the flows it is nested in: text inside an image draws on the
+    #  image instead of flowing around it. the test uses rects, not regions:
+    #  a region that depended on the blockers it intersects could not be
+    #  resolved without a cycle.
+
     @regionize: cells rectree ->
-    
-        rectree = @absolutize cells rectree
+
+        ⮐ null if not rectree?
+
+        root = @absolutize cells rectree
+
+        @addRegions(root (@blockersIn(root)) [])
         
-    @dumpRegions: rectree -> ""
+        # log @dumpRegions(root)
+
+        root
+
+    @blockersIn: node ->
+
+        found = []
+
+        found.push node if node.blocks and node.w > 0 and node.h > 0
+
+        for child in node.children ? []
+            for entry in @blockersIn child
+                found.push entry
+
+        found
+
+    @addRegions: node blockers ancestors ->
+
+        node.regions = @intervalsOf node
+
+        if @flows node
+            for blocker in blockers
+                continue if blocker == node
+                continue if blocker in ancestors
+                node.regions = @cutBy(node.regions blocker)
+
+        for child in node.children ? []
+            @addRegions(child blockers ancestors.concat([node]))
+
+    #  a node flows when it has content that is placed cell by cell
+
+    @flows: node ->
+
+        ⮐ false if node.flows == false
+
+        valid node.text or valid node.pattern or valid node.image
+
+    #  a rect as one interval per row, in reading order
+
+    @intervalsOf: rect ->
+
+        top = rect.y
+        bot = rect.y + rect.h
+
+        out = []
+        for y in top...bot
+            out.push [rect.x y rect.x+rect.w]
+        out
+
+    #  remove the cells of a blocker from intervals of one region
+
+    @cutBy: intervals blocker ->
+
+        bx1 = blocker.x
+        bx2 = blocker.x + blocker.w
+        by1 = blocker.y
+        by2 = blocker.y + blocker.h
+
+        out = []
+
+        for rng in intervals
+
+            x1 = rng[0]
+            y  = rng[1]
+            x2 = rng[2]
+
+            if y < by1 or y >= by2 or bx2 <= x1 or bx1 >= x2
+                out.push rng
+                continue
+
+            out.push [x1 y bx1] if x1 < bx1
+            out.push [bx2 y x2] if bx2 < x2
+
+        out
+
+    #  paint the regionized tree into a grid of characters and return it as
+    #  text. the dump only knows characters: colours, attributes and the
+    #  vertical part of scaled text do not show. it is a view for tests and
+    #  for looking at a layout, not part of the renderer.
+    #
+    #  nodes paint in document order, so a later node is on top. a child with
+    #  erase masks its parent: it writes nothing itself, it only stops the
+    #  parent from writing the named channels in its region.
+
+    @dumpRegions: rectree ->
+
+        ⮐ '' if not rectree?
+
+        grid = []
+        for y in 0...rectree.h
+            row = []
+            for x in 0...rectree.w
+                row.push ' '
+            grid.push row
+
+        @dumpNode rectree grid
+
+        lines = []
+        for row in grid
+            lines.push(row.join(''))
+
+        lines.join '\n'
+
+    @dumpNode: node grid ->
+
+        ⮐ if not node?
+
+        @paintNode(node grid) if not node.erase?
+
+        for child in node.children ? []
+            @dumpNode child grid
+
+    @paintNode: node grid ->
+
+        ⮐ if not node.regions?
+
+        strings = null
+
+        if valid node.pattern
+            strings = fill.pattern(node node.regions)
+        else if valid node.text
+            strings = fill.text(node node.regions)
+
+        ⮐ if not valid strings
+
+        masked = @charMaskOf node
+
+        for i in 0...node.regions.length
+
+            rng = node.regions[i]
+            cells = Array.from(strings[i] ? '')
+
+            for j in 0...cells.length
+
+                x = rng[0] + j
+                y = rng[1]
+
+                continue if masked["#{x},#{y}"]
+                continue if x < 0 or y < 0 or y >= grid.length or x >= grid[y].length
+
+                grid[y][x] = cells[j]
+
+    #  the cells a node's eraser children keep it from writing characters in
+
+    @charMaskOf: node ->
+
+        masked = {}
+
+        for child in node.children ? []
+
+            continue if not child.erase?
+
+            channels = child.erase
+            channels = [channels] if channels is str
+
+            continue if 'char' not in channels
+
+            for rng in child.regions ? []
+                for x in rng[0]...rng[2]
+                    masked["#{x},#{rng[1]}"] = true
+
+        masked
+
 
 export layout

@@ -533,6 +533,8 @@ use ./utils ▪ kc ke
         kc  "f('op') and b != 'op='" ▸ "f('op') && b !== 'op='"
         kc  "f 'op' and b != 'op='"  ▸ "f('op' && b !== 'op=')"
         
+        kc  "@f box.w node.x"        ▸ "this.f(box.w,node.x)"
+        
   ▸ chain
     
         kc  """

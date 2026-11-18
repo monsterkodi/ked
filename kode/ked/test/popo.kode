@@ -9,123 +9,255 @@ use ../popo   ◆ layout fill
     
       ▸ percentages
     
-            layout.absolutize {cols:100 rows:50} {x:'20%' y:'10%' r:'20%' b:'10%'} ▸ {x:20 y:5 w:60 h:40}
-            layout.absolutize {cols:10  rows:5 } {x:'20%' y:'20%' r:'20%' b:'20%'} ▸ {x:2  y:1 w:6  h:3 }
-            layout.absolutize {cols:10  rows:5 } {x:'20%' y:'20%' w:'60%' h:'60%'} ▸ {x:2  y:1 w:6  h:3 }
+                layout.absolutize {cols:100 rows:50} {x:'20%' y:'10%' r:'20%' b:'10%'} ▸ {x:20 y:5 w:60 h:40}
+                layout.absolutize {cols:10  rows:5 } {x:'20%' y:'20%' r:'20%' b:'20%'} ▸ {x:2  y:1 w:6  h:3 }
+                layout.absolutize {cols:10  rows:5 } {x:'20%' y:'20%' w:'60%' h:'60%'} ▸ {x:2  y:1 w:6  h:3 }
             
-            tree = { x:10 y:10 w:'100%' h:'100%' children:[{x:'50%' y:'50%' w:'50%' h:'25%'}]}
-            
-            layout.absolutize {cols:100 rows:100} tree ▸ { x:10 y:10 w:90 h:90 children:[{x:55 y:55 w:45 h:22}]}
+                tree = { x:10 y:10 w:'100%' h:'100%' children:[{x:'50%' y:'50%' w:'50%' h:'25%'}]}
+                
+                layout.absolutize {cols:100 rows:100} tree ▸ { x:10 y:10 w:90 h:90 children:[{x:55 y:55 w:45 h:22}]}
             
       ▸ cells
     
-            layout.absolutize {cols:100 rows:50} {x:3 y:4 w:20 h:10}         ▸ {x:3 y:4 w:20 h:10}
-            layout.absolutize {cols:100 rows:50} {x:3 y:4 r:7 b:6}           ▸ {x:3 y:4 w:90 h:40}
-            layout.absolutize {cols:100 rows:50} {x:'3' y:'4' w:'20' h:'10'} ▸ {x:3 y:4 w:20 h:10}
-            layout.absolutize {cols:100 rows:50} {x:3 y:'10%' w:20 h:'20%'}  ▸ {x:3 y:5 w:20 h:10}
+                layout.absolutize {cols:100 rows:50} {x:3 y:4 w:20 h:10}         ▸ {x:3 y:4 w:20 h:10}
+                layout.absolutize {cols:100 rows:50} {x:3 y:4 r:7 b:6}           ▸ {x:3 y:4 w:90 h:40}
+                layout.absolutize {cols:100 rows:50} {x:'3' y:'4' w:'20' h:'10'} ▸ {x:3 y:4 w:20 h:10}
+                layout.absolutize {cols:100 rows:50} {x:3 y:'10%' w:20 h:'20%'}  ▸ {x:3 y:5 w:20 h:10}
             
       ▸ nesting
     
-            tree = { x:1 y:1 w:10 h:10 children:[{x:1 y:1 w:'50%' h:'50%'} {x:0 y:'60%' w:4 h:2}]}
-            
-            layout.absolutize {cols:20 rows:20} tree ▸ { x:1 y:1 w:10 h:10 children:[{x:2 y:2 w:5 h:5} {x:1 y:7 w:4 h:2}]}
-            
-            tree = { x:0 y:0 w:'50%' h:'50%' children:[{x:'50%' y:'50%' w:'50%' h:'50%' children:[{x:0 y:0 w:'50%' h:'50%'}]}]}
-            
-            layout.absolutize {cols:100 rows:100} tree ▸ { x:0 y:0 w:50 h:50 children:[{x:25 y:25 w:25 h:25 children:[{x:25 y:25 w:12 h:12}]}]}
-            
-            tree = { x:8 y:0 w:'100%' h:10 children:[{x:'50%' y:0 w:'50%' h:2}]}
-            
-            layout.absolutize {cols:10 rows:10} tree ▸ { x:8 y:0 w:2 h:10 children:[{x:9 y:0 w:1 h:2}]}
-            
-            tree = { x:1 y:1 w:18 h:8 children:[{x:0 y:0 w:'50%' h:3 children:[{x:1 y:1 w:'50%' h:2}]} {x:'50%' y:0 w:'50%' h:3}]}
-            
-            layout.absolutize {cols:20 rows:20} tree ▸ { x:1 y:1 w:18 h:8 children:[{x:1 y:1 w:9 h:3 children:[{x:2 y:2 w:4 h:2}]} {x:10 y:1 w:9 h:3}]}
+                tree = { x:1 y:1 w:10 h:10 children:[{x:1 y:1 w:'50%' h:'50%'} {x:0 y:'60%' w:4 h:2}]}
+                
+                layout.absolutize {cols:20 rows:20} tree ▸ { x:1 y:1 w:10 h:10 children:[{x:2 y:2 w:5 h:5} {x:1 y:7 w:4 h:2}]}
+                
+                tree = { x:0 y:0 w:'50%' h:'50%' children:[{x:'50%' y:'50%' w:'50%' h:'50%' children:[{x:0 y:0 w:'50%' h:'50%'}]}]}
+                
+                layout.absolutize {cols:100 rows:100} tree ▸ { x:0 y:0 w:50 h:50 children:[{x:25 y:25 w:25 h:25 children:[{x:25 y:25 w:12 h:12}]}]}
+                
+                tree = { x:8 y:0 w:'100%' h:10 children:[{x:'50%' y:0 w:'50%' h:2}]}
+                
+                layout.absolutize {cols:10 rows:10} tree ▸ { x:8 y:0 w:2 h:10 children:[{x:9 y:0 w:1 h:2}]}
+                
+                tree = { x:1 y:1 w:18 h:8 children:[{x:0 y:0 w:'50%' h:3 children:[{x:1 y:1 w:'50%' h:2}]} {x:'50%' y:0 w:'50%' h:3}]}
+                
+                layout.absolutize {cols:20 rows:20} tree ▸ { x:1 y:1 w:18 h:8 children:[{x:1 y:1 w:9 h:3 children:[{x:2 y:2 w:4 h:2}]} {x:10 y:1 w:9 h:3}]}
             
       ▸ no space
     
-            tree = { x:0 y:0 w:10 h:5 children:[{x:20 y:20 w:5 h:5}]}
-            
-            layout.absolutize {cols:10 rows:5} tree ▸ { x:0 y:0 w:10 h:5 children:[{x:10 y:5 w:0 h:0}]}
-            
-            tree = { x:0 y:0 w:10 h:5 children:[{x:8 y:3 w:5 h:5}]}
-            
-            layout.absolutize {cols:10 rows:5} tree ▸ { x:0 y:0 w:10 h:5 children:[{x:8 y:3 w:2 h:2}]}
-            
-            tree = { x:0 y:0 w:0 h:0 children:[{x:1 y:1 w:3 h:3}]}
-            
-            layout.absolutize {cols:10 rows:5} tree ▸ { x:0 y:0 w:0 h:0 children:[{x:0 y:0 w:0 h:0}]}
-            
-            tree = { x:2 y:2 w:6 h:4 children:[{x:-2 y:-1 w:'100%' h:'100%'}]}
-            
-            layout.absolutize {cols:10 rows:10} tree ▸ { x:2 y:2 w:6 h:4 children:[{x:2 y:2 w:6 h:4}]}
-            
-            layout.absolutize {cols:10 rows:5} {x:0 y:0 w:5 h:5 children:[]} ▸ {x:0 y:0 w:5 h:5 children:[]}
-            
-      #  the four ways to give a rect - w+h, w+b, r+h, r+b - one per level,
-      #  with w h r b and x y each written in cells once and in percent once.
-      #  the last level has no room left and nullsizes.
+                tree = { x:0 y:0 w:10 h:5 children:[{x:20 y:20 w:5 h:5}]}
+                
+                layout.absolutize {cols:10 rows:5} tree ▸ { x:0 y:0 w:10 h:5 children:[{x:10 y:5 w:0 h:0}]}
+                
+                tree = { x:0 y:0 w:10 h:5 children:[{x:8 y:3 w:5 h:5}]}
+                
+                layout.absolutize {cols:10 rows:5} tree ▸ { x:0 y:0 w:10 h:5 children:[{x:8 y:3 w:2 h:2}]}
+                
+                tree = { x:0 y:0 w:0 h:0 children:[{x:1 y:1 w:3 h:3}]}
+                
+                layout.absolutize {cols:10 rows:5} tree ▸ { x:0 y:0 w:0 h:0 children:[{x:0 y:0 w:0 h:0}]}
+                
+                tree = { x:2 y:2 w:6 h:4 children:[{x:-2 y:-1 w:'100%' h:'100%'}]}
+                
+                layout.absolutize {cols:10 rows:10} tree ▸ { x:2 y:2 w:6 h:4 children:[{x:2 y:2 w:6 h:4}]}
+                
+                layout.absolutize {cols:10 rows:5} {x:0 y:0 w:5 h:5 children:[]} ▸ {x:0 y:0 w:5 h:5 children:[]}
             
       ▸ permutations
     
-            tree = { x:'10%' y:'10%' r:'10%' b:10 children:[{ x:4 y:2 w:'50%' b:'20%' children:[{ x:'25%' y:3 r:6 h:'25%' children:[{ x:2 y:'50%' w:12 h:2 children:[{ x:0 y:0 r:'100%' b:'100%' }] }] }] }] }
-            
-            layout.absolutize {cols:100 rows:50} tree ▸ { x:10 y:5 w:80 h:35 children:[{ x:14 y:7 w:40 h:26 children:[{ x:24 y:10 w:24 h:6 children:[{ x:26 y:13 w:12 h:2 children:[{ x:26 y:13 w:0 h:0 }] }] }] }] }
+                tree = { x:'10%' y:'10%' r:'10%' b:10 children:[{ x:4 y:2 w:'50%' b:'20%' children:[{ x:'25%' y:3 r:6 h:'25%' children:[{ x:2 y:'50%' w:12 h:2 children:[{ x:0 y:0 r:'100%' b:'100%' }] }] }] }] }
+                
+                layout.absolutize {cols:100 rows:50} tree ▸ { x:10 y:5 w:80 h:35 children:[{ x:14 y:7 w:40 h:26 children:[{ x:24 y:10 w:24 h:6 children:[{ x:26 y:13 w:12 h:2 children:[{ x:26 y:13 w:0 h:0 }] }] }] }] }
             
       ▸ errors
     
-            try
-                layout.absolutize {cols:10 rows:5} {x:0 y:0 w:1 r:1}
-                true ▸ false
-            catch err
-                "#{err}".indexOf('w and r are both given') >= 0 ▸ true
-            
-            try
-                layout.absolutize {cols:10 rows:5} {x:0 y:0 h:1 b:1}
-                true ▸ false
-            catch err
-                "#{err}".indexOf('h and b are both given') >= 0 ▸ true
+                try
+                    layout.absolutize {cols:10 rows:5} {x:0 y:0 w:1 r:1}
+                    true ▸ false
+                catch err
+                    "#{err}".indexOf('w and r are both given') >= 0 ▸ true
+                
+                try
+                    layout.absolutize {cols:10 rows:5} {x:0 y:0 h:1 b:1}
+                    true ▸ false
+                catch err
+                    "#{err}".indexOf('h and b are both given') >= 0 ▸ true
 
-  ▸ regionize
-        
-        tree = { 
-          bg:'#00f'
-          children:[
-            { pattern:'0123456789' type:'repeat' fg:'#ff0' x:0 y:0
-              children:[
-                { erase:'fg' x:2 y:2 r:2 b:2 }    
-              ] }
-            { text:'heading' x:4 y:3 r:6 h:3 scale:3 flows:false }
-            { text:'longer text that flows and flows and flows and flows into the sea' x:8 y:14 w:'100%' h:3 }
-            { text:'some' x:8 y:15 h:3 scale:3 blocks:true }
-          ] }
-          
-        regions = layout.regionize {rows:20 cols:30} tree
-        
-        sds.get regions 'children.3.w' ▸ 22
-        sds.get regions 'children.3.regions' ▸ [[13 8 23] [4 9 23] [4 10 23]]
-        
-        layout.dumpRegions regions ▸ 
-            """
-            01234567890123456789012345
-            012                     45
-            012                     45
-            01 h  e  a  d  i  n  g  45
-            01                      45
-            01          longer text 45
-            01 s o m e  that flows  45
-            01 and flows and flows  45
-            01234567890123456789012345
-            01234567890123456789012345
-            """ 
-        
   ▸ fill
-  
+
     ▸ pattern
     
-            fill.pattern pattern:'0123456789' type:'repeat' [[10 2 20]] ▸ ['01234567890']
-            fill.pattern pattern:'0123456789' type:'repeat' [[5  2 20][5 3 15][0 4 15]] ▸ ['567890123456789' '5678901234' '012345678901234']
+            fill.pattern {pattern:'0123456789' type:'repeat'} [[10 2 20]] ▸ ['0123456789']
+            fill.pattern {pattern:'0123456789' type:'repeat'} [[5 2 20] [5 3 15] [0 4 15]] ▸ ['567890123456789' '5678901234' '012345678901234']
+            fill.pattern {pattern:'ab' type:'repeat'} [[0 0 3] [1 0 2]] ▸ ['aba' 'b']
+            fill.pattern {pattern:'ab' type:'repeat'} [] ▸ []
+            fill.pattern {pattern:'ab' type:'repeat'} [[5 0 5]] ▸ ['']
+            
+            try
+                fill.pattern {pattern:'ab' type:'bounce'} [[0 0 2]]
+                true ▸ false
+            catch err
+                "#{err}".indexOf('pattern type bounce is not known') >= 0 ▸ true
             
     ▸ text
     
-            fill.text text:'some text' [[5 200 10][5 201 10]] ▸ ['some ' 'text ']
+            fill.text {text:'some text'} [[5 200 10] [5 201 10]] ▸ ['some ' 'text ']
+            fill.text {text:'abcdefgh'} [[0 0 3] [0 1 3] [0 2 3]] ▸ ['abc' 'def' 'gh ']
+            fill.text {text:'a\nb'} [[0 0 4] [0 1 4]] ▸ ['a   ' 'b   ']
+            fill.text {text:'abc' scale:2} [[0 0 8]] ▸ ['a b c   ']
+            fill.text {text:'abcdef' scale:2} [[0 0 5]] ▸ ['a b  ']
+            fill.text {text:''} [[0 0 3]] ▸ ['   ']
+            
+  ▸ regionize
+    
+    ▸ regions
+        
+            tree = { bg:'#00f' children:[
+                { pattern:'0123456789' type:'repeat' fg:'#ff0' x:0 y:0
+                  children:[{ erase:'char' x:2 y:2 r:2 b:2 }] }
+                { text:'heading' x:4 y:3 r:6 h:3 scale:3 flows:false }
+                { text:'longer text' x:8 y:14 w:'100%' h:3 }
+                { text:'some' x:8 y:15 h:3 scale:3 blocks:true }
+              ] }
+            
+            regions = layout.regionize {rows:20 cols:30} tree
+            
+            sds.get regions 'children.3.w' ▸ 22
+            sds.get regions 'children.3.regions' ▸ [[8 15 30] [8 16 30] [8 17 30]]
+            sds.get regions 'children.2.regions' ▸ [[8 14 30]]
+            sds.get regions 'children.1.regions' ▸ [[4 3 24] [4 4 24] [4 5 24]]
+            sds.get regions 'children.0.regions' ▸ [[0 0 30] [0 1 30] [0 2 30] [0 3 30] [0 4 30] [0 5 30] [0 6 30] [0 7 30] [0 8 30] [0 9 30] [0 10 30] [0 11 30] [0 12 30] [0 13 30] [0 14 30] [0 15 8] [0 16 8] [0 17 8] [0 18 30] [0 19 30]]
+        
+            dmp = c r -> layout.dumpRegions layout.regionize(c r)
+
+            tree = { bg:'#00f' children:[
+                { pattern:'0123456789' type:'repeat' fg:'#ff0' x:0 y:0
+                  children:[{ erase:'char' x:2 y:2 r:2 b:2 }] }
+                { text:'heading' x:4 y:3 r:2 h:1 scale:3 flows:false }
+                { text:'longer text that flows and flows and flows and flows into the sea.' x:4 y:6 r:4 h:5 }
+                { text:'some' x:'40%' y:7 w:12 h:3 scale:3 blocks:true }
+                { text:'longer text that flows and flows and flows and flows into the sea.' x:4 y:13 r:4 h:5 }
+                { text:'some' x:4 y:14 w:12 h:3 scale:3 blocks:true }
+              ] }
+            
+            dmp {rows:20 cols:30} tree ▸ 
+            """
+            012345678901234567890123456789
+            012345678901234567890123456789
+            01                          89
+            01  h  e  a  d  i  n  g     89
+            01                          89
+            01                          89
+            01  longer text that flows  89
+            01   and flos  o  m  e  ws  89
+            01   and flo            ws  89
+            01   and flo            ws  89
+            01   into the sea.          89
+            01                          89
+            01                          89
+            01  longer text that flows  89
+            01  s  o  m  e   and flows  89
+            01               and flows  89
+            01               and flows  89
+            01   into the sea.          89
+            012345678901234567890123456789
+            012345678901234567890123456789
+            """ 
+
+            dmp {rows:15 cols:25} tree ▸ 
+            """
+            0123456789012345678901234
+            0123456789012345678901234
+            01                     34
+            01  h  e  a  d  i  n   34
+            01                     34
+            01                     34
+            01  longer text that   34
+            01  flows s  o  m  e   34
+            01  and fl             34
+            01  ows an             34
+            01  d flows and flows  34
+            01                     34
+            01                     34
+            0123longer text that 1234
+            0123s  o  m  e  flows1234
+            """ 
+            
+            dmp {cols:10 rows:3} {pattern:'1234' type:'repeat'} ▸ 
+            """
+            1234123412
+            1234123412
+            1234123412
+            """
+            
+            dmp {cols:10 rows:3} {pattern:'1234' type:'repeat' children:[{erase:'char' x:3 y:1 r:3 h:1}]} ▸ 
+            """
+            1234123412
+            123    412
+            1234123412
+            """
+
+            dmp {cols:10 rows:3} {pattern:'1234' type:'repeat' children:[{erase:'char' x:3 y:1 r:3 h:1} {text:'hello' x:4 y:1 w:2 h:1}]} ▸ 
+            """
+            1234123412
+            123 he 412
+            1234123412
+            """
+
+            dmp {cols:10 rows:3} {pattern:'1234' type:'repeat' children:[{erase:'char' x:3 y:1 r:3 h:1} {text:'hello' x:4 y:1 w:2 h:1 scale:2}]} ▸ 
+            """
+            1234123412
+            123 h  412
+            1234123412
+            """
+        
+    ▸ blocks
+        
+            tree = { w:10 h:2 children:[{ text:'abcdefghij' x:0 y:0 w:10 h:2 } { blocks:true x:3 y:0 w:2 h:2 }] }
+            
+            regions = layout.regionize {rows:2 cols:10} tree
+            
+            sds.get regions 'children.0.regions' ▸ [[0 0 3] [5 0 10] [0 1 3] [5 1 10]]
+            
+            tree = { blocks:true x:0 y:0 w:8 h:2 children:[{ text:'ab' x:0 y:0 w:8 h:2 }] }
+            
+            regions = layout.regionize {rows:2 cols:8} tree
+            
+            sds.get regions 'children.0.regions' ▸ [[0 0 8] [0 1 8]]
+            
+            tree = { text:'ab' x:0 y:0 w:8 h:1 flows:false children:[{ blocks:true x:2 y:0 w:2 h:1 }] }
+            
+            regions = layout.regionize {rows:1 cols:8} tree
+            
+            sds.get regions 'regions' ▸ [[0 0 8]]
+            
+            tree = { pattern:'x' x:0 y:0 w:6 h:1 children:[{ blocks:true x:2 y:0 w:2 h:1 }] }
+            
+            regions = layout.regionize {rows:1 cols:6} tree
+            
+            sds.get regions 'regions' ▸ [[0 0 2] [4 0 6]]
+            
+  ▸ dump
+    
+        tree = { text:'abcdefghij' x:0 y:0 w:10 h:2 children:[{ blocks:true x:3 y:0 w:2 h:2 }] }
+        
+        regions = layout.regionize {rows:2 cols:10} tree
+        
+        layout.dumpRegions regions ▸ 'abc  defgh\nij        '
+        
+        tree = { pattern:'abc' x:0 y:0 w:6 h:2 children:[{ erase:'char' x:1 y:0 w:2 h:1 }] }
+        
+        regions = layout.regionize {rows:2 cols:6} tree
+        
+        layout.dumpRegions regions ▸ 'a  abc\nabcabc'
+        
+        tree = { text:'abc' scale:2 x:0 y:0 w:8 h:1 }
+        
+        regions = layout.regionize {rows:1 cols:8} tree
+        
+        layout.dumpRegions regions ▸ 'a b c   '
+        
+        tree = { w:4 h:1 children:[{ pattern:'#.' x:0 y:0 w:4 h:1 } { text:'xy' x:1 y:0 w:2 h:1 }] }
+        
+        regions = layout.regionize {rows:1 cols:4} tree
+        
+        layout.dumpRegions regions ▸ '#xy.'

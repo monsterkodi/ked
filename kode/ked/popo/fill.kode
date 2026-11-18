@@ -1,0 +1,93 @@
+■fill
+
+    #  a region is a list of intervals [x1 y x2] with x2 exclusive, in the
+    #  order the content fills them.
+    #
+    #  every fill returns one string per interval, in the same order and
+    #  exactly as wide as its interval, so the caller can place them by
+    #  zipping strings with regions. an interval without width returns ''.
+    #
+    #  the y of an interval is not used by a fill: the caller decides which
+    #  row a string ends up in, a fill only decides what its cells say.
+
+    #  repeat the pattern, x1 picks the phase, so neighbouring intervals
+    #  continue one another instead of starting over
+
+    @pattern: conf region ->
+
+        cells = Array.from(conf.pattern ? '')
+        ⮐ @blanks(region) if empty cells
+
+        if conf.type? and conf.type != 'repeat'
+            throw new Error "fill: pattern type #{conf.type} is not known"
+
+        n   = cells.length
+        out = []
+
+        for rng in region
+
+            width = rng[2] - rng[0]
+
+            if width <= 0
+                out.push ''
+                continue
+
+            row = ''
+            for i in 0...width
+                row += cells[((rng[0] + i) % n + n) % n]
+
+            out.push row
+
+        out
+
+    #  pour the text through the intervals in order, a newline moves on to
+    #  the next interval, a short row is padded with spaces.
+    #
+    #  scale makes every grapheme take scale cells, the grapheme itself in
+    #  the first one, the rest blank. a grapheme that does not fit whole
+    #  moves to the next interval instead of being cut.
+
+    @text: conf region ->
+
+        cells = Array.from(conf.text ? '')
+        scale = max 1 int(conf.scale ? 1)
+        out   = []
+        i     = 0
+
+        for rng in region
+
+            width = rng[2] - rng[0]
+
+            if width <= 0
+                out.push ''
+                continue
+
+            row = []
+
+            while row.length + scale <= width and i < cells.length
+
+                if cells[i] == '\n'
+                    i += 1
+                    break
+
+                row.push cells[i]
+                i += 1
+
+                for k in 1...scale
+                    row.push ' '
+
+            while row.length < width
+                row.push ' '
+
+            out.push(row.join(''))
+
+        out
+
+    @blanks: region ->
+
+        out = []
+        for rng in region
+            out.push ''
+        out
+
+export fill
