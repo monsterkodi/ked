@@ -1,5 +1,5 @@
 use ../../kxk ▪ sds
-use ../popo   ◆ layout
+use ../popo   ◆ layout fill
 
 ▸ popo
   
@@ -85,3 +85,47 @@ use ../popo   ◆ layout
                 true ▸ false
             catch err
                 "#{err}".indexOf('h and b are both given') >= 0 ▸ true
+
+  ▸ regionize
+        
+        tree = { 
+          bg:'#00f'
+          children:[
+            { pattern:'0123456789' type:'repeat' fg:'#ff0' x:0 y:0
+              children:[
+                { erase:'fg' x:2 y:2 r:2 b:2 }    
+              ] }
+            { text:'heading' x:4 y:3 r:6 h:3 scale:3 flows:false }
+            { text:'longer text that flows and flows and flows and flows into the sea' x:8 y:14 w:'100%' h:3 }
+            { text:'some' x:8 y:15 h:3 scale:3 blocks:true }
+          ] }
+          
+        regions = layout.regionize {rows:20 cols:30} tree
+        
+        sds.get regions 'children.3.w' ▸ 22
+        sds.get regions 'children.3.regions' ▸ [[13 8 23] [4 9 23] [4 10 23]]
+        
+        layout.dumpRegions regions ▸ 
+            """
+            01234567890123456789012345
+            012                     45
+            012                     45
+            01 h  e  a  d  i  n  g  45
+            01                      45
+            01          longer text 45
+            01 s o m e  that flows  45
+            01 and flows and flows  45
+            01234567890123456789012345
+            01234567890123456789012345
+            """ 
+        
+  ▸ fill
+  
+    ▸ pattern
+    
+            fill.pattern pattern:'0123456789' type:'repeat' [[10 2 20]] ▸ ['01234567890']
+            fill.pattern pattern:'0123456789' type:'repeat' [[5  2 20][5 3 15][0 4 15]] ▸ ['567890123456789' '5678901234' '012345678901234']
+            
+    ▸ text
+    
+            fill.text text:'some text' [[5 200 10][5 201 10]] ▸ ['some ' 'text ']

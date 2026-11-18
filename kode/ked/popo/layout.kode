@@ -88,5 +88,11 @@
             out[key] = value
 
         out
+        
+    @regionize: cells rectree ->
+    
+        rectree = @absolutize cells rectree
+        
+    @dumpRegions: rectree -> ""
 
 export layout
