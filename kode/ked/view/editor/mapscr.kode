@@ -282,7 +282,7 @@ use                 ◆ mapview
         @cells.screen.t.placeImageOverlay @knobId @cells.x @cells.y ky @mapWidth @knobHeight
 
     hide: =>
-    
+        
         ⮐ if @hidden()
         
         @cells.screen.t.hideImageOverlay @knobId

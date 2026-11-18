@@ -55,6 +55,12 @@ use                 ◆ mapscr
         
         @state.applyScales data?.scale
         
+        if data?.mapScroll?.enable
+            log "SHOW"
+            @mapscr?.show()
+        else
+            @mapscr?.hide()
+        
     setCurrentFile: @currentFile =>
         
         @gutter.clearChanges()
