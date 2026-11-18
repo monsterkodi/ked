@@ -1,0 +1,9 @@
+■layout
+
+    # converts rectree: replaces percentages with cell counts and right and bottom offsets with width and height
+    
+    @absolutize: cells rectree -> 
+    
+        rectree
+    
+export layout

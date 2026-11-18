@@ -453,7 +453,7 @@ import rgxs from './quicky.json' with { type: "json" }
         if not @cells.inside(col, row)
             ⮐ 
         item = @choiceAtRow row + @state.s.view[1]
-        log "itemAtEvent #{row} #{@state.s.view[1]} #{item.path}"
+        log "itemAtEvent #{row} #{@state.s.view[1]} #{item?.path}"
         item
 
     tilde: item -> item.tilde = lpad(item.depth*2+1) + diritem.symbolName(item)
