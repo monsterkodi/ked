@@ -92,6 +92,7 @@ use child_process ▪ spawn exec
         post.on 'quit'              @quit
         post.on 'file.change'       @onFileChange
         post.on 'git.status'        @onGitStatus
+        post.on 'config.loaded'     @onConfigLoaded
         # post.on 'focus'         (name) -> log "focus: '#{name}'"
         
         @contextHandlers = [                                                                                                         @editor        @dircol @funcol ]
@@ -122,7 +123,7 @@ use child_process ▪ spawn exec
     showEditor: -> 
     
         @editor.show()
-        @title.show()
+        @title.show() if not config.data?.zen?.enable
         @dircol.show()
         @funcol.show()
 
@@ -233,7 +234,9 @@ use child_process ▪ spawn exec
         dcw = @dircol.cells.cols
         fcw = @funcol.cells.cols
         
-        dcw = 0 if @dircol.hidden() or not @dircol.active
+        zen = config.data?.zen?.enable
+        if not zen
+            dcw = 0 if @dircol.hidden() or not @dircol.active
         fcw = 0 if @funcol.hidden() or not @funcol.active
         
         if @viewSizeDelta
@@ -242,10 +245,12 @@ use child_process ▪ spawn exec
                 @funcol.name ➜ fcw = @funcol.cells.cols + @viewSizeDelta.delta
             delete @viewSizeDelta
         
-        @dircol.layout  0     0  dcw        h    if @dircol.visible() and @dircol.active
-        @funcol.layout  w-fcw 1  fcw        h-1  if @funcol.visible() and @funcol.active
-        @title.layout   dcw   0  w-dcw      1
-        @editor.layout  dcw   1  w-dcw-fcw  h-1
+        th = @title.visible() ? 1 : 0
+        
+        @dircol.layout  0     0   dcw        h     if @dircol.visible() and @dircol.active
+        @funcol.layout  w-fcw th  fcw        h-th  if @funcol.visible() and @funcol.active
+        @title.layout   dcw   0   w-dcw      1     if @title.visible()
+        @editor.layout  dcw   th  w-dcw-fcw  h-th
     
     quit: msg ◯=>
         
@@ -328,6 +333,15 @@ use child_process ▪ spawn exec
         #                 KED.building = false
             
     onGitStatus: => git.diff @currentFile
+    
+    onConfigLoaded: data => 
+    
+        if data?.zen?.enable
+            @title.hide()
+            @dircol.hide()
+        else
+            @title.show()
+            @dircol.show()
         
     reloadFile: => 
         

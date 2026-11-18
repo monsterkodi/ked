@@ -207,12 +207,13 @@ use                 ◆ dirtree
     onResize: => @knob.doDrag = true
     onToggle: => 
         
-        @toggle() #if not (@visible() and @collapsed())
+        @toggle()
         @active = @visible()
         ked_session.set 'dircol▸active' @active
         cols = max 16 int(@cells.screen.cols / 6)
-        post.emit 'view.size' @name 'right' (@hidden() ? -@cells.cols : cols-@cells.cols )
-        if @hidden() ➜ post.emit 'focus' 'editor'
+        if not config.data?.zen?.enable
+            post.emit 'view.size' @name 'right' (@hidden() ? -@cells.cols : cols-@cells.cols )
+        if @hidden() ➜ post.emit 'focus' 'editor'; post.emit 'redraw'
                      ➜ @dirtree.grabFocus() 
         
     onShow: =>

@@ -199,6 +199,8 @@ use ../base        ◆ view
 #!revert
 
     onMouse: event =>
+        
+        ⮐ if not @visible()
 
         if @cells.isOutsideEvent event
             if valid @hoverBlock
@@ -370,6 +372,8 @@ use ../base        ◆ view
                 squares.place sx sy sw sh fg
         
     draw: ->
+        
+        ⮐ if not @visible()
         
         mainCursor = @state.mainCursor()
         

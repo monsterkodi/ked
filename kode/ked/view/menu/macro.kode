@@ -39,6 +39,7 @@ use                 ◆ inputchoice
             history
             mapscr
             scale
+            zen
             """
 
         s = @editor.state.s
@@ -97,6 +98,7 @@ use                 ◆ inputchoice
         else
             # log "macro.applyChoice ▸#{choice}◂"
             switch choice
+                'zen'     ➜ post.emit 'config.toggle' 'zen.enable'
                 'scale'   ➜ post.emit 'config.toggle' 'scale.enable'
                 'mapscr'  ➜ post.emit 'config.toggle' 'mapScroll.enable'
                 'diff'    ➜ post.emit 'differ.file'

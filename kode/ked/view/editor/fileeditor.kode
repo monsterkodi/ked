@@ -57,6 +57,11 @@ use                 ◆ mapscr
         
         @state.applyScales data?.scale
         
+        if data?.zen?.enable
+            @gutter.hide()
+        else
+            @gutter.show()
+        
     setCurrentFile: @currentFile =>
         
         @gutter.clearChanges()

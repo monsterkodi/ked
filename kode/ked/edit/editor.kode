@@ -56,7 +56,7 @@ use                ◆ state draw complete mode susan
                 sl = s
                 @scroll.layout x      y   s   h 
             
-        if @gutter
+        if @gutter and @gutter.visible()
 
             g = @state.gutterWidth()
             @gutter.layout    x+sl    y   g   h
