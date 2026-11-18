@@ -1,111 +1,100 @@
-
 cursor
-    topOffset       8
-    bottomOffset    33%
-    scaleAdjustCol  true
-        
+                        topOffset       8
+                        bottomOffset    33%
+                        scaleAdjustCol  true
 mouse
-    wheelSteps      4
-    wheelSpeedup    2
-    
+                        wheelSteps      4
+                        wheelSpeedup    2
 mapScroll
-    enable          false
-    clickOffset     5
-
+                        enable          true
+                        clickOffset     5
 scale
-    enable          true
-    md
-        h1          7
-        h2          6
-        h3          5
-        h4          4
-        h5          3
-        li1         2
-    kode            
-        class       7
-        section     2
-        bang!       7
-        bang        7
-    noon            
-        bang!       7
-        bang        7
-        obj         2
-        
+                        enable  true
+                        md
+                            h1      7
+                            h2      6
+                            h3      5
+                            h4      4
+                            h5      3
+                            li1     2
+                        kode
+                            class       7
+                            section     2
+                            bang!       7
+                            bang        7
+                        noon
+                            bang!   7
+                            bang    7
+                            obj     2
 novim
-    autoStart           false
-    autoEnableOnEscape  true
-    yankFlashMs         700
-
+                        autoStart           false
+                        autoEnableOnEscape  true
+                        yankFlashMs         700
 project
-    maxDepth    6
-    ignore      
-        node_modules
-        .kkache
-        ked.log
-        
+                        maxDepth    6
+                        ignore
+                            node_modules
+                            .kkache
+                            ked.log
 log
-    memory      false
-    
+                        memory  false
 dirtree
-    allow
-        ~
-        /tmp
-
+                        allow
+                            ~
+                            /tmp
 filetypes
-    config       noon
-    .kkache      noon
-    .todo        noon
-    .gitignore   noon
-    kk           js
-    ked          js
-    ked_restart  js
-    salter       js
-    where        js
-    zero2blocks  js
-    
+                        config          noon
+                        .kkache         noon
+                        .todo           noon
+                        .gitignore      noon
+                        kk              js
+                        ked             js
+                        ked_restart     js
+                        salter          js
+                        where           js
+                        zero2blocks     js
 sourceFileExtensions
-    kode 
-    mm 
-    zig 
-    cc 
-    c 
-    h 
-    hpp 
-    cpp 
-    nim 
-    lua 
-    bashrc
-    bash_history
-    gitconfig
-    gitignore_global
-    lesshst
-    npmrc
-    nvimrc
-    profile
-    zprofile
-    zsh_history
-    zshrc
-    ts 
-    js 
-    mjs 
-    swift 
-    styl 
-    css 
-    pug 
-    html 
-    md 
-    noon 
-    json 
-    txt 
-    log 
-    sh 
-    fish 
-    py 
-    frag 
-    vert 
-    config 
-    toml 
-    conf 
-    gitignore 
-    plist
-    
+                        kode
+                        mm
+                        zig
+                        cc
+                        c
+                        h
+                        hpp
+                        cpp
+                        nim
+                        lua
+                        bashrc
+                        bash_history
+                        gitconfig
+                        gitignore_global
+                        lesshst
+                        npmrc
+                        nvimrc
+                        profile
+                        zprofile
+                        zsh_history
+                        zshrc
+                        ts
+                        js
+                        mjs
+                        swift
+                        styl
+                        css
+                        pug
+                        html
+                        md
+                        noon
+                        json
+                        txt
+                        log
+                        sh
+                        fish
+                        py
+                        frag
+                        vert
+                        config
+                        toml
+                        conf
+                        gitignore
+                        plist

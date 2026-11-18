@@ -31,7 +31,6 @@ use ../screen    ◆ cells
         
     show: -> 
     
-        log "SHOW #{@name}"
         @isVisible = true
         
         if @isPopup
@@ -48,7 +47,6 @@ use ../screen    ◆ cells
         
     hide: ->
     
-        log "HIDE #{@name}"
         @isVisible = false 
         
         if @isPopup

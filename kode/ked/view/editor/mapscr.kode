@@ -34,17 +34,27 @@ use                 ◆ mapview
         @screen.t.on 'preResize' @clearImages
         
         post.on 'greet.show' @hide
-        post.on 'greet.hide' @show
-        post.on 'popup.hide' @show
+        post.on 'greet.hide' @showIfEnabled
+        post.on 'popup.hide' @showIfEnabled
         post.on 'popup.show' (name) =>
             @hide() if name in ['differ' 'searcher' 'replacer']
-            @show() if name in ['finder']
+            @showIfEnabled() if name in ['finder']
+        
+        post.on 'config.loaded' (data) => @syncEnabled()
         
         @editor.state.on 'lines.changed'  @onLinesChanged
         @editor.state.on 'colors.changed' @onColorsChanged
         @editor.state.on 'sue.changed'    @onSueChanged
         
         @calcView()
+    
+    enabled: => config.data?.mapScroll?.enable
+    
+    syncEnabled: =>
+        if @enabled() ➜ @show()
+        else          ➜ @hide()
+    
+    showIfEnabled: => @show() if @enabled()
         
     onLinesChanged: diff =>
         

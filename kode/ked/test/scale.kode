@@ -1,4 +1,4 @@
-use ../../kxk      ▪ kseg
+use ../../kxk      ▪ kseg post
 use ../edit        ◆ state editor
 use ../theme       ◆ theme
 use ../util        ◆ harness config
@@ -1814,8 +1814,46 @@ blockArea = scr ->
         scr.get_bg(6 1) ▸ e.color.yank
         scr.get_bg(9 1) ▸ e.color.yank
 
+▸ map
+
+  ▸ the map follows the mapScroll setting
+
+        [h e] = hed cols:40 rows:10
+        old = config.data
+
+        m = new mapscr e
+
+        config.data = {mapScroll: {enable: true}}
+        post.emit 'config.loaded' config.data
+        m.visible() ▸ true
+
+        config.data = {mapScroll: {enable: false}}
+        post.emit 'config.loaded' config.data
+        m.hidden() ▸ true
+
+        post.emit 'popup.hide' 'macro'
+        m.hidden() ▸ true
+
+        post.emit 'popup.show' 'finder'
+        m.hidden() ▸ true
+
+        post.emit 'greet.hide'
+        m.hidden() ▸ true
+
+        config.data = {mapScroll: {enable: true}}
+        post.emit 'config.loaded' config.data
+        m.visible() ▸ true
+
+        post.emit 'popup.show' 'differ'
+        m.hidden() ▸ true
+
+        post.emit 'popup.hide' 'differ'
+        m.visible() ▸ true
+
+        config.data = old
+
 ▸ squares
-    
+
   ▸ tilesInRect
 
         squares.csz = [10 20] 

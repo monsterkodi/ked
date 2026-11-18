@@ -29,7 +29,9 @@ use                 ◆ mapscr
         
         super screen name features
         
-        if @feats.mapscr ➜ @mapscr = new mapscr @; @mapscr.show()
+        if @feats.mapscr
+            @mapscr = new mapscr @
+            @mapscr.syncEnabled()
         
         post.on 'editor.highlight' @state.highlightText
         post.on 'goto.line'        @onGotoLine
@@ -54,12 +56,6 @@ use                 ◆ mapscr
     onConfigLoaded: data =>
         
         @state.applyScales data?.scale
-        
-        if data?.mapScroll?.enable
-            log "SHOW"
-            @mapscr?.show()
-        else
-            @mapscr?.hide()
         
     setCurrentFile: @currentFile =>
         
