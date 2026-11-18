@@ -26,6 +26,10 @@ scale
                             bang!   7
                             bang    7
                             obj     2
+                            
+zen
+                        enable  true
+                            
 novim
                         autoStart           false
                         autoEnableOnEscape  true
@@ -98,5 +102,3 @@ sourceFileExtensions
                         conf
                         gitignore
                         plist
-zen
-                        enable  false
