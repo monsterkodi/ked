@@ -58,11 +58,7 @@ arr = [a b c]                # array elements. no commas needed.
 'x' + y                      # concatenation is +, as in JS
 "#{x}"                       # string interpolation
 
-f a b     ≡  f(a, b)         # parens are inserted for un-nested top-level calls only!
-f a, b    ≡  f(a, b)
-f(a, b)   ≡  f(a, b)
-f a(b)    ≡  f(a(b))         # if nested, only braces make the call
-f(a(b))   ≡  f(a(b))
+f a b     ≡  f(a, b)         # parens are inserted for un-nested top-level calls
 [f a]     ≡  [f, a]
 
 obj.method? arg              # trailing? ▸ call only if it exists

@@ -26,10 +26,8 @@ scale
                             bang!   7
                             bang    7
                             obj     2
-                            
 zen
-                        enable  true
-                            
+                        enable  false
 novim
                         autoStart           false
                         autoEnableOnEscape  true
