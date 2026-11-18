@@ -7,6 +7,8 @@ use ../popo   ◆ layout
 
     ▸ absolutize
     
+      ▸ percentages
+    
             layout.absolutize {cols:100 rows:50} {x:'20%' y:'10%' r:'20%' b:'10%'} ▸ {x:20 y:5 w:60 h:40}
             layout.absolutize {cols:10  rows:5 } {x:'20%' y:'20%' r:'20%' b:'20%'} ▸ {x:2  y:1 w:6  h:3 }
             layout.absolutize {cols:10  rows:5 } {x:'20%' y:'20%' w:'60%' h:'60%'} ▸ {x:2  y:1 w:6  h:3 }
@@ -14,3 +16,49 @@ use ../popo   ◆ layout
             tree = { x:10 y:10 w:'100%' h:'100%' children:[{x:'50%' y:'50%' w:'50%' h:'25%'}]}
             
             layout.absolutize {cols:100 rows:100} tree ▸ { x:10 y:10 w:90 h:90 children:[{x:55 y:55 w:45 h:22}]}
+            
+      ▸ cells
+    
+            layout.absolutize {cols:100 rows:50} {x:3 y:4 w:20 h:10}         ▸ {x:3 y:4 w:20 h:10}
+            layout.absolutize {cols:100 rows:50} {x:3 y:4 r:7 b:6}           ▸ {x:3 y:4 w:90 h:40}
+            layout.absolutize {cols:100 rows:50} {x:'3' y:'4' w:'20' h:'10'} ▸ {x:3 y:4 w:20 h:10}
+            layout.absolutize {cols:100 rows:50} {x:3 y:'10%' w:20 h:'20%'}  ▸ {x:3 y:5 w:20 h:10}
+            layout.absolutize {cols:100 rows:50} {x:3 y:4 w:20 h:10 r:7 b:6} ▸ {x:3 y:4 w:20 h:10}
+            
+      ▸ nesting
+    
+            tree = { x:1 y:1 w:10 h:10 children:[{x:1 y:1 w:'50%' h:'50%'} {x:0 y:'60%' w:4 h:2}]}
+            
+            layout.absolutize {cols:20 rows:20} tree ▸ { x:1 y:1 w:10 h:10 children:[{x:2 y:2 w:5 h:5} {x:1 y:7 w:4 h:2}]}
+            
+            tree = { x:0 y:0 w:'50%' h:'50%' children:[{x:'50%' y:'50%' w:'50%' h:'50%' children:[{x:0 y:0 w:'50%' h:'50%'}]}]}
+            
+            layout.absolutize {cols:100 rows:100} tree ▸ { x:0 y:0 w:50 h:50 children:[{x:25 y:25 w:25 h:25 children:[{x:25 y:25 w:12 h:12}]}]}
+            
+            tree = { x:8 y:0 w:'100%' h:10 children:[{x:'50%' y:0 w:'50%' h:2}]}
+            
+            layout.absolutize {cols:10 rows:10} tree ▸ { x:8 y:0 w:2 h:10 children:[{x:9 y:0 w:1 h:2}]}
+            
+            tree = { x:1 y:1 w:18 h:8 children:[{x:0 y:0 w:'50%' h:3 children:[{x:1 y:1 w:'50%' h:2}]} {x:'50%' y:0 w:'50%' h:3}]}
+            
+            layout.absolutize {cols:20 rows:20} tree ▸ { x:1 y:1 w:18 h:8 children:[{x:1 y:1 w:9 h:3 children:[{x:2 y:2 w:4 h:2}]} {x:10 y:1 w:9 h:3}]}
+            
+      ▸ no space
+    
+            tree = { x:0 y:0 w:10 h:5 children:[{x:20 y:20 w:5 h:5}]}
+            
+            layout.absolutize {cols:10 rows:5} tree ▸ { x:0 y:0 w:10 h:5 children:[{x:10 y:5 w:0 h:0}]}
+            
+            tree = { x:0 y:0 w:10 h:5 children:[{x:8 y:3 w:5 h:5}]}
+            
+            layout.absolutize {cols:10 rows:5} tree ▸ { x:0 y:0 w:10 h:5 children:[{x:8 y:3 w:2 h:2}]}
+            
+            tree = { x:0 y:0 w:0 h:0 children:[{x:1 y:1 w:3 h:3}]}
+            
+            layout.absolutize {cols:10 rows:5} tree ▸ { x:0 y:0 w:0 h:0 children:[{x:0 y:0 w:0 h:0}]}
+            
+            tree = { x:2 y:2 w:6 h:4 children:[{x:-2 y:-1 w:'100%' h:'100%'}]}
+            
+            layout.absolutize {cols:10 rows:10} tree ▸ { x:2 y:2 w:6 h:4 children:[{x:2 y:2 w:6 h:4}]}
+            
+            layout.absolutize {cols:10 rows:5} {x:0 y:0 w:5 h:5 children:[]} ▸ {x:0 y:0 w:5 h:5 children:[]}
