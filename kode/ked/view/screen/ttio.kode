@@ -183,33 +183,33 @@ use ../../util/img ◆ rounded
 
     placeImageOverlay: id x y py pw ph ->
         
-        if not @overlayID
-            @overlayID = @sendImg rounded.rect(300 400 0 [255 255 255 2]) 1
-
-        cy = y + int(py / @cellsz[1])
-        oy = py % @cellsz[1]
+        @overlayID ?= @sendImg rounded.rect(300 400 0 [255 255 255 2])
         
-        @setCursor x cy
-        @write "\x1b_Gq=1,a=p,i=#{@overlayID},p=#{id},X=0,Y=#{oy},w=#{pw},h=#{ph},z=1000,C=1\x1b\\"
+        @placeOverlay @overlayID id x y py pw ph
 
     placeCellRectOverlay: id x y py pw ph ->
         
-        if not @cellRectOverlayID
-            @cellRectOverlayID = @sendImg rounded.rect(300 400 0 [255 255 255 100]) 1
+        @cellRectOverlayID ?= @sendImg rounded.rect(300 400 0 [255 255 255 100])
+        
+        @placeOverlay @cellRectOverlayID id x y py pw ph
+
+    placeOverlay: imgId id x y py pw ph ->
 
         cy = y + int(py / @cellsz[1])
         oy = py % @cellsz[1]
         
         @setCursor x cy
-        @write "\x1b_Gq=1,a=p,i=#{@cellRectOverlayID},p=#{id},X=0,Y=#{oy},w=#{pw},h=#{ph},z=1000,C=1\x1b\\"
+        @write "\x1b_Gq=1,a=p,i=#{imgId},p=#{id},X=0,Y=#{oy},w=#{pw},h=#{ph},z=1000,C=1\x1b\\"
         
-    hideImageOverlay: id ->
-    
-        @write "\x1b_Gq=1,a=d,d=i,i=#{@overlayID},p=#{id}\x1b\\"
+    hideImageOverlay: id -> @hideOverlay @overlayID id
 
-    hideCellRectOverlay: id ->
+    hideCellRectOverlay: id -> @hideOverlay @cellRectOverlayID id
     
-        @write "\x1b_Gq=1,a=d,d=i,i=#{@cellRectOverlayID},p=#{id}\x1b\\"
+    hideOverlay: imgId id ->
+        
+        ⮐ if empty imgId
+        
+        @write "\x1b_Gq=1,a=d,d=i,i=#{imgId},p=#{id}\x1b\\"
         
     sendImg: img id ->
     

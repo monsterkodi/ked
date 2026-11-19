@@ -45,13 +45,22 @@ use                 ◆ mapscr
         post.on 'funtree.loaded'   @onFuntreeLoaded
         post.on 'screen.erased'    @onScreenErased
         post.on 'cells.rect'       @onCellsRect
+
+    grabFocus: =>        
+    
+        super()
+        @onCellsRect()
         
     onCellsRect: rect =>
     
-        ⮐ if not rect?
+        t = @cells.screen.t
+        
+        if not rect?
+            t.hideCellRectOverlay 0xefef
+            ⮐ 
+            
         ⮐ if rect.w < 1 or rect.h < 1
         
-        t = @cells.screen.t
         csz = t.cellsz
         
         ⮐ if empty csz

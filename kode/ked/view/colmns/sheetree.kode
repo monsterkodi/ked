@@ -93,10 +93,10 @@ use ../menu         ◆ filterchoice
                 
             'hover'
                 
-                log 'HOVER' choice
+                # log 'HOVER' choice
                 post.emit 'cells.rect' choice
                 
-            # ➜ log 'unhandles action?' action
+            # ➜ log 'unhandled action?' action
                  
         super action choice event
         

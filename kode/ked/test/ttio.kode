@@ -48,6 +48,21 @@ use ../util        ◆ harness keyscript
 
         (t.written().split('a=p').length - 1) ▸ 1
 
+  ▸ overlays with different colors use different image data
+
+        t = new ttio headless:true input:false
+        t.cellsz = [10 20]
+
+        t.placeImageOverlay 1 0 0 0 10 20
+        t.placeCellRectOverlay 2 0 0 0 10 20
+
+        (t.overlayID != t.cellRectOverlayID) ▸ true
+
+        written = t.written()
+
+        written.includes("a=p,i=#{t.overlayID},p=1") ▸ true
+        written.includes("a=p,i=#{t.cellRectOverlayID},p=2") ▸ true
+
   ▸ a hidden image placement can be shown again
 
         t = new ttio headless:true input:false
