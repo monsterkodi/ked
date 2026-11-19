@@ -16,12 +16,28 @@ use ../menu         ◆ filterchoice
         
         post.on 'file.loaded'    @onFileLoaded
         post.on 'session.merge'  @onSessionMerge
+        post.on 'editor.resize'  @onEditorResize
+        
+    onEditorResize: =>
+        
+        ⮐ if @hidden()
+        
+        row = @currentIndex()
+        @onFileLoaded() # 𝜏𝖍𝕒𝜏𝖘 𝕒 𝔟𝚒𝜏 𝖍𝕒⊂𝛋𝛾!
+        @select row
+        
+    select: row -> 
+        
+        super row
+        post.emit 'cells.rect' @current()
         
     onFileLoaded: path => 
         
         if @editor.sheet?.rectree
             tree = layout.regionize @editor.cells @editor.sheet.rectree
             @set layout.titlify(tree) 'title'
+        else
+            post.emit 'cells.rect'
 
     onSessionMerge: recent =>
     
@@ -31,6 +47,7 @@ use ../menu         ◆ filterchoice
         
     onCursorsSet: =>
     
+        # log 'cursor set'
         @selectItemForPos @editor.state.mainCursor()
         
     selectItemForPos: pos =>
@@ -47,6 +64,7 @@ use ../menu         ◆ filterchoice
     jumpTo: choice => 
         
         log 'JUMP' choice
+        post.emit 'goto.line' choice.y choice.x
                 
     emitAction: action choice event  ->
     
@@ -90,11 +108,6 @@ use ../menu         ◆ filterchoice
             
                 @jumpTo choice
                 ⮐ 
-                
-            'hover'
-                
-                # log 'HOVER' choice
-                post.emit 'cells.rect' choice
                 
             # ➜ log 'unhandled action?' action
                  

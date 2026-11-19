@@ -264,8 +264,8 @@ use ../../util/img  ◆ rounded
         pw = rect.w * csz[0]
         ph = rect.h * csz[1]
         
-        t.placeOverlay ids[0] pid x1 y1 0 pw    csz[1]
-        t.placeOverlay ids[1] pid x1 y2 0 pw    csz[1]
+        t.placeOverlay ids[0] pid x1 y1 0 pw     csz[1]
+        t.placeOverlay ids[1] pid x1 y2 0 pw     csz[1]
         t.placeOverlay ids[2] pid x1 y1 0 csz[0] ph
         t.placeOverlay ids[3] pid x2 y1 0 csz[0] ph
         

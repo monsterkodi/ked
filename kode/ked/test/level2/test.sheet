@@ -1,4 +1,4 @@
-bg        #00f
+bg        #333
 children
   .
     erase     bg
@@ -7,27 +7,17 @@ children
     r         10%
     b         2
   .
-    bg        #800
-    x         20%
-    y         30
-  .
     pattern   |0123456789|
-    type      repeat
     fg        #ff0
-    x         0
-    y         0
-    children
-      .
-        erase   char
-        x       2
-        y       2
-        r       2
-        b       2
+    x         2
+    y         2
+    r         2
+    b         2
   .
     text      heading
     x         4
     y         0
-    w         21
+    w         22
     h         3
     scale     3
     flows     false

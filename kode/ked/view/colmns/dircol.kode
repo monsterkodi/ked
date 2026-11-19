@@ -239,9 +239,11 @@ use                 ◆ dirtree
         ⮐ if not @dirtree.hasFocus()
         
         switch key
-            'f2'        ➜ ⮐ @rename()
-            'cmd+left'
-            'ctrl+left' ➜ ⮐ @setRoot slash.dir(@dirtree.currentRoot)
+            'f2'              ➜ ⮐ @rename()
+            'cmd+left'        
+            'ctrl+left'       ➜ ⮐ @setRoot slash.dir(@dirtree.currentRoot)
+            'shift+alt+cmd+[' ➜ ⮐ post.emit 'view.size' @name 'right' -1
+            'shift+alt+cmd+]' ➜ ⮐ post.emit 'view.size' @name 'right'  1
             
         @dirtree.onKey key event
 

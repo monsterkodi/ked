@@ -177,10 +177,14 @@ use                 ◆ funtree sheetree colorpicker uniko
         
         ⮐ if @hidden() or @collapsed() or not @active
 
+        switch key
+            'shift+alt+cmd+[' ➜ ⮐ post.emit 'view.size' @name 'left'  1
+            'shift+alt+cmd+]' ➜ ⮐ post.emit 'view.size' @name 'left' -1
+
         ⮐ true if @uniko.onKey key event
         ⮐ true if @colorpicker.onKey key event
 
         if @funtree.hasFocus()  ➜ ⮐ @funtree.onKey key event
         if @sheetree.hasFocus() ➜ ⮐ @sheetree.onKey key event
-
+        
 export funcol

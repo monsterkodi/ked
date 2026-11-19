@@ -96,10 +96,10 @@ use child_process ▪ spawn exec
         post.on 'config.loaded'     @onConfigLoaded
         # post.on 'focus'         (name) -> log "focus: '#{name}'"
         
-        @contextHandlers = [                                                                                                         @editor        @dircol @funcol ]
-        @mouseHandlers   = [ @input @context @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop @menu @macro @editor @title @dircol @funcol ]
-        @wheelHandlers   = [                 @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop       @macro @editor        @dircol @funcol ]
-        @keyHandlers     = [ @input @context @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop @menu @macro @editor @title @dircol @funcol ]
+        @contextHandlers = [                                                                                                         @dircol @funcol @editor        ]
+        @mouseHandlers   = [ @input @context @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop @menu @macro @dircol @funcol @editor @title ]
+        @wheelHandlers   = [                 @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop       @macro @dircol @funcol @editor        ]
+        @keyHandlers     = [ @input @context @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop @menu @macro @dircol @funcol @editor @title ]
         
         @t.on 'key'    @onKey
         @t.on 'mouse'  @onMouse
@@ -809,6 +809,7 @@ use child_process ▪ spawn exec
         
         @viewSizeDelta = name:name side:side delta:delta
         @redraw()
+        # post.emit 'editor.resize'
         
     onResize: cols rows size cellsz => 
     
@@ -829,6 +830,7 @@ use child_process ▪ spawn exec
         sircels.onResize cols rows size cellsz
         @redraw()
         @editor.mapscr?.onResize()
+        # post.emit 'editor.resize'
         
     onInputPopup: opt =>
     
@@ -886,6 +888,8 @@ use child_process ▪ spawn exec
         
         start = process.hrtime()
         
+        editorRect = @editor.cells.rect()
+        
         @t.syncStart()
         
         @title.gutter = @editor.state.gutterWidth()
@@ -929,6 +933,9 @@ use child_process ▪ spawn exec
         @t.syncEnd()
         
         @title.time = process.hrtime(start)[1]
+        
+        if not (editorRect eql @editor.cells.rect())
+            post.emit 'editor.resize'
         
 export KED.run
 

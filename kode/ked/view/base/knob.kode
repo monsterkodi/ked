@@ -22,7 +22,7 @@ use              ◆ view
     onMouse: event =>
         
         super event
-        
+
         switch event.type
             
             'press'
@@ -44,6 +44,7 @@ use              ◆ view
                         'right' ➜ col
                     
                     post.emit 'pointer' 'grabbing'
+                    
                     if delta
                         post.emit 'view.size' @parentName @frameSide delta
                         
@@ -57,6 +58,13 @@ use              ◆ view
                     post.emit 'pointer' @pointerType if @hover
                     delete @doDrag
                     ⮐ redraw:true
+                    
+#             'hover'
+#                 ⮐ redraw:true
+# 
+#             'move'
+#                 if @hover
+#                     ⮐ redraw:true
         @hover
             
     draw: =>
