@@ -194,6 +194,18 @@ use ◆ png
         @fill   img 0 h2 h2 h2 bottom
         @encode img 
         
+    @cellRect: side w h fg ->
+        
+        img = @img w h
+        
+        switch side
+            'top'    ➜ @fill img 0   0   w 0 fg
+            'bottom' ➜ @fill img 0   h-1 w 0 fg
+            'left'   ➜ @fill img 0   0   0 h fg
+            'right'  ➜ @fill img w-1 0   0 h fg
+        
+        @encode img
+        
 #!cursor
 
     @cursor: w h fg ->

@@ -53,21 +53,13 @@ use                 ◆ mapscr
         
     onCellsRect: rect =>
     
-        t = @cells.screen.t
+        @cells.del_cell_rect @cellRectId
+        delete @cellRectId
         
-        if not rect?
-            t.hideCellRectOverlay 0xefef
-            ⮐ 
-            
+        ⮐ if not rect?
         ⮐ if rect.w < 1 or rect.h < 1
-        
-        csz = t.cellsz
-        
-        ⮐ if empty csz
-        
-        [x y] = @cells.screenForPos rect.x rect.y
-        
-        t.placeCellRectOverlay 0xefef x y 0 rect.w*csz[0] rect.h*csz[1]
+                
+        @cellRectId = @cells.draw_cell_rect rect
         
     onScreenErased: rect =>
         

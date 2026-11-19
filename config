@@ -6,7 +6,7 @@ mouse
                         wheelSteps      4
                         wheelSpeedup    2
 mapScroll
-                        enable          true
+                        enable          false
                         clickOffset     5
 scale
                         enable  true
@@ -100,4 +100,3 @@ sourceFileExtensions
                         conf
                         gitignore
                         plist
-                        

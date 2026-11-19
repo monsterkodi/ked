@@ -217,6 +217,67 @@ use ../../util/img  ◆ rounded
     
         rounded.place @wx(x) @wy(y) 'rounded.horizontal' fg null null zLayer bg
         
+    cellRectImageIdsFor: rect csz fg ->
+        
+        t = @screen.t
+        
+        key = "#{rect.w}x#{rect.h}:#{csz[0]}x#{csz[1]}:#{fg}"
+        
+        if @cellRectKey == key and @cellRectImageIds?
+            ⮐ @cellRectImageIds
+        
+        if @cellRectImageIds?
+            for imgId in @cellRectImageIds
+                t.deleteImage imgId
+        
+        wpx = rect.w * csz[0]
+        hpx = rect.h * csz[1]
+        
+        @cellRectImageIds = [
+            t.sendImg(rounded.cellRect('top'    wpx    csz[1] fg))
+            t.sendImg(rounded.cellRect('bottom' wpx    csz[1] fg))
+            t.sendImg(rounded.cellRect('left'   csz[0] hpx    fg))
+            t.sendImg(rounded.cellRect('right'  csz[0] hpx    fg))
+            ]
+        @cellRectKey = key
+        
+        @cellRectImageIds
+        
+    draw_cell_rect: rect ->
+    
+        t = @screen.t
+        csz = t.cellsz
+        
+        ⮐ [] if empty csz
+        
+        ids = @cellRectImageIdsFor rect csz theme.editor.cellrect
+        
+        x1 = @wx rect.x
+        y1 = @wy rect.y
+        x2 = @wx(rect.x + rect.w - 1)
+        y2 = @wy(rect.y + rect.h - 1)
+        
+        @cellRectPid ?= 0
+        @cellRectPid += 1
+        pid = @cellRectPid
+        
+        pw = rect.w * csz[0]
+        ph = rect.h * csz[1]
+        
+        t.placeOverlay ids[0] pid x1 y1 0 pw    csz[1]
+        t.placeOverlay ids[1] pid x1 y2 0 pw    csz[1]
+        t.placeOverlay ids[2] pid x1 y1 0 csz[0] ph
+        t.placeOverlay ids[3] pid x2 y1 0 csz[0] ph
+        
+        [[ids[0] pid] [ids[1] pid] [ids[2] pid] [ids[3] pid]]
+        
+    del_cell_rect: rectid ->
+        
+        ⮐ if empty rectid
+        
+        for [imgId pid] in rectid
+            @screen.t.hideOverlay imgId pid
+            
     draw_rounded_cursor: x y fg scale=1 =>
         
         if @screen.t.headless

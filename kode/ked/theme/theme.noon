@@ -7,6 +7,7 @@ editor
     bg                                      #000   
     empty                                   #000   
     mapscr                                  #060606
+    cellrect                                #ff0   
     
 cursor
     multi                                   #f00   
