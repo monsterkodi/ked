@@ -13,7 +13,7 @@ use ./view/editor ◆ fileeditor
 use ./view/screen ◆ screen ttio
 use ./view/menu   ◆ context menu macro finder searcher replacer clippo differ
 use ./view/colmns ◆ browse dircol funcol quicky droop saveas
-use ./popo       ◆ layout
+use ./popo        ◆ layout
 use child_process ▪ spawn exec
 
 ■KED
@@ -227,37 +227,6 @@ use child_process ▪ spawn exec
                 @hideEditor()
                 @menu.show true
                 
-    #  a sheet is shown, not edited: the file holds the rectree as json and
-    #  the editor shows what layout makes of it. sizing happens here because
-    #  the editor cells are only known after arrange, and a sheet has to be
-    #  resolved against them, on load and on every resize.
-
-    rectreeOf: text ->
-        try
-            ⮐ noon.parse text
-        catch err
-            error err
-            error "ked - sheet has no readable rectree" @currentFile
-            null
-
-    sheetCheck: =>
-
-        ⮐ if not @sheet?
-
-        cols = @editor.cells.cols
-        rows = @editor.cells.rows
-
-        ⮐ if cols < 1 or rows < 1
-        ⮐ if @sheet.cols == cols and @sheet.rows == rows
-
-        @sheet.cols = cols
-        @sheet.rows = rows
-
-        data = sue.desue(layout.sueify({cols:cols rows:rows} @sheet.rectree))
-
-        @editor.state.loadLines data.text.split('\n')
-        @editor.state.loadSue data.sue
-
     arrange: =>
         
         w = @t.cols()
@@ -494,12 +463,13 @@ use child_process ▪ spawn exec
         if text == undefined
             text = '◯ binary ◯'
 
-        @sheet = null
+        delete @editor.sheet
 
         if slash.ext(@currentFile) == 'sheet'
-            rectree = @rectreeOf text
+            rectree = noon.parse text
             if valid rectree
-                @sheet = rectree:rectree source:text
+                @editor.sheet = rectree:rectree source:text
+                # log "SHEET" @editor.sheet
                 text = layout.sueify {cols:@editor.cells.cols rows:@editor.cells.rows} rectree
 
         sueData = sue.desue text
@@ -641,8 +611,8 @@ use child_process ▪ spawn exec
     
     textForSave: (path text) =>
 
-        #  a sheet is shown, not edited: give back what was loaded
-        ⮐ @sheet.source if @sheet? and path == @currentFile
+        # temporary hack to save original file content until sheet editing is done:
+        ⮐ @editor.sheet.source if @editor.sheet? and path == @currentFile
 
         areas = @editor.state.s.sue ? []
         areas = areas.concat(sue.areasForColors(@editor.state.s.colors))
@@ -774,28 +744,18 @@ use child_process ▪ spawn exec
             "alt+cmd+["                  ➜ ⮐ post.emit 'dircol.toggle'
             "alt+cmd+]"                  ➜ ⮐ post.emit 'funcol.toggle'
             'shift+cmd+['                ➜ ⮐ post.emit 'dircol.reveal' @currentFile
-
-        for handler in @keyHandlers
-            continue if handler.hidden()
-            result = handler.onKey key event
-            @redraw() if result?.redraw != false
-            if result
-                # log "ked.onKey #{result} #{handler.name}"
-                ⮐ 
-        
-        switch key
-            
+            'alt+q' 'ctrl+q' 'cmd+q'     ➜ ⮐ @quit()
+            'ctrl+s' 'cmd+s'             ➜ ⮐ @saveFile()
+            'shift+cmd+s' 'shift+ctrl+s' ➜ ⮐ @saveAs()
             'alt+1'                      ➜ ⮐ post.emit 'filepos.goBackward'  
             'alt+2'                      ➜ ⮐ post.emit 'filepos.goForward'   
             'cmd+1' 'ctrl+1'             ➜ ⮐ post.emit 'filepos.swapPrevious'
             'alt+h'                      ➜ ⮐ @showFileposHistory()
-            'alt+q' 'ctrl+q' 'cmd+q'     ➜ ⮐ @quit()
             'ctrl+r' 'cmd+r'             ➜ ⮐ @reloadFile()
-            'ctrl+s' 'cmd+s'             ➜ ⮐ @saveFile()
-            'shift+cmd+s' 'shift+ctrl+s' ➜ ⮐ @saveAs()
             'cmd+n' 'ctrl+n'             ➜ ⮐ @newFile()
             'alt+m'                      ➜ ⮐ @menu.show()
             'cmd+p' 'ctrl+p'             ➜ ⮐ @quicky.showProjectFiles @currentFile
+            'alt+cmd+p'
             'shift+cmd+p' 'shift+ctrl+p' ➜ ⮐ @quicky.showRecentFiles @currentFile
             'cmd+f' 'ctrl+f'             ➜ ⮐ @showFinderOrSearcher()
             'shift+cmd+f' 'shift+ctrl+f' ➜ ⮐ @searcher.show()
@@ -810,6 +770,17 @@ use child_process ▪ spawn exec
             'cmd+i'                      ➜ ⮐ post.emit 'differ.status'
             'alt+c'                      ➜ ⮐ post.emit 'colorpicker.show'
             'alt+u'                      ➜ ⮐ post.emit 'uniko.show'
+
+        for handler in @keyHandlers
+            continue if handler.hidden()
+            result = handler.onKey key event
+            @redraw() if result?.redraw != false
+            if result
+                # log "ked.onKey #{result} #{handler.name}"
+                ⮐ 
+        
+        switch key
+            
             'shift+alt+c'                ➜ ⮐ @clearDecoration()
             'shift+alt+u'                ➜ ⮐ @toggleStyle 'u'
             'shift+alt+s'                ➜ ⮐ @toggleStyle 's'
@@ -888,6 +859,24 @@ use child_process ▪ spawn exec
 
         clearImmediate @redrawId
         @redrawId = setImmediate @draw
+
+    sheetCheck: => # temporary hack to inject and relayout sheets
+
+        ⮐ if not @editor.sheet?
+
+        cols = @editor.cells.cols
+        rows = @editor.cells.rows
+
+        ⮐ if cols < 1 or rows < 1
+        ⮐ if @editor.sheet.cols == cols and @editor.sheet.rows == rows
+
+        @editor.sheet.cols = cols
+        @editor.sheet.rows = rows
+
+        data = sue.desue layout.sueify({cols:cols rows:rows} @editor.sheet.rectree)
+
+        @editor.state.loadLines data.text.split('\n')
+        @editor.state.loadSue data.sue
                                       
     draw: =>
             
@@ -905,7 +894,8 @@ use child_process ▪ spawn exec
         
         @arrange()
         
-        @sheetCheck()
+        @sheetCheck() 
+        
         editorDrawn = @menu.greet.hidden() and not @differ.visible() and not @editor.hidden()
         
         # ●▸ draw

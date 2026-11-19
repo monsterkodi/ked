@@ -3,6 +3,7 @@ use ../../../kxk    ▪ post slash nfs
 use ../../theme     ◆ color theme icons
 use ../../edit/tool ◆ belt
 use ../../index     ◆ indexer
+use ../../popo      ◆ layout
 use ../menu         ◆ filterchoice
 
 ■sheetree□filterchoice
@@ -18,9 +19,8 @@ use ../menu         ◆ filterchoice
         
     onFileLoaded: path => 
         
-        log "onFileLoaded #{path}"
-        items = ['hello' 'world']
-        @set items 
+        if @editor.sheet?.rectree
+            @set layout.titlify(@editor.sheet.rectree) 'title'
 
     onSessionMerge: recent =>
     

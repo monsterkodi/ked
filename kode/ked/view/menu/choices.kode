@@ -275,6 +275,8 @@ use ../../edit      ◆ editor
         
     onMouse: event =>
         
+        ⮐ if @hidden()
+        
         ret = super event; ⮐ ret if ret?.redraw
         
         ret = @mapscr?.onMouse event; ⮐ ret if ret # mapview doesn't do mouse yet, just to prevent clickthrough to editor

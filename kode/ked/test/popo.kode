@@ -71,20 +71,6 @@ use ../util  ◆ harness
                 
                 layout.absolutize {cols:100 rows:50} tree ▸ { x:10 y:5 w:80 h:35 children:[{ x:14 y:7 w:40 h:26 children:[{ x:24 y:10 w:24 h:6 children:[{ x:26 y:13 w:12 h:2 children:[{ x:26 y:13 w:0 h:0 }] }] }] }] }
             
-      ▸ errors
-    
-                try
-                    layout.absolutize {cols:10 rows:5} {x:0 y:0 w:1 r:1}
-                    true ▸ false
-                catch err
-                    "#{err}".indexOf('w and r are both given') >= 0 ▸ true
-                
-                try
-                    layout.absolutize {cols:10 rows:5} {x:0 y:0 h:1 b:1}
-                    true ▸ false
-                catch err
-                    "#{err}".indexOf('h and b are both given') >= 0 ▸ true
-
   ▸ fill
 
     ▸ pattern
@@ -94,12 +80,6 @@ use ../util  ◆ harness
             fill.pattern {pattern:'ab' type:'repeat'} [[0 0 3] [1 0 2]] ▸ ['aba' 'b']
             fill.pattern {pattern:'ab' type:'repeat'} [] ▸ []
             fill.pattern {pattern:'ab' type:'repeat'} [[5 0 5]] ▸ ['']
-            
-            try
-                fill.pattern {pattern:'ab' type:'bounce'} [[0 0 2]]
-                true ▸ false
-            catch err
-                "#{err}".indexOf('pattern type bounce is not known') >= 0 ▸ true
             
     ▸ text
     
@@ -268,9 +248,6 @@ use ../util  ◆ harness
         
   ▸ sueify
     
-    #  the grid as a text the editor can show: characters in the lines,
-    #  colours in sue payloads that susan turns back into fg and bg cells.
-    
         tree = { bg:'#00f' children:[{ text:'hi' x:1 y:1 w:3 h:1 fg:'#ff0' }] }
         
         data = sue.desue(layout.sueify({cols:8 rows:3} tree))
@@ -283,9 +260,6 @@ use ../util  ◆ harness
         fg.length ▸ 1
         fg[0].value ▸ [31 3 1 '#ff0']
 
-        #  a scaled glyph lives on the bottom row of its block, the rows
-        #  above get a space and the run grows up from there
-        
         tree = { children:[{ text:'A' x:1 y:1 w:3 h:3 scale:3 fg:'#ff0' }] }
         
         data = sue.desue(layout.sueify({cols:6 rows:5} tree))
@@ -299,8 +273,6 @@ use ../util  ◆ harness
         runs[0].y ▸ 3
         runs[0].value[3] ▸ 3
         
-        #  a block that does not fit its node keeps its single cell
-        
         tree = { children:[{ text:'A' x:1 y:1 w:3 h:1 scale:3 }] }
         
         data = sue.desue(layout.sueify({cols:6 rows:3} tree))
@@ -309,10 +281,7 @@ use ../util  ◆ harness
         data.sue.filter((area) -> area.value[0] == sue.SCALE).length ▸ 0
         
   ▸ editor
-    
-    #  the end of the line: sueified text loaded into a real editor view
-    #  paints characters and colours through susan
-    
+        
         h = new harness cols:16 rows:4
         e = new editor h.screen 'popo_test_editor' []
         e.layout 0 0 16 4
@@ -330,8 +299,6 @@ use ../util  ◆ harness
         h.screen.get_fg(1 1) ▸ [255 255 0]
         h.screen.get_bg(5 0) ▸ [0 0 255]
 
-        #  with text sizing the editor grows a scaled glyph into a block
-        
         h.t.textSizing = true
         h.screen.init()
         

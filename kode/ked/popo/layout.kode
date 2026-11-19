@@ -3,38 +3,25 @@ use ../edit/tool ◆ sue
 
 ■layout
 
-    #  absolutize a rectree against the cells of its view
-    #
-    #  a rectree node is { x, y, w, h, r, b, children } with every value
-    #  either in cells or a percentage of the containing box:
+    #  rectree node
     #
     #      x y   offset from the top left corner of the box
     #      w h   extent
     #      r b   offset from the right or bottom edge of the box
     #
-    #  a node gives x and y, one of w or r, one of h or b. a node with
-    #  neither w nor r fills the box in width, the same holds for height.
-    #  giving both w and r (or h and b) is an error, not a silent choice.
-    #  the result is clipped to the box and has no percentages or offsets
-    #  left, its children are resolved inside the new box.
+    #  a node without w or r fills the box horizontally.
+    #  a node without h or b fills the box vertically.
 
     @absolutize: cells rectree ->
 
-        box = {x:0 y:0 w:cells.cols h:cells.rows}
-
-        @inBox box rectree
-
-    #  resolve one node inside box, then the children inside the result
+        @inBox {x:0 y:0 w:cells.cols h:cells.rows} rectree
 
     @inBox: box node ->
 
         ⮐ node if not node?
 
-        if node.w? and node.r?
-            throw new Error "layout: w and r are both given"
-
-        if node.h? and node.b?
-            throw new Error "layout: h and b are both given"
+        ▴ "layout: w and r are both given" not (node.w? and node.r?)
+        ▴ "layout: h and b are both given" not (node.h? and node.b?)
 
         x = clamp 0 box.w (@offset(box.w node.x))
         y = clamp 0 box.h (@offset(box.h node.y))
@@ -57,8 +44,6 @@ use ../edit/tool ◆ sue
 
         out
 
-    #  a value in cells: a number is cells, '20%' is percent of extent
-
     @offset: extent value ->
 
         ⮐ 0 if not valid value
@@ -70,8 +55,6 @@ use ../edit/tool ◆ sue
 
         value
 
-    #  the extent of a node: w or r, a node with neither fills
-
     @extent: total start w r ->
 
         ⮐ @offset(total w) if valid w
@@ -79,8 +62,6 @@ use ../edit/tool ◆ sue
         ⮐ total - start - (@offset(total r)) if valid r
 
         total - start
-
-    #  a copy of node without the geometry keys, the caller sets those
 
     @withoutGeometry: node ->
 
@@ -92,19 +73,6 @@ use ../edit/tool ◆ sue
 
         out
         
-    #  resolve the rects and give every node the cells its content may use:
-    #  its rect, minus the blockers that overlap it.
-    #
-    #  a node with content (text, pattern, image) is a flow and is cut by
-    #  blockers, a node that only paints colours keeps its whole rect, and
-    #  flows:false opts any node out.
-    #
-    #  a blocker is a node with blocks:true. it cuts every flow it overlaps,
-    #  except the flows it is nested in: text inside an image draws on the
-    #  image instead of flowing around it. the test uses rects, not regions:
-    #  a region that depended on the blockers it intersects could not be
-    #  resolved without a cycle.
-
     @regionize: cells rectree ->
 
         ⮐ null if not rectree?
@@ -142,15 +110,11 @@ use ../edit/tool ◆ sue
         for child in node.children ? []
             @addRegions(child blockers ancestors.concat([node]))
 
-    #  a node flows when it has content that is placed cell by cell
-
     @flows: node ->
 
         ⮐ false if node.flows == false
 
         valid node.text or valid node.pattern or valid node.image
-
-    #  a rect as one interval per row, in reading order
 
     @intervalsOf: rect ->
 
@@ -161,8 +125,6 @@ use ../edit/tool ◆ sue
         for y in top...bot
             out.push [rect.x y rect.x+rect.w]
         out
-
-    #  remove the cells of a blocker from intervals of one region
 
     @cutBy: intervals blocker ->
 
@@ -188,15 +150,6 @@ use ../edit/tool ◆ sue
 
         out
 
-    #  paint the regionized tree into a grid of characters and return it as
-    #  text. the dump only knows characters: colours, attributes and the
-    #  vertical part of scaled text do not show. it is a view for tests and
-    #  for looking at a layout, not part of the renderer.
-    #
-    #  nodes paint in document order, so a later node is on top. a child with
-    #  erase masks its parent: it writes nothing itself, it only stops the
-    #  parent from writing the named channels in its region.
-
     @dumpRegions: rectree ->
 
         grid = @gridOf rectree
@@ -215,10 +168,17 @@ use ../edit/tool ◆ sue
 
         lines.join '\n'
 
-    #  the same picture, but as a text the editor can show: the characters
-    #  are the text, the colours are hidden in sue payloads that susan turns
-    #  back into fg and bg cells. size the cells to the editor you want to
-    #  show it in, the rectree is resolved against them.
+    @titlify: rectree items=[] -> # generate items for display in sheetree 
+        
+        if 
+            rectree.erase ➜ items.push 'erase'
+            rectree.text  ➜ items.push 'text'
+                          ➜ items.push '???'
+            
+        for child in rectree.children
+            @titlify child items
+            
+        items
 
     @sueify: cells rectree ->
 
@@ -241,8 +201,6 @@ use ../edit/tool ◆ sue
 
         sue.ensue(lines.join('\n') areas)
 
-    #  one text line for one row of the grid.
-    #
     #  a scaled glyph lives in a block of scale by scale cells, and a sue
     #  run grows upwards from the line it is on, so the glyph is written on
     #  the bottom row of its block and the rows above get a space in its
@@ -290,8 +248,6 @@ use ../edit/tool ◆ sue
 
         {line:line.join('') areas:@areasOfGlyphs(glyphs y)}
 
-    #  colour runs count graphemes, a scaled glyph gets a run of its own
-
     @areasOfGlyphs: (glyphs y) ->
 
         areas = []
@@ -318,8 +274,6 @@ use ../edit/tool ◆ sue
                 areas.push {x:i+1 y:y value:[sue.CLOSE -1 1 sue.SCALE]}
 
         areas
-
-    #  a grid of cells { char fg bg block } the size of the rectree, painted
 
     @gridOf: rectree ->
 
@@ -388,14 +342,6 @@ use ../edit/tool ◆ sue
 
                 @markBlock(grid x y scale cell.char node)
 
-    #  reserve the block of a scaled glyph: the glyph keeps the top left
-    #  cell, every other cell of the block is emptied so that what was
-    #  painted there before is covered.
-    #
-    #  a block only exists when it fits inside the node it belongs to: a
-    #  glyph that cannot grow keeps its one cell and is not scaled at all,
-    #  so a node can never paint outside the rect it was given.
-
     @markBlock: (grid x y scale char node) ->
 
         ⮐ if x + scale > node.x + node.w
@@ -408,8 +354,6 @@ use ../edit/tool ◆ sue
 
                 cell.block = {x:x y:y scale:scale char:char}
                 cell.char  = '' if c != x or r != y
-
-    #  the channels a node's eraser children keep it from writing
 
     @channelMaskOf: node ->
 

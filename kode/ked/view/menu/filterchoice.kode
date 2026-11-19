@@ -158,6 +158,8 @@ use ../../edit/tool ◆ belt
         
     onMouse: event =>
         
+        ⮐ if @hidden()
+        
         if @input.visible() and @filterCells.isInsideEvent(event)
             
             @input.grabFocus() if event.type == 'press'
