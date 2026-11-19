@@ -1,28 +1,34 @@
 
 use ../../../kxk ◆ post
 use ../../theme  ◆ theme
-use ../base      ◆ view input
+use ../base      ◆ view input tripleinput
 
 ■sheenode□view
     # editor for a single sheetree node
     
-    @: @screen @editor @name ->
+    @: @editor @name ->
 
-        super @screen @name
+        super @editor.screen @name
 
         @height = 8
 
         @setColor 'bg' theme.uniko.bg
 
-        @input  = new input  @screen "#{@name}_input"
+        @input    = new input       @screen "#{@name}_input"
+        @xwrInput = new tripleinput @screen "#{@name}_xwr"  ['x' 'w' 'r']
+        @yhbInput = new tripleinput @screen "#{@name}_yhb"  ['y' 'h' 'b']
+        
+        @input.drawUnfocusedCursors = false
 
         @input.on 'action' @onInputAction
 
         @isVisible = false
+        
+    hasFocus: => @input.hasFocus()
+    grabFocus: => @focusInput()
 
     focusInput: =>
 
-        @focus = 'input'
         @input.grabFocus()
         true
 
@@ -44,37 +50,43 @@ use ../base      ◆ view input
 
         post.emit 'redraw'
 
-    onKey: key event =>
-
-        ⮐ false if @hidden()
-
-        if @focus == 'input'
-
-            ⮐ @input.onKey key event
-
-        false
-
-    onInputAction: action text =>
-
-    onMouse: event =>
-
-        ⮐ if @hidden()
-        ret = @input.onMouse event   ; ⮐ ret if ret?.redraw
-        super event
-
     layout: x y w h =>
 
         super x y w h
-        @input.layout x+1 y+1 w-2 1
+        
+        @input.layout     x+1 y+1 w-2 1
+        @xwrInput.layout  x+1 y+3 w-2 1
+        @yhbInput.layout  x+1 y+5 w-2 1
 
     draw: =>
 
         ⮐ if @hidden() or @collapsed()
 
         @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
-
         @input.draw()
+        @xwrInput.draw()
+        @yhbInput.draw()
 
         super()
+
+    onInputAction: action text =>
+
+    onMouse: event =>
+
+        ⮐ if @hidden()
+        ret = @input.onMouse    event   ; ⮐ ret if ret?.redraw
+        ret = @xwrInput.onMouse event   ; ⮐ ret if ret?.redraw
+        ret = @yhbInput.onMouse event   ; ⮐ ret if ret?.redraw
+        super event
+
+    onKey: key event =>
+        # log "onKey #{key}"
+        ⮐ false if @hidden()
+
+        if @input.hasFocus()    ➜ ⮐ @input.onKey    key event
+        if @xwrInput.hasFocus() ➜ ⮐ @xwrInput.onKey key event
+        if @yhbInput.hasFocus() ➜ ⮐ @yhbInput.onKey key event
+
+        false
 
 export sheenode

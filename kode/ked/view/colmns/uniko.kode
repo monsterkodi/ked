@@ -26,8 +26,10 @@ import julia from '../../util/julia.json' with { type: "json" }
         @matrix.setColor 'selection_blur' theme.uniko.selection_blur
         @matrix.setColor 'scroll'         theme.scroll.knob
         @matrix.setColor 'scroll_dot'     theme.scroll.dot
-
+        
+        @input.drawUnfocusedCursors = false
         @input.on 'action' @onInputAction
+        
         @matrix.on 'submit' @submit
 
         @allItems = []
@@ -144,6 +146,7 @@ import julia from '../../util/julia.json' with { type: "json" }
 
         if valid event.char and event.char.length == 1
             @focusInput()
+            ⮐ true if event.char == '\t'
             ⮐ @input.onKey key event
 
         false

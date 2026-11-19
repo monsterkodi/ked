@@ -38,11 +38,7 @@ use              ◆ sheetree sheenode
         
     layout: x y w h ->
         
-        # log "LAYOUT #{w} #{h} #{@hidden()} #{@collapsed()}"
-        
         ⮐ if @hidden()
-        
-        log "LAYOUT #{w} #{h}"
         
         snh = @sheenode.height
         sth = h-snh
@@ -84,9 +80,24 @@ use              ◆ sheetree sheenode
         @sheetree.onWheel event
         @sheenode.onWheel event
         
-    onKey: key event =>
+    moveFocus: =>
         
+        if @sheetree.hasFocus()
+            @sheenode.grabFocus()
+            post.emit 'redraw'
+        else
+            @sheetree.grabFocus()
+            
+        true
+        
+    onKey: key event =>
+        # log "EDITOR #{key} #{@hidden()}"
         ⮐ if @hidden() or @collapsed()
+
+        combo = event.combo
+
+        switch combo
+            'tab' 'shift+tab' ➜ ⮐ @moveFocus()
 
         if @sheetree.hasFocus() ➜ ⮐ @sheetree.onKey key event
         if @sheenode.hasFocus() ➜ ⮐ @sheenode.onKey key event

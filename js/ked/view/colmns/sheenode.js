@@ -8,36 +8,50 @@ import theme from "../../theme/theme.js"
 
 import view from "../base/view.js"
 import input from "../base/input.js"
+import tripleinput from "../base/tripleinput.js"
 
 
 sheenode = (function ()
 {
     _k_.extend(sheenode, view)
-    function sheenode (screen, editor, name)
+    function sheenode (editor, name)
     {
-        this.screen = screen
         this.editor = editor
         this.name = name
     
-        this["draw"] = this["draw"].bind(this)
-        this["layout"] = this["layout"].bind(this)
+        this["onKey"] = this["onKey"].bind(this)
         this["onMouse"] = this["onMouse"].bind(this)
         this["onInputAction"] = this["onInputAction"].bind(this)
-        this["onKey"] = this["onKey"].bind(this)
+        this["draw"] = this["draw"].bind(this)
+        this["layout"] = this["layout"].bind(this)
         this["hide"] = this["hide"].bind(this)
         this["show"] = this["show"].bind(this)
         this["focusInput"] = this["focusInput"].bind(this)
-        sheenode.__super__.constructor.call(this,this.screen,this.name)
+        this["grabFocus"] = this["grabFocus"].bind(this)
+        this["hasFocus"] = this["hasFocus"].bind(this)
+        sheenode.__super__.constructor.call(this,this.editor.screen,this.name)
         this.height = 8
         this.setColor('bg',theme.uniko.bg)
         this.input = new input(this.screen,`${this.name}_input`)
+        this.xwrInput = new tripleinput(this.screen,`${this.name}_xwr`,['x','w','r'])
+        this.yhbInput = new tripleinput(this.screen,`${this.name}_yhb`,['y','h','b'])
+        this.input.drawUnfocusedCursors = false
         this.input.on('action',this.onInputAction)
         this.isVisible = false
     }
 
+    sheenode.prototype["hasFocus"] = function ()
+    {
+        return this.input.hasFocus()
+    }
+
+    sheenode.prototype["grabFocus"] = function ()
+    {
+        return this.focusInput()
+    }
+
     sheenode.prototype["focusInput"] = function ()
     {
-        this.focus = 'input'
         this.input.grabFocus()
         return true
     }
@@ -60,17 +74,26 @@ sheenode = (function ()
         return post.emit('redraw')
     }
 
-    sheenode.prototype["onKey"] = function (key, event)
+    sheenode.prototype["layout"] = function (x, y, w, h)
     {
-        if (this.hidden())
+        sheenode.__super__.layout.call(this,x,y,w,h)
+    
+        this.input.layout(x + 1,y + 1,w - 2,1)
+        this.xwrInput.layout(x + 1,y + 3,w - 2,1)
+        return this.yhbInput.layout(x + 1,y + 5,w - 2,1)
+    }
+
+    sheenode.prototype["draw"] = function ()
+    {
+        if (this.hidden() || this.collapsed())
         {
-            return false
+            return
         }
-        if (this.focus === 'input')
-        {
-            return this.input.onKey(key,event)
-        }
-        return false
+        this.cells.fill_rect(0,0,-1,-1,' ',null,this.color.bg)
+        this.input.draw()
+        this.xwrInput.draw()
+        this.yhbInput.draw()
+        return sheenode.__super__.draw.call(this)
     }
 
     sheenode.prototype["onInputAction"] = function (action, text)
@@ -89,25 +112,38 @@ sheenode = (function ()
         {
             return ret
         }
+        ret = this.xwrInput.onMouse(event)
+        if ((ret != null ? ret.redraw : undefined))
+        {
+            return ret
+        }
+        ret = this.yhbInput.onMouse(event)
+        if ((ret != null ? ret.redraw : undefined))
+        {
+            return ret
+        }
         return sheenode.__super__.onMouse.call(this,event)
     }
 
-    sheenode.prototype["layout"] = function (x, y, w, h)
+    sheenode.prototype["onKey"] = function (key, event)
     {
-        sheenode.__super__.layout.call(this,x,y,w,h)
-    
-        return this.input.layout(x + 1,y + 1,w - 2,1)
-    }
-
-    sheenode.prototype["draw"] = function ()
-    {
-        if (this.hidden() || this.collapsed())
+        if (this.hidden())
         {
-            return
+            return false
         }
-        this.cells.fill_rect(0,0,-1,-1,' ',null,this.color.bg)
-        this.input.draw()
-        return sheenode.__super__.draw.call(this)
+        if (this.input.hasFocus())
+        {
+            return this.input.onKey(key,event)
+        }
+        if (this.xwrInput.hasFocus())
+        {
+            return this.xwrInput.onKey(key,event)
+        }
+        if (this.yhbInput.hasFocus())
+        {
+            return this.yhbInput.onKey(key,event)
+        }
+        return false
     }
 
     return sheenode
@@ -115,5 +151,5 @@ sheenode = (function ()
 
 export default sheenode;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZW5vZGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWVub2RlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsV0FBTjs7T0FDTSxZQUFUOztPQUNTLFdBQVo7T0FBaUIsWUFBakI7OztBQUVOLFlBQUQ7O3lCQUFVO2FBR04sVUFBSSxRQUFRLFFBQVE7O1FBQWpCO1FBQVE7UUFBUTs7Ozs7Ozs7OztpREFFVCxLQUFDLE9BQU8sS0FBQztRQUVmLEtBQUMsU0FBUztRQUVWLEtBQUMsU0FBUyxLQUFLLE1BQU0sTUFBTTtRQUUzQixLQUFDLFlBQWEsTUFBTyxLQUFDLFVBQVUsS0FBQztRQUVqQyxLQUFDLE1BQU0sR0FBRyxTQUFTLEtBQUM7UUFFcEIsS0FBQyxZQUFZOzs7d0JBRWpCOztRQUVJLEtBQUMsUUFBUTtRQUNULEtBQUMsTUFBTTtlQUNQOzs7d0JBRUo7O1FBRUksS0FBQyxNQUFNLElBQUk7O2VBSVgsS0FBSyxLQUFLOzs7d0JBRWQ7O1lBRVMsS0FBQzs7Ozs7UUFJTixLQUFDLE1BQU0sTUFBTTtlQUViLEtBQUssS0FBSzs7O3dCQUVkLG9CQUFPLEtBQUk7O1lBRUksS0FBQzs7bUJBQVY7O1lBRUMsS0FBQyxVQUFTOzttQkFFUCxLQUFDLE1BQU0sTUFBTSxJQUFJOztlQUV2Qjs7O3dCQUVKLDRCQUFlLFFBQU87Ozt3QkFFdEIsc0JBQVM7Ozs7WUFFQSxLQUFDOzs7O1FBQ04sTUFBTSxLQUFDLE1BQU0sUUFBUTthQUFtQixjQUFBLElBQUs7O21CQUFaOztvREFDM0I7Ozt3QkFFVixxQkFBUSxHQUFFLEdBQUUsR0FBRTs7NENBRUosRUFBRSxFQUFFLEVBQUU7O2VBQ1osS0FBQyxNQUFNLE9BQU8sSUFBRSxFQUFFLElBQUUsRUFBRSxJQUFFLEVBQUU7Ozt3QkFFOUI7O1lBRVMsS0FBQyxZQUFZLEtBQUM7Ozs7UUFFbkIsS0FBQyxNQUFNLFVBQVUsRUFBRSxFQUFFLEdBQUcsR0FBRyxJQUFJLEtBQUssS0FBQyxNQUFNO1FBRTNDLEtBQUMsTUFBTTs7OztXQXRFZDs7O2VBMEVNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZW5vZGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWVub2RlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsV0FBTjs7T0FDTSxZQUFUOztPQUNTLFdBQVo7T0FBaUIsWUFBakI7T0FBdUIsa0JBQXZCOzs7QUFFTixZQUFEOzt5QkFBVTthQUdOLFVBQUksUUFBUTs7UUFBVDtRQUFROzs7Ozs7Ozs7Ozs7aURBRUQsS0FBQyxPQUFPLE9BQU8sS0FBQztRQUV0QixLQUFDLFNBQVM7UUFFVixLQUFDLFNBQVMsS0FBSyxNQUFNLE1BQU07UUFFM0IsS0FBQyxZQUFlLE1BQVksS0FBQyxVQUFVLEtBQUM7UUFDeEMsS0FBQyxlQUFlLFlBQVksS0FBQyxVQUFVLEtBQUMsWUFBYSxJQUFJLElBQUk7UUFDN0QsS0FBQyxlQUFlLFlBQVksS0FBQyxVQUFVLEtBQUMsWUFBYSxJQUFJLElBQUk7UUFFN0QsS0FBQyxNQUFNLHVCQUF1QjtRQUU5QixLQUFDLE1BQU0sR0FBRyxTQUFTLEtBQUM7UUFFcEIsS0FBQyxZQUFZOzs7d0JBRWpCOztlQUFhLEtBQUMsTUFBTTs7O3dCQUNwQjs7ZUFBYyxLQUFDOzs7d0JBRWY7O1FBRUksS0FBQyxNQUFNO2VBQ1A7Ozt3QkFFSjs7UUFFSSxLQUFDLE1BQU0sSUFBSTs7ZUFJWCxLQUFLLEtBQUs7Ozt3QkFFZDs7WUFFUyxLQUFDOzs7OztRQUlOLEtBQUMsTUFBTSxNQUFNO2VBRWIsS0FBSyxLQUFLOzs7d0JBRWQscUJBQVEsR0FBRSxHQUFFLEdBQUU7OzRDQUVKLEVBQUUsRUFBRSxFQUFFOztRQUVaLEtBQUMsTUFBTSxPQUFXLElBQUUsRUFBRSxJQUFFLEVBQUUsSUFBRSxFQUFFO1FBQzlCLEtBQUMsU0FBUyxPQUFRLElBQUUsRUFBRSxJQUFFLEVBQUUsSUFBRSxFQUFFO2VBQzlCLEtBQUMsU0FBUyxPQUFRLElBQUUsRUFBRSxJQUFFLEVBQUUsSUFBRSxFQUFFOzs7d0JBRWxDOztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7O1FBRW5CLEtBQUMsTUFBTSxVQUFVLEVBQUUsRUFBRSxHQUFHLEdBQUcsSUFBSSxLQUFLLEtBQUMsTUFBTTtRQUMzQyxLQUFDLE1BQU07UUFDUCxLQUFDLFNBQVM7UUFDVixLQUFDLFNBQVM7Ozs7d0JBSWQsNEJBQWUsUUFBTzs7O3dCQUV0QixzQkFBUzs7OztZQUVBLEtBQUM7Ozs7UUFDTixNQUFNLEtBQUMsTUFBTSxRQUFXO2FBQW1CLGNBQUEsSUFBSzs7bUJBQVo7O1FBQ3BDLE1BQU0sS0FBQyxTQUFTLFFBQVE7YUFBbUIsY0FBQSxJQUFLOzttQkFBWjs7UUFDcEMsTUFBTSxLQUFDLFNBQVMsUUFBUTthQUFtQixjQUFBLElBQUs7O21CQUFaOztvREFDOUI7Ozt3QkFFVixvQkFBTyxLQUFJOztZQUVJLEtBQUM7O21CQUFWOztZQUVDLEtBQUMsTUFBTTs7bUJBQWtCLEtBQUMsTUFBTSxNQUFTLElBQUk7O1lBQzdDLEtBQUMsU0FBUzs7bUJBQWUsS0FBQyxTQUFTLE1BQU0sSUFBSTs7WUFDN0MsS0FBQyxTQUFTOzttQkFBZSxLQUFDLFNBQVMsTUFBTSxJQUFJOztlQUVoRDs7O1dBcEZQOzs7ZUFzRk0ifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/sheenode.kode

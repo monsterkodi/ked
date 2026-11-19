@@ -5,9 +5,9 @@ use ../../edit/tool ◆ belt
 use ../base         ◆ view knob
 use                 ◆ funtree sheeditor colorpicker uniko
 ■funcol□view
-    @: screen @editor features ->
+    @: @screen @editor features ->
         
-        super screen 'funcol' features
+        super @screen 'funcol' features
         
         @isVisible     = false
         @active        = false
@@ -16,11 +16,11 @@ use                 ◆ funtree sheeditor colorpicker uniko
         
         @pointerType = 'pointer'
         
-        @knob        = new knob        screen         "#{@name}_knob"
-        @funtree     = new funtree            @editor "#{@name}_funtree" ['scrllr']
-        @sheeditor   = new sheeditor   screen @editor "#{@name}_sheeditor"
-        @colorpicker = new colorpicker screen @editor "#{@name}_colorpicker"
-        @uniko       = new uniko       screen @editor "#{@name}_uniko"
+        @knob        = new knob        @screen         "#{@name}_knob"
+        @funtree     = new funtree             @editor "#{@name}_funtree" ['scrllr']
+        @sheeditor   = new sheeditor   @screen @editor "#{@name}_sheeditor"
+        @colorpicker = new colorpicker @screen @editor "#{@name}_colorpicker"
+        @uniko       = new uniko       @screen @editor "#{@name}_uniko"
         
         @knob.frameSide = 'left'
         

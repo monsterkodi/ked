@@ -340,7 +340,7 @@ use               ◆ inputchoice
         combo = event.combo
 
         switch combo
-            'esc' 'escape' ➜ @onEscape() ; ⮐ true
+            'esc' 'escape'    ➜ @onEscape()  ; ⮐ true
             'tab' 'shift+tab' ➜ @moveFocus() ; ⮐ true
 
         if combo in ['return' 'enter']

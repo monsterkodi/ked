@@ -11,10 +11,17 @@ use ../../edit   ◆ editor
         
         super screen name ['brckts' 'replex' 'unype']
         
+        @drawUnfocusedCursors = true
+        
         @setColor 'selection_line'  @color.selection
         @setColor 'bg'              theme.quicky.bg
         @setColor 'bg_blur'         theme.quicky.bg
         @setColor 'bg_focus'        theme.editor.bg
+        
+    drawCursors: =>
+    
+        if @drawUnfocusedCursors or @hasFocus()
+            super()
                 
     onMouseLeave: event => 
     

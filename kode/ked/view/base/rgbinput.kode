@@ -9,6 +9,8 @@ use              ◆ input
     @: screen name ->
 
         super screen name
+        
+        @drawUnfocusedCursors = false
 
         @setColor 'bg'       theme.colorpicker.bg
         @setColor 'bg_blur'  theme.colorpicker.bg
@@ -69,10 +71,10 @@ use              ◆ input
         for ch, x in @current()
             @cells.set_fg x 0 @textColor
 
-    drawCursors: =>
-
-        ⮐ if not @hasFocus()
-        super()
+#     drawCursors: =>
+# 
+#         ⮐ if not @hasFocus()
+#         super()
 
     onKey: key event =>
 

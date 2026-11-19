@@ -23,17 +23,17 @@ use ../base         ◆ view colorslider rgbinput radio palette
         @palette    = []
         @paletteMax = 8
 
-        @hue    = new colorslider screen "#{@name}_hue" 360 (v) => color.hsvToRgb [v 100 100]
-        @sat    = new colorslider screen "#{@name}_sat" 100 (v) => color.hsvToRgb [@h() v @v()]
-        @val    = new colorslider screen "#{@name}_val" 100 (v) => color.hsvToRgb [@h() @s() v]
+        @hue    = new colorslider @screen "#{@name}_hue" 360 (v) => color.hsvToRgb [v 100 100]
+        @sat    = new colorslider @screen "#{@name}_sat" 100 (v) => color.hsvToRgb [@h() v @v()]
+        @val    = new colorslider @screen "#{@name}_val" 100 (v) => color.hsvToRgb [@h() @s() v]
 
-        @red    = new rgbinput screen "#{@name}_red"
-        @green  = new rgbinput screen "#{@name}_green"
-        @blue   = new rgbinput screen "#{@name}_blue"
+        @red    = new rgbinput @screen "#{@name}_red"
+        @green  = new rgbinput @screen "#{@name}_green"
+        @blue   = new rgbinput @screen "#{@name}_blue"
                 
-        @radio  = new radio screen "#{@name}_radio"
+        @radio  = new radio @screen "#{@name}_radio"
 
-        @paletteView = new palette screen "#{@name}_palette"
+        @paletteView = new palette @screen "#{@name}_palette"
 
         @sliders   = [@hue @sat @val]
         @inputs    = [@red @green @blue]
