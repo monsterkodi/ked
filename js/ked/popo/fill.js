@@ -45,12 +45,13 @@ fill = (function ()
 
     fill["text"] = function (conf, region)
     {
-        var cells, i, k, out, rng, row, scale, width, _52_37_, _53_37_
+        var cells, i, k, lineY, out, rng, row, scale, width, y, _53_37_, _54_37_
 
-        cells = Array.from(((_52_37_=conf.text) != null ? _52_37_ : ''))
-        scale = _k_.max(1,parseInt(((_53_37_=conf.scale) != null ? _53_37_ : 1)))
+        cells = Array.from(((_53_37_=conf.text) != null ? _53_37_ : ''))
+        scale = _k_.max(1,parseInt(((_54_37_=conf.scale) != null ? _54_37_ : 1)))
         out = []
         i = 0
+        lineY = null
         var list = _k_.list(region)
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
@@ -61,6 +62,13 @@ fill = (function ()
                 out.push('')
                 continue
             }
+            y = rng[1]
+            if (!_k_.empty(lineY) && y > lineY && y < lineY + scale)
+            {
+                out.push(this.blank(width))
+                continue
+            }
+            lineY = y
             row = []
             while (row.length + scale <= width && i < cells.length)
             {
@@ -85,6 +93,18 @@ fill = (function ()
         return out
     }
 
+    fill["blank"] = function (width)
+    {
+        var row
+
+        row = []
+        while (row.length < width)
+        {
+            row.push(' ')
+        }
+        return row.join('')
+    }
+
     fill["blanks"] = function (region)
     {
         var out, rng
@@ -104,5 +124,5 @@ fill = (function ()
 
 export default fill;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmlsbC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvcG9wby9maWxsLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7O0FBQUMsUUFBRDs7Ozs7SUFlSSxNQUFDLHNCQUFTLE1BQUs7Ozs7UUFFWCxRQUFRLE1BQU0sZUFBSyxLQUFLLDZCQUFVO3NCQUNQOzttQkFBekIsS0FBQyxPQUFPOzthQUVQLEtBQUssaUJBQVUsS0FBSyxTQUFROztZQUMzQixVQUFVLDRCQUE0QixLQUFLOztRQUUvQyxJQUFNLE1BQU07UUFDWjs0QkFFVzs7O1lBQVA7WUFFQSxRQUFRLElBQUksS0FBSyxJQUFJO2dCQUVsQixTQUFTOztnQkFDUixJQUFJLEtBQUs7Z0JBQ1Q7O1lBRUosTUFBTTsyQkFDRixJQUFLLFNBQUkseUJBQUEsWUFBQTs7Z0JBQ1QsT0FBTyxRQUFRLElBQUksS0FBSyxLQUFLLElBQUksS0FBSzs7WUFFMUMsSUFBSSxLQUFLOztlQUViOzs7SUFTSixNQUFDLG1CQUFNLE1BQUs7Ozs7UUFFUixRQUFRLE1BQU0sZUFBSyxLQUFLLDBCQUFPO1FBQy9CLGdCQUFZLHFCQUFNLEtBQUssMkJBQVE7UUFDL0I7UUFDQSxJQUFROzRCQUVHOzs7WUFBUDtZQUVBLFFBQVEsSUFBSSxLQUFLLElBQUk7Z0JBRWxCLFNBQVM7O2dCQUNSLElBQUksS0FBSztnQkFDVDs7WUFFSjttQkFFTSxJQUFJLFNBQVMsU0FBUyxTQUFVLElBQUksTUFBTTs7b0JBRXpDLE1BQU0sT0FBTTs7b0JBQ1gsS0FBSztvQkFDTDs7Z0JBRUosSUFBSSxLQUFLLE1BQU07Z0JBQ2YsS0FBSzsrQkFFRCxJQUFLLFNBQUkseUJBQUEsWUFBQTs7b0JBQ1QsSUFBSSxLQUFLOzs7bUJBRVgsSUFBSSxTQUFTOztnQkFDZixJQUFJLEtBQUs7O1lBRWIsSUFBSSxLQUFLLElBQUksS0FBSzs7ZUFFdEI7OztJQUVKLE1BQUMscUJBQVE7Ozs7UUFFTDs0QkFDVzs7O1lBQVA7WUFDQSxJQUFJLEtBQUs7O2VBQ2I7OztXQTFGUDs7O2VBNEZNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmlsbC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvcG9wby9maWxsLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7O0FBQUMsUUFBRDs7Ozs7SUFlSSxNQUFDLHNCQUFTLE1BQUs7Ozs7UUFFWCxRQUFRLE1BQU0sZUFBSyxLQUFLLDZCQUFVO3NCQUNQOzttQkFBekIsS0FBQyxPQUFPOzthQUVQLEtBQUssaUJBQVUsS0FBSyxTQUFROztZQUMzQixVQUFVLDRCQUE0QixLQUFLOztRQUUvQyxJQUFNLE1BQU07UUFDWjs0QkFFVzs7O1lBQVA7WUFFQSxRQUFRLElBQUksS0FBSyxJQUFJO2dCQUVsQixTQUFTOztnQkFDUixJQUFJLEtBQUs7Z0JBQ1Q7O1lBRUosTUFBTTsyQkFDRixJQUFLLFNBQUkseUJBQUEsWUFBQTs7Z0JBQ1QsT0FBTyxRQUFRLElBQUksS0FBSyxLQUFLLElBQUksS0FBSzs7WUFFMUMsSUFBSSxLQUFLOztlQUViOzs7SUFVSixNQUFDLG1CQUFNLE1BQUs7Ozs7UUFFUixRQUFRLE1BQU0sZUFBSyxLQUFLLDBCQUFPO1FBQy9CLGdCQUFZLHFCQUFNLEtBQUssMkJBQVE7UUFDL0I7UUFDQSxJQUFRO1FBQ1IsUUFBUTs0QkFFRzs7O1lBQVA7WUFFQSxRQUFRLElBQUksS0FBSyxJQUFJO2dCQUVsQixTQUFTOztnQkFDUixJQUFJLEtBQUs7Z0JBQ1Q7O1lBRUosSUFBSSxJQUFJOzJCQUlDLFVBQVUsSUFBSSxTQUFVLElBQUksUUFBUTs7Z0JBQ3pDLElBQUksS0FBSyxLQUFDLE1BQU07Z0JBQ2hCOztZQUVKLFFBQVE7WUFDUjttQkFFTSxJQUFJLFNBQVMsU0FBUyxTQUFVLElBQUksTUFBTTs7b0JBRXpDLE1BQU0sT0FBTTs7b0JBQ1gsS0FBSztvQkFDTDs7Z0JBRUosSUFBSSxLQUFLLE1BQU07Z0JBQ2YsS0FBSzsrQkFFRCxJQUFLLFNBQUkseUJBQUEsWUFBQTs7b0JBQ1QsSUFBSSxLQUFLOzs7bUJBRVgsSUFBSSxTQUFTOztnQkFDZixJQUFJLEtBQUs7O1lBRWIsSUFBSSxLQUFLLElBQUksS0FBSzs7ZUFFdEI7OztJQUVKLE1BQUMsb0JBQU87Ozs7UUFFSjtlQUNNLElBQUksU0FBUzs7WUFDZixJQUFJLEtBQUs7O2VBQ2IsSUFBSSxLQUFLOzs7SUFFYixNQUFDLHFCQUFROzs7O1FBRUw7NEJBQ1c7OztZQUFQO1lBQ0EsSUFBSSxLQUFLOztlQUNiOzs7V0E1R1A7OztlQThHTSJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/popo/fill.kode

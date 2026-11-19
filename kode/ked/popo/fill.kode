@@ -43,9 +43,10 @@
     #  pour the text through the intervals in order, a newline moves on to
     #  the next interval, a short row is padded with spaces.
     #
-    #  scale makes every grapheme take scale cells, the grapheme itself in
-    #  the first one, the rest blank. a grapheme that does not fit whole
-    #  moves to the next interval instead of being cut.
+    #  scale makes every grapheme take scale cells in both directions: the
+    #  grapheme in the first cell of its block, the rest blank, and only
+    #  every scale-th row starts a new line of text. a grapheme that does
+    #  not fit whole moves to the next line instead of being cut.
 
     @text: conf region ->
 
@@ -53,6 +54,7 @@
         scale = max 1 int(conf.scale ? 1)
         out   = []
         i     = 0
+        lineY = null
 
         for rng in region
 
@@ -62,7 +64,16 @@
                 out.push ''
                 continue
 
-            row = []
+            y = rng[1]
+
+            #  a row inside the blocks of the line above starts nothing
+
+            if valid lineY and y > lineY and y < lineY + scale
+                out.push(@blank(width))
+                continue
+
+            lineY = y
+            row   = []
 
             while row.length + scale <= width and i < cells.length
 
@@ -82,6 +93,13 @@
             out.push(row.join(''))
 
         out
+
+    @blank: width ->
+
+        row = []
+        while row.length < width
+            row.push ' '
+        row.join('')
 
     @blanks: region ->
 

@@ -207,7 +207,10 @@ use ../edit/tool ◆ sue
         for row in grid
             chars = []
             for cell in row
-                chars.push cell.char
+                if cell.char == ''
+                    chars.push ' '
+                else
+                    chars.push cell.char
             lines.push(chars.join(''))
 
         lines.join '\n'
@@ -229,44 +232,94 @@ use ../edit/tool ◆ sue
 
         for y in 0...grid.length
 
-            row   = grid[y]
-            chars = []
+            row = @lineOfRow(grid y)
 
-            for cell in row
-                chars.push cell.char
+            lines.push row.line
 
-            lines.push(chars.join(''))
-            for area in @colourAreasOf(row y)
+            for area in row.areas
                 areas.push area
 
         sue.ensue(lines.join('\n') areas)
 
-    #  one area per run of equal colour in a row, so a plain background is
-    #  a handful of payloads instead of one per cell
+    #  one text line for one row of the grid.
+    #
+    #  a scaled glyph lives in a block of scale by scale cells, and a sue
+    #  run grows upwards from the line it is on, so the glyph is written on
+    #  the bottom row of its block and the rows above get a space in its
+    #  place, which the block paints over.
+    #
+    #  the x of a sue area is a grapheme index, not a cell column: a run of
+    #  scale n makes n cells out of one grapheme, so the two differ as soon
+    #  as anything is scaled.
 
-    @colourAreasOf: row y ->
+    @lineOfRow: (grid y) ->
+
+        row    = grid[y]
+        glyphs = []
+        x      = 0
+
+        while x < row.length
+
+            cell  = row[x]
+            block = cell.block
+
+            if valid block
+
+                bottom = block.y + block.scale - 1
+
+                if bottom == y
+
+                    if block.x == x
+                        glyphs.push {char:block.char fg:cell.fg bg:cell.bg scale:block.scale}
+                        x += block.scale
+                    else
+                        x += 1
+
+                    continue
+
+                glyphs.push {char:' ' fg:cell.fg bg:cell.bg scale:1}
+                x += 1
+                continue
+
+            glyphs.push {char:cell.char fg:cell.fg bg:cell.bg scale:1}
+            x += 1
+
+        line = []
+        for glyph in glyphs
+            line.push glyph.char
+
+        {line:line.join('') areas:@areasOfGlyphs(glyphs y)}
+
+    #  colour runs count graphemes, a scaled glyph gets a run of its own
+
+    @areasOfGlyphs: (glyphs y) ->
 
         areas = []
 
         for [code channel] in [[sue.FG_COLOR 'fg'] [sue.BG_COLOR 'bg']]
 
-            x = 0
+            i = 0
 
-            while x < row.length
+            while i < glyphs.length
 
-                value = row[x][channel]
+                value = glyphs[i][channel]
                 width = 1
 
-                while x+width < row.length and row[x+width][channel] == value
+                while i+width < glyphs.length and glyphs[i+width][channel] == value
                     width += 1
 
-                areas.push {x:x y:y value:[code width 1 value]} if valid value
+                areas.push {x:i y:y value:[code width 1 value]} if valid value
 
-                x += width
+                i += width
+
+        for i in 0...glyphs.length
+            if glyphs[i].scale > 1
+                areas.push {x:i y:y value:[sue.SCALE -1 1 glyphs[i].scale]}
+                areas.push {x:i+1 y:y value:[sue.CLOSE -1 1 sue.SCALE]}
 
         areas
 
-    #  a grid of cells { char fg bg } the size of the rectree, painted
+    #  a grid of cells { char fg bg block } the size of the rectree, painted
 
     @gridOf: rectree ->
 
@@ -277,9 +330,8 @@ use ../edit/tool ◆ sue
         for y in 0...rectree.h
             row = []
             for x in 0...rectree.w
-                row.push {char:' ' fg:null bg:null}
+                row.push {char:' ' fg:null bg:null block:null}
             grid.push row
-
         @paintTree rectree grid
 
         grid
@@ -304,6 +356,9 @@ use ../edit/tool ◆ sue
         else if valid node.text
             strings = fill.text(node node.regions)
 
+        scale  = 1
+        scale  = max(1 int(node.scale ? 1)) if valid node.text
+
         masked = @channelMaskOf node
 
         for i in 0...node.regions.length
@@ -327,6 +382,32 @@ use ../edit/tool ◆ sue
 
                 cell.fg = node.fg if valid node.fg and not gone.fg
                 cell.bg = node.bg if valid node.bg and not gone.bg
+
+                continue if not (valid strings and scale > 1 and j % scale == 0)
+                continue if not cell.char? or cell.char == ' '
+
+                @markBlock(grid x y scale cell.char node)
+
+    #  reserve the block of a scaled glyph: the glyph keeps the top left
+    #  cell, every other cell of the block is emptied so that what was
+    #  painted there before is covered.
+    #
+    #  a block only exists when it fits inside the node it belongs to: a
+    #  glyph that cannot grow keeps its one cell and is not scaled at all,
+    #  so a node can never paint outside the rect it was given.
+
+    @markBlock: (grid x y scale char node) ->
+
+        ⮐ if x + scale > node.x + node.w
+        ⮐ if y + scale > node.y + node.h
+
+        for r in y...min(grid.length y+scale)
+            for c in x...min(grid[r].length x+scale)
+
+                cell = grid[r][c]
+
+                cell.block = {x:x y:y scale:scale char:char}
+                cell.char  = '' if c != x or r != y
 
     #  the channels a node's eraser children keep it from writing
 
