@@ -22,6 +22,8 @@ use                 ◆ funtree sheeditor colorpicker uniko
         @colorpicker = new colorpicker @screen @editor "#{@name}_colorpicker"
         @uniko       = new uniko       @screen @editor "#{@name}_uniko"
         
+        @mouseItems  = [@knob @uniko @colorpicker @funtree @sheeditor]
+        
         @knob.frameSide = 'left'
         
         @funtree.setColor 'bg'            theme.funtree.bg
@@ -144,17 +146,6 @@ use                 ◆ funtree sheeditor colorpicker uniko
     
         if @hidden() ➜ @onFuncolToggle()
                      ➜ @focusTree()
-        
-    onMouse: event =>
-    
-        ⮐ if @hidden() or @collapsed() or not @active
-        
-        ret = super event                ; ⮐ ret if ret?.redraw
-        ret = @knob.onMouse event        ; ⮐ ret if ret?.redraw
-        ret = @uniko.onMouse event       ; ⮐ ret if ret?.redraw
-        ret = @colorpicker.onMouse event ; ⮐ ret if ret?.redraw
-        ret = @funtree.onMouse event     ; ⮐ ret if ret?.redraw
-        ret = @sheeditor.onMouse event   ; ⮐ ret if ret?.redraw
         
     onWheel: event =>
         

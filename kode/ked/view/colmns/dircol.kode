@@ -20,6 +20,8 @@ use                 ◆ dirtree
         @knob    = new knob    screen "#{@name}_knob"
         @crumbs  = new crumbs  screen "#{@name}_crumbs"
         @dirtree = new dirtree screen "#{@name}_dirtree" ['scroll']
+
+        @mouseItems = [@knob @crumbs @dirtree]
         
         @crumbs.on 'action' @onCrumbsAction
         
@@ -219,14 +221,6 @@ use                 ◆ dirtree
     onShow: =>
         if @hidden() ➜ @onToggle()
                      ➜ @dirtree.grabFocus()
-        
-    onMouse: event =>
-    
-        ⮐ if @hidden() or @collapsed() or not @active
-        ret = super event            ; ⮐ ret if ret?.redraw
-        ret = @knob.onMouse event    ; ⮐ ret if ret?.redraw
-        ret = @crumbs.onMouse event  ; ⮐ ret if ret?.redraw
-        ret = @dirtree.onMouse event ; ⮐ ret if ret?.redraw
         
     onWheel: event =>
         

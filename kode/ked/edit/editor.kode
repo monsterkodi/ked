@@ -31,6 +31,8 @@ use                ◆ state draw complete mode susan
         if @feats.mapview  ➜ @mapscr   = new mapview  @screen @state
         if @feats.gutter   ➜ @gutter   = new gutter   @
         if @feats.complete ➜ @complete = new complete @
+        
+        @mouseItems = [@gutter @mapscr @scroll @complete]
             
         mode.autoStartForEditor @
         
@@ -74,17 +76,6 @@ use                ◆ state draw complete mode susan
         @complete?.onEditorLayout()
         
         @state.initView()
-                
-    onMouse: event =>
-        
-        super event
-        
-        ret = @gutter?.onMouse(event)   ; ⮐ ret if ret?.redraw
-        ret = @mapscr?.onMouse(event)   ; ⮐ ret if ret?.redraw
-        ret = @scroll?.onMouse(event)   ; ⮐ ret if ret?.redraw
-        ret = @complete?.onMouse(event) ; ⮐ ret if ret?.redraw
-                        
-        false
                 
     onWheel: event =>
         

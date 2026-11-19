@@ -35,9 +35,10 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         @paletteView = new palette @screen "#{@name}_palette"
 
-        @sliders   = [@hue @sat @val]
-        @inputs    = [@red @green @blue]
-        @focusRing = [@radio @hue @sat @val @red @green @blue]
+        @sliders    = [@hue @sat @val]
+        @inputs     = [@red @green @blue]
+        @focusRing  = [@radio @hue @sat @val @red @green @blue]
+        @mouseItems = [@radio @paletteView].concat(@sliders).concat(@inputs)
 
         @red.textColor   = theme.colorpicker.red
         @green.textColor = theme.colorpicker.green
@@ -409,22 +410,6 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         post.emit 'colorpicker.hide'
         @hide()
-
-    onMouse: event =>
-
-        ⮐ if @hidden() or @collapsed()
-
-        ret = @radio.onMouse event     ; ⮐ ret if ret?.redraw
-
-        ret = @paletteView.onMouse event ; ⮐ ret if ret?.redraw
-
-        for slider in @sliders
-            ret = slider.onMouse event ; ⮐ ret if ret?.redraw
-
-        for input in @inputs
-            ret = input.onMouse event  ; ⮐ ret if ret?.redraw
-
-        super event
 
     onWheel: event =>
 

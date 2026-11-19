@@ -35,12 +35,6 @@ use ../../edit   ◆ editor
         @emit 'action' 'cancel'
         super event
         
-    onMouse: event =>
-    
-        ⮐ if @hidden()
-        
-        super event
-
     current:  => kseg.str @state.s.lines[0]
 
     set: text ->

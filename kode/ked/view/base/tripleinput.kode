@@ -11,10 +11,13 @@ use              ◆ input view
         @focusable = true
         
         @inputs = []
+        
         for field in @fields
             inp = new input @screen "#{@name}_#{field}" @opt
             inp.drawUnfocusedCursors = false
             @inputs.push inp
+            
+        @mouseItems = @items
 
     onWheel: event =>
 
