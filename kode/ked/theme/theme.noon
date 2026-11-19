@@ -45,7 +45,7 @@ funtree
     test3                                   #44f   
 
 sheetree
-    bg                                      #0a0a8a
+    bg                                      #161616
 
 colorpicker
     bg                                      #161616
@@ -126,10 +126,6 @@ novim
     cursor
         multi                               #44a   
         main                                #88f   
-
-vinder
-    bg                                      #1a1a1a
-    frame                                   #44a   
 
 quicky
     bg                                      #111   

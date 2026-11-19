@@ -20,7 +20,8 @@ use ../menu         ◆ filterchoice
     onFileLoaded: path => 
         
         if @editor.sheet?.rectree
-            @set layout.titlify(@editor.sheet.rectree) 'title'
+            tree = layout.regionize @editor.cells @editor.sheet.rectree
+            @set layout.titlify(tree) 'title'
 
     onSessionMerge: recent =>
     
@@ -42,6 +43,10 @@ use ../menu         ◆ filterchoice
         for item,idx in @items
             if false # check if item is topmost rect at pos
                 ⮐ item
+                
+    jumpTo: choice => 
+        
+        log 'JUMP' choice
                 
     emitAction: action choice event  ->
     
@@ -85,6 +90,13 @@ use ../menu         ◆ filterchoice
             
                 @jumpTo choice
                 ⮐ 
+                
+            'hover'
+                
+                log 'HOVER' choice
+                post.emit 'cells.rect' choice
+                
+            # ➜ log 'unhandles action?' action
                  
         super action choice event
         

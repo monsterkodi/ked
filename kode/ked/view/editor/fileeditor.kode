@@ -44,6 +44,11 @@ use                 ◆ mapscr
         post.on 'config.loaded'    @onConfigLoaded        
         post.on 'funtree.loaded'   @onFuntreeLoaded
         post.on 'screen.erased'    @onScreenErased
+        post.on 'cells.rect'       @onCellsRect
+        
+    onCellsRect: rect =>
+    
+        log 'fileeditor.onCellsRect' rect
         
     onScreenErased: rect =>
         

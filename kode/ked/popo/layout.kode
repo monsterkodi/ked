@@ -81,8 +81,6 @@ use ../edit/tool ◆ sue
 
         @addRegions(root (@blockersIn(root)) [])
         
-        # log @dumpRegions(root)
-
         root
 
     @blockersIn: node ->
@@ -168,15 +166,18 @@ use ../edit/tool ◆ sue
 
         lines.join '\n'
 
-    @titlify: rectree items=[] -> # generate items for display in sheetree 
+    @titlify: rectree items=[] depth=0 -> # generate items for display in sheetree 
         
-        if 
-            rectree.erase ➜ items.push 'erase'
-            rectree.text  ➜ items.push 'text'
-                          ➜ items.push '???'
-            
+        for type in ['erase''text''pattern''bg''fg']
+            if rectree[type]? 
+                item = title:lpad(depth+2)+type x:rectree.x y:rectree.y w:rectree.w h:rectree.h
+                break
+                
+        if item ➜ items.push item
+                ➜ log '???' rectree    
+        
         for child in rectree.children
-            @titlify child items
+            @titlify child items depth+2
             
         items
 
