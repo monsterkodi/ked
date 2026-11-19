@@ -23,6 +23,8 @@ tripleinput = (function ()
         var field, inp
 
         this["onKey"] = this["onKey"].bind(this)
+        this["grabFocus"] = this["grabFocus"].bind(this)
+        this["hasFocus"] = this["hasFocus"].bind(this)
         this["onWheel"] = this["onWheel"].bind(this)
         tripleinput.__super__.constructor.call(this,this.screen,this.name)
         this.focusable = true
@@ -39,6 +41,8 @@ tripleinput = (function ()
 
     tripleinput.prototype["onWheel"] = function (event)
     {
+        var input
+
         if (this.hidden() || this.collapsed())
         {
             return
@@ -47,7 +51,15 @@ tripleinput = (function ()
         {
             return
         }
-        return {redraw:true}
+        var list = _k_.list(this.inputs)
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            input = list[_a_]
+            if (input.hasFocus())
+            {
+                return input.onWheel(event)
+            }
+        }
     }
 
     tripleinput.prototype["layout"] = function (x, y, w, h)
@@ -71,7 +83,6 @@ tripleinput = (function ()
     {
         var input
 
-        console.log(`${this.hidden()} ${this.collapsed()}`)
         if (this.hidden() || this.collapsed())
         {
             return
@@ -83,6 +94,27 @@ tripleinput = (function ()
             input = list[_a_]
             input.draw()
         }
+    }
+
+    tripleinput.prototype["hasFocus"] = function ()
+    {
+        var input
+
+        var list = _k_.list(this.inputs)
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            input = list[_a_]
+            if (input.hasFocus())
+            {
+                return true
+            }
+        }
+        return false
+    }
+
+    tripleinput.prototype["grabFocus"] = function ()
+    {
+        return this.inputs[0].grabFocus()
     }
 
     tripleinput.prototype["onKey"] = function (key, event)
@@ -114,5 +146,5 @@ tripleinput = (function ()
 
 export default tripleinput;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHJpcGxlaW5wdXQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS90cmlwbGVpbnB1dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsVUFBQTtJQUFNOztPQUNBLFlBQVQ7O09BQ1MsWUFBQTtPQUFNLFdBQUE7OztBQUV4QixlQUFEOzs0QkFBYTthQUNULGFBQUksUUFBUSxNQUFNOztRQUFmO1FBQVE7UUFBTTs7Ozs7O29EQUVQLEtBQUMsT0FBTyxLQUFDO1FBRWYsS0FBQyxZQUFZO1FBRWIsS0FBQzs0QkFDWSxLQUFDOzs7WUFBVjtZQUNBLFVBQVUsTUFBTSxLQUFDLFVBQVUsS0FBQyxRQUFRO1lBQ3BDLElBQUksdUJBQXVCO1lBQzNCLEtBQUMsT0FBTyxLQUFLOzs7OzJCQWVyQixzQkFBUzs7WUFFQSxLQUFDLFlBQVksS0FBQzs7OzthQUNWLEtBQUMsTUFBTSxjQUFjOzs7O2dCQWdCOUIsT0FBTzs7OzJCQUVYLHFCQUFRLEdBQUUsR0FBRSxHQUFFOzs7O1FBRVYsY0FBUyxJQUFJO1FBQ2IsYUFBUyxLQUFHLEVBQUU7UUFDZCxLQUFLOzRCQUNRLEtBQUM7OztZQUFWO1lBQ0EsTUFBTSxPQUFPLElBQUUsR0FBRyxFQUFFLEdBQUc7WUFDdkIsTUFBTTs7c0RBRUosRUFBRSxFQUFFLEVBQUU7OzsyQkFFaEI7Ozs7UUFFSSxlQUFPLEtBQUMsWUFBWSxLQUFDO1lBQ2hCLEtBQUMsWUFBWSxLQUFDOzs7Ozs0QkFJTixLQUFDOzs7WUFBVjtZQUNBLE1BQU07Ozs7MkJBRWQsb0JBQU8sS0FBSTs7OzthQUVRLEtBQUM7O21CQUFkOztZQUNTLEtBQUMsWUFBWSxLQUFDOzttQkFBdkI7OzRCQUVXLEtBQUM7OztZQUFWO2dCQUNHLE1BQU07O3VCQUFlLE1BQU0sTUFBTSxJQUFJOzs7ZUFFNUM7OztXQTVFUDs7O2VBOEVNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHJpcGxlaW5wdXQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS90cmlwbGVpbnB1dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsVUFBQTtJQUFNOztPQUNBLFlBQVQ7O09BQ1MsWUFBQTtPQUFNLFdBQUE7OztBQUV4QixlQUFEOzs0QkFBYTthQUNULGFBQUksUUFBUSxNQUFNOztRQUFmO1FBQVE7UUFBTTs7Ozs7Ozs7b0RBRVAsS0FBQyxPQUFPLEtBQUM7UUFFZixLQUFDLFlBQVk7UUFFYixLQUFDOzRCQUNZLEtBQUM7OztZQUFWO1lBQ0EsVUFBVSxNQUFNLEtBQUMsVUFBVSxLQUFDLFFBQVE7WUFDcEMsSUFBSSx1QkFBdUI7WUFDM0IsS0FBQyxPQUFPLEtBQUs7Ozs7MkJBZXJCLHNCQUFTOzs7O1lBRUEsS0FBQyxZQUFZLEtBQUM7Ozs7YUFDVixLQUFDLE1BQU0sY0FBYzs7Ozs0QkFFakIsS0FBQzs7O1lBQVY7Z0JBQ0csTUFBTTs7dUJBQWUsTUFBTSxRQUFROzs7OzsyQkFrQjlDLHFCQUFRLEdBQUUsR0FBRSxHQUFFOzs7O1FBRVYsY0FBUyxJQUFJO1FBQ2IsYUFBUyxLQUFHLEVBQUU7UUFDZCxLQUFLOzRCQUNRLEtBQUM7OztZQUFWO1lBQ0EsTUFBTSxPQUFPLElBQUUsR0FBRyxFQUFFLEdBQUc7WUFDdkIsTUFBTTs7c0RBRUosRUFBRSxFQUFFLEVBQUU7OzsyQkFFaEI7Ozs7WUFFUyxLQUFDLFlBQVksS0FBQzs7Ozs7NEJBSU4sS0FBQzs7O1lBQVY7WUFDQSxNQUFNOzs7OzJCQUVkOzs7OzRCQUVpQixLQUFDOzs7WUFBVjtnQkFDRyxNQUFNOzt1QkFBZTs7O2VBQzVCOzs7MkJBRUo7O2VBQWMsS0FBQyxPQUFPLEdBQUc7OzsyQkFFekIsb0JBQU8sS0FBSTs7OzthQUVRLEtBQUM7O21CQUFkOztZQUNTLEtBQUMsWUFBWSxLQUFDOzttQkFBdkI7OzRCQUVXLEtBQUM7OztZQUFWO2dCQUNHLE1BQU07O3VCQUFlLE1BQU0sTUFBTSxJQUFJOzs7ZUFFNUM7OztXQXRGUDs7O2VBd0ZNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/base/tripleinput.kode

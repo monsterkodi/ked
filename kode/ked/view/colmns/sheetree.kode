@@ -19,7 +19,7 @@ use ../menu         ◆ filterchoice
     onEditorResize: =>
         
         ⮐ if @hidden() or @collapsed()
-        # log "RESIZE #{@visible()} #{@collapsed()}"
+
         row = @currentIndex()
         @reloadTree() 
         @select row
@@ -35,7 +35,6 @@ use ../menu         ◆ filterchoice
         
     grabFocus: =>
     
-        log "FOGGUS #{@hidden()} #{@collapsed()} #{@cells.rows} #{@cells.cols}"
         ⮐ if @hidden() or @collapsed()
         super()
         

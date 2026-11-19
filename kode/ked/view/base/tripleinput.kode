@@ -33,6 +33,9 @@ use              ◆ input view
 
         ⮐ if @hidden() or @collapsed()
         ⮐ if not @cells.isInsideEvent event
+        
+        for input in @inputs
+            if input.hasFocus() ➜ ⮐ input.onWheel event
 
 #         dir = switch event.dir
 #             'up'    ➜  1
@@ -48,7 +51,7 @@ use              ◆ input view
 #         
 #         @state.moveCursors (dir > 0 ? 'eol' : 'bol')
 
-        redraw:true
+        # redraw:true
         
     layout: x y w h ->
         
@@ -63,13 +66,20 @@ use              ◆ input view
 
     draw: ->
         
-        log "#{@hidden()} #{@collapsed()}"
         ⮐ if @hidden() or @collapsed()
 
         super()
         
         for input in @inputs
             input.draw()
+
+    hasFocus: => 
+        
+        for input in @inputs
+            if input.hasFocus() ➜ ⮐ true
+        false
+    
+    grabFocus: => @inputs[0].grabFocus()
 
     onKey: key event =>
 

@@ -18,14 +18,37 @@ use ../base      ◆ view input tripleinput
         @xwrInput = new tripleinput @screen "#{@name}_xwr"  ['x' 'w' 'r']
         @yhbInput = new tripleinput @screen "#{@name}_yhb"  ['y' 'h' 'b']
         
+        @items = [@input @xwrInput @yhbInput]
+        @focusRing = [@input].concat(@xwrInput.inputs).concat(@yhbInput.inputs)
+        
         @input.drawUnfocusedCursors = false
 
         @input.on 'action' @onInputAction
 
         @isVisible = false
         
-    hasFocus: => @input.hasFocus()
+    hasFocus: => 
+        
+        for item in @focusRing
+            if item.hasFocus() ➜ ⮐ true
+        false
+    
     grabFocus: => @focusInput()
+    
+    focusDelta: delta =>
+    
+        for item,index in @focusRing
+            if item.hasFocus()
+                num = @focusRing.length
+                if 0 <= index+delta < num
+                    if @focusRing[index+delta].focusable
+                        @focusRing[index+delta].grabFocus()
+                        ⮐ true
+                ⮐ false
+        false
+            
+    focusNext: => @focusDelta 1
+    focusPrev: => @focusDelta -1
 
     focusInput: =>
 
@@ -54,18 +77,19 @@ use ../base      ◆ view input tripleinput
 
         super x y w h
         
-        @input.layout     x+1 y+1 w-2 1
-        @xwrInput.layout  x+1 y+3 w-2 1
-        @yhbInput.layout  x+1 y+5 w-2 1
+        o = 1
+        for item in @items
+            item.layout x+1 y+o w-2 1
+            o += 2
 
     draw: =>
 
         ⮐ if @hidden() or @collapsed()
 
         @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
-        @input.draw()
-        @xwrInput.draw()
-        @yhbInput.draw()
+        
+        for item in @items
+            item.draw()
 
         super()
 
@@ -74,18 +98,22 @@ use ../base      ◆ view input tripleinput
     onMouse: event =>
 
         ⮐ if @hidden()
-        ret = @input.onMouse    event   ; ⮐ ret if ret?.redraw
-        ret = @xwrInput.onMouse event   ; ⮐ ret if ret?.redraw
-        ret = @yhbInput.onMouse event   ; ⮐ ret if ret?.redraw
+        
+        for item in @items
+            ret = item.onMouse event ; ⮐ ret if ret?.redraw
+            
         super event
 
     onKey: key event =>
-        # log "onKey #{key}"
-        ⮐ false if @hidden()
 
-        if @input.hasFocus()    ➜ ⮐ @input.onKey    key event
-        if @xwrInput.hasFocus() ➜ ⮐ @xwrInput.onKey key event
-        if @yhbInput.hasFocus() ➜ ⮐ @yhbInput.onKey key event
+        ⮐ false if @hidden()
+        
+        switch event.combo
+            'down''tab'      ➜ ⮐ @focusNext() 
+            'up''shift+tab'  ➜ ⮐ @focusPrev()
+
+        for item in @
+            if item.hasFocus() ➜ ⮐ item.onKey key event
 
         false
 
