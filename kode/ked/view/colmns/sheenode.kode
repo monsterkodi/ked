@@ -10,31 +10,33 @@ use ../base      ◆ view input tripleinput
 
         super @editor.screen @name
 
-        @height = 8
+        @height = 7
 
         @setColor 'bg' theme.uniko.bg
 
-        @input    = new input       @screen "#{@name}_input"
-        @xwrInput = new tripleinput @screen "#{@name}_xwr"  ['x' 'w' 'r']
-        @yhbInput = new tripleinput @screen "#{@name}_yhb"  ['y' 'h' 'b']
+        @typeArg  = new tripleinput @screen "#{@name}_typearg"  ['type' 'arg']
+        @xwrInput = new tripleinput @screen "#{@name}_xwr"  ['x' 'w' 'r'] maxsize:5 number:true
+        @yhbInput = new tripleinput @screen "#{@name}_yhb"  ['y' 'h' 'b'] maxsize:5 number:true
         
-        @items = [@input @xwrInput @yhbInput]
-        @focusRing = [@input].concat(@xwrInput.inputs).concat(@yhbInput.inputs)
+        @items = [@typeArg @xwrInput @yhbInput]
+        @focusRing = @typeArg.inputs.concat(@xwrInput.inputs).concat(@yhbInput.inputs)
         
-        @input.drawUnfocusedCursors = false
-
-        @input.on 'action' @onInputAction
-
         @isVisible = false
         
-    grabFocus: =>
-        
-        @input.grabFocus()
-        true
+    onNode: node =>
     
-    show: =>
+        @typeArg.inputs[0].set String(node.type ? '')
+        @typeArg.inputs[1].set String(node.arg ? '')
 
-        @input.set ''
+        @xwrInput.inputs[0].set String(node.x ? '')
+        @xwrInput.inputs[1].set String(node.w ? '')
+        @xwrInput.inputs[2].set String(node.r ? '')
+
+        @yhbInput.inputs[0].set String(node.y ? '')
+        @yhbInput.inputs[1].set String(node.h ? '')
+        @yhbInput.inputs[2].set String(node.b ? '')
+        
+    show: =>
 
         super()
 
@@ -46,19 +48,14 @@ use ../base      ◆ view input tripleinput
 
         super()
 
-        @input.state.deselect()
-
         post.emit 'redraw'
 
     layout: x y w h =>
 
         super x y w h
         
-        o = 1
-        for item in @items
-            item.layout x+1 y+o w-2 1
-            o += 2
-
+        @layout_vbox x y w h @items
+        
     draw: =>
 
         ⮐ if @hidden() or @collapsed()
@@ -69,8 +66,6 @@ use ../base      ◆ view input tripleinput
             item.draw()
 
         super()
-
-    onInputAction: action text =>
 
     onMouse: event =>
 

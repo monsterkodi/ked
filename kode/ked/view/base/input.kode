@@ -4,12 +4,19 @@ use ../../theme  ◆ theme
 use ../../edit   ◆ editor
 ■input□editor
 ###
-    simple text input field
-    used in inputchoice to filter choices
+    simple text and number input field
+    used in 
+        - inputchoice to filter choices
+        - colorpicker
+        - sheenode
+        - uniko
 ###
-    @: screen name ->
+    @: @screen @name @opt={} ->
         
-        super screen name ['brckts' 'replex' 'unype']
+        super @screen @name ['brckts' 'replex' 'unype']
+        
+        if @opt.number
+            @value = @opt.value ? 0
         
         @drawUnfocusedCursors = true
         
@@ -44,6 +51,48 @@ use ../../edit   ◆ editor
     
         @state.selectLine 0
         @state.moveCursors 'eol'
+        
+    changeValue: v =>
+        
+        ⮐ if not @opt.number
+        
+        v = clamp 0 255 int(v)
+        if v != @value
+            @setValue v
+            @emit 'valueChange' @value
+            
+    getValue: -> @value
+    
+    setValue: v =>
+        
+        ⮐ if not @opt.number
+
+        @value = clamp 0 255 int(v)
+        if "#{@value}" != @current()
+            @set "#{@value}"
+            @state.moveCursors 'eol'
+
+    onWheel: event =>
+        
+        ⮐ if not @opt.number
+        ⮐ if @hidden() or @collapsed()
+        ⮐ if not @cells.isInsideEvent event
+        
+        dir = switch event.dir
+            'up'    ➜  1
+            'right' ➜  1
+            'down'  ➜ -1
+            'left'  ➜ -1
+                    ➜ ⮐ 
+
+        step = 1
+        step = 10 if event.shift
+
+        @changeValue @value + dir*step
+        
+        @state.moveCursors (dir > 0 ? 'eol' : 'bol')
+
+        redraw:true
 
     onKey: key event ->
         

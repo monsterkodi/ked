@@ -6,9 +6,9 @@ use              ◆ input
 ■rgbinput□input
     # a three digit rgb input for the colorpicker
     
-    @: screen name ->
+    @: @screen @name ->
 
-        super screen name
+        super @screen @name number:true
         
         @drawUnfocusedCursors = false
 
@@ -25,43 +25,6 @@ use              ◆ input
 
         @pointerType    = 'text'
 
-    getValue: -> @value
-
-    onWheel: event =>
-
-        ⮐ if @hidden() or @collapsed()
-        ⮐ if not @cells.isInsideEvent event
-
-        dir = switch event.dir
-            'up'    ➜  1
-            'right' ➜  1
-            'down'  ➜ -1
-            'left'  ➜ -1
-                    ➜ ⮐ 
-
-        step = 1
-        step = 10 if event.shift
-
-        @changeValue @value + dir*step
-        
-        @state.moveCursors (dir > 0 ? 'eol' : 'bol')
-
-        redraw:true
-
-    changeValue: v =>
-        
-        v = clamp 0 255 int(v)
-        if v != @value
-            @setValue v
-            @emit 'valueChange' @value
-
-    setValue: v =>
-
-        @value = clamp 0 255 int(v)
-        if "#{@value}" != @current()
-            @set "#{@value}"
-            @state.moveCursors 'eol'
-
     draw: ->
 
         super()
@@ -70,11 +33,6 @@ use              ◆ input
 
         for ch, x in @current()
             @cells.set_fg x 0 @textColor
-
-#     drawCursors: =>
-# 
-#         ⮐ if not @hasFocus()
-#         super()
 
     onKey: key event =>
 

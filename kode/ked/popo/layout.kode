@@ -166,24 +166,30 @@ use ../edit/tool ◆ sue
 
         lines.join '\n'
 
-    @titlify: rectree items=[] depth=0 -> # generate items for display in sheetree 
+    @titlify: cells rectree items=[] depth=0 -> # generate items for display in sheetree 
+        
+        abstree = @absolutize cells rectree
         
         for type in ['erase''text''pattern''bg''fg']
             if rectree[type]? 
-                item = title:lpad(depth+2)+type x:rectree.x y:rectree.y w:rectree.w h:rectree.h
+                rect = x:abstree.x y:abstree.y w:abstree.w h:abstree.h
+                item = title:lpad(depth+2)+type rect:rect type:type arg:rectree[type] 
+                for key in ['x''y''w''h''r''b']
+                    if rectree[key]?
+                        item[key] = rectree[key]
                 break
                 
         if item ➜ items.push item
                 ➜ log '???' rectree    
         
         for child in rectree.children
-            @titlify child items depth+2
+            @titlify cells child items depth+2
             
         items
 
     @sueify: cells rectree ->
 
-        root = @regionize(cells rectree)
+        root = @regionize cells rectree
 
         ⮐ '' if not root?
 

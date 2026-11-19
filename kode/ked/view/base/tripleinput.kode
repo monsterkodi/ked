@@ -4,7 +4,7 @@ use ../../theme  ◆ theme
 use              ◆ input view
 
 ■tripleinput□view
-    @: @screen @name @fields ->
+    @: @screen @name @fields @opt={} ->
 
         super @screen @name
         
@@ -12,22 +12,9 @@ use              ◆ input view
         
         @inputs = []
         for field in @fields
-            inp = new input @screen "#{@name}_#{field}"
+            inp = new input @screen "#{@name}_#{field}" @opt
             inp.drawUnfocusedCursors = false
             @inputs.push inp
-
-#         @setColor 'bg'       theme.colorpicker.bg
-#         @setColor 'bg_blur'  theme.colorpicker.bg
-#         @setColor 'bg_focus' theme.selection.line
-#         @setColor 'empty'    theme.colorpicker.bg
-# 
-#         @textColor = theme.colorpicker.fg
-#         @value     = 0
-#         @set '0'
-# 
-#         @state.skipAdjustViewForMainCursor = true
-
-        # @pointerType    = 'text'
 
     onWheel: event =>
 
@@ -36,32 +23,11 @@ use              ◆ input view
         
         for input in @inputs
             if input.hasFocus() ➜ ⮐ input.onWheel event
-
-#         dir = switch event.dir
-#             'up'    ➜  1
-#             'right' ➜  1
-#             'down'  ➜ -1
-#             'left'  ➜ -1
-#                     ➜ ⮐ 
-# 
-#         step = 1
-#         step = 10 if event.shift
-# 
-#         @changeValue @value + dir*step
-#         
-#         @state.moveCursors (dir > 0 ? 'eol' : 'bol')
-
-        # redraw:true
         
     layout: x y w h ->
         
-        xs = int w / 3
-        wi = min xs-1 5
-        xi = 0
-        for input in @inputs
-            input.layout x+xi y wi 1
-            xi += xs
-    
+        @layout_hbox x y w h @inputs @opt
+        
         super x y w h
 
     draw: ->

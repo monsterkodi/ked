@@ -14,6 +14,8 @@ use              ◆ sheetree sheenode
         @sheetree = new sheetree @editor "#{@name}_sheetree" ['scrllr']
         @sheenode = new sheenode @editor "#{@name}_sheenode" 
         
+        @sheetree.on 'tree.node' @sheenode.onNode
+        
         post.on 'file.loaded' @onFileLoaded
         
     onFileLoaded: path =>

@@ -31,7 +31,9 @@ use ../menu         ◆ filterchoice
     select: row -> 
 
         super row
-        post.emit 'cells.rect' @current()
+        # log "SELECT #{row}" @current()
+        post.emit 'cells.rect' @current().rect
+        @emit 'tree.node' @current() 
         
     grabFocus: =>
     
@@ -41,8 +43,9 @@ use ../menu         ◆ filterchoice
     reloadTree: => 
         
         if @editor.sheet?.rectree
-            tree = layout.regionize @editor.cells @editor.sheet.rectree
-            @set layout.titlify(tree) 'title'
+            items = layout.titlify @editor.cells @editor.sheet.rectree
+            # log "ITEMS" items
+            @set items 'title'
         else
             post.emit 'cells.rect'
         

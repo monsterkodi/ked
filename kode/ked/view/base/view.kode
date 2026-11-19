@@ -126,11 +126,15 @@ use ../screen    ◆ cells
     focusPrev: => @focusDelta -1
     
     grabFocus: =>
-        # log "view.grabFocus #{@name}"
+        
+        ⮐ false if @hidden()
+        
+        if valid @focusRing
+            ⮐ @focusRing[0].grabFocus()            
+
         post.emit 'focus' @name
         post.emit 'redraw'
         
-    # onKey: key event => log "view.onKey #{@name}"
     onKey: key event =>
 
         ⮐ false if @hidden()
@@ -147,6 +151,32 @@ use ../screen    ◆ cells
         false
         
     layout: x y w h -> @cells.layout x y w h 
+    
+    layout_vbox: x y w h items opt={} ->
+
+        padding = opt.padding ? 1
+        spacing = opt.spacing ? 1
+        height  = opt.height  ? 1
+    
+        o = padding
+        for item in items
+            item.layout x y+o w height
+            o += height
+            o += spacing
+    
+    layout_hbox: x y w h items opt={} ->
+        
+        padding = opt.padding ? 1
+        spacing = opt.spacing ? 1
+        maxsize = opt.maxsize ? Infinity
+        as  = w - 2*padding - (items.length-1)*spacing
+        xs  = int as / items.length
+        wi  = min xs maxsize
+        gap = int (as - items.length*wi) / (items.length-1)
+        xi = padding
+        for item in items
+            item.layout x+xi y wi 1
+            xi += wi + spacing + gap
     
     erase: => @cells.erase_scaled 0 0 -1 -1
     
