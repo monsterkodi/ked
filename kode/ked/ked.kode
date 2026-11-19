@@ -13,6 +13,7 @@ use ./view/editor ◆ fileeditor
 use ./view/screen ◆ screen ttio
 use ./view/menu   ◆ context menu macro finder searcher replacer clippo differ
 use ./view/colmns ◆ browse dircol funcol quicky droop saveas
+use ./popo       ◆ layout
 use child_process ▪ spawn exec
 
 ■KED
@@ -226,6 +227,37 @@ use child_process ▪ spawn exec
                 @hideEditor()
                 @menu.show true
                 
+    #  a sheet is shown, not edited: the file holds the rectree as json and
+    #  the editor shows what layout makes of it. sizing happens here because
+    #  the editor cells are only known after arrange, and a sheet has to be
+    #  resolved against them, on load and on every resize.
+
+    rectreeOf: text ->
+        try
+            ⮐ JSON.parse text
+        catch err
+            error err
+            error "ked - sheet has no readable rectree" @currentFile
+            null
+
+    sheetCheck: =>
+
+        ⮐ if not @sheet?
+
+        cols = @editor.cells.cols
+        rows = @editor.cells.rows
+
+        ⮐ if cols < 1 or rows < 1
+        ⮐ if @sheet.cols == cols and @sheet.rows == rows
+
+        @sheet.cols = cols
+        @sheet.rows = rows
+
+        data = sue.desue(layout.sueify({cols:cols rows:rows} @sheet.rectree))
+
+        @editor.state.loadLines data.text.split('\n')
+        @editor.state.loadSue data.sue
+
     arrange: =>
         
         w = @t.cols()
@@ -462,6 +494,17 @@ use child_process ▪ spawn exec
         if text == undefined
             text = '◯ binary ◯'
 
+        # convert text to sueified text for .sheet files
+        
+        @sheet = null
+
+        if slash.ext(@currentFile) == 'sheet'
+            log "TEXT" text
+            rectree = @rectreeOf text
+            if valid rectree
+                @sheet = {rectree:rectree source:text}
+                text = layout.sueify({cols:@editor.cells.cols rows:@editor.cells.rows} rectree)
+
         sueData = sue.desue text
         text    = sueData.text
 
@@ -601,6 +644,9 @@ use child_process ▪ spawn exec
         true
     
     textForSave: (path text) =>
+
+        #  a sheet is shown, not edited: give back what was loaded
+        ⮐ @sheet.source if @sheet? and path == @currentFile
 
         areas = @editor.state.s.sue ? []
         areas = areas.concat(sue.areasForColors(@editor.state.s.colors))
@@ -863,6 +909,7 @@ use child_process ▪ spawn exec
         
         @arrange()
         
+        @sheetCheck()
         editorDrawn = @menu.greet.hidden() and not @differ.visible() and not @editor.hidden()
         
         # ●▸ draw

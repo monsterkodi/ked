@@ -1,4 +1,5 @@
 use ◆ fill
+use ../edit/tool ◆ sue
 
 ■layout
 
@@ -198,31 +199,99 @@ use ◆ fill
 
     @dumpRegions: rectree ->
 
-        ⮐ '' if not rectree?
+        grid = @gridOf rectree
 
-        grid = []
-        for y in 0...rectree.h
-            row = []
-            for x in 0...rectree.w
-                row.push ' '
-            grid.push row
-
-        @dumpNode rectree grid
+        ⮐ '' if not grid?
 
         lines = []
         for row in grid
-            lines.push(row.join(''))
+            chars = []
+            for cell in row
+                chars.push cell.char
+            lines.push(chars.join(''))
 
         lines.join '\n'
 
-    @dumpNode: node grid ->
+    #  the same picture, but as a text the editor can show: the characters
+    #  are the text, the colours are hidden in sue payloads that susan turns
+    #  back into fg and bg cells. size the cells to the editor you want to
+    #  show it in, the rectree is resolved against them.
+
+    @sueify: cells rectree ->
+
+        root = @regionize(cells rectree)
+
+        ⮐ '' if not root?
+
+        grid  = @gridOf root
+        lines = []
+        areas = []
+
+        for y in 0...grid.length
+
+            row   = grid[y]
+            chars = []
+
+            for cell in row
+                chars.push cell.char
+
+            lines.push(chars.join(''))
+            for area in @colourAreasOf(row y)
+                areas.push area
+
+        sue.ensue(lines.join('\n') areas)
+
+    #  one area per run of equal colour in a row, so a plain background is
+    #  a handful of payloads instead of one per cell
+
+    @colourAreasOf: row y ->
+
+        areas = []
+
+        for [code channel] in [[sue.FG_COLOR 'fg'] [sue.BG_COLOR 'bg']]
+
+            x = 0
+
+            while x < row.length
+
+                value = row[x][channel]
+                width = 1
+
+                while x+width < row.length and row[x+width][channel] == value
+                    width += 1
+
+                areas.push {x:x y:y value:[code width 1 value]} if valid value
+
+                x += width
+
+        areas
+
+    #  a grid of cells { char fg bg } the size of the rectree, painted
+
+    @gridOf: rectree ->
+
+        ⮐ null if not rectree?
+
+        grid = []
+
+        for y in 0...rectree.h
+            row = []
+            for x in 0...rectree.w
+                row.push {char:' ' fg:null bg:null}
+            grid.push row
+
+        @paintTree rectree grid
+
+        grid
+
+    @paintTree: node grid ->
 
         ⮐ if not node?
 
         @paintNode(node grid) if not node.erase?
 
         for child in node.children ? []
-            @dumpNode child grid
+            @paintTree child grid
 
     @paintNode: node grid ->
 
@@ -235,28 +304,33 @@ use ◆ fill
         else if valid node.text
             strings = fill.text(node node.regions)
 
-        ⮐ if not valid strings
-
-        masked = @charMaskOf node
+        masked = @channelMaskOf node
 
         for i in 0...node.regions.length
 
-            rng = node.regions[i]
-            cells = Array.from(strings[i] ? '')
+            rng   = node.regions[i]
+            width = rng[2] - rng[0]
+            chars = Array.from(strings?[i] ? '')
 
-            for j in 0...cells.length
+            for j in 0...width
 
                 x = rng[0] + j
                 y = rng[1]
 
-                continue if masked["#{x},#{y}"]
                 continue if x < 0 or y < 0 or y >= grid.length or x >= grid[y].length
 
-                grid[y][x] = cells[j]
+                cell = grid[y][x]
+                gone = masked["#{x},#{y}"] ? {}
 
-    #  the cells a node's eraser children keep it from writing characters in
+                if valid strings and not gone.char
+                    cell.char = chars[j] ? ' '
 
-    @charMaskOf: node ->
+                cell.fg = node.fg if valid node.fg and not gone.fg
+                cell.bg = node.bg if valid node.bg and not gone.bg
+
+    #  the channels a node's eraser children keep it from writing
+
+    @channelMaskOf: node ->
 
         masked = {}
 
@@ -267,13 +341,19 @@ use ◆ fill
             channels = child.erase
             channels = [channels] if channels is str
 
-            continue if 'char' not in channels
-
             for rng in child.regions ? []
                 for x in rng[0]...rng[2]
-                    masked["#{x},#{rng[1]}"] = true
+
+                    key   = "#{x},#{rng[1]}"
+                    entry = masked[key]
+
+                    if not entry?
+                        entry = {}
+                        masked[key] = entry
+
+                    for channel in channels
+                        entry[channel] = true
 
         masked
-
 
 export layout

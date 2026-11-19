@@ -1,0 +1,9 @@
+{ "bg":"#00f", "children": [
+        { "pattern":"0123456789", "type":"repeat", "fg":"#ff0", "x":0, "y":0, "children":[{ "erase":"char", "x":2, "y":2, "r":2, "b":2 }] },
+        { "text":"heading", "x":4, "y":3, "r":2, "h":1, "scale":3, "flows":false },
+        { "text":"longer text that flows and flows and flows and flows into the sea.", "x":4, "y":6, "r":4, "h":5 },
+        { "text":"some", "x":"40%", "y":7, "w":12, "h":3, "scale":3, "blocks":true },
+        { "text":"longer text that flows and flows and flows and flows into the sea.", "x":4, "y":13, "r":4, "h":5 },
+        { "text":"some", "x":4, "y":14, "w":12, "h":3, "scale":3, "blocks":true }
+    ] 
+}        

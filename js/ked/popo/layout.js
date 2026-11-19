@@ -4,6 +4,8 @@ var layout
 
 import fill from "./fill.js"
 
+import sue from "../edit/tool/sue.js"
+
 
 layout = (function ()
 {
@@ -20,7 +22,7 @@ layout = (function ()
 
     layout["inBox"] = function (box, node)
     {
-        var child, h, inner, out, w, x, y, _32_17_, _32_29_, _35_17_, _35_29_, _51_24_
+        var child, h, inner, out, w, x, y, _33_17_, _33_29_, _36_17_, _36_29_, _52_24_
 
         if (!(node != null))
         {
@@ -119,14 +121,14 @@ layout = (function ()
 
     layout["blockersIn"] = function (node)
     {
-        var child, entry, found, _125_35_
+        var child, entry, found, _126_35_
 
         found = []
         if (node.blocks && node.w > 0 && node.h > 0)
         {
             found.push(node)
         }
-        var list = ((_125_35_=node.children) != null ? _125_35_ : [])
+        var list = ((_126_35_=node.children) != null ? _126_35_ : [])
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             child = list[_a_]
@@ -142,7 +144,7 @@ layout = (function ()
 
     layout["addRegions"] = function (node, blockers, ancestors)
     {
-        var blocker, child, _141_35_
+        var blocker, child, _142_35_
 
         node.regions = this.intervalsOf(node)
         if (this.flows(node))
@@ -162,7 +164,7 @@ layout = (function ()
                 node.regions = this.cutBy(node.regions,blocker)
             }
         }
-        var list1 = ((_141_35_=node.children) != null ? _141_35_ : [])
+        var list1 = ((_142_35_=node.children) != null ? _142_35_ : [])
         for (var _b_ = 0; _b_ < list1.length; _b_++)
         {
             child = list1[_b_]
@@ -228,11 +230,99 @@ layout = (function ()
 
     layout["dumpRegions"] = function (rectree)
     {
-        var grid, lines, row, x, y
+        var cell, chars, grid, lines, row
+
+        grid = this.gridOf(rectree)
+        if (!(grid != null))
+        {
+            return ''
+        }
+        lines = []
+        var list = _k_.list(grid)
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            row = list[_a_]
+            chars = []
+            var list1 = _k_.list(row)
+            for (var _b_ = 0; _b_ < list1.length; _b_++)
+            {
+                cell = list1[_b_]
+                chars.push(cell.char)
+            }
+            lines.push(chars.join(''))
+        }
+        return lines.join('\n')
+    }
+
+    layout["sueify"] = function (cells, rectree)
+    {
+        var area, areas, cell, chars, grid, lines, root, row, y
+
+        root = this.regionize(cells,rectree)
+        if (!(root != null))
+        {
+            return ''
+        }
+        grid = this.gridOf(root)
+        lines = []
+        areas = []
+        for (var _a_ = y = 0, _b_ = grid.length; (_a_ <= _b_ ? y < grid.length : y > grid.length); (_a_ <= _b_ ? ++y : --y))
+        {
+            row = grid[y]
+            chars = []
+            var list = _k_.list(row)
+            for (var _c_ = 0; _c_ < list.length; _c_++)
+            {
+                cell = list[_c_]
+                chars.push(cell.char)
+            }
+            lines.push(chars.join(''))
+            var list1 = _k_.list(this.colourAreasOf(row,y))
+            for (var _d_ = 0; _d_ < list1.length; _d_++)
+            {
+                area = list1[_d_]
+                areas.push(area)
+            }
+        }
+        return sue.ensue(lines.join('\n'),areas)
+    }
+
+    layout["colourAreasOf"] = function (row, y)
+    {
+        var areas, channel, code, value, width, x
+
+        areas = []
+        var list = [[sue.FG_COLOR,'fg'],[sue.BG_COLOR,'bg']]
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            code = list[_a_][0]
+            channel = list[_a_][1]
+            x = 0
+            while (x < row.length)
+            {
+                value = row[x][channel]
+                width = 1
+                while (x + width < row.length && row[x + width][channel] === value)
+                {
+                    width += 1
+                }
+                if (!_k_.empty(value))
+                {
+                    areas.push({x:x,y:y,value:[code,width,1,value]})
+                }
+                x += width
+            }
+        }
+        return areas
+    }
+
+    layout["gridOf"] = function (rectree)
+    {
+        var grid, row, x, y
 
         if (!(rectree != null))
         {
-            return ''
+            return null
         }
         grid = []
         for (var _a_ = y = 0, _b_ = rectree.h; (_a_ <= _b_ ? y < rectree.h : y > rectree.h); (_a_ <= _b_ ? ++y : --y))
@@ -240,24 +330,17 @@ layout = (function ()
             row = []
             for (var _c_ = x = 0, _d_ = rectree.w; (_c_ <= _d_ ? x < rectree.w : x > rectree.w); (_c_ <= _d_ ? ++x : --x))
             {
-                row.push(' ')
+                row.push({char:' ',fg:null,bg:null})
             }
             grid.push(row)
         }
-        this.dumpNode(rectree,grid)
-        lines = []
-        var list = _k_.list(grid)
-        for (var _e_ = 0; _e_ < list.length; _e_++)
-        {
-            row = list[_e_]
-            lines.push(row.join(''))
-        }
-        return lines.join('\n')
+        this.paintTree(rectree,grid)
+        return grid
     }
 
-    layout["dumpNode"] = function (node, grid)
+    layout["paintTree"] = function (node, grid)
     {
-        var child, _222_47_, _224_35_
+        var child, _291_47_, _293_35_
 
         if (!(node != null))
         {
@@ -267,17 +350,17 @@ layout = (function ()
         {
             this.paintNode(node,grid)
         }
-        var list = ((_224_35_=node.children) != null ? _224_35_ : [])
+        var list = ((_293_35_=node.children) != null ? _293_35_ : [])
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             child = list[_a_]
-            this.dumpNode(child,grid)
+            this.paintTree(child,grid)
         }
     }
 
     layout["paintNode"] = function (node, grid)
     {
-        var cells, i, j, masked, rng, strings, x, y, _229_29_, _245_42_
+        var cell, chars, gone, i, j, masked, rng, strings, width, x, y, _298_29_, _313_43_, _323_43_, _326_41_
 
         if (!(node.regions != null))
         {
@@ -292,38 +375,44 @@ layout = (function ()
         {
             strings = fill.text(node,node.regions)
         }
-        if (!!_k_.empty(strings))
-        {
-            return
-        }
-        masked = this.charMaskOf(node)
+        masked = this.channelMaskOf(node)
         for (var _a_ = i = 0, _b_ = node.regions.length; (_a_ <= _b_ ? i < node.regions.length : i > node.regions.length); (_a_ <= _b_ ? ++i : --i))
         {
             rng = node.regions[i]
-            cells = Array.from(((_245_42_=strings[i]) != null ? _245_42_ : ''))
-            for (var _c_ = j = 0, _d_ = cells.length; (_c_ <= _d_ ? j < cells.length : j > cells.length); (_c_ <= _d_ ? ++j : --j))
+            width = rng[2] - rng[0]
+            chars = Array.from(((_313_43_=(strings != null ? strings[i] : undefined)) != null ? _313_43_ : ''))
+            for (var _c_ = j = 0, _d_ = width; (_c_ <= _d_ ? j < width : j > width); (_c_ <= _d_ ? ++j : --j))
             {
                 x = rng[0] + j
                 y = rng[1]
-                if (masked[`${x},${y}`])
-                {
-                    continue
-                }
                 if (x < 0 || y < 0 || y >= grid.length || x >= grid[y].length)
                 {
                     continue
                 }
-                grid[y][x] = cells[j]
+                cell = grid[y][x]
+                gone = ((_323_43_=masked[`${x},${y}`]) != null ? _323_43_ : {})
+                if (!_k_.empty(strings) && !gone.char)
+                {
+                    cell.char = ((_326_41_=chars[j]) != null ? _326_41_ : ' ')
+                }
+                if (!_k_.empty(node.fg) && !gone.fg)
+                {
+                    cell.fg = node.fg
+                }
+                if (!_k_.empty(node.bg) && !gone.bg)
+                {
+                    cell.bg = node.bg
+                }
             }
         }
     }
 
-    layout["charMaskOf"] = function (node)
+    layout["channelMaskOf"] = function (node)
     {
-        var channels, child, masked, rng, x, _263_35_, _265_39_, _272_37_
+        var channel, channels, child, entry, key, masked, rng, x, _337_35_, _339_39_, _344_37_
 
         masked = {}
-        var list = ((_263_35_=node.children) != null ? _263_35_ : [])
+        var list = ((_337_35_=node.children) != null ? _337_35_ : [])
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             child = list[_a_]
@@ -336,17 +425,25 @@ layout = (function ()
             {
                 channels = [channels]
             }
-            if (!(_k_.in('char',channels)))
-            {
-                continue
-            }
-            var list1 = ((_272_37_=child.regions) != null ? _272_37_ : [])
+            var list1 = ((_344_37_=child.regions) != null ? _344_37_ : [])
             for (var _b_ = 0; _b_ < list1.length; _b_++)
             {
                 rng = list1[_b_]
                 for (var _c_ = x = rng[0], _d_ = rng[2]; (_c_ <= _d_ ? x < rng[2] : x > rng[2]); (_c_ <= _d_ ? ++x : --x))
                 {
-                    masked[`${x},${rng[1]}`] = true
+                    key = `${x},${rng[1]}`
+                    entry = masked[key]
+                    if (!(entry != null))
+                    {
+                        entry = {}
+                        masked[key] = entry
+                    }
+                    var list2 = _k_.list(channels)
+                    for (var _e_ = 0; _e_ < list2.length; _e_++)
+                    {
+                        channel = list2[_e_]
+                        entry[channel] = true
+                    }
                 }
             }
         }
@@ -358,5 +455,5 @@ layout = (function ()
 
 export default layout;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibGF5b3V0LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC9wb3BvL2xheW91dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQU0sV0FBQTs7O0FBRUwsVUFBRDs7Ozs7SUFpQkksUUFBQyx5QkFBWSxPQUFNOzs7O1FBRWYsT0FBTyxFQUFFLEVBQUUsRUFBRSxFQUFFLEVBQUUsTUFBTSxLQUFLLEVBQUUsTUFBTTtlQUVwQyxLQUFDLE1BQU0sSUFBSTs7O0lBSWYsUUFBQyxvQkFBTyxLQUFJOzs7O2NBRU07O21CQUFaOzthQUVDLEtBQUssZUFBTyxLQUFLOztZQUNoQixVQUFVLE1BQU07O2FBRWpCLEtBQUssZUFBTyxLQUFLOztZQUNoQixVQUFVLE1BQU07O1FBRXBCLGNBQVUsRUFBRSxJQUFJLEdBQUcsS0FBQyxPQUFPLElBQUksRUFBRSxLQUFLO1FBQ3RDLGNBQVUsRUFBRSxJQUFJLEdBQUcsS0FBQyxPQUFPLElBQUksRUFBRSxLQUFLO1FBRXRDLGNBQVUsR0FBRyxJQUFJLElBQUUsSUFBSSxLQUFDLE9BQU8sSUFBSSxFQUFFLEVBQUUsS0FBSyxFQUFFLEtBQUs7UUFDbkQsY0FBVSxHQUFHLElBQUksSUFBRSxJQUFJLEtBQUMsT0FBTyxJQUFJLEVBQUUsRUFBRSxLQUFLLEVBQUUsS0FBSztRQUVuRCxNQUFNLEtBQUMsZ0JBQWdCO1FBRXZCLElBQUksSUFBSSxJQUFJLElBQUk7UUFDaEIsSUFBSSxJQUFJLElBQUksSUFBSTtRQUNoQixJQUFJLElBQUk7UUFDUixJQUFJLElBQUk7YUFFTCxLQUFLOztZQUNKLFNBQVMsRUFBRSxJQUFJLEVBQUUsRUFBRSxJQUFJLEVBQUUsRUFBRSxFQUFFLEVBQUU7WUFDL0IsSUFBSTtnQ0FDUyxLQUFLOzs7Z0JBQWQ7Z0JBQ0EsSUFBSSxTQUFTLEtBQUssS0FBQyxNQUFNLE1BQU07OztlQUV2Qzs7O0lBSUosUUFBQyxxQkFBUSxRQUFPOzt3QkFFSzs7bUJBQWY7O1lBRVUsVUFBVDs7Z0JBQ0ksTUFBTSxTQUFTOztnQ0FD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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibGF5b3V0LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC9wb3BvL2xheW91dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQU0sV0FBQTs7T0FDYSxVQUFQOzs7QUFFWCxVQUFEOzs7OztJQWlCSSxRQUFDLHlCQUFZLE9BQU07Ozs7UUFFZixPQUFPLEVBQUUsRUFBRSxFQUFFLEVBQUUsRUFBRSxNQUFNLEtBQUssRUFBRSxNQUFNO2VBRXBDLEtBQUMsTUFBTSxJQUFJOzs7SUFJZixRQUFDLG9CQUFPLEtBQUk7Ozs7Y0FFTTs7bUJBQVo7O2FBRUMsS0FBSyxlQUFPLEtBQUs7O1lBQ2hCLFVBQVUsTUFBTTs7YUFFakIsS0FBSyxlQUFPLEtBQUs7O1lBQ2hCLFVBQVUsTUFBTTs7UUFFcEIsY0FBVSxFQUFFLElBQUksR0FBRyxLQUFDLE9BQU8sSUFBSSxFQUFFLEtBQUs7UUFDdEMsY0FBVSxFQUFFLElBQUksR0FBRyxLQUFDLE9BQU8sSUFBSSxFQUFFLEtBQUs7UUFFdEMsY0FBVSxHQUFHLElBQUksSUFBRSxJQUFJLEtBQUMsT0FBTyxJQUFJLEVBQUUsRUFBRSxLQUFLLEVBQUUsS0FBSztRQUNuRCxjQUFVLEdBQUcsSUFBSSxJQUFFLElBQUksS0FBQyxPQUFPLElBQUksRUFBRSxFQUFFLEtBQUssRUFBRSxLQUFLO1FBRW5ELE1BQU0sS0FBQyxnQkFBZ0I7UUFFdkIsSUFBSSxJQUFJLElBQUksSUFBSTtRQUNoQixJQUFJLElBQUksSUFBSSxJQUFJO1FBQ2hCLElBQUksSUFBSTtRQUNSLElBQUksSUFBSTthQUVMLEtBQUs7O1lBQ0osU0FBUyxFQUFFLElBQUksRUFBRSxFQUFFLElBQUksRUFBRSxFQUFFLEVBQUUsRUFBRTtZQUMvQixJQUFJO2dDQUNTLEtBQUs7OztnQkFBZDtnQkFDQSxJQUFJLFNBQVMsS0FBSyxLQUFDLE1BQU0sTUFBTTs7O2VBRXZDOzs7SUFJSixRQUFDLHFCQUFRLFFBQU87O3dCQUVLOzttQkFBZjs7WUFFVSxVQUFUOztnQkFDSSxNQUFNLFNBQVM7O2dDQUNSLGtCQUFhLFlBQU0sVUFBVzs7NEJBQ2xDOztlQUVWOzs7SUFJSixRQUFDLHFCQUFRLE9BQU0sT0FBTSxHQUFFOzt1QkFFUzs7bUJBQTFCLEtBQUMsT0FBTyxNQUFNOzt1QkFFOEI7O21CQUE1QyxRQUFRLFNBQVMsS0FBQyxPQUFPLE1BQU07O2VBRWpDLFFBQVE7OztJQUlaLFFBQUMsOEJBQWlCOzs7O1FBRWQ7YUFFSSxPQUFhOztZQUFULFFBQVM7dUJBQ0QsS0FBUSxJQUFJLElBQUksSUFBSSxJQUFJLElBQUksSUFBSTs7Z0JBQTVDOztZQUNBLElBQUksT0FBTzs7ZUFFZjs7O0lBZUosUUFBQyx3QkFBVyxPQUFNOzs7O2NBRUE7O21CQUFaOztRQUVGLE9BQU8sS0FBQyxXQUFXLE1BQU07UUFFekIsS0FBQyxXQUFXLE1BQU0sS0FBQyxXQUFXO2VBSTlCOzs7SUFFSixRQUFDLHlCQUFZOzs7O1FBRVQ7WUFFbUIsS0FBSyxVQUFXLEtBQUssSUFBSSxLQUFNLEtBQUssSUFBSTs7WUFBM0QsTUFBTSxLQUFLOzs4QkFFRSxLQUFLOzs7WUFBZDtpQ0FDYSxLQUFDLFdBQVc7OztnQkFBckI7Z0JBQ0EsTUFBTSxLQUFLOzs7ZUFFbkI7OztJQUVKLFFBQUMseUJBQVksTUFBSyxVQUFTOzs7O1FBRXZCLEtBQUssVUFBVSxLQUFDLFlBQVk7WUFFekIsS0FBQyxNQUFNOztnQ0FDUzs7O2dCQUFYO29CQUNZLFlBQVc7O29CQUF2Qjs7MkJBQ1ksUUFBVzs7b0JBQXZCOztnQkFDQSxLQUFLLFVBQVUsS0FBQyxNQUFNLEtBQUssUUFBUTs7OytCQUU5QixLQUFLOzs7WUFBZDtZQUNBLEtBQUMsV0FBVyxNQUFNLFNBQVMsVUFBVSxRQUFROzs7O0lBSXJELFFBQUMsb0JBQU87O1lBRU8sS0FBSyxVQUFTOzttQkFBdkI7OzBCQUVJLEtBQUssb0JBQWMsS0FBSyx1QkFBaUIsS0FBSzs7O0lBSXhELFFBQUMsMEJBQWE7Ozs7UUFFVixNQUFNLEtBQUs7UUFDWCxNQUFNLEtBQUssSUFBSSxLQUFLO1FBRXBCO3VCQUNJLElBQUssV0FBTSx1QkFBQSxVQUFBOztZQUNYLElBQUksTUFBTSxLQUFLLEVBQUUsRUFBRSxLQUFLLElBQUUsS0FBSzs7ZUFDbkM7OztJQUlKLFFBQUMsb0JBQU8sV0FBVTs7OztRQUVkLE1BQU0sUUFBUTtRQUNkLE1BQU0sUUFBUSxJQUFJLFFBQVE7UUFDMUIsTUFBTSxRQUFRO1FBQ2QsTUFBTSxRQUFRLElBQUksUUFBUTtRQUUxQjs0QkFFVzs7O1lBQVA7WUFFQSxLQUFLLElBQUk7WUFDVCxJQUFLLElBQUk7WUFDVCxLQUFLLElBQUk7Z0JBRU4sSUFBSSxPQUFPLEtBQUssT0FBTyxPQUFPLE1BQU0sT0FBTzs7Z0JBQzFDLElBQUksS0FBSztnQkFDVDs7Z0JBRW1CLEtBQUs7O2dCQUE1QixJQUFJLE1BQU0sR0FBRyxFQUFFOztnQkFDUSxNQUFNOztnQkFBN0IsSUFBSSxNQUFNLElBQUksRUFBRTs7O2VBRXBCOzs7SUFXSixRQUFDLDBCQUFhOzs7O1FBRVYsT0FBTyxLQUFDLE9BQU87Y0FFSDs7bUJBQVY7O1FBRUY7NEJBQ1c7OztZQUFQO1lBQ0E7aUNBQ1k7OztnQkFBUjtnQkFDQSxNQUFNLEtBQUssS0FBSzs7WUFDcEIsTUFBTSxLQUFLLE1BQU0sS0FBSzs7ZUFFMUIsTUFBTSxLQUFLOzs7SUFPZixRQUFDLHFCQUFRLE9BQU07Ozs7UUFFWCxPQUFPLEtBQUMsVUFBVSxNQUFNO2NBRVo7O21CQUFWOztRQUVGLE9BQVEsS0FBQyxPQUFPO1FBQ2hCO1FBQ0E7dUJBRUksSUFBSyxTQUFJLEtBQUssMEJBQUwsS0FBSyxhQUFMLEtBQUs7O1lBRWQsTUFBUSxLQUFLO1lBQ2I7Z0NBRVk7OztnQkFBUjtnQkFDQSxNQUFNLEtBQUssS0FBSzs7WUFFcEIsTUFBTSxLQUFLLE1BQU0sS0FBSztpQ0FDVixLQUFDLGNBQWMsSUFBSTs7O2dCQUEzQjtnQkFDQSxNQUFNLEtBQUs7OztlQUVuQixJQUFJLE1BQU0sTUFBTSxLQUFLLE1BQU07OztJQUsvQixRQUFDLDRCQUFlLEtBQUk7Ozs7UUFFaEI7cUJBRXdCLElBQUksU0FBUyxPQUFPLElBQUksU0FBUzs7O1lBQXBEO1lBQUs7WUFFTixJQUFJO21CQUVFLElBQUksSUFBSTs7Z0JBRVYsUUFBUSxJQUFJLEdBQUc7Z0JBQ2YsUUFBUTt1QkFFRixJQUFFLFFBQVEsSUFBSSxVQUFXLElBQUksSUFBRSxPQUFPLGFBQVk7O29CQUNwRCxTQUFTOzsrQkFFNEM7O29CQUF6RCxNQUFNLE1BQU0sRUFBRSxFQUFFLEVBQUUsRUFBRSxPQUFPLEtBQUssTUFBTSxFQUFFOztnQkFFeEMsS0FBSzs7O2VBRWI7OztJQUlKLFFBQUMscUJBQVE7Ozs7Y0FFUzs7bUJBQVo7O1FBRUY7dUJBRUksSUFBSyxTQUFJLFFBQVEscUJBQVIsUUFBUSxRQUFSLFFBQVE7O1lBQ2pCOzJCQUNJLElBQUssU0FBSSxRQUFRLHFCQUFSLFFBQVEsUUFBUixRQUFROztnQkFDakIsSUFBSSxNQUFNLEtBQUssSUFBSSxHQUFHLEtBQUssR0FBRzs7WUFDbEMsS0FBSyxLQUFLOztRQUVkLEtBQUMsVUFBVSxRQUFRO2VBRW5COzs7SUFFSixRQUFDLHdCQUFXLE1BQUs7Ozs7Y0FFSjs7OztjQUVvQixLQUFLOztZQUFsQyxLQUFDLFVBQVUsS0FBSzs7OEJBRUgsS0FBSzs7O1lBQWQ7WUFDQSxLQUFDLFVBQVUsTUFBTTs7OztJQUV6QixRQUFDLHdCQUFXLE1BQUs7Ozs7Y0FFSixLQUFLOzs7O1FBRWQsVUFBVTt1QkFFRCxLQUFLOztZQUNWLFVBQVUsS0FBSyxRQUFRLEtBQUssS0FBSzs7NEJBQ3ZCLEtBQUs7O1lBQ2YsVUFBVSxLQUFLLEtBQUssS0FBSyxLQUFLOztRQUVsQyxTQUFTLEtBQUMsY0FBYzt1QkFFcEIsSUFBSyxTQUFJLEtBQUssUUFBUSwwQkFBYixLQUFLLFFBQVEsYUFBYixLQUFLLFFBQVE7O1lBRXRCLE1BQVEsS0FBSyxRQUFRO1lBQ3JCLFFBQVEsSUFBSSxLQUFLLElBQUk7WUFDckIsUUFBUSxNQUFNLGlCQUFLLGtCQUFBLFFBQVMsc0NBQUs7MkJBRTdCLElBQUssU0FBSSx5QkFBQSxZQUFBOztnQkFFVCxJQUFJLElBQUksS0FBSztnQkFDYixJQUFJLElBQUk7b0JBRUksSUFBSSxLQUFLLElBQUksS0FBSyxLQUFLLEtBQUssVUFBVSxLQUFLLEtBQUssR0FBRzs7b0JBQS9EOztnQkFFQSxPQUFPLEtBQUssR0FBRztnQkFDZixrQkFBTyxVQUFVLEtBQUs7K0JBRWIsYUFBZ0IsS0FBSzs7b0JBQzFCLEtBQUssa0JBQU8sTUFBTSx5QkFBSzs7K0JBRUEsS0FBSyxRQUFXLEtBQUs7O29CQUFoRCxLQUFLLEtBQUssS0FBSzs7K0JBQ1ksS0FBSyxRQUFXLEtBQUs7O29CQUFoRCxLQUFLLEtBQUssS0FBSzs7Ozs7O0lBSTNCLFFBQUMsNEJBQWU7Ozs7UUFFWjs4QkFFYSxLQUFLOzs7WUFBZDtrQkFFZ0IsTUFBTTs7Z0JBQXRCOztZQUVBLFdBQVcsTUFBTTtnQkFDb0IsVUFBWjs7Z0JBQXpCLFlBQVk7O21DQUVELE1BQU07OztnQkFBYjsrQkFDSSxJQUFLLElBQUksVUFBSyxJQUFJLHNCQUFKLElBQUksU0FBSixJQUFJOztvQkFFbEIsU0FBVyxLQUFLLElBQUk7b0JBQ3BCLFFBQVEsT0FBTzswQkFFUjs7d0JBQ0g7d0JBQ0EsT0FBTyxPQUFPOzt5Q0FFSDs7O3dCQUFYO3dCQUNBLE1BQU0sV0FBVzs7Ozs7ZUFFakM7OztXQWpXUDs7O2VBbVdNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/popo/layout.kode

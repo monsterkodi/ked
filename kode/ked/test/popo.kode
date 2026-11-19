@@ -1,5 +1,8 @@
 use ../../kxk ▪ sds
 use ../popo   ◆ layout fill
+use ../edit  ◆ editor
+use ../edit/tool ◆ sue
+use ../util  ◆ harness
 
 ▸ popo
   
@@ -261,3 +264,42 @@ use ../popo   ◆ layout fill
         regions = layout.regionize {rows:1 cols:4} tree
         
         layout.dumpRegions regions ▸ '#xy.'
+        
+  ▸ sueify
+    
+    #  the grid as a text the editor can show: characters in the lines,
+    #  colours in sue payloads that susan turns back into fg and bg cells.
+    
+        tree = { bg:'#00f' children:[{ text:'hi' x:1 y:1 w:3 h:1 fg:'#ff0' }] }
+        
+        data = sue.desue(layout.sueify({cols:8 rows:3} tree))
+        
+        data.text ▸ '        \n hi     \n        '
+        data.sue.length ▸ 4
+        
+        fg = data.sue.filter((area) -> area.value[0] == sue.FG_COLOR)
+        
+        fg.length ▸ 1
+        fg[0].value ▸ [31 3 1 '#ff0']
+        
+  ▸ editor
+    
+    #  the end of the line: sueified text loaded into a real editor view
+    #  paints characters and colours through susan
+    
+        h = new harness cols:16 rows:4
+        e = new editor h.screen 'popo_test_editor' []
+        e.layout 0 0 16 4
+        
+        tree = { bg:'#00f' children:[{ text:'hi' x:1 y:1 w:2 h:1 fg:'#ff0' }] }
+        
+        data = sue.desue(layout.sueify({cols:16 rows:4} tree))
+        
+        e.state.loadLines data.text.split('\n')
+        e.state.loadSue data.sue
+        e.draw()
+        
+        h.at(1 1) ▸ 'h'
+        h.at(2 1) ▸ 'i'
+        h.screen.get_fg(1 1) ▸ [255 255 0]
+        h.screen.get_bg(5 0) ▸ [0 0 255]
