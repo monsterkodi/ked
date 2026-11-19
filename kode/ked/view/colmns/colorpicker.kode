@@ -61,21 +61,6 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         @isVisible = false
 
-    focusDelta: delta =>
-    
-        for item,index in @focusRing
-            if item.hasFocus()
-                num = @focusRing.length
-                if 0 <= index+delta < num
-                    if @focusRing[index+delta].focusable
-                        @focusRing[index+delta].grabFocus()
-                        ⮐ true
-                ⮐ false
-        false
-            
-    focusNext: => @focusDelta 1
-    focusPrev: => @focusDelta -1
-
     activeIndex: => @radio.active
     
     onRadioActiveChanged: => @syncAll()
@@ -458,18 +443,6 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         ⮐ false if @hidden()
             
-        # log "colorpicker.onKey #{key}"
-        ⮐ true if @red   .onKey key event
-        ⮐ true if @green .onKey key event
-        ⮐ true if @blue  .onKey key event
-
-        ⮐ true if @hue   .onKey key event
-        ⮐ true if @sat   .onKey key event
-        ⮐ true if @val   .onKey key event
-        
-        ⮐ true if @radio .onKey key event
-        ⮐ true if @paletteView.onKey key event
-
         switch event.combo
             'down''tab'      ➜ ⮐ @focusNext() 
             'up''shift+tab'  ➜ ⮐ @focusPrev()
@@ -483,7 +456,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
             'ctrl+v' 'cmd+v' ➜   @setHex(clip.paste()) ; @syncAll() ; ⮐ true
             'ctrl+s' 'cmd+s' ➜ ⮐ @addCurrentColor()
         
-        false
+        super key event
 
     onReturn: =>
 

@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}}
 
 var view
 
@@ -26,6 +26,9 @@ view = (function ()
         this["erase"] = this["erase"].bind(this)
         this["onKey"] = this["onKey"].bind(this)
         this["grabFocus"] = this["grabFocus"].bind(this)
+        this["focusPrev"] = this["focusPrev"].bind(this)
+        this["focusNext"] = this["focusNext"].bind(this)
+        this["focusDelta"] = this["focusDelta"].bind(this)
         this["hasFocus"] = this["hasFocus"].bind(this)
         this["onFocus"] = this["onFocus"].bind(this)
         this["handleHover"] = this["handleHover"].bind(this)
@@ -188,7 +191,53 @@ view = (function ()
 
     view.prototype["hasFocus"] = function ()
     {
+        var item
+
+        var list = _k_.list(this.focusRing)
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            item = list[_a_]
+            if (item.hasFocus())
+            {
+                return true
+            }
+        }
         return this.focused
+    }
+
+    view.prototype["focusDelta"] = function (delta)
+    {
+        var index, item, num
+
+        var list = _k_.list(this.focusRing)
+        for (index = 0; index < list.length; index++)
+        {
+            item = list[index]
+            if (item.hasFocus())
+            {
+                num = this.focusRing.length
+                if ((0 <= index + delta && index + delta < num))
+                {
+                    if (this.focusRing[index + delta].focusable)
+                    {
+                        this.focusRing[index + delta].grabFocus()
+                        return true
+                    }
+                }
+                return false
+            }
+        }
+        return false
+    }
+
+    view.prototype["focusNext"] = function ()
+    {
+        return this.focusDelta(1)
+    }
+
+    view.prototype["focusPrev"] = function ()
+    {
+        return this.focusDelta(-1)
     }
 
     view.prototype["grabFocus"] = function ()
@@ -199,7 +248,37 @@ view = (function ()
 
     view.prototype["onKey"] = function (key, event)
     {
-        console.log(`view.onKey ${this.name}`)
+        var item
+
+        if (this.hidden())
+        {
+            return false
+        }
+        if (!_k_.empty(this.focusRing))
+        {
+            switch (event.combo)
+            {
+                case 'down':
+                case 'tab':
+                    return this.focusNext()
+
+                case 'up':
+                case 'shift+tab':
+                    return this.focusPrev()
+
+            }
+
+            var list = _k_.list(this.focusRing)
+            for (var _a_ = 0; _a_ < list.length; _a_++)
+            {
+                item = list[_a_]
+                if (item.hasFocus())
+                {
+                    return item.onKey(key,event)
+                }
+            }
+        }
+        return false
     }
 
     view.prototype["layout"] = function (x, y, w, h)
@@ -220,5 +299,5 @@ view = (function ()
 
 export default view;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidmlldy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy9iYXNlL3ZpZXcua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUNhLFVBQUE7SUFBTTtJQUFPOztPQUNQLFlBQVQ7O09BQ1MsWUFBWjs7O0FBQ04sUUFBRDs7cUJBQU07SUFZRixNQUFDLGlCQUFjO2FBRWYsTUFBSSxRQUFRLE1BQUs7O1FBQWQ7UUFBUTs7Ozs7Ozs7Ozs7Ozs7OztRQUVQLEtBQUMsWUFBWSxNQUFNLEtBQUM7UUFDcEIsS0FBQztRQUNELEtBQUM7NEJBQ3lCOzs7WUFBTDtZQUFyQixLQUFDLE1BQU0sS0FBSzs7UUFFWixLQUFDLFlBQVk7UUFDYixLQUFDLFlBQVk7UUFDYixLQUFDLFVBQVk7Ozs7b0JBRWpCLHVCQUFVLEtBQUk7O2VBQU8sS0FBQyxNQUFNLE9BQU8sTUFBTSxPQUFPOzs7b0JBRWhEOzs7O1FBRUksS0FBQyxZQUFZO1lBRVYsS0FBQzs7Z0JBQ0csS0FBSyxnQkFBaUIsS0FBSyxpQkFBZ0I7O2dCQUMxQyxRQUFRLEtBQUs7Z0JBQ2IsS0FBSyxlQUFlO2dCQUNwQixNQUFNOztZQUNWLEtBQUssZUFBZTtZQUVwQixLQUFLLEtBQUssYUFBYSxLQUFDOztRQUU1QixLQUFDO2dCQUNELE9BQU87OztvQkFFWDs7UUFFSSxLQUFDLFlBQVk7WUFFVixLQUFDOztnQkFDRyxTQUFLLEtBQUs7O2dCQUNULEtBQUssZUFBZTtnQkFFcEIsS0FBSyxLQUFLLGFBQWEsS0FBQzs7O2dCQUVoQyxPQUFPOzs7b0JBRVg7OztvQkFDQTs7Z0JBQWdCLEtBQUM7OztvQkFDakI7O2VBQVksS0FBQzs7O29CQUNiOztZQUFlLEtBQUM7O21CQUFjLEtBQUM7Ozs7bUJBQVksS0FBQzs7OztvQkFFNUM7O2VBQWMsS0FBQyxNQUFNLFFBQVEsS0FBSyxLQUFDLE1BQU0sUUFBUTs7O29CQUVqRCx1QkFBVTs7ZUFBUyxLQUFDLE1BQU0sWUFBWTs7O29CQUV0QyxzQkFBUzs7ZUFBUyxLQUFDLFlBQVk7OztvQkFDL0Isc0JBQVM7OztvQkFFVCwyQkFBYzs7ZUFBUyxLQUFLLEtBQUs7OztvQkFDakMsMkJBQWM7O1lBQ1AsS0FBQzs7WUFDQSxLQUFDOztZQUVGLEtBQUM7O1lBQ0EsS0FBSyxLQUFLLFVBQVUsS0FBQzttQkFDckIsS0FBSyxLQUFLOzs7O29CQUVsQiwwQkFBYTs7OztRQUlULFVBQWEsTUFBTSxXQUFZLEtBQUMsTUFBTSxjQUFjO1lBQ2pELEtBQUMsVUFBYzs7WUFDZCxLQUFDLFFBQVE7WUFDVCxLQUFDLGFBQWE7O2lCQUNWLFdBQWUsS0FBQzs7WUFDcEIsS0FBQyxRQUFRO1lBQ1QsS0FBQyxhQUFhOztlQUNsQixLQUFDOzs7b0JBRUwsMkJBQWMsSUFBRTs7WUFFVCxNQUFVLEtBQUM7O1lBQ1YsS0FBQyxZQUFZO21CQUNiLEtBQUssR0FBRyxRQUFRLEtBQUM7O2lCQUNiLEtBQUMsY0FBa0I7O1lBQ3ZCLEtBQUMsWUFBWTttQkFDYixLQUFLLGVBQWUsUUFBUSxLQUFDOzs7O29CQUVyQyxzQkFBUzs7ZUFFTCxLQUFDLFdBQVcsS0FBQyxTQUFROzs7b0JBQ3pCOztlQUFjLEtBQUM7OztvQkFDZjs7UUFFSSxLQUFLLEtBQUssUUFBUSxLQUFDO2VBQ25CLEtBQUssS0FBSzs7O29CQUVkLG9CQUFPLEtBQUk7O1FBQVMsMEJBQWtCLEtBQUM7OztvQkFFdkMscUJBQVEsR0FBRSxHQUFFLEdBQUU7O2VBQUssS0FBQyxNQUFNLE9BQU8sRUFBRSxFQUFFLEVBQUU7OztvQkFFdkM7O2VBQVUsS0FBQyxNQUFNLGFBQWEsRUFBRSxFQUFFLEdBQUc7OztvQkFFckM7OztXQWpISDs7O2VBbUhNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidmlldy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvdmlldy9iYXNlL3ZpZXcua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUNhLFVBQUE7SUFBTTtJQUFPOztPQUNQLFlBQVQ7O09BQ1MsWUFBWjs7O0FBQ04sUUFBRDs7cUJBQU07SUFZRixNQUFDLGlCQUFjO2FBRWYsTUFBSSxRQUFRLE1BQUs7O1FBQWQ7UUFBUTs7Ozs7Ozs7Ozs7Ozs7Ozs7OztRQUVQLEtBQUMsWUFBWSxNQUFNLEtBQUM7UUFDcEIsS0FBQztRQUNELEtBQUM7NEJBQ3lCOzs7WUFBTDtZQUFyQixLQUFDLE1BQU0sS0FBSzs7UUFFWixLQUFDLFlBQVk7UUFDYixLQUFDLFlBQVk7UUFDYixLQUFDLFVBQVk7Ozs7b0JBRWpCLHVCQUFVLEtBQUk7O2VBQU8sS0FBQyxNQUFNLE9BQU8sTUFBTSxPQUFPOzs7b0JBRWhEOzs7O1FBRUksS0FBQyxZQUFZO1lBRVYsS0FBQzs7Z0JBQ0csS0FBSyxnQkFBaUIsS0FBSyxpQkFBZ0I7O2dCQUMxQyxRQUFRLEtBQUs7Z0JBQ2IsS0FBSyxlQUFlO2dCQUNwQixNQUFNOztZQUNWLEtBQUssZUFBZTtZQUVwQixLQUFLLEtBQUssYUFBYSxLQUFDOztRQUU1QixLQUFDO2dCQUNELE9BQU87OztvQkFFWDs7UUFFSSxLQUFDLFlBQVk7WUFFVixLQUFDOztnQkFDRyxTQUFLLEtBQUs7O2dCQUNULEtBQUssZUFBZTtnQkFFcEIsS0FBSyxLQUFLLGFBQWEsS0FBQzs7O2dCQUVoQyxPQUFPOzs7b0JBRVg7OztvQkFDQTs7Z0JBQWdCLEtBQUM7OztvQkFDakI7O2VBQVksS0FBQzs7O29CQUNiOztZQUFlLEtBQUM7O21CQUFjLEtBQUM7Ozs7bUJBQVksS0FBQzs7OztvQkFFNUM7O2VBQWMsS0FBQyxNQUFNLFFBQVEsS0FBSyxLQUFDLE1BQU0sUUFBUTs7O29CQUVqRCx1QkFBVTs7ZUFBUyxLQUFDLE1BQU0sWUFBWTs7O29CQUV0QyxzQkFBUzs7ZUFBUyxLQUFDLFlBQVk7OztvQkFDL0Isc0JBQVM7OztvQkFFVCwyQkFBYzs7ZUFBUyxLQUFLLEtBQUs7OztvQkFDakMsMkJBQWM7O1lBQ1AsS0FBQzs7WUFDQSxLQUFDOztZQUVGLEtBQUM7O1lBQ0EsS0FBSyxLQUFLLFVBQVUsS0FBQzttQkFDckIsS0FBSyxLQUFLOzs7O29CQUVsQiwwQkFBYTs7OztRQUlULFVBQWEsTUFBTSxXQUFZLEtBQUMsTUFBTSxjQUFjO1lBQ2pELEtBQUMsVUFBYzs7WUFDZCxLQUFDLFFBQVE7WUFDVCxLQUFDLGFBQWE7O2lCQUNWLFdBQWUsS0FBQzs7WUFDcEIsS0FBQyxRQUFRO1lBQ1QsS0FBQyxhQUFhOztlQUNsQixLQUFDOzs7b0JBRUwsMkJBQWMsSUFBRTs7WUFFVCxNQUFVLEtBQUM7O1lBQ1YsS0FBQyxZQUFZO21CQUNiLEtBQUssR0FBRyxRQUFRLEtBQUM7O2lCQUNiLEtBQUMsY0FBa0I7O1lBQ3ZCLEtBQUMsWUFBWTttQkFDYixLQUFLLGVBQWUsUUFBUSxLQUFDOzs7O29CQUVyQyxzQkFBUzs7ZUFFTCxLQUFDLFdBQVcsS0FBQyxTQUFROzs7b0JBRXpCOzs7OzRCQUVnQixLQUFDOzs7WUFBVDtnQkFDRyxLQUFLOzt1QkFBZTs7O2VBQzNCLEtBQUM7OztvQkFFTCx5QkFBWTs7Ozs0QkFFVSxLQUFDO2FBQVY7O1lBQUw7Z0JBQ0csS0FBSzs7Z0JBQ0osTUFBTSxLQUFDLFVBQVU7cUJBQ2QsS0FBSyxRQUFNLFNBQU4sUUFBTSxRQUFROzt3QkFDZixLQUFDLFVBQVUsUUFBTSxPQUFPOzt3QkFDdkIsS0FBQyxVQUFVLFFBQU0sT0FBTzsrQkFDdEI7Ozt1QkFDUjs7O2VBQ1Y7OztvQkFFSjs7ZUFBYyxLQUFDLFdBQVc7OztvQkFDMUI7O2VBQWMsS0FBQyxXQUFXOzs7b0JBRTFCOztRQUVJLEtBQUssS0FBSyxRQUFRLEtBQUM7ZUFDbkIsS0FBSyxLQUFLOzs7b0JBR2Qsb0JBQU8sS0FBSTs7OztZQUVJLEtBQUM7O21CQUFWOzt1QkFFTyxLQUFDOztvQkFFQyxNQUFNOztxQkFDVDtxQkFBTTsyQkFBZSxLQUFDOztxQkFDdEI7cUJBQUk7MkJBQWlCLEtBQUM7Ozs7Z0NBRWQsS0FBQzs7O2dCQUFUO29CQUNHLEtBQUs7OzJCQUFlLEtBQUssTUFBTSxJQUFJOzs7O2VBRTlDOzs7b0JBRUoscUJBQVEsR0FBRSxHQUFFLEdBQUU7O2VBQUssS0FBQyxNQUFNLE9BQU8sRUFBRSxFQUFFLEVBQUU7OztvQkFFdkM7O2VBQVUsS0FBQyxNQUFNLGFBQWEsRUFBRSxFQUFFLEdBQUc7OztvQkFFckM7OztXQXBKSDs7O2VBc0pNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/base/view.kode

@@ -103,13 +103,48 @@ use ../screen    ◆ cells
     onFocus: name => 
         # log "view.onFocus #{name} #{@name}"
         @focused = (@name == name)
-    hasFocus:  => @focused
+    
+    hasFocus: => 
+        
+        for item in @focusRing
+            if item.hasFocus() ➜ ⮐ true
+        @focused
+    
+    focusDelta: delta =>
+    
+        for item,index in @focusRing
+            if item.hasFocus()
+                num = @focusRing.length
+                if 0 <= index+delta < num
+                    if @focusRing[index+delta].focusable
+                        @focusRing[index+delta].grabFocus()
+                        ⮐ true
+                ⮐ false
+        false
+            
+    focusNext: => @focusDelta 1
+    focusPrev: => @focusDelta -1
+    
     grabFocus: =>
         # log "view.grabFocus #{@name}"
         post.emit 'focus' @name
         post.emit 'redraw'
         
-    onKey: key event => log "view.onKey #{@name}"
+    # onKey: key event => log "view.onKey #{@name}"
+    onKey: key event =>
+
+        ⮐ false if @hidden()
+        
+        if valid @focusRing
+            
+            switch event.combo
+                'down''tab'      ➜ ⮐ @focusNext() 
+                'up''shift+tab'  ➜ ⮐ @focusPrev()
+    
+            for item in @focusRing
+                if item.hasFocus() ➜ ⮐ item.onKey key event
+            
+        false
         
     layout: x y w h -> @cells.layout x y w h 
     

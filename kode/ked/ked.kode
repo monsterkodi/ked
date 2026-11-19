@@ -744,8 +744,8 @@ use child_process ▪ spawn exec
             "alt+cmd+["                  ➜ ⮐ post.emit 'dircol.toggle'
             "alt+cmd+]"                  ➜ ⮐ post.emit 'funcol.toggle'
             'shift+cmd+['                ➜ ⮐ post.emit 'dircol.reveal' @currentFile
-            'alt+q' 'ctrl+q' 'cmd+q'     ➜ ⮐ @quit()
-            'ctrl+s' 'cmd+s'             ➜ ⮐ @saveFile()
+            'alt+q' 'ctrl+q' 'cmd+q'     ➜ ⮐ @quit() 
+            'ctrl+s' 'cmd+s'             ➜ ⮐ @saveFile() if not @funcol.colorpicker.hasFocus()
             'shift+cmd+s' 'shift+ctrl+s' ➜ ⮐ @saveAs()
             'alt+1'                      ➜ ⮐ post.emit 'filepos.goBackward'  
             'alt+2'                      ➜ ⮐ post.emit 'filepos.goForward'   
@@ -770,7 +770,7 @@ use child_process ▪ spawn exec
             'cmd+i'                      ➜ ⮐ post.emit 'differ.status'
             'alt+c'                      ➜ ⮐ post.emit 'colorpicker.show'
             'alt+u'                      ➜ ⮐ post.emit 'uniko.show'
-
+         
         for handler in @keyHandlers
             continue if handler.hidden()
             result = handler.onKey key event

@@ -27,34 +27,11 @@ use ../base      ◆ view input tripleinput
 
         @isVisible = false
         
-    hasFocus: => 
+    grabFocus: =>
         
-        for item in @focusRing
-            if item.hasFocus() ➜ ⮐ true
-        false
-    
-    grabFocus: => @focusInput()
-    
-    focusDelta: delta =>
-    
-        for item,index in @focusRing
-            if item.hasFocus()
-                num = @focusRing.length
-                if 0 <= index+delta < num
-                    if @focusRing[index+delta].focusable
-                        @focusRing[index+delta].grabFocus()
-                        ⮐ true
-                ⮐ false
-        false
-            
-    focusNext: => @focusDelta 1
-    focusPrev: => @focusDelta -1
-
-    focusInput: =>
-
         @input.grabFocus()
         true
-
+    
     show: =>
 
         @input.set ''
@@ -103,18 +80,5 @@ use ../base      ◆ view input tripleinput
             ret = item.onMouse event ; ⮐ ret if ret?.redraw
             
         super event
-
-    onKey: key event =>
-
-        ⮐ false if @hidden()
-        
-        switch event.combo
-            'down''tab'      ➜ ⮐ @focusNext() 
-            'up''shift+tab'  ➜ ⮐ @focusPrev()
-
-        for item in @
-            if item.hasFocus() ➜ ⮐ item.onKey key event
-
-        false
 
 export sheenode

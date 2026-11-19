@@ -19,19 +19,13 @@ sheenode = (function ()
         this.editor = editor
         this.name = name
     
-        this["onKey"] = this["onKey"].bind(this)
         this["onMouse"] = this["onMouse"].bind(this)
         this["onInputAction"] = this["onInputAction"].bind(this)
         this["draw"] = this["draw"].bind(this)
         this["layout"] = this["layout"].bind(this)
         this["hide"] = this["hide"].bind(this)
         this["show"] = this["show"].bind(this)
-        this["focusInput"] = this["focusInput"].bind(this)
-        this["focusPrev"] = this["focusPrev"].bind(this)
-        this["focusNext"] = this["focusNext"].bind(this)
-        this["focusDelta"] = this["focusDelta"].bind(this)
         this["grabFocus"] = this["grabFocus"].bind(this)
-        this["hasFocus"] = this["hasFocus"].bind(this)
         sheenode.__super__.constructor.call(this,this.editor.screen,this.name)
         this.height = 8
         this.setColor('bg',theme.uniko.bg)
@@ -45,63 +39,7 @@ sheenode = (function ()
         this.isVisible = false
     }
 
-    sheenode.prototype["hasFocus"] = function ()
-    {
-        var item
-
-        var list = _k_.list(this.focusRing)
-        for (var _a_ = 0; _a_ < list.length; _a_++)
-        {
-            item = list[_a_]
-            if (item.hasFocus())
-            {
-                return true
-            }
-        }
-        return false
-    }
-
     sheenode.prototype["grabFocus"] = function ()
-    {
-        return this.focusInput()
-    }
-
-    sheenode.prototype["focusDelta"] = function (delta)
-    {
-        var index, item, num
-
-        var list = _k_.list(this.focusRing)
-        for (index = 0; index < list.length; index++)
-        {
-            item = list[index]
-            if (item.hasFocus())
-            {
-                num = this.focusRing.length
-                if ((0 <= index + delta && index + delta < num))
-                {
-                    if (this.focusRing[index + delta].focusable)
-                    {
-                        this.focusRing[index + delta].grabFocus()
-                        return true
-                    }
-                }
-                return false
-            }
-        }
-        return false
-    }
-
-    sheenode.prototype["focusNext"] = function ()
-    {
-        return this.focusDelta(1)
-    }
-
-    sheenode.prototype["focusPrev"] = function ()
-    {
-        return this.focusDelta(-1)
-    }
-
-    sheenode.prototype["focusInput"] = function ()
     {
         this.input.grabFocus()
         return true
@@ -183,42 +121,10 @@ sheenode = (function ()
         return sheenode.__super__.onMouse.call(this,event)
     }
 
-    sheenode.prototype["onKey"] = function (key, event)
-    {
-        var item
-
-        if (this.hidden())
-        {
-            return false
-        }
-        switch (event.combo)
-        {
-            case 'down':
-            case 'tab':
-                return this.focusNext()
-
-            case 'up':
-            case 'shift+tab':
-                return this.focusPrev()
-
-        }
-
-        var list = _k_.list(this)
-        for (var _a_ = 0; _a_ < list.length; _a_++)
-        {
-            item = list[_a_]
-            if (item.hasFocus())
-            {
-                return item.onKey(key,event)
-            }
-        }
-        return false
-    }
-
     return sheenode
 })()
 
 export default sheenode;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZW5vZGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWVub2RlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsV0FBTjs7T0FDTSxZQUFUOztPQUNTLFdBQVo7T0FBaUIsWUFBakI7T0FBdUIsa0JBQXZCOzs7QUFFTixZQUFEOzt5QkFBVTthQUdOLFVBQUksUUFBUTs7UUFBVDtRQUFROzs7Ozs7Ozs7Ozs7Ozs7aURBRUQsS0FBQyxPQUFPLE9BQU8sS0FBQztRQUV0QixLQUFDLFNBQVM7UUFFVixLQUFDLFNBQVMsS0FBSyxNQUFNLE1BQU07UUFFM0IsS0FBQyxZQUFlLE1BQVksS0FBQyxVQUFVLEtBQUM7UUFDeEMsS0FBQyxlQUFlLFlBQVksS0FBQyxVQUFVLEtBQUMsWUFBYSxJQUFJLElBQUk7UUFDN0QsS0FBQyxlQUFlLFlBQVksS0FBQyxVQUFVLEtBQUMsWUFBYSxJQUFJLElBQUk7UUFFN0QsS0FBQyxTQUFTLEtBQUMsTUFBTSxLQUFDLFNBQVMsS0FBQztRQUM1QixLQUFDLGFBQWEsS0FBQyxPQUFPLE9BQU8sS0FBQyxTQUFTLFFBQVEsT0FBTyxLQUFDLFNBQVM7UUFFaEUsS0FBQyxNQUFNLHVCQUF1QjtRQUU5QixLQUFDLE1BQU0sR0FBRyxTQUFTLEtBQUM7UUFFcEIsS0FBQyxZQUFZOzs7d0JBRWpCOzs7OzRCQUVnQixLQUFDOzs7WUFBVDtnQkFDRyxLQUFLOzt1QkFBZTs7O2VBQzNCOzs7d0JBRUo7O2VBQWMsS0FBQzs7O3dCQUVmLHlCQUFZOzs7OzRCQUVVLEtBQUM7YUFBVjs7WUFBTDtnQkFDRyxLQUFLOztnQkFDSixNQUFNLEtBQUMsVUFBVTtxQkFDZCxLQUFLLFFBQU0sU0FBTixRQUFNLFFBQVE7O3dCQUNmLEtBQUMsVUFBVSxRQUFNLE9BQU87O3dCQUN2QixLQUFDLFVBQVUsUUFBTSxPQUFPOytCQUN0Qjs7O3VCQUNSOzs7ZUFDVjs7O3dCQUVKOztlQUFjLEtBQUMsV0FBVzs7O3dCQUMxQjs7ZUFBYyxLQUFDLFdBQVc7Ozt3QkFFMUI7O1FBRUksS0FBQyxNQUFNO2VBQ1A7Ozt3QkFFSjs7UUFFSSxLQUFDLE1BQU0sSUFBSTs7ZUFJWCxLQUFLLEtBQUs7Ozt3QkFFZDs7WUFFUyxLQUFDOzs7OztRQUlOLEtBQUMsTUFBTSxNQUFNO2VBRWIsS0FBSyxLQUFLOzs7d0JBRWQscUJBQVEsR0FBRSxHQUFFLEdBQUU7OzRDQUVKLEVBQUUsRUFBRSxFQUFFOzs7O1FBRVosSUFBSTs0QkFDUSxLQUFDOzs7WUFBVDtZQUNBLEtBQUssT0FBTyxJQUFFLEVBQUUsSUFBRSxFQUFFLElBQUUsRUFBRTtZQUN4QixLQUFLOzs7O3dCQUViOzs7O1lBRVMsS0FBQyxZQUFZLEtBQUM7Ozs7UUFFbkIsS0FBQyxNQUFNLFVBQVUsRUFBRSxFQUFFLEdBQUcsR0FBRyxJQUFJLEtBQUssS0FBQyxNQUFNOzRCQUUvQixLQUFDOzs7WUFBVDtZQUNBLEtBQUs7Ozs7O3dCQUliLDRCQUFlLFFBQU87Ozt3QkFFdEIsc0JBQVM7Ozs7WUFFQSxLQUFDOzs7OzRCQUVNLEtBQUM7OztZQUFUO1lBQ0EsTUFBTSxLQUFLLFFBQVE7aUJBQWlCLGNBQUEsSUFBSzs7dUJBQVo7OztvREFFM0I7Ozt3QkFFVixvQkFBTyxLQUFJOzs7O1lBRUksS0FBQzs7bUJBQVY7O2dCQUVLLE1BQU07O2lCQUNUO2lCQUFNO3VCQUFlLEtBQUM7O2lCQUN0QjtpQkFBSTt1QkFBaUIsS0FBQzs7Ozs0QkFFZDs7O1lBQVI7Z0JBQ0csS0FBSzs7dUJBQWUsS0FBSyxNQUFNLElBQUk7OztlQUUxQzs7O1dBaEhQOzs7ZUFrSE0ifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZW5vZGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWVub2RlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsV0FBTjs7T0FDTSxZQUFUOztPQUNTLFdBQVo7T0FBaUIsWUFBakI7T0FBdUIsa0JBQXZCOzs7QUFFTixZQUFEOzt5QkFBVTthQUdOLFVBQUksUUFBUTs7UUFBVDtRQUFROzs7Ozs7Ozs7aURBRUQsS0FBQyxPQUFPLE9BQU8sS0FBQztRQUV0QixLQUFDLFNBQVM7UUFFVixLQUFDLFNBQVMsS0FBSyxNQUFNLE1BQU07UUFFM0IsS0FBQyxZQUFlLE1BQVksS0FBQyxVQUFVLEtBQUM7UUFDeEMsS0FBQyxlQUFlLFlBQVksS0FBQyxVQUFVLEtBQUMsWUFBYSxJQUFJLElBQUk7UUFDN0QsS0FBQyxlQUFlLFlBQVksS0FBQyxVQUFVLEtBQUMsWUFBYSxJQUFJLElBQUk7UUFFN0QsS0FBQyxTQUFTLEtBQUMsTUFBTSxLQUFDLFNBQVMsS0FBQztRQUM1QixLQUFDLGFBQWEsS0FBQyxPQUFPLE9BQU8sS0FBQyxTQUFTLFFBQVEsT0FBTyxLQUFDLFNBQVM7UUFFaEUsS0FBQyxNQUFNLHVCQUF1QjtRQUU5QixLQUFDLE1BQU0sR0FBRyxTQUFTLEtBQUM7UUFFcEIsS0FBQyxZQUFZOzs7d0JBRWpCOztRQUVJLEtBQUMsTUFBTTtlQUNQOzs7d0JBRUo7O1FBRUksS0FBQyxNQUFNLElBQUk7O2VBSVgsS0FBSyxLQUFLOzs7d0JBRWQ7O1lBRVMsS0FBQzs7Ozs7UUFJTixLQUFDLE1BQU0sTUFBTTtlQUViLEtBQUssS0FBSzs7O3dCQUVkLHFCQUFRLEdBQUUsR0FBRSxHQUFFOzs0Q0FFSixFQUFFLEVBQUUsRUFBRTs7OztRQUVaLElBQUk7NEJBQ1EsS0FBQzs7O1lBQVQ7WUFDQSxLQUFLLE9BQU8sSUFBRSxFQUFFLElBQUUsRUFBRSxJQUFFLEVBQUU7WUFDeEIsS0FBSzs7Ozt3QkFFYjs7OztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7O1FBRW5CLEtBQUMsTUFBTSxVQUFVLEVBQUUsRUFBRSxHQUFHLEdBQUcsSUFBSSxLQUFLLEtBQUMsTUFBTTs0QkFFL0IsS0FBQzs7O1lBQVQ7WUFDQSxLQUFLOzs7Ozt3QkFJYiw0QkFBZSxRQUFPOzs7d0JBRXRCLHNCQUFTOzs7O1lBRUEsS0FBQzs7Ozs0QkFFTSxLQUFDOzs7WUFBVDtZQUNBLE1BQU0sS0FBSyxRQUFRO2lCQUFpQixjQUFBLElBQUs7O3VCQUFaOzs7b0RBRTNCOzs7V0E1RWI7OztlQThFTSJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/sheenode.kode
