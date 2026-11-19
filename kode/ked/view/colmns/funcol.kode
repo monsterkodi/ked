@@ -3,7 +3,7 @@ use ../../../kxk    ▪ post slash kseg kutil
 use ../../theme     ◆ color theme
 use ../../edit/tool ◆ belt
 use ../base         ◆ view knob
-use                 ◆ funtree colorpicker uniko
+use                 ◆ funtree sheetree colorpicker uniko
 ■funcol□view
     @: screen @editor features ->
         
@@ -17,7 +17,8 @@ use                 ◆ funtree colorpicker uniko
         @pointerType = 'pointer'
         
         @knob        = new knob        screen         "#{@name}_knob"
-        @funtree     = new funtree            @editor "#{@name}_funtree" ['scrllr']       
+        @funtree     = new funtree            @editor "#{@name}_funtree" ['scrllr']
+        @sheetree    = new sheetree           @editor "#{@name}_sheetree" ['scrllr']
         @colorpicker = new colorpicker screen @editor "#{@name}_colorpicker"
         @uniko       = new uniko       screen @editor "#{@name}_uniko"
         
@@ -30,14 +31,26 @@ use                 ◆ funtree colorpicker uniko
         @funtree.scroll.setColor 'bg'     @funtree.color.bg
         
         @knob   .setColor 'bg'            @funtree.color.bg
+
+        @sheetree.setColor 'bg'           theme.sheetree.bg
         
-        post.on 'funcol.resize' @onFuncolResize
-        post.on 'funcol.toggle' @onFuncolToggle
-        post.on 'funcol.show'   @onFuncolShow
-        post.on 'session.merge' @onSessionMerge
-        post.on 'funcol.focus'  => @funtree.grabFocus()
+        post.on 'session.merge'     @onSessionMerge
+        post.on 'funcol.resize'     @onFuncolResize
+        post.on 'funcol.toggle'     @onFuncolToggle
+        post.on 'funcol.show'       @onFuncolShow
+        post.on 'funcol.focus'      @focusTree
         post.on 'colorpicker.show'  @onColorPickerShow
         post.on 'uniko.show'        @onUnikoShow
+        post.on 'file.loaded'       @onFileLoaded
+        
+    onFileLoaded: path =>
+    
+        if slash.ext(path) == 'sheet'
+            @sheetree.show()
+            @funtree.hide()
+        else
+            @sheetree.hide()
+            @funtree.show()
         
     onSessionMerge: recent =>
     
@@ -83,6 +96,7 @@ use                 ◆ funtree colorpicker uniko
         uh = 0 if uh < 1
 
         @funtree.layout     x y w h-ph-uh
+        @sheetree.layout    x y w h-ph-uh
         @uniko.layout       x y+h-ph-uh w uh if uh
         @colorpicker.layout x y+h-ph w ph if ph
         @knob.layout        x y 1 h
@@ -97,7 +111,8 @@ use                 ◆ funtree colorpicker uniko
         @cells.fill_rect 0 0 -1  0 ' ' null theme.gutter.bg
         
         @funtree.draw()
-        @uniko.draw() if @uniko.visible()
+        @sheetree.draw()    
+        @uniko.draw()       if @uniko.visible()
         @colorpicker.draw() if @colorpicker.visible()
         @knob.draw()
     
@@ -108,22 +123,29 @@ use                 ◆ funtree colorpicker uniko
         ⮐ if not @hover
     
         log "funcol.onContext: #{@hover}" event
+    
+    focusTree: => 
+        
+        if @sheetree.visible()
+            @sheetree.grabFocus()
+        else
+            @funtree.grabFocus()
         
     onFuncolResize: => @knob.doDrag = true
     onFuncolToggle: => 
     
-        @toggle() # if not (@visible() and @collapsed())
+        @toggle()
         @active = @visible()
         ked_session.set 'funcol▸active' @active
         cols = max 16 int(@cells.screen.cols / 6)
         post.emit 'view.size' @name 'left' (@hidden() ? -@cells.cols : cols-@cells.cols)
         if @hidden() ➜ post.emit 'focus' 'editor'
-                     ➜ @funtree.grabFocus()
+                     ➜ @focusTree()
         
     onFuncolShow: =>
     
         if @hidden() ➜ @onFuncolToggle()
-                     ➜ @funtree.grabFocus()
+                     ➜ @focusTree()
         
     onMouse: event =>
     
@@ -134,6 +156,7 @@ use                 ◆ funtree colorpicker uniko
         ret = @uniko.onMouse event       ; ⮐ ret if ret?.redraw
         ret = @colorpicker.onMouse event ; ⮐ ret if ret?.redraw
         ret = @funtree.onMouse event     ; ⮐ ret if ret?.redraw
+        ret = @sheetree.onMouse event    ; ⮐ ret if ret?.redraw
         
     onWheel: event =>
         
@@ -148,6 +171,7 @@ use                 ◆ funtree colorpicker uniko
                 ⮐ ret
 
         @funtree.onWheel event
+        @sheetree.onWheel event
         
     onKey: key event =>
         
@@ -156,8 +180,7 @@ use                 ◆ funtree colorpicker uniko
         ⮐ true if @uniko.onKey key event
         ⮐ true if @colorpicker.onKey key event
 
-        ⮐ if not @funtree.hasFocus()
-        
-        @funtree.onKey key event
+        if @funtree.hasFocus()  ➜ ⮐ @funtree.onKey key event
+        if @sheetree.hasFocus() ➜ ⮐ @sheetree.onKey key event
 
 export funcol

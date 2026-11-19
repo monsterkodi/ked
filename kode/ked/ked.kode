@@ -494,16 +494,13 @@ use child_process ▪ spawn exec
         if text == undefined
             text = '◯ binary ◯'
 
-        # convert text to sueified text for .sheet files
-        
         @sheet = null
 
         if slash.ext(@currentFile) == 'sheet'
-            log "TEXT" text
             rectree = @rectreeOf text
             if valid rectree
-                @sheet = {rectree:rectree source:text}
-                text = layout.sueify({cols:@editor.cells.cols rows:@editor.cells.rows} rectree)
+                @sheet = rectree:rectree source:text
+                text = layout.sueify {cols:@editor.cells.cols rows:@editor.cells.rows} rectree
 
         sueData = sue.desue text
         text    = sueData.text
@@ -548,7 +545,6 @@ use child_process ▪ spawn exec
         @indexer.index @currentFile ext:@editor.state.syntax.ext
         prjcts.index   @currentFile
         git.diff       @currentFile
-        
         watcher.watch  @currentFile
                 
         @t.setTitle slash.file(@title.file)

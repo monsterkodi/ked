@@ -1,0 +1,91 @@
+
+use ../../../kxk    ▪ post slash nfs
+use ../../theme     ◆ color theme icons
+use ../../edit/tool ◆ belt
+use ../../index     ◆ indexer
+use ../menu         ◆ filterchoice
+
+■sheetree□filterchoice
+
+    @: @editor @name features ->
+        
+        super @editor.screen @name features
+        
+        @editor.state.on 'cursorsSet' @onCursorsSet
+        
+        post.on 'file.loaded'    @onFileLoaded
+        post.on 'session.merge'  @onSessionMerge
+        
+    onFileLoaded: path => 
+        
+        log "onFileLoaded #{path}"
+        items = ['hello' 'world']
+        @set items 
+
+    onSessionMerge: recent =>
+    
+        ⮐ if empty recent.sheetree
+        
+        ked_session.set 'sheetree' recent.sheetree
+        
+    onCursorsSet: =>
+    
+        @selectItemForPos @editor.state.mainCursor()
+        
+    selectItemForPos: pos =>
+        
+        if item = @itemForPos pos
+            log 'select item' item
+            
+    itemForPos: pos =>
+        
+        for item,idx in @items
+            if false # check if item is topmost rect at pos
+                ⮐ item
+                
+    emitAction: action choice event  ->
+    
+        if empty choice
+            error 'funtree.emitAction -- empty choice ▸ action:' action 
+            error 'funtree.emitAction -- empty choice ▸ event:' event
+            ⮐ 
+        
+        switch action
+        
+            'space'
+            
+                @jumpTo choice
+                @grabFocus()
+                ⮐ 
+        
+            'right'
+            
+                @selectNext()
+                choice = @choiceAtRow @currentIndex()
+                @jumpTo choice
+                @grabFocus()
+                ⮐ 
+                
+            'left'
+            
+                @selectPrev()
+                choice = @choiceAtRow @currentIndex()
+                @jumpTo choice
+                @grabFocus()
+                ⮐ 
+                
+            'click'
+            'return'
+            
+                @jumpTo choice
+                post.emit 'focus' 'editor'
+                ⮐ 
+                
+            'drag'
+            
+                @jumpTo choice
+                ⮐ 
+                 
+        super action choice event
+        
+export sheetree

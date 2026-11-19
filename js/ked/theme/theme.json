@@ -44,6 +44,9 @@
     "test2": "#88f",
     "test3": "#44f"
   },
+  "sheetree": {
+    "bg": "#0a0a8a"
+  },
   "colorpicker": {
     "bg": "#161616",
     "fg": "#888",
