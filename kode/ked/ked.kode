@@ -94,7 +94,7 @@ use child_process ▪ spawn exec
         post.on 'file.change'       @onFileChange
         post.on 'git.status'        @onGitStatus
         post.on 'config.loaded'     @onConfigLoaded
-        # post.on 'focus'         (name) -> log "focus: '#{name}'"
+        post.on 'focus'         (name) -> log "focus: '#{name}'"
         
         @contextHandlers = [                                                                                                         @dircol @funcol @editor        ]
         @mouseHandlers   = [ @input @context @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop @menu @macro @dircol @funcol @editor @title ]

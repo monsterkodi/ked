@@ -1,0 +1,94 @@
+
+use ../../../kxk ◆ post
+use ../base      ◆ view
+use              ◆ sheetree sheenode
+■sheeditor□view
+
+    @: @screen @editor @name ->
+        
+        super @screen @name
+        
+        @isVisible = false
+        @focusable = true
+        
+        @sheetree = new sheetree @editor "#{@name}_sheetree" ['scrllr']
+        @sheenode = new sheenode @editor "#{@name}_sheenode" 
+        
+        post.on 'file.loaded' @onFileLoaded
+        
+    onFileLoaded: path =>
+    
+        if @editor.sheet?.rectree
+            @sheetree.reloadTree()
+            @show()
+        else
+            @hide()
+            
+    hide: =>
+        
+        @sheetree.hide()
+        @sheenode.hide()
+        super()
+
+    show: =>
+        
+        @sheetree.show()
+        @sheenode.show()
+        super()
+        
+    layout: x y w h ->
+        
+        # log "LAYOUT #{w} #{h} #{@hidden()} #{@collapsed()}"
+        
+        ⮐ if @hidden()
+        
+        log "LAYOUT #{w} #{h}"
+        
+        snh = @sheenode.height
+        sth = h-snh
+        
+        @sheetree.layout x y     w sth
+        @sheenode.layout x y+sth w snh
+        
+        super x y w h
+
+    draw: ->
+        
+        ⮐ if @hidden() or @collapsed()
+        
+        @sheetree.draw()
+        @sheenode.draw()
+    
+        super()
+        
+    hasFocus:  => @sheetree.hasFocus() or @sheenode.hasFocus()
+    grabFocus: => 
+        
+        ⮐ if @hidden() or @collapsed()
+        @sheetree.grabFocus()
+    
+    onMouse: event =>
+    
+        ⮐ if @hidden() or @collapsed()
+        
+        ret = super event               ; ⮐ ret if ret?.redraw
+        ret = @sheetree.onMouse event   ; ⮐ ret if ret?.redraw
+        ret = @sheenode.onMouse event   ; ⮐ ret if ret?.redraw
+        
+        false
+        
+    onWheel: event =>
+        
+        ⮐ if @hidden() or @collapsed()
+
+        @sheetree.onWheel event
+        @sheenode.onWheel event
+        
+    onKey: key event =>
+        
+        ⮐ if @hidden() or @collapsed()
+
+        if @sheetree.hasFocus() ➜ ⮐ @sheetree.onKey key event
+        if @sheenode.hasFocus() ➜ ⮐ @sheenode.onKey key event
+            
+export sheeditor

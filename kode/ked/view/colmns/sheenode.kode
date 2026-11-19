@@ -1,0 +1,80 @@
+
+use ../../../kxk ◆ post
+use ../../theme  ◆ theme
+use ../base      ◆ view input
+
+■sheenode□view
+    # editor for a single sheetree node
+    
+    @: @screen @editor @name ->
+
+        super @screen @name
+
+        @height = 8
+
+        @setColor 'bg' theme.uniko.bg
+
+        @input  = new input  @screen "#{@name}_input"
+
+        @input.on 'action' @onInputAction
+
+        @isVisible = false
+
+    focusInput: =>
+
+        @focus = 'input'
+        @input.grabFocus()
+        true
+
+    show: =>
+
+        @input.set ''
+
+        super()
+
+        post.emit 'redraw'
+
+    hide: =>
+
+        ⮐ if @hidden()
+
+        super()
+
+        @input.state.deselect()
+
+        post.emit 'redraw'
+
+    onKey: key event =>
+
+        ⮐ false if @hidden()
+
+        if @focus == 'input'
+
+            ⮐ @input.onKey key event
+
+        false
+
+    onInputAction: action text =>
+
+    onMouse: event =>
+
+        ⮐ if @hidden()
+        ret = @input.onMouse event   ; ⮐ ret if ret?.redraw
+        super event
+
+    layout: x y w h =>
+
+        super x y w h
+        @input.layout x+1 y+1 w-2 1
+
+    draw: =>
+
+        ⮐ if @hidden() or @collapsed()
+
+        @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
+
+        @input.draw()
+
+        super()
+
+export sheenode

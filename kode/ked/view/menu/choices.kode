@@ -168,7 +168,7 @@ use ../../edit      ◆ editor
     
         @highlight row
         
-        @grabFocus() if @focusable
+        @grabFocus() if @focusable and @visible()
         @emit 'select' @choiceAtRow(row)
         
     highlight: row ->

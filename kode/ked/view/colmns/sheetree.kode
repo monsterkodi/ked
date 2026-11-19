@@ -14,36 +14,38 @@ use ../menu         ◆ filterchoice
         
         @editor.state.on 'cursorsSet' @onCursorsSet
         
-        post.on 'file.loaded'    @onFileLoaded
-        post.on 'session.merge'  @onSessionMerge
         post.on 'editor.resize'  @onEditorResize
         
     onEditorResize: =>
         
-        ⮐ if @hidden()
-        
+        ⮐ if @hidden() or @collapsed()
+        # log "RESIZE #{@visible()} #{@collapsed()}"
         row = @currentIndex()
-        @onFileLoaded() # 𝜏𝖍𝕒𝜏𝖘 𝕒 𝔟𝚒𝜏 𝖍𝕒⊂𝛋𝛾!
+        @reloadTree() 
         @select row
         
-    select: row -> 
+    hide: => 
+        post.emit 'cells.rect'
+        super()
         
+    select: row -> 
+
         super row
         post.emit 'cells.rect' @current()
         
-    onFileLoaded: path => 
+    grabFocus: =>
+    
+        log "FOGGUS #{@hidden()} #{@collapsed()} #{@cells.rows} #{@cells.cols}"
+        ⮐ if @hidden() or @collapsed()
+        super()
+        
+    reloadTree: => 
         
         if @editor.sheet?.rectree
             tree = layout.regionize @editor.cells @editor.sheet.rectree
             @set layout.titlify(tree) 'title'
         else
             post.emit 'cells.rect'
-
-    onSessionMerge: recent =>
-    
-        ⮐ if empty recent.sheetree
-        
-        ked_session.set 'sheetree' recent.sheetree
         
     onCursorsSet: =>
     
@@ -63,7 +65,6 @@ use ../menu         ◆ filterchoice
                 
     jumpTo: choice => 
         
-        log 'JUMP' choice
         post.emit 'goto.line' choice.y choice.x
                 
     emitAction: action choice event  ->
