@@ -17,7 +17,7 @@ use ../base         ◆ view
         
         @setColor 'bg' theme.quicky.bg
         
-        @imgId  = kstr.hash(@state.name) & ~0xffff
+        @imgId      = kstr.hash(@state.name) & ~0xffff
         @rowOffset  = 0
         @imageCache = new Map()
         @imgSeq     = 0

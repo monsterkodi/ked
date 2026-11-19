@@ -48,7 +48,17 @@ use                 ◆ mapscr
         
     onCellsRect: rect =>
     
-        log 'fileeditor.onCellsRect' rect
+        ⮐ if not rect?
+        ⮐ if rect.w < 1 or rect.h < 1
+        
+        t = @cells.screen.t
+        csz = t.cellsz
+        
+        ⮐ if empty csz
+        
+        [x y] = @cells.screenForPos rect.x rect.y
+        
+        t.placeCellRectOverlay 0xefef x y 0 rect.w*csz[0] rect.h*csz[1]
         
     onScreenErased: rect =>
         

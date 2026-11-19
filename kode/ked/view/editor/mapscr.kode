@@ -60,16 +60,10 @@ use                 ◆ mapview
         
         ⮐ if @suspended
         
-        #  an image belongs to a line, so inserting or removing lines needs no
-        #  image work at all. only a color span is tied to the line position.
-        
         if diff.ins.length or diff.del.length
             colors = @state.s.colors
             if colors? and (not empty colors.fg or not empty colors.bg)
                 @clearImages()
-    
-    #  undo emits colors.changed even when no line carries a color span,
-    #  only rebuild the images when a color can really have changed
     
     onColorsChanged: =>
         
@@ -81,9 +75,6 @@ use                 ◆ mapview
         post.emit 'redraw'
         
     onSueChanged: =>
-        
-        #  an area can scale a line, so the row heights are stale
-        #  the images themselves are keyed by line height
         
         @rowCache = null
         post.emit 'redraw'
@@ -255,9 +246,6 @@ use                 ◆ mapview
         
         @drawKnob()
         
-    #  the map only ever shows its window, keeping images for other lines
-    #  would make the terminal hold a picture of the whole file
-    
     pruneImages: =>
         
         cache = @imageCache

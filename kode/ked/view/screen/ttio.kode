@@ -191,10 +191,25 @@ use ../../util/img ◆ rounded
         
         @setCursor x cy
         @write "\x1b_Gq=1,a=p,i=#{@overlayID},p=#{id},X=0,Y=#{oy},w=#{pw},h=#{ph},z=1000,C=1\x1b\\"
+
+    placeCellRectOverlay: id x y py pw ph ->
+        
+        if not @cellRectOverlayID
+            @cellRectOverlayID = @sendImg rounded.rect(300 400 0 [255 255 255 100]) 1
+
+        cy = y + int(py / @cellsz[1])
+        oy = py % @cellsz[1]
+        
+        @setCursor x cy
+        @write "\x1b_Gq=1,a=p,i=#{@cellRectOverlayID},p=#{id},X=0,Y=#{oy},w=#{pw},h=#{ph},z=1000,C=1\x1b\\"
         
     hideImageOverlay: id ->
     
         @write "\x1b_Gq=1,a=d,d=i,i=#{@overlayID},p=#{id}\x1b\\"
+
+    hideCellRectOverlay: id ->
+    
+        @write "\x1b_Gq=1,a=d,d=i,i=#{@cellRectOverlayID},p=#{id}\x1b\\"
         
     sendImg: img id ->
     
