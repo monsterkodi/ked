@@ -1,5 +1,5 @@
 
-use ../kxk        ▪ karg kstr kseg slash post nfs sleep watcher
+use ../kxk        ▪ karg kstr kseg slash post nfs sleep watcher noon
 use ./index       ◆ prjcts indexer
 use ./util        ◆ logfile session help frecent git config dumpstate leak fileutil
 use ./util/img    ◆ rounded squares sircels
@@ -234,7 +234,7 @@ use child_process ▪ spawn exec
 
     rectreeOf: text ->
         try
-            ⮐ JSON.parse text
+            ⮐ noon.parse text
         catch err
             error err
             error "ked - sheet has no readable rectree" @currentFile
