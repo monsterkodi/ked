@@ -16,9 +16,9 @@ use ../../popo   ◆ layout
         @setColor 'bg' theme.uniko.bg
 
         @typeArg    = new tripleinput @screen "#{@name}_typearg"  ['type' 'arg']
-        @xwrInput   = new tripleinput @screen "#{@name}_xwr"  ['x' 'w' 'r'] maxsize:5 number:true
-        @yhbInput   = new tripleinput @screen "#{@name}_yhb"  ['y' 'h' 'b'] maxsize:5 number:true
-        @scaleInput = new tripleinput @screen "#{@name}_scale" ['scale'] maxsize:5 number:true
+        @xwrInput   = new tripleinput @screen "#{@name}_xwr"  ['x' 'w' 'r'] maxsize:5 number:true min:0 max:999
+        @yhbInput   = new tripleinput @screen "#{@name}_yhb"  ['y' 'h' 'b'] maxsize:5 number:true min:0 max:999
+        @scaleInput = new tripleinput @screen "#{@name}_scale" ['scale'] maxsize:5 number:true min:1 max:7
         
         @items      = [@typeArg @xwrInput @yhbInput @scaleInput]
         @focusRing  = @typeArg.inputs.concat(@xwrInput.inputs).concat(@yhbInput.inputs).concat(@scaleInput.inputs)

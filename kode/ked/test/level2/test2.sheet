@@ -15,9 +15,10 @@ children
                 b           2
                 children
                     .
-                        text    HELLO world
+                        text    HELLO world sun shine
                         x       2
                         y       1
                         w       12
-                        h       1
+                        h       8
+                        scale   2
 x           0
