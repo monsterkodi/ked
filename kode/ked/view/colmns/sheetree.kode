@@ -17,6 +17,8 @@ use ../menu         ◆ filterchoice
         post.on 'editor.resize'   @onEditorResize
         post.on 'sheetree.select' @select
         post.on 'sheet.edited'    @onSheetEdited
+        post.on 'popup.show'      @hideRect
+        post.on 'popup.hide'      @showRect
                 
     hide: => 
         post.emit 'cells.rect'
@@ -25,7 +27,10 @@ use ../menu         ◆ filterchoice
     select: row => 
 
         super row
-        post.emit 'cells.rect' @current().rect.abs
+        @showRect()
+        
+    hideRect: => post.emit 'cells.rect'
+    showRect: => if @editor.state.rectree and @current() ➜ post.emit 'cells.rect' @current().rect.abs
         
     grabFocus: =>
     
@@ -45,7 +50,7 @@ use ../menu         ◆ filterchoice
         row = @currentIndex()
         @reloadTree() 
         @highlight row
-        post.emit 'cells.rect' @current().rect.abs
+        @showRect()
 
     reloadTree: => 
         
@@ -54,7 +59,7 @@ use ../menu         ◆ filterchoice
             items = @itemsForTree @editor.state.rectree
             @set items 'title'
         else
-            post.emit 'cells.rect'
+            @hideRect()
 
     itemsForTree: node =>
 
@@ -83,9 +88,8 @@ use ../menu         ◆ filterchoice
             if item = layout.nodeForPos(@editor.cells @editor.state.rectree @editor.state.mainCursor())
                 if item.index? and 0 <= item.index < @fuzzied.length
                     @highlight item.index
-                    node = @current()
-                    post.emit 'cells.rect' node.rect.abs
-                    @emit 'tree.node' node
+                    @showRect()
+                    @emit 'tree.node' @current()
             
     jumpTo: choice => 
         

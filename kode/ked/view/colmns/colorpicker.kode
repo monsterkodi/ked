@@ -18,6 +18,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
         @colorReplace  = null
         @colorDecorate = null
         @sheetNode     = null
+        @sheetEdit     = false
         @bgChanged     = false
         @voided        = [false false]
         @colorStates   = []
@@ -238,6 +239,10 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         ⮐ if not @sheetNode?
 
+        if not @sheetEdit
+            @editor.state.begin()
+            @sheetEdit = true
+
         for [idx channel] in [[0 'fg'] [1 'bg']]
             if @colorVoided idx
                 delete @sheetNode[channel]
@@ -387,6 +392,10 @@ use ../base         ◆ view colorslider rgbinput radio palette
     hide: =>
 
         ⮐ if @hidden()
+
+        if @sheetEdit
+            @editor.state.end()
+            @sheetEdit = false
 
         super()
 

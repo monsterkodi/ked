@@ -23,10 +23,12 @@ sheetPickr = ->
     e.layout 0 0 16 4
 
     e.state.loadLines ['                ' '                ' '                ' '                ']
-    e.state.rectree = {children:[{ text:'hi' x:1 y:1 w:2 h:1 fg:'#ff0000' bg:'#0000ff' }]}
-    e.state.rectreeCols = 16
-    e.state.rectreeRows = 4
-    e.state.setCursors [[1 1]]
+
+    tree = {children:[{ text:'hi' x:1 y:1 w:2 h:1 fg:'#ff0000' bg:'#0000ff' }]}
+
+    e.state.setSheetTree tree 16 4
+    e.state.renderSheet tree {cols:16 rows:4} [1 1] history:false silent:true
+    e.state.clearHistory()
 
     p = new colorpicker h.screen e 'test_colorpicker_sheet'
     p.layout 0 0 16 9
@@ -189,6 +191,33 @@ pal = (cols colors) ->
         e.draw()
 
         h.screen.get_fg(2 1) ▸ [18 52 86]
+
+  ▸ a sheet color change can be undone
+
+        [h e p] = sheetPickr()
+
+        p.setHex '#123456' 0
+        p.emitChanged()
+
+        sds.get(e.state.rectree 'children.0.fg') ▸ '#123456'
+
+        e.state.undo()
+
+        sds.get(e.state.rectree 'children.0.fg') ▸ '#ff0000'
+
+  ▸ a color drag is one undo step
+
+        [h e p] = sheetPickr()
+
+        p.setHex '#123456' 0
+        p.emitChanged()
+        p.setHex '#654321' 0
+        p.emitChanged()
+        p.hide()
+
+        e.state.undo()
+
+        sds.get(e.state.rectree 'children.0.fg') ▸ '#ff0000'
 
   ▸ a voided channel is removed from the sheet node
 

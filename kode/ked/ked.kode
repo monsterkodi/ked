@@ -465,18 +465,14 @@ use child_process ▪ spawn exec
         if text == undefined
             text = '◯ binary ◯'
 
-        delete @editor.state.rectree
-        delete @editor.state.rectreeCols
-        delete @editor.state.rectreeRows
+        @editor.state.clearSheet()
 
         if slash.ext(@currentFile) == 'sheet'
             rectree = noon.parse text
             if valid rectree
                 cols = @editor.cells.cols
                 rows = @editor.cells.rows
-                @editor.state.rectree = rectree
-                @editor.state.rectreeCols = cols
-                @editor.state.rectreeRows = rows
+                @editor.state.setSheetTree rectree cols rows
                 text = layout.sueify {cols:cols rows:rows} rectree
 
         sueData = sue.desue text
@@ -535,9 +531,7 @@ use child_process ▪ spawn exec
                     
     loadMissingFile: path =>
 
-        delete @editor.state.rectree
-        delete @editor.state.rectreeCols
-        delete @editor.state.rectreeRows
+        @editor.state.clearSheet()
 
         @currentFile = path
 
@@ -854,14 +848,7 @@ use child_process ▪ spawn exec
 
         mc = @editor.state.mainCursor()
 
-        @editor.state.rectreeCols = cols
-        @editor.state.rectreeRows = rows
-
-        data = sue.desue layout.sueify({cols:cols rows:rows} @editor.state.rectree)
-
-        @editor.state.loadLines data.text.split('\n')
-        @editor.state.loadSue data.sue
-        @editor.state.setCursors [mc] silent:true
+        @editor.state.renderSheet @editor.state.rectree {cols:cols rows:rows} mc history:false silent:true
                                       
     draw: =>
             

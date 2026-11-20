@@ -697,6 +697,90 @@ use ../util  ◆ harness
 
         sds.get(e.state.rectree 'children.0.rect.abs') ▸ {x:2 y:1 w:3 h:2}
 
+  ▸ sheet undo
+
+        h = new harness cols:16 rows:4
+        e = new editor h.screen 'popo_sheet_undo' []
+        e.layout 0 0 16 4
+        e.grabFocus()
+
+        e.state.loadLines ['                ' '                ' '                ' '                ']
+
+        tree = {children:[{ text:'a' x:2 y:1 w:3 h:2 }]}
+
+        e.state.setSheetTree tree 16 4
+        e.state.renderSheet tree {cols:16 rows:4} [3 1] history:false silent:true
+        e.state.clearHistory()
+
+        e.state.moveSheetNode 'right'
+
+        sds.get(e.state.rectree 'children.0.x') ▸ 3
+
+        e.draw()
+        h.at(3 1) ▸ 'a'
+
+        e.state.undo()
+
+        sds.get(e.state.rectree 'children.0.x') ▸ 2
+        e.state.mainCursor() ▸ [3 1]
+
+        e.draw()
+        h.at(2 1) ▸ 'a'
+
+        e.state.redo()
+
+        sds.get(e.state.rectree 'children.0.x') ▸ 3
+
+  ▸ sheet text undo
+
+        h = new harness cols:16 rows:4
+        e = new editor h.screen 'popo_sheet_text_undo' []
+        e.layout 0 0 16 4
+        e.grabFocus()
+
+        e.state.loadLines ['                ' '                ' '                ' '                ']
+
+        tree = {bg:'#000'}
+
+        e.state.setSheetTree tree 16 4
+        e.state.renderSheet tree {cols:16 rows:4} [2 1] history:false silent:true
+        e.state.clearHistory()
+        e.state.setCursors [[2 1]]
+
+        e.state.insert 'a'
+
+        sds.get(e.state.rectree 'children.0.text') ▸ 'a'
+
+        e.state.undo()
+
+        noChildren = not sds.get(e.state.rectree 'children')?
+        noChildren ▸ true
+
+        e.state.redo()
+
+        sds.get(e.state.rectree 'children.0.text') ▸ 'a'
+
+  ▸ a sheet resize is not an undo step
+
+        h = new harness cols:16 rows:4
+        e = new editor h.screen 'popo_sheet_resize_history' []
+        e.layout 0 0 16 4
+        e.grabFocus()
+
+        e.state.loadLines ['                ' '                ' '                ' '                ']
+
+        tree = {children:[{ text:'a' x:2 y:1 w:3 h:2 }]}
+
+        e.state.setSheetTree tree 16 4
+        e.state.renderSheet tree {cols:16 rows:4} [3 1] history:false silent:true
+        e.state.clearHistory()
+
+        before = e.state.h.length
+
+        e.state.renderSheet tree {cols:10 rows:4} [3 1] history:false silent:true
+
+        e.state.h.length ▸ before
+
   ▸ sheet render size
 
         h = new harness cols:16 rows:4

@@ -2,6 +2,7 @@ var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!
 
 import kxk from "../../../kxk.js"
 let kstr = kxk.kstr
+let kseg = kxk.kseg
 let post = kxk.post
 
 import prof from "../../util/prof.js"
@@ -54,32 +55,93 @@ export default {
         this.renderSheet(rectree,cells,[pos[0] + advance,pos[1]])
         return advance
     },
+    setSheetTree:function (rectree, cols, rows)
+    {
+        this.rectree = rectree
+        this.rectreeCols = cols
+        this.rectreeRows = rows
+        this.s = this.s.set('rectree',layout.plainNode(rectree))
+        this.s = this.s.set('rectreeCols',cols)
+        this.s = this.s.set('rectreeRows',rows)
+        return this
+    },
+    clearSheet:function ()
+    {
+        delete this.rectree
+        delete this.rectreeCols
+        delete this.rectreeRows
+        this.s = this.s.set('rectree',null)
+        this.s = this.s.set('rectreeCols',null)
+        this.s = this.s.set('rectreeRows',null)
+        return this
+    },
+    restoreSheet:function ()
+    {
+        var _68_21_, _71_42_, _72_42_
+    
+        if ((this.s.rectree != null))
+        {
+            this.rectree = this.s.rectree.asMutable()
+            this.rectreeCols = ((_71_42_=this.s.rectreeCols) != null ? _71_42_ : this.cells.cols)
+            this.rectreeRows = ((_72_42_=this.s.rectreeRows) != null ? _72_42_ : this.cells.rows)
+            layout.absolutize({cols:this.rectreeCols,rows:this.rectreeRows},this.rectree)
+            post.emit('sheet.edited')
+        }
+        else
+        {
+            this.clearSheet()
+        }
+        return this
+    },
     renderSheet:function (rectree, cells, pos, opt)
     {
-        var data
+        var data, lines
     
         opt = (opt != null ? opt : {})
-        post.emit('sheet.edited')
         data = sue.desue(layout.sueify({cols:cells.cols,rows:cells.rows},rectree))
-        this.loadLines(data.text.split('\n'))
-        this.loadSue(data.sue)
+        lines = kseg.segls(data.text.split('\n'))
+        this.segls = lines
+        this.changeLinesSegls()
+        this.syntax.setSegls(this.s.lines)
+        this.s = this.s.set('sue',data.sue)
+        this.s = this.s.set('rectree',layout.plainNode(rectree))
+        this.s = this.s.set('rectreeCols',cells.cols)
+        this.s = this.s.set('rectreeRows',cells.rows)
         if ((pos != null))
         {
-            if (opt.silent)
+            this.s = this.s.set('cursors',[pos])
+            this.s = this.s.set('main',0)
+        }
+        this.rectree = rectree
+        this.rectreeCols = cells.cols
+        this.rectreeRows = cells.rows
+        this.segls = this.s.lines.slice()
+        this.rowCache = null
+        this.r = []
+        this.emit('sue.changed')
+        if (opt.history === false)
+        {
+            this.swapState()
+        }
+        else
+        {
+            this.pushState()
+        }
+        if ((pos != null))
+        {
+            this.adjustViewForMainCursor()
+            if (!opt.silent)
             {
-                this.setCursors([pos],{silent:true})
-            }
-            else
-            {
-                this.setCursors([pos])
+                mode.cursorsSet(this)
+                this.emit('cursorsSet')
             }
         }
-        this.rectreeCols = cells.cols
-        return this.rectreeRows = cells.rows
+        post.emit('sheet.edited')
+        return this
     },
     moveSheetNode:function (dir)
     {
-        var cells, cursor, maxX, maxY, moved, node, oldRect, rect, x, y, _66_30_
+        var cells, cursor, maxX, maxY, moved, node, oldRect, rect, x, y, _134_30_
     
         if (!(this.rectree != null))
         {
@@ -130,5 +192,5 @@ export default {
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5zZXJ0LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L2FjdC9pbnNlcnQua29kZSJdLCJtYXBwaW5ncyI6Ijs7T0FDYSxVQUFBO0lBQU07SUFBSzs7T0FDTCxXQUFSOztPQUNRLGFBQVQ7O09BQ1MsV0FBWjtPQUFpQixVQUFqQjs7T0FDWSxXQUFBOzs7SUFHZixpQkFBUTs7OztRQUVKLE9BQU8sS0FBSyxPQUFPLEtBQUU7YUFFaEIsS0FBQyxvQkFBYSxLQUFDLGdCQUFnQjs7Ozt1QkFFM0IsS0FBQyxFQUFFOztnQkFDb0IsU0FBUTs7dUJBQWxDLEtBQUM7O1lBQ0gsS0FBQzs7a0JBRWEsS0FBSyxzQkFBc0IsS0FBQyxFQUFFLE1BQU0sS0FBSyxLQUFDLEVBQUUsVUFBN0QsZ0JBQU07O1FBRVAsS0FBQyxrQkFBa0I7UUFFbkIsS0FBQztRQUNELEtBQUMsU0FBVztRQUNaLEtBQUMsV0FBVztlQUVaLEtBQUssV0FBVzs7SUFFcEIsMEJBQWlCOzs7O1FBRWIsU0FBVyxnQkFBTSxLQUFDLGlDQUFjLEtBQUMsTUFBTSxPQUFNLGdCQUFNLEtBQUMsaUNBQWMsS0FBQyxNQUFNO1FBQ3pFLFVBQVUsS0FBQztRQUNYLE1BQVUsS0FBQztRQUNYLFVBQVUsT0FBTyxhQUFhLE1BQU0sUUFBUSxJQUFJO2FBRXJDOzttQkFBVDs7UUFFRixLQUFDLFlBQVksUUFBUSxPQUFPLElBQUksS0FBRyxRQUFRLElBQUk7ZUFFL0M7O0lBRUosc0JBQWMsU0FBUSxPQUFNLEtBQUk7Ozs7UUFJNUIsT0FBQSxjQUFBO1FBRUEsS0FBSyxLQUFLO1FBRVYsT0FBTyxJQUFJLE1BQU0sT0FBTyxRQUFRLEtBQUssTUFBTSxLQUFLLEtBQUssTUFBTSxNQUFNO1FBRWpFLEtBQUMsVUFBVSxLQUFLLEtBQUssTUFBTTtRQUMzQixLQUFDLFFBQVUsS0FBSzthQUViOztnQkFDSSxJQUFJOztnQkFDSCxLQUFDLFlBQVksTUFBSyxPQUFPOzs7O2dCQUV6QixLQUFDLFlBQVk7OztRQUVyQixLQUFDLGNBQWMsTUFBTTtlQUNyQixLQUFDLGNBQWMsTUFBTTs7SUFFekIsd0JBQWdCOzs7O2NBRUUsS0FBQzs7bUJBQWI7O1FBRUYsU0FBUyxLQUFLLEtBQUMsTUFBTSxLQUFLLEtBQUssS0FBQyxNQUFNO1FBRXRDLE9BQU8sV0FBVyxNQUFNLEtBQUM7UUFFekIsU0FBUyxLQUFDO1FBQ1YsT0FBUyxPQUFPLFVBQVUsS0FBQyxRQUFRO2NBRXJCOzttQkFBWjs7UUFFRixvQkFBZ0IsS0FBSyxLQUFLO1FBQzFCLFFBQVUsT0FBTyxXQUFXLE1BQU0sS0FBQyxRQUFRLE9BQU87Y0FFcEM7O21CQUFaOztRQUVGLE9BQU8sTUFBTSxLQUFLO1FBRWxCLGVBQVcsS0FBSyxHQUFHLEtBQUssSUFBSSxLQUFLLElBQUk7UUFDckMsZUFBVyxLQUFLLEdBQUcsS0FBSyxJQUFJLEtBQUssSUFBSTtRQUVyQyxjQUFVLEtBQUssRUFBRSxNQUFNLEtBQUssSUFBSSxPQUFPLEtBQUssUUFBUTtRQUNwRCxjQUFVLEtBQUssRUFBRSxNQUFNLEtBQUssSUFBSSxPQUFPLEtBQUssUUFBUTtRQUVwRCxLQUFDLFlBQVksS0FBQyxRQUFRLE9BQU8sRUFBRTtlQUUvQjs7SUFFSjs7OztrQkFFaUMsS0FBSyx1Q0FBdUMsS0FBQyxFQUFFLE1BQU0sS0FBQyxFQUFFLFFBQVEsS0FBQyxFQUFFLGFBQS9GLGdCQUFNLGtCQUFROztRQUVmLEtBQUM7UUFDRCxLQUFDLFNBQWM7UUFDZixLQUFDLGNBQWM7ZUFDZixLQUFDLFdBQWM7O0lBRW5CLDRCQUFtQixTQUFROzs7O2tCQUVSLEtBQUssdUJBQXVCLEtBQUMsRUFBRSxNQUFNLEtBQUMsRUFBRSxXQUFXLFFBQVEsT0FBekUsZ0JBQU07O1FBRVAsS0FBQyxTQUFjO1FBQ2YsS0FBQztlQUNELEtBQUMsV0FBYyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5zZXJ0LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L2FjdC9pbnNlcnQua29kZSJdLCJtYXBwaW5ncyI6Ijs7T0FDYSxVQUFBO0lBQU07SUFBSztJQUFLOztPQUNWLFdBQVI7O09BQ1EsYUFBVDs7T0FDUyxXQUFaO09BQWlCLFVBQWpCOztPQUNZLFdBQUE7OztJQUdmLGlCQUFROzs7O1FBRUosT0FBTyxLQUFLLE9BQU8sS0FBRTthQUVoQixLQUFDLG9CQUFhLEtBQUMsZ0JBQWdCOzs7O3VCQUUzQixLQUFDLEVBQUU7O2dCQUNvQixTQUFROzt1QkFBbEMsS0FBQzs7WUFDSCxLQUFDOztrQkFFYSxLQUFLLHNCQUFzQixLQUFDLEVBQUUsTUFBTSxLQUFLLEtBQUMsRUFBRSxVQUE3RCxnQkFBTTs7UUFFUCxLQUFDLGtCQUFrQjtRQUVuQixLQUFDO1FBQ0QsS0FBQyxTQUFXO1FBQ1osS0FBQyxXQUFXO2VBRVosS0FBSyxXQUFXOztJQUVwQiwwQkFBaUI7Ozs7UUFFYixTQUFXLGdCQUFNLEtBQUMsaUNBQWMsS0FBQyxNQUFNLE9BQU0sZ0JBQU0sS0FBQyxpQ0FBYyxLQUFDLE1BQU07UUFDekUsVUFBVSxLQUFDO1FBQ1gsTUFBVSxLQUFDO1FBQ1gsVUFBVSxPQUFPLGFBQWEsTUFBTSxRQUFRLElBQUk7YUFFckM7O21CQUFUOztRQUVGLEtBQUMsWUFBWSxRQUFRLE9BQU8sSUFBSSxLQUFHLFFBQVEsSUFBSTtlQUUvQzs7SUFFSix1QkFBZSxTQUFRLE1BQUs7O1FBRXhCLEtBQUMsVUFBVTtRQUNYLEtBQUMsY0FBYztRQUNmLEtBQUMsY0FBYztRQUVmLEtBQUMsSUFBSSxLQUFDLEVBQUUsSUFBSSxVQUFVLE9BQU8sVUFBVTtRQUN2QyxLQUFDLElBQUksS0FBQyxFQUFFLElBQUksY0FBYztRQUMxQixLQUFDLElBQUksS0FBQyxFQUFFLElBQUksY0FBYztlQUUxQjs7SUFFSjs7ZUFFVyxLQUFDO2VBQ0QsS0FBQztlQUNELEtBQUM7UUFFUixLQUFD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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/act/insert.kode

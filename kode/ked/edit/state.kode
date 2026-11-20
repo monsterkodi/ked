@@ -446,6 +446,9 @@ use           ◆ keys mode
             scrollOffset: 0
             colors:      {fg: [], bg: []}
             sue:         []
+            rectree:     null
+            rectreeCols: null
+            rectreeRows: null
             
         @syntax.clear()
 
@@ -799,6 +802,7 @@ use           ◆ keys mode
         @segls = @s.lines.slice()
         @rowCache = null
         @syntax.setSegls @s.lines
+        @restoreSheet()
         @emit 'colors.changed'
 
     redo: =>
@@ -809,6 +813,7 @@ use           ◆ keys mode
         @segls = @s.lines.slice()
         @rowCache = null
         @syntax.setSegls @s.lines
+        @restoreSheet()
         @emit 'colors.changed'
 
     begin: =>

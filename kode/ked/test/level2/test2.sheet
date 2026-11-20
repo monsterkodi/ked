@@ -8,7 +8,7 @@ children
                 b       1
             .
                 pattern     .
-                fg          |#ff0|
+                fg          |#001eff|
                 x           4
                 y           2
                 r           4
@@ -21,4 +21,6 @@ children
                         w       39%
                         h       10
                         scale   2
+                        bg      |#000000|
+                        fg      |#f5ff69|
 x           0

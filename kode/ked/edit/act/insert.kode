@@ -1,5 +1,5 @@
 
-use ../../../kxk ▪ kstr post
+use ../../../kxk ▪ kstr kseg post
 use ../../util   ◆ prof
 use ../../popo   ◆ layout
 use ../tool      ◆ belt sue
@@ -39,27 +39,95 @@ export
 
         advance
 
+    setSheetTree: (rectree cols rows) ->
+
+        @rectree = rectree
+        @rectreeCols = cols
+        @rectreeRows = rows
+
+        @s = @s.set 'rectree' layout.plainNode(rectree)
+        @s = @s.set 'rectreeCols' cols
+        @s = @s.set 'rectreeRows' rows
+
+        @
+
+    clearSheet: ->
+
+        delete @rectree
+        delete @rectreeCols
+        delete @rectreeRows
+
+        @s = @s.set 'rectree' null
+        @s = @s.set 'rectreeCols' null
+        @s = @s.set 'rectreeRows' null
+
+        @
+
+    restoreSheet: ->
+
+        if @s.rectree?
+
+            @rectree = @s.rectree.asMutable()
+            @rectreeCols = @s.rectreeCols ? @cells.cols
+            @rectreeRows = @s.rectreeRows ? @cells.rows
+
+            layout.absolutize {cols:@rectreeCols rows:@rectreeRows} @rectree
+
+            post.emit 'sheet.edited'
+
+        else
+            @clearSheet()
+
+        @
+
     renderSheet: (rectree cells pos opt) ->
 
-        # render a sheet rectree into the editor
+        # render a sheet rectree and commit it in one undoable step
 
         opt ?= {}
 
-        post.emit 'sheet.edited'
+        data  = sue.desue layout.sueify({cols:cells.cols rows:cells.rows} rectree)
+        lines = kseg.segls data.text.split('\n')
 
-        data = sue.desue layout.sueify({cols:cells.cols rows:cells.rows} rectree)
+        @segls = lines
 
-        @loadLines data.text.split('\n')
-        @loadSue   data.sue
+        @changeLinesSegls()
+
+        @syntax.setSegls @s.lines
+
+        @s = @s.set 'sue' data.sue
+        @s = @s.set 'rectree' layout.plainNode(rectree)
+        @s = @s.set 'rectreeCols' cells.cols
+        @s = @s.set 'rectreeRows' cells.rows
 
         if pos?
-            if opt.silent
-                @setCursors [pos] silent:true
-            else
-                @setCursors [pos]
+            @s = @s.set 'cursors' [pos]
+            @s = @s.set 'main' 0
 
+        @rectree = rectree
         @rectreeCols = cells.cols
         @rectreeRows = cells.rows
+
+        @segls = @s.lines.slice()
+        @rowCache = null
+        @r = []
+
+        @emit 'sue.changed'
+
+        if opt.history == false
+            @swapState()
+        else
+            @pushState()
+
+        if pos?
+            @adjustViewForMainCursor()
+            if not opt.silent
+                mode.cursorsSet @
+                @emit 'cursorsSet'
+
+        post.emit 'sheet.edited'
+
+        @
 
     moveSheetNode: (dir) ->
 
