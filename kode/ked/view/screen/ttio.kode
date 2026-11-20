@@ -454,6 +454,12 @@ use ../../util/img ◆ rounded
             mods.push key
             
         combo = mods.join '+'
+
+        if empty char and key.length == 1 and key.charCodeAt(0) >= 32 and not ('ctrl' in mods or 'alt' in mods or 'cmd' in mods)
+            if 'shift' in mods
+                char = key.toUpperCase()
+            else
+                char = key
             
         event = 
             key:    key
@@ -538,11 +544,12 @@ use ../../util/img ◆ rounded
     keyEventForChar: char =>
         
         if char.length
-            key = char.toLowerCase()
+            key   = char.toLowerCase()
+            combo = key == char ? char : "shift+#{key}"
             ⮐ 
                 key:    key
                 type:   'press'
-                combo:  key != char ? 'shift' : ''
+                combo:  combo
                 char:   char
                 
     keyEventForCombo: combo char='' =>

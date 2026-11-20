@@ -24,7 +24,7 @@ use ../menu         ◆ filterchoice
 
         row = @currentIndex()
         @reloadTree() 
-        @select row
+        @highlight row
         
     hide: => 
         post.emit 'cells.rect'

@@ -182,7 +182,6 @@ use ../edit/tool ◆ sue
                 break
                 
         if item ➜ items.push item
-                ➜ log '???' rectree    
         for child in rectree.children
             @titlify cells child items depth+2
             

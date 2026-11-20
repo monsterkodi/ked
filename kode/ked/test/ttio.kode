@@ -211,6 +211,42 @@ use ../util        ◆ harness keyscript
 
         keys ▸ ['down' 'down' 'return']
 
+  ▸ a printable character is a key with itself as combo and char
+
+        t = new ttio headless:true input:false
+        keys = []
+
+        t.on 'key' (combo event) -> keys.push [combo event.char]
+
+        for ch in ['a' 'b' ' ' '!']
+            t.onData Buffer.from(ch)
+
+        keys ▸ [['a' 'a'] ['b' 'b'] [' ' ' '] ['!' '!']]
+
+  ▸ an uppercase character is shift and that character
+
+        t = new ttio headless:true input:false
+        keys = []
+
+        t.on 'key' (combo event) -> keys.push [combo event.char]
+
+        for ch in ['A' 'b']
+            t.onData Buffer.from(ch)
+
+        keys ▸ [['shift+a' 'A'] ['b' 'b']]
+
+  ▸ a kitty character without modifiers is its own char
+
+        t = new ttio headless:true input:false
+        keys = []
+
+        t.on 'key' (combo event) -> keys.push [combo event.char]
+
+        t.onData Buffer.from('\x1b[104;1u')
+        t.onData Buffer.from('\x1b[105u')
+
+        keys ▸ [['h' 'h'] ['i' 'i']]
+
   ▸ a mouse press in a chunk is a mouse event
 
         t = new ttio headless:true input:false
