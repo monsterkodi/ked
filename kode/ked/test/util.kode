@@ -419,3 +419,28 @@ use ../edit        ◆ mode
             for x in 0...8
                 s.getClass(x y) ▸ fresh.getClass(x y)
         
+
+▸ number inputs
+
+  ▸ clamps to min and max
+
+        h = new harness
+
+        i = new input h.screen 'test_number_input' number:true min:0 max:5
+        i.layout 0 0 20 1
+
+        i.changeValue 10
+        i.value ▸ 5
+
+        i.changeValue -3
+        i.value ▸ 0
+
+        i.changeValue 3
+        i.value ▸ 3
+
+        i.onWheel {dir:'down' cell:[1 0]}
+        i.value ▸ 2
+
+        i.changeValue 0
+        i.onWheel {dir:'down' cell:[1 0]}
+        i.value ▸ 0

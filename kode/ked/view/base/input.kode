@@ -48,9 +48,9 @@ use ../../edit   ◆ editor
         
     clampValue: v =>
         
-        ⮐ 0 if empty v
-        if @opt.max ➜ v = min @opt.max int(v)
-        if @opt.min ➜ v = max @opt.min int(v)
+        ⮐ (@opt.min ? 0) if empty v
+        if valid @opt.max ➜ v = min @opt.max int(v)
+        if valid @opt.min ➜ v = max @opt.min int(v)
         int(v)
         
     changeValue: v =>

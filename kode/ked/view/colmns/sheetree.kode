@@ -87,7 +87,6 @@ use ../menu         ◆ filterchoice
                     @highlight item.index
                     node = @current()
                     post.emit 'cells.rect' node.rect.abs
-                    log 'CURSOR SET'
                     @emit 'tree.node' node
             
     jumpTo: choice => 
