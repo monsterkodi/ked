@@ -593,8 +593,8 @@ use child_process ▪ spawn exec
     
     textForSave: (path text) =>
 
-        # temporary hack to save original file content until sheet editing is done:
-        ⮐ @editor.sheet.source if @editor.sheet? and path == @currentFile
+        # a sheet is saved from its rectree:
+        ⮐ layout.sourceOf(@editor.sheet.rectree) if @editor.sheet? and slash.ext(path) == 'sheet'
 
         areas = @editor.state.s.sue ? []
         areas = areas.concat(sue.areasForColors(@editor.state.s.colors))

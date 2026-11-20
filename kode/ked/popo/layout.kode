@@ -1,4 +1,5 @@
 use ◆ fill
+use ../../kxk ▪ noon
 use ../edit/tool ◆ sue
 
 ■layout
@@ -195,6 +196,32 @@ use ../edit/tool ◆ sue
         type = @typeOf node
 
         ⮐ node[type] if type?
+
+    @sourceOf: rectree ->
+
+        # the .sheet text for a rectree, without computed node fields
+
+        ⮐ '' if not rectree?
+
+        plain = @plainNode rectree
+
+        noon.stringify plain
+
+    @plainNode: node ->
+
+        out = {}
+
+        for key,value of node
+            continue if key in ['rect' 'title' 'index' 'regions']
+            if key == 'children'
+                out.children = []
+                for child in value
+                    plainChild = @plainNode child
+                    out.children.push plainChild
+            else
+                out[key] = value
+
+        out
 
     @nodeForPos: cells rectree pos ->
 
