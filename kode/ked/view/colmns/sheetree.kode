@@ -17,15 +17,7 @@ use ../menu         ◆ filterchoice
         post.on 'editor.resize'   @onEditorResize
         post.on 'sheetree.select' @select
         post.on 'sheet.edited'    @onSheetEdited
-        
-    onEditorResize: =>
-        
-        ⮐ if @hidden() or @collapsed()
-
-        row = @currentIndex()
-        @reloadTree() 
-        @highlight row
-        
+                
     hide: => 
         post.emit 'cells.rect'
         super()
@@ -44,11 +36,17 @@ use ../menu         ◆ filterchoice
     
         delete @editor.state.rectreeCols
         delete @editor.state.rectreeRows
+        @onEditorResize()
+
+    onEditorResize: =>
+        
+        ⮐ if @hidden() or @collapsed()
+
         row = @currentIndex()
-        @reloadTree()
+        @reloadTree() 
         @highlight row
         post.emit 'cells.rect' @current().rect.abs
-        
+
     reloadTree: => 
         
         if @editor.state.rectree?

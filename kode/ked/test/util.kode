@@ -430,17 +430,72 @@ use ../edit        ◆ mode
         i.layout 0 0 20 1
 
         i.changeValue 10
-        i.value ▸ 5
+        i.getValue() ▸ '5'
 
         i.changeValue -3
-        i.value ▸ 0
+        i.getValue() ▸ '0'
 
         i.changeValue 3
-        i.value ▸ 3
+        i.getValue() ▸ '3'
 
         i.onWheel {dir:'down' cell:[1 0]}
-        i.value ▸ 2
+        i.getValue() ▸ '2'
 
         i.changeValue 0
         i.onWheel {dir:'down' cell:[1 0]}
-        i.value ▸ 0
+        i.getValue() ▸ '0'
+
+  ▸ stores values as strings
+
+        h = new harness
+
+        i = new input h.screen 'test_number_input_string' number:true min:0 max:5
+        i.layout 0 0 20 1
+
+        i.changeValue 3
+
+        i.getValue() ▸ '3'
+        i.int() ▸ 3
+
+  ▸ percent values keep their suffix
+
+        h = new harness
+
+        i = new input h.screen 'test_number_input_percent' number:true min:0 max:999 percent:true
+        i.layout 0 0 20 1
+
+        i.changeValue '50%'
+
+        i.current() ▸ '50%'
+        i.getValue() ▸ '50%'
+        i.int() ▸ 50
+
+        i.changeValue '150%'
+        i.current() ▸ '100%'
+
+        i.changeValue '200'
+        i.current() ▸ '200'
+
+  ▸ typing a percent sign keeps it visible
+
+        h = new harness
+
+        i = new input h.screen 'test_number_input_percent_typing' number:true min:0 max:999 percent:true
+        i.layout 0 0 20 1
+
+        h.focus i
+        h.type i '50%'
+
+        i.current() ▸ '50%'
+
+  ▸ wheel keeps the percent suffix
+
+        h = new harness
+
+        i = new input h.screen 'test_number_input_percent_wheel' number:true min:0 max:999 percent:true
+        i.layout 0 0 20 1
+
+        i.changeValue '50%'
+        i.onWheel {dir:'up' cell:[1 0]}
+
+        i.current() ▸ '51%'

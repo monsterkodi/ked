@@ -80,6 +80,49 @@ ked_sess = ->
 
         node.pattern ▸ 'dots'
 
+  ▸ percent values are stored as strings
+
+        ked_sess()
+
+        h = new harness cols:40 rows:20
+        e = new editor h.screen 'sheenode_test_percent' []
+        sn = new sheenode h.screen e
+        sn.layout 0 0 40 9
+
+        node = { text:'hi' x:1 y:2 w:3 h:1 }
+
+        sn.onNode node
+
+        sn.xwrInput.inputs[1].changeValue '50%'
+
+        node.w ▸ '50%'
+        noR = not node.r?
+        noR ▸ true
+
+        sn.xwrInput.inputs[0].changeValue '200'
+
+        node.x ▸ 200
+
+  ▸ typing into a percent input updates the node
+
+        ked_sess()
+
+        h = new harness cols:40 rows:20
+        e = new editor h.screen 'sheenode_test_percent_typing' []
+        sn = new sheenode h.screen e
+        sn.layout 0 0 40 9
+
+        node = { text:'hi' x:1 y:2 w:3 h:1 }
+
+        sn.onNode node
+
+        sn.xwrInput.inputs[1].grabFocus()
+        sn.xwrInput.inputs[1].selectAll()
+        h.type sn.xwrInput.inputs[1] '50%'
+
+        sn.xwrInput.inputs[1].current() ▸ '50%'
+        node.w ▸ '50%'
+
   ▸ the scale row
 
         ked_sess()

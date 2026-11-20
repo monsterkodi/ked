@@ -216,7 +216,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
     rgbChanged: =>
 
-        @colorStates[@activeIndex()] = [@red.getValue() @green.getValue() @blue.getValue()]
+        @colorStates[@activeIndex()] = [@red.int() @green.int() @blue.int()]
 
         @syncRadio()
         @syncSliders()

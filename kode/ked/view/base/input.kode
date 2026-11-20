@@ -15,9 +15,6 @@ use ../../edit   ◆ editor
         
         super @screen @name ['brckts' 'replex' 'unype']
         
-        if @opt.number
-            @value = @opt.value ? 0
-        
         @drawUnfocusedCursors = true
         
         @setColor 'selection_line'  @color.selection
@@ -48,22 +45,30 @@ use ../../edit   ◆ editor
         
     clampValue: v =>
         
-        ⮐ (@opt.min ? 0) if empty v
+        ⮐ "#{@opt.min ? 0}" if empty v
+
         p = @opt.percent and v is str and v.endsWith('%')
-        if valid @opt.min ➜ v = max @opt.min int(v)
-        if valid @opt.max ➜ v = min @opt.max int(v)
-        if valid @opt.percent and @opt.max > 100
-            v = min 100 int(v)
-        "#{v}" + (p ? '%' : '')
+        value = int v
+
+        if p
+            value = clamp 0 100 value
+        else
+            if valid @opt.min ➜ value = max @opt.min value
+            if valid @opt.max ➜ value = min @opt.max value
+
+        "#{value}" + (p ? '%' : '')
         
     changeValue: v =>
         
         ⮐ if not @opt.number
-        
+
+        if typeof v == 'number' and @opt.percent and @current().endsWith '%'
+            v = "#{v}%"
+
         v = @clampValue v
-        if v != @getValue()
-            @setValue v
-            @emit 'valueChange' @current() @name
+
+        @setValue v if v != @getValue()
+        @emit 'valueChange' @current() @name
             
     getValue: -> @current()
     int: -> int @current()
@@ -74,7 +79,7 @@ use ../../edit   ◆ editor
         value = @clampValue v
         if value != @getValue()
             @set value
-            if value == '0'
+            if @int() == 0
                 @selectAll()
 
     onWheel: event =>
@@ -131,7 +136,7 @@ use ../../edit   ◆ editor
         sr = super key event
         
         if before != @current()
-            @changeValue parseInt(@current()) if @opt.number
+            @changeValue @current() if @opt.number
             @emit 'action' 'change' @current() 
             ⮐ true
         

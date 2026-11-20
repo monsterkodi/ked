@@ -25,7 +25,7 @@ use ../../popo   ◆ layout
         @mouseItems = @items
         @wheelItems = [@xwrInput @yhbInput @scaleInput]
         
-        for input in @wheelItems
+        for input in @focusRing
             input.on 'valueChange' @onInputChange
 
         @typeArg.inputs[0].on 'action' @onTypeAction
@@ -33,18 +33,19 @@ use ../../popo   ◆ layout
         
         @isVisible = false
         
-    onInputChange: value =>
+    onInputChange: (value name) =>
         
-        if not value.endsWith '%' ➜ value = int value
+        if not (value is str and value.endsWith '%')
+            value = int value
         
         if 
-            input.name.endsWith 'xwr_x' ➜ @node.x = value
-            input.name.endsWith 'xwr_w' ➜ @node.w = value ; delete @node.r ; @xwrInput.inputs[2].set ''
-            input.name.endsWith 'xwr_r' ➜ @node.r = value ; delete @node.w ; @xwrInput.inputs[1].set ''
-            input.name.endsWith 'yhb_y' ➜ @node.y = value
-            input.name.endsWith 'yhb_h' ➜ @node.h = value ; delete @node.b ; @yhbInput.inputs[2].set ''
-            input.name.endsWith 'yhb_b' ➜ @node.b = value ; delete @node.h ; @yhbInput.inputs[1].set ''
-            input.name.endsWith 'scale_scale' ➜ @node.scale = input.value
+            name.endsWith 'xwr_x' ➜ @node.x = value
+            name.endsWith 'xwr_w' ➜ @node.w = value ; delete @node.r ; @xwrInput.inputs[2].set ''
+            name.endsWith 'xwr_r' ➜ @node.r = value ; delete @node.w ; @xwrInput.inputs[1].set ''
+            name.endsWith 'yhb_y' ➜ @node.y = value
+            name.endsWith 'yhb_h' ➜ @node.h = value ; delete @node.b ; @yhbInput.inputs[2].set ''
+            name.endsWith 'yhb_b' ➜ @node.b = value ; delete @node.h ; @yhbInput.inputs[1].set ''
+            name.endsWith 'scale_scale' ➜ @node.scale = value
             
         @emit 'shee.node' @node
 

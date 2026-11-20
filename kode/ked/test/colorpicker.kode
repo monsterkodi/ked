@@ -103,6 +103,17 @@ pal = (cols colors) ->
 
         p.foregroundHex() ▸ (color.hex(theme.syntax.keyword))
 
+  ▸ an rgb input change updates the color
+
+        p = pickr()
+
+        p.setHex '#000000'
+        p.syncAll()
+
+        p.red.changeValue 255
+
+        p.foregroundHex() ▸ '#ff0000'
+
   ▸ a sheet node at the cursor seeds the picker
 
         [h e p] = sheetPickr()
