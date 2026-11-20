@@ -70,7 +70,68 @@ use ../util  ◆ harness
                 tree = { x:'10%' y:'10%' r:'10%' b:10 children:[{ x:4 y:2 w:'50%' b:'20%' children:[{ x:'25%' y:3 r:6 h:'25%' children:[{ x:2 y:'50%' w:12 h:2 children:[{ x:0 y:0 r:'100%' b:'100%' }] }] }] }] }
                 
                 layout.absolutize {cols:100 rows:50} tree ▸ { x:10 y:5 w:80 h:35 children:[{ x:14 y:7 w:40 h:26 children:[{ x:24 y:10 w:24 h:6 children:[{ x:26 y:13 w:12 h:2 children:[{ x:26 y:13 w:0 h:0 }] }] }] }] }
-            
+
+    ▸ nodeForPos
+
+      ▸ containment
+
+                tree = { bg:'#000' children:[{ text:'hello' x:2 y:1 w:5 h:2 }] }
+
+                res = layout.nodeForPos {cols:10 rows:5} tree [3 2]
+
+                res.text ▸ 'hello'
+                res.x ▸ 2
+                res.y ▸ 1
+                res.w ▸ 5
+                res.h ▸ 2
+
+                res = layout.nodeForPos {cols:10 rows:5} tree [7 2]
+                res.bg ▸ '#000'
+
+                res = layout.nodeForPos {cols:10 rows:5} tree [3 3]
+                res.bg ▸ '#000'
+
+      ▸ percentages and anchors
+
+                layout.nodeForPos {cols:10 rows:5} {x:'20%' y:1 w:'40%' h:2} [2 1] ▸ {x:2 y:1 w:4 h:2}
+                layout.nodeForPos {cols:10 rows:5} {x:'20%' y:1 w:'40%' h:2} [5 2] ▸ {x:2 y:1 w:4 h:2}
+                layout.nodeForPos {cols:10 rows:5} {x:'20%' y:1 w:'40%' h:2} [6 2] ▸ null
+                layout.nodeForPos {cols:10 rows:5} {x:'20%' y:1 w:'40%' h:2} [2 3] ▸ null
+
+                layout.nodeForPos {cols:10 rows:5} {x:1 y:1 r:2 b:1} [7 3] ▸ {x:1 y:1 w:7 h:3}
+                layout.nodeForPos {cols:10 rows:5} {x:1 y:1 r:2 b:1} [8 3] ▸ null
+
+      ▸ topmost
+
+                tree = { bg:'#111' children:[{ text:'x' x:1 y:1 w:2 h:2 }] }
+
+                res = layout.nodeForPos {cols:4 rows:4} tree [2 2]
+                res.text ▸ 'x'
+
+                tree = { children:[{ text:'a' x:0 y:0 w:4 h:2 } { text:'b' x:2 y:0 w:4 h:2 }] }
+
+                res = layout.nodeForPos {cols:6 rows:2} tree [1 0]
+                res.text ▸ 'a'
+
+                res = layout.nodeForPos {cols:6 rows:2} tree [3 0]
+                res.text ▸ 'b'
+
+                tree = { children:[{ text:'outer' x:0 y:0 w:4 h:2 children:[{ text:'inner' x:1 y:0 w:2 h:2 }] }] }
+
+                res = layout.nodeForPos {cols:4 rows:2} tree [1 0]
+                res.text ▸ 'inner'
+
+                res = layout.nodeForPos {cols:4 rows:2} tree [3 0]
+                res.text ▸ 'outer'
+
+      ▸ empty and indexed
+
+                tree = { children:[{ text:'z' x:2 y:2 w:0 h:0 }] }
+
+                layout.nodeForPos {cols:4 rows:4} tree [2 2] ▸ {x:0 y:0 w:4 h:4 children:[{text:'z' x:2 y:2 w:0 h:0}]}
+
+                layout.nodeForPos {cols:4 rows:4} { index:1 text:'i' x:1 y:1 w:2 h:2 } [2 2] ▸ {index:1 text:'i' x:1 y:1 w:2 h:2}
+
   ▸ fill
 
     ▸ pattern

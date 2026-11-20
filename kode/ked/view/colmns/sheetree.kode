@@ -61,7 +61,7 @@ use ../menu         ◆ filterchoice
     onCursorsSet: =>
 
         if @editor.sheet?.rectree
-            if item = layout.nodeForPos(@editor.sheet.rectree @editor.state.mainCursor())
+            if item = layout.nodeForPos(@editor.cells @editor.sheet.rectree @editor.state.mainCursor())
                 if item.index? and 0 <= item.index < @fuzzied.length
                     log "GOT ITEM #{item.index}/#{@fuzzied.length}"
                     @highlight item.index

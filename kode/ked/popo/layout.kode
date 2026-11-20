@@ -197,10 +197,32 @@ use ../edit/tool ◆ sue
                 else
                     delete treeNode[key]
 
-    @nodeForPos: rectree pos ->
-        
+    @nodeForPos: cells rectree pos ->
+
         # return 'topmost' node containing pos
-        
+
+        @topmostIn @absolutize(cells rectree) pos
+
+    @topmostIn: node pos ->
+
+        ⮐ null if not node?
+
+        found = null
+        found = node if @holds(node pos)
+
+        for child in node.children ? []
+            if hit = @topmostIn child pos
+                found = hit
+
+        found
+
+    @holds: node pos ->
+
+        x = pos[0]
+        y = pos[1]
+
+        ⮐ x >= node.x and x < node.x+node.w and y >= node.y and y < node.y+node.h
+
     @nodeAtIndex: rectree index ->
     
         if rectree.index == index
