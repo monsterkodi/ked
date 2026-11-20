@@ -42,8 +42,8 @@ use ../menu         ◆ filterchoice
         
     onNode: node =>
     
-        delete @editor.sheet.cols
-        delete @editor.sheet.rows
+        delete @editor.state.rectreeCols
+        delete @editor.state.rectreeRows
         row = @currentIndex()
         @reloadTree()
         @highlight row
@@ -51,9 +51,9 @@ use ../menu         ◆ filterchoice
         
     reloadTree: => 
         
-        if @editor.sheet?.rectree
-            layout.titlify @editor.cells @editor.sheet.rectree
-            items = @itemsForTree @editor.sheet.rectree
+        if @editor.state.rectree?
+            layout.titlify @editor.cells @editor.state.rectree
+            items = @itemsForTree @editor.state.rectree
             @set items 'title'
         else
             post.emit 'cells.rect'
@@ -81,8 +81,8 @@ use ../menu         ◆ filterchoice
         
     onCursorsSet: =>
 
-        if @editor.sheet?.rectree
-            if item = layout.nodeForPos(@editor.cells @editor.sheet.rectree @editor.state.mainCursor())
+        if @editor.state.rectree?
+            if item = layout.nodeForPos(@editor.cells @editor.state.rectree @editor.state.mainCursor())
                 if item.index? and 0 <= item.index < @fuzzied.length
                     @highlight item.index
                     node = @current()

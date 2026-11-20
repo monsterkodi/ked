@@ -107,9 +107,6 @@ use           ◆ keys mode
         areas = @s.sue ? []
         ⮐ if empty areas or empty ranges
 
-        #  the cut works on rectangles, a multiline range covers a different
-        #  part of every line, so it is split into one range per line
-
         ranges = belt.splitLineRanges(@s.lines ranges false)
 
         cut = sue.rangesCutFromAreasInLines(ranges areas @s.lines)
@@ -121,9 +118,6 @@ use           ◆ keys mode
         @r = []
         @pushState()
         @emit 'sue.changed'
-
-    #  the ranges to decorate: the selections, or the word at every cursor
-    #  the selections are immutable, so they are only read, never changed
 
     decorationRanges: =>
 
@@ -190,10 +184,6 @@ use           ◆ keys mode
         @r = []
         @pushState()
         @emit 'sue.changed'
-
-    #  the selections split into single line pieces
-    #  a piece that covers a whole line is scaled by the line, a partial
-    #  piece by wrapping it in a run
 
     selectionPieces: =>
 
@@ -415,9 +405,6 @@ use           ◆ keys mode
         
         @changeLinesSegls()
         
-        #  the syntax caches the dissection by line, so it has to see the same
-        #  line objects the editor keeps in @s.lines, not the incoming array
-        
         @syntax.setSegls @s.lines
         
         @r = []
@@ -543,9 +530,6 @@ use           ◆ keys mode
     rowPrefix: =>
 
         ⮐ @rowCache if @rowCache and @rowCacheExt == @syntax.ext
-
-        #  the width of every line is cached by line reference,
-        #  a line is immutable, so unchanged lines keep their width
 
         @lineWidths ?= new WeakMap()
 

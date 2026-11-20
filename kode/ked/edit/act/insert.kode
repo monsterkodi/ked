@@ -10,7 +10,7 @@ export
 
         text = mode.insert @ text
 
-        ⮐ if @sheet? and @insertIntoSheet text
+        ⮐ if @rectree? and @insertIntoSheet text
 
         if valid @s.selections
             ⮐ @indentSelectedLines() if text == '\t'
@@ -28,8 +28,8 @@ export
 
     insertIntoSheet: text ->
 
-        cells   = {cols:(@sheet.cols ? @cells.cols) rows:(@sheet.rows ? @cells.rows)}
-        rectree = @sheet.rectree
+        cells   = {cols:(@rectreeCols ? @cells.cols) rows:(@rectreeRows ? @cells.rows)}
+        rectree = @rectree
         pos     = @mainCursor()
         advance = layout.insertTextAt cells rectree pos text
 
@@ -43,8 +43,8 @@ export
         @loadSue   data.sue
         @setCursors [[pos[0]+advance pos[1]]]
 
-        @sheet.cols = cells.cols
-        @sheet.rows = cells.rows
+        @rectreeCols = cells.cols
+        @rectreeRows = cells.rows
 
         advance
 

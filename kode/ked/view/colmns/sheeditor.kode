@@ -23,7 +23,7 @@ use              ◆ sheetree sheenode
                 
     onFileLoaded: path =>
     
-        if @editor.sheet?.rectree
+        if @editor.state.rectree?
             @sheetree.reloadTree()
             @show()
         else

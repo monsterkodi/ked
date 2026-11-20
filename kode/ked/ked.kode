@@ -465,16 +465,19 @@ use child_process ▪ spawn exec
         if text == undefined
             text = '◯ binary ◯'
 
-        delete @editor.sheet
-        delete @editor.state.sheet
+        delete @editor.state.rectree
+        delete @editor.state.rectreeCols
+        delete @editor.state.rectreeRows
 
         if slash.ext(@currentFile) == 'sheet'
             rectree = noon.parse text
             if valid rectree
-                @editor.sheet = rectree:rectree source:text
-                @editor.state.sheet = @editor.sheet
-                # log "SHEET" @editor.sheet
-                text = layout.sueify {cols:@editor.cells.cols rows:@editor.cells.rows} rectree
+                cols = @editor.cells.cols
+                rows = @editor.cells.rows
+                @editor.state.rectree = rectree
+                @editor.state.rectreeCols = cols
+                @editor.state.rectreeRows = rows
+                text = layout.sueify {cols:cols rows:rows} rectree
 
         sueData = sue.desue text
         text    = sueData.text
@@ -531,6 +534,10 @@ use child_process ▪ spawn exec
         @
                     
     loadMissingFile: path =>
+
+        delete @editor.state.rectree
+        delete @editor.state.rectreeCols
+        delete @editor.state.rectreeRows
 
         @currentFile = path
 
@@ -594,7 +601,7 @@ use child_process ▪ spawn exec
     textForSave: (path text) =>
 
         # a sheet is saved from its rectree:
-        ⮐ layout.sourceOf(@editor.sheet.rectree) if @editor.sheet? and slash.ext(path) == 'sheet'
+        ⮐ layout.sourceOf(@editor.state.rectree) if @editor.state.rectree? and slash.ext(path) == 'sheet'
 
         areas = @editor.state.s.sue ? []
         areas = areas.concat(sue.areasForColors(@editor.state.s.colors))
@@ -837,20 +844,20 @@ use child_process ▪ spawn exec
 
     sheetCheck: => # temporary hack to inject and relayout sheets
 
-        ⮐ if not @editor.sheet?
+        ⮐ if not @editor.state.rectree?
 
         cols = @editor.cells.cols
         rows = @editor.cells.rows
 
         ⮐ if cols < 1 or rows < 1
-        ⮐ if @editor.sheet.cols == cols and @editor.sheet.rows == rows
+        ⮐ if @editor.state.rectreeCols == cols and @editor.state.rectreeRows == rows
 
         mc = @editor.state.mainCursor()
 
-        @editor.sheet.cols = cols
-        @editor.sheet.rows = rows
+        @editor.state.rectreeCols = cols
+        @editor.state.rectreeRows = rows
 
-        data = sue.desue layout.sueify({cols:cols rows:rows} @editor.sheet.rectree)
+        data = sue.desue layout.sueify({cols:cols rows:rows} @editor.state.rectree)
 
         @editor.state.loadLines data.text.split('\n')
         @editor.state.loadSue data.sue

@@ -544,7 +544,7 @@ use ../util  ◆ harness
 
         e.state.loadLines ['                ' '                ' '                ' '                ']
 
-        e.state.sheet = rectree:{bg:'#000'}
+        e.state.rectree = {bg:'#000'}
 
         e.state.setCursors [[2 1]]
 
@@ -554,8 +554,8 @@ use ../util  ◆ harness
 
         e.state.mainCursor() ▸ [3 1]
         h.at(2 1) ▸ 'a'
-        sds.get(e.state.sheet.rectree 'children.0.text') ▸ 'a'
-        sds.get(e.state.sheet.rectree 'children.0.rect.abs') ▸ {x:2 y:1 w:2 h:1}
+        sds.get(e.state.rectree 'children.0.text') ▸ 'a'
+        sds.get(e.state.rectree 'children.0.rect.abs') ▸ {x:2 y:1 w:2 h:1}
 
         e.state.insert 'b'
 
@@ -563,18 +563,18 @@ use ../util  ◆ harness
 
         e.state.mainCursor() ▸ [4 1]
         h.at(3 1) ▸ 'b'
-        sds.get(e.state.sheet.rectree 'children.0.text') ▸ 'ab'
-        sds.get(e.state.sheet.rectree 'children.0.w') ▸ 3
+        sds.get(e.state.rectree 'children.0.text') ▸ 'ab'
+        sds.get(e.state.rectree 'children.0.w') ▸ 3
 
-        e.state.sheet = rectree:{x:2 y:1 w:6 h:2}
+        e.state.rectree = {x:2 y:1 w:6 h:2}
 
         e.state.setCursors [[10 3]]
 
         e.state.insert 'c'
 
-        sds.get(e.state.sheet.rectree 'children.0.text') ▸ 'c'
-        sds.get(e.state.sheet.rectree 'children.0.x') ▸ 8
-        sds.get(e.state.sheet.rectree 'children.0.y') ▸ 2
+        sds.get(e.state.rectree 'children.0.text') ▸ 'c'
+        sds.get(e.state.rectree 'children.0.x') ▸ 8
+        sds.get(e.state.rectree 'children.0.y') ▸ 2
 
   ▸ sheet render size
 
@@ -584,11 +584,13 @@ use ../util  ◆ harness
 
         e.state.loadLines ['                ' '                ' '                ' '                ']
 
-        e.state.sheet = rectree:{children:[{pattern:'x' x:'50%' y:0 w:'50%' h:2}]} cols:10 rows:4
+        e.state.rectree = {children:[{pattern:'x' x:'50%' y:0 w:'50%' h:2}]}
+        e.state.rectreeCols = 10
+        e.state.rectreeRows = 4
 
         e.state.setCursors [[6 0]]
 
         e.state.insert 'a'
 
-        sds.get(e.state.sheet.rectree 'children.0.rect.abs') ▸ {x:5 y:0 w:5 h:2}
-        sds.get(e.state.sheet.rectree 'children.0.children.0.rect.abs') ▸ {x:6 y:0 w:2 h:1}
+        sds.get(e.state.rectree 'children.0.rect.abs') ▸ {x:5 y:0 w:5 h:2}
+        sds.get(e.state.rectree 'children.0.children.0.rect.abs') ▸ {x:6 y:0 w:2 h:1}
