@@ -59,21 +59,14 @@ use ../menu         ◆ filterchoice
             post.emit 'cells.rect'
         
     onCursorsSet: =>
-    
-        # log 'cursor set'
-        @selectItemForPos @editor.state.mainCursor()
-        
-    selectItemForPos: pos =>
-        
-        if item = @itemForPos pos
-            log 'select item' item
+
+        if @editor.sheet?.rectree
+            if item = layout.nodeForPos(@editor.sheet.rectree @editor.state.mainCursor())
+                if item.index? and 0 <= item.index < @fuzzied.length
+                    log "GOT ITEM #{item.index}/#{@fuzzied.length}"
+                    @highlight item.index
+                    post.emit 'cells.rect' @current().rect
             
-    itemForPos: pos =>
-        
-        for item,idx in @items
-            if false # check if item is topmost rect at pos
-                ⮐ item
-                
     jumpTo: choice => 
         
         post.emit 'goto.line' choice.y choice.x

@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}}
 
 var sheetree
 
@@ -29,8 +29,6 @@ sheetree = (function ()
         this.name = name
     
         this["jumpTo"] = this["jumpTo"].bind(this)
-        this["itemForPos"] = this["itemForPos"].bind(this)
-        this["selectItemForPos"] = this["selectItemForPos"].bind(this)
         this["onCursorsSet"] = this["onCursorsSet"].bind(this)
         this["reloadTree"] = this["reloadTree"].bind(this)
         this["onNode"] = this["onNode"].bind(this)
@@ -109,30 +107,18 @@ sheetree = (function ()
 
     sheetree.prototype["onCursorsSet"] = function ()
     {
-        return this.selectItemForPos(this.editor.state.mainCursor())
-    }
+        var item, _63_24_, _65_29_
 
-    sheetree.prototype["selectItemForPos"] = function (pos)
-    {
-        var item
-
-        if (item = this.itemForPos(pos))
+        if ((this.editor.sheet != null ? this.editor.sheet.rectree : undefined))
         {
-            console.log('select item',item)
-        }
-    }
-
-    sheetree.prototype["itemForPos"] = function (pos)
-    {
-        var idx, item
-
-        var list = _k_.list(this.items)
-        for (idx = 0; idx < list.length; idx++)
-        {
-            item = list[idx]
-            if (false)
+            if (item = layout.nodeForPos(this.editor.sheet.rectree,this.editor.state.mainCursor()))
             {
-                return item
+                if ((item.index != null) && (0 <= item.index && item.index < this.fuzzied.length))
+                {
+                    console.log(`GOT ITEM ${item.index}/${this.fuzzied.length}`)
+                    this.highlight(item.index)
+                    return post.emit('cells.rect',this.current().rect)
+                }
             }
         }
     }
@@ -210,5 +196,5 @@ sheetree = (function ()
 
 export default sheetree;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZXRyZWUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWV0cmVlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQVM7SUFBSztJQUFNOztPQUNYLFlBQVo7T0FBa0IsWUFBbEI7T0FBd0IsWUFBeEI7O09BQ1ksV0FBUDs7T0FDTyxjQUFYOztPQUNXLGFBQVo7O09BQ1ksbUJBQWY7OztBQUVOLFlBQUQ7O3lCQUFVO2FBRU4sVUFBSSxRQUFRLE1BQUs7O1FBQWQ7UUFBUTs7Ozs7Ozs7Ozs7O2lEQUVELEtBQUMsT0FBTyxPQUFPLEtBQUMsS0FBSztRQUUzQixLQUFDLE9BQU8sTUFBTSxHQUFHLGFBQWEsS0FBQztRQUUvQixLQUFLLEdBQUcsZ0JBQWtCLEtBQUM7UUFDM0IsS0FBSyxHQUFHLGtCQUFrQixLQUFDOzs7d0JBRS9COzs7O1lBRVMsS0FBQyxZQUFZLEtBQUM7Ozs7UUFFbkIsTUFBTSxLQUFDO1FBQ1AsS0FBQztlQUNELEtBQUMsT0FBTzs7O3dCQUVaOztRQUNJLEtBQUssS0FBSzs7Ozt3QkFHZCxxQkFBUTs7NENBRUU7O2VBQ04sS0FBSyxLQUFLLGFBQWEsS0FBQyxVQUFVOzs7d0JBRXRDOztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7Ozs7O3dCQUd2QixxQkFBUTs7OztRQUVKLE9BQU8sZUFBZSxLQUFDLE9BQU8sTUFBTSxRQUFRO2VBQ3JDLEtBQUMsT0FBTyxNQUFNO2VBQ2QsS0FBQyxPQUFPLE1BQU07UUFDckIsTUFBTSxLQUFDO1FBQ1AsS0FBQztRQUNELEtBQUMsVUFBVTtlQUVYLEtBQUssS0FBSyxhQUFhLEtBQUMsVUFBVTs7O3dCQUV0Qzs7OzthQUVPLEtBQUMsT0FBTyxnQkFBUixLQUFDLE9BQU8sTUFBTzs7WUFDZCxRQUFRLE9BQU8sUUFBUSxLQUFDLE9BQU8sTUFBTSxLQUFDLE9BQU8sTUFBTTttQkFDbkQsS0FBQyxJQUFJLE1BQU07Ozs7bUJBRVgsS0FBSyxLQUFLOzs7O3dCQUVsQjs7ZUFHSSxLQUFDLGlCQUFpQixLQUFDLE9BQU8sTUFBTTs7O3dCQUVwQywrQkFBa0I7Ozs7WUFFWCxPQUFPLEtBQUMsV0FBVzs7WUFDbEIsWUFBSSxjQUFjOzs7O3dCQUUxQix5QkFBWTs7Ozs0QkFFUSxLQUFDO2FBQVI7O1lBQUw7Z0JBQ0c7O3VCQUNHOzs7Ozt3QkFFZCxxQkFBUTs7OztRQUVKLEtBQUssS0FBSyxZQUFZLE9BQU8sRUFBRSxPQUFPO1FBQ3RDLE9BQU8sS0FBQztRQUNSLEtBQUssUUFBUSxLQUFDO2VBQ2QsS0FBQyxLQUFLLFlBQVk7Ozt3QkFFdEI7Ozs7ZUFBd0IsS0FBQyxPQUFPLEtBQUM7Ozt3QkFDakM7Ozs7ZUFBd0IsS0FBQyxPQUFPLEtBQUM7Ozt3QkFFakMseUJBQVksUUFBTyxRQUFPOztzQkFFYjs7WUFDTCxjQUFNLCtDQUErQztZQUNyRCxjQUFNLDhDQUE4Qzs7O2dCQUdqRDs7aUJBRUg7Z0JBRUksS0FBQyxPQUFPO2dCQUNSLEtBQUM7OztpQkFHTDtnQkFFSSxLQUFDO2dCQUNELFNBQVMsS0FBQyxZQUFZLEtBQUM7Z0JBQ3ZCLEtBQUMsT0FBTztnQkFDUixLQUFDOzs7aUJBR0w7Z0JBRUksS0FBQztnQkFDRCxTQUFTLEtBQUMsWUFBWSxLQUFDO2dCQUN2QixLQUFDLE9BQU87Z0JBQ1IsS0FBQzs7O2lCQUdMO2lCQUNBO2dCQUVJLEtBQUMsT0FBTztnQkFDUixLQUFLLEtBQUssUUFBUTs7O2lCQUd0QjtnQkFFSSxLQUFDLE9BQU87Ozs7O3VEQUtWLE9BQU8sT0FBTzs7O1dBM0gzQjs7O2VBNkhNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZXRyZWUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWV0cmVlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQVM7SUFBSztJQUFNOztPQUNYLFlBQVo7T0FBa0IsWUFBbEI7T0FBd0IsWUFBeEI7O09BQ1ksV0FBUDs7T0FDTyxjQUFYOztPQUNXLGFBQVo7O09BQ1ksbUJBQWY7OztBQUVOLFlBQUQ7O3lCQUFVO2FBRU4sVUFBSSxRQUFRLE1BQUs7O1FBQWQ7UUFBUTs7Ozs7Ozs7OztpREFFRCxLQUFDLE9BQU8sT0FBTyxLQUFDLEtBQUs7UUFFM0IsS0FBQyxPQUFPLE1BQU0sR0FBRyxhQUFhLEtBQUM7UUFFL0IsS0FBSyxHQUFHLGdCQUFrQixLQUFDO1FBQzNCLEtBQUssR0FBRyxrQkFBa0IsS0FBQzs7O3dCQUUvQjs7OztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7O1FBRW5CLE1BQU0sS0FBQztRQUNQLEtBQUM7ZUFDRCxLQUFDLE9BQU87Ozt3QkFFWjs7UUFDSSxLQUFLLEtBQUs7Ozs7d0JBR2QscUJBQVE7OzRDQUVFOztlQUNOLEtBQUssS0FBSyxhQUFhLEtBQUMsVUFBVTs7O3dCQUV0Qzs7WUFFUyxLQUFDLFlBQVksS0FBQzs7Ozs7Ozt3QkFHdkIscUJBQVE7Ozs7UUFFSixPQUFPLGVBQWUsS0FBQyxPQUFPLE1BQU0sUUFBUTtlQUNyQyxLQUFDLE9BQU8sTUFBTTtlQUNkLEtBQUMsT0FBTyxNQUFNO1FBQ3JCLE1BQU0sS0FBQztRQUNQLEtBQUM7UUFDRCxLQUFDLFVBQVU7ZUFFWCxLQUFLLEtBQUssYUFBYSxLQUFDLFVBQVU7Ozt3QkFFdEM7Ozs7YUFFTyxLQUFDLE9BQU8sZ0JBQVIsS0FBQyxPQUFPLE1BQU87O1lBQ2QsUUFBUSxPQUFPLFFBQVEsS0FBQyxPQUFPLE1BQU0sS0FBQyxPQUFPLE1BQU07bUJBQ25ELEtBQUMsSUFBSSxNQUFNOzs7O21CQUVYLEtBQUssS0FBSzs7Ozt3QkFFbEI7Ozs7YUFFTyxLQUFDLE9BQU8sZ0JBQVIsS0FBQyxPQUFPLE1BQU87O2dCQUNYLE9BQU8sT0FBTyxXQUFXLEtBQUMsT0FBTyxNQUFNLFFBQVEsS0FBQyxPQUFPLE1BQU07O3FCQUN6RCxLQUFLLG1CQUFXLEtBQUssS0FBSyxTQUFMLEtBQUssUUFBUSxLQUFDLFFBQVE7O29CQUMxQyx3QkFBZ0IsS0FBSyxTQUFTLEtBQUMsUUFBUTtvQkFDdkMsS0FBQyxVQUFVLEtBQUs7MkJBQ2hCLEtBQUssS0FBSyxhQUFhLEtBQUMsVUFBVTs7Ozs7O3dCQUVsRCxxQkFBUTs7OztRQUVKLEtBQUssS0FBSyxZQUFZLE9BQU8sRUFBRSxPQUFPO1FBQ3RDLE9BQU8sS0FBQztRQUNSLEtBQUssUUFBUSxLQUFDO2VBQ2QsS0FBQyxLQUFLLFlBQVk7Ozt3QkFFdEI7Ozs7ZUFBd0IsS0FBQyxPQUFPLEtBQUM7Ozt3QkFDakM7Ozs7ZUFBd0IsS0FBQyxPQUFPLEtBQUM7Ozt3QkFFakMseUJBQVksUUFBTyxRQUFPOztzQkFFYjs7WUFDTCxjQUFNLCtDQUErQztZQUNyRCxjQUFNLDhDQUE4Qzs7O2dCQUdqRDs7aUJBRUg7Z0JBRUksS0FBQyxPQUFPO2dCQUNSLEtBQUM7OztpQkFHTDtnQkFFSSxLQUFDO2dCQUNELFNBQVMsS0FBQyxZQUFZLEtBQUM7Z0JBQ3ZCLEtBQUMsT0FBTztnQkFDUixLQUFDOzs7aUJBR0w7Z0JBRUksS0FBQztnQkFDRCxTQUFTLEtBQUMsWUFBWSxLQUFDO2dCQUN2QixLQUFDLE9BQU87Z0JBQ1IsS0FBQzs7O2lCQUdMO2lCQUNBO2dCQUVJLEtBQUMsT0FBTztnQkFDUixLQUFLLEtBQUssUUFBUTs7O2lCQUd0QjtnQkFFSSxLQUFDLE9BQU87Ozs7O3VEQUtWLE9BQU8sT0FBTzs7O1dBcEgzQjs7O2VBc0hNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/sheetree.kode

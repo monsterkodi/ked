@@ -196,6 +196,10 @@ use ../edit/tool ◆ sue
                     treeNode[key] = node[key]
                 else
                     delete treeNode[key]
+
+    @nodeForPos: rectree pos ->
+        
+        # return 'topmost' node containing pos
         
     @nodeAtIndex: rectree index ->
     
