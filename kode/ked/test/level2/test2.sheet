@@ -1,15 +1,23 @@
-bg        #333
+bg          |#333|
 children
-  .
-    erase     bg
-    x         2
-    y         1
-    r         2
-    b         1
-  .
-    pattern   |.|
-    fg        #ff0
-    x         4
-    y         2
-    r         4
-    b         2
+            .
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+            .
+                pattern     .
+                fg          |#ff0|
+                x           4
+                y           2
+                r           4
+                b           2
+                children
+                    .
+                        text    HELLO world
+                        x       2
+                        y       1
+                        w       12
+                        h       1
+x           0

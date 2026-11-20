@@ -1,0 +1,98 @@
+use ../../kxk ▪ post
+use ../edit    ◆ editor
+use ../util    ◆ harness
+use ../popo    ◆ layout
+use ../view/colmns ◆ sheenode
+
+ked_sess = ->
+    store = {}
+    fakeGet = (key def) -> store[key] ? def
+    fakeSet = (key value) -> store[key] = value
+    global.ked_session = get:fakeGet set:fakeSet
+
+▸ sheenode
+
+  ▸ inputs
+
+        ked_sess()
+
+        h = new harness cols:40 rows:20
+        e = new editor h.screen 'sheenode_test_editor' []
+        sn = new sheenode h.screen e
+        sn.layout 0 0 40 9
+
+        node = { text:'hi' x:1 y:2 w:3 h:1 r:4 b:5 fg:'#fff' bg:'#000' }
+
+        sn.onNode node
+
+        sn.items.length ▸ 4
+        sn.focusRing.length ▸ 9
+        sn.items[3] ▸ sn.scaleInput
+        sn.typeArg.inputs[0].current() ▸ 'text'
+        sn.typeArg.inputs[1].current() ▸ 'hi'
+
+  ▸ changing type and arg
+
+        ked_sess()
+
+        h = new harness cols:40 rows:20
+        e = new editor h.screen 'sheenode_test_typearg' []
+        sn = new sheenode h.screen e
+        sn.layout 0 0 40 9
+
+        node = { text:'hi' x:1 y:2 w:3 h:1 }
+
+        sn.onNode node
+
+        sn.onTypeAction 'change' 'pattern'
+
+        node.pattern ▸ 'hi'
+        noText = not node.text?
+        noText ▸ true
+
+        sn.onArgAction 'change' 'dots'
+
+        node.pattern ▸ 'dots'
+
+        sn.onTypeAction 'change' ''
+
+        noPattern = not node.pattern?
+        noPattern ▸ true
+
+        sn.onTypeAction 'change' 'nonsense'
+
+        layout.typeOf(node) ▸ null
+
+        node = { text:'hi' x:1 y:2 w:3 h:1 }
+        sn.onNode node
+
+        sn.typeArg.inputs[0].grabFocus()
+        sn.typeArg.inputs[0].selectAll()
+        h.type sn.typeArg.inputs[0] 'pattern'
+
+        node.pattern ▸ 'hi'
+        noTextInNode = not node.text?
+        noTextInNode ▸ true
+
+        sn.typeArg.inputs[1].grabFocus()
+        sn.typeArg.inputs[1].selectAll()
+        h.type sn.typeArg.inputs[1] 'dots'
+
+        node.pattern ▸ 'dots'
+
+  ▸ the scale row
+
+        ked_sess()
+
+        h = new harness cols:40 rows:20
+        e = new editor h.screen 'sheenode_test_scale' []
+        sn = new sheenode h.screen e
+        sn.layout 0 0 40 9
+
+        node = { text:'hi' x:1 y:2 w:3 h:1 }
+
+        sn.onNode node
+
+        sn.scaleInput.inputs[0].changeValue 3
+
+        node.scale ▸ 3

@@ -11,21 +11,25 @@ use ../../popo   ◆ layout
 
         super @editor.screen @name
 
-        @height = 7
+        @height = 9
 
         @setColor 'bg' theme.uniko.bg
 
-        @typeArg  = new tripleinput @screen "#{@name}_typearg"  ['type' 'arg']
-        @xwrInput = new tripleinput @screen "#{@name}_xwr"  ['x' 'w' 'r'] maxsize:5 number:true
-        @yhbInput = new tripleinput @screen "#{@name}_yhb"  ['y' 'h' 'b'] maxsize:5 number:true
+        @typeArg    = new tripleinput @screen "#{@name}_typearg"  ['type' 'arg']
+        @xwrInput   = new tripleinput @screen "#{@name}_xwr"  ['x' 'w' 'r'] maxsize:5 number:true
+        @yhbInput   = new tripleinput @screen "#{@name}_yhb"  ['y' 'h' 'b'] maxsize:5 number:true
+        @scaleInput = new tripleinput @screen "#{@name}_scale" ['scale'] maxsize:5 number:true
         
-        @items      = [@typeArg @xwrInput @yhbInput]
-        @focusRing  = @typeArg.inputs.concat(@xwrInput.inputs).concat(@yhbInput.inputs)
+        @items      = [@typeArg @xwrInput @yhbInput @scaleInput]
+        @focusRing  = @typeArg.inputs.concat(@xwrInput.inputs).concat(@yhbInput.inputs).concat(@scaleInput.inputs)
         @mouseItems = @items
-        @wheelItems = [@xwrInput @yhbInput]
+        @wheelItems = [@xwrInput @yhbInput @scaleInput]
         
         for input in @focusRing
             input.on 'valueChange' @onInputChange
+
+        @typeArg.inputs[0].on 'action' @onTypeAction
+        @typeArg.inputs[1].on 'action' @onArgAction
         
         @isVisible = false
         
@@ -38,7 +42,36 @@ use ../../popo   ◆ layout
             input.name.endsWith 'yhb_y' ➜ @node.y = input.value
             input.name.endsWith 'yhb_h' ➜ @node.h = input.value ; delete @node.b ; @yhbInput.inputs[2].set ''
             input.name.endsWith 'yhb_b' ➜ @node.b = input.value ; delete @node.h ; @yhbInput.inputs[1].set ''
+            input.name.endsWith 'scale_scale' ➜ @node.scale = input.value
             
+        @emit 'shee.node' @node
+
+    onTypeAction: action text =>
+
+        ⮐ if action != 'change'
+
+        old = layout.typeOf @node
+
+        if empty text
+            delete @node[old] if old?
+        else if text in ['erase''text''pattern''bg''fg']
+            delete @node[old] if old? and old != text
+            @node[text] = @typeArg.inputs[1].current()
+        else
+            ⮐
+
+        @emit 'shee.node' @node
+
+    onArgAction: action text =>
+
+        ⮐ if action != 'change'
+
+        type = layout.typeOf @node
+
+        ⮐ if not type?
+
+        @node[type] = text
+
         @emit 'shee.node' @node
             
     onMouseEnter: event =>
@@ -63,6 +96,8 @@ use ../../popo   ◆ layout
         @yhbInput.inputs[0].set String(node.y ? '')
         @yhbInput.inputs[1].set String(node.h ? '')
         @yhbInput.inputs[2].set String(node.b ? '')
+
+        @scaleInput.inputs[0].set String(node.scale ? '')
         
         idx = @node.bg and not @node.fg ? 1 : 0
         post.emit 'colorpicker.show' [@node.fg @node.bg] focus:false select:idx
