@@ -39,11 +39,21 @@ use ../menu         ◆ filterchoice
         ⮐ if @hidden() or @collapsed()
         super()
         
+    onNode: node =>
+    
+        layout.modifyTreeNode @editor.sheet.rectree node
+        delete @editor.sheet.cols
+        delete @editor.sheet.rows
+        row = @currentIndex()
+        @reloadTree()
+        @highlight row
+        # post.emit 'redraw'
+        post.emit 'cells.rect' @current().rect
+        
     reloadTree: => 
         
         if @editor.sheet?.rectree
             items = layout.titlify @editor.cells @editor.sheet.rectree
-            # log "ITEMS" items
             @set items 'title'
         else
             post.emit 'cells.rect'

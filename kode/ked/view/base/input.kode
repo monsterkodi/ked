@@ -46,11 +46,18 @@ use ../../edit   ◆ editor
         @state.selectLine 0
         @state.moveCursors 'eol'
         
+    clampValue: v =>
+        
+        ⮐ 0 if empty v
+        if @opt.max ➜ v = min @opt.max int(v)
+        if @opt.min ➜ v = max @opt.min int(v)
+        int(v)
+        
     changeValue: v =>
         
         ⮐ if not @opt.number
         
-        v = clamp 0 255 int(v)
+        v = @clampValue v
         if v != @value
             @setValue v
             @emit 'valueChange' @
@@ -59,12 +66,12 @@ use ../../edit   ◆ editor
     
     setValue: v =>
         
-        ⮐ if not @opt.number
-
-        @value = clamp 0 255 int(v)
+        ⮐ if not @opt.number        
+        @value = @clampValue v
         if "#{@value}" != @current()
             @set "#{@value}"
-            @state.moveCursors 'eol'
+            if @value == 0
+                @selectAll()
 
     onWheel: event =>
 

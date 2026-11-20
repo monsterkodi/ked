@@ -17,6 +17,7 @@ use              ◆ sheetree sheenode
         @wheelItems = @mouseItems
         
         @sheetree.on 'tree.node' @sheenode.onNode
+        @sheenode.on 'shee.node' @sheetree.onNode
         
         post.on 'file.loaded' @onFileLoaded
                 

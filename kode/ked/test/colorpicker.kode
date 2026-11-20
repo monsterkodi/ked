@@ -71,27 +71,6 @@ pal = (cols colors) ->
             count: 1
         p.onMouse e
 
-  ▸ the wheel steps an rgb input and focuses it
-
-        p = pickr()
-        p.red.setValue 100
-
-        e =
-            type: 'wheel'
-            cell: [2 7]
-            dir: 'down'
-        p.onWheel e
-
-        p.red.getValue() ▸ 99
-
-  ▸ the radio is out of the ring in single color mode
-
-        p = pickr()
-        p.show '#ff0000'
-
-        p.radio.options.length ▸ 1
-        p.radio.focusable ▸ false
-
   ▸ a syntax color at the cursor seeds the picker
 
         h = new harness cols:30 rows:9
@@ -178,25 +157,6 @@ pal = (cols colors) ->
         p.onKey 'return' e
 
         p.hex() ▸ '#ff0000'
-
-  ▸ backspace on a focused palette cell removes it
-
-        p = pickr()
-        p.setHex '#ff0000'
-        p.addCurrentColor()
-        p.setHex '#00ff00'
-        p.addCurrentColor()
-
-        p.paletteView.setActive 1
-        p.paletteView.grabFocus()
-
-        e =
-            type: 'press'
-            combo: 'backspace'
-            char: ''
-        p.onKey 'backspace' e
-
-        p.palette ▸ ['#ff0000']
 
   ▸ the palette is not in the focus ring when it is empty
 

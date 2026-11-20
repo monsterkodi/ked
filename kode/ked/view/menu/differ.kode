@@ -105,6 +105,7 @@ use                 ◆ searcher searcherfile
             for idx in @choices.currentIndex()+1...@choices.items.length
                 if @choices.items[idx].type in ['file''commit']
                     ⮐ idx
+            ⮐ @choices.items.length-2
         @choices.currentIndex()
         
     pageUpRow: =>

@@ -166,9 +166,11 @@ use ../edit/tool ◆ sue
 
         lines.join '\n'
 
-    @titlify: cells rectree items=[] depth=0 -> # generate items for display in sheetree 
+    @titlify: cells rectree items=[] depth=0 -> # generate items for sheetree 
         
         abstree = @absolutize cells rectree
+        
+        rectree.index = items.length
         
         for type in ['erase''text''pattern''bg''fg']
             if rectree[type]? 
@@ -181,11 +183,27 @@ use ../edit/tool ◆ sue
                 
         if item ➜ items.push item
                 ➜ log '???' rectree    
-        
         for child in rectree.children
             @titlify cells child items depth+2
             
         items
+        
+    @modifyTreeNode: rectree node ->
+        
+        if treeNode = @nodeAtIndex rectree node.index
+            for key in ['x''y''w''h''r''b''fg''bg']
+                if node[key]?
+                    treeNode[key] = node[key]
+                else
+                    delete treeNode[key]
+        
+    @nodeAtIndex: rectree index ->
+    
+        if rectree.index == index
+            ⮐ rectree
+        for child in rectree.children
+            n = @nodeAtIndex child index
+            ⮐ n if n
 
     @sueify: cells rectree ->
 
@@ -207,15 +225,6 @@ use ../edit/tool ◆ sue
                 areas.push area
 
         sue.ensue(lines.join('\n') areas)
-
-    #  a scaled glyph lives in a block of scale by scale cells, and a sue
-    #  run grows upwards from the line it is on, so the glyph is written on
-    #  the bottom row of its block and the rows above get a space in its
-    #  place, which the block paints over.
-    #
-    #  the x of a sue area is a grapheme index, not a cell column: a run of
-    #  scale n makes n cells out of one grapheme, so the two differ as soon
-    #  as anything is scaled.
 
     @lineOfRow: (grid y) ->
 

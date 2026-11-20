@@ -30,8 +30,16 @@ use ../base      ◆ view input tripleinput
         
     onInputChange: input =>
         
-        log "onInputChange #{input.name} #{input.value}"
-        
+        if 
+            input.name.endsWith 'xwr_x' ➜ @node.x = input.value
+            input.name.endsWith 'xwr_w' ➜ @node.w = input.value ; delete @node.r ; @xwrInput.inputs[2].set ''
+            input.name.endsWith 'xwr_r' ➜ @node.r = input.value ; delete @node.w ; @xwrInput.inputs[1].set ''
+            input.name.endsWith 'yhb_y' ➜ @node.y = input.value
+            input.name.endsWith 'yhb_h' ➜ @node.h = input.value ; delete @node.b ; @yhbInput.inputs[2].set ''
+            input.name.endsWith 'yhb_b' ➜ @node.b = input.value ; delete @node.h ; @yhbInput.inputs[1].set ''
+            
+        @emit 'shee.node' @node
+            
     onMouseEnter: event =>
         
         if @node
