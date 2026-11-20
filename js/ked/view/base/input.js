@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, isStr: function (o) {return typeof o === 'string' || o instanceof String}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }}
 
 var input
 
@@ -72,21 +72,26 @@ input = (function ()
 
     input.prototype["clampValue"] = function (v)
     {
-        var _51_20_
+        var p, _51_20_
 
         if (_k_.empty(v))
         {
             return (((_51_20_=this.opt.min) != null ? _51_20_ : 0))
         }
-        if (!_k_.empty(this.opt.max))
-        {
-            v = _k_.min(this.opt.max,parseInt(v))
-        }
+        p = this.opt.percent && _k_.isStr(v) && v.endsWith('%')
         if (!_k_.empty(this.opt.min))
         {
             v = _k_.max(this.opt.min,parseInt(v))
         }
-        return parseInt(v)
+        if (!_k_.empty(this.opt.max))
+        {
+            v = _k_.min(this.opt.max,parseInt(v))
+        }
+        if (!_k_.empty(this.opt.percent) && this.opt.max > 100)
+        {
+            v = _k_.min(100,parseInt(v))
+        }
+        return `${v}` + ((p ? '%' : ''))
     }
 
     input.prototype["changeValue"] = function (v)
@@ -96,29 +101,36 @@ input = (function ()
             return
         }
         v = this.clampValue(v)
-        if (v !== this.value)
+        if (v !== this.getValue())
         {
             this.setValue(v)
-            return this.emit('valueChange',this)
+            return this.emit('valueChange',this.current(),this.name)
         }
     }
 
     input.prototype["getValue"] = function ()
     {
-        return this.value
+        return this.current()
+    }
+
+    input.prototype["int"] = function ()
+    {
+        return parseInt(this.current())
     }
 
     input.prototype["setValue"] = function (v)
     {
+        var value
+
         if (!this.opt.number)
         {
             return
         }
-        this.value = this.clampValue(v)
-        if (`${this.value}` !== this.current())
+        value = this.clampValue(v)
+        if (value !== this.getValue())
         {
-            this.set(`${this.value}`)
-            if (this.value === 0)
+            this.set(value)
+            if (value === '0')
             {
                 return this.selectAll()
             }
@@ -167,7 +179,7 @@ input = (function ()
         {
             step = 10
         }
-        this.changeValue(this.value + dir * step)
+        this.changeValue(this.int() + dir * step)
         this.state.moveCursors(((dir > 0 ? 'eol' : 'bol')))
         return {redraw:true}
     }
@@ -234,5 +246,5 @@ input = (function ()
 
 export default input;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5wdXQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS9pbnB1dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsVUFBQTtJQUFNOztPQUNBLFlBQVQ7O09BQ1MsYUFBVDs7O0FBQ1QsU0FBRDs7c0JBQU87YUFTSCxPQUFJLFFBQVEsTUFBTTs7UUFBZjtRQUFRO1FBQU07Ozs7Ozs7Ozs7OzhDQUVQLEtBQUMsT0FBTyxLQUFDLE1BQU0sU0FBUyxTQUFTO1lBRXBDLEtBQUMsSUFBSTs7WUFDSixLQUFDLGtCQUFRLEtBQUMsSUFBSSwyQkFBUTs7UUFFMUIsS0FBQyx1QkFBdUI7UUFFeEIsS0FBQyxTQUFTLGlCQUFrQixLQUFDLE1BQU07UUFDbkMsS0FBQyxTQUFTLEtBQWtCLE1BQU0sT0FBTztRQUN6QyxLQUFDLFNBQVMsVUFBa0IsTUFBTSxPQUFPO1FBQ3pDLEtBQUMsU0FBUyxXQUFrQixNQUFNLE9BQU87OztxQkFFN0M7O1lBRU8sS0FBQyx3QkFBd0IsS0FBQzs7Ozs7O3FCQUdqQywyQkFBYzs7UUFFVixLQUFDLEtBQUssU0FBUztzREFDVDs7O3FCQUVWOztlQUFhLEtBQUssSUFBSSxLQUFDLE1BQU0sRUFBRSxNQUFNOzs7cUJBRXJDLGtCQUFLOztlQUVELEtBQUMsTUFBTSxXQUFXOzs7cUJBRXRCOztRQUVJLEtBQUMsTUFBTSxXQUFXO2VBQ2xCLEtBQUMsTUFBTSxZQUFZOzs7cUJBRXZCLHlCQUFZOzs7O3NCQUVrQjs7OEJBQXZCLEtBQUMsSUFBSSx5QkFBTTs7dUJBQ0wsS0FBQyxJQUFJOztZQUFNLFlBQVEsS0FBQyxJQUFJLGFBQVE7O3VCQUNoQyxLQUFDLElBQUk7O1lBQU0sWUFBUSxLQUFDLElBQUksYUFBUTs7d0JBQ3JDOzs7cUJBRVIsMEJBQWE7O2FBRUEsS0FBQyxJQUFJOzs7O1FBRWQsSUFBSSxLQUFDLFdBQVc7WUFDYixNQUFLLEtBQUM7O1lBQ0wsS0FBQyxTQUFTO21CQUNWLEtBQUMsS0FBSyxjQUFjOzs7O3FCQUU1Qjs7ZUFBYSxLQUFDOzs7cUJBRWQsdUJBQVU7O2FBRUcsS0FBQyxJQUFJOzs7O1FBQ2QsS0FBQyxRQUFRLEtBQUMsV0FBVztlQUNmLEtBQUMsWUFBVyxLQUFDOztZQUNmLEtBQUMsT0FBTyxLQUFDO2dCQUNOLEtBQUMsVUFBUzs7dUJBQ1QsS0FBQzs7Ozs7cUJBRWIsc0JBQVM7Ozs7YUFFSSxLQUFDLElBQUk7Ozs7WUFDVCxLQUFDLFlBQVksS0FBQzs7OzthQUNWLEtBQUMsTUFBTSxjQUFjOzs7O1FBRTlCOztvQkFBYSxNQUFNOztxQkFDZjsyQkFBVzs7cUJBQ1g7MkJBQVc7O3FCQUNYOzJCQUFVOztxQkFDVjsyQkFBVTs7Ozs7OztRQUdkLE9BQU87WUFDTSxNQUFNOztZQUFuQixPQUFPOztRQUVQLEtBQUMsWUFBWSxLQUFDLFFBQVEsTUFBSTtRQUUxQixLQUFDLE1BQU0sY0FBYSxNQUFNLElBQUksUUFBUTtnQkFFdEMsT0FBTzs7O3FCQUVYLG9CQUFPLEtBQUk7Ozs7YUFFUSxLQUFDOzttQkFBZDs7Z0JBRUssTUFBTTs7aUJBRVQ7Z0JBRUksS0FBQyxLQUFLLFNBQVMsU0FBUyxLQUFDO3VCQUN2Qjs7aUJBRU47aUJBQUs7Z0JBRUQsS0FBQyxLQUFLLFNBQVMsTUFBTTt1QkFDbkI7O2lCQUVOO29CQUVPLEtBQUMsTUFBTSxhQUFhLE1BQU0sS0FBQyxVQUFVOztvQkFDcEMsS0FBQyxLQUFLLFNBQVM7MkJBQ2I7OztpQkFFVjtnQkFFSSxLQUFDLEtBQUssU0FBUzt1QkFDYjs7OztRQUVWLFNBQVMsS0FBQztRQUVWLHFDQUFXLElBQUk7WUFFWixXQUFVLEtBQUM7O2dCQUMyQixLQUFDLElBQUk7O2dCQUExQyxLQUFDLFlBQVksU0FBUyxLQUFDOztZQUN2QixLQUFDLEtBQUssU0FBUyxTQUFTLEtBQUM7bUJBQ3ZCOztlQUVOOzs7cUJBRUo7O1lBRVMsS0FBQyxZQUFZLEtBQUM7Ozs7UUFFbkIsS0FBQyxTQUFTLE1BQUssS0FBQyxhQUFhLEtBQUMsTUFBTSxXQUFXLEtBQUMsTUFBTTtRQUN0RCxLQUFDLFNBQVMsUUFBUSxLQUFDLE1BQU07Ozs7V0F4SWhDOzs7ZUE0SU0ifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5wdXQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS9pbnB1dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsVUFBQTtJQUFNOztPQUNBLFlBQVQ7O09BQ1MsYUFBVDs7O0FBQ1QsU0FBRDs7c0JBQU87YUFTSCxPQUFJLFFBQVEsTUFBTTs7UUFBZjtRQUFRO1FBQU07Ozs7Ozs7Ozs7OzhDQUVQLEtBQUMsT0FBTyxLQUFDLE1BQU0sU0FBUyxTQUFTO1lBRXBDLEtBQUMsSUFBSTs7WUFDSixLQUFDLGtCQUFRLEtBQUMsSUFBSSwyQkFBUTs7UUFFMUIsS0FBQyx1QkFBdUI7UUFFeEIsS0FBQyxTQUFTLGlCQUFrQixLQUFDLE1BQU07UUFDbkMsS0FBQyxTQUFTLEtBQWtCLE1BQU0sT0FBTztRQUN6QyxLQUFDLFNBQVMsVUFBa0IsTUFBTSxPQUFPO1FBQ3pDLEtBQUMsU0FBUyxXQUFrQixNQUFNLE9BQU87OztxQkFFN0M7O1lBRU8sS0FBQyx3QkFBd0IsS0FBQzs7Ozs7O3FCQUdqQywyQkFBYzs7UUFFVixLQUFDLEtBQUssU0FBUztzREFDVDs7O3FCQUVWOztlQUFhLEtBQUssSUFBSSxLQUFDLE1BQU0sRUFBRSxNQUFNOzs7cUJBRXJDLGtCQUFLOztlQUVELEtBQUMsTUFBTSxXQUFXOzs7cUJBRXRCOztRQUVJLEtBQUMsTUFBTSxXQUFXO2VBQ2xCLEtBQUMsTUFBTSxZQUFZOzs7cUJBRXZCLHlCQUFZOzs7O3NCQUVrQjs7OEJBQXZCLEtBQUMsSUFBSSx5QkFBTTs7UUFDZCxJQUFJLEtBQUMsSUFBSSxXQUFpQixVQUFMLE1BQWEsRUFBRSxTQUFTO3VCQUNwQyxLQUFDLElBQUk7O1lBQU0sWUFBUSxLQUFDLElBQUksYUFBUTs7dUJBQ2hDLEtBQUMsSUFBSTs7WUFBTSxZQUFRLEtBQUMsSUFBSSxhQUFROzt1QkFDaEMsS0FBQyxJQUFJLFlBQVksS0FBQyxJQUFJLE1BQU07O1lBQ2pDLFlBQVEsYUFBUTs7a0JBQ2pCLFFBQU8sSUFBSSxNQUFNOzs7cUJBRXhCLDBCQUFhOzthQUVBLEtBQUMsSUFBSTs7OztRQUVkLElBQUksS0FBQyxXQUFXO1lBQ2IsTUFBSyxLQUFDOztZQUNMLEtBQUMsU0FBUzttQkFDVixLQUFDLEtBQUssY0FBYyxLQUFDLFVBQVUsS0FBQzs7OztxQkFFeEM7O2VBQWEsS0FBQzs7O3FCQUNkOzt3QkFBWSxLQUFDOzs7cUJBRWIsdUJBQVU7Ozs7YUFFRyxLQUFDLElBQUk7Ozs7UUFDZCxRQUFRLEtBQUMsV0FBVztZQUNqQixVQUFTLEtBQUM7O1lBQ1QsS0FBQyxJQUFJO2dCQUNGLFVBQVM7O3VCQUNSLEtBQUM7Ozs7O3FCQUViLHNCQUFTOzs7O2FBRUksS0FBQyxJQUFJOzs7O1lBQ1QsS0FBQyxZQUFZLEtBQUM7Ozs7YUFDVixLQUFDLE1BQU0sY0FBYzs7OztRQUU5Qjs7b0JBQWEsTUFBTTs7cUJBQ2Y7MkJBQVc7O3FCQUNYOzJCQUFXOztxQkFDWDsyQkFBVTs7cUJBQ1Y7MkJBQVU7Ozs7Ozs7UUFHZCxPQUFPO1lBQ00sTUFBTTs7WUFBbkIsT0FBTzs7UUFFUCxLQUFDLFlBQVksS0FBQyxRQUFRLE1BQUk7UUFFMUIsS0FBQyxNQUFNLGNBQWEsTUFBTSxJQUFJLFFBQVE7Z0JBRXRDLE9BQU87OztxQkFFWCxvQkFBTyxLQUFJOzs7O2FBRVEsS0FBQzs7bUJBQWQ7O2dCQUVLLE1BQU07O2lCQUVUO2dCQUVJLEtBQUMsS0FBSyxTQUFTLFNBQVMsS0FBQzt1QkFDdkI7O2lCQUVOO2lCQUFLO2dCQUVELEtBQUMsS0FBSyxTQUFTLE1BQU07dUJBQ25COztpQkFFTjtvQkFFTyxLQUFDLE1BQU0sYUFBYSxNQUFNLEtBQUMsVUFBVTs7b0JBQ3BDLEtBQUMsS0FBSyxTQUFTOzJCQUNiOzs7aUJBRVY7Z0JBRUksS0FBQyxLQUFLLFNBQVM7dUJBQ2I7Ozs7UUFFVixTQUFTLEtBQUM7UUFFVixxQ0FBVyxJQUFJO1lBRVosV0FBVSxLQUFDOztnQkFDMkIsS0FBQyxJQUFJOztnQkFBMUMsS0FBQyxZQUFZLFNBQVMsS0FBQzs7WUFDdkIsS0FBQyxLQUFLLFNBQVMsU0FBUyxLQUFDO21CQUN2Qjs7ZUFFTjs7O3FCQUVKOztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7O1FBRW5CLEtBQUMsU0FBUyxNQUFLLEtBQUMsYUFBYSxLQUFDLE1BQU0sV0FBVyxLQUFDLE1BQU07UUFDdEQsS0FBQyxTQUFTLFFBQVEsS0FBQyxNQUFNOzs7O1dBNUloQzs7O2VBZ0pNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/base/input.kode

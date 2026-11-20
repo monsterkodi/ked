@@ -3,6 +3,7 @@ use ../../../kxk    ▪ post kseg kutil clip
 use ../../theme     ◆ color theme
 use ../../edit      ◆ susan
 use ../../edit/tool ◆ belt
+use ../../popo      ◆ layout
 use ../base         ◆ view colorslider rgbinput radio palette
 ■colorpicker□view
     
@@ -16,6 +17,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         @colorReplace  = null
         @colorDecorate = null
+        @sheetNode     = null
         @bgChanged     = false
         @voided        = [false false]
         @colorStates   = []
@@ -76,6 +78,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
         @voided[@activeIndex()] = true
 
         @syncRadio()
+        @updateSheet()
 
         post.emit 'redraw'
 
@@ -134,6 +137,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
         @setHex opt.label
 
         @syncAll()
+        @updateSheet()
 
         post.emit 'colorpicker.change' @hex()
         post.emit 'redraw'
@@ -168,7 +172,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         for idx in 0...@colorStates.length
             col = @colorHex idx
-            opts.push {color: color.values(col), label: (@voided[0] ? 'none' : col)} if col?
+            opts.push {color: color.values(col), label: (@voided[idx] ? 'none' : col)} if col?
 
         @radio.setOptions opts
         @radio.setActive @activeIndex()
@@ -223,25 +227,58 @@ use ../base         ◆ view colorslider rgbinput radio palette
         @voided[@activeIndex()] = false
         @bgChanged = true if @activeIndex() == 1
 
+        @updateSheet()
+
         post.emit 'colorpicker.change' @hex()
         post.emit 'redraw'
+
+    updateSheet: =>
+
+        # write the picked colors into the sheet node and render it in the editor
+
+        ⮐ if not @sheetNode?
+
+        for [idx channel] in [[0 'fg'] [1 'bg']]
+            if @colorVoided idx
+                delete @sheetNode[channel]
+            else if hex = @colorHex idx
+                @sheetNode[channel] = hex
+
+        @renderSheet()
+
+    renderSheet: =>
+
+        state = @editor.state
+        ⮐ if not state.rectree?
+
+        cells = {cols:(state.rectreeCols ? @editor.cells.cols) rows:(state.rectreeRows ? @editor.cells.rows)}
+
+        state.renderSheet state.rectree cells state.mainCursor() silent:true
 
     show: hexl opt={focus:true} =>
 
         @bgChanged    = false
         @voided       = [false false]
         @colorStates  = []
+        @sheetNode    = opt.node ? null
         @radio.active = opt.select ? 0
         
         if valid hexl
-            for hex,idx in hexl
-                @setHex hex idx
+            if @sheetNode?
+                @setSheetColors hexl
+            else
+                for hex,idx in hexl
+                    @setHex hex idx
         else
             if found = @hexAtCursor()
-                hex = found.text
-                @colorReplace = found
-                @setHex hex
-                @colorReplace.from = @hex()
+                if found.node?
+                    @sheetNode = found.node
+                    @setSheetColors found.colors
+                else
+                    hex = found.text
+                    @colorReplace = found
+                    @setHex hex
+                    @colorReplace.from = @hex()
                 
             else if not empty @editor.state.s.selections
                 
@@ -262,7 +299,21 @@ use ../base         ◆ view colorslider rgbinput radio palette
         super()
         
         if opt.focus ➜ @hue.grabFocus()
-        
+
+    setSheetColors: hexl =>
+
+        # a missing sheet channel is voided, but seeded so the sliders stay usable
+
+        for hex,idx in hexl
+            if empty hex
+                @voided[idx] = true
+                @setHex (idx == 0 ? '#ffffff' : '#000000') idx
+                @voided[idx] = true
+            else
+                @setHex hex idx
+
+        @radio.active = 1 if @colorVoided 0 and not @colorVoided 1
+
     colorAtSelection: layer =>
 
         if c = @sueColorAtSelection layer
@@ -289,9 +340,21 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         null
         
+    sheetNodeAtCursor: =>
+
+        state = @editor.state
+        ⮐ null if not state.rectree?
+
+        layout.nodeForPos @editor.cells state.rectree state.mainCursor()
+
     hexAtCursor: =>
 
         state = @editor.state
+
+        if state.rectree? and empty state.s.selections
+            if node = @sheetNodeAtCursor()
+                ⮐ {node:node colors:[node.fg node.bg]}
+
         mc    = state.mainCursor()
         lines = state.s.lines
         [x y] = mc
@@ -335,26 +398,29 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
     submit: =>
 
-        hex = @hex()
-        if @colorReplace? and hex != @colorReplace.from
-            @replaceColor hex
+        if @sheetNode?
+            @updateSheet()
+        else
+            hex = @hex()
+            if @colorReplace? and hex != @colorReplace.from
+                @replaceColor hex
 
-        else if @colorDecorate?
+            else if @colorDecorate?
 
-            ranges = @colorDecorate.ranges
+                ranges = @colorDecorate.ranges
 
-            @colorDecorate = null
+                @colorDecorate = null
 
-            fg = @foregroundHex()
-            bg = null
+                fg = @foregroundHex()
+                bg = null
 
-            bg = @backgroundHex() if @backgroundChanged()
+                bg = @backgroundHex() if @backgroundChanged()
 
-            voided = []
-            voided.push 'fg' if @colorVoided 0
-            voided.push 'bg' if @colorVoided 1
+                voided = []
+                voided.push 'fg' if @colorVoided 0
+                voided.push 'bg' if @colorVoided 1
 
-            @submitSue ranges fg bg voided
+                @submitSue ranges fg bg voided
 
         @hide()
 

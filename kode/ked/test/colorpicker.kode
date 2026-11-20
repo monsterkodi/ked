@@ -1,5 +1,5 @@
 
-use ../../kxk    ▪ kseg
+use ../../kxk    ▪ kseg sds
 use ../util        ◆ harness
 use ../edit        ◆ state editor
 use ../edit/tool   ◆ belt colorspans
@@ -15,6 +15,24 @@ pickr = ->
     p.layout 0 0 30 9
     p.show()
     p
+
+sheetPickr = ->
+
+    h = new harness cols:16 rows:9
+    e = new editor h.screen 'test_editor_colorpicker_sheet' []
+    e.layout 0 0 16 4
+
+    e.state.loadLines ['                ' '                ' '                ' '                ']
+    e.state.rectree = {children:[{ text:'hi' x:1 y:1 w:2 h:1 fg:'#ff0000' bg:'#0000ff' }]}
+    e.state.rectreeCols = 16
+    e.state.rectreeRows = 4
+    e.state.setCursors [[1 1]]
+
+    p = new colorpicker h.screen e 'test_colorpicker_sheet'
+    p.layout 0 0 16 9
+    p.show()
+
+    [h e p]
 
 pal = (cols colors) ->
 
@@ -84,6 +102,92 @@ pal = (cols colors) ->
         p.show()
 
         p.foregroundHex() ▸ (color.hex(theme.syntax.keyword))
+
+  ▸ a sheet node at the cursor seeds the picker
+
+        [h e p] = sheetPickr()
+
+        p.foregroundHex() ▸ '#ff0000'
+        p.backgroundHex() ▸ '#0000ff'
+
+  ▸ a sheet node with only a background selects it
+
+        h = new harness cols:16 rows:9
+        e = new editor h.screen 'test_editor_colorpicker_sheet_bg' []
+        e.layout 0 0 16 4
+
+        e.state.loadLines ['                ' '                ' '                ' '                ']
+        e.state.rectree = {children:[{ text:'hi' x:1 y:1 w:2 h:1 bg:'#0000ff' }]}
+        e.state.rectreeCols = 16
+        e.state.rectreeRows = 4
+        e.state.setCursors [[1 1]]
+
+        p = new colorpicker h.screen e 'test_colorpicker_sheet_bg'
+        p.layout 0 0 16 9
+        p.show()
+
+        p.activeIndex() ▸ 1
+        p.colorVoided 0 ▸ true
+        p.backgroundHex() ▸ '#0000ff'
+        p.radio.options[0].label ▸ 'none'
+        p.radio.options[1].label ▸ '#0000ff'
+
+  ▸ a sheet node passed in is updated live
+
+        h = new harness cols:16 rows:9
+        e = new editor h.screen 'test_editor_colorpicker_sheet_node' []
+        e.layout 0 0 16 4
+
+        e.state.loadLines ['                ' '                ' '                ' '                ']
+        e.state.rectree = {bg:'#0000ff'}
+        e.state.rectreeCols = 16
+        e.state.rectreeRows = 4
+        e.state.setCursors [[1 1]]
+
+        p = new colorpicker h.screen e 'test_colorpicker_sheet_node'
+        p.layout 0 0 16 9
+        p.show [null '#0000ff'] node:e.state.rectree
+
+        p.setHex '#ff0000' 1
+        p.emitChanged()
+
+        sds.get(e.state.rectree 'bg') ▸ '#ff0000'
+        noFg = not e.state.rectree.fg?
+        noFg ▸ true
+
+  ▸ return sets the colors on the sheet node
+
+        [h e p] = sheetPickr()
+
+        p.setHex '#00ff00' 0
+        p.setHex '#000000' 1
+        p.submit()
+
+        sds.get(e.state.rectree 'children.0.fg') ▸ '#00ff00'
+        sds.get(e.state.rectree 'children.0.bg') ▸ '#000000'
+
+  ▸ changing a color updates the sheet live
+
+        [h e p] = sheetPickr()
+
+        p.setHex '#123456' 0
+        p.emitChanged()
+
+        sds.get(e.state.rectree 'children.0.fg') ▸ '#123456'
+
+        e.draw()
+
+        h.screen.get_fg(2 1) ▸ [18 52 86]
+
+  ▸ a voided channel is removed from the sheet node
+
+        [h e p] = sheetPickr()
+
+        p.voidActiveColor()
+        p.submit()
+
+        noFg = not sds.get(e.state.rectree 'children.0.fg')?
+        noFg ▸ true
 
 ▸ colorpicker palette
 

@@ -35,18 +35,31 @@ export
 
         ⮐ 0 if not advance
 
+        @renderSheet rectree cells [pos[0]+advance pos[1]]
+
+        advance
+
+    renderSheet: (rectree cells pos opt) ->
+
+        # render a sheet rectree into the editor
+
+        opt ?= {}
+
         post.emit 'sheet.edited'
 
         data = sue.desue layout.sueify({cols:cells.cols rows:cells.rows} rectree)
 
         @loadLines data.text.split('\n')
         @loadSue   data.sue
-        @setCursors [[pos[0]+advance pos[1]]]
+
+        if pos?
+            if opt.silent
+                @setCursors [pos] silent:true
+            else
+                @setCursors [pos]
 
         @rectreeCols = cells.cols
         @rectreeRows = cells.rows
-
-        advance
 
     insertAsciiHeaderForSelectionOrWordAtCursor: ->
 

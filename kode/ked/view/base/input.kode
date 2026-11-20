@@ -49,28 +49,32 @@ use ../../edit   ◆ editor
     clampValue: v =>
         
         ⮐ (@opt.min ? 0) if empty v
-        if valid @opt.max ➜ v = min @opt.max int(v)
+        p = @opt.percent and v is str and v.endsWith('%')
         if valid @opt.min ➜ v = max @opt.min int(v)
-        int(v)
+        if valid @opt.max ➜ v = min @opt.max int(v)
+        if valid @opt.percent and @opt.max > 100
+            v = min 100 int(v)
+        "#{v}" + (p ? '%' : '')
         
     changeValue: v =>
         
         ⮐ if not @opt.number
         
         v = @clampValue v
-        if v != @value
+        if v != @getValue()
             @setValue v
-            @emit 'valueChange' @
+            @emit 'valueChange' @current() @name
             
-    getValue: -> @value
+    getValue: -> @current()
+    int: -> int @current()
     
     setValue: v =>
         
-        ⮐ if not @opt.number        
-        @value = @clampValue v
-        if "#{@value}" != @current()
-            @set "#{@value}"
-            if @value == 0
+        ⮐ if not @opt.number
+        value = @clampValue v
+        if value != @getValue()
+            @set value
+            if value == '0'
                 @selectAll()
 
     onWheel: event =>
@@ -89,7 +93,7 @@ use ../../edit   ◆ editor
         step = 1
         step = 10 if event.shift
 
-        @changeValue @value + dir*step
+        @changeValue @int() + dir*step
         
         @state.moveCursors (dir > 0 ? 'eol' : 'bol')
 
