@@ -885,3 +885,18 @@ sel = r... -> s.allSelections() ▸ r
 
         parsed.length                  ▸ 3
         parsed[1].key                  ▸ 'esc'
+
+  ▸ a silent cursor restore
+
+        st = new state {cols:20 rows:6} 'silent_state'
+        st.loadLines ['abc' 'def' 'ghi']
+
+        count = 0
+        st.on 'cursorsSet' -> count += 1
+
+        st.setCursors [[1 1]]
+        count ▸ 1
+
+        st.setCursors [[2 2]] silent:true
+        count ▸ 1
+        st.mainCursor() ▸ [2 2]

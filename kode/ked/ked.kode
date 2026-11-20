@@ -854,7 +854,7 @@ use child_process ▪ spawn exec
 
         @editor.state.loadLines data.text.split('\n')
         @editor.state.loadSue data.sue
-        @editor.state.setCursors [mc]
+        @editor.state.setCursors [mc] silent:true
                                       
     draw: =>
             

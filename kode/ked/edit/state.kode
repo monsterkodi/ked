@@ -384,9 +384,10 @@ use           ◆ keys mode
         @adjustViewForMainCursor opt
         
         @swapState()
-        
-        mode.cursorsSet @
-        @emit 'cursorsSet'
+
+        if not opt.silent
+            mode.cursorsSet @
+            @emit 'cursorsSet'
         @
             
     textOfSelectionOrWordAtCursor: => 
