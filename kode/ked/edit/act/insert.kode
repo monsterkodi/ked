@@ -1,14 +1,17 @@
 
-use ../../../kxk ▪ kstr
+use ../../../kxk ▪ kstr post
 use ../../util   ◆ prof
-use ../tool      ◆ belt
+use ../../popo   ◆ layout
+use ../tool      ◆ belt sue
 use ..           ◆ mode
 #!insert
 export
     insert: text ->
 
         text = mode.insert @ text
-        
+
+        ⮐ if @sheet? and @insertIntoSheet text
+
         if valid @s.selections
             ⮐ @indentSelectedLines() if text == '\t'
             @deleteSelection()
@@ -22,6 +25,28 @@ export
         @setCursors cursors
         
         mode.postInsert @
+
+    insertIntoSheet: text ->
+
+        cells   = {cols:@cells.cols rows:@cells.rows}
+        rectree = @sheet.rectree
+        pos     = @mainCursor()
+        advance = layout.insertTextAt cells rectree pos text
+
+        ⮐ 0 if not advance
+
+        post.emit 'sheet.edited'
+
+        data = sue.desue layout.sueify({cols:cells.cols rows:cells.rows} rectree)
+
+        @loadLines data.text.split('\n')
+        @loadSue   data.sue
+        @setCursors [[pos[0]+advance pos[1]]]
+
+        @sheet.cols = cells.cols
+        @sheet.rows = cells.rows
+
+        advance
 
     insertAsciiHeaderForSelectionOrWordAtCursor: ->
 

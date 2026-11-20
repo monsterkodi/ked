@@ -2,19 +2,27 @@ var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!
 
 import kxk from "../../../kxk.js"
 let kstr = kxk.kstr
+let post = kxk.post
 
 import prof from "../../util/prof.js"
 
+import layout from "../../popo/layout.js"
+
 import belt from "../tool/belt.js"
+import sue from "../tool/sue.js"
 
 import mode from "../mode.js"
 
 export default {
     insert:function (text)
     {
-        var cursors, lines
+        var cursors, lines, _13_19_
     
         text = mode.insert(this,text)
+        if ((this.sheet != null) && this.insertIntoSheet(text))
+        {
+            return
+        }
         if (!_k_.empty(this.s.selections))
         {
             if (text === '\t')
@@ -30,6 +38,27 @@ export default {
         this.setLines(lines)
         this.setCursors(cursors)
         return mode.postInsert(this)
+    },
+    insertIntoSheet:function (text)
+    {
+        var advance, cells, data, pos, rectree
+    
+        cells = {cols:this.cells.cols,rows:this.cells.rows}
+        rectree = this.sheet.rectree
+        pos = this.mainCursor()
+        advance = layout.insertTextAt(cells,rectree,pos,text)
+        if (!advance)
+        {
+            return 0
+        }
+        post.emit('sheet.edited')
+        data = sue.desue(layout.sueify({cols:cells.cols,rows:cells.rows},rectree))
+        this.loadLines(data.text.split('\n'))
+        this.loadSue(data.sue)
+        this.setCursors([[pos[0] + advance,pos[1]]])
+        this.sheet.cols = cells.cols
+        this.sheet.rows = cells.rows
+        return advance
     },
     insertAsciiHeaderForSelectionOrWordAtCursor:function ()
     {
@@ -54,5 +83,5 @@ export default {
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5zZXJ0LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L2FjdC9pbnNlcnQua29kZSJdLCJtYXBwaW5ncyI6Ijs7T0FDYSxVQUFBO0lBQU07O09BQ0EsV0FBUjs7T0FDUSxXQUFaOztPQUNZLFdBQUE7OztJQUdmLGlCQUFROzs7O1FBRUosT0FBTyxLQUFLLE9BQU8sS0FBRTt1QkFFWixLQUFDLEVBQUU7O2dCQUNvQixTQUFROzt1QkFBbEMsS0FBQzs7WUFDSCxLQUFDOztrQkFFYSxLQUFLLHNCQUFzQixLQUFDLEVBQUUsTUFBTSxLQUFLLEtBQUMsRUFBRSxVQUE3RCxnQkFBTTs7UUFFUCxLQUFDLGtCQUFrQjtRQUVuQixLQUFDO1FBQ0QsS0FBQyxTQUFXO1FBQ1osS0FBQyxXQUFXO2VBRVosS0FBSyxXQUFXOztJQUVwQjs7OztrQkFFaUMsS0FBSyx1Q0FBdUMsS0FBQyxFQUFFLE1BQU0sS0FBQyxFQUFFLFFBQVEsS0FBQyxFQUFFLGFBQS9GLGdCQUFNLGtCQUFROztRQUVmLEtBQUM7UUFDRCxLQUFDLFNBQWM7UUFDZixLQUFDLGNBQWM7ZUFDZixLQUFDLFdBQWM7O0lBRW5CLDRCQUFtQixTQUFROzs7O2tCQUVSLEtBQUssdUJBQXVCLEtBQUMsRUFBRSxNQUFNLEtBQUMsRUFBRSxXQUFXLFFBQVEsT0FBekUsZ0JBQU07O1FBRVAsS0FBQyxTQUFjO1FBQ2YsS0FBQztlQUNELEtBQUMsV0FBYyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5zZXJ0LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L2FjdC9pbnNlcnQua29kZSJdLCJtYXBwaW5ncyI6Ijs7T0FDYSxVQUFBO0lBQU07SUFBSzs7T0FDTCxXQUFSOztPQUNRLGFBQVQ7O09BQ1MsV0FBWjtPQUFpQixVQUFqQjs7T0FDWSxXQUFBOzs7SUFHZixpQkFBUTs7OztRQUVKLE9BQU8sS0FBSyxPQUFPLEtBQUU7YUFFaEIsS0FBQyxrQkFBVyxLQUFDLGdCQUFnQjs7Ozt1QkFFekIsS0FBQyxFQUFFOztnQkFDb0IsU0FBUTs7dUJBQWxDLEtBQUM7O1lBQ0gsS0FBQzs7a0JBRWEsS0FBSyxzQkFBc0IsS0FBQyxFQUFFLE1BQU0sS0FBSyxLQUFDLEVBQUUsVUFBN0QsZ0JBQU07O1FBRVAsS0FBQyxrQkFBa0I7UUFFbkIsS0FBQztRQUNELEtBQUMsU0FBVztRQUNaLEtBQUMsV0FBVztlQUVaLEtBQUssV0FBVzs7SUFFcEIsMEJBQWlCOzs7O1FBRWIsU0FBVyxLQUFLLEtBQUMsTUFBTSxLQUFLLEtBQUssS0FBQyxNQUFNO1FBQ3hDLFVBQVUsS0FBQyxNQUFNO1FBQ2pCLE1BQVUsS0FBQztRQUNYLFVBQVUsT0FBTyxhQUFhLE1BQU0sUUFBUSxJQUFJO2FBRXJDOzttQkFBVDs7UUFFRixLQUFLLEtBQUs7UUFFVixPQUFPLElBQUksTUFBTSxPQUFPLFFBQVEsS0FBSyxNQUFNLEtBQUssS0FBSyxNQUFNLE1BQU07UUFFakUsS0FBQyxVQUFVLEtBQUssS0FBSyxNQUFNO1FBQzNCLEtBQUMsUUFBVSxLQUFLO1FBQ2hCLEtBQUMsYUFBYSxJQUFJLEtBQUcsUUFBUSxJQUFJO1FBRWpDLEtBQUMsTUFBTSxPQUFPLE1BQU07UUFDcEIsS0FBQyxNQUFNLE9BQU8sTUFBTTtlQUVwQjs7SUFFSjs7OztrQkFFaUMsS0FBSyx1Q0FBdUMsS0FBQyxFQUFFLE1BQU0sS0FBQyxFQUFFLFFBQVEsS0FBQyxFQUFFLGFBQS9GLGdCQUFNLGtCQUFROztRQUVmLEtBQUM7UUFDRCxLQUFDLFNBQWM7UUFDZixLQUFDLGNBQWM7ZUFDZixLQUFDLFdBQWM7O0lBRW5CLDRCQUFtQixTQUFROzs7O2tCQUVSLEtBQUssdUJBQXVCLEtBQUMsRUFBRSxNQUFNLEtBQUMsRUFBRSxXQUFXLFFBQVEsT0FBekUsZ0JBQU07O1FBRVAsS0FBQyxTQUFjO1FBQ2YsS0FBQztlQUNELEtBQUMsV0FBYyJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/act/insert.kode

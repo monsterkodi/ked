@@ -132,6 +132,50 @@ use ../util  ◆ harness
 
                 layout.nodeForPos {cols:4 rows:4} { index:1 text:'i' x:1 y:1 w:2 h:2 } [2 2] ▸ {index:1 text:'i' x:1 y:1 w:2 h:2}
 
+    ▸ insertTextAt
+
+      ▸ creates a text node
+
+                tree = {}
+
+                layout.insertTextAt {cols:10 rows:5} tree [3 2] 'a' ▸ 1
+
+                tree ▸ {children:[{text:'a' x:3 y:2 w:2 h:1}]}
+
+                tree = { pattern:'x' x:1 y:1 w:6 h:3 }
+
+                layout.insertTextAt {cols:10 rows:5} tree [3 2] 'a' ▸ 1
+
+                sds.get(tree 'children.0') ▸ {text:'a' x:2 y:1 w:2 h:1}
+
+                tree = { x:2 y:2 w:4 h:2 }
+
+                layout.insertTextAt {cols:10 rows:10} tree [8 8] 'a' ▸ 1
+
+                sds.get(tree 'children.0') ▸ {text:'a' x:6 y:6 w:2 h:1}
+
+      ▸ inserts into a text node
+
+                tree = { children:[{ text:'ab' x:1 y:1 w:6 h:2 }] }
+
+                layout.insertTextAt {cols:10 rows:5} tree [2 1] 'X' ▸ 1
+
+                sds.get(tree 'children.0.text') ▸ 'aXb'
+
+                tree = { children:[{ text:'ab' x:1 y:1 w:6 h:2 }] }
+
+                layout.insertTextAt {cols:10 rows:5} tree [6 1] 'Z' ▸ 1
+
+                sds.get(tree 'children.0.text') ▸ 'abZ'
+
+                tree = { children:[{ text:'ab' scale:2 x:0 y:0 w:8 h:2 }] }
+
+                layout.insertTextAt {cols:8 rows:2} tree [4 0] 'X' ▸ 2
+
+                sds.get(tree 'children.0.text') ▸ 'abX'
+
+                layout.insertTextAt {cols:8 rows:2} null [0 0] 'X' ▸ 0
+
   ▸ fill
 
     ▸ pattern
@@ -373,3 +417,40 @@ use ../util  ◆ harness
         
         h.at(1 1).includes(']66;s=3') ▸ true
         h.screen.blockAt(1 1) ▸ [1 1 3 1 3]
+
+  ▸ sheet typing
+
+        h = new harness cols:16 rows:4
+        e = new editor h.screen 'popo_sheet_typing' []
+        e.layout 0 0 16 4
+
+        e.state.loadLines ['                ' '                ' '                ' '                ']
+
+        e.state.sheet = rectree:{bg:'#000'}
+
+        e.state.setCursors [[2 1]]
+
+        e.state.insert 'a'
+
+        e.draw()
+
+        e.state.mainCursor() ▸ [3 1]
+        h.at(2 1) ▸ 'a'
+        sds.get(e.state.sheet.rectree 'children.0') ▸ {text:'a' x:2 y:1 w:2 h:1}
+
+        e.state.insert 'b'
+
+        e.draw()
+
+        e.state.mainCursor() ▸ [4 1]
+        h.at(3 1) ▸ 'b'
+        sds.get(e.state.sheet.rectree 'children.0.text') ▸ 'ab'
+        sds.get(e.state.sheet.rectree 'children.0.w') ▸ 3
+
+        e.state.sheet = rectree:{x:2 y:1 w:6 h:2}
+
+        e.state.setCursors [[10 3]]
+
+        e.state.insert 'c'
+
+        sds.get(e.state.sheet.rectree 'children.0') ▸ {text:'c' x:8 y:2 w:2 h:1}

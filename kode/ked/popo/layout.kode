@@ -201,20 +201,70 @@ use ../edit/tool ◆ sue
 
         # return 'topmost' node containing pos
 
-        @topmostIn @absolutize(cells rectree) pos
+        pair = @topmostPairAt @absolutize(cells rectree) rectree pos
 
-    @topmostIn: node pos ->
+        ⮐ null if not pair?
 
-        ⮐ null if not node?
+        pair[0]
+
+    @insertTextAt: cells rectree pos text ->
+
+        # insert text into the text node at pos or create one under the topmost node at pos
+        # returns the number of cells the cursor advances
+
+        abs  = @absolutize cells rectree
+        pair = @topmostPairAt abs rectree pos
+
+        if pair?
+            [node target] = pair
+        else
+            ⮐ 0 if not abs?
+            node   = abs
+            target = rectree
+
+        if valid target.text
+            scale = @scaleOf node
+            spare = target.text.length * scale + scale
+            offset = @textOffsetIn node pos target.text.length
+            target.text = target.text[0...offset] + text + target.text[offset..]
+            if int(target.w) == spare and int(target.h) == scale and not target.r? and not target.b?
+                target.w = spare + text.split('\n')[0].length * scale
+        else
+            width = text.split('\n')[0].length
+            target.children ?= []
+            target.children.push {text:text x:pos[0]-node.x y:pos[1]-node.y w:width+1 h:1}
+            scale = 1
+
+        scale * text.split('\n')[0].length
+
+    @topmostPairAt: abs raw pos ->
+
+        # pair each absolutized node with its source node
+
+        ⮐ null if not abs? or not raw?
 
         found = null
-        found = node if @holds(node pos)
+        found = [abs raw] if @holds(abs pos)
 
-        for child in node.children ? []
-            if hit = @topmostIn child pos
+        for child,i in abs.children ? []
+            if hit = @topmostPairAt child raw.children[i] pos
                 found = hit
 
         found
+
+    @textOffsetIn: node pos length ->
+
+        scale   = @scaleOf node
+        perLine = max 1 int(node.w / scale)
+        offset  = (max(0 pos[1]-node.y) * perLine) + int(max(0 pos[0]-node.x) / scale)
+
+        clamp 0 length offset
+
+    @scaleOf: node ->
+
+        ⮐ 1 if not valid node.text
+
+        max 1 int(node.scale ? 1)
 
     @holds: node pos ->
 

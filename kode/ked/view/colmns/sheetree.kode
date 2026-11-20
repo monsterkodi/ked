@@ -16,6 +16,7 @@ use ../menu         ◆ filterchoice
         
         post.on 'editor.resize'   @onEditorResize
         post.on 'sheetree.select' @select
+        post.on 'sheet.edited'    @onSheetEdited
         
     onEditorResize: =>
         
@@ -57,6 +58,10 @@ use ../menu         ◆ filterchoice
             @set items 'title'
         else
             post.emit 'cells.rect'
+
+    onSheetEdited: =>
+
+        @reloadTree()
         
     onCursorsSet: =>
 
