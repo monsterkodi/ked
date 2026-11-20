@@ -33,7 +33,7 @@ use ../menu         ◆ filterchoice
     select: row => 
 
         super row
-        post.emit 'cells.rect' @current().rect
+        post.emit 'cells.rect' @current().rect.abs
         
     grabFocus: =>
     
@@ -42,22 +42,39 @@ use ../menu         ◆ filterchoice
         
     onNode: node =>
     
-        layout.modifyTreeNode @editor.sheet.rectree node
         delete @editor.sheet.cols
         delete @editor.sheet.rows
         row = @currentIndex()
         @reloadTree()
         @highlight row
         # post.emit 'redraw'
-        post.emit 'cells.rect' @current().rect
+        post.emit 'cells.rect' @current().rect.abs
         
     reloadTree: => 
         
         if @editor.sheet?.rectree
-            items = layout.titlify @editor.cells @editor.sheet.rectree
+            layout.titlify @editor.cells @editor.sheet.rectree
+            items = @itemsForTree @editor.sheet.rectree
             @set items 'title'
         else
             post.emit 'cells.rect'
+
+    itemsForTree: node =>
+
+        items = []
+
+        @addItemsForTree node items
+
+        items
+
+    addItemsForTree: node items =>
+
+        node.index = items.length
+
+        items.push node if node.title?
+
+        for child in node.children ? []
+            @addItemsForTree child items
 
     onSheetEdited: =>
 
@@ -70,12 +87,13 @@ use ../menu         ◆ filterchoice
                 if item.index? and 0 <= item.index < @fuzzied.length
                     @highlight item.index
                     node = @current()
-                    post.emit 'cells.rect' node.rect
+                    post.emit 'cells.rect' node.rect.abs
                     @emit 'tree.node' node
             
     jumpTo: choice => 
         
-        post.emit 'goto.line' choice.y choice.x
+        rect = choice.rect.abs
+        post.emit 'goto.line' rect.y rect.x
         node = @current()
         node.index = @currentIndex()
         @emit 'tree.node' node

@@ -2,6 +2,7 @@
 use ../../../kxk ◆ post
 use ../../theme  ◆ theme
 use ../base      ◆ view input tripleinput
+use ../../popo   ◆ layout
 
 ■sheenode□view
     # editor for a single sheetree node
@@ -49,8 +50,11 @@ use ../base      ◆ view input tripleinput
         
     onNode: @node =>
     
-        @typeArg.inputs[0].set String(node.type ? '')
-        @typeArg.inputs[1].set String(node.arg ? '')
+        type = layout.typeOf node
+        arg  = layout.argOf node
+
+        @typeArg.inputs[0].set String(type ? '')
+        @typeArg.inputs[1].set String(arg ? '')
 
         @xwrInput.inputs[0].set String(node.x ? '')
         @xwrInput.inputs[1].set String(node.w ? '')

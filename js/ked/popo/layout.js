@@ -14,40 +14,36 @@ layout = (function ()
 
     layout["absolutize"] = function (cells, rectree)
     {
-        return this.inBox({x:0,y:0,w:cells.cols,h:cells.rows},rectree)
+        this.inBox({x:0,y:0,w:cells.cols,h:cells.rows},rectree)
+        return rectree
     }
 
     layout["inBox"] = function (box, node)
     {
-        var child, h, inner, out, w, x, y, _23_54_, _23_66_, _24_54_, _24_66_, _39_24_
+        var child, h, inner, w, x, y, _30_54_, _30_66_, _31_54_, _31_66_, _41_24_
 
         if (!(node != null))
         {
             return node
         }
-        _k_.assert("/home/kodi/s/ked/kode/ked/popo/layout.kode", 23, 8, "layout: w and r are both given" + " !((node.w != null) && (node.r != null))", !((node.w != null) && (node.r != null)))
-        _k_.assert("/home/kodi/s/ked/kode/ked/popo/layout.kode", 24, 8, "layout: h and b are both given" + " !((node.h != null) && (node.b != null))", !((node.h != null) && (node.b != null)))
+        _k_.assert("/home/kodi/s/ked/kode/ked/popo/layout.kode", 30, 8, "layout: w and r are both given" + " !((node.w != null) && (node.r != null))", !((node.w != null) && (node.r != null)))
+        _k_.assert("/home/kodi/s/ked/kode/ked/popo/layout.kode", 31, 8, "layout: h and b are both given" + " !((node.h != null) && (node.b != null))", !((node.h != null) && (node.b != null)))
         x = _k_.clamp(0,box.w,(this.offset(box.w,node.x)))
         y = _k_.clamp(0,box.h,(this.offset(box.h,node.y)))
         w = _k_.clamp(0,(box.w - x),(this.extent(box.w,x,node.w,node.r)))
         h = _k_.clamp(0,(box.h - y),(this.extent(box.h,y,node.h,node.b)))
-        out = this.withoutGeometry(node)
-        out.x = box.x + x
-        out.y = box.y + y
-        out.w = w
-        out.h = h
+        node.rect = {abs:{x:box.x + x,y:box.y + y,w:w,h:h},rel:{x:x,y:y,w:w,h:h}}
         if ((node.children != null))
         {
-            inner = {x:out.x,y:out.y,w:w,h:h}
-            out.children = []
+            inner = {x:box.x + x,y:box.y + y,w:w,h:h}
             var list = _k_.list(node.children)
             for (var _a_ = 0; _a_ < list.length; _a_++)
             {
                 child = list[_a_]
-                out.children.push(this.inBox(inner,child))
+                this.inBox(inner,child)
             }
         }
-        return out
+        return node
     }
 
     layout["offset"] = function (extent, value)
@@ -80,46 +76,27 @@ layout = (function ()
         return total - start
     }
 
-    layout["withoutGeometry"] = function (node)
-    {
-        var key, out, value
-
-        out = {}
-        for (key in node)
-        {
-            value = node[key]
-            if (_k_.in(key,['x','y','w','h','r','b','children']))
-            {
-                continue
-            }
-            out[key] = value
-        }
-        return out
-    }
-
     layout["regionize"] = function (cells, rectree)
     {
-        var root
-
         if (!(rectree != null))
         {
             return null
         }
-        root = this.absolutize(cells,rectree)
-        this.addRegions(root,(this.blockersIn(root)),[])
-        return root
+        this.absolutize(cells,rectree)
+        this.addRegions(rectree,(this.blockersIn(rectree)),[])
+        return rectree
     }
 
     layout["blockersIn"] = function (node)
     {
-        var child, entry, found, _92_35_
+        var child, entry, found, _83_35_
 
         found = []
-        if (node.blocks && node.w > 0 && node.h > 0)
+        if (node.blocks && node.rect.abs.w > 0 && node.rect.abs.h > 0)
         {
             found.push(node)
         }
-        var list = ((_92_35_=node.children) != null ? _92_35_ : [])
+        var list = ((_83_35_=node.children) != null ? _83_35_ : [])
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             child = list[_a_]
@@ -135,7 +112,7 @@ layout = (function ()
 
     layout["addRegions"] = function (node, blockers, ancestors)
     {
-        var blocker, child, _108_35_
+        var blocker, child, _99_35_
 
         node.regions = this.intervalsOf(node)
         if (this.flows(node))
@@ -155,7 +132,7 @@ layout = (function ()
                 node.regions = this.cutBy(node.regions,blocker)
             }
         }
-        var list1 = ((_108_35_=node.children) != null ? _108_35_ : [])
+        var list1 = ((_99_35_=node.children) != null ? _99_35_ : [])
         for (var _b_ = 0; _b_ < list1.length; _b_++)
         {
             child = list1[_b_]
@@ -172,10 +149,11 @@ layout = (function ()
         return !_k_.empty(node.text) || !_k_.empty(node.pattern) || !_k_.empty(node.image)
     }
 
-    layout["intervalsOf"] = function (rect)
+    layout["intervalsOf"] = function (node)
     {
-        var bot, out, top, y
+        var bot, out, rect, top, y
 
+        rect = node.rect.abs
         top = rect.y
         bot = rect.y + rect.h
         out = []
@@ -188,12 +166,13 @@ layout = (function ()
 
     layout["cutBy"] = function (intervals, blocker)
     {
-        var bx1, bx2, by1, by2, out, rng, x1, x2, y
+        var bx1, bx2, by1, by2, out, rect, rng, x1, x2, y
 
-        bx1 = blocker.x
-        bx2 = blocker.x + blocker.w
-        by1 = blocker.y
-        by2 = blocker.y + blocker.h
+        rect = blocker.rect.abs
+        bx1 = rect.x
+        bx2 = rect.x + rect.w
+        by1 = rect.y
+        by2 = rect.y + rect.h
         out = []
         var list = _k_.list(intervals)
         for (var _a_ = 0; _a_ < list.length; _a_++)
@@ -252,141 +231,125 @@ layout = (function ()
         return lines.join('\n')
     }
 
-    layout["titlify"] = function (cells, rectree, items = [], depth = 0, abstree = null)
+    layout["titlify"] = function (cells, rectree, depth = 0)
     {
-        var child, i, item, key, rect, type
+        this.absolutize(cells,rectree)
+        this.titleIn(rectree,depth)
+        return rectree
+    }
 
-        if (!(abstree != null))
+    layout["titleIn"] = function (node, depth)
+    {
+        var child, type, _183_35_
+
+        if (!(node != null))
         {
-            abstree = this.absolutize(cells,rectree)
+            return
         }
-        rectree.index = items.length
+        type = this.typeOf(node)
+        if ((type != null))
+        {
+            node.title = _k_.lpad(depth + 2) + type
+        }
+        else
+        {
+            delete node.title
+        }
+        var list = ((_183_35_=node.children) != null ? _183_35_ : [])
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            child = list[_a_]
+            this.titleIn(child,depth + 2)
+        }
+    }
+
+    layout["typeOf"] = function (node)
+    {
+        var type
+
         var list = ['erase','text','pattern','bg','fg']
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             type = list[_a_]
-            if ((rectree[type] != null))
+            if ((node[type] != null))
             {
-                rect = {x:abstree.x,y:abstree.y,w:abstree.w,h:abstree.h}
-                item = {title:_k_.lpad(depth + 2) + type,rect:rect,type:type,arg:rectree[type]}
-                var list1 = ['x','y','w','h','r','b','fg','bg']
-                for (var _b_ = 0; _b_ < list1.length; _b_++)
-                {
-                    key = list1[_b_]
-                    if ((rectree[key] != null))
-                    {
-                        item[key] = rectree[key]
-                    }
-                }
-                break
+                return type
             }
         }
-        if (item)
-        {
-            items.push(item)
-        }
-        var list2 = _k_.list(rectree.children)
-        for (i = 0; i < list2.length; i++)
-        {
-            child = list2[i]
-            this.titlify(cells,child,items,depth + 2,abstree.children[i])
-        }
-        return items
+        return null
     }
 
-    layout["modifyTreeNode"] = function (rectree, node)
+    layout["argOf"] = function (node)
     {
-        var key, treeNode
+        var type
 
-        if (treeNode = this.nodeAtIndex(rectree,node.index))
+        type = this.typeOf(node)
+        if ((type != null))
         {
-            var list = ['x','y','w','h','r','b','fg','bg']
-            for (var _a_ = 0; _a_ < list.length; _a_++)
-            {
-                key = list[_a_]
-                if ((node[key] != null))
-                {
-                    treeNode[key] = node[key]
-                }
-                else
-                {
-                    delete treeNode[key]
-                }
-            }
+            return node[type]
         }
     }
 
     layout["nodeForPos"] = function (cells, rectree, pos)
     {
-        var pair
-
-        pair = this.topmostPairAt(this.absolutize(cells,rectree),rectree,pos)
-        if (!(pair != null))
-        {
-            return null
-        }
-        return pair[0]
+        this.absolutize(cells,rectree)
+        return this.topmostIn(rectree,pos)
     }
 
     layout["insertTextAt"] = function (cells, rectree, pos, text)
     {
-        var abs, node, offset, pair, scale, spare, target, width, _221_26_, _230_81_, _230_99_, _234_28_
+        var node, offset, rect, scale, spare, width, _225_75_, _225_91_, _230_26_
 
-        abs = this.absolutize(cells,rectree)
-        pair = this.topmostPairAt(abs,rectree,pos)
-        if ((pair != null))
+        if (!(rectree != null))
         {
-            var _a_ = pair; node = _a_[0]; target = _a_[1]
-
+            return 0
         }
-        else
+        this.absolutize(cells,rectree)
+        node = this.topmostIn(rectree,pos)
+        if (!(node != null))
         {
-            if (!(abs != null))
-            {
-                return 0
-            }
-            node = abs
-            target = rectree
+            node = rectree
         }
-        if (!_k_.empty(target.text))
+        if (!_k_.empty(node.text))
         {
             scale = this.scaleOf(node)
-            spare = target.text.length * scale + scale
-            offset = this.textOffsetIn(node,pos,target.text.length)
-            target.text = target.text.slice(0, typeof offset === 'number' ? offset : -1) + text + target.text.slice(offset)
-            if (parseInt(target.w) === spare && parseInt(target.h) === scale && !(target.r != null) && !(target.b != null))
+            spare = node.text.length * scale + scale
+            offset = this.textOffsetIn(node,pos,node.text.length)
+            node.text = node.text.slice(0, typeof offset === 'number' ? offset : -1) + text + node.text.slice(offset)
+            if (parseInt(node.w) === spare && parseInt(node.h) === scale && !(node.r != null) && !(node.b != null))
             {
-                target.w = spare + text.split('\n')[0].length * scale
+                node.w = spare + text.split('\n')[0].length * scale
             }
         }
         else
         {
             width = text.split('\n')[0].length
-            target.children = ((_234_28_=target.children) != null ? _234_28_ : [])
-            target.children.push({text:text,x:pos[0] - node.x,y:pos[1] - node.y,w:width + 1,h:1})
+            rect = node.rect.abs
+            node.children = ((_230_26_=node.children) != null ? _230_26_ : [])
+            node.children.push({text:text,x:pos[0] - rect.x,y:pos[1] - rect.y,w:width + 1,h:1})
             scale = 1
         }
         return scale * text.split('\n')[0].length
     }
 
-    layout["topmostPairAt"] = function (abs, raw, pos)
+    layout["topmostIn"] = function (node, pos)
     {
-        var child, found, hit, i, _244_25_, _249_36_
+        var child, found, hit, _243_35_
 
-        if (!(abs != null) || !(raw != null))
+        if (!(node != null))
         {
             return null
         }
         found = null
-        if (this.holds(abs,pos))
+        if (this.holds(node,pos))
         {
-            found = [abs,raw]
+            found = node
         }
-        var list = ((_249_36_=abs.children) != null ? _249_36_ : [])
-        for (i = 0; i < list.length; i++)
+        var list = ((_243_35_=node.children) != null ? _243_35_ : [])
+        for (var _a_ = 0; _a_ < list.length; _a_++)
         {
-            child = list[i]
-            if (hit = this.topmostPairAt(child,raw.children[i],pos))
+            child = list[_a_]
+            if (hit = this.topmostIn(child,pos))
             {
                 found = hit
             }
@@ -396,52 +359,34 @@ layout = (function ()
 
     layout["textOffsetIn"] = function (node, pos, length)
     {
-        var offset, perLine, scale
+        var offset, perLine, rect, scale
 
+        rect = node.rect.abs
         scale = this.scaleOf(node)
-        perLine = _k_.max(1,parseInt(node.w / scale))
-        offset = (_k_.max(0,pos[1] - node.y) * perLine) + parseInt(_k_.max(0,pos[0] - node.x) / scale)
+        perLine = _k_.max(1,parseInt(rect.w / scale))
+        offset = (_k_.max(0,pos[1] - rect.y) * perLine) + parseInt(_k_.max(0,pos[0] - rect.x) / scale)
         return _k_.clamp(0,length,offset)
     }
 
     layout["scaleOf"] = function (node)
     {
-        var _267_29_
+        var _262_29_
 
         if (!!_k_.empty(node.text))
         {
             return 1
         }
-        return _k_.max(1,parseInt(((_267_29_=node.scale) != null ? _267_29_ : 1)))
+        return _k_.max(1,parseInt(((_262_29_=node.scale) != null ? _262_29_ : 1)))
     }
 
     layout["holds"] = function (node, pos)
     {
-        var x, y
+        var rect, x, y
 
+        rect = node.rect.abs
         x = pos[0]
         y = pos[1]
-        return x >= node.x && x < node.x + node.w && y >= node.y && y < node.y + node.h
-    }
-
-    layout["nodeAtIndex"] = function (rectree, index)
-    {
-        var child, n
-
-        if (rectree.index === index)
-        {
-            return rectree
-        }
-        var list = _k_.list(rectree.children)
-        for (var _a_ = 0; _a_ < list.length; _a_++)
-        {
-            child = list[_a_]
-            n = this.nodeAtIndex(child,index)
-            if (n)
-            {
-                return n
-            }
-        }
+        return x >= rect.x && x < rect.x + rect.w && y >= rect.y && y < rect.y + rect.h
     }
 
     layout["sueify"] = function (cells, rectree)
@@ -553,17 +498,18 @@ layout = (function ()
 
     layout["gridOf"] = function (rectree)
     {
-        var grid, row, x, y
+        var grid, rect, row, x, y
 
         if (!(rectree != null))
         {
             return null
         }
         grid = []
-        for (var _a_ = y = 0, _b_ = rectree.h; (_a_ <= _b_ ? y < rectree.h : y > rectree.h); (_a_ <= _b_ ? ++y : --y))
+        rect = rectree.rect.abs
+        for (var _a_ = y = 0, _b_ = rect.h; (_a_ <= _b_ ? y < rect.h : y > rect.h); (_a_ <= _b_ ? ++y : --y))
         {
             row = []
-            for (var _c_ = x = 0, _d_ = rectree.w; (_c_ <= _d_ ? x < rectree.w : x > rectree.w); (_c_ <= _d_ ? ++x : --x))
+            for (var _c_ = x = 0, _d_ = rect.w; (_c_ <= _d_ ? x < rect.w : x > rect.w); (_c_ <= _d_ ? ++x : --x))
             {
                 row.push({char:' ',fg:null,bg:null,block:null})
             }
@@ -575,7 +521,7 @@ layout = (function ()
 
     layout["paintTree"] = function (node, grid)
     {
-        var child, _389_47_, _391_35_
+        var child, _378_47_, _380_35_
 
         if (!(node != null))
         {
@@ -585,7 +531,7 @@ layout = (function ()
         {
             this.paintNode(node,grid)
         }
-        var list = ((_391_35_=node.children) != null ? _391_35_ : [])
+        var list = ((_380_35_=node.children) != null ? _380_35_ : [])
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             child = list[_a_]
@@ -595,7 +541,7 @@ layout = (function ()
 
     layout["paintNode"] = function (node, grid)
     {
-        var cell, chars, gone, i, j, masked, rng, scale, strings, width, x, y, _396_29_, _406_38_, _414_43_, _424_43_, _427_41_, _433_41_
+        var cell, chars, gone, i, j, masked, rng, scale, strings, width, x, y, _385_29_, _395_38_, _403_43_, _413_43_, _416_41_, _422_41_
 
         if (!(node.regions != null))
         {
@@ -613,14 +559,14 @@ layout = (function ()
         scale = 1
         if (!_k_.empty(node.text))
         {
-            scale = _k_.max(1,parseInt(((_406_38_=node.scale) != null ? _406_38_ : 1)))
+            scale = _k_.max(1,parseInt(((_395_38_=node.scale) != null ? _395_38_ : 1)))
         }
         masked = this.channelMaskOf(node)
         for (var _a_ = i = 0, _b_ = node.regions.length; (_a_ <= _b_ ? i < node.regions.length : i > node.regions.length); (_a_ <= _b_ ? ++i : --i))
         {
             rng = node.regions[i]
             width = rng[2] - rng[0]
-            chars = Array.from(((_414_43_=(strings != null ? strings[i] : undefined)) != null ? _414_43_ : ''))
+            chars = Array.from(((_403_43_=(strings != null ? strings[i] : undefined)) != null ? _403_43_ : ''))
             for (var _c_ = j = 0, _d_ = width; (_c_ <= _d_ ? j < width : j > width); (_c_ <= _d_ ? ++j : --j))
             {
                 x = rng[0] + j
@@ -630,10 +576,10 @@ layout = (function ()
                     continue
                 }
                 cell = grid[y][x]
-                gone = ((_424_43_=masked[`${x},${y}`]) != null ? _424_43_ : {})
+                gone = ((_413_43_=masked[`${x},${y}`]) != null ? _413_43_ : {})
                 if (!_k_.empty(strings) && !gone.char)
                 {
-                    cell.char = ((_427_41_=chars[j]) != null ? _427_41_ : ' ')
+                    cell.char = ((_416_41_=chars[j]) != null ? _416_41_ : ' ')
                 }
                 if (!_k_.empty(node.fg) && !gone.fg)
                 {
@@ -658,13 +604,14 @@ layout = (function ()
 
     layout["markBlock"] = function (grid, x, y, scale, char, node)
     {
-        var c, cell, r
+        var c, cell, r, rect
 
-        if (x + scale > node.x + node.w)
+        rect = node.rect.abs
+        if (x + scale > rect.x + rect.w)
         {
             return
         }
-        if (y + scale > node.y + node.h)
+        if (y + scale > rect.y + rect.h)
         {
             return
         }
@@ -684,10 +631,10 @@ layout = (function ()
 
     layout["channelMaskOf"] = function (node)
     {
-        var channel, channels, child, entry, key, masked, rng, x, _454_35_, _456_39_, _461_37_
+        var channel, channels, child, entry, key, masked, rng, x, _445_35_, _447_39_, _452_37_
 
         masked = {}
-        var list = ((_454_35_=node.children) != null ? _454_35_ : [])
+        var list = ((_445_35_=node.children) != null ? _445_35_ : [])
         for (var _a_ = 0; _a_ < list.length; _a_++)
         {
             child = list[_a_]
@@ -700,7 +647,7 @@ layout = (function ()
             {
                 channels = [channels]
             }
-            var list1 = ((_461_37_=child.regions) != null ? _461_37_ : [])
+            var list1 = ((_452_37_=child.regions) != null ? _452_37_ : [])
             for (var _b_ = 0; _b_ < list1.length; _b_++)
             {
                 rng = list1[_b_]
@@ -730,5 +677,5 @@ layout = (function ()
 
 export default layout;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibGF5b3V0LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC9wb3BvL2xheW91dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQU0sV0FBQTs7T0FDYSxVQUFQOzs7QUFFWCxVQUFEOzs7OztJQVdJLFFBQUMseUJBQVksT0FBTTs7ZUFFZixLQUFDLE9BQU8sRUFBRSxFQUFFLEVBQUUsRUFBRSxFQUFFLE1BQU0sS0FBSyxFQUFFLE1BQU0sTUFBTTs7O0lBRS9DLFFBQUMsb0JBQU8sS0FBSTs7OztjQUVNOzttQkFBWjs7Z0hBRXNDLEtBQUssZUFBTyxLQUFLLGlCQUFqQixLQUFLLGVBQU8sS0FBSztnSEFDakIsS0FBSyxlQUFPLEtBQUssaUJBQWpCLEtBQUssZUFBTyxLQUFLO1FBRXpELGNBQVUsRUFBRSxJQUFJLEdBQUcsS0FBQyxPQUFPLElBQUksRUFBRSxLQUFLO1FBQ3RDLGNBQVUsRUFBRSxJQUFJLEdBQUcsS0FBQyxPQUFPLElBQUksRUFBRSxLQUFLO1FBRXRDLGNBQVUsR0FBRyxJQUFJLElBQUUsSUFBSSxLQUFDLE9BQU8sSUFBSSxFQUFFLEVBQUUsS0FBSyxFQUFFLEtBQUs7UUFDbkQsY0FBVSxHQUFHLElBQUksSUFBRSxJQUFJLEtBQUMsT0FBTyxJQUFJLEVBQUUsRUFBRSxLQUFLLEVBQUUsS0FBSztRQUVuRCxNQUFNLEtBQUMsZ0JBQWdCO1FBRXZCLElBQUksSUFBSSxJQUFJLElBQUk7UUFDaEIsSUFBSSxJQUFJLElBQUksSUFBSTtRQUNoQixJQUFJLElBQUk7UUFDUixJQUFJLElBQUk7YUFFTCxLQUFLOztZQUNKLFNBQVMsRUFBRSxJQUFJLEVBQUUsRUFBRSxJQUFJLEVBQUUsRUFBRSxFQUFFLEVBQUU7WUFDL0IsSUFBSTtnQ0FDUyxLQUFLOzs7Z0JBQWQ7Z0JBQ0EsSUFBSSxTQUFTLEtBQUssS0FBQyxNQUFNLE1BQU07OztlQUV2Qzs7O0lBRUosUUFBQyxxQkFBUSxRQUFPOzt3QkFFSzs7bUJBQWY7O1lBRVUsVUFBVDs7Z0JBQ0ksTUFBTSxT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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibGF5b3V0LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC9wb3BvL2xheW91dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQU0sV0FBQTs7T0FDYSxVQUFQOzs7QUFFWCxVQUFEOzs7OztJQWdCSSxRQUFDLHlCQUFZLE9BQU07O1FBRWYsS0FBQyxPQUFPLEVBQUUsRUFBRSxFQUFFLEVBQUUsRUFBRSxNQUFNLEtBQUssRUFBRSxNQUFNLE1BQU07ZUFFM0M7OztJQUVKLFFBQUMsb0JBQU8sS0FBSTs7OztjQUVNOzttQkFBWjs7Z0hBRXNDLEtBQUssZUFBTyxLQUFLLGlCQUFqQixLQUFLLGVBQU8sS0FBSztnSEFDakIsS0FBSyxlQUFPLEtBQUssaUJBQWpCLEtBQUssZUFBTyxLQUFLO1FBRXpELGNBQVUsRUFBRSxJQUFJLEdBQUcsS0FBQyxPQUFPLElBQUksRUFBRSxLQUFLO1FBQ3RDLGNBQVUsRUFBRSxJQUFJLEdBQUcsS0FBQyxPQUFPLElBQUksRUFBRSxLQUFLO1FBRXRDLGNBQVUsR0FBRyxJQUFJLElBQUUsSUFBSSxLQUFDLE9BQU8sSUFBSSxFQUFFLEVBQUUsS0FBSyxFQUFFLEtBQUs7UUFDbkQsY0FBVSxHQUFHLElBQUksSUFBRSxJQUFJLEtBQUMsT0FBTyxJQUFJLEVBQUUsRUFBRSxLQUFLLEVBQUUsS0FBSztRQUVuRCxLQUFLLFFBQVEsS0FBSyxFQUFFLElBQUksSUFBRSxFQUFFLEVBQUUsSUFBSSxJQUFFLEVBQUUsRUFBRSxFQUFFLEVBQUUsR0FBRyxLQUFLLEVBQUUsRUFBRSxFQUFFLEVBQUUsRUFBRSxFQUFFLEVBQUU7YUFFL0QsS0FBSzs7WUFDSixTQUFTLEVBQUUsSUFBSSxJQUFFLEVBQUUsRUFBRSxJQUFJLElBQUUsRUFBRSxFQUFFLEVBQUUsRUFBRTtnQ0FDdEIsS0FBSzs7O2dCQUFkO2dCQUNBLEtBQUMsTUFBTSxNQUFNOzs7ZUFFckI7OztJQUVKLFFBQUMscUJBQVEsUUFBTzs7d0JBRUs7O21CQUFmOztZQUVVLFVBQVQ7O2dCQUNJ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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/popo/layout.kode

@@ -12,64 +12,102 @@ use ../util  ◆ harness
     
       ▸ percentages
     
-                layout.absolutize {cols:100 rows:50} {x:'20%' y:'10%' r:'20%' b:'10%'} ▸ {x:20 y:5 w:60 h:40}
-                layout.absolutize {cols:10  rows:5 } {x:'20%' y:'20%' r:'20%' b:'20%'} ▸ {x:2  y:1 w:6  h:3 }
-                layout.absolutize {cols:10  rows:5 } {x:'20%' y:'20%' w:'60%' h:'60%'} ▸ {x:2  y:1 w:6  h:3 }
+                tree = { x:'20%' y:'10%' r:'20%' b:'10%' }
+                layout.absolutize {cols:100 rows:50} tree
+                tree.rect ▸ {abs:{x:20 y:5 w:60 h:40} rel:{x:20 y:5 w:60 h:40}}
+
+                tree = { x:'20%' y:'20%' r:'20%' b:'20%' }
+                layout.absolutize {cols:10 rows:5} tree
+                tree.rect ▸ {abs:{x:2 y:1 w:6 h:3} rel:{x:2 y:1 w:6 h:3}}
+
+                tree = { x:'20%' y:'20%' w:'60%' h:'60%' }
+                layout.absolutize {cols:10 rows:5} tree
+                tree.rect ▸ {abs:{x:2 y:1 w:6 h:3} rel:{x:2 y:1 w:6 h:3}}
             
                 tree = { x:10 y:10 w:'100%' h:'100%' children:[{x:'50%' y:'50%' w:'50%' h:'25%'}]}
-                
-                layout.absolutize {cols:100 rows:100} tree ▸ { x:10 y:10 w:90 h:90 children:[{x:55 y:55 w:45 h:22}]}
+                layout.absolutize {cols:100 rows:100} tree
+                tree.rect ▸ {abs:{x:10 y:10 w:90 h:90} rel:{x:10 y:10 w:90 h:90}}
+                sds.get(tree 'children.0.rect') ▸ {abs:{x:55 y:55 w:45 h:22} rel:{x:45 y:45 w:45 h:22}}
             
       ▸ cells
     
-                layout.absolutize {cols:100 rows:50} {x:3 y:4 w:20 h:10}         ▸ {x:3 y:4 w:20 h:10}
-                layout.absolutize {cols:100 rows:50} {x:3 y:4 r:7 b:6}           ▸ {x:3 y:4 w:90 h:40}
-                layout.absolutize {cols:100 rows:50} {x:'3' y:'4' w:'20' h:'10'} ▸ {x:3 y:4 w:20 h:10}
-                layout.absolutize {cols:100 rows:50} {x:3 y:'10%' w:20 h:'20%'}  ▸ {x:3 y:5 w:20 h:10}
+                tree = { x:3 y:4 w:20 h:10 }
+                layout.absolutize {cols:100 rows:50} tree
+                tree.rect ▸ {abs:{x:3 y:4 w:20 h:10} rel:{x:3 y:4 w:20 h:10}}
+
+                tree = { x:3 y:4 r:7 b:6 }
+                layout.absolutize {cols:100 rows:50} tree
+                tree.rect ▸ {abs:{x:3 y:4 w:90 h:40} rel:{x:3 y:4 w:90 h:40}}
+
+                tree = { x:'3' y:'4' w:'20' h:'10' }
+                layout.absolutize {cols:100 rows:50} tree
+                tree.rect ▸ {abs:{x:3 y:4 w:20 h:10} rel:{x:3 y:4 w:20 h:10}}
+
+                tree = { x:3 y:'10%' w:20 h:'20%' }
+                layout.absolutize {cols:100 rows:50} tree
+                tree.rect ▸ {abs:{x:3 y:5 w:20 h:10} rel:{x:3 y:5 w:20 h:10}}
             
       ▸ nesting
     
                 tree = { x:1 y:1 w:10 h:10 children:[{x:1 y:1 w:'50%' h:'50%'} {x:0 y:'60%' w:4 h:2}]}
-                
-                layout.absolutize {cols:20 rows:20} tree ▸ { x:1 y:1 w:10 h:10 children:[{x:2 y:2 w:5 h:5} {x:1 y:7 w:4 h:2}]}
+                layout.absolutize {cols:20 rows:20} tree
+                tree.rect ▸ {abs:{x:1 y:1 w:10 h:10} rel:{x:1 y:1 w:10 h:10}}
+                sds.get(tree 'children.0.rect') ▸ {abs:{x:2 y:2 w:5 h:5} rel:{x:1 y:1 w:5 h:5}}
+                sds.get(tree 'children.1.rect') ▸ {abs:{x:1 y:7 w:4 h:2} rel:{x:0 y:6 w:4 h:2}}
                 
                 tree = { x:0 y:0 w:'50%' h:'50%' children:[{x:'50%' y:'50%' w:'50%' h:'50%' children:[{x:0 y:0 w:'50%' h:'50%'}]}]}
-                
-                layout.absolutize {cols:100 rows:100} tree ▸ { x:0 y:0 w:50 h:50 children:[{x:25 y:25 w:25 h:25 children:[{x:25 y:25 w:12 h:12}]}]}
+                layout.absolutize {cols:100 rows:100} tree
+                tree.rect ▸ {abs:{x:0 y:0 w:50 h:50} rel:{x:0 y:0 w:50 h:50}}
+                sds.get(tree 'children.0.rect') ▸ {abs:{x:25 y:25 w:25 h:25} rel:{x:25 y:25 w:25 h:25}}
+                sds.get(tree 'children.0.children.0.rect') ▸ {abs:{x:25 y:25 w:12 h:12} rel:{x:0 y:0 w:12 h:12}}
                 
                 tree = { x:8 y:0 w:'100%' h:10 children:[{x:'50%' y:0 w:'50%' h:2}]}
-                
-                layout.absolutize {cols:10 rows:10} tree ▸ { x:8 y:0 w:2 h:10 children:[{x:9 y:0 w:1 h:2}]}
+                layout.absolutize {cols:10 rows:10} tree
+                tree.rect ▸ {abs:{x:8 y:0 w:2 h:10} rel:{x:8 y:0 w:2 h:10}}
+                sds.get(tree 'children.0.rect') ▸ {abs:{x:9 y:0 w:1 h:2} rel:{x:1 y:0 w:1 h:2}}
                 
                 tree = { x:1 y:1 w:18 h:8 children:[{x:0 y:0 w:'50%' h:3 children:[{x:1 y:1 w:'50%' h:2}]} {x:'50%' y:0 w:'50%' h:3}]}
-                
-                layout.absolutize {cols:20 rows:20} tree ▸ { x:1 y:1 w:18 h:8 children:[{x:1 y:1 w:9 h:3 children:[{x:2 y:2 w:4 h:2}]} {x:10 y:1 w:9 h:3}]}
+                layout.absolutize {cols:20 rows:20} tree
+                tree.rect ▸ {abs:{x:1 y:1 w:18 h:8} rel:{x:1 y:1 w:18 h:8}}
+                sds.get(tree 'children.0.rect') ▸ {abs:{x:1 y:1 w:9 h:3} rel:{x:0 y:0 w:9 h:3}}
+                sds.get(tree 'children.0.children.0.rect') ▸ {abs:{x:2 y:2 w:4 h:2} rel:{x:1 y:1 w:4 h:2}}
+                sds.get(tree 'children.1.rect') ▸ {abs:{x:10 y:1 w:9 h:3} rel:{x:9 y:0 w:9 h:3}}
             
       ▸ no space
     
                 tree = { x:0 y:0 w:10 h:5 children:[{x:20 y:20 w:5 h:5}]}
-                
-                layout.absolutize {cols:10 rows:5} tree ▸ { x:0 y:0 w:10 h:5 children:[{x:10 y:5 w:0 h:0}]}
+                layout.absolutize {cols:10 rows:5} tree
+                tree.rect ▸ {abs:{x:0 y:0 w:10 h:5} rel:{x:0 y:0 w:10 h:5}}
+                sds.get(tree 'children.0.rect') ▸ {abs:{x:10 y:5 w:0 h:0} rel:{x:10 y:5 w:0 h:0}}
                 
                 tree = { x:0 y:0 w:10 h:5 children:[{x:8 y:3 w:5 h:5}]}
-                
-                layout.absolutize {cols:10 rows:5} tree ▸ { x:0 y:0 w:10 h:5 children:[{x:8 y:3 w:2 h:2}]}
+                layout.absolutize {cols:10 rows:5} tree
+                sds.get(tree 'children.0.rect') ▸ {abs:{x:8 y:3 w:2 h:2} rel:{x:8 y:3 w:2 h:2}}
                 
                 tree = { x:0 y:0 w:0 h:0 children:[{x:1 y:1 w:3 h:3}]}
-                
-                layout.absolutize {cols:10 rows:5} tree ▸ { x:0 y:0 w:0 h:0 children:[{x:0 y:0 w:0 h:0}]}
+                layout.absolutize {cols:10 rows:5} tree
+                tree.rect ▸ {abs:{x:0 y:0 w:0 h:0} rel:{x:0 y:0 w:0 h:0}}
+                sds.get(tree 'children.0.rect') ▸ {abs:{x:0 y:0 w:0 h:0} rel:{x:0 y:0 w:0 h:0}}
                 
                 tree = { x:2 y:2 w:6 h:4 children:[{x:-2 y:-1 w:'100%' h:'100%'}]}
+                layout.absolutize {cols:10 rows:10} tree
+                tree.rect ▸ {abs:{x:2 y:2 w:6 h:4} rel:{x:2 y:2 w:6 h:4}}
+                sds.get(tree 'children.0.rect') ▸ {abs:{x:2 y:2 w:6 h:4} rel:{x:0 y:0 w:6 h:4}}
                 
-                layout.absolutize {cols:10 rows:10} tree ▸ { x:2 y:2 w:6 h:4 children:[{x:2 y:2 w:6 h:4}]}
-                
-                layout.absolutize {cols:10 rows:5} {x:0 y:0 w:5 h:5 children:[]} ▸ {x:0 y:0 w:5 h:5 children:[]}
+                tree = { x:0 y:0 w:5 h:5 children:[] }
+                layout.absolutize {cols:10 rows:5} tree
+                tree.rect ▸ {abs:{x:0 y:0 w:5 h:5} rel:{x:0 y:0 w:5 h:5}}
+                tree.children ▸ []
             
       ▸ permutations
     
                 tree = { x:'10%' y:'10%' r:'10%' b:10 children:[{ x:4 y:2 w:'50%' b:'20%' children:[{ x:'25%' y:3 r:6 h:'25%' children:[{ x:2 y:'50%' w:12 h:2 children:[{ x:0 y:0 r:'100%' b:'100%' }] }] }] }] }
-                
-                layout.absolutize {cols:100 rows:50} tree ▸ { x:10 y:5 w:80 h:35 children:[{ x:14 y:7 w:40 h:26 children:[{ x:24 y:10 w:24 h:6 children:[{ x:26 y:13 w:12 h:2 children:[{ x:26 y:13 w:0 h:0 }] }] }] }] }
+                layout.absolutize {cols:100 rows:50} tree
+                tree.rect ▸ {abs:{x:10 y:5 w:80 h:35} rel:{x:10 y:5 w:80 h:35}}
+                sds.get(tree 'children.0.rect.abs') ▸ {x:14 y:7 w:40 h:26}
+                sds.get(tree 'children.0.children.0.rect.abs') ▸ {x:24 y:10 w:24 h:6}
+                sds.get(tree 'children.0.children.0.children.0.rect.abs') ▸ {x:26 y:13 w:12 h:2}
+                sds.get(tree 'children.0.children.0.children.0.children.0.rect.abs') ▸ {x:26 y:13 w:0 h:0}
 
     ▸ nodeForPos
 
@@ -93,13 +131,27 @@ use ../util  ◆ harness
 
       ▸ percentages and anchors
 
-                layout.nodeForPos {cols:10 rows:5} {x:'20%' y:1 w:'40%' h:2} [2 1] ▸ {x:2 y:1 w:4 h:2}
-                layout.nodeForPos {cols:10 rows:5} {x:'20%' y:1 w:'40%' h:2} [5 2] ▸ {x:2 y:1 w:4 h:2}
-                layout.nodeForPos {cols:10 rows:5} {x:'20%' y:1 w:'40%' h:2} [6 2] ▸ null
-                layout.nodeForPos {cols:10 rows:5} {x:'20%' y:1 w:'40%' h:2} [2 3] ▸ null
+                tree = { x:'20%' y:1 w:'40%' h:2 }
 
-                layout.nodeForPos {cols:10 rows:5} {x:1 y:1 r:2 b:1} [7 3] ▸ {x:1 y:1 w:7 h:3}
-                layout.nodeForPos {cols:10 rows:5} {x:1 y:1 r:2 b:1} [8 3] ▸ null
+                res = layout.nodeForPos {cols:10 rows:5} tree [2 1]
+                res.rect.abs ▸ {x:2 y:1 w:4 h:2}
+
+                res = layout.nodeForPos {cols:10 rows:5} tree [5 2]
+                res.rect.abs ▸ {x:2 y:1 w:4 h:2}
+
+                res = layout.nodeForPos {cols:10 rows:5} tree [6 2]
+                res ▸ null
+
+                res = layout.nodeForPos {cols:10 rows:5} tree [2 3]
+                res ▸ null
+
+                tree = { x:1 y:1 r:2 b:1 }
+
+                res = layout.nodeForPos {cols:10 rows:5} tree [7 3]
+                res.rect.abs ▸ {x:1 y:1 w:7 h:3}
+
+                res = layout.nodeForPos {cols:10 rows:5} tree [8 3]
+                res ▸ null
 
       ▸ topmost
 
@@ -124,29 +176,58 @@ use ../util  ◆ harness
                 res = layout.nodeForPos {cols:4 rows:2} tree [3 0]
                 res.text ▸ 'outer'
 
+      ▸ nested
+
+                tree = { bg:'#000' x:2 y:2 w:20 h:10 children:[{ x:3 y:2 w:10 h:5 children:[{ text:'in' x:1 y:1 w:6 h:3 }] }] }
+
+                res = layout.nodeForPos {cols:30 rows:20} tree [9 6]
+
+                res.text ▸ 'in'
+                res.rect.abs ▸ {x:6 y:5 w:6 h:3}
+                res.rect.rel ▸ {x:1 y:1 w:6 h:3}
+
       ▸ empty and indexed
 
                 tree = { children:[{ text:'z' x:2 y:2 w:0 h:0 }] }
 
-                layout.nodeForPos {cols:4 rows:4} tree [2 2] ▸ {x:0 y:0 w:4 h:4 children:[{text:'z' x:2 y:2 w:0 h:0}]}
+                res = layout.nodeForPos {cols:4 rows:4} tree [2 2]
+                res.rect.abs ▸ {x:0 y:0 w:4 h:4}
+                sds.get(res 'children.0.rect.abs') ▸ {x:2 y:2 w:0 h:0}
 
-                layout.nodeForPos {cols:4 rows:4} { index:1 text:'i' x:1 y:1 w:2 h:2 } [2 2] ▸ {index:1 text:'i' x:1 y:1 w:2 h:2}
+                node = { index:1 text:'i' x:1 y:1 w:2 h:2 }
+                res = layout.nodeForPos {cols:4 rows:4} node [2 2]
+                res.index ▸ 1
+                res.text ▸ 'i'
+                res.rect.abs ▸ {x:1 y:1 w:2 h:2}
 
     ▸ titlify
 
         tree = { bg:'#000' x:2 y:2 w:20 h:10 children:[{ x:3 y:2 w:10 h:5 children:[{ text:'hi' x:1 y:1 w:3 h:1 }] }] }
 
-        items = layout.titlify {cols:30 rows:20} tree
+        layout.titlify {cols:30 rows:20} tree
 
-        items.length ▸ 2
-        items[0].rect ▸ {x:2 y:2 w:20 h:10}
-        items[1].rect ▸ {x:6 y:5 w:3 h:1}
+        tree.title ▸ '  bg'
+        tree.rect.abs ▸ {x:2 y:2 w:20 h:10}
+
+        container = sds.get(tree 'children.0')
+        containerTitle = container.title?
+        containerTitle ▸ false
+
+        text = sds.get(tree 'children.0.children.0')
+        text.title ▸ '      text'
+        text.rect.abs ▸ {x:6 y:5 w:3 h:1}
+
+        layout.typeOf(tree) ▸ 'bg'
+        layout.argOf(tree) ▸ '#000'
+        layout.typeOf(container) ▸ null
+        layout.typeOf(text) ▸ 'text'
+        layout.argOf(text) ▸ 'hi'
 
         tree = { bg:'#000' children:[{ x:2 y:1 w:10 h:5 children:[{ text:'hi' x:1 y:1 r:1 b:1 }] }] }
 
-        items = layout.titlify {cols:30 rows:20} tree
+        layout.titlify {cols:30 rows:20} tree
 
-        items[1].rect ▸ {x:3 y:2 w:8 h:3}
+        sds.get(tree 'children.0.children.0.rect.abs') ▸ {x:3 y:2 w:8 h:3}
 
   ▸ insertTextAt
 
@@ -156,7 +237,7 @@ use ../util  ◆ harness
 
                 layout.insertTextAt {cols:10 rows:5} tree [3 2] 'a' ▸ 1
 
-                tree ▸ {children:[{text:'a' x:3 y:2 w:2 h:1}]}
+                sds.get(tree 'children.0') ▸ {text:'a' x:3 y:2 w:2 h:1}
 
                 tree = { pattern:'x' x:1 y:1 w:6 h:3 }
 
@@ -226,7 +307,7 @@ use ../util  ◆ harness
             
             regions = layout.regionize {rows:20 cols:30} tree
             
-            sds.get regions 'children.3.w' ▸ 22
+            sds.get regions 'children.3.rect.abs.w' ▸ 22
             sds.get regions 'children.3.regions' ▸ [[8 15 30] [8 16 30] [8 17 30]]
             sds.get regions 'children.2.regions' ▸ [[8 14 30]]
             sds.get regions 'children.1.regions' ▸ [[4 3 24] [4 4 24] [4 5 24]]
@@ -452,7 +533,8 @@ use ../util  ◆ harness
 
         e.state.mainCursor() ▸ [3 1]
         h.at(2 1) ▸ 'a'
-        sds.get(e.state.sheet.rectree 'children.0') ▸ {text:'a' x:2 y:1 w:2 h:1}
+        sds.get(e.state.sheet.rectree 'children.0.text') ▸ 'a'
+        sds.get(e.state.sheet.rectree 'children.0.rect.abs') ▸ {x:2 y:1 w:2 h:1}
 
         e.state.insert 'b'
 
@@ -469,7 +551,9 @@ use ../util  ◆ harness
 
         e.state.insert 'c'
 
-        sds.get(e.state.sheet.rectree 'children.0') ▸ {text:'c' x:8 y:2 w:2 h:1}
+        sds.get(e.state.sheet.rectree 'children.0.text') ▸ 'c'
+        sds.get(e.state.sheet.rectree 'children.0.x') ▸ 8
+        sds.get(e.state.sheet.rectree 'children.0.y') ▸ 2
 
   ▸ sheet render size
 
@@ -485,4 +569,5 @@ use ../util  ◆ harness
 
         e.state.insert 'a'
 
-        sds.get(e.state.sheet.rectree 'children.0.children.0') ▸ {text:'a' x:1 y:0 w:2 h:1}
+        sds.get(e.state.sheet.rectree 'children.0.rect.abs') ▸ {x:5 y:0 w:5 h:2}
+        sds.get(e.state.sheet.rectree 'children.0.children.0.rect.abs') ▸ {x:6 y:0 w:2 h:1}

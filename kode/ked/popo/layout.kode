@@ -11,10 +11,17 @@ use ../edit/tool ◆ sue
     #
     #  a node without w or r fills the box horizontally.
     #  a node without h or b fills the box vertically.
+    #
+    #  absolutize adds a rect to every node:
+    #
+    #      rect.abs   absolute rect in cell coordinates
+    #      rect.rel   rect relative to the parent node
 
     @absolutize: cells rectree ->
 
         @inBox {x:0 y:0 w:cells.cols h:cells.rows} rectree
+
+        rectree
 
     @inBox: box node ->
 
@@ -29,20 +36,14 @@ use ../edit/tool ◆ sue
         w = clamp 0 (box.w-x) (@extent(box.w x node.w node.r))
         h = clamp 0 (box.h-y) (@extent(box.h y node.h node.b))
 
-        out = @withoutGeometry node
-
-        out.x = box.x + x
-        out.y = box.y + y
-        out.w = w
-        out.h = h
+        node.rect = {abs:{x:box.x+x y:box.y+y w:w h:h} rel:{x:x y:y w:w h:h}}
 
         if node.children?
-            inner = {x:out.x y:out.y w:w h:h}
-            out.children = []
+            inner = {x:box.x+x y:box.y+y w:w h:h}
             for child in node.children
-                out.children.push @inBox(inner child)
+                @inBox inner child
 
-        out
+        node
 
     @offset: extent value ->
 
@@ -63,31 +64,21 @@ use ../edit/tool ◆ sue
 
         total - start
 
-    @withoutGeometry: node ->
-
-        out = {}
-
-        for key,value of node
-            continue if key in ['x' 'y' 'w' 'h' 'r' 'b' 'children']
-            out[key] = value
-
-        out
-        
     @regionize: cells rectree ->
 
         ⮐ null if not rectree?
 
-        root = @absolutize cells rectree
+        @absolutize cells rectree
 
-        @addRegions(root (@blockersIn(root)) [])
+        @addRegions rectree (@blockersIn(rectree)) []
         
-        root
+        rectree
 
     @blockersIn: node ->
 
         found = []
 
-        found.push node if node.blocks and node.w > 0 and node.h > 0
+        found.push node if node.blocks and node.rect.abs.w > 0 and node.rect.abs.h > 0
 
         for child in node.children ? []
             for entry in @blockersIn child
@@ -114,7 +105,9 @@ use ../edit/tool ◆ sue
 
         valid node.text or valid node.pattern or valid node.image
 
-    @intervalsOf: rect ->
+    @intervalsOf: node ->
+
+        rect = node.rect.abs
 
         top = rect.y
         bot = rect.y + rect.h
@@ -126,10 +119,12 @@ use ../edit/tool ◆ sue
 
     @cutBy: intervals blocker ->
 
-        bx1 = blocker.x
-        bx2 = blocker.x + blocker.w
-        by1 = blocker.y
-        by2 = blocker.y + blocker.h
+        rect = blocker.rect.abs
+
+        bx1 = rect.x
+        bx2 = rect.x + rect.w
+        by1 = rect.y
+        by2 = rect.y + rect.h
 
         out = []
 
@@ -166,97 +161,97 @@ use ../edit/tool ◆ sue
 
         lines.join '\n'
 
-    @titlify: cells rectree items=[] depth=0 abstree=null -> # generate items for sheetree 
-        
-        if not abstree?
-            abstree = @absolutize cells rectree
-        
-        rectree.index = items.length
-        
+    @titlify: cells rectree depth=0 -> # add titles for the sheetree
+
+        @absolutize cells rectree
+
+        @titleIn rectree depth
+
+        rectree
+
+    @titleIn: node depth ->
+
+        ⮐ if not node?
+
+        type = @typeOf node
+
+        if type?
+            node.title = lpad(depth+2)+type
+        else
+            delete node.title
+
+        for child in node.children ? []
+            @titleIn child depth+2
+
+    @typeOf: node ->
+
         for type in ['erase''text''pattern''bg''fg']
-            if rectree[type]? 
-                rect = x:abstree.x y:abstree.y w:abstree.w h:abstree.h
-                item = title:lpad(depth+2)+type rect:rect type:type arg:rectree[type] 
-                for key in ['x''y''w''h''r''b''fg''bg']
-                    if rectree[key]?
-                        item[key] = rectree[key]
-                break
-                
-        if item ➜ items.push item
-        for child,i in rectree.children
-            @titlify cells child items depth+2 abstree.children[i]
-            
-        items
-        
-    @modifyTreeNode: rectree node ->
-        
-        if treeNode = @nodeAtIndex rectree node.index
-            for key in ['x''y''w''h''r''b''fg''bg']
-                if node[key]?
-                    treeNode[key] = node[key]
-                else
-                    delete treeNode[key]
+            ⮐ type if node[type]?
+
+        null
+
+    @argOf: node ->
+
+        type = @typeOf node
+
+        ⮐ node[type] if type?
 
     @nodeForPos: cells rectree pos ->
 
         # return 'topmost' node containing pos
 
-        pair = @topmostPairAt @absolutize(cells rectree) rectree pos
+        @absolutize cells rectree
 
-        ⮐ null if not pair?
-
-        pair[0]
+        @topmostIn rectree pos
 
     @insertTextAt: cells rectree pos text ->
 
         # insert text into the text node at pos or create one under the topmost node at pos
         # returns the number of cells the cursor advances
 
-        abs  = @absolutize cells rectree
-        pair = @topmostPairAt abs rectree pos
+        ⮐ 0 if not rectree?
 
-        if pair?
-            [node target] = pair
-        else
-            ⮐ 0 if not abs?
-            node   = abs
-            target = rectree
+        @absolutize cells rectree
 
-        if valid target.text
+        node = @topmostIn rectree pos
+
+        node = rectree if not node?
+
+        if valid node.text
             scale = @scaleOf node
-            spare = target.text.length * scale + scale
-            offset = @textOffsetIn node pos target.text.length
-            target.text = target.text[0...offset] + text + target.text[offset..]
-            if int(target.w) == spare and int(target.h) == scale and not target.r? and not target.b?
-                target.w = spare + text.split('\n')[0].length * scale
+            spare = node.text.length * scale + scale
+            offset = @textOffsetIn node pos node.text.length
+            node.text = node.text[0...offset] + text + node.text[offset..]
+            if int(node.w) == spare and int(node.h) == scale and not node.r? and not node.b?
+                node.w = spare + text.split('\n')[0].length * scale
         else
             width = text.split('\n')[0].length
-            target.children ?= []
-            target.children.push {text:text x:pos[0]-node.x y:pos[1]-node.y w:width+1 h:1}
+            rect = node.rect.abs
+            node.children ?= []
+            node.children.push {text:text x:pos[0]-rect.x y:pos[1]-rect.y w:width+1 h:1}
             scale = 1
 
         scale * text.split('\n')[0].length
 
-    @topmostPairAt: abs raw pos ->
+    @topmostIn: node pos ->
 
-        # pair each absolutized node with its source node
-
-        ⮐ null if not abs? or not raw?
+        ⮐ null if not node?
 
         found = null
-        found = [abs raw] if @holds(abs pos)
+        found = node if @holds(node pos)
 
-        for child,i in abs.children ? []
-            if hit = @topmostPairAt child raw.children[i] pos
+        for child in node.children ? []
+            if hit = @topmostIn child pos
                 found = hit
 
         found
 
     @textOffsetIn: node pos length ->
 
+        rect    = node.rect.abs
         scale   = @scaleOf node
-        perLine = max 1 int(node.w / scale)
-        offset  = (max(0 pos[1]-node.y) * perLine) + int(max(0 pos[0]-node.x) / scale)
+        perLine = max 1 int(rect.w / scale)
+        offset  = (max(0 pos[1]-rect.y) * perLine) + int(max(0 pos[0]-rect.x) / scale)
 
         clamp 0 length offset
 
@@ -268,18 +263,11 @@ use ../edit/tool ◆ sue
 
     @holds: node pos ->
 
-        x = pos[0]
-        y = pos[1]
+        rect = node.rect.abs
+        x    = pos[0]
+        y    = pos[1]
 
-        ⮐ x >= node.x and x < node.x+node.w and y >= node.y and y < node.y+node.h
-
-    @nodeAtIndex: rectree index ->
-    
-        if rectree.index == index
-            ⮐ rectree
-        for child in rectree.children
-            n = @nodeAtIndex child index
-            ⮐ n if n
+        ⮐ x >= rect.x and x < rect.x+rect.w and y >= rect.y and y < rect.y+rect.h
 
     @sueify: cells rectree ->
 
@@ -372,10 +360,11 @@ use ../edit/tool ◆ sue
         ⮐ null if not rectree?
 
         grid = []
+        rect = rectree.rect.abs
 
-        for y in 0...rectree.h
+        for y in 0...rect.h
             row = []
-            for x in 0...rectree.w
+            for x in 0...rect.w
                 row.push {char:' ' fg:null bg:null block:null}
             grid.push row
         @paintTree rectree grid
@@ -436,8 +425,10 @@ use ../edit/tool ◆ sue
 
     @markBlock: (grid x y scale char node) ->
 
-        ⮐ if x + scale > node.x + node.w
-        ⮐ if y + scale > node.y + node.h
+        rect = node.rect.abs
+
+        ⮐ if x + scale > rect.x + rect.w
+        ⮐ if y + scale > rect.y + rect.h
 
         for r in y...min(grid.length y+scale)
             for c in x...min(grid[r].length x+scale)

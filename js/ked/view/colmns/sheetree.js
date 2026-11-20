@@ -31,6 +31,8 @@ sheetree = (function ()
         this["jumpTo"] = this["jumpTo"].bind(this)
         this["onCursorsSet"] = this["onCursorsSet"].bind(this)
         this["onSheetEdited"] = this["onSheetEdited"].bind(this)
+        this["addItemsForTree"] = this["addItemsForTree"].bind(this)
+        this["itemsForTree"] = this["itemsForTree"].bind(this)
         this["reloadTree"] = this["reloadTree"].bind(this)
         this["onNode"] = this["onNode"].bind(this)
         this["grabFocus"] = this["grabFocus"].bind(this)
@@ -67,7 +69,7 @@ sheetree = (function ()
     {
         sheetree.__super__.select.call(this,row)
     
-        return post.emit('cells.rect',this.current().rect)
+        return post.emit('cells.rect',this.current().rect.abs)
     }
 
     sheetree.prototype["grabFocus"] = function ()
@@ -83,27 +85,53 @@ sheetree = (function ()
     {
         var row
 
-        layout.modifyTreeNode(this.editor.sheet.rectree,node)
         delete this.editor.sheet.cols
         delete this.editor.sheet.rows
         row = this.currentIndex()
         this.reloadTree()
         this.highlight(row)
-        return post.emit('cells.rect',this.current().rect)
+        return post.emit('cells.rect',this.current().rect.abs)
     }
 
     sheetree.prototype["reloadTree"] = function ()
     {
-        var items, _56_24_
+        var items, _55_24_
 
         if ((this.editor.sheet != null ? this.editor.sheet.rectree : undefined))
         {
-            items = layout.titlify(this.editor.cells,this.editor.sheet.rectree)
+            layout.titlify(this.editor.cells,this.editor.sheet.rectree)
+            items = this.itemsForTree(this.editor.sheet.rectree)
             return this.set(items,'title')
         }
         else
         {
             return post.emit('cells.rect')
+        }
+    }
+
+    sheetree.prototype["itemsForTree"] = function (node)
+    {
+        var items
+
+        items = []
+        this.addItemsForTree(node,items)
+        return items
+    }
+
+    sheetree.prototype["addItemsForTree"] = function (node, items)
+    {
+        var child, _74_37_, _76_35_
+
+        node.index = items.length
+        if ((node.title != null))
+        {
+            items.push(node)
+        }
+        var list = ((_76_35_=node.children) != null ? _76_35_ : [])
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            child = list[_a_]
+            this.addItemsForTree(child,items)
         }
     }
 
@@ -114,7 +142,7 @@ sheetree = (function ()
 
     sheetree.prototype["onCursorsSet"] = function ()
     {
-        var item, node, _68_24_, _70_29_
+        var item, node, _85_24_, _87_29_
 
         if ((this.editor.sheet != null ? this.editor.sheet.rectree : undefined))
         {
@@ -124,7 +152,7 @@ sheetree = (function ()
                 {
                     this.highlight(item.index)
                     node = this.current()
-                    post.emit('cells.rect',node.rect)
+                    post.emit('cells.rect',node.rect.abs)
                     return this.emit('tree.node',node)
                 }
             }
@@ -133,9 +161,10 @@ sheetree = (function ()
 
     sheetree.prototype["jumpTo"] = function (choice)
     {
-        var node
+        var node, rect
 
-        post.emit('goto.line',choice.y,choice.x)
+        rect = choice.rect.abs
+        post.emit('goto.line',rect.y,rect.x)
         node = this.current()
         node.index = this.currentIndex()
         return this.emit('tree.node',node)
@@ -204,5 +233,5 @@ sheetree = (function ()
 
 export default sheetree;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZXRyZWUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWV0cmVlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQVM7SUFBSztJQUFNOztPQUNYLFlBQVo7T0FBa0IsWUFBbEI7T0FBd0IsWUFBeEI7O09BQ1ksV0FBUDs7T0FDTyxjQUFYOztPQUNXLGFBQVo7O09BQ1ksbUJBQWY7OztBQUVOLFlBQUQ7O3lCQUFVO2FBRU4sVUFBSSxRQUFRLE1BQUs7O1FBQWQ7UUFBUTs7Ozs7Ozs7Ozs7aURBRUQsS0FBQyxPQUFPLE9BQU8sS0FBQyxLQUFLO1FBRTNCLEtBQUMsT0FBTyxNQUFNLEdBQUcsYUFBYSxLQUFDO1FBRS9CLEtBQUssR0FBRyxnQkFBa0IsS0FBQztRQUMzQixLQUFLLEdBQUcsa0JBQWtCLEtBQUM7UUFDM0IsS0FBSyxHQUFHLGVBQWtCLEtBQUM7Ozt3QkFFL0I7Ozs7WUFFUyxLQUFDLFlBQVksS0FBQzs7OztRQUVuQixNQUFNLEtBQUM7UUFDUCxLQUFDO2VBQ0QsS0FBQyxVQUFVOzs7d0JBRWY7O1FBQ0ksS0FBSyxLQUFLOzs7O3dCQUdkLHFCQUFROzs0Q0FFRTs7ZUFDTixLQUFLLEtBQUssYUFBYSxLQUFDLFVBQVU7Ozt3QkFFdEM7O1lBRVMsS0FBQyxZQUFZLEtBQUM7Ozs7Ozs7d0JBR3ZCLHFCQUFROzs7O1FBRUosT0FBTyxlQUFlLEtBQUMsT0FBTyxNQUFNLFFBQVE7ZUFDckMsS0FBQyxPQUFPLE1BQU07ZUFDZCxLQUFDLE9BQU8sTUFBTTtRQUNyQixNQUFNLEtBQUM7UUFDUCxLQUFDO1FBQ0QsS0FBQyxVQUFVO2VBRVgsS0FBSyxLQUFLLGFBQWEsS0FBQyxVQUFVOzs7d0JBRXRDOzs7O2FBRU8sS0FBQyxPQUFPLGdCQUFSLEtBQUMsT0FBTyxNQUFPOztZQUNkLFFBQVEsT0FBTyxRQUFRLEtBQUMsT0FBTyxNQUFNLEtBQUMsT0FBTyxNQUFNO21CQUNuRCxLQUFDLElBQUksTUFBTTs7OzttQkFFWCxLQUFLLEtBQUs7Ozs7d0JBRWxCOztlQUVJLEtBQUM7Ozt3QkFFTDs7OzthQUVPLEtBQUMsT0FBTyxnQkFBUixLQUFDLE9BQU8sTUFBTzs7Z0JBQ1gsT0FBTyxPQUFPLFdBQVcsS0FBQyxPQUFPLE1BQU0sS0FBQyxPQUFPLE1BQU0sUUFBUSxLQUFDLE9BQU8sTUFBTTs7cUJBQ3ZFLEtBQUssbUJBQVcsS0FBSyxLQUFLLFNBQUwsS0FBSyxRQUFRLEtBQUMsUUFBUTs7b0JBQzFDLEtBQUMsVUFBVSxLQUFLO29CQUNoQixPQUFPLEtBQUM7b0JBQ1IsS0FBSyxLQUFLLGFBQWEsS0FBSzsyQkFDNUIsS0FBQyxLQUFLLFlBQVk7Ozs7Ozt3QkFFbEMscUJBQVE7Ozs7UUFFSixLQUFLLEtBQUssWUFBWSxPQUFPLEVBQUUsT0FBTztRQUN0QyxPQUFPLEtBQUM7UUFDUixLQUFLLFFBQVEsS0FBQztlQUNkLEtBQUMsS0FBSyxZQUFZOzs7d0JBRXRCOzs7O2VBQXdCLEtBQUMsT0FBTyxLQUFDOzs7d0JBQ2pDOzs7O2VBQXdCLEtBQUMsT0FBTyxLQUFDOzs7d0JBRWpDLHlCQUFZLFFBQU8sUUFBTzs7c0JBRWI7O1lBQ0wsY0FBTSwrQ0FBK0M7WUFDckQsY0FBTSw4Q0FBOEM7OztnQkFHakQ7O2lCQUVIO2dCQUVJLEtBQUMsT0FBTztnQkFDUixLQUFDOzs7aUJBR0w7Z0JBRUksS0FBQztnQkFDRCxTQUFTLEtBQUMsWUFBWSxLQUFDO2dCQUN2QixLQUFDLE9BQU87Z0JBQ1IsS0FBQzs7O2lCQUdMO2dCQUVJLEtBQUM7Z0JBQ0QsU0FBUyxLQUFDLFlBQVksS0FBQztnQkFDdkIsS0FBQyxPQUFPO2dCQUNSLEtBQUM7OztpQkFHTDtpQkFDQTtnQkFFSSxLQUFDLE9BQU87Z0JBQ1IsS0FBSyxLQUFLLFFBQVE7OztpQkFHdEI7Z0JBRUksS0FBQyxPQUFPOzs7Ozt1REFLVixPQUFPLE9BQU87OztXQTFIM0I7OztlQTRITSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZXRyZWUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWV0cmVlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQVM7SUFBSztJQUFNOztPQUNYLFlBQVo7T0FBa0IsWUFBbEI7T0FBd0IsWUFBeEI7O09BQ1ksV0FBUDs7T0FDTyxjQUFYOztPQUNXLGFBQVo7O09BQ1ksbUJBQWY7OztBQUVOLFlBQUQ7O3lCQUFVO2FBRU4sVUFBSSxRQUFRLE1BQUs7O1FBQWQ7UUFBUTs7Ozs7Ozs7Ozs7OztpREFFRCxLQUFDLE9BQU8sT0FBTyxLQUFDLEtBQUs7UUFFM0IsS0FBQyxPQUFPLE1BQU0sR0FBRyxhQUFhLEtBQUM7UUFFL0IsS0FBSyxHQUFHLGdCQUFrQixLQUFDO1FBQzNCLEtBQUssR0FBRyxrQkFBa0IsS0FBQztRQUMzQixLQUFLLEdBQUcsZUFBa0IsS0FBQzs7O3dCQUUvQjs7OztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7O1FBRW5CLE1BQU0sS0FBQztRQUNQLEtBQUM7ZUFDRCxLQUFDLFVBQVU7Ozt3QkFFZjs7UUFDSSxLQUFLLEtBQUs7Ozs7d0JBR2QscUJBQVE7OzRDQUVFOztlQUNOLEtBQUssS0FBSyxhQUFhLEtBQUMsVUFBVSxLQUFLOzs7d0JBRTNDOztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7Ozs7O3dCQUd2QixxQkFBUTs7OztlQUVHLEtBQUMsT0FBTyxNQUFNO2VBQ2QsS0FBQyxPQUFPLE1BQU07UUFDckIsTUFBTSxLQUFDO1FBQ1AsS0FBQztRQUNELEtBQUMsVUFBVTtlQUVYLEtBQUssS0FBSyxhQUFhLEtBQUMsVUFBVSxLQUFLOzs7d0JBRTNDOzs7O2FBRU8sS0FBQyxPQUFPLGdCQUFSLEtBQUMsT0FBTyxNQUFPOztZQUNkLE9BQU8sUUFBUSxLQUFDLE9BQU8sTUFBTSxLQUFDLE9BQU8sTUFBTTtZQUMzQyxRQUFRLEtBQUMsYUFBYSxLQUFDLE9BQU8sTUFBTTttQkFDcEMsS0FBQyxJQUFJLE1BQU07Ozs7bUJBRVgsS0FBSyxLQUFLOzs7O3dCQUVsQiwyQkFBYzs7OztRQUVWO1FBRUEsS0FBQyxnQkFBZ0IsS0FBSztlQUV0Qjs7O3dCQUVKLDhCQUFpQixNQUFLOzs7O1FBRWxCLEtBQUssUUFBUSxNQUFNO2FBRUEsS0FBSzs7WUFBeEIsTUFBTSxLQUFLOzs2QkFFRSxLQUFLOzs7WUFBZDtZQUNBLEtBQUMsZ0JBQWdCLE1BQU07Ozs7d0JBRS9COztlQUVJLEtBQUM7Ozt3QkFFTDs7OzthQUVPLEtBQUMsT0FBTyxnQkFBUixLQUFDLE9BQU8sTUFBTzs7Z0JBQ1gsT0FBTyxPQUFPLFdBQVcsS0FBQyxPQUFPLE1BQU0sS0FBQyxPQUFPLE1BQU0sUUFBUSxLQUFDLE9BQU8sTUFBTTs7cUJBQ3ZFLEtBQUssbUJBQVcsS0FBSyxLQUFLLFNBQUwsS0FBSyxRQUFRLEtBQUMsUUFBUTs7b0JBQzFDLEtBQUMsVUFBVSxLQUFLO29CQUNoQixPQUFPLEtBQUM7b0JBQ1IsS0FBSyxLQUFLLGFBQWEsS0FBSyxLQUFLOzJCQUNqQyxLQUFDLEtBQUssWUFBWTs7Ozs7O3dCQUVsQyxxQkFBUTs7OztRQUVKLE9BQU8sT0FBTyxLQUFLO1FBQ25CLEtBQUssS0FBSyxZQUFZLEtBQUssRUFBRSxLQUFLO1FBQ2xDLE9BQU8sS0FBQztRQUNSLEtBQUssUUFBUSxLQUFDO2VBQ2QsS0FBQyxLQUFLLFlBQVk7Ozt3QkFFdEI7Ozs7ZUFBd0IsS0FBQyxPQUFPLEtBQUM7Ozt3QkFDakM7Ozs7ZUFBd0IsS0FBQyxPQUFPLEtBQUM7Ozt3QkFFakMseUJBQVksUUFBTyxRQUFPOztzQkFFYjs7WUFDTCxjQUFNLCtDQUErQztZQUNyRCxjQUFNLDhDQUE4Qzs7O2dCQUdqRDs7aUJBRUg7Z0JBRUksS0FBQyxPQUFPO2dCQUNSLEtBQUM7OztpQkFHTDtnQkFFSSxLQUFDO2dCQUNELFNBQVMsS0FBQyxZQUFZLEtBQUM7Z0JBQ3ZCLEtBQUMsT0FBTztnQkFDUixLQUFDOzs7aUJBR0w7Z0JBRUksS0FBQztnQkFDRCxTQUFTLEtBQUMsWUFBWSxLQUFDO2dCQUN2QixLQUFDLE9BQU87Z0JBQ1IsS0FBQzs7O2lCQUdMO2lCQUNBO2dCQUVJLEtBQUMsT0FBTztnQkFDUixLQUFLLEtBQUssUUFBUTs7O2lCQUd0QjtnQkFFSSxLQUFDLE9BQU87Ozs7O3VEQUtWLE9BQU8sT0FBTzs7O1dBNUkzQjs7O2VBOElNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/sheetree.kode
