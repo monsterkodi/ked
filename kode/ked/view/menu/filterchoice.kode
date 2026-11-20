@@ -10,9 +10,9 @@ use ../../edit/tool ◆ belt
     a choices view with an internal filter input
     the input is hidden until a plain alphanumeric key is pressed
 ###
-    @: screen name features ->
+    @: @screen @name features ->
         
-        super screen name features
+        super @screen @name features
         
         @input       = new input @screen "#{@name}_input"
         @filterCells = new cells @screen

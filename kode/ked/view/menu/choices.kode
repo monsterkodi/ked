@@ -15,9 +15,9 @@ use ../../edit      ◆ editor
     supports filtering of the items
 ###
 
-    @: screen name features=[] ->
+    @: @screen @name features=[] ->
 
-        super screen name features
+        super @screen @name features
         
         @setColor 'bg'    theme.editor.bg
         @setColor 'hover' theme.hover
@@ -190,8 +190,8 @@ use ../../edit      ◆ editor
         
     selectPageUp:   -> @select @pageUpRow()
     selectPageDown: -> @select @pageDownRow()
-    selectNext: -> @select @nextRow()
-    selectPrev: -> 
+    selectNext:     -> @select @nextRow()
+    selectPrev:     -> 
         row = @prevRow()
         if empty row
             @emitAction 'boundary' @current()

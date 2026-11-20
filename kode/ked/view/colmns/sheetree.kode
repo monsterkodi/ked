@@ -14,7 +14,8 @@ use ../menu         ◆ filterchoice
         
         @editor.state.on 'cursorsSet' @onCursorsSet
         
-        post.on 'editor.resize'  @onEditorResize
+        post.on 'editor.resize'   @onEditorResize
+        post.on 'sheetree.select' @select
         
     onEditorResize: =>
         
@@ -28,7 +29,7 @@ use ../menu         ◆ filterchoice
         post.emit 'cells.rect'
         super()
         
-    select: row -> 
+    select: row => 
 
         super row
         post.emit 'cells.rect' @current().rect
@@ -66,7 +67,12 @@ use ../menu         ◆ filterchoice
     jumpTo: choice => 
         
         post.emit 'goto.line' choice.y choice.x
-        @emit 'tree.node' @current()
+        node = @current()
+        node.index = @currentIndex()
+        @emit 'tree.node' node
+        
+    selectNext: -> super(); @jumpTo @current()
+    selectPrev: -> super(); @jumpTo @current()
                 
     emitAction: action choice event  ->
     

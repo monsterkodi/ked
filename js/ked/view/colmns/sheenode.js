@@ -24,6 +24,7 @@ sheenode = (function ()
         this["hide"] = this["hide"].bind(this)
         this["show"] = this["show"].bind(this)
         this["onNode"] = this["onNode"].bind(this)
+        this["onMouseEnter"] = this["onMouseEnter"].bind(this)
         sheenode.__super__.constructor.call(this,this.editor.screen,this.name)
         this.height = 7
         this.setColor('bg',theme.uniko.bg)
@@ -36,18 +37,29 @@ sheenode = (function ()
         this.isVisible = false
     }
 
+    sheenode.prototype["onMouseEnter"] = function (event)
+    {
+        if (this.node)
+        {
+            post.emit('sheetree.select',this.node.index)
+        }
+        return sheenode.__super__.onMouseEnter.call(this,event)
+    }
+
     sheenode.prototype["onNode"] = function (node)
     {
-        var _29_48_, _30_47_, _32_46_, _33_46_, _34_46_, _36_46_, _37_46_, _38_46_
+        this.node = node
+    
+        var _36_48_, _37_47_, _39_46_, _40_46_, _41_46_, _43_46_, _44_46_, _45_46_
 
-        this.typeArg.inputs[0].set(String(((_29_48_=node.type) != null ? _29_48_ : '')))
-        this.typeArg.inputs[1].set(String(((_30_47_=node.arg) != null ? _30_47_ : '')))
-        this.xwrInput.inputs[0].set(String(((_32_46_=node.x) != null ? _32_46_ : '')))
-        this.xwrInput.inputs[1].set(String(((_33_46_=node.w) != null ? _33_46_ : '')))
-        this.xwrInput.inputs[2].set(String(((_34_46_=node.r) != null ? _34_46_ : '')))
-        this.yhbInput.inputs[0].set(String(((_36_46_=node.y) != null ? _36_46_ : '')))
-        this.yhbInput.inputs[1].set(String(((_37_46_=node.h) != null ? _37_46_ : '')))
-        return this.yhbInput.inputs[2].set(String(((_38_46_=node.b) != null ? _38_46_ : '')))
+        this.typeArg.inputs[0].set(String(((_36_48_=node.type) != null ? _36_48_ : '')))
+        this.typeArg.inputs[1].set(String(((_37_47_=node.arg) != null ? _37_47_ : '')))
+        this.xwrInput.inputs[0].set(String(((_39_46_=node.x) != null ? _39_46_ : '')))
+        this.xwrInput.inputs[1].set(String(((_40_46_=node.w) != null ? _40_46_ : '')))
+        this.xwrInput.inputs[2].set(String(((_41_46_=node.r) != null ? _41_46_ : '')))
+        this.yhbInput.inputs[0].set(String(((_43_46_=node.y) != null ? _43_46_ : '')))
+        this.yhbInput.inputs[1].set(String(((_44_46_=node.h) != null ? _44_46_ : '')))
+        return this.yhbInput.inputs[2].set(String(((_45_46_=node.b) != null ? _45_46_ : '')))
     }
 
     sheenode.prototype["show"] = function ()
@@ -97,5 +109,5 @@ sheenode = (function ()
 
 export default sheenode;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZW5vZGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWVub2RlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsV0FBTjs7T0FDTSxZQUFUOztPQUNTLFdBQVo7T0FBaUIsWUFBakI7T0FBdUIsa0JBQXZCOzs7QUFFTixZQUFEOzt5QkFBVTthQUdOLFVBQUksUUFBUTs7UUFBVDtRQUFROzs7Ozs7O2lEQUVELEtBQUMsT0FBTyxPQUFPLEtBQUM7UUFFdEIsS0FBQyxTQUFTO1FBRVYsS0FBQyxTQUFTLEtBQUssTUFBTSxNQUFNO1FBRTNCLEtBQUMsY0FBZSxZQUFZLEtBQUMsVUFBVSxLQUFDLGdCQUFpQixPQUFPO1FBQ2hFLEtBQUMsZUFBZSxZQUFZLEtBQUMsVUFBVSxLQUFDLFlBQWEsSUFBSSxJQUFJLE1BQUssUUFBUSxFQUFFLE9BQU87UUFDbkYsS0FBQyxlQUFlLFlBQVksS0FBQyxVQUFVLEtBQUMsWUFBYSxJQUFJLElBQUksTUFBSyxRQUFRLEVBQUUsT0FBTztRQUVuRixLQUFDLFNBQWMsS0FBQyxRQUFRLEtBQUMsU0FBUyxLQUFDO1FBQ25DLEtBQUMsWUFBYSxLQUFDLFFBQVEsT0FBTyxPQUFPLEtBQUMsU0FBUyxRQUFRLE9BQU8sS0FBQyxTQUFTO1FBQ3hFLEtBQUMsYUFBYSxLQUFDO1FBRWYsS0FBQyxZQUFZOzs7d0JBRWpCLHFCQUFROzs7O1FBRUosS0FBQyxRQUFRLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssMEJBQU87UUFDMUMsS0FBQyxRQUFRLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUsseUJBQU07UUFFekMsS0FBQyxTQUFTLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssdUJBQUk7UUFDeEMsS0FBQyxTQUFTLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssdUJBQUk7UUFDeEMsS0FBQyxTQUFTLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssdUJBQUk7UUFFeEMsS0FBQyxTQUFTLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssdUJBQUk7UUFDeEMsS0FBQyxTQUFTLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssdUJBQUk7ZUFDeEMsS0FBQyxTQUFTLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssdUJBQUk7Ozt3QkFFNUM7Ozs7ZUFJSSxLQUFLLEtBQUs7Ozt3QkFFZDs7WUFFUyxLQUFDOzs7OztlQUlOLEtBQUssS0FBSzs7O3dCQUVkLHFCQUFRLEdBQUUsR0FBRSxHQUFFOzs0Q0FFSixFQUFFLEVBQUUsRUFBRTs7ZUFFWixLQUFDLFlBQVksRUFBRSxFQUFFLEVBQUUsRUFBRSxLQUFDOzs7d0JBRTFCOzs7O1lBRVMsS0FBQyxZQUFZLEtBQUM7Ozs7UUFFbkIsS0FBQyxNQUFNLFVBQVUsRUFBRSxFQUFFLEdBQUcsR0FBRyxJQUFJLEtBQUssS0FBQyxNQUFNOzRCQUUvQixLQUFDOzs7WUFBVDtZQUNBLEtBQUs7Ozs7O1dBN0RoQjs7O2VBaUVNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZW5vZGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWVub2RlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsV0FBTjs7T0FDTSxZQUFUOztPQUNTLFdBQVo7T0FBaUIsWUFBakI7T0FBdUIsa0JBQXZCOzs7QUFFTixZQUFEOzt5QkFBVTthQUdOLFVBQUksUUFBUTs7UUFBVDtRQUFROzs7Ozs7OztpREFFRCxLQUFDLE9BQU8sT0FBTyxLQUFDO1FBRXRCLEtBQUMsU0FBUztRQUVWLEtBQUMsU0FBUyxLQUFLLE1BQU0sTUFBTTtRQUUzQixLQUFDLGNBQWUsWUFBWSxLQUFDLFVBQVUsS0FBQyxnQkFBaUIsT0FBTztRQUNoRSxLQUFDLGVBQWUsWUFBWSxLQUFDLFVBQVUsS0FBQyxZQUFhLElBQUksSUFBSSxNQUFLLFFBQVEsRUFBRSxPQUFPO1FBQ25GLEtBQUMsZUFBZSxZQUFZLEtBQUMsVUFBVSxLQUFDLFlBQWEsSUFBSSxJQUFJLE1BQUssUUFBUSxFQUFFLE9BQU87UUFFbkYsS0FBQyxTQUFjLEtBQUMsUUFBUSxLQUFDLFNBQVMsS0FBQztRQUNuQyxLQUFDLFlBQWEsS0FBQyxRQUFRLE9BQU8sT0FBTyxLQUFDLFNBQVMsUUFBUSxPQUFPLEtBQUMsU0FBUztRQUN4RSxLQUFDLGFBQWEsS0FBQztRQUVmLEtBQUMsWUFBWTs7O3dCQUVqQiwyQkFBYzs7WUFFUCxLQUFDOztZQUNBLEtBQUssS0FBSyxrQkFBa0IsS0FBQyxLQUFLOzt5REFFaEM7Ozt3QkFFVixxQkFBUzs7UUFBRDs7OztRQUVKLEtBQUMsUUFBUSxPQUFPLEdBQUcsSUFBSSxpQkFBTyxLQUFLLDBCQUFPO1FBQzFDLEtBQUMsUUFBUSxPQUFPLEdBQUcsSUFBSSxpQkFBTyxLQUFLLHlCQUFNO1FBRXpDLEtBQUMsU0FBUyxPQUFPLEdBQUcsSUFBSSxpQkFBTyxLQUFLLHVCQUFJO1FBQ3hDLEtBQUMsU0FBUyxPQUFPLEdBQUcsSUFBSSxpQkFBTyxLQUFLLHVCQUFJO1FBQ3hDLEtBQUMsU0FBUyxPQUFPLEdBQUcsSUFBSSxpQkFBTyxLQUFLLHVCQUFJO1FBRXhDLEtBQUMsU0FBUyxPQUFPLEdBQUcsSUFBSSxpQkFBTyxLQUFLLHVCQUFJO1FBQ3hDLEtBQUMsU0FBUyxPQUFPLEdBQUcsSUFBSSxpQkFBTyxLQUFLLHVCQUFJO2VBQ3hDLEtBQUMsU0FBUyxPQUFPLEdBQUcsSUFBSSxpQkFBTyxLQUFLLHVCQUFJOzs7d0JBRTVDOzs7O2VBSUksS0FBSyxLQUFLOzs7d0JBRWQ7O1lBRVMsS0FBQzs7Ozs7ZUFJTixLQUFLLEtBQUs7Ozt3QkFFZCxxQkFBUSxHQUFFLEdBQUUsR0FBRTs7NENBRUosRUFBRSxFQUFFLEVBQUU7O2VBRVosS0FBQyxZQUFZLEVBQUUsRUFBRSxFQUFFLEVBQUUsS0FBQzs7O3dCQUUxQjs7OztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7O1FBRW5CLEtBQUMsTUFBTSxVQUFVLEVBQUUsRUFBRSxHQUFHLEdBQUcsSUFBSSxLQUFLLEtBQUMsTUFBTTs0QkFFL0IsS0FBQzs7O1lBQVQ7WUFDQSxLQUFLOzs7OztXQXBFaEI7OztlQXdFTSJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/sheenode.kode

@@ -24,7 +24,14 @@ use ../base      ◆ view input tripleinput
         
         @isVisible = false
         
-    onNode: node =>
+    onMouseEnter: event =>
+        
+        if @node
+            post.emit 'sheetree.select' @node.index
+            
+        super event
+        
+    onNode: @node =>
     
         @typeArg.inputs[0].set String(node.type ? '')
         @typeArg.inputs[1].set String(node.arg ? '')

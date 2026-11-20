@@ -15,9 +15,9 @@ use                ◆ state draw complete mode susan
     complex editing is delegated to mode(s)
 ###
 
-    @: screen name features ->
+    @: @screen @name features ->
         
-        super screen name features
+        super @screen @name features
         
         @focusable = true
         
