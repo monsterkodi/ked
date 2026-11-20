@@ -247,7 +247,11 @@ use ../../util/img  ◆ rounded
     
         t = @screen.t
         csz = t.cellsz
-        
+
+        if t.headless
+            @cellRect = rect
+            ⮐ []
+
         ⮐ [] if empty csz
         
         ids = @cellRectImageIdsFor rect csz theme.editor.cellrect
@@ -272,11 +276,24 @@ use ../../util/img  ◆ rounded
         [[ids[0] pid] [ids[1] pid] [ids[2] pid] [ids[3] pid]]
         
     del_cell_rect: rectid ->
-        
+
+        delete @cellRect
+
         ⮐ if empty rectid
         
         for [imgId pid] in rectid
             @screen.t.hideOverlay imgId pid
+
+    draw_cell_rect_corners: =>
+
+        # a headless dump has no images, so mark the rect with corner glyphs
+
+        ⮐ if not @cellRect?
+
+        rect = @cellRect
+
+        @set_char rect.x              rect.y              '╭'
+        @set_char rect.x+rect.w-1     rect.y+rect.h-1     '╯'
             
     draw_rounded_cursor: x y fg scale=1 =>
         

@@ -132,7 +132,23 @@ use ../util  ◆ harness
 
                 layout.nodeForPos {cols:4 rows:4} { index:1 text:'i' x:1 y:1 w:2 h:2 } [2 2] ▸ {index:1 text:'i' x:1 y:1 w:2 h:2}
 
-    ▸ insertTextAt
+    ▸ titlify
+
+        tree = { bg:'#000' x:2 y:2 w:20 h:10 children:[{ x:3 y:2 w:10 h:5 children:[{ text:'hi' x:1 y:1 w:3 h:1 }] }] }
+
+        items = layout.titlify {cols:30 rows:20} tree
+
+        items.length ▸ 2
+        items[0].rect ▸ {x:2 y:2 w:20 h:10}
+        items[1].rect ▸ {x:6 y:5 w:3 h:1}
+
+        tree = { bg:'#000' children:[{ x:2 y:1 w:10 h:5 children:[{ text:'hi' x:1 y:1 r:1 b:1 }] }] }
+
+        items = layout.titlify {cols:30 rows:20} tree
+
+        items[1].rect ▸ {x:3 y:2 w:8 h:3}
+
+  ▸ insertTextAt
 
       ▸ creates a text node
 

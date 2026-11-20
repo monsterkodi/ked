@@ -166,9 +166,10 @@ use ../edit/tool ◆ sue
 
         lines.join '\n'
 
-    @titlify: cells rectree items=[] depth=0 -> # generate items for sheetree 
+    @titlify: cells rectree items=[] depth=0 abstree=null -> # generate items for sheetree 
         
-        abstree = @absolutize cells rectree
+        if not abstree?
+            abstree = @absolutize cells rectree
         
         rectree.index = items.length
         
@@ -182,8 +183,8 @@ use ../edit/tool ◆ sue
                 break
                 
         if item ➜ items.push item
-        for child in rectree.children
-            @titlify cells child items depth+2
+        for child,i in rectree.children
+            @titlify cells child items depth+2 abstree.children[i]
             
         items
         

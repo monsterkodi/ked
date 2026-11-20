@@ -199,6 +199,8 @@ use child_process ▪ spawn exec
     dump: label =>
         
         @draw()
+
+        @editor.cells.draw_cell_rect_corners()
         
         state = dumpstate.tags @editor.state @currentFile
         line  = valid state ? "#{label} #{state}" : label
