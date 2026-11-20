@@ -563,28 +563,6 @@ use child_process ▪ spawn exec
 
 #!save
     
-    toggleStyle: flag =>
-
-        @editor.state.toggleSueFlag flag
-
-        @redraw()
-
-    scaleLine: delta =>
-
-        @editor.state.stepScales delta
-
-        @redraw()
-        
-    unscaleLine: =>
-
-        @editor.state.clearScales()
-
-        @redraw()
-
-    clearDecoration: =>
-
-        @editor.state.clearSueAtCursorOrSelection()
-
     saveFile: file ◯=>
         
         text = kseg.str @editor.state.s.lines
@@ -762,8 +740,6 @@ use child_process ▪ spawn exec
             'shift+cmd+r' 'shift+ctrl+r' ➜ ⮐ @replacer.show()
             'shift+cmd+v' 'shift+ctrl+v' ➜ ⮐ @clippo.show()
             'alt+o'                      ➜ ⮐ @editor.jumpToCounterpart()
-            'alt+,'                      ➜ ⮐ @goToPrevFunc()
-            'alt+.'                      ➜ ⮐ @goToNextFunc()
             'cmd+m' 'cmd+;' 'cmd+space'  ➜ ⮐ @macro.show()
             'cmd+.' 'ctrl+.'             ➜ ⮐ @browse.gotoDir slash.dir(@currentFile)
             'cmd+o' 'ctrl+o'             ➜ ⮐ post.emit 'browse.dir' process.cwd()
@@ -772,24 +748,17 @@ use child_process ▪ spawn exec
             'alt+u'                      ➜ ⮐ post.emit 'uniko.show'
          
         for handler in @keyHandlers
-            continue if handler.hidden()
+            continue if handler.hidden() or handler.collapsed()
             result = handler.onKey key event
             @redraw() if result?.redraw != false
             if result
                 # log "ked.onKey #{result} #{handler.name}"
                 ⮐ 
-        
+                
         switch key
-            
-            'shift+alt+c'                ➜ ⮐ @clearDecoration()
-            'shift+alt+u'                ➜ ⮐ @toggleStyle 'u'
-            'shift+alt+s'                ➜ ⮐ @toggleStyle 's'
-            'shift+alt+b'                ➜ ⮐ @toggleStyle 'b'
-            'shift+alt+i'                ➜ ⮐ @toggleStyle 'i'
-            'shift+alt+='                ➜ ⮐ @scaleLine 1
-            'shift+alt+-'                ➜ ⮐ @scaleLine -1
-            'shift+alt+0'                ➜ ⮐ @unscaleLine()
-                            
+            'alt+,'                      ➜ ⮐ @goToPrevFunc()
+            'alt+.'                      ➜ ⮐ @goToNextFunc()
+                                    
     goToPrevFunc: =>
     
         if @searcher.visible() ➜ ⮐ @searcher.selectPrevFileHeader()

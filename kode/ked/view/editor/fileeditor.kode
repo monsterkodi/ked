@@ -21,6 +21,7 @@ use                 ◆ mapscr
             'filepos' # autostart modes
             'replex' 
             'brckts' 
+            'susan'
             
             'unype'   # temporary modes
             'novim' 

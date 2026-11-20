@@ -157,6 +157,28 @@ use                ◆ state draw complete mode susan
             if 0 <= cx < width
                 ⮐ state.syntax.getClass cx y
         null
+        
+    toggleStyle: flag =>
+
+        @state.toggleSueFlag flag
+
+        @redraw()
+
+    scaleLine: delta =>
+
+        @state.stepScales delta
+
+        @redraw()
+        
+    unscaleLine: =>
+
+        @state.clearScales()
+
+        @redraw()
+ 
+    clearDecoration: =>
+
+        @state.clearSueAtCursorOrSelection()
 
     grabFocus: =>
     
@@ -185,6 +207,17 @@ use                ◆ state draw complete mode susan
         
         if @complete?
             ⮐ true if @complete.handleKey(key event) != 'unhandled'
+
+        if @feats['susan']            
+            switch key
+                'shift+alt+c'                ➜ ⮐ @clearDecoration()
+                'shift+alt+u'                ➜ ⮐ @toggleStyle 'u'
+                'shift+alt+s'                ➜ ⮐ @toggleStyle 's'
+                'shift+alt+b'                ➜ ⮐ @toggleStyle 'b'
+                'shift+alt+i'                ➜ ⮐ @toggleStyle 'i'
+                'shift+alt+='                ➜ ⮐ @scaleLine 1
+                'shift+alt+-'                ➜ ⮐ @scaleLine -1
+                'shift+alt+0'                ➜ ⮐ @unscaleLine()
 
         result = @state.feedKey key event
 

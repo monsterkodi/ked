@@ -39,6 +39,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
         @inputs     = [@red @green @blue]
         @focusRing  = [@radio @hue @sat @val @red @green @blue]
         @mouseItems = [@radio @paletteView].concat(@sliders).concat(@inputs)
+        @wheelItems = @sliders.concat @inputs
 
         @red.textColor   = theme.colorpicker.red
         @green.textColor = theme.colorpicker.green
@@ -186,7 +187,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
     setHex: hex idx =>
 
-        ⮐ if empty hex
+        hex ?= "#000"
         rgb = color.values hex
         ⮐ if empty rgb
         idx ?= @activeIndex()
@@ -225,15 +226,16 @@ use ../base         ◆ view colorslider rgbinput radio palette
         post.emit 'colorpicker.change' @hex()
         post.emit 'redraw'
 
-    show: hex =>
+    show: hexl opt={focus:true} =>
 
         @bgChanged    = false
         @voided       = [false false]
         @colorStates  = []
-        @radio.active = 0
+        @radio.active = opt.select ? 0
         
-        if hex?
-            @setHex hex
+        if valid hexl
+            for hex,idx in hexl
+                @setHex hex idx
         else
             if found = @hexAtCursor()
                 hex = found.text
@@ -256,9 +258,10 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         @syncAll()
         @syncPalette()
+        
         super()
-
-        @hue.grabFocus()
+        
+        if opt.focus ➜ @hue.grabFocus()
         
     colorAtSelection: layer =>
 
@@ -411,30 +414,18 @@ use ../base         ◆ view colorslider rgbinput radio palette
         post.emit 'colorpicker.hide'
         @hide()
 
-    onWheel: event =>
-
-        ⮐ if @hidden() or @collapsed()
-
-        for slider in @sliders
-            ret = slider.onWheel event ; ⮐ ret if ret?.redraw
-
-        for input in @inputs
-            ret = input.onWheel event  ; ⮐ ret if ret?.redraw
-
-        if @cells.isInsideEvent event
-            ⮐ redraw:false
-
     onKey: key event =>
 
-        ⮐ false if @hidden()
+        ⮐ false if @hidden() or @collapsed()
+        ⮐ false if not @hasFocus()
             
         switch event.combo
             'down''tab'      ➜ ⮐ @focusNext() 
             'up''shift+tab'  ➜ ⮐ @focusPrev()
             'esc'            ➜ ⮐ @cancel()
             'return'         ➜ ⮐ @onReturn()
-            'delete'         
-            'backspace'      ➜ ⮐ @onDelete()
+            'cmd+delete'     
+            'cmd+backspace'  ➜ ⮐ @onDelete()
             'cmd+left'       
             'cmd+right'      ➜ ⮐ @swapColors()
             'ctrl+c' 'cmd+c' ➜   clip.copy @hex() ; ⮐ true

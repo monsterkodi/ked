@@ -8,8 +8,6 @@ use              ◆ input view
 
         super @screen @name
         
-        # @focusable = true
-        
         @inputs = []
         
         for field in @fields
@@ -18,14 +16,7 @@ use              ◆ input view
             @inputs.push inp
             
         @mouseItems = @inputs
-
-    onWheel: event =>
-
-        ⮐ if @hidden() or @collapsed()
-        ⮐ if not @cells.isInsideEvent event
-        
-        for input in @inputs
-            if input.hasFocus() ➜ ⮐ input.onWheel event
+        @wheelItems = @inputs
         
     layout: x y w h ->
         

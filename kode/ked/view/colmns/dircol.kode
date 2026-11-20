@@ -22,6 +22,7 @@ use                 ◆ dirtree
         @dirtree = new dirtree screen "#{@name}_dirtree" ['scroll']
 
         @mouseItems = [@knob @crumbs @dirtree]
+        @wheelItems = [@dirtree]
         
         @crumbs.on 'action' @onCrumbsAction
         
@@ -221,12 +222,6 @@ use                 ◆ dirtree
     onShow: =>
         if @hidden() ➜ @onToggle()
                      ➜ @dirtree.grabFocus()
-        
-    onWheel: event =>
-        
-        ⮐ if @hidden() or @collapsed() or not @active
-        
-        @dirtree.onWheel event
         
     onKey: key event =>
         

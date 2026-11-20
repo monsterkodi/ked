@@ -182,10 +182,10 @@ use ../../edit      ◆ editor
     moveSelection: dir ->
         
         switch dir
-            'pagedown' ➜ @selectPageDown()
-            'pageup'   ➜ @selectPageUp()
-            'down'     ➜ @selectNext()
-            'up'       ➜ @selectPrev() 
+            'pagedown'  ➜ @selectPageDown()
+            'pageup'    ➜ @selectPageUp()
+            'down'      ➜ @selectNext()
+            'up'        ➜ @selectPrev() 
         @
         
     selectPageUp:   -> @select @pageUpRow()
@@ -329,8 +329,8 @@ use ../../edit      ◆ editor
                 @moveSelection event.combo
                 ⮐ true
                 
-            'ctrl+alt+up'   ➜ @moveSelection 'pageup'   ; ⮐ true 
-            'ctrl+alt+down' ➜ @moveSelection 'pagedown' ; ⮐ true 
+            'alt+,' 'ctrl+alt+up'   ➜ @moveSelection 'pageup'   ; ⮐ true 
+            'alt+.' 'ctrl+alt+down' ➜ @moveSelection 'pagedown' ; ⮐ true 
         
         ⮐ if not @hasFocus()
             

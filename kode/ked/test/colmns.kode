@@ -77,7 +77,7 @@ ked_sess = ->
 
         f = new funcol h.screen e []
 
-        f.onColorPickerShow ''
+        f.onColorPickerShow ['']
 
         f.colorpicker.hex() ▸ '#ff8000'
 
@@ -94,7 +94,7 @@ ked_sess = ->
 
         f = new funcol h.screen e []
 
-        f.onColorPickerShow ''
+        f.onColorPickerShow ['']
 
         f.colorReplace ▸ null
 
@@ -111,7 +111,7 @@ ked_sess = ->
 
         f = new funcol h.screen e []
 
-        f.onColorPickerShow ''
+        f.onColorPickerShow ['']
 
         f.colorpicker.submit f.colorpicker.hex()
 
@@ -131,7 +131,7 @@ ked_sess = ->
 
         f = new funcol h.screen e []
 
-        f.onColorPickerShow '#123456'
+        f.onColorPickerShow ['#123456']
 
         f.colorReplace ▸ null
 
@@ -151,7 +151,7 @@ ked_sess = ->
 
         f = new funcol h.screen e []
 
-        f.onColorPickerShow ''
+        f.onColorPickerShow ['']
 
         f.colorpicker.visible() ▸ true
         f.cells.cols ▸ 16
@@ -171,7 +171,7 @@ ked_sess = ->
 
         f = new funcol h.screen e []
 
-        f.onColorPickerShow ''
+        f.onColorPickerShow ['']
 
         f.layout 0 0 16 29
         f.colorpicker.cells.rows ▸ 9

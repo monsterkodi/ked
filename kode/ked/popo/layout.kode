@@ -174,7 +174,7 @@ use ../edit/tool ◆ sue
             if rectree[type]? 
                 rect = x:abstree.x y:abstree.y w:abstree.w h:abstree.h
                 item = title:lpad(depth+2)+type rect:rect type:type arg:rectree[type] 
-                for key in ['x''y''w''h''r''b']
+                for key in ['x''y''w''h''r''b''fg''bg']
                     if rectree[key]?
                         item[key] = rectree[key]
                 break

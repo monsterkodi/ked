@@ -21,7 +21,7 @@ use              ◆ view
         newValue = clamp @min @max int(v)
         if newValue != @value
             @setValue newValue
-            @emit 'valueChange' @value
+            @emit 'valueChange' @
         true
 
     setValue: v => 

@@ -29,6 +29,9 @@ use                 ◆ searcher searcherfile
                 [255 255 0]
             else
                 @symbolColors[c]
+                
+        @choices.pageDownRow = @pageDownRow
+        @choices.pageUpRow   = @pageUpRow
         
         post.on 'differ.status'  @status
         post.on 'differ.file'    @file
@@ -95,6 +98,22 @@ use                 ◆ searcher searcherfile
         if valid diff.changes
             @show()
             @diff diff
+    
+    pageDownRow: => 
+        
+        if @choices.currentIndex() < @choices.items.length
+            for idx in @choices.currentIndex()+1...@choices.items.length
+                if @choices.items[idx].type in ['file''commit']
+                    ⮐ idx
+        @choices.currentIndex()
+        
+    pageUpRow: =>
+        
+        if @choices.currentIndex() > 0
+            for idx in @choices.currentIndex()-1..0
+                if @choices.items[idx].type in ['file''commit']
+                    ⮐ idx
+        @choices.currentIndex()
             
     status: ◯=> 
     
@@ -209,7 +228,8 @@ use                 ◆ searcher searcherfile
             items.push 
                 line:   ' ● ' + h.msg
                 commit: h.commit
-                ext: 'txt'
+                ext:  'txt'
+                type: 'commit'
 
             for f in h.files
                 
@@ -234,8 +254,6 @@ use                 ◆ searcher searcherfile
         
         ⮐ if empty patch
         
-        # log "rev #{rev}" patch
-        
         currentFile = ked_session.get 'editor▸file'
         gitDir =◯ git.dir currentFile
         
@@ -244,8 +262,6 @@ use                 ◆ searcher searcherfile
         for p in patch
         
             file = slash.path gitDir p.tgtfile[2..]
-        
-            # log "file #{file}"
         
             items.push 
                 line:   ' ◆ ' + p.tgtfile[2..]
@@ -290,7 +306,7 @@ use                 ◆ searcher searcherfile
             'change'
                 if valid text and not text.startsWith '▸'
                     log "onInputAction #{action} '#{text}'"
-            
+                    
         super action text
 
 export differ

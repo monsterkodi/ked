@@ -21,8 +21,16 @@ use ../base      ◆ view input tripleinput
         @items      = [@typeArg @xwrInput @yhbInput]
         @focusRing  = @typeArg.inputs.concat(@xwrInput.inputs).concat(@yhbInput.inputs)
         @mouseItems = @items
+        @wheelItems = [@xwrInput @yhbInput]
+        
+        for input in @focusRing
+            input.on 'valueChange' @onInputChange
         
         @isVisible = false
+        
+    onInputChange: input =>
+        
+        log "onInputChange #{input.name} #{input.value}"
         
     onMouseEnter: event =>
         
@@ -44,20 +52,9 @@ use ../base      ◆ view input tripleinput
         @yhbInput.inputs[1].set String(node.h ? '')
         @yhbInput.inputs[2].set String(node.b ? '')
         
-    show: =>
-
-        super()
-
-        post.emit 'redraw'
-
-    hide: =>
-
-        ⮐ if @hidden()
-
-        super()
-
-        post.emit 'redraw'
-
+        idx = @node.bg and not @node.fg ? 1 : 0
+        post.emit 'colorpicker.show' [@node.fg @node.bg] focus:false select:idx
+        
     layout: x y w h =>
 
         super x y w h

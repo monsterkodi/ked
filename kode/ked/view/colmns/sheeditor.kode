@@ -14,6 +14,7 @@ use              ◆ sheetree sheenode
         @sheenode = new sheenode @editor "#{@name}_sheenode" 
         
         @mouseItems = [@sheetree @sheenode]
+        @wheelItems = @mouseItems
         
         @sheetree.on 'tree.node' @sheenode.onNode
         
@@ -66,13 +67,6 @@ use              ◆ sheetree sheenode
         ⮐ if @hidden() or @collapsed()
         @sheetree.grabFocus()
                     
-    onWheel: event =>
-        
-        ⮐ if @hidden() or @collapsed()
-
-        @sheetree.onWheel event
-        @sheenode.onWheel event
-        
     moveFocus: =>
         
         if @sheetree.hasFocus()
@@ -84,7 +78,7 @@ use              ◆ sheetree sheenode
         true
         
     onKey: key event =>
-        # log "EDITOR #{key} #{@hidden()}"
+
         ⮐ if @hidden() or @collapsed()
 
         combo = event.combo

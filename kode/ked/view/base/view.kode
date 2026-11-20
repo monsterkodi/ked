@@ -81,7 +81,14 @@ use ../screen    ◆ cells
     
         @handleHover event
     
-    onWheel: event => #log "view.onWheel #{@name}"
+    onWheel: event =>
+
+        ⮐ if @hidden() or @collapsed()
+        ⮐ if not @cells.isInsideEvent event
+        
+        for item in @wheelItems
+            if item.hasFocus() 
+                ⮐ item.onWheel event
     
     onMouseLeave: event => post.emit 'redraw'
     onMouseEnter: event => 
@@ -115,13 +122,17 @@ use ../screen    ◆ cells
             post.removeListener 'focus' @onFocus
 
     onFocus: name => 
-        # log "view.onFocus #{name} #{@name}"
         @focused = (@name == name)
+        # log "view.onFocus #{@name}" if @focused
+        @focused
     
     hasFocus: => 
         
         for item in @focusRing
-            if item.hasFocus() ➜ ⮐ true
+            if item.hasFocus() 
+                # log "ringFocus #{@name}"
+                ⮐ true
+            
         @focused
     
     focusDelta: delta =>

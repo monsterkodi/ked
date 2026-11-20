@@ -26,7 +26,6 @@ tripleinput = (function ()
         this["onKey"] = this["onKey"].bind(this)
         this["grabFocus"] = this["grabFocus"].bind(this)
         this["hasFocus"] = this["hasFocus"].bind(this)
-        this["onWheel"] = this["onWheel"].bind(this)
         tripleinput.__super__.constructor.call(this,this.screen,this.name)
         this.inputs = []
         var list = _k_.list(this.fields)
@@ -38,29 +37,7 @@ tripleinput = (function ()
             this.inputs.push(inp)
         }
         this.mouseItems = this.inputs
-    }
-
-    tripleinput.prototype["onWheel"] = function (event)
-    {
-        var input
-
-        if (this.hidden() || this.collapsed())
-        {
-            return
-        }
-        if (!this.cells.isInsideEvent(event))
-        {
-            return
-        }
-        var list = _k_.list(this.inputs)
-        for (var _a_ = 0; _a_ < list.length; _a_++)
-        {
-            input = list[_a_]
-            if (input.hasFocus())
-            {
-                return input.onWheel(event)
-            }
-        }
+        this.wheelItems = this.inputs
     }
 
     tripleinput.prototype["layout"] = function (x, y, w, h)
@@ -136,5 +113,5 @@ tripleinput = (function ()
 
 export default tripleinput;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHJpcGxlaW5wdXQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS90cmlwbGVpbnB1dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsVUFBQTtJQUFNOztPQUNBLFlBQVQ7O09BQ1MsWUFBQTtPQUFNLFdBQUE7OztBQUV4QixlQUFEOzs0QkFBYTthQUNULGFBQUksUUFBUSxNQUFNLFFBQVE7O1FBQXZCO1FBQVE7UUFBTTtRQUFROzs7Ozs7OztvREFFZixLQUFDLE9BQU8sS0FBQztRQUlmLEtBQUM7NEJBRVksS0FBQzs7O1lBQVY7WUFDQSxVQUFVLE1BQU0sS0FBQyxVQUFVLEtBQUMsUUFBUSxRQUFRLEtBQUM7WUFDN0MsSUFBSSx1QkFBdUI7WUFDM0IsS0FBQyxPQUFPLEtBQUs7O1FBRWpCLEtBQUMsYUFBYSxLQUFDOzs7MkJBRW5CLHNCQUFTOzs7O1lBRUEsS0FBQyxZQUFZLEtBQUM7Ozs7YUFDVixLQUFDLE1BQU0sY0FBYzs7Ozs0QkFFakIsS0FBQzs7O1lBQVY7Z0JBQ0csTUFBTTs7dUJBQWUsTUFBTSxRQUFROzs7OzsyQkFFOUMscUJBQVEsR0FBRSxHQUFFLEdBQUU7O1FBRVYsS0FBQyxZQUFZLEVBQUUsRUFBRSxFQUFFLEVBQUUsS0FBQyxPQUFPLEtBQUM7c0RBRXhCLEVBQUUsRUFBRSxFQUFFOzs7MkJBRWhCOzs7O1lBRVMsS0FBQyxZQUFZLEtBQUM7Ozs7OzRCQUlOLEtBQUM7OztZQUFWO1lBQ0EsTUFBTTs7OzsyQkFFZDs7Ozs0QkFFaUIsS0FBQzs7O1lBQVY7Z0JBQ0csTUFBTTs7dUJBQWU7OztlQUM1Qjs7OzJCQUVKOztlQUFjLEtBQUMsT0FBTyxHQUFHOzs7MkJBRXpCLG9CQUFPLEtBQUk7Ozs7YUFFUSxLQUFDOzttQkFBZDs7WUFDUyxLQUFDLFlBQVksS0FBQzs7bUJBQXZCOzs0QkFFVyxLQUFDOzs7WUFBVjtnQkFDRyxNQUFNOzt1QkFBZSxNQUFNLE1BQU0sSUFBSTs7O2VBRTVDOzs7V0F2RFA7OztlQXlETSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHJpcGxlaW5wdXQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvYmFzZS90cmlwbGVpbnB1dC5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2EsVUFBQTtJQUFNOztPQUNBLFlBQVQ7O09BQ1MsWUFBQTtPQUFNLFdBQUE7OztBQUV4QixlQUFEOzs0QkFBYTthQUNULGFBQUksUUFBUSxNQUFNLFFBQVE7O1FBQXZCO1FBQVE7UUFBTTtRQUFROzs7Ozs7O29EQUVmLEtBQUMsT0FBTyxLQUFDO1FBRWYsS0FBQzs0QkFFWSxLQUFDOzs7WUFBVjtZQUNBLFVBQVUsTUFBTSxLQUFDLFVBQVUsS0FBQyxRQUFRLFFBQVEsS0FBQztZQUM3QyxJQUFJLHVCQUF1QjtZQUMzQixLQUFDLE9BQU8sS0FBSzs7UUFFakIsS0FBQyxhQUFhLEtBQUM7UUFDZixLQUFDLGFBQWEsS0FBQzs7OzJCQUVuQixxQkFBUSxHQUFFLEdBQUUsR0FBRTs7UUFFVixLQUFDLFlBQVksRUFBRSxFQUFFLEVBQUUsRUFBRSxLQUFDLE9BQU8sS0FBQztzREFFeEIsRUFBRSxFQUFFLEVBQUU7OzsyQkFFaEI7Ozs7WUFFUyxLQUFDLFlBQVksS0FBQzs7Ozs7NEJBSU4sS0FBQzs7O1lBQVY7WUFDQSxNQUFNOzs7OzJCQUVkOzs7OzRCQUVpQixLQUFDOzs7WUFBVjtnQkFDRyxNQUFNOzt1QkFBZTs7O2VBQzVCOzs7MkJBRUo7O2VBQWMsS0FBQyxPQUFPLEdBQUc7OzsyQkFFekIsb0JBQU8sS0FBSTs7OzthQUVRLEtBQUM7O21CQUFkOztZQUNTLEtBQUMsWUFBWSxLQUFDOzttQkFBdkI7OzRCQUVXLEtBQUM7OztZQUFWO2dCQUNHLE1BQU07O3VCQUFlLE1BQU0sTUFBTSxJQUFJOzs7ZUFFNUM7OztXQTlDUDs7O2VBZ0RNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/base/tripleinput.kode

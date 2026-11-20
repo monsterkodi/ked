@@ -53,7 +53,7 @@ use ../../edit   ◆ editor
         v = clamp 0 255 int(v)
         if v != @value
             @setValue v
-            @emit 'valueChange' @value
+            @emit 'valueChange' @
             
     getValue: -> @value
     
@@ -67,7 +67,7 @@ use ../../edit   ◆ editor
             @state.moveCursors 'eol'
 
     onWheel: event =>
-        
+
         ⮐ if not @opt.number
         ⮐ if @hidden() or @collapsed()
         ⮐ if not @cells.isInsideEvent event
@@ -120,6 +120,7 @@ use ../../edit   ◆ editor
         sr = super key event
         
         if before != @current()
+            @changeValue parseInt(@current()) if @opt.number
             @emit 'action' 'change' @current() 
             ⮐ true
         

@@ -23,6 +23,7 @@ use                 ◆ funtree sheeditor colorpicker uniko
         @uniko       = new uniko       @screen @editor "#{@name}_uniko"
         
         @mouseItems  = [@knob @uniko @colorpicker @funtree @sheeditor]
+        @wheelItems  = [      @uniko @colorpicker @funtree @sheeditor]
         
         @knob.frameSide = 'left'
         
@@ -62,7 +63,7 @@ use                 ◆ funtree sheeditor colorpicker uniko
             
         ked_session.set 'funcol' recent.funcol
 
-    onColorPickerShow: hex =>
+    onColorPickerShow: hexl opt=focus:true =>
 
         @active = true
 
@@ -70,7 +71,7 @@ use                 ◆ funtree sheeditor colorpicker uniko
 
         @show() if @hidden()
 
-        @colorpicker.show()
+        @colorpicker.show hexl opt
 
         ked_session.set 'funcol▸active' @active
         post.emit 'redraw'
@@ -146,21 +147,6 @@ use                 ◆ funtree sheeditor colorpicker uniko
     
         if @hidden() ➜ @onFuncolToggle()
                      ➜ @focusTree()
-        
-    onWheel: event =>
-        
-        ⮐ if @hidden() or @collapsed() or not @active
-
-        if @uniko.visible()
-            if ret = @uniko.onWheel event
-                ⮐ ret
-
-        if @colorpicker.visible()
-            if ret = @colorpicker.onWheel event
-                ⮐ ret
-
-        @funtree.onWheel event
-        @sheeditor.onWheel event
         
     onKey: key event =>
         

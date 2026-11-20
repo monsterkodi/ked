@@ -182,7 +182,7 @@ use ../menu      ◆ choices
             if result = @input.onKey key event
                 @autoHide()
                 ⮐ result
-            #  up and down became input actions that already moved the choices
+
             if event.combo in ['up' 'down']
                 @choices.grabFocus() if event.combo == 'down'
                 @autoHide()
