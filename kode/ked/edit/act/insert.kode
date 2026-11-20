@@ -28,7 +28,7 @@ export
 
     insertIntoSheet: text ->
 
-        cells   = {cols:@cells.cols rows:@cells.rows}
+        cells   = {cols:(@sheet.cols ? @cells.cols) rows:(@sheet.rows ? @cells.rows)}
         rectree = @sheet.rectree
         pos     = @mainCursor()
         advance = layout.insertTextAt cells rectree pos text

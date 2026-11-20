@@ -454,3 +454,19 @@ use ../util  ◆ harness
         e.state.insert 'c'
 
         sds.get(e.state.sheet.rectree 'children.0') ▸ {text:'c' x:8 y:2 w:2 h:1}
+
+  ▸ sheet render size
+
+        h = new harness cols:16 rows:4
+        e = new editor h.screen 'popo_sheet_render_size' []
+        e.layout 0 0 16 4
+
+        e.state.loadLines ['                ' '                ' '                ' '                ']
+
+        e.state.sheet = rectree:{children:[{pattern:'x' x:'50%' y:0 w:'50%' h:2}]} cols:10 rows:4
+
+        e.state.setCursors [[6 0]]
+
+        e.state.insert 'a'
+
+        sds.get(e.state.sheet.rectree 'children.0.children.0') ▸ {text:'a' x:1 y:0 w:2 h:1}
