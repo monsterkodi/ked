@@ -61,6 +61,36 @@ export
         @rectreeCols = cells.cols
         @rectreeRows = cells.rows
 
+    moveSheetNode: (dir) ->
+
+        ⮐ null if not @rectree?
+
+        cells = {cols:@cells.cols rows:@cells.rows}
+
+        layout.absolutize cells @rectree
+
+        cursor = @mainCursor()
+        node   = layout.topmostIn @rectree cursor
+
+        ⮐ null if not node?
+
+        oldRect = clone node.rect.abs
+        moved   = layout.moveNodeAt cells @rectree cursor dir
+
+        ⮐ null if not moved?
+
+        rect = moved.rect.abs
+
+        maxX = max rect.x (rect.x + rect.w - 1)
+        maxY = max rect.y (rect.y + rect.h - 1)
+
+        x = clamp rect.x maxX (rect.x + cursor[0] - oldRect.x)
+        y = clamp rect.y maxY (rect.y + cursor[1] - oldRect.y)
+
+        @renderSheet @rectree cells [x y] silent:true
+
+        moved
+
     insertAsciiHeaderForSelectionOrWordAtCursor: ->
 
         [lines cursors selections] = belt.insertAsciiHeaderForPositionsAndRanges @s.lines @s.cursors @s.selections

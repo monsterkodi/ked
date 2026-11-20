@@ -219,6 +219,17 @@ use                ◆ state draw complete mode susan
                 'shift+alt+-'                ➜ ⮐ @scaleLine -1
                 'shift+alt+0'                ➜ ⮐ @unscaleLine()
 
+        if @state.rectree?
+            dir = switch key
+                'shift+alt+h' ➜ 'left'
+                'shift+alt+j' ➜ 'down'
+                'shift+alt+k' ➜ 'up'
+                'shift+alt+l' ➜ 'right'
+                            ➜ null
+            if dir?
+                @state.moveSheetNode dir
+                ⮐ true
+
         result = @state.feedKey key event
 
         if result == 'handled'

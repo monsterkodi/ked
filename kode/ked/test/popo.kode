@@ -200,6 +200,95 @@ use ../util  ◆ harness
                 res.text ▸ 'i'
                 res.rect.abs ▸ {x:1 y:1 w:2 h:2}
 
+    ▸ moveNodeAt
+
+      ▸ moves a numeric rect by one cell
+
+                tree = { children:[{ text:'a' x:2 y:2 w:4 h:2 }] }
+
+                res = layout.moveNodeAt {cols:20 rows:10} tree [3 3] 'right'
+
+                sds.get(tree 'children.0.x') ▸ 3
+                sds.get(tree 'children.0.rect.abs') ▸ {x:3 y:2 w:4 h:2}
+                res.rect.abs ▸ {x:3 y:2 w:4 h:2}
+
+                layout.moveNodeAt {cols:20 rows:10} tree [4 3] 'down'
+
+                sds.get(tree 'children.0.y') ▸ 3
+                sds.get(tree 'children.0.rect.abs') ▸ {x:3 y:3 w:4 h:2}
+
+      ▸ keeps a percent x
+
+                tree = { children:[{ text:'a' x:'20%' y:2 w:4 h:2 }] }
+
+                layout.moveNodeAt {cols:100 rows:10} tree [21 3] 'right'
+
+                sds.get(tree 'children.0.x') ▸ '21%'
+                sds.get(tree 'children.0.rect.abs') ▸ {x:21 y:2 w:4 h:2}
+
+                layout.moveNodeAt {cols:100 rows:10} tree [21 3] 'left'
+
+                sds.get(tree 'children.0.x') ▸ '20%'
+                sds.get(tree 'children.0.rect.abs') ▸ {x:20 y:2 w:4 h:2}
+
+      ▸ percent moves by at least one cell
+
+                tree = { children:[{ text:'a' x:'20%' y:2 w:4 h:2 }] }
+
+                layout.moveNodeAt {cols:200 rows:10} tree [42 3] 'right'
+
+                sds.get(tree 'children.0.x') ▸ '21%'
+                sds.get(tree 'children.0.rect.abs') ▸ {x:42 y:2 w:4 h:2}
+
+      ▸ stays inside the editor cells
+
+                tree = { children:[{ text:'a' x:8 y:2 w:2 h:2 }] }
+
+                res = layout.moveNodeAt {cols:10 rows:10} tree [9 3] 'right'
+
+                res ▸ null
+                sds.get(tree 'children.0.rect.abs') ▸ {x:8 y:2 w:2 h:2}
+
+      ▸ stays inside its parent
+
+                tree = { children:[{ x:2 y:2 w:6 h:4 children:[{ text:'a' x:3 y:1 w:2 h:1 }] }] }
+
+                layout.moveNodeAt {cols:30 rows:20} tree [5 3] 'right'
+
+                sds.get(tree 'children.0.children.0.rect.abs') ▸ {x:6 y:3 w:2 h:1}
+
+                res = layout.moveNodeAt {cols:30 rows:20} tree [6 3] 'right'
+
+                res ▸ null
+
+      ▸ moves r and b anchors without resizing
+
+                tree = { children:[{ text:'a' x:2 y:2 r:2 b:2 }] }
+
+                layout.moveNodeAt {cols:20 rows:10} tree [4 4] 'right'
+
+                sds.get(tree 'children.0.x') ▸ 3
+                sds.get(tree 'children.0.r') ▸ 1
+                noW = not sds.get(tree 'children.0').w?
+                noW ▸ true
+                sds.get(tree 'children.0.rect.abs') ▸ {x:3 y:2 w:16 h:6}
+
+                layout.moveNodeAt {cols:20 rows:10} tree [4 4] 'down'
+
+                sds.get(tree 'children.0.y') ▸ 3
+                sds.get(tree 'children.0.b') ▸ 1
+                sds.get(tree 'children.0.rect.abs') ▸ {x:3 y:3 w:16 h:6}
+
+      ▸ keeps a percent r when there is no x
+
+                tree = { children:[{ text:'a' r:'20%' y:2 }] }
+
+                layout.moveNodeAt {cols:100 rows:10} tree [1 3] 'right'
+
+                sds.get(tree 'children.0.x') ▸ 1
+                sds.get(tree 'children.0.r') ▸ '19%'
+                sds.get(tree 'children.0.rect.abs') ▸ {x:1 y:2 w:80 h:8}
+
     ▸ titlify
 
         tree = { bg:'#000' x:2 y:2 w:20 h:10 children:[{ x:3 y:2 w:10 h:5 children:[{ text:'hi' x:1 y:1 w:3 h:1 }] }] }
@@ -575,6 +664,38 @@ use ../util  ◆ harness
         sds.get(e.state.rectree 'children.0.text') ▸ 'c'
         sds.get(e.state.rectree 'children.0.x') ▸ 8
         sds.get(e.state.rectree 'children.0.y') ▸ 2
+
+  ▸ sheet move keys
+
+        h = new harness cols:16 rows:4
+        e = new editor h.screen 'popo_sheet_move' []
+        e.layout 0 0 16 4
+        e.grabFocus()
+
+        e.state.loadLines ['                ' '                ' '                ' '                ']
+
+        e.state.rectree = {children:[{ text:'a' x:2 y:1 w:3 h:2 }]}
+        e.state.rectreeCols = 16
+        e.state.rectreeRows = 4
+
+        e.state.setCursors [[3 1]]
+
+        h.key e 'shift+alt+l'
+
+        sds.get(e.state.rectree 'children.0.rect.abs') ▸ {x:3 y:1 w:3 h:2}
+        e.state.mainCursor() ▸ [4 1]
+
+        h.key e 'shift+alt+j'
+
+        sds.get(e.state.rectree 'children.0.rect.abs') ▸ {x:3 y:2 w:3 h:2}
+
+        h.key e 'shift+alt+k'
+
+        sds.get(e.state.rectree 'children.0.rect.abs') ▸ {x:3 y:1 w:3 h:2}
+
+        h.key e 'shift+alt+h'
+
+        sds.get(e.state.rectree 'children.0.rect.abs') ▸ {x:2 y:1 w:3 h:2}
 
   ▸ sheet render size
 

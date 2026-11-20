@@ -231,6 +231,135 @@ use ../edit/tool ◆ sue
 
         @topmostIn rectree pos
 
+    @moveNodeAt: cells rectree pos dir ->
+
+        @absolutize cells rectree
+
+        node = @topmostIn rectree pos
+        ⮐ null if not node?
+
+        parent = @parentOf rectree node
+        box    = parent?.rect.abs ? {x:0 y:0 w:cells.cols h:cells.rows}
+        rect   = node.rect.abs
+
+        dx = 0
+        dy = 0
+
+        switch dir
+            'left'  ➜ dx = -1
+            'right' ➜ dx =  1
+            'up'    ➜ dy = -1
+            'down'  ➜ dy =  1
+
+        moved = false
+
+        if dx != 0 and (node.w? or node.r?)
+
+            maxRel = max 0 (box.w - rect.w)
+
+            if node.w?
+                value = @movedValue node.x (rect.x - box.x) maxRel dx box.w
+                if value?
+                    node.x = value
+                    moved = true
+            else
+                oldRel = rect.x - box.x
+                oldEnd = maxRel - oldRel
+
+                if node.x?
+                    value = @movedValue node.x oldRel maxRel dx box.w
+                    if value?
+                        newRel = @offset box.w value
+                        node.x = value
+                        node.r = oldEnd - (newRel - oldRel)
+                        moved = true
+                else
+                    value = @movedValue node.r oldEnd maxRel (-dx) box.w
+                    if value?
+                        newEnd = @offset box.w value
+                        node.r = value
+                        node.x = maxRel - newEnd
+                        moved = true
+
+        if dy != 0 and (node.h? or node.b?)
+
+            maxRel = max 0 (box.h - rect.h)
+
+            if node.h?
+                value = @movedValue node.y (rect.y - box.y) maxRel dy box.h
+                if value?
+                    node.y = value
+                    moved = true
+            else
+                oldRel = rect.y - box.y
+                oldEnd = maxRel - oldRel
+
+                if node.y?
+                    value = @movedValue node.y oldRel maxRel dy box.h
+                    if value?
+                        newRel = @offset box.h value
+                        node.y = value
+                        node.b = oldEnd - (newRel - oldRel)
+                        moved = true
+                else
+                    value = @movedValue node.b oldEnd maxRel (-dy) box.h
+                    if value?
+                        newEnd = @offset box.h value
+                        node.b = value
+                        node.y = maxRel - newEnd
+                        moved = true
+
+        ⮐ null if not moved
+
+        @absolutize cells rectree
+
+        node
+
+    @parentOf: node target ->
+
+        for child in node.children ? []
+            ⮐ node if child == target
+
+        for child in node.children ? []
+            if found = @parentOf child target
+                ⮐ found
+
+        null
+
+    @movedValue: field oldRel maxRel dir total ->
+
+        if field is str and field.endsWith '%'
+            ⮐ @movedPercent oldRel maxRel dir total
+
+        newRel = clamp 0 maxRel (oldRel + dir)
+
+        ⮐ null if newRel == oldRel
+
+        newRel
+
+    @movedPercent: oldRel maxRel dir total ->
+
+        best = null
+
+        for p in 0..100
+
+            rel = int(total * p / 100)
+
+            continue if rel > maxRel
+
+            if dir > 0
+                continue if rel <= oldRel
+                if not best? or rel < best.rel
+                    best = {p:p rel:rel}
+            else
+                continue if rel >= oldRel
+                if not best? or rel > best.rel
+                    best = {p:p rel:rel}
+
+        ⮐ null if not best?
+
+        "#{best.p}%"
+
     @insertTextAt: cells rectree pos text ->
 
         # insert text into the text node at pos or create one under the topmost node at pos
