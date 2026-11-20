@@ -20,6 +20,8 @@ use ../menu      ◆ choices
         @input   = new input   @screen "#{@name}_input"
         @choices = new choices @screen "#{@name}_choices" features
         
+        @mouseItems = [@input @choices]
+        
         @setColor 'bg'    theme.quicky.bg
         @setColor 'frame' theme.quicky.frame
 
@@ -202,11 +204,8 @@ use ../menu      ◆ choices
         
     onMouse: event =>
 
-        ⮐ if @hidden()
-        
-        ret = @input.onMouse   event ; ⮐ ret if ret?.redraw
-        ret = @choices.onMouse event ; ⮐ ret if ret?.redraw
-        ret = super event            ; ⮐ ret if ret?.redraw
+        ret = super event
+        ⮐ ret if ret?.redraw
         
         if event.type == 'press' and not @hover
             post.emit 'focus' 'editor'

@@ -18,8 +18,9 @@ use ../base      ◆ view input tripleinput
         @xwrInput = new tripleinput @screen "#{@name}_xwr"  ['x' 'w' 'r'] maxsize:5 number:true
         @yhbInput = new tripleinput @screen "#{@name}_yhb"  ['y' 'h' 'b'] maxsize:5 number:true
         
-        @items = [@typeArg @xwrInput @yhbInput]
-        @focusRing = @typeArg.inputs.concat(@xwrInput.inputs).concat(@yhbInput.inputs)
+        @items      = [@typeArg @xwrInput @yhbInput]
+        @focusRing  = @typeArg.inputs.concat(@xwrInput.inputs).concat(@yhbInput.inputs)
+        @mouseItems = @items
         
         @isVisible = false
         
@@ -66,14 +67,5 @@ use ../base      ◆ view input tripleinput
             item.draw()
 
         super()
-
-    onMouse: event =>
-
-        ⮐ if @hidden()
-        
-        for item in @items
-            ret = item.onMouse event ; ⮐ ret if ret?.redraw
-            
-        super event
 
 export sheenode

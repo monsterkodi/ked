@@ -21,6 +21,8 @@ import rgxs from './quicky.json' with { type: "json" }
         @brocol = new brocol @screen "#{@name}_brocol"
         @brocol.setColor 'bg' color.darken(@color.bg 0.7)
         @brocol.on 'action'   @onBrocolAction
+        
+        @mouseItems = [@brocol]
 
         @choices.mapscr.rowOffset = 1
         @choices.frontRoundOffset = 2
@@ -148,12 +150,6 @@ import rgxs from './quicky.json' with { type: "json" }
         @arrange()    
         post.emit 'redraw'
             
-    onMouse: event =>
-
-        ⮐ if @hidden()
-        ret = @brocol.onMouse event  ; ⮐ ret if ret?.redraw
-        super event
-
     onWheel: event =>
         
         ⮐ if @hidden()

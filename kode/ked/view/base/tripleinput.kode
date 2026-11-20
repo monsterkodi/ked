@@ -8,7 +8,7 @@ use              ◆ input view
 
         super @screen @name
         
-        @focusable = true
+        # @focusable = true
         
         @inputs = []
         
@@ -17,7 +17,7 @@ use              ◆ input view
             inp.drawUnfocusedCursors = false
             @inputs.push inp
             
-        @mouseItems = @items
+        @mouseItems = @inputs
 
     onWheel: event =>
 

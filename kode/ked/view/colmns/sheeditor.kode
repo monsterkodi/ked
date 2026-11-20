@@ -9,10 +9,11 @@ use              ◆ sheetree sheenode
         super @screen @name
         
         @isVisible = false
-        @focusable = true
         
         @sheetree = new sheetree @editor "#{@name}_sheetree" ['scrllr']
         @sheenode = new sheenode @editor "#{@name}_sheenode" 
+        
+        @mouseItems = [@sheetree @sheenode]
         
         @sheetree.on 'tree.node' @sheenode.onNode
         
@@ -64,17 +65,7 @@ use              ◆ sheetree sheenode
         
         ⮐ if @hidden() or @collapsed()
         @sheetree.grabFocus()
-            
-    onMouse: event =>
-    
-        ⮐ if @hidden() or @collapsed()
-        
-        ret = super event               ; ⮐ ret if ret?.redraw
-        ret = @sheetree.onMouse event   ; ⮐ ret if ret?.redraw
-        ret = @sheenode.onMouse event   ; ⮐ ret if ret?.redraw
-        
-        false
-        
+                    
     onWheel: event =>
         
         ⮐ if @hidden() or @collapsed()

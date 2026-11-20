@@ -19,7 +19,6 @@ sheenode = (function ()
         this.editor = editor
         this.name = name
     
-        this["onMouse"] = this["onMouse"].bind(this)
         this["draw"] = this["draw"].bind(this)
         this["layout"] = this["layout"].bind(this)
         this["hide"] = this["hide"].bind(this)
@@ -33,21 +32,22 @@ sheenode = (function ()
         this.yhbInput = new tripleinput(this.screen,`${this.name}_yhb`,['y','h','b'],{maxsize:5,number:true})
         this.items = [this.typeArg,this.xwrInput,this.yhbInput]
         this.focusRing = this.typeArg.inputs.concat(this.xwrInput.inputs).concat(this.yhbInput.inputs)
+        this.mouseItems = this.items
         this.isVisible = false
     }
 
     sheenode.prototype["onNode"] = function (node)
     {
-        var _28_48_, _29_47_, _31_46_, _32_46_, _33_46_, _35_46_, _36_46_, _37_46_
+        var _29_48_, _30_47_, _32_46_, _33_46_, _34_46_, _36_46_, _37_46_, _38_46_
 
-        this.typeArg.inputs[0].set(String(((_28_48_=node.type) != null ? _28_48_ : '')))
-        this.typeArg.inputs[1].set(String(((_29_47_=node.arg) != null ? _29_47_ : '')))
-        this.xwrInput.inputs[0].set(String(((_31_46_=node.x) != null ? _31_46_ : '')))
-        this.xwrInput.inputs[1].set(String(((_32_46_=node.w) != null ? _32_46_ : '')))
-        this.xwrInput.inputs[2].set(String(((_33_46_=node.r) != null ? _33_46_ : '')))
-        this.yhbInput.inputs[0].set(String(((_35_46_=node.y) != null ? _35_46_ : '')))
-        this.yhbInput.inputs[1].set(String(((_36_46_=node.h) != null ? _36_46_ : '')))
-        return this.yhbInput.inputs[2].set(String(((_37_46_=node.b) != null ? _37_46_ : '')))
+        this.typeArg.inputs[0].set(String(((_29_48_=node.type) != null ? _29_48_ : '')))
+        this.typeArg.inputs[1].set(String(((_30_47_=node.arg) != null ? _30_47_ : '')))
+        this.xwrInput.inputs[0].set(String(((_32_46_=node.x) != null ? _32_46_ : '')))
+        this.xwrInput.inputs[1].set(String(((_33_46_=node.w) != null ? _33_46_ : '')))
+        this.xwrInput.inputs[2].set(String(((_34_46_=node.r) != null ? _34_46_ : '')))
+        this.yhbInput.inputs[0].set(String(((_36_46_=node.y) != null ? _36_46_ : '')))
+        this.yhbInput.inputs[1].set(String(((_37_46_=node.h) != null ? _37_46_ : '')))
+        return this.yhbInput.inputs[2].set(String(((_38_46_=node.b) != null ? _38_46_ : '')))
     }
 
     sheenode.prototype["show"] = function ()
@@ -92,31 +92,10 @@ sheenode = (function ()
         return sheenode.__super__.draw.call(this)
     }
 
-    sheenode.prototype["onMouse"] = function (event)
-    {
-        var item, ret
-
-        if (this.hidden())
-        {
-            return
-        }
-        var list = _k_.list(this.items)
-        for (var _a_ = 0; _a_ < list.length; _a_++)
-        {
-            item = list[_a_]
-            ret = item.onMouse(event)
-            if ((ret != null ? ret.redraw : undefined))
-            {
-                return ret
-            }
-        }
-        return sheenode.__super__.onMouse.call(this,event)
-    }
-
     return sheenode
 })()
 
 export default sheenode;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZW5vZGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWVub2RlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsV0FBTjs7T0FDTSxZQUFUOztPQUNTLFdBQVo7T0FBaUIsWUFBakI7T0FBdUIsa0JBQXZCOzs7QUFFTixZQUFEOzt5QkFBVTthQUdOLFVBQUksUUFBUTs7UUFBVDtRQUFROzs7Ozs7OztpREFFRCxLQUFDLE9BQU8sT0FBTyxLQUFDO1FBRXRCLEtBQUMsU0FBUztRQUVWLEtBQUMsU0FBUyxLQUFLLE1BQU0sTUFBTTtRQUUzQixLQUFDLGNBQWUsWUFBWSxLQUFDLFVBQVUsS0FBQyxnQkFBaUIsT0FBTztRQUNoRSxLQUFDLGVBQWUsWUFBWSxLQUFDLFVBQVUsS0FBQyxZQUFhLElBQUksSUFBSSxNQUFLLFFBQVEsRUFBRSxPQUFPO1FBQ25GLEtBQUMsZUFBZSxZQUFZLEtBQUMsVUFBVSxLQUFDLFlBQWEsSUFBSSxJQUFJLE1BQUssUUFBUSxFQUFFLE9BQU87UUFFbkYsS0FBQyxTQUFTLEtBQUMsUUFBUSxLQUFDLFNBQVMsS0FBQztRQUM5QixLQUFDLFlBQVksS0FBQyxRQUFRLE9BQU8sT0FBTyxLQUFDLFNBQVMsUUFBUSxPQUFPLEtBQUMsU0FBUztRQUV2RSxLQUFDLFlBQVk7Ozt3QkFFakIscUJBQVE7Ozs7UUFFSixLQUFDLFFBQVEsT0FBTyxHQUFHLElBQUksaUJBQU8sS0FBSywwQkFBTztRQUMxQyxLQUFDLFFBQVEsT0FBTyxHQUFHLElBQUksaUJBQU8sS0FBSyx5QkFBTTtRQUV6QyxLQUFDLFNBQVMsT0FBTyxHQUFHLElBQUksaUJBQU8sS0FBSyx1QkFBSTtRQUN4QyxLQUFDLFNBQVMsT0FBTyxHQUFHLElBQUksaUJBQU8sS0FBSyx1QkFBSTtRQUN4QyxLQUFDLFNBQVMsT0FBTyxHQUFHLElBQUksaUJBQU8sS0FBSyx1QkFBSTtRQUV4QyxLQUFDLFNBQVMsT0FBTyxHQUFHLElBQUksaUJBQU8sS0FBSyx1QkFBSTtRQUN4QyxLQUFDLFNBQVMsT0FBTyxHQUFHLElBQUksaUJBQU8sS0FBSyx1QkFBSTtlQUN4QyxLQUFDLFNBQVMsT0FBTyxHQUFHLElBQUksaUJBQU8sS0FBSyx1QkFBSTs7O3dCQUU1Qzs7OztlQUlJLEtBQUssS0FBSzs7O3dCQUVkOztZQUVTLEtBQUM7Ozs7O2VBSU4sS0FBSyxLQUFLOzs7d0JBRWQscUJBQVEsR0FBRSxHQUFFLEdBQUU7OzRDQUVKLEVBQUUsRUFBRSxFQUFFOztlQUVaLEtBQUMsWUFBWSxFQUFFLEVBQUUsRUFBRSxFQUFFLEtBQUM7Ozt3QkFFMUI7Ozs7WUFFUyxLQUFDLFlBQVksS0FBQzs7OztRQUVuQixLQUFDLE1BQU0sVUFBVSxFQUFFLEVBQUUsR0FBRyxHQUFHLElBQUksS0FBSyxLQUFDLE1BQU07NEJBRS9CLEtBQUM7OztZQUFUO1lBQ0EsS0FBSzs7Ozs7d0JBSWIsc0JBQVM7Ozs7WUFFQSxLQUFDOzs7OzRCQUVNLEtBQUM7OztZQUFUO1lBQ0EsTUFBTSxLQUFLLFFBQVE7aUJBQWlCLGNBQUEsSUFBSzs7dUJBQVo7OztvREFFM0I7OztXQXZFYjs7O2VBeUVNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZW5vZGUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWVub2RlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsV0FBTjs7T0FDTSxZQUFUOztPQUNTLFdBQVo7T0FBaUIsWUFBakI7T0FBdUIsa0JBQXZCOzs7QUFFTixZQUFEOzt5QkFBVTthQUdOLFVBQUksUUFBUTs7UUFBVDtRQUFROzs7Ozs7O2lEQUVELEtBQUMsT0FBTyxPQUFPLEtBQUM7UUFFdEIsS0FBQyxTQUFTO1FBRVYsS0FBQyxTQUFTLEtBQUssTUFBTSxNQUFNO1FBRTNCLEtBQUMsY0FBZSxZQUFZLEtBQUMsVUFBVSxLQUFDLGdCQUFpQixPQUFPO1FBQ2hFLEtBQUMsZUFBZSxZQUFZLEtBQUMsVUFBVSxLQUFDLFlBQWEsSUFBSSxJQUFJLE1BQUssUUFBUSxFQUFFLE9BQU87UUFDbkYsS0FBQyxlQUFlLFlBQVksS0FBQyxVQUFVLEtBQUMsWUFBYSxJQUFJLElBQUksTUFBSyxRQUFRLEVBQUUsT0FBTztRQUVuRixLQUFDLFNBQWMsS0FBQyxRQUFRLEtBQUMsU0FBUyxLQUFDO1FBQ25DLEtBQUMsWUFBYSxLQUFDLFFBQVEsT0FBTyxPQUFPLEtBQUMsU0FBUyxRQUFRLE9BQU8sS0FBQyxTQUFTO1FBQ3hFLEtBQUMsYUFBYSxLQUFDO1FBRWYsS0FBQyxZQUFZOzs7d0JBRWpCLHFCQUFROzs7O1FBRUosS0FBQyxRQUFRLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssMEJBQU87UUFDMUMsS0FBQyxRQUFRLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUsseUJBQU07UUFFekMsS0FBQyxTQUFTLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssdUJBQUk7UUFDeEMsS0FBQyxTQUFTLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssdUJBQUk7UUFDeEMsS0FBQyxTQUFTLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssdUJBQUk7UUFFeEMsS0FBQyxTQUFTLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssdUJBQUk7UUFDeEMsS0FBQyxTQUFTLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssdUJBQUk7ZUFDeEMsS0FBQyxTQUFTLE9BQU8sR0FBRyxJQUFJLGlCQUFPLEtBQUssdUJBQUk7Ozt3QkFFNUM7Ozs7ZUFJSSxLQUFLLEtBQUs7Ozt3QkFFZDs7WUFFUyxLQUFDOzs7OztlQUlOLEtBQUssS0FBSzs7O3dCQUVkLHFCQUFRLEdBQUUsR0FBRSxHQUFFOzs0Q0FFSixFQUFFLEVBQUUsRUFBRTs7ZUFFWixLQUFDLFlBQVksRUFBRSxFQUFFLEVBQUUsRUFBRSxLQUFDOzs7d0JBRTFCOzs7O1lBRVMsS0FBQyxZQUFZLEtBQUM7Ozs7UUFFbkIsS0FBQyxNQUFNLFVBQVUsRUFBRSxFQUFFLEdBQUcsR0FBRyxJQUFJLEtBQUssS0FBQyxNQUFNOzRCQUUvQixLQUFDOzs7WUFBVDtZQUNBLEtBQUs7Ozs7O1dBN0RoQjs7O2VBaUVNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/sheenode.kode

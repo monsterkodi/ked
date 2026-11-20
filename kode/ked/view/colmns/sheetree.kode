@@ -31,9 +31,7 @@ use ../menu         ◆ filterchoice
     select: row -> 
 
         super row
-        # log "SELECT #{row}" @current()
         post.emit 'cells.rect' @current().rect
-        @emit 'tree.node' @current() 
         
     grabFocus: =>
     
@@ -68,6 +66,7 @@ use ../menu         ◆ filterchoice
     jumpTo: choice => 
         
         post.emit 'goto.line' choice.y choice.x
+        @emit 'tree.node' @current()
                 
     emitAction: action choice event  ->
     

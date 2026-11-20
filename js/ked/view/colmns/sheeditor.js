@@ -22,7 +22,6 @@ sheeditor = (function ()
         this["onKey"] = this["onKey"].bind(this)
         this["moveFocus"] = this["moveFocus"].bind(this)
         this["onWheel"] = this["onWheel"].bind(this)
-        this["onMouse"] = this["onMouse"].bind(this)
         this["grabFocus"] = this["grabFocus"].bind(this)
         this["hasFocus"] = this["hasFocus"].bind(this)
         this["show"] = this["show"].bind(this)
@@ -30,16 +29,16 @@ sheeditor = (function ()
         this["onFileLoaded"] = this["onFileLoaded"].bind(this)
         sheeditor.__super__.constructor.call(this,this.screen,this.name)
         this.isVisible = false
-        this.focusable = true
         this.sheetree = new sheetree(this.editor,`${this.name}_sheetree`,['scrllr'])
         this.sheenode = new sheenode(this.editor,`${this.name}_sheenode`)
+        this.mouseItems = [this.sheetree,this.sheenode]
         this.sheetree.on('tree.node',this.sheenode.onNode)
         post.on('file.loaded',this.onFileLoaded)
     }
 
     sheeditor.prototype["onFileLoaded"] = function (path)
     {
-        var _23_24_
+        var _24_24_
 
         if ((this.editor.sheet != null ? this.editor.sheet.rectree : undefined))
         {
@@ -106,32 +105,6 @@ sheeditor = (function ()
         return this.sheetree.grabFocus()
     }
 
-    sheeditor.prototype["onMouse"] = function (event)
-    {
-        var ret
-
-        if (this.hidden() || this.collapsed())
-        {
-            return
-        }
-        ret = sheeditor.__super__.onMouse.call(this,event)
-        if ((ret != null ? ret.redraw : undefined))
-        {
-            return ret
-        }
-        ret = this.sheetree.onMouse(event)
-        if ((ret != null ? ret.redraw : undefined))
-        {
-            return ret
-        }
-        ret = this.sheenode.onMouse(event)
-        if ((ret != null ? ret.redraw : undefined))
-        {
-            return ret
-        }
-        return false
-    }
-
     sheeditor.prototype["onWheel"] = function (event)
     {
         if (this.hidden() || this.collapsed())
@@ -188,5 +161,5 @@ sheeditor = (function ()
 
 export default sheeditor;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZWRpdG9yLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2NvbG1ucy9zaGVlZGl0b3Iua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUNtQixXQUFOOztPQUNNLFdBQVo7O09BQ1ksZUFBQTtPQUFTLGVBQUE7OztBQUMzQixhQUFEOzswQkFBVzthQUVQLFdBQUksUUFBUSxRQUFROztRQUFqQjtRQUFRO1FBQVE7Ozs7Ozs7Ozs7O2tEQUVULEtBQUMsT0FBTyxLQUFDO1FBRWYsS0FBQyxZQUFZO1FBQ2IsS0FBQyxZQUFZO1FBRWIsS0FBQyxlQUFlLFNBQVMsS0FBQyxVQUFVLEtBQUMsaUJBQWlCO1FBQ3RELEtBQUMsZUFBZSxTQUFTLEtBQUMsVUFBVSxLQUFDO1FBRXJDLEtBQUMsU0FBUyxHQUFHLFlBQVksS0FBQyxTQUFTO1FBRW5DLEtBQUssR0FBRyxjQUFjLEtBQUM7Ozt5QkFFM0IsMkJBQWM7Ozs7YUFFUCxLQUFDLE9BQU8sZ0JBQVIsS0FBQyxPQUFPLE1BQU87O1lBQ2QsS0FBQyxTQUFTO21CQUNWLEtBQUM7Ozs7bUJBRUQsS0FBQzs7Ozt5QkFFVDs7UUFFSSxLQUFDLFNBQVM7UUFDVixLQUFDLFNBQVM7Ozs7eUJBR2Q7O1FBRUksS0FBQyxTQUFTO1FBQ1YsS0FBQyxTQUFTOzs7O3lCQUdkLHFCQUFRLEdBQUUsR0FBRSxHQUFFOzs7O1lBRUwsS0FBQzs7OztRQUVOLE1BQU0sS0FBQyxTQUFTO1FBQ2hCLE1BQU0sSUFBRTtRQUVSLEtBQUMsU0FBUyxPQUFPLEVBQUUsRUFBTSxFQUFFO1FBQzNCLEtBQUMsU0FBUyxPQUFPLEVBQUUsSUFBRSxJQUFJLEVBQUU7b0RBRXJCLEVBQUUsRUFBRSxFQUFFOzs7eUJBRWhCOztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7O1FBRW5CLEtBQUMsU0FBUztRQUNWLEtBQUMsU0FBUzs7Ozt5QkFJZDs7ZUFBYyxLQUFDLFNBQVMsY0FBYyxLQUFDLFNBQVM7Ozt5QkFDaEQ7O1lBRVMsS0FBQyxZQUFZLEtBQUM7Ozs7ZUFDbkIsS0FBQyxTQUFTOzs7eUJBRWQsc0JBQVM7Ozs7WUFFQSxLQUFDLFlBQVksS0FBQzs7OztRQUVuQiw0Q0FBWTthQUErQixjQUFBLElBQUs7O21CQUFaOztRQUNwQyxNQUFNLEtBQUMsU0FBUyxRQUFRO2FBQW1CLGNBQUEsSUFBSzs7bUJBQVo7O1FBQ3BDLE1BQU0sS0FBQyxTQUFTLFFBQVE7YUFBbUIsY0FBQSxJQUFLOzttQkFBWjs7ZUFFcEM7Ozt5QkFFSixzQkFBUzs7WUFFQSxLQUFDLFlBQVksS0FBQzs7OztRQUVuQixLQUFDLFNBQVMsUUFBUTtlQUNsQixLQUFDLFNBQVMsUUFBUTs7O3lCQUV0Qjs7WUFFTyxLQUFDLFNBQVM7O1lBQ1QsS0FBQyxTQUFTO1lBQ1YsS0FBSyxLQUFLOzs7O1lBRVYsS0FBQyxTQUFTOztlQUVkOzs7eUJBRUosb0JBQU8sS0FBSTs7OztZQUVGLEtBQUMsWUFBWSxLQUFDOzs7O1FBRW5CLFFBQVEsTUFBTTtnQkFFUDs7aUJBQ0g7aUJBQU07dUJBQWdCLEtBQUM7Ozs7WUFFeEIsS0FBQyxTQUFTOzttQkFBZSxLQUFDLFNBQVMsTUFBTSxJQUFJOztZQUM3QyxLQUFDLFNBQVM7O21CQUFlLEtBQUMsU0FBUyxNQUFNLElBQUk7Ozs7V0FwR3ZEOzs7ZUFzR00ifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZWRpdG9yLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2NvbG1ucy9zaGVlZGl0b3Iua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUNtQixXQUFOOztPQUNNLFdBQVo7O09BQ1ksZUFBQTtPQUFTLGVBQUE7OztBQUMzQixhQUFEOzswQkFBVzthQUVQLFdBQUksUUFBUSxRQUFROztRQUFqQjtRQUFRO1FBQVE7Ozs7Ozs7Ozs7a0RBRVQsS0FBQyxPQUFPLEtBQUM7UUFFZixLQUFDLFlBQVk7UUFFYixLQUFDLGVBQWUsU0FBUyxLQUFDLFVBQVUsS0FBQyxpQkFBaUI7UUFDdEQsS0FBQyxlQUFlLFNBQVMsS0FBQyxVQUFVLEtBQUM7UUFFckMsS0FBQyxjQUFjLEtBQUMsU0FBUyxLQUFDO1FBRTFCLEtBQUMsU0FBUyxHQUFHLFlBQVksS0FBQyxTQUFTO1FBRW5DLEtBQUssR0FBRyxjQUFjLEtBQUM7Ozt5QkFFM0IsMkJBQWM7Ozs7YUFFUCxLQUFDLE9BQU8sZ0JBQVIsS0FBQyxPQUFPLE1BQU87O1lBQ2QsS0FBQyxTQUFTO21CQUNWLEtBQUM7Ozs7bUJBRUQsS0FBQzs7Ozt5QkFFVDs7UUFFSSxLQUFDLFNBQVM7UUFDVixLQUFDLFNBQVM7Ozs7eUJBR2Q7O1FBRUksS0FBQyxTQUFTO1FBQ1YsS0FBQyxTQUFTOzs7O3lCQUdkLHFCQUFRLEdBQUUsR0FBRSxHQUFFOzs7O1lBRUwsS0FBQzs7OztRQUVOLE1BQU0sS0FBQyxTQUFTO1FBQ2hCLE1BQU0sSUFBRTtRQUVSLEtBQUMsU0FBUyxPQUFPLEVBQUUsRUFBTSxFQUFFO1FBQzNCLEtBQUMsU0FBUyxPQUFPLEVBQUUsSUFBRSxJQUFJLEVBQUU7b0RBRXJCLEVBQUUsRUFBRSxFQUFFOzs7eUJBRWhCOztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7O1FBRW5CLEtBQUMsU0FBUztRQUNWLEtBQUMsU0FBUzs7Ozt5QkFJZDs7ZUFBYyxLQUFDLFNBQVMsY0FBYyxLQUFDLFNBQVM7Ozt5QkFDaEQ7O1lBRVMsS0FBQyxZQUFZLEtBQUM7Ozs7ZUFDbkIsS0FBQyxTQUFTOzs7eUJBRWQsc0JBQVM7O1lBRUEsS0FBQyxZQUFZLEtBQUM7Ozs7UUFFbkIsS0FBQyxTQUFTLFFBQVE7ZUFDbEIsS0FBQyxTQUFTLFFBQVE7Ozt5QkFFdEI7O1lBRU8sS0FBQyxTQUFTOztZQUNULEtBQUMsU0FBUztZQUNWLEtBQUssS0FBSzs7OztZQUVWLEtBQUMsU0FBUzs7ZUFFZDs7O3lCQUVKLG9CQUFPLEtBQUk7Ozs7WUFFRixLQUFDLFlBQVksS0FBQzs7OztRQUVuQixRQUFRLE1BQU07Z0JBRVA7O2lCQUNIO2lCQUFNO3VCQUFnQixLQUFDOzs7O1lBRXhCLEtBQUMsU0FBUzs7bUJBQWUsS0FBQyxTQUFTLE1BQU0sSUFBSTs7WUFDN0MsS0FBQyxTQUFTOzttQkFBZSxLQUFDLFNBQVMsTUFBTSxJQUFJOzs7O1dBM0Z2RDs7O2VBNkZNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/sheeditor.kode

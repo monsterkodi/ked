@@ -71,10 +71,13 @@ use ../screen    ◆ cells
         ⮐ if @hidden() or @collapsed()
         
         if valid @mouseItems
+            # log "VIEW #{@name} #{@mouseItems.length}"
             for item in @mouseItems
                 continue if empty item
                 ret = item.onMouse event
-                ⮐ ret if ret?.redraw
+                if ret?.redraw
+                    # log "onMouse handled by #{item.name}"
+                    ⮐ ret 
     
         @handleHover event
     
