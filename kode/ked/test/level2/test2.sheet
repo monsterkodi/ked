@@ -16,8 +16,8 @@ children
                 children
                     .
                         text    HELLO world! sun shine happy
-                        x       20%
-                        y       4
+                        x       10%
+                        y       3
                         w       39%
                         h       10
                         scale   2

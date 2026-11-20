@@ -225,7 +225,6 @@ use                ◆ state draw complete mode susan
                 'shift+alt+j' ➜ 'down'
                 'shift+alt+k' ➜ 'up'
                 'shift+alt+l' ➜ 'right'
-                            ➜ null
             if dir?
                 @state.moveSheetNode dir
                 ⮐ true
