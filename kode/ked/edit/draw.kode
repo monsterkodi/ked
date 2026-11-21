@@ -459,15 +459,15 @@ use              ◆ mode
 #!cursors
     
     #  a cursor inside a run grows with it, and grows upwards like the run
-    #  at the open marker a typed character would land outside the run,
-    #  before the close marker it would land inside
+    #  at either end the cursor is drawn in the run: text typed at the open
+    #  marker joins the run, text typed at the close marker already did
 
     cursorRunScale: pos ->
 
         [x y] = pos
 
         for run in @runsForLine y
-            if run[0] < x and x <= run[1]
+            if run[0] <= x and x <= run[1]
                 ⮐ run[2]
 
         1

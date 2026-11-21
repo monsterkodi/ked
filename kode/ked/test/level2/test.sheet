@@ -1,52 +1,56 @@
-bg        #333
+bg          |#1a1a1a|
 children
-  .
-    erase     bg
-    x         10%
-    y         20%
-    r         10%
-    b         2
-  .
-    pattern   |0123456789|
-    fg        #ff0
-    x         2
-    y         2
-    r         2
-    b         2
-  .
-    text      heading
-    x         4
-    y         0
-    w         22
-    h         3
-    scale     3
-    flows     false
-  .
-    pattern   longer text that flows and flows and flows and flows into the sea
-    x         4
-    y         6
-    r         4
-    h         5
-    flows     true
-  .
-    text      som!
-    x         40%
-    y         7
-    w         12
-    h         3
-    scale     3
-    blocks    true
-  .
-    text      longer text that flows and flows and flows and flows into the sea.
-    x         4
-    y         13
-    r         4
-    h         5
-  .
-    text      somx
-    x         4
-    y         14
-    w         12
-    h         3
-    scale     3
-    blocks    true
+            .
+                erase   bg
+                x       10%
+                y       20%
+                r       10%
+                b       2
+            .
+                pattern     ◇
+                fg          |#3d3d00|
+                x           2
+                y           2
+                r           2
+                b           2
+            .
+                text    heading
+                x       4
+                y       0
+                w       22
+                h       3
+                scale   3
+                flows   false
+                fg      |#cc9a02|
+            .
+                pattern     longer text that flows and flows and flows and flows into the sea
+                x           4
+                y           6
+                r           4
+                h           5
+                flows       true
+                fg          |#cc1414|
+            .
+                text    som!
+                x       40%
+                y       7
+                w       12
+                h       3
+                scale   3
+                blocks  true
+            .
+                text    longer text that flows and flows and flows and flows into the sea.
+                x       4
+                y       13
+                r       120
+                h       5
+                bg      |#000000|
+                fg      |#2e2e73|
+            .
+                text    somx
+                x       4
+                y       14
+                w       12
+                h       3
+                scale   3
+                blocks  true

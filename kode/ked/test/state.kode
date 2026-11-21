@@ -732,6 +732,45 @@ sel = r... -> s.allSelections() ▸ r
         s.stepScales -1
         s.s.sue ▸ []
 
+  ▸ typing at the start of a run joins the run
+
+        s.loadLines ['xx BIG yy']
+        s.setSelections [[3 0 6 0]]
+        s.stepScales 1
+        s.setSelections []
+
+        s.setMainCursor 3 0
+        s.insert 'X'
+
+        txt 'xx XBIG yy'
+        s.s.sue ▸ [{x: 3 y: 0 value: [41 -1 1 2]} {x: 7 y: 0 value: [99 -1 1 41]}]
+
+  ▸ typing at the end of a run joins the run
+
+        s.loadLines ['xx BIG yy']
+        s.setSelections [[3 0 6 0]]
+        s.stepScales 1
+        s.setSelections []
+
+        s.setMainCursor 6 0
+        s.insert 'X'
+
+        txt 'xx BIGX yy'
+        s.s.sue ▸ [{x: 3 y: 0 value: [41 -1 1 2]} {x: 7 y: 0 value: [99 -1 1 41]}]
+
+  ▸ typing before a run stays outside it
+
+        s.loadLines ['xx BIG yy']
+        s.setSelections [[3 0 6 0]]
+        s.stepScales 1
+        s.setSelections []
+
+        s.setMainCursor 2 0
+        s.insert 'X'
+
+        txt 'xxX BIG yy'
+        s.s.sue ▸ [{x: 4 y: 0 value: [41 -1 1 2]} {x: 7 y: 0 value: [99 -1 1 41]}]
+
   ▸ a whole line selection scales the line
 
         s.loadLines ['abcd']

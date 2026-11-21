@@ -58,6 +58,9 @@
     row-(scale-1), so it grows upwards and sits on the line's baseline.
     the cells it covers are blanked, so decorations must skip them.
 
+    a pure insertion at an open marker does not move the marker, so text
+    typed at the left edge of a run joins the run and it grows there.
+
 #### api
 
     desue        text       -> { text, sue }

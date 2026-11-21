@@ -159,6 +159,29 @@ collect = (pending y x areas) ->
         areas.push({x: x y: y value: value}) if value != null
         i += total
 
+#  the index of a pure insertion on one line, or -1
+#  a pure insertion leaves every old grapheme in place, so a marker at
+#  the insertion point can keep its x and let the new text join its run
+
+insertionIndex = (oldLine newLine) ->
+
+    oldLen = oldLine.length
+    newLen = newLine.length
+
+    ⮐ -1 if newLen <= oldLen
+
+    p = 0
+    while p < oldLen and oldLine[p] == newLine[p]
+        p += 1
+
+    s = 0
+    while s < oldLen-p and newLine[newLen-1-s] == oldLine[oldLen-1-s]
+        s += 1
+
+    ⮐ -1 if oldLen - s != p
+
+    p
+
 ■sue
 
     @FG_COLOR:    FG_COLOR
@@ -390,6 +413,11 @@ collect = (pending y x areas) ->
             x = area.x
 
             if not (oldLine eql newLine)
+                #  text inserted exactly at an open marker joins the run, so
+                #  the marker keeps its x instead of sliding past the input
+                if area.value[0] == SCALE and insertionIndex(oldLine newLine) == area.x
+                    result.push {x: x y: ny value: area.value}
+                    continue
                 adj = colorspans.adjustSegment [area.x area.y area.x+1 area] oldLine newLine
                 continue if not adj?
                 x = adj[0]
