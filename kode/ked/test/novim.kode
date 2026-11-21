@@ -1089,7 +1089,7 @@ windowReset = (s) ->
         
             s.executeNovim {operator:'visualYank'}
             s.novim.yankFlash ▸ [[0 0 2 0]]
-            s.visual ▸ null
+            s.novim.visual ▸ null
         
             s.clearYankFlash()
             s.novim.yankFlash ▸ null
@@ -1881,7 +1881,7 @@ windowReset = (s) ->
             s.s.selections ▸ [[0 0 3 0]]
         
             s.lastChange = null
-            s.novimInsert = null
+            s.novim.insert = null
         
             keys '.'
             txt "one two three"
@@ -1963,7 +1963,7 @@ windowReset = (s) ->
             loadText "abc\ndef"
         
             keys 'i'
-            s.novimInsert.kind ▸ 'insert'
+            s.novim.insert.kind ▸ 'insert'
             s.insert 'X'
             s.finishNovimInsert()
             txt "Xabc\ndef"
@@ -2342,10 +2342,10 @@ windowReset = (s) ->
         keys 'RXY'
         txt "XYcdef"
         cur 2 0
-        s.novimInsert.kind ▸ 'replace'
+        s.novim.insert.kind ▸ 'replace'
 
         key 'esc'
-        s.novimInsert ▸ null
+        s.novim.insert ▸ null
 
         loadText "abcdef"
 
@@ -2412,7 +2412,7 @@ windowReset = (s) ->
         loadText "one two"
 
         keys 'vllR'
-        s.visual ▸ null
+        s.novim.visual ▸ null
         s.s.selections ▸ [[0 0 2 0]]
 
         s.insert 'X'
@@ -2442,14 +2442,14 @@ windowReset = (s) ->
 
         keys 'vllrX'
         txt "aXXd\nefgh\nijkl"
-        s.visual ▸ null
+        s.novim.visual ▸ null
         cur 1 0
 
         loadText "abcd\nefgh\nijkl"
 
         keys 'VjrX'
         txt "XXXX\nXXXX\nijkl"
-        s.visual ▸ null
+        s.novim.visual ▸ null
         cur 0 0
 
         loadText "abcd\nefgh\nijkl" 1 0
@@ -2457,7 +2457,7 @@ windowReset = (s) ->
         key 'ctrl+v'
         keys 'jllrX'
         txt "aXXd\neXXh\nijkl"
-        s.visual ▸ null
+        s.novim.visual ▸ null
         cur 1 0
 
         loadText "abcd\nefgh\nijkl" 1 0
@@ -2476,7 +2476,7 @@ windowReset = (s) ->
         loadText "abcd\nefgh" 1 0
 
         keys 'vllrXgv'
-        s.visual ▸ 'char'
+        s.novim.visual ▸ 'char'
         s.s.selections ▸ [[1 0 3 0]]
         cur 3 0
 
@@ -2802,7 +2802,7 @@ windowReset = (s) ->
         loadText "one two\nthree four"
     
         key 'v'
-        s.visual ▸ 'char'
+        s.novim.visual ▸ 'char'
         s.s.selections ▸ []
         cur 0 0
     
@@ -2823,7 +2823,7 @@ windowReset = (s) ->
         cur 0 0
     
         key 'V'
-        s.visual ▸ 'line'
+        s.novim.visual ▸ 'line'
         s.s.selections ▸ [[0 0 7 0]]
         cur 0 0
     
@@ -2832,7 +2832,7 @@ windowReset = (s) ->
         cur 0 1
     
         key 'esc'
-        s.visual ▸ null
+        s.novim.visual ▸ null
         s.s.selections ▸ []
         txt "one two\nthree four"
 
@@ -2843,7 +2843,7 @@ windowReset = (s) ->
         [m key keys] = novimKeysFor s
 
         keys 'gv'
-        s.visual ▸ null
+        s.novim.visual ▸ null
         s.s.selections ▸ []
 
         loadText "one two\nthree four"
@@ -2851,7 +2851,7 @@ windowReset = (s) ->
         keys 'vll'
         key 'esc'
         keys 'gv'
-        s.visual ▸ 'char'
+        s.novim.visual ▸ 'char'
         s.s.selections ▸ [[0 0 2 0]]
         cur 2 0
 
@@ -2861,7 +2861,7 @@ windowReset = (s) ->
         keys 'vl'
         key 'esc'
         keys 'gv'
-        s.visual ▸ 'char'
+        s.novim.visual ▸ 'char'
         s.s.selections ▸ [[0 0 1 0] [0 2 1 2]]
         s.allCursors() ▸ [[1 0] [1 2]]
 
@@ -2870,7 +2870,7 @@ windowReset = (s) ->
         keys 'vll'
         key 'y'
         keys 'gv'
-        s.visual ▸ 'char'
+        s.novim.visual ▸ 'char'
         s.s.selections ▸ [[0 0 2 0]]
         cur 2 0
 
@@ -2880,7 +2880,7 @@ windowReset = (s) ->
         key 'esc'
         s.setMainCursor 0 0
         keys 'vllgv'
-        s.visual ▸ 'char'
+        s.novim.visual ▸ 'char'
         s.s.selections ▸ [[4 0 5 0]]
         cur 5 0
 
@@ -2890,7 +2890,7 @@ windowReset = (s) ->
         key 'esc'
         s.setText "zero\none\ntwo\nthree"
         keys 'gv'
-        s.visual ▸ 'line'
+        s.novim.visual ▸ 'line'
         s.s.selections ▸ [[0 2 5 3]]
         cur 0 3
 
@@ -2900,7 +2900,7 @@ windowReset = (s) ->
         key 'd'
         txt "aaa\nddd"
         keys 'gv'
-        s.visual ▸ 'line'
+        s.novim.visual ▸ 'line'
         s.s.selections ▸ [[0 1 3 1]]
         cur 0 1
 
@@ -2910,7 +2910,7 @@ windowReset = (s) ->
         keys 'lj'
         key 'esc'
         keys 'gv'
-        s.visual ▸ 'block'
+        s.novim.visual ▸ 'block'
         s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
         cur 1 1
 
@@ -2920,7 +2920,7 @@ windowReset = (s) ->
         key 'esc'
         s.setText "XX aaa bbb ccc\nsecond"
         keys 'gv'
-        s.visual ▸ 'char'
+        s.novim.visual ▸ 'char'
         s.s.selections ▸ [[4 0 6 0]]
         cur 6 0
 
@@ -2931,7 +2931,7 @@ windowReset = (s) ->
         s.setText "zero\none\ntwo\nthree"
         s.undo()
         keys 'gv'
-        s.visual ▸ 'line'
+        s.novim.visual ▸ 'line'
         s.s.selections ▸ [[0 1 5 2]]
         cur 0 2
 
@@ -2969,12 +2969,12 @@ windowReset = (s) ->
             loadText "one\ntwo\nthree" 1 1
         
             keys 'Vj'
-            s.visual ▸ 'line'
+            s.novim.visual ▸ 'line'
             s.s.selections ▸ [[0 1 5 2]]
             cur 1 2
         
             key 'V'
-            s.visual ▸ null
+            s.novim.visual ▸ null
             s.s.selections ▸ []
         
     ▸ visual block starts empty
@@ -2982,12 +2982,12 @@ windowReset = (s) ->
             loadText "abcd\nefgh"
         
             key 'ctrl+v'
-            s.visual ▸ 'block'
+            s.novim.visual ▸ 'block'
             s.s.selections ▸ []
             cur 0 0
         
             key 'j'
-            s.visual ▸ 'block'
+            s.novim.visual ▸ 'block'
             s.s.selections ▸ []
             cur 0 1
         
@@ -3020,7 +3020,7 @@ windowReset = (s) ->
             cur 1 1
         
             key 'esc'
-            s.visual ▸ null
+            s.novim.visual ▸ null
             s.s.selections ▸ []
         
     ▸ visual block toggles and switches
@@ -3029,16 +3029,16 @@ windowReset = (s) ->
         
             key 'ctrl+v'
             key 'ctrl+v'
-            s.visual ▸ null
+            s.novim.visual ▸ null
             s.s.selections ▸ []
         
             key 'ctrl+v'
             key 'v'
-            s.visual ▸ 'char'
+            s.novim.visual ▸ 'char'
             s.s.selections ▸ []
         
             key 'V'
-            s.visual ▸ 'line'
+            s.novim.visual ▸ 'line'
             s.s.selections ▸ [[0 0 4 0]]
         
             key 'esc'
@@ -3053,7 +3053,7 @@ windowReset = (s) ->
         
             key 'd'
             txt "bcd\nfgh"
-            s.visual ▸ null
+            s.novim.visual ▸ null
             s.novim.register.value.lines ▸ ['a' 'e']
             s.novim.register.value.linewise ▸ false
         
@@ -3070,7 +3070,7 @@ windowReset = (s) ->
         
             s.novim.register.value.lines ▸ ['a' 'e']
             s.novim.register.value.linewise ▸ false
-            s.visual ▸ null
+            s.novim.visual ▸ null
             s.s.selections ▸ []
             cur 0 0
             txt "abcd\nefgh"
@@ -3104,7 +3104,7 @@ windowReset = (s) ->
             keys 'lj'
             key 'I'
         
-            s.visual ▸ null
+            s.novim.visual ▸ null
             s.s.selections ▸ []
             s.allCursors() ▸ [[0 0] [0 1]]
         
@@ -3118,7 +3118,7 @@ windowReset = (s) ->
             keys 'lj'
             key 'A'
         
-            s.visual ▸ null
+            s.novim.visual ▸ null
             s.s.selections ▸ []
             s.allCursors() ▸ [[1 0] [1 1]]
         
@@ -3141,7 +3141,7 @@ windowReset = (s) ->
             key 'ctrl+v'
             key 'j'
             key 'I'
-            s.visual ▸ 'block'
+            s.novim.visual ▸ 'block'
             s.s.selections ▸ []
         
             key 'esc'
@@ -3154,7 +3154,7 @@ windowReset = (s) ->
             keys 'vlly'
             s.novim.register.value.lines ▸ ['on']
             s.novim.register.value.linewise ▸ false
-            s.visual ▸ null
+            s.novim.visual ▸ null
             s.s.selections ▸ []
             cur 0 0
             txt "one two"
@@ -3172,7 +3172,7 @@ windowReset = (s) ->
             keys 'vlld'
             txt "e two"
             s.novim.register.value.lines ▸ ['on']
-            s.visual ▸ null
+            s.novim.visual ▸ null
             cur 0 0
         
             loadText "one\ntwo\nthree" 0 1
@@ -3191,7 +3191,7 @@ windowReset = (s) ->
             txt "one two"
             s.s.selections ▸ [[0 0 2 0]]
             cur 2 0
-            s.visual ▸ null
+            s.novim.visual ▸ null
         
             s.insert 'X'
             txt "Xe two"
@@ -3251,7 +3251,7 @@ windowReset = (s) ->
             key 'v'
             key 'esc'
         
-            s.visual ▸ null
+            s.novim.visual ▸ null
             s.s.selections ▸ []
             mode.isActive s 'novim' ▸ true
         
@@ -3309,13 +3309,13 @@ windowReset = (s) ->
         
             keys 'Vj>'
             txt "one\n    two\n    three"
-            s.visual ▸ 'line'
+            s.novim.visual ▸ 'line'
             s.s.selections ▸ [[0 1 9 2]]
             cur 5 2
         
             key '>'
             txt "one\n        two\n        three"
-            s.visual ▸ 'line'
+            s.novim.visual ▸ 'line'
             s.s.selections ▸ [[0 1 13 2]]
             cur 9 2
         
@@ -3323,7 +3323,7 @@ windowReset = (s) ->
         
             keys 'Vj<'
             txt "    one\n    two\n        three"
-            s.visual ▸ 'line'
+            s.novim.visual ▸ 'line'
             s.s.selections ▸ [[0 1 13 2]]
             cur 0 2
         
@@ -3331,7 +3331,7 @@ windowReset = (s) ->
         
             keys 'vlj>'
             txt "one\n    two\n    three"
-            s.visual ▸ 'char'
+            s.novim.visual ▸ 'char'
             s.s.selections ▸ [[4 1 5 2]]
             cur 5 2
     
@@ -3526,7 +3526,7 @@ windowReset = (s) ->
         starts[-1] ▸ {state:'test.state' text:"'<,'>"}
         m.cancelEx()
         s.stopVisual()
-        s.visual   ▸ null
+        s.novim.visual   ▸ null
 
         m.runEx "'<,'>s/a/b/"
         errors[-1] ▸ 'no visual selection'
@@ -3552,14 +3552,14 @@ windowReset = (s) ->
         freshText "a\nb\nc"
 
         nkeys 'Vj'
-        s.visual ▸ 'line'
+        s.novim.visual ▸ 'line'
 
         nkey ':'
         nm.ex ▸ "'<,'>"
         nm.runEx "'<,'>s/b/X/"
 
         txt "a\nX\nc"
-        s.visual ▸ null
+        s.novim.visual ▸ null
 
         freshText "a\nb\nc"
 
@@ -3569,7 +3569,7 @@ windowReset = (s) ->
 
         txt "a\nb\nc"
         nm.ex ▸ null
-        s.visual ▸ 'line'
+        s.novim.visual ▸ 'line'
         s.stopVisual()
 
         freshText "one two one\nthree one"

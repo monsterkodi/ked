@@ -248,7 +248,7 @@ use ..           ◆ mode
 
     completeReplace: char ->
 
-        if @state.visual
+        if @state.novim.visual
             ⮐ @execute { operator: 'visualReplace', char: char }
 
         @execute novim.commands['r'](@countNumber() char)
@@ -309,7 +309,7 @@ use ..           ◆ mode
 
         @state.novim.register.set ':', { lines: [line], linewise: false } if record
 
-        @state.stopVisual() if @state.visual
+        @state.stopVisual() if @state.novim.visual
 
         parsed = belt.parseEx line
 
@@ -480,14 +480,14 @@ use ..           ◆ mode
 
         for c in keys
 
-            if @state.novimInsert
+            if @state.novim.insert
                 event = { combo:c char:c }
                 sr    = @state.handleKey c event
                 @state.insert c if sr == 'unhandled'
             else
                 @handleKey c {combo:c char:c}
 
-        if @state.novimInsert
+        if @state.novim.insert
             @state.finishNovimInsert()
 
         true
@@ -815,7 +815,7 @@ use ..           ◆ mode
         @reset()
 
         text = ''
-        if @state.visual
+        if @state.novim.visual
             @exRange = @visualLineRange()
             text     = "'<,'>"
 
@@ -881,7 +881,7 @@ use ..           ◆ mode
             @handleSubstituteConfirmKey combo char
             ⮐ true
 
-        if @state.novimInsert and @state.novimInsert.kind == 'replace'
+        if @state.novim.insert and @state.novim.insert.kind == 'replace'
             ⮐ @handleReplaceKey combo char
 
         if combo == 'ctrl+v'
@@ -889,7 +889,7 @@ use ..           ◆ mode
                 @state.startVisual 'block'
             ⮐ @reset()
 
-        if combo in ['ctrl+o' 'ctrl+i' 'tab'] and not @state.novimInsert and not @state.visual
+        if combo in ['ctrl+o' 'ctrl+i' 'tab'] and not @state.novim.insert and not @state.novim.visual
             count = @countNumber()
             @reset()
             if combo == 'ctrl+o'
@@ -942,14 +942,14 @@ use ..           ◆ mode
             @reset()
             ⮐ true
 
-        if char == 'q' and not @state.visual and not @operator and not @area and not @prefix
+        if char == 'q' and not @state.novim.visual and not @operator and not @area and not @prefix
             @state.markMacroControlKey()
             @macroPending = 'record'
             ⮐ @logPending()
 
         if combo in ['esc' 'escape']
             @reset()
-            if @state.visual
+            if @state.novim.visual
                 @state.stopVisual()
             else if @state.hasCursorsHighlightsOrSelections()
                 @state.clearCursorsHighlightsAndSelections()
@@ -996,7 +996,7 @@ use ..           ◆ mode
 
         ⮐ 'unhandled' if char.length != 1 # ignore every other non text key
 
-        if @state.visual and not @operator and not @area and not @prefix
+        if @state.novim.visual and not @operator and not @area and not @prefix
 
             switch char
                 ':'     ➜ ⮐ @startEx()
@@ -1012,10 +1012,10 @@ use ..           ◆ mode
                 'o'     ➜ ⮐ @execute { operator: 'visualSwap' }
                 '>'     ➜ ⮐ @execute { operator: 'visualIndent',   count: @countNumber() }
                 '<'     ➜ ⮐ @execute { operator: 'visualDeindent', count: @countNumber() }
-                'I'     ➜ ⮐ @execute { operator: 'visualBlockPrepend' } if @state.visual == 'block'
-                'A'     ➜ ⮐ @execute { operator: 'visualBlockAppend' }  if @state.visual == 'block'
+                'I'     ➜ ⮐ @execute { operator: 'visualBlockPrepend' } if @state.novim.visual == 'block'
+                'A'     ➜ ⮐ @execute { operator: 'visualBlockAppend' }  if @state.novim.visual == 'block'
              
-        if (@state.visual or @operator) and not @area and char in 'ia'
+        if (@state.novim.visual or @operator) and not @area and char in 'ia'
             @area = char == 'i' ? 'inner' : 'around'
             ⮐ @logPending()
 
@@ -1028,7 +1028,7 @@ use ..           ◆ mode
                     @state.startVisual 'line'
                     ⮐ @reset()
                 ':' 
-                    if not @state.visual
+                    if not @state.novim.visual
                         ⮐ @startEx()
         if 
             @prefix # gg 
@@ -1036,7 +1036,7 @@ use ..           ◆ mode
                 prefix  = @prefix
                 @prefix = null
                 if prefix == 'g' and char in [';' ',']
-                    if @operator or @area or @state.visual
+                    if @operator or @area or @state.novim.visual
                         ⮐ @reset()
                     count = @countNumber()
                     @reset()
@@ -1054,7 +1054,7 @@ use ..           ◆ mode
                     kind = 'toggle'
                     kind = 'lower' if char == 'u'
                     kind = 'upper' if char == 'U'
-                    if @state.visual
+                    if @state.novim.visual
                         ⮐ @execute { operator: 'visualCase', kind: kind }
                     @operator = 'g' + char
                     ⮐ @logPending()
@@ -1063,7 +1063,7 @@ use ..           ◆ mode
             @area
     
                 if target = novim.textObjects[char]
-                    if @state.visual
+                    if @state.novim.visual
                         ⮐ @execute { operator: 'visualTextObject', motion: { kind: 'textObject', area: @area, target: target, count: @countNumber() } }
                     else
                         ⮐ @completeTextObject target
@@ -1113,7 +1113,7 @@ use ..           ◆ mode
             'A' ➜ ⮐ @state.startNovimInsert kind:'appendEol'
 
             'R'
-                if not @state.visual
+                if not @state.novim.visual
                     count = @countNumber()
                     @reset()
                     ⮐ @state.startNovimReplace count

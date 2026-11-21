@@ -21,7 +21,7 @@ export
         if cmd.motion
             cmd.motion.count ?= cmd.count
 
-        if @visual and cmd.operator not in ['move' 'matchBracket' 'visualDelete' 'visualYank' 'visualChange' 'visualSwap' 'visualTextObject' 'visualIndent' 'visualDeindent' 'visualReplace' 'visualCase' 'visualBlockPrepend' 'visualBlockAppend']
+        if @novim.visual and cmd.operator not in ['move' 'matchBracket' 'visualDelete' 'visualYank' 'visualChange' 'visualSwap' 'visualTextObject' 'visualIndent' 'visualDeindent' 'visualReplace' 'visualCase' 'visualBlockPrepend' 'visualBlockAppend']
             @stopVisual()
 
         switch cmd.operator
@@ -226,17 +226,17 @@ export
             @pushJump()
             @setCursors newCursors main:@s.main
             
-        @updateVisual() if @visual
+        @updateVisual() if @novim.visual
 
     startVisual: kind ->
 
-        if @visual == kind
+        if @novim.visual == kind
             ⮐ @stopVisual()
 
-        if not @visual
-            @visualAnchors = @allCursors().map (c) -> [c[0] c[1]]
+        if not @novim.visual
+            @novim.visualAnchors = @allCursors().map (c) -> [c[0] c[1]]
 
-        @visual = kind
+        @novim.visual = kind
 
         @updateVisual()
 
@@ -244,15 +244,15 @@ export
 
         @rememberVisual() if remember
 
-        @visual        = null
-        @visualAnchors = []
+        @novim.visual        = null
+        @novim.visualAnchors = []
 
         if not keepSelections
             @setSelections []
 
     rememberVisual: ->
 
-        ⮐ false if not @visual
+        ⮐ false if not @novim.visual
 
         pairs = @visualPairs()
 
@@ -260,8 +260,8 @@ export
 
         main = @mainCursor()
 
-        @lastVisual =
-            kind:  @visual
+        @novim.lastVisual =
+            kind:  @novim.visual
             pairs: pairs
             main:  [main[0] main[1]]
             lines: @s.lines
@@ -270,7 +270,7 @@ export
 
     startLastVisual: ->
 
-        lv = @lastVisual
+        lv = @novim.lastVisual
 
         ⮐ false if not lv or empty lv.pairs
 
@@ -286,8 +286,8 @@ export
         main   = mapped lv.main
         starts = pairs.map (p) -> [p[1][0] p[1][1]]
 
-        @visual        = lv.kind
-        @visualAnchors = pairs.map (p) -> [p[0][0] p[0][1]]
+        @novim.visual        = lv.kind
+        @novim.visualAnchors = pairs.map (p) -> [p[0][0] p[0][1]]
 
         @setCursors starts main:main
         @updateVisual()
@@ -297,7 +297,7 @@ export
     visualPairs: ->
 
         cursors = @allCursors()
-        anchors = @visualAnchors
+        anchors = @novim.visualAnchors
         pairs   = []
 
         for cursor, i in cursors
@@ -322,7 +322,7 @@ export
 
     visualRangeForPair: anchor cursor ->
 
-        if @visual == 'line'
+        if @novim.visual == 'line'
 
             y1 = min anchor[1] cursor[1]
             y2 = max anchor[1] cursor[1]
@@ -380,13 +380,13 @@ export
 
     updateVisual: ->
 
-        ⮐ if not @visual
+        ⮐ if not @novim.visual
 
         pairs   = @visualPairs()
         cursors = pairs.map (p) -> [p[1][0] p[1][1]]
         anchors = pairs.map (p) -> [p[0][0] p[0][1]]
 
-        @visualAnchors = anchors
+        @novim.visualAnchors = anchors
 
         same = cursors.length == @s.cursors.length
 
@@ -399,7 +399,7 @@ export
 
         rngs = []
         for pair in pairs
-            if @visual == 'block'
+            if @novim.visual == 'block'
                 rngs = rngs.concat @visualBlockRanges(pair[0] pair[1])
             else
                 rngs.push @visualRangeForPair(pair[0] pair[1])
@@ -412,11 +412,11 @@ export
 
         ⮐ if empty rngs
 
-        linewise = @visual == 'line'
+        linewise = @novim.visual == 'line'
 
         blockStarts = null
 
-        if @visual == 'block'
+        if @novim.visual == 'block'
             blockStarts = @visualPairs().map (p) -> [min(p[0][0] p[1][0]) min(p[0][1] p[1][1])]
 
         @setNovimRegister rngs linewise register 'delete'
@@ -441,12 +441,12 @@ export
 
         ⮐ if empty rngs
 
-        linewise = @visual == 'line'
+        linewise = @novim.visual == 'line'
 
         @setNovimRegister rngs linewise register 'yank'
         @flashYank rngs
 
-        if @visual == 'block'
+        if @novim.visual == 'block'
             pairs  = @visualPairs()
             starts = pairs.map (p) -> [min(p[0][0] p[1][0]) min(p[0][1] p[1][1])]
         else
@@ -466,12 +466,12 @@ export
 
         @rememberVisual()
 
-        @startNovimInsert { kind: 'visual', linewise: @visual == 'line', shapes: @visualRepeatShapes() }
+        @startNovimInsert { kind: 'visual', linewise: @novim.visual == 'line', shapes: @visualRepeatShapes() }
 
         @setCursors belt.endPositionsOfRanges(rngs) main:@mainCursor()
 
-        @visual        = null
-        @visualAnchors = []
+        @novim.visual        = null
+        @novim.visualAnchors = []
 
     visualReplace: text ->
 
@@ -479,7 +479,7 @@ export
 
         ⮐ if empty rngs
 
-        if @visual == 'block'
+        if @novim.visual == 'block'
             pairs  = @visualPairs()
             starts = pairs.map (p) -> [min(p[0][0] p[1][0]) min(p[0][1] p[1][1])]
         else
@@ -525,7 +525,7 @@ export
 
         shapes = []
 
-        if @visual == 'line'
+        if @novim.visual == 'line'
 
             y1 = Infinity
             y2 = -1
@@ -536,7 +536,7 @@ export
 
             shapes.push { linewise: true, count: y2-y1+1 }
 
-        else if @visual == 'block'
+        else if @novim.visual == 'block'
 
             if not empty @s.selections
 
@@ -562,10 +562,10 @@ export
 
     visualSwap: ->
 
-        ⮐ if not @visual
+        ⮐ if not @novim.visual
 
         cursors = @allCursors()
-        anchors = @visualAnchors
+        anchors = @novim.visualAnchors
 
         for cursor, i in cursors
 
@@ -575,7 +575,7 @@ export
             anchors[i] = [cursor[0] cursor[1]]
             cursors[i] = [anchor[0] anchor[1]]
 
-        @visualAnchors = anchors
+        @novim.visualAnchors = anchors
 
         @setCursors cursors main:@mainCursor()
 
@@ -583,7 +583,7 @@ export
 
     visualTextObject: spec ->
 
-        ⮐ if not @visual
+        ⮐ if not @novim.visual
 
         rngs = []
 
@@ -598,7 +598,7 @@ export
 
         ⮐ if empty rngs
 
-        @visualAnchors = rngs.map (r) -> [r[0] r[1]]
+        @novim.visualAnchors = rngs.map (r) -> [r[0] r[1]]
 
         cursors = rngs.map (r) -> [max(r[0] r[2]-1) r[3]]
 
@@ -640,7 +640,7 @@ export
 
         anchors = []
 
-        for anchor in @visualAnchors
+        for anchor in @novim.visualAnchors
 
             oldIndent = indents[anchor[1]]
 
@@ -650,7 +650,7 @@ export
             else
                 anchors.push [anchor[0] anchor[1]]
 
-        @visualAnchors = anchors
+        @novim.visualAnchors = anchors
 
         @lastChange = { operator: deindent ? 'deindent' : 'indent', motion: { kind: 'line', count: indices.length } }
 
@@ -688,9 +688,9 @@ export
 
     startNovimInsert: spec ->
 
-        @novimInsert = copy spec
+        @novim.insert = copy spec
 
-        @novimInsert.text ?= ''
+        @novim.insert.text ?= ''
         
         switch spec.kind
             'append'         ➜ @moveCursors 'right'
@@ -698,22 +698,22 @@ export
             'insertAtIndent' ➜ @moveCursors 'ind'
         
         @stopMode 'novim'
-        @novimInsert
+        @novim.insert
 
     startNovimReplace: count ->
 
         n = max 1 (count ? 1)
 
-        @novimInsert = { kind: 'replace', text: '', count: n, undo: [] }
+        @novim.insert = { kind: 'replace', text: '', count: n, undo: [] }
 
         for i in 0...@s.cursors.length
-            @novimInsert.undo.push []
+            @novim.insert.undo.push []
 
-        @novimInsert
+        @novim.insert
 
     replaceNovimChar: text ->
 
-        ni = @novimInsert
+        ni = @novim.insert
 
         ⮐ false if not ni or ni.kind != 'replace'
 
@@ -756,7 +756,7 @@ export
 
     replaceNovimBackspace: ->
 
-        ni = @novimInsert
+        ni = @novim.insert
 
         ⮐ false if not ni or ni.kind != 'replace'
 
@@ -801,28 +801,28 @@ export
 
     recordNovimInsert: text ->
 
-        ⮐ if not @novimInsert or @novimReplaying
+        ⮐ if not @novim.insert or @novimReplaying
 
-        if @novimInsert.kind == 'replace' and '\n' in text
-            @novimInsert.undo = @novimInsert.undo.map (h) -> []
+        if @novim.insert.kind == 'replace' and '\n' in text
+            @novim.insert.undo = @novim.insert.undo.map (h) -> []
 
-        @novimInsert.text += text
+        @novim.insert.text += text
 
     recordNovimBackspace: ->
 
-        ⮐ if not @novimInsert or @novimReplaying
+        ⮐ if not @novim.insert or @novimReplaying
 
-        text = @novimInsert.text
+        text = @novim.insert.text
 
-        @novimInsert.text = text[0...-1] if text.length
+        @novim.insert.text = text[0...-1] if text.length
 
     finishNovimInsert: ->
 
-        ⮐ if not @novimInsert
+        ⮐ if not @novim.insert
 
-        insert = @novimInsert
+        insert = @novim.insert
 
-        @novimInsert = null
+        @novim.insert = null
 
         if insert.kind == 'replace'
             n = max 1 (insert.count ? 1)
@@ -1505,7 +1505,7 @@ export
 
         ⮐ if empty rngs
 
-        if @visual == 'block'
+        if @novim.visual == 'block'
             pairs  = @visualPairs()
             starts = pairs.map (p) -> [min(p[0][0] p[1][0]) min(p[0][1] p[1][1])]
         else
@@ -1654,7 +1654,7 @@ export
             for i in 1..n
                 @moveCursors spec.kind
                 
-        @updateVisual() if @visual
+        @updateVisual() if @novim.visual
 
         @pushJump(origin) if jump and not (origin eql @mainCursor())
 

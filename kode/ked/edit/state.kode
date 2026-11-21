@@ -402,13 +402,12 @@ use           ◆ keys mode
     clearEmpty:  => @clearSegls [  ]
     clearSegls: @segls =>
     
-        @visual        = null
-        @visualAnchors = []
-        @lastVisual    = null
-        @novimInsert   = null
-
         clearTimeout @novim.yankFlashTimer if @novim.yankFlashTimer
 
+        @novim.visualAnchors  = []
+        @novim.visual         = null
+        @novim.lastVisual     = null
+        @novim.insert         = null
         @novim.yankFlash      = null
         @novim.yankFlashTimer = null
     

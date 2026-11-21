@@ -93,7 +93,7 @@ use ../view/title ◆ title
         press 'esc'
 
         t.titlenovim.input.visible()  ▸ false
-        e.state.visual                ▸ 'line'
+        e.state.novim.visual          ▸ 'line'
 
         e.state.stopVisual()
         e.state.loadLines belt.linesForText('aa aa')
