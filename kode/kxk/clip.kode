@@ -95,8 +95,8 @@ use child_process
 
     @copy: text  ->
 
-        # copying nothing is a no-op, it must not clear the buffer
         ⮐ if empty text
+        ⮐ if text == '\n'
 
         Clip.text = text
 
