@@ -497,8 +497,7 @@ export
 
         ⮐ if not changed
 
-        lines  = @s.lines
-        starts = starts.map (p) -> [min(p[0] kseg.width(lines[p[1]])) p[1]]
+        starts = starts.map (p) => [min(p[0] kseg.width(@s.lines[p[1]])) p[1]]
 
         @setCursors starts main:@s.main
         @stopVisual false false

@@ -79,11 +79,6 @@ use           ◆ keys mode
 
 #!sue
 
-    setSue: (x y value) =>
-
-        areas = @s.sue ? []
-        @changeSue areas.concat([{x: x y: y value: value}])
-        
     sueAt: pos =>
 
         areas = @s.sue ? []
@@ -95,6 +90,11 @@ use           ◆ keys mode
             area = areas[i]
             if area.y == y and area.x <= x
                 ⮐ area
+
+    setSue: (x y value) =>
+
+        areas = @s.sue ? []
+        @changeSue areas.concat([{x: x y: y value: value}])
         
     changeSue: areas =>
 
@@ -130,18 +130,6 @@ use           ◆ keys mode
         ⮐ if cut eql areas
 
         @changeSue cut
-
-    decorationRanges: =>
-
-        ⮐ @s.selections if not empty @s.selections
-
-        ranges = []
-
-        for pos in @s.cursors
-            if rng = belt.rangeOfClosestWordToPos @s.lines pos
-                ranges.push rng
-
-        ranges
 
     toggleSueFlag: flag =>
 
@@ -181,22 +169,6 @@ use           ◆ keys mode
             keep.push area
 
         keep
-
-    selectionPieces: =>
-
-        pieces = []
-
-        for rng in @s.selections
-            rngs = [rng]
-            pieces = pieces.concat belt.splitLineRanges(@s.lines rngs false)
-
-        pieces
-
-    isFullLinePiece: piece =>
-
-        [x1 y x2] = piece
-
-        x1 == 0 and (kseg.width(@s.lines[y] ? []) <= x2 or (@s.lines[y] ? []).length <= x2)
 
     areasWithRun: (areas y x1 x2 scale) =>
 
@@ -273,8 +245,8 @@ use           ◆ keys mode
             lines = []
             runs  = []
 
-            for piece in @selectionPieces()
-                if @isFullLinePiece piece
+            for piece in belt.splitLineRanges(@s.lines @s.selections false)
+                if belt.isFullLineRange @s.lines piece
                     lines.push piece[1] if piece[1] not in lines
                 else
                     runs.push piece
@@ -291,8 +263,8 @@ use           ◆ keys mode
 
         next = @areasWithoutLineScales(areas indices)
 
-        for piece in @selectionPieces()
-            continue if @isFullLinePiece piece
+        for piece in belt.splitLineRanges(@s.lines @s.selections false)
+            continue if belt.isFullLineRange @s.lines piece
             for run in sue.runsForLine(next @s.lines piece[1])
                 if run[0] <= piece[0] and piece[2] <= run[1]
                     next = @areasWithoutRun(next piece[1] run[0] run[1])
@@ -309,8 +281,8 @@ use           ◆ keys mode
 
     clearSueAtCursorOrSelection: =>
 
-        ranges = @decorationRanges()
-        @clearSueForRanges ranges if not empty ranges
+        if ranges = @selectionsOrCursorWordRanges()
+            @clearSueForRanges ranges
 
 #!cursors
 
@@ -810,7 +782,6 @@ use           ◆ keys mode
                 @beginIndex = @beginIndices[-1]
             else
                 delete @beginIndex
-
         @
 
     pushState: => @h.push @s ; @
