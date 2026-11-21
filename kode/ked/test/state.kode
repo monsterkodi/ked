@@ -1,8 +1,7 @@
 
 use ../../kxk    ▪ kseg
-use ../edit/tool ◆ belt
+use ../edit/tool ◆ belt register
 use ../edit      ◆ state mode
-use ../edit/register
 use ../util      ◆ dumpstate
 
 global.lf = args... -> log args.map((a) -> "#{a}").join(' ')

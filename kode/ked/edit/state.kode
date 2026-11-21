@@ -3,8 +3,7 @@ use ../../kxk ▪ immutable kstr kseg events absMin post
 use ../../kxk ◆ clip
 use ../util   ◆ syntax config scaling
 use ./act     ◆ del insert select join indent multi main novim sort count range macro
-use ./tool    ◆ belt colorspans jumplist changelist motion sue
-use ./register
+use ./tool    ◆ belt colorspans jumplist changelist motion sue register
 use           ◆ keys mode
 
 ■state□events
