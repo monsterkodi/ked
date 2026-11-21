@@ -1,11 +1,17 @@
 
 use ../../../kxk ▪ kseg post
 use ../mode      ◆ novim
-use ../tool      ◆ belt motion
+use ../tool      ◆ belt motion register
 use ../../util   ◆ config
-#!novim
+#!act novim
 export
-
+    
+    novimState: ->
+    
+        register:           new register
+        macroReplaying:     0
+        macroLastRegister:  null
+    
     executeNovim: cmd ->
 
         # log 'novim command ▸' cmd
@@ -1126,11 +1132,11 @@ export
 
     copyRegisterToClipboard: reg ->
 
-        @registers.writeClipboard reg
+        @novim.register.writeClipboard reg
 
     registerFromClipboard: ->
 
-        @registers.readClipboard()
+        @novim.register.readClipboard()
 
     selectByMotion: spec ->
 
@@ -1164,7 +1170,7 @@ export
 
         @novimRegister = value if register != '_'
 
-        @registers.write register value operation
+        @novim.register.write register value operation
 
         @copyRegisterToClipboard value if @usesClipboard(register) and not register
 
@@ -1244,8 +1250,8 @@ export
 
     registerForPut: register ->
 
-        ⮐ @registers.read('+') if @usesClipboard(register)
-        ⮐ @registers.read(register) if register
+        ⮐ @novim.register.read('+') if @usesClipboard(register)
+        ⮐ @novim.register.read(register) if register
 
         @novimRegister
 

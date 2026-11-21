@@ -1262,8 +1262,8 @@ windowReset = (s) ->
 
         keys '"ayy'
 
-        s.registers.read('a').lines  ▸ ['one']
-        s.registers.read('a').linewise ▸ true
+        s.novim.register.read('a').lines  ▸ ['one']
+        s.novim.register.read('a').linewise ▸ true
         s.novimRegister.lines        ▸ ['one']
 
         s.executeNovim {operator:'put', after:true, register:'a'}
@@ -1275,7 +1275,7 @@ windowReset = (s) ->
         s.setMainCursor 0 1
         keys '"Ayy'
 
-        s.registers.read('a').lines  ▸ ['one' 'two']
+        s.novim.register.read('a').lines  ▸ ['one' 'two']
 
         b = new state cells 'blackhole'
         loadTextOn b "one\ntwo"
@@ -1285,7 +1285,7 @@ windowReset = (s) ->
 
         kseg.str(b.s.lines)          ▸ 'two'
         b.novimRegister.lines        ▸ ['one']
-        b.registers.read('1')        ▸ undefined
+        b.novim.register.read('1')   ▸ undefined
 
   ▸ macros
 
@@ -1307,7 +1307,7 @@ windowReset = (s) ->
         feed 'x'
         feed 'q'
 
-        mac.registers.read('a').keys.length ▸ 1
+        mac.novim.register.read('a').keys.length ▸ 1
         mtxt() ▸ "ne\ntwo"
 
         feed '@'
@@ -1365,7 +1365,7 @@ windowReset = (s) ->
         feed 'l'
         feed 'q'
 
-        mac.registers.read('c').keys.length ▸ 2
+        mac.novim.register.read('c').keys.length ▸ 2
 
         feed 'q'
         feed 'd'
@@ -1373,7 +1373,7 @@ windowReset = (s) ->
         feed 'a'
         feed 'q'
 
-        mac.registers.read('d').keys.length ▸ 2
+        mac.novim.register.read('d').keys.length ▸ 2
 
         loadTextOn mac "a\nb\nc"
 
@@ -1386,7 +1386,7 @@ windowReset = (s) ->
 
         loadTextOn mac "abc"
 
-        mac.registers.write 'e' { lines: ['x'], linewise: false } 'yank'
+        mac.novim.register.write 'e' { lines: ['x'], linewise: false } 'yank'
 
         feed '@'
         feed 'e'
@@ -1405,7 +1405,7 @@ windowReset = (s) ->
         feed ':'
 
         macroErrors[-1]    ▸ 'command-line window not implemented'
-        mac.isMacroRecording() ▸ false
+        valid mac.macroRecording ▸ false
 
         stopNovim mac
         config.data = oldConfig
@@ -1746,7 +1746,7 @@ windowReset = (s) ->
             s.s.selections ▸ [[4 0 7 0]]
             cur 7 0
             s.novimRegister.lines ▸ ['two']
-            s.registers.read('-').lines ▸ ['two']
+            s.novim.register.read('-').lines ▸ ['two']
         
             loadText "one two three" 5 0
         
@@ -1798,23 +1798,23 @@ windowReset = (s) ->
 
         cr.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
 
-        cr.registers.read('-').lines   ▸ ['two']
-        cr.registers.read('1')         ▸ undefined
+        cr.novim.register.read('-').lines   ▸ ['two']
+        cr.novim.register.read('1')         ▸ undefined
         cr.novimRegister.lines         ▸ ['two']
 
         loadTextOn cr "one two"
 
         cr.executeNovim {operator:'change', motion:{kind:'word', count:1}, register:'a'}
 
-        cr.registers.read('a').lines   ▸ ['one ']
+        cr.novim.register.read('a').lines   ▸ ['one ']
 
         loadTextOn cr "one\ntwo"
-        cr.registers.set '-', { lines: ['old'], linewise: false }
+        cr.novim.register.set '-', { lines: ['old'], linewise: false }
 
         cr.executeNovim {operator:'change', motion:{kind:'line', count:1}}
 
-        cr.registers.read('1').lines   ▸ ['one']
-        cr.registers.read('-').lines   ▸ ['old']
+        cr.novim.register.read('1').lines   ▸ ['one']
+        cr.novim.register.read('-').lines   ▸ ['old']
 
   ▸ change does not touch history
     
@@ -3475,7 +3475,7 @@ windowReset = (s) ->
     
         m.runEx 'q'
 
-        s.registers.read(':').lines ▸ ['q']
+        s.novim.register.read(':').lines ▸ ['q']
 
         quits  ▸ 1
         writes ▸ []
@@ -3851,7 +3851,7 @@ windowReset = (s) ->
 
         sm.searchChanged 'bar'
         novim.lastVind ▸ 'bar'
-        s.registers.read('/').lines ▸ ['bar']
+        s.novim.register.read('/').lines ▸ ['bar']
         s.s.highlights ▸ [[4 0 7] [3 1 6]]
 
         sm.searchChanged ''

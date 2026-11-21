@@ -108,18 +108,18 @@ use ..           ◆ mode
     @lastVindForward: true
     
     @: @state ->
-
-        @name     = 'novim'
-        @lastFind = null
-        @exRange  = null
-        @exConfirms = null
+        
+        @name           = 'novim'
+        @lastFind       = null
+        @exRange        = null
+        @exConfirms     = null
         @exHighlighting = false
-        @searchForward = true
-        @searchText = ''
-        @searchHistory = new cmdlinehistory 'search'
-        @exHistory     = new cmdlinehistory 'ex'
+        @searchForward  = true
+        @searchText     = ''
+        @searchHistory  = new cmdlinehistory 'search'
+        @exHistory      = new cmdlinehistory 'ex'
         @reset()
-
+        
     @clipboardSync: null # on in ked, off in a headless editor
 
     @isHeadless: ->
@@ -213,13 +213,13 @@ use ..           ◆ mode
 
     playLastExCommand: count ->
 
-        value = @state.registers.read ':'
+        value = @state.novim.register.read ':'
 
         ⮐ false if not value
 
-        line = @state.registers.textForValue value
+        line = @state.novim.register.textForValue value
 
-        @state.macroLastRegister = ':'
+        @state.novim.macroLastRegister = ':'
 
         n = max 1 (count ? 1)
 
@@ -307,7 +307,7 @@ use ..           ◆ mode
 
         @exHistory.add line if record
 
-        @state.registers.set ':', { lines: [line], linewise: false } if record
+        @state.novim.register.set ':', { lines: [line], linewise: false } if record
 
         @state.stopVisual() if @state.visual
 
@@ -730,7 +730,7 @@ use ..           ◆ mode
             @state.setMainCursor rng[0] rng[1]
 
         novim.lastVind = text
-        @state.registers.set '/', { lines: [text], linewise: false }
+        @state.novim.register.set '/', { lines: [text], linewise: false }
 
         if empty text
             @state.setHighlights []
@@ -745,7 +745,7 @@ use ..           ◆ mode
 
         @searchText = text
         novim.lastVind = text
-        @state.registers.set '/', { lines: [text], linewise: false }
+        @state.novim.register.set '/', { lines: [text], linewise: false }
 
         if empty text
             @state.setHighlights []
@@ -924,7 +924,7 @@ use ..           ◆ mode
                 if char == ':'
                     @playLastExCommand count
                 else if char == '@'
-                    if @state.macroLastRegister == ':'
+                    if @state.novim.macroLastRegister == ':'
                         @playLastExCommand count
                     else
                         @state.playLastMacro count
@@ -936,7 +936,7 @@ use ..           ◆ mode
             @reset()
             ⮐ true
 
-        if char == 'q' and @state.isMacroRecording()
+        if char == 'q' and @state.macroRecording
             @state.markMacroControlKey()
             @state.stopMacroRecording()
             @reset()

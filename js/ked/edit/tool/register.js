@@ -1,18 +1,18 @@
 var _k_ = {copy: function (o) { return Array.isArray(o) ? o.slice() : typeof o == 'object' && o.constructor.name == 'Object' ? Object.assign({}, o) : typeof o == 'string' ? ''+o : o }, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
 
-var registers
+var register
 
 import clip from "../../../kxk/clip.js"
 
 
-registers = (function ()
+register = (function ()
 {
-    function registers ()
+    function register ()
     {
         this.values = {}
     }
 
-    registers["cloneValue"] = function (value)
+    register["cloneValue"] = function (value)
     {
         var cloned, _12_36_, _13_37_
 
@@ -31,7 +31,7 @@ registers = (function ()
         return cloned
     }
 
-    registers["textForValue"] = function (value)
+    register["textForValue"] = function (value)
     {
         var text
 
@@ -47,7 +47,7 @@ registers = (function ()
         return text
     }
 
-    registers["recordForText"] = function (text)
+    register["recordForText"] = function (text)
     {
         var lines, linewise
 
@@ -64,7 +64,7 @@ registers = (function ()
         return {lines:lines,linewise:linewise}
     }
 
-    registers["eventForSpecial"] = function (name)
+    register["eventForSpecial"] = function (name)
     {
         switch (name.toLowerCase())
         {
@@ -91,7 +91,7 @@ registers = (function ()
         return null
     }
 
-    registers["keysForText"] = function (text)
+    register["keysForText"] = function (text)
     {
         var ch, close, event, i, keys
 
@@ -105,7 +105,7 @@ registers = (function ()
                 close = text.indexOf('>',i + 1)
                 if (close > i)
                 {
-                    event = registers.eventForSpecial(text.slice(i + 1, typeof close === 'number' ? close : -1))
+                    event = register.eventForSpecial(text.slice(i + 1, typeof close === 'number' ? close : -1))
                     if (event)
                     {
                         keys.push(event)
@@ -127,7 +127,7 @@ registers = (function ()
         return keys
     }
 
-    registers["textForKeys"] = function (keys)
+    register["textForKeys"] = function (keys)
     {
         var event, key, text, _85_29_
 
@@ -169,7 +169,7 @@ registers = (function ()
         return text
     }
 
-    registers["target"] = function (name)
+    register["target"] = function (name)
     {
         if (name === 'clipboard')
         {
@@ -193,16 +193,16 @@ registers = (function ()
         }
     }
 
-    registers["appendValues"] = function (old, value)
+    register["appendValues"] = function (old, value)
     {
         var last
 
         if (!old)
         {
-            return registers.cloneValue(value)
+            return register.cloneValue(value)
         }
-        old = registers.cloneValue(old)
-        value = registers.cloneValue(value)
+        old = register.cloneValue(old)
+        value = register.cloneValue(value)
         if (value.linewise)
         {
             old.lines = old.lines.concat(value.lines)
@@ -217,21 +217,21 @@ registers = (function ()
         return old
     }
 
-    registers.prototype["textForValue"] = function (value)
+    register.prototype["textForValue"] = function (value)
     {
-        return registers.textForValue(value)
+        return register.textForValue(value)
     }
 
-    registers.prototype["keysForText"] = function (text)
+    register.prototype["keysForText"] = function (text)
     {
-        return registers.keysForText(text)
+        return register.keysForText(text)
     }
 
-    registers.prototype["macroTarget"] = function (name)
+    register.prototype["macroTarget"] = function (name)
     {
         var target
 
-        target = registers.target(name)
+        target = register.target(name)
         if (!target)
         {
             return
@@ -243,11 +243,11 @@ registers = (function ()
         return target
     }
 
-    registers.prototype["read"] = function (name)
+    register.prototype["read"] = function (name)
     {
         var target
 
-        target = registers.target(name)
+        target = register.target(name)
         if (!target)
         {
             return
@@ -260,14 +260,14 @@ registers = (function ()
         {
             return this.readClipboard()
         }
-        return registers.cloneValue(this.values[target.name])
+        return register.cloneValue(this.values[target.name])
     }
 
-    registers.prototype["write"] = function (name, value, operation = 'yank')
+    register.prototype["write"] = function (name, value, operation = 'yank')
     {
         var appended, target
 
-        target = registers.target(name)
+        target = register.target(name)
         if (!target)
         {
             return
@@ -276,7 +276,7 @@ registers = (function ()
         {
             return
         }
-        value = registers.cloneValue(value)
+        value = register.cloneValue(value)
         if (!value)
         {
             return
@@ -286,14 +286,14 @@ registers = (function ()
         {
             if (target.name === '"')
             {
-                this.values['0'] = registers.cloneValue(value)
+                this.values['0'] = register.cloneValue(value)
             }
         }
         else if (_k_.in(operation,['delete','change']))
         {
             if (!value.linewise && value.lines.length <= 1)
             {
-                this.values['-'] = registers.cloneValue(value)
+                this.values['-'] = register.cloneValue(value)
             }
             else
             {
@@ -309,21 +309,21 @@ registers = (function ()
         }
         else if (target.append)
         {
-            appended = registers.appendValues(this.values[target.name],value)
+            appended = register.appendValues(this.values[target.name],value)
             this.values[target.name] = appended
         }
         else
         {
-            this.values[target.name] = registers.cloneValue(value)
+            this.values[target.name] = register.cloneValue(value)
         }
-        return registers.cloneValue(this.values['"'])
+        return register.cloneValue(this.values['"'])
     }
 
-    registers.prototype["set"] = function (name, value)
+    register.prototype["set"] = function (name, value)
     {
         var target
 
-        target = registers.target(name)
+        target = register.target(name)
         if (!target)
         {
             return false
@@ -332,11 +332,11 @@ registers = (function ()
         {
             return false
         }
-        this.values[target.name] = registers.cloneValue(value)
+        this.values[target.name] = register.cloneValue(value)
         return true
     }
 
-    registers.prototype["setMacro"] = function (name, keys)
+    register.prototype["setMacro"] = function (name, keys)
     {
         var old, target
 
@@ -358,14 +358,14 @@ registers = (function ()
             }
             else
             {
-                keys = registers.keysForText(registers.textForValue(old)).concat(keys)
+                keys = register.keysForText(register.textForValue(old)).concat(keys)
             }
         }
-        this.values[target.name] = {lines:registers.textForKeys(keys).split('\n'),linewise:false,keys:keys}
+        this.values[target.name] = {lines:register.textForKeys(keys).split('\n'),linewise:false,keys:keys}
         return true
     }
 
-    registers.prototype["shiftNumbered"] = function (value)
+    register.prototype["shiftNumbered"] = function (value)
     {
         var i, source
 
@@ -374,29 +374,29 @@ registers = (function ()
             source = this.values[`${i - 1}`]
             if (source)
             {
-                this.values[`${i}`] = registers.cloneValue(source)
+                this.values[`${i}`] = register.cloneValue(source)
             }
             else
             {
                 delete this.values[`${i}`]
             }
         }
-        return this.values['1'] = registers.cloneValue(value)
+        return this.values['1'] = register.cloneValue(value)
     }
 
-    registers.prototype["readClipboard"] = function ()
+    register.prototype["readClipboard"] = function ()
     {
         var text
 
         text = (clip.detect() === 'none' ? clip.text : clip.paste())
-        return registers.recordForText(text)
+        return register.recordForText(text)
     }
 
-    registers.prototype["writeClipboard"] = function (value)
+    register.prototype["writeClipboard"] = function (value)
     {
         var text
 
-        text = registers.textForValue(value)
+        text = register.textForValue(value)
         if (clip.detect() === 'none')
         {
             return clip.text = text
@@ -407,10 +407,10 @@ registers = (function ()
         }
     }
 
-    return registers
+    return register
 })()
 
-export default registers;
+export default register;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVnaXN0ZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvdG9vbC9yZWdpc3Rlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQW1CLFdBQU47OztBQUNaLGFBQUQ7O2FBRUk7O1FBQ0ksS0FBQzs7O0lBRUwsV0FBQyx5QkFBWTs7OzthQUVBOzs7O1FBRVQsVUFDSSwwQkFBWSxNQUFNLGlDQUNsQixtQkFBVSxNQUFNLDhCQUFXO1lBRTVCLE1BQU07O1lBQ0wsT0FBTyxPQUFPLE1BQU0sS0FBSyxjQUFLOzt3QkFDeEIsSUFBSyxNQUFNLElBQUssTUFBTyxNQUFNLE1BQU8sS0FBTSxNQUFNOzs7ZUFFMUQ7OztJQUVKLFdBQUMsMkJBQWM7Ozs7YUFFQzs7bUJBQVY7O1FBRUYsT0FBTyxNQUFNLE1BQU0sS0FBSztZQUNSLE1BQU07O1lBQXRCLFFBQVE7O2VBRVI7OztJQUVKLFdBQUMsNEJBQWU7Ozs7c0JBRUQ7Ozs7UUFFWCxXQUFXLEtBQUssU0FBUztRQUN6QixRQUFXLEtBQUssTUFBTTtZQUVQOztZQUFmLE1BQU07O2dCQUVKLE1BQU8sTUFBTyxTQUFVOzs7SUFFOUIsV0FBQyw4QkFBaUI7O2dCQUVQLEtBQUs7O2lCQUNSO2lCQUFNO3dCQUFtQixJQUFLLE1BQVksTUFBTyxNQUFZLEtBQU07O2lCQUNuRTtpQkFBSzt3QkFBb0IsSUFBSyxTQUFZLE1BQU8sU0FBWSxLQUFNOztpQkFDbkU7d0JBQXlCLElBQUssTUFBWSxNQUFPLE1BQVksS0FBTTs7aUJBQ25FO3dCQUF5QixJQUFLLFFBQVksTUFBTyxRQUFZLEtBQU07O2lCQUNuRTtpQkFBSzt3QkFBb0IsSUFBSyxZQUFZLE1BQU8sWUFBWSxLQUFNOzs7O2VBRXZFOzs7SUFFSixXQUFDLDBCQUFhOzs7O1FBRVY7UUFDQSxJQUFPO2VBRUQsSUFBSSxLQUFLOztZQUVYLEtBQUssS0FBSztnQkFFUCxPQUFNOztnQkFDTCxRQUFRLEtBQUssUUFBUSxJQUFJLElBQUU7b0JBQ3hCLFFBQVE7O29C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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVnaXN0ZXIuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvdG9vbC9yZWdpc3Rlci5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQW1CLFdBQU47OztBQUNaLFlBQUQ7O2FBRUk7O1FBQ0ksS0FBQzs7O0lBRUwsVUFBQyx5QkFBWTs7OzthQUVBOzs7O1FBRVQsVUFDSSwwQkFBWSxNQUFNLGlDQUNsQixtQkFBVSxNQUFNLDhCQUFXO1lBRTVCLE1BQU07O1lBQ0wsT0FBTyxPQUFPLE1BQU0sS0FBSyxjQUFLOzt3QkFDeEIsSUFBSyxNQUFNLElBQUssTUFBTyxNQUFNLE1BQU8sS0FBTSxNQUFNOzs7ZUFFMUQ7OztJQUVKLFVBQUMsMkJBQWM7Ozs7YUFFQzs7bUJBQVY7O1FBRUYsT0FBTyxNQUFNLE1BQU0sS0FBSztZQUNSLE1BQU07O1lBQXRCLFFBQVE7O2VBRVI7OztJQUVKLFVBQUMsNEJBQWU7Ozs7c0JBRUQ7Ozs7UUFFWCxXQUFXLEtBQUssU0FBUztRQUN6QixRQUFXLEtBQUssTUFBTTtZQUVQOztZQUFmLE1BQU07O2dCQUVKLE1BQU8sTUFBTyxTQUFVOzs7SUFFOUIsVUFBQyw4QkFBaUI7O2dCQUVQLEtBQUs7O2lCQUNSO2lCQUFNO3dCQUFtQixJQUFLLE1BQVksTUFBTyxNQUFZLEtBQU07O2lCQUNuRTtpQkFBSzt3QkFBb0IsSUFBSyxTQUFZLE1BQU8sU0FBWSxLQUFNOztpQkFDbkU7d0JBQXlCLElBQUssTUFBWSxNQUFPLE1BQVksS0FBTTs7aUJBQ25FO3dCQUF5QixJQUFLLFFBQVksTUFBTyxRQUFZLEtBQU07O2lCQUNuRTtpQkFBSzt3QkFBb0IsSUFBSyxZQUFZLE1BQU8sWUFBWSxLQUFNOzs7O2VBRXZFOzs7SUFFSixVQUFDLDBCQUFhOzs7O1FBRVY7UUFDQSxJQUFPO2VBRUQsSUFBSSxLQUFLOztZQUVYLEtBQUssS0FBSztnQkFFUCxPQUFNOztnQkFDTCxRQUFRLEtBQUssUUFBUSxJQUFJLElBQUU7b0JBQ3hCLFFBQVE7O29C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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/tool/register.kode

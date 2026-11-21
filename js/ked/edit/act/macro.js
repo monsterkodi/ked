@@ -1,4 +1,4 @@
-var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
+var _k_ = {in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, max: function () { var m = -Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.max.apply(_k_.max,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n > m ? n : m}}}; return m }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
 import kxk from "../../../kxk.js"
 let post = kxk.post
@@ -22,12 +22,12 @@ export default {
     },
     recordMacroKey:function (key, event)
     {
-        if (this.macroSkipKey)
+        if (this.novim.macroSkipKey)
         {
-            this.macroSkipKey = false
+            this.novim.macroSkipKey = false
             return false
         }
-        if (this.macroReplaying > 0)
+        if (this.novim.macroReplaying > 0)
         {
             return false
         }
@@ -38,13 +38,9 @@ export default {
         this.macroRecording.keys.push(this.macroEvent(key,event))
         return true
     },
-    isMacroRecording:function ()
-    {
-        return !_k_.empty(this.macroRecording)
-    },
     markMacroControlKey:function ()
     {
-        return this.macroSkipKey = true
+        return this.novim.macroSkipKey = true
     },
     startMacroRecording:function (register, append)
     {
@@ -76,13 +72,13 @@ export default {
         {
             return false
         }
-        this.macroRecording = null
+        delete this.macroRecording
         name = recording.register
         if (recording.append)
         {
             name = name.toUpperCase()
         }
-        this.registers.setMacro(name,recording.keys)
+        this.novim.register.setMacro(name,recording.keys)
         post.emit('novim.macro.stop',{state:this.name,register:recording.register})
         return true
     },
@@ -93,11 +89,11 @@ export default {
     },
     playLastMacro:function (count)
     {
-        if (!this.macroLastRegister)
+        if (!this.novim.macroLastRegister)
         {
             return this.macroError('no previous macro')
         }
-        return this.playMacro(this.macroLastRegister,count)
+        return this.playMacro(this.novim.macroLastRegister,count)
     },
     playMacro:function (register, count)
     {
@@ -107,18 +103,18 @@ export default {
         {
             return this.macroError('invalid register')
         }
-        value = this.registers.read(register)
+        value = this.novim.register.read(register)
         if (!value)
         {
             return this.macroError(`register ${register} is empty`)
         }
         keys = value.keys
-        keys = (keys != null ? keys : this.registers.keysForText(this.registers.textForValue(value)))
+        keys = (keys != null ? keys : this.novim.register.keysForText(this.novim.register.textForValue(value)))
         if (_k_.empty(keys))
         {
             return this.macroError(`register ${register} is empty`)
         }
-        this.macroLastRegister = register
+        this.novim.macroLastRegister = register
         n = _k_.max(1,((count != null ? count : 1)))
         for (var _a_ = i = 0, _b_ = n; (_a_ <= _b_ ? i < n : i > n); (_a_ <= _b_ ? ++i : --i))
         {
@@ -130,11 +126,11 @@ export default {
     {
         var event
     
-        if (this.macroReplaying >= 100)
+        if (this.novim.macroReplaying >= 100)
         {
             return this.macroError('macro recursion too deep')
         }
-        this.macroReplaying += 1
+        this.novim.macroReplaying += 1
         try
         {
             var list = _k_.list(keys)
@@ -150,13 +146,13 @@ export default {
         }
         finally
         {
-            this.macroReplaying -= 1
+            this.novim.macroReplaying -= 1
         }
         return true
     },
     feedKey:function (key, event)
     {
-        var char, combo, result, _132_28_
+        var char, combo, result, _130_28_
     
         result = this.handleKey(key,event)
         if (result !== 'unhandled')
@@ -168,7 +164,7 @@ export default {
             return 'unhandled'
         }
         char = event.char
-        combo = ((_132_28_=event.combo) != null ? _132_28_ : key)
+        combo = ((_130_28_=event.combo) != null ? _130_28_ : key)
         if (!_k_.empty(char) && (char === combo || _k_.in(combo,['space','shift+space','return','tab']) || combo.slice(0, -1) === 'shift+'))
         {
             this.insert(char)
@@ -178,5 +174,5 @@ export default {
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFjcm8uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvYWN0L21hY3JvLmtvZGUiXSwibWFwcGluZ3MiOiI7O09BQWEsVUFBQTtJQUFNOzs7SUFJZixpQ0FBeUIsS0FBSTs7OztRQUV6QixTQUFTLEtBQUMsV0FBVyxJQUFJO1FBRXpCLEtBQUMsZUFBZSxJQUFJO2VBRXBCOztJQUVKLHFCQUFhLEtBQUk7Ozs7UUFFYixtQkFBUSxnQkFBQSxNQUFPLHdDQUFRO1FBQ3ZCLFFBQVEsZ0JBQUEsTUFBTztnQkFFYixJQUFLLElBQUssTUFBTyxNQUFPLEtBQU07O0lBRXBDLHlCQUFpQixLQUFJOztZQUVkLEtBQUM7O1lBQ0EsS0FBQyxlQUFlO21CQUNkOztZQUVLLEtBQUMsaUJBQWlCOzttQkFBM0I7O2FBQ2EsS0FBQzs7bUJBQWQ7O1FBRUYsS0FBQyxlQUFlLEtBQUssS0FBSyxLQUFDLFdBQVcsSUFBSTtlQUUxQzs7SUFFSjs7MEJBQTJCLEtBQUM7O0lBRTVCOztlQUF3QixLQUFDLGVBQWU7O0lBRXhDLDhCQUFxQixVQUFTOzs7O2FBRVg7O21CQUFiOztRQUVGLE9BQU8sU0FBUztZQUVMLEtBQUssV0FBVTs7bUJBQXhCOztxQkFDUyxLQUFZOzttQkFBckI7O1FBRUYsS0FBQyxrQkFDRyxTQUFVLEtBQ1YsT0FBVSxPQUNWO1FBRUosS0FBSyxLQUFLLHFCQUFvQixNQUFNLEtBQUMsS0FBSyxTQUFTLEtBQUssT0FBTztlQUUvRDs7SUFFSjs7OztRQUVJLFlBQVksS0FBQzthQUVFOzttQkFBYjs7UUFFRixLQUFDLGlCQUFpQjtRQUVsQixPQUFPLFVBQVU7WUFDWSxVQUFVOztZQUF2QyxPQUFPLEtBQUs7O1FBRVosS0FBQyxVQUFVLFNBQVMsS0FBSyxVQUFVO1FBRW5DLEtBQUssS0FBSyxvQkFBbUIsTUFBTSxLQUFDLEtBQUssU0FBUyxVQUFVO2VBRTVEOztJQUVKLHFCQUFZOztRQUVSLEtBQUssS0FBSyxjQUFjO2VBRXhCOztJQUVKLHdCQUFlOzthQUUrQixLQUFDOzttQkFBekMsS0FBQyxXQUFXOztlQUVkLEtBQUMsVUFBVSxLQUFDLGtCQUFrQjs7SUFFbEMsb0JBQVcsVUFBUzs7OzthQUV5Qjs7bUJBQXZDLEtBQUMsV0FBVzs7UUFFZCxRQUFRLEtBQUMsVUFBVSxLQUFLO2FBRThCOzttQkFBcEQsS0FBQyx1QkFBdUI7O1FBRTFCLE9BQU8sTUFBTTtRQUViLFFBQUEsZUFBQSxPQUFRLEtBQUMsVUFBVSxZQUFZLEtBQUMsVUFBVSxhQUFhO3NCQUVDOzttQkFBdEQsS0FBQyx1QkFBdUI7O1FBRTFCLEtBQUMsb0JBQW9CO1FBRXJCLFlBQVEsSUFBRyxnQkFBQSxRQUFRO3VCQUVmLElBQUssU0FBSSxxQkFBQSxRQUFBOztZQUNULEtBQUMsZ0JBQWdCOztlQUVyQjs7SUFFSiwwQkFBaUI7Ozs7WUFFVixLQUFDLGtCQUFrQjs7bUJBQ2hCLEtBQUMsV0FBVzs7UUFFbEIsS0FBQyxrQkFBa0I7OztnQ0FHRjs7O2dCQUFUO2dCQUNBLEtBQUMsUUFBUSxNQUFNLElBQUk7OztlQUNyQjs7WUFDRixLQUFDLDRCQUE0QixJQUFJOzs7O1lBRWpDLEtBQUMsa0JBQWtCOztlQUV2Qjs7SUFFSixrQkFBVSxLQUFJOzs7O1FBRVYsU0FBUyxLQUFDLFVBQVUsSUFBSTtZQUVULFdBQVU7O21CQUF2Qjs7YUFDbUI7O21CQUFuQjs7UUFFRixPQUFRLE1BQU07UUFDZCxtQkFBUSxNQUFNLDRCQUFRO3VCQUViLFVBQ0EsU0FBUSxnQkFDVCxPQUFVLFFBQVEsY0FBYyxTQUFTLFdBQ3pDLFlBQU0sV0FBVTs7WUFDcEIsS0FBQyxPQUFPO21CQUNOOztlQUVOIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFjcm8uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvYWN0L21hY3JvLmtvZGUiXSwibWFwcGluZ3MiOiI7O09BQWEsVUFBQTtJQUFNOzs7SUFJZixpQ0FBeUIsS0FBSTs7OztRQUV6QixTQUFTLEtBQUMsV0FBVyxJQUFJO1FBRXpCLEtBQUMsZUFBZSxJQUFJO2VBRXBCOztJQUVKLHFCQUFhLEtBQUk7Ozs7UUFFYixtQkFBUSxnQkFBQSxNQUFPLHdDQUFRO1FBQ3ZCLFFBQVEsZ0JBQUEsTUFBTztnQkFFYixJQUFLLElBQUssTUFBTyxNQUFPLEtBQU07O0lBRXBDLHlCQUFpQixLQUFJOztZQUVkLEtBQUMsTUFBTTs7WUFDTixLQUFDLE1BQU0sZUFBZTttQkFDcEI7O1lBRUssS0FBQyxNQUFNLGlCQUFpQjs7bUJBQWpDOzthQUNhLEtBQUM7O21CQUFkOztRQUVGLEtBQUMsZUFBZSxLQUFLLEtBQUssS0FBQyxXQUFXLElBQUk7ZUFFMUM7O0lBRUo7O2VBQXdCLEtBQUMsTUFBTSxlQUFlOztJQUU5Qyw4QkFBcUIsVUFBUzs7OzthQUVYOzttQkFBYjs7UUFFRixPQUFPLFNBQVM7WUFFTCxLQUFLLFdBQVU7O21CQUF4Qjs7cUJBQ1MsS0FBWTs7bUJBQXJCOztRQUVGLEtBQUMsa0JBQ0csU0FBVSxLQUNWLE9BQVUsT0FDVjtRQUVKLEtBQUssS0FBSyxxQkFBb0IsTUFBTSxLQUFDLEtBQUssU0FBUyxLQUFLLE9BQU87ZUFFL0Q7O0lBRUo7Ozs7UUFFSSxZQUFZLEtBQUM7YUFFRTs7bUJBQWI7O2VBRUssS0FBQztRQUVSLE9BQU8sVUFBVTtZQUNZLFVBQVU7O1lBQXZDLE9BQU8sS0FBSzs7UUFFWixLQUFDLE1BQU0sU0FBUyxTQUFTLEtBQUssVUFBVTtRQUV4QyxLQUFLLEtBQUssb0JBQW1CLE1BQU0sS0FBQyxLQUFLLFNBQVMsVUFBVTtlQUU1RDs7SUFFSixxQkFBWTs7UUFFUixLQUFLLEtBQUssY0FBYztlQUV4Qjs7SUFFSix3QkFBZTs7YUFFK0IsS0FBQyxNQUFNOzttQkFBL0MsS0FBQyxXQUFXOztlQUVkLEtBQUMsVUFBVSxLQUFDLE1BQU0sa0JBQWtCOztJQUV4QyxvQkFBVyxVQUFTOzs7O2FBRXlCOzttQkFBdkMsS0FBQyxXQUFXOztRQUVkLFFBQVEsS0FBQyxNQUFNLFNBQVMsS0FBSzthQUV5Qjs7bUJBQXBELEtBQUMsdUJBQXVCOztRQUUxQixPQUFPLE1BQU07UUFFYixRQUFBLGVBQUEsT0FBUSxLQUFDLE1BQU0sU0FBUyxZQUFZLEtBQUMsTUFBTSxTQUFTLGFBQWE7c0JBRVQ7O21CQUF0RCxLQUFDLHVCQUF1Qjs7UUFFMUIsS0FBQyxNQUFNLG9CQUFvQjtRQUUzQixZQUFRLElBQUcsZ0JBQUEsUUFBUTt1QkFFZixJQUFLLFNBQUkscUJBQUEsUUFBQTs7WUFDVCxLQUFDLGdCQUFnQjs7ZUFFckI7O0lBRUosMEJBQWlCOzs7O1lBRVYsS0FBQyxNQUFNLGtCQUFrQjs7bUJBQ3RCLEtBQUMsV0FBVzs7UUFFbEIsS0FBQyxNQUFNLGtCQUFrQjs7O2dDQUdSOzs7Z0JBQVQ7Z0JBQ0EsS0FBQyxRQUFRLE1BQU0sSUFBSTs7O2VBQ3JCOztZQUNGLEtBQUMsNEJBQTRCLElBQUk7Ozs7WUFFakMsS0FBQyxNQUFNLGtCQUFrQjs7ZUFFN0I7O0lBRUosa0JBQVUsS0FBSTs7OztRQUVWLFNBQVMsS0FBQyxVQUFVLElBQUk7WUFFVCxXQUFVOzttQkFBdkI7O2FBQ21COzttQkFBbkI7O1FBRUYsT0FBUSxNQUFNO1FBQ2QsbUJBQVEsTUFBTSw0QkFBUTt1QkFFYixVQUNBLFNBQVEsZ0JBQ1QsT0FBVSxRQUFRLGNBQWMsU0FBUyxXQUN6QyxZQUFNLFdBQVU7O1lBQ3BCLEtBQUMsT0FBTzttQkFDTjs7ZUFFTiJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/act/macro.kode

@@ -1,5 +1,5 @@
 use ../../../kxk ◆ clip
-■registers
+■register
 
     @: ->
         @values = {}
@@ -61,7 +61,7 @@ use ../../../kxk ◆ clip
             if ch == '<'
                 close = text.indexOf '>' i+1
                 if close > i
-                    event = registers.eventForSpecial text[i+1...close]
+                    event = register.eventForSpecial text[i+1...close]
                     if event
                         keys.push event
                         i = close+1
@@ -114,10 +114,10 @@ use ../../../kxk ◆ clip
 
     @appendValues: old value ->
 
-        ⮐ registers.cloneValue value if not old
+        ⮐ register.cloneValue value if not old
 
-        old   = registers.cloneValue old
-        value = registers.cloneValue value
+        old   = register.cloneValue old
+        value = register.cloneValue value
 
         if value.linewise
             old.lines = old.lines.concat value.lines
@@ -129,12 +129,12 @@ use ../../../kxk ◆ clip
         old.keys = null
         old
 
-    textForValue: value -> registers.textForValue value
-    keysForText:  text  -> registers.keysForText text
+    textForValue: value -> register.textForValue value
+    keysForText:  text  -> register.keysForText text
 
     macroTarget: name ->
 
-        target = registers.target name
+        target = register.target name
 
         ⮐ if not target
         ⮐ if target.name not in 'abcdefghijklmnopqrstuvwxyz'
@@ -143,32 +143,32 @@ use ../../../kxk ◆ clip
 
     read: name ->
 
-        target = registers.target name
+        target = register.target name
 
         ⮐ if not target
         ⮐ if target.name == '_'
         ⮐ @readClipboard() if target.name in ['+' '*']
 
-        registers.cloneValue @values[target.name]
+        register.cloneValue @values[target.name]
 
     write: name value operation='yank' ->
 
-        target = registers.target name
+        target = register.target name
 
         ⮐ if not target
         ⮐ if target.name == '_'
 
-        value = registers.cloneValue value
+        value = register.cloneValue value
 
         ⮐ if not value
 
         @values['"'] = value
 
         if operation == 'yank'
-            @values['0'] = registers.cloneValue(value) if target.name == '"'
+            @values['0'] = register.cloneValue(value) if target.name == '"'
         else if operation in ['delete' 'change']
             if not value.linewise and value.lines.length <= 1
-                @values['-'] = registers.cloneValue(value)
+                @values['-'] = register.cloneValue(value)
             else
                 @shiftNumbered value
 
@@ -177,21 +177,21 @@ use ../../../kxk ◆ clip
         else if target.name == '"'
             # the unnamed register was already set above
         else if target.append
-            appended = registers.appendValues(@values[target.name], value)
+            appended = register.appendValues(@values[target.name], value)
             @values[target.name] = appended
         else
-            @values[target.name] = registers.cloneValue(value)
+            @values[target.name] = register.cloneValue(value)
 
-        registers.cloneValue @values['"']
+        register.cloneValue @values['"']
 
     set: name value ->
 
-        target = registers.target name
+        target = register.target name
 
         ⮐ false if not target
         ⮐ false if target.name == '_'
 
-        @values[target.name] = registers.cloneValue value
+        @values[target.name] = register.cloneValue value
 
         true
 
@@ -209,10 +209,10 @@ use ../../../kxk ◆ clip
             if old.keys
                 keys = old.keys.concat keys
             else
-                keys = registers.keysForText(registers.textForValue(old)).concat keys
+                keys = register.keysForText(register.textForValue(old)).concat keys
 
         @values[target.name] =
-            lines:    registers.textForKeys(keys).split('\n')
+            lines:    register.textForKeys(keys).split('\n')
             linewise: false
             keys:     keys
 
@@ -223,25 +223,25 @@ use ../../../kxk ◆ clip
         for i in 9..2
             source = @values["#{i-1}"]
             if source
-                @values["#{i}"] = registers.cloneValue source
+                @values["#{i}"] = register.cloneValue source
             else
                 delete @values["#{i}"]
 
-        @values['1'] = registers.cloneValue value
+        @values['1'] = register.cloneValue value
 
     readClipboard: ->
 
         text = clip.detect() == 'none' ? clip.text : clip.paste()
 
-        registers.recordForText text
+        register.recordForText text
 
     writeClipboard: value ->
 
-        text = registers.textForValue value
+        text = register.textForValue value
 
         if clip.detect() == 'none'
             clip.text = text
         else
             clip.copy text
 
-export registers
+export register

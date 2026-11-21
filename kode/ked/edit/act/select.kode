@@ -319,9 +319,22 @@ export
     
     selectionsOrCursorLineRanges: -> 
         
-        if valid @s.selections ➜ ⮐ @s.selections
+        ⮐ @s.selections if valid @s.selections
         
         belt.lineRangesForPositions(@s.lines @s.cursors true)
+        
+    selectionsOrCursorWordRanges: ->
+    
+        ⮐ @s.selections if valid @s.selections
+        @cursorWordRanges()
+
+    cursorWordRanges: ->
+        
+        ranges = []
+        for pos in @s.cursors
+            if rng = belt.rangeOfClosestWordToPos @s.lines pos
+                ranges.push rng
+        ranges
     
     textOfSelectionOrCursorLines: -> 
         

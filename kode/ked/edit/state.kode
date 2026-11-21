@@ -16,15 +16,11 @@ use           ◆ keys mode
     @: @cells name ->
 
         @name = name + '.state'
+        
+        @novim = novim.novimState()
 
-        @registers      = new register
         @novimRegister  = null
         @allowedModes   = {}
-
-        @macroRecording    = null
-        @macroReplaying    = 0
-        @macroSkipKey      = false
-        @macroLastRegister = null
 
         for act in [del insert select join indent multi main novim sort count range macro]
             for k,v of act
@@ -44,12 +40,12 @@ use           ◆ keys mode
         @yankFlash      = null
         @yankFlashTimer = null
 
-        @rowCache    = null
-        @rowCacheExt = null
-        @maxWidthCache = 0
+        @rowCache       = null
+        @rowCacheExt    = null
+        @maxWidthCache  = 0
         @gutterWidthOverride = null
 
-        @jumps = new jumplist
+        @jumps   = new jumplist
         @changes = new changelist
         @keepJumps = 0
 
@@ -135,9 +131,9 @@ use           ◆ keys mode
         areas = @s.sue ? []
         ⮐ if empty areas or empty ranges
 
-        ranges = belt.splitLineRanges(@s.lines ranges false)
+        ranges = belt.splitLineRanges @s.lines ranges false
 
-        cut = sue.rangesCutFromAreasInLines(ranges areas @s.lines)
+        cut = sue.rangesCutFromAreasInLines ranges areas @s.lines
 
         ⮐ if cut eql areas
 
@@ -157,12 +153,12 @@ use           ◆ keys mode
 
     toggleSueFlag: flag =>
 
-        ranges = @decorationRanges()
+        ranges = @selectionsOrCursorWordRanges()
         ⮐ if empty ranges
 
-        ranges = belt.splitLineRanges(@s.lines ranges false)
+        ranges = belt.splitLineRanges @s.lines ranges false
 
-        next = sue.rangesWithToggledFlag(ranges (@s.sue ? []) @s.lines flag)
+        next = sue.rangesWithToggledFlag ranges (@s.sue ? []) @s.lines flag
 
         ⮐ if next eql @s.sue
 
@@ -180,8 +176,8 @@ use           ◆ keys mode
         keep = @areasWithoutLineScales(areas indices)
 
         for y,i in indices
-            keep.push {x: 0 y: y value: [sue.LINE_SCALE -1 1 scales[i]]} if scales[i] > 1
-
+            if scales[i] > 1
+                keep.push {x: 0 y: y value: [sue.LINE_SCALE -1 1 scales[i]]} 
         keep
 
     areasWithoutLineScales: (areas indices) =>
@@ -200,7 +196,7 @@ use           ◆ keys mode
 
         for rng in @s.selections
             rngs = [rng]
-            pieces = pieces.concat(belt.splitLineRanges(@s.lines rngs false))
+            pieces = pieces.concat belt.splitLineRanges(@s.lines rngs false)
 
         pieces
 

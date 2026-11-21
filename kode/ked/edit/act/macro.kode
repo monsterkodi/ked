@@ -19,20 +19,18 @@ export
 
     recordMacroKey: (key event) ->
 
-        if @macroSkipKey
-            @macroSkipKey = false
+        if @novim.macroSkipKey
+            @novim.macroSkipKey = false
             ⮐ false
 
-        ⮐ false if @macroReplaying > 0
+        ⮐ false if @novim.macroReplaying > 0
         ⮐ false if not @macroRecording
 
         @macroRecording.keys.push @macroEvent(key event)
 
         true
 
-    isMacroRecording: -> valid @macroRecording
-
-    markMacroControlKey: -> @macroSkipKey = true
+    markMacroControlKey: -> @novim.macroSkipKey = true
 
     startMacroRecording: register append ->
 
@@ -58,12 +56,12 @@ export
 
         ⮐ false if not recording
 
-        @macroRecording = null
+        delete @macroRecording
 
         name = recording.register
         name = name.toUpperCase() if recording.append
 
-        @registers.setMacro name recording.keys
+        @novim.register.setMacro name recording.keys
 
         post.emit 'novim.macro.stop' state:@name register:recording.register
 
@@ -77,25 +75,25 @@ export
 
     playLastMacro: count ->
 
-        ⮐ @macroError('no previous macro') if not @macroLastRegister
+        ⮐ @macroError('no previous macro') if not @novim.macroLastRegister
 
-        @playMacro @macroLastRegister count
+        @playMacro @novim.macroLastRegister count
 
     playMacro: register count ->
 
         ⮐ @macroError('invalid register') if not register
 
-        value = @registers.read register
+        value = @novim.register.read register
 
         ⮐ @macroError("register #{register} is empty") if not value
 
         keys = value.keys
 
-        keys ?= @registers.keysForText(@registers.textForValue(value))
+        keys ?= @novim.register.keysForText(@novim.register.textForValue(value))
 
         ⮐ @macroError("register #{register} is empty") if empty keys
 
-        @macroLastRegister = register
+        @novim.macroLastRegister = register
 
         n = max 1 (count ? 1)
 
@@ -106,10 +104,10 @@ export
 
     replayMacroKeys: keys ->
 
-        if @macroReplaying >= 100
+        if @novim.macroReplaying >= 100
             ⮐ @macroError('macro recursion too deep')
 
-        @macroReplaying += 1
+        @novim.macroReplaying += 1
 
         try
             for event in keys
@@ -117,7 +115,7 @@ export
         catch err
             @macroError "macro failed: #{err.message}"
         finally
-            @macroReplaying -= 1
+            @novim.macroReplaying -= 1
 
         true
 
