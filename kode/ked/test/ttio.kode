@@ -3,6 +3,26 @@ use ../edit        ◆ editor
 use ../view/screen ◆ ttio
 use ../util        ◆ harness keyscript
 
+# feeds one chunk of text or an array of chunks to a headless ttio and
+# reports what it emitted: the number of pastes and the keys as
+# [combo char] pairs
+
+pasteKeys = (chunks enc='utf8') ->
+
+    chunks = [chunks] if chunks is str
+
+    t = new ttio headless:true input:false
+    pastes = 0
+    keys = []
+
+    t.on 'paste' -> pastes += 1
+    t.on 'key' (combo event) -> keys.push [combo event.char]
+
+    for chunk in chunks
+        t.onData Buffer.from(chunk enc)
+
+    ⮐ { pastes: pastes  keys: keys }
+
 ▸ ttio
 
   ▸ a headless ttio has no cells
@@ -262,63 +282,33 @@ use ../util        ◆ harness keyscript
         clicks[0].button  ▸ 'left'
         clicks[0].cell    ▸ [10 4]
 
-  ▸ a bracketed paste in one chunk is pasted
+  ▸ a bracketed paste in one chunk is one paste
 
-        t = new ttio headless:true input:false
-        pasted = []
-        keys = []
+        pasteKeys '\x1b[200~■\x1b[201~' 'utf8' ▸ pastes:1 keys:[]
 
-        t.on 'paste' (text) -> pasted.push text
-        t.on 'key'   (combo) -> keys.push combo
+  ▸ the text of a paste does not leak out as keys
 
-        t.onData Buffer.from('\x1b[200~■\x1b[201~' 'utf8')
+        pasteKeys '\x1b[200~a■b\x1b[201~' 'utf8' ▸ pastes:1 keys:[]
 
-        pasted ▸ ['■']
-        keys   ▸ []
+  ▸ a bracketed paste arriving in parts is one paste when it ends
 
-  ▸ a bracketed paste with unicode and text is pasted as text
-
-        t = new ttio headless:true input:false
-        pasted = []
-        keys = []
-
-        t.on 'paste' (text) -> pasted.push text
-        t.on 'key'   (combo) -> keys.push combo
-
-        t.onData Buffer.from('\x1b[200~a■b\x1b[201~' 'utf8')
-
-        pasted ▸ ['a■b']
-        keys   ▸ []
-
-  ▸ a bracketed paste arriving in parts is pasted when it ends
-
-        t = new ttio headless:true input:false
-        pasted = []
-
-        t.on 'paste' (text) -> pasted.push text
-
-        t.onData Buffer.from('\x1b[200~a' 'utf8')
-        t.onData Buffer.from('■b\x1b[20' 'utf8')
-
-        pasted ▸ []
-
-        t.onData Buffer.from('1~' 'utf8')
-
-        pasted ▸ ['a■b']
+        pasteKeys ['\x1b[200~a' '■b\x1b[20' '1~'] 'utf8' ▸ pastes:1 keys:[]
 
   ▸ input after a bracketed paste is still handled
 
-        t = new ttio headless:true input:false
-        pasted = []
-        keys = []
+        pasteKeys '\x1b[200~■\x1b[201~\x1b[B' 'utf8' ▸ pastes:1 keys:[['down' '']]
 
-        t.on 'paste' (text) -> pasted.push text
-        t.on 'key'   (combo) -> keys.push combo
+  ▸ two bracketed pastes in one chunk are two pastes
 
-        t.onData Buffer.from('\x1b[200~■\x1b[201~\x1b[B' 'utf8')
+        pasteKeys '\x1b[200~a\x1b[201~\x1b[200~b\x1b[201~' 'utf8' ▸ pastes:2 keys:[]
 
-        pasted ▸ ['■']
-        keys   ▸ ['down']
+  ▸ escape sequences inside a paste are part of the paste
+
+        pasteKeys '\x1b[200~a\x1b[Bb\x1b[201~' 'utf8' ▸ pastes:1 keys:[]
+
+  ▸ text typed in one chunk arrives as keys
+
+        pasteKeys 'ab\r' 'utf8' ▸ pastes:0 keys:[['a' 'a'] ['b' 'b'] ['return' '\n']]
 
   ▸ an escape before a printable character is alt and that character
 
