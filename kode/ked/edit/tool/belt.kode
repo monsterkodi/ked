@@ -260,11 +260,6 @@ use ◆ text cell edit misc pair salt ex sue
         else
             rngs
 
-    ###
-    returns a list of ranges for lines split by positions.
-    the range up to the first position is included, as well as the
-    one from the last position up to the end of text.
-    ###        
     @rangesForLinesSplitAtPositions: lines posl ->
         
         ⮐ [] if empty posl

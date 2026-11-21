@@ -123,19 +123,19 @@ export
 
     moveSheetNode: (dir) ->
 
-        ⮐ null if not @rectree?
+        ⮐ if not @rectree?
 
         layout.absolutize @cells @rectree
 
         cursor = @mainCursor()
         node   = layout.topmostIn @rectree cursor
 
-        ⮐ null if not node?
+        ⮐ if not node?
 
         oldRect = clone node.rect.abs
         moved   = layout.moveNode @cells @rectree node dir
 
-        ⮐ null if not moved?
+        ⮐ if not moved?
 
         rect = moved.rect.abs
 
@@ -151,17 +151,17 @@ export
 
     resizeSheetNode: (dir) ->
 
-        ⮐ null if not @rectree?
+        ⮐ if not @rectree?
 
         cursor = @mainCursor()
         node   = layout.topmostIn @rectree cursor
 
-        ⮐ null if not node?
+        ⮐ if not node?
 
         oldRect = clone node.rect.abs
         moved   = layout.resizeNode @cells @rectree node dir
 
-        ⮐ null if not moved?
+        ⮐ if not moved?
 
         rect = moved.rect.abs
 

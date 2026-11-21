@@ -1,10 +1,6 @@
 ■jumplist
 ###
     remembers cursor positions before jumps
-
-    older and newer walk the list for ctrl+o and ctrl+i
-
-    a position on a line that is already in the list replaces the old one
 ###
     @: ->
 

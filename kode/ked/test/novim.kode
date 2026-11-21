@@ -1284,7 +1284,7 @@ windowReset = (s) ->
 
         kseg.str(b.s.lines)          ▸ 'two'
         b.novimRegister.lines        ▸ ['one']
-        b.registers.read('1')        ▸ null
+        b.registers.read('1')        ▸ undefined
 
   ▸ macros
 
@@ -1798,7 +1798,7 @@ windowReset = (s) ->
         cr.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
 
         cr.registers.read('-').lines   ▸ ['two']
-        cr.registers.read('1')         ▸ null
+        cr.registers.read('1')         ▸ undefined
         cr.novimRegister.lines         ▸ ['two']
 
         loadTextOn cr "one two"
