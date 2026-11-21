@@ -1,5 +1,4 @@
 use ../../../kxk ▪ post
-use ..           ◆ keys
 #!macro
 export
 
@@ -9,19 +8,6 @@ export
         char  = event?.char
 
         { key: key  combo: combo  char: char }
-
-    recordMacroKey: (key event) ->
-
-        if @novim.macroSkipKey
-            @novim.macroSkipKey = false
-            ⮐ false
-
-        ⮐ false if @novim.macroReplaying > 0
-        ⮐ false if not @macroRecording
-
-        @macroRecording.keys.push @macroEvent(key event)
-
-        true
 
     markMacroControlKey: -> @novim.macroSkipKey = true
 
@@ -104,10 +90,45 @@ export
 
         try
             for event in events
-                keys.feedKey @ event.key event
+                @feedKey event.key event
         catch err
             @macroError "macro failed: #{err.message}"
         finally
             @novim.macroReplaying -= 1
 
         true
+
+    recordMacroKey: (key event) ->
+
+        if @novim.macroSkipKey
+            @novim.macroSkipKey = false
+            ⮐ false
+
+        ⮐ false if @novim.macroReplaying > 0
+        ⮐ false if not @macroRecording
+
+        @macroRecording.keys.push @macroEvent(key event)
+
+        true
+
+    feedKey: (key event) -> 
+
+        result = @handleKey key event
+    
+        @recordMacroKey key event
+    
+        ⮐ 'handled' if result != 'unhandled'
+        ⮐ 'unhandled' if not event
+    
+        char  = event.char
+        combo = event.combo ? key
+    
+        if valid char and \
+                (char == combo or \
+                combo in ['space' 'shift+space' 'return' 'tab'] or \
+                combo[0..-2] == 'shift+')
+            @insert char
+            ⮐ 'inserted'
+    
+        'unhandled'
+

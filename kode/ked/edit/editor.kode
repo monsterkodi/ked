@@ -240,7 +240,7 @@ use                ◆ state draw complete mode susan keys
                 @state.resizeSheetNode dir
                 ⮐ true
 
-        result = keys.feedKey @state key event
+        result = @state.feedKey key event
 
         if result == 'handled'
             @complete?.hide()
@@ -253,5 +253,5 @@ use                ◆ state draw complete mode susan keys
         if key.split('+')[-1] not in ['shift' 'ctrl' 'alt' 'cmd' 'esc']
             # log "editor.onKey? |#{key}|" event
             ⮐ false
-
+            
 export editor

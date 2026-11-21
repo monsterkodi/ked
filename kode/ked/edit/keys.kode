@@ -5,141 +5,117 @@ use ◆ mode
 ###
     maps keyboard input to text manipulation
     functions of edit▸state
-    records keys for macros and inserts printable input
 ###
-handleKey = (state key event) ->
+handleKey = key event -> # will be bound to state
 
     # log 'edit.handleKey' key event
     
-    ⮐ if 'unhandled' != mode.handleKey state key event
+    ⮐ if 'unhandled' != mode.handleKey @ key event
 
     switch key                  
                      
-        'up'                                ➜ ⮐ state.moveCursors 'up'   
-        'down'                              ➜ ⮐ state.moveCursors 'down' 
-        'left'                              ➜ ⮐ state.moveCursors 'left' 
-        'right'                             ➜ ⮐ state.moveCursors 'right'
+        'up'                                ➜ ⮐ @moveCursors 'up'   
+        'down'                              ➜ ⮐ @moveCursors 'down' 
+        'left'                              ➜ ⮐ @moveCursors 'left' 
+        'right'                             ➜ ⮐ @moveCursors 'right'
                                                  
-        'ctrl+alt+up'                       ➜ ⮐ state.singleCursorPage 'up'  
-        'ctrl+alt+down'                     ➜ ⮐ state.singleCursorPage 'down'
-        'shift+ctrl+alt+up'                 ➜ ⮐ state.moveCursors 'up'    count:16
-        'shift+ctrl+alt+down'               ➜ ⮐ state.moveCursors 'down'  count:16
+        'ctrl+alt+up'                       ➜ ⮐ @singleCursorPage 'up'  
+        'ctrl+alt+down'                     ➜ ⮐ @singleCursorPage 'down'
+        'shift+ctrl+alt+up'                 ➜ ⮐ @moveCursors 'up'    count:16
+        'shift+ctrl+alt+down'               ➜ ⮐ @moveCursors 'down'  count:16
             
-        'cmd+left'      'ctrl+left'         ➜ ⮐ state.moveCursors ['bos' 'ind_bol']
-        'cmd+right'     'ctrl+right'        ➜ ⮐ state.moveCursors ['eos' 'ind_eol']
+        'cmd+left'      'ctrl+left'         ➜ ⮐ @moveCursors ['bos' 'ind_bol']
+        'cmd+right'     'ctrl+right'        ➜ ⮐ @moveCursors ['eos' 'ind_eol']
                                                  
-        'alt+left'                          ➜ ⮐ state.moveCursors 'left'  jump:['ws' 'word' 'empty' 'punct']
-        'alt+right'                         ➜ ⮐ state.moveCursors 'right' jump:['ws' 'word' 'empty' 'punct']
+        'alt+left'                          ➜ ⮐ @moveCursors 'left'  jump:['ws' 'word' 'empty' 'punct']
+        'alt+right'                         ➜ ⮐ @moveCursors 'right' jump:['ws' 'word' 'empty' 'punct']
                                                  
-        'shift+alt+right'                   ➜ ⮐ state.moveCursorsAndSelect 'right' jump:['ws' 'word' 'empty' 'punct']
-        'shift+alt+left'                    ➜ ⮐ state.moveCursorsAndSelect 'left'  jump:['ws' 'word' 'empty' 'punct']
-        'shift+up'                          ➜ ⮐ state.moveCursorsAndSelect 'up'
-        'shift+down'                        ➜ ⮐ state.moveCursorsAndSelect 'down'
-        'shift+left'                        ➜ ⮐ state.moveCursorsAndSelect 'left'
-        'shift+right'                       ➜ ⮐ state.moveCursorsAndSelect 'right'
-        'shift+cmd+right'                   ➜ ⮐ state.moveCursorsAndSelect 'ind_eol'
-        'shift+cmd+left'                    ➜ ⮐ state.moveCursorsAndSelect 'ind_bol'
-        'shift+ctrl+h'                      ➜ ⮐ state.moveCursorsAndSelect 'bof'
-        'shift+ctrl+j'                      ➜ ⮐ state.moveCursorsAndSelect 'eof'
+        'shift+alt+right'                   ➜ ⮐ @moveCursorsAndSelect 'right' jump:['ws' 'word' 'empty' 'punct']
+        'shift+alt+left'                    ➜ ⮐ @moveCursorsAndSelect 'left'  jump:['ws' 'word' 'empty' 'punct']
+        'shift+up'                          ➜ ⮐ @moveCursorsAndSelect 'up'
+        'shift+down'                        ➜ ⮐ @moveCursorsAndSelect 'down'
+        'shift+left'                        ➜ ⮐ @moveCursorsAndSelect 'left'
+        'shift+right'                       ➜ ⮐ @moveCursorsAndSelect 'right'
+        'shift+cmd+right'                   ➜ ⮐ @moveCursorsAndSelect 'ind_eol'
+        'shift+cmd+left'                    ➜ ⮐ @moveCursorsAndSelect 'ind_bol'
+        'shift+ctrl+h'                      ➜ ⮐ @moveCursorsAndSelect 'bof'
+        'shift+ctrl+j'                      ➜ ⮐ @moveCursorsAndSelect 'eof'
                                                  
-        'shift+alt+cmd+up'                  ➜ ⮐ state.moveMainCursorInDirection 'up'    keep:true # 'paint' cursors
-        'shift+alt+cmd+down'                ➜ ⮐ state.moveMainCursorInDirection 'down'  keep:true # 'paint' cursors
-        'shift+alt+cmd+left'                ➜ ⮐ state.moveMainCursorInDirection 'left'  keep:true # 'paint' cursors
-        'shift+alt+cmd+right'               ➜ ⮐ state.moveMainCursorInDirection 'right' keep:true # 'paint' cursors
+        'shift+alt+cmd+up'                  ➜ ⮐ @moveMainCursorInDirection 'up'    keep:true # 'paint' cursors
+        'shift+alt+cmd+down'                ➜ ⮐ @moveMainCursorInDirection 'down'  keep:true # 'paint' cursors
+        'shift+alt+cmd+left'                ➜ ⮐ @moveMainCursorInDirection 'left'  keep:true # 'paint' cursors
+        'shift+alt+cmd+right'               ➜ ⮐ @moveMainCursorInDirection 'right' keep:true # 'paint' cursors
                                                  
-        'alt+up'        'shift+ctrl+up'     ➜ ⮐ state.moveSelectionOrCursorLines   'up'
-        'alt+down'      'shift+ctrl+down'   ➜ ⮐ state.moveSelectionOrCursorLines   'down'
-        'shift+alt+up'                      ➜ ⮐ state.cloneSelectionAndCursorLines 'up'
-        'shift+alt+down'                    ➜ ⮐ state.cloneSelectionAndCursorLines 'down'
+        'alt+up'        'shift+ctrl+up'     ➜ ⮐ @moveSelectionOrCursorLines   'up'
+        'alt+down'      'shift+ctrl+down'   ➜ ⮐ @moveSelectionOrCursorLines   'down'
+        'shift+alt+up'                      ➜ ⮐ @cloneSelectionAndCursorLines 'up'
+        'shift+alt+down'                    ➜ ⮐ @cloneSelectionAndCursorLines 'down'
 
-        'cmd+up'        'ctrl+up'           ➜ ⮐ state.expandCursors   'up'
-        'cmd+down'      'ctrl+down'         ➜ ⮐ state.expandCursors   'down'
-        'shift+cmd+up'                      ➜ ⮐ state.contractCursors 'up'
-        'shift+cmd+down'                    ➜ ⮐ state.contractCursors 'down'
+        'cmd+up'        'ctrl+up'           ➜ ⮐ @expandCursors   'up'
+        'cmd+down'      'ctrl+down'         ➜ ⮐ @expandCursors   'down'
+        'shift+cmd+up'                      ➜ ⮐ @contractCursors 'up'
+        'shift+cmd+down'                    ➜ ⮐ @contractCursors 'down'
                                                  
-        'pageup'                            ➜ ⮐ state.singleCursorPage 'up'
-        'pagedown'                          ➜ ⮐ state.singleCursorPage 'down'
+        'pageup'                            ➜ ⮐ @singleCursorPage 'up'
+        'pagedown'                          ➜ ⮐ @singleCursorPage 'down'
                                                  
-        'home'                              ➜ ⮐ state.singleCursorAtIndentOrStartOfLine()
-        'end'                               ➜ ⮐ state.singleCursorAtEndOfLine()
+        'home'                              ➜ ⮐ @singleCursorAtIndentOrStartOfLine()
+        'end'                               ➜ ⮐ @singleCursorAtEndOfLine()
                                                  
-        'ctrl+h'                            ➜ ⮐ state.setMainCursor 0 0
-        'ctrl+j'                            ➜ ⮐ state.setMainCursor state.s.lines[state.s.lines.length-1].length state.s.lines.length-1
+        'ctrl+h'                            ➜ ⮐ @setMainCursor 0 0
+        'ctrl+j'                            ➜ ⮐ @setMainCursor @s.lines[@s.lines.length-1].length @s.lines.length-1
                                                  
-        'alt+d'                             ➜ ⮐ state.delete 'next' true
-        'shift+ctrl+k'  'entf'              ➜ ⮐ state.delete 'next'
-        'ctrl+k'                            ➜ ⮐ state.delete 'eol'
-        'delete'                            ➜ ⮐ state.delete 'back'
-        'ctrl+delete'                       ➜ ⮐ state.delete 'back' true
-        'cmd+delete'                        ➜ ⮐ state.delete 'back' true
+        'alt+d'                             ➜ ⮐ @delete 'next' true
+        'shift+ctrl+k'  'entf'              ➜ ⮐ @delete 'next'
+        'ctrl+k'                            ➜ ⮐ @delete 'eol'
+        'delete'                            ➜ ⮐ @delete 'back'
+        'ctrl+delete'                       ➜ ⮐ @delete 'back' true
+        'cmd+delete'                        ➜ ⮐ @delete 'back' true
                                                  
-        'shift+tab'                         ➜ ⮐ state.deindentSelectedOrCursorLines()
-        'tab'                               ➜ ⮐ state.insert '\t'
+        'shift+tab'                         ➜ ⮐ @deindentSelectedOrCursorLines()
+        'tab'                               ➜ ⮐ @insert '\t'
                                                  
-        'cmd+x'         'ctrl+x'            ➜ ⮐ state.cut()
-        'cmd+c'         'ctrl+c'            ➜ ⮐ state.copy()
-        'cmd+v'         'ctrl+v'            ➜ ⮐ state.paste() if not mode.isActive state 'novim' 
+        'cmd+x'         'ctrl+x'            ➜ ⮐ @cut()
+        'cmd+c'         'ctrl+c'            ➜ ⮐ @copy()
+        'cmd+v'         'ctrl+v'            ➜ ⮐ @paste() if not mode.isActive @ 'novim' 
                                                  
-        'cmd+z'         'ctrl+z'            ➜ ⮐ state.undo()
+        'cmd+z'         'ctrl+z'            ➜ ⮐ @undo()
         'shift+cmd+z'                            
-        'cmd+y'         'ctrl+y'            ➜ ⮐ state.redo()
+        'cmd+y'         'ctrl+y'            ➜ ⮐ @redo()
                                                  
-        'cmd+a'         'ctrl+a'            ➜ ⮐ state.selectAllLines()
-        'cmd+j'                             ➜ ⮐ state.joinLines()
-        'cmd+l'         'ctrl+l'            ➜ ⮐ state.selectMoreLines()
-        'shift+cmd+l'   'shift+ctrl+l'      ➜ ⮐ state.selectLessLines()
+        'cmd+a'         'ctrl+a'            ➜ ⮐ @selectAllLines()
+        'cmd+j'                             ➜ ⮐ @joinLines()
+        'cmd+l'         'ctrl+l'            ➜ ⮐ @selectMoreLines()
+        'shift+cmd+l'   'shift+ctrl+l'      ➜ ⮐ @selectLessLines()
                                                  
-        'cmd+e'         'ctrl+e'            ➜ ⮐ state.highlightWordAtCursor_deselectCursorHighlight_moveCursorToNextHighlight()
-        'cmd+d'         'ctrl+d'            ➜ ⮐ state.selectWordAtCursor_highlightSelection_addNextHighlightToSelection()
-        'cmd+g'         'ctrl+g'            ➜ ⮐ state.selectWordAtCursor_highlightSelection_selectNextHighlight()
+        'cmd+e'         'ctrl+e'            ➜ ⮐ @highlightWordAtCursor_deselectCursorHighlight_moveCursorToNextHighlight()
+        'cmd+d'         'ctrl+d'            ➜ ⮐ @selectWordAtCursor_highlightSelection_addNextHighlightToSelection()
+        'cmd+g'         'ctrl+g'            ➜ ⮐ @selectWordAtCursor_highlightSelection_selectNextHighlight()
                                                  
-        'shift+cmd+e'   'shift+ctrl+e'      ➜ ⮐ state.highlightWordAtCursor_deselectCursorHighlight_moveCursorToPrevHighlight()
-        'shift+cmd+d'   'shift+ctrl+d'      ➜ ⮐ state.selectWordAtCursor_highlightSelection_addPrevHighlightToSelection()
-        'shift+cmd+g'   'shift+ctrl+g'      ➜ ⮐ state.selectWordAtCursor_highlightSelection_selectPrevHighlight()
+        'shift+cmd+e'   'shift+ctrl+e'      ➜ ⮐ @highlightWordAtCursor_deselectCursorHighlight_moveCursorToPrevHighlight()
+        'shift+cmd+d'   'shift+ctrl+d'      ➜ ⮐ @selectWordAtCursor_highlightSelection_addPrevHighlightToSelection()
+        'shift+cmd+g'   'shift+ctrl+g'      ➜ ⮐ @selectWordAtCursor_highlightSelection_selectPrevHighlight()
                                                  
-        'alt+y'                             ➜ ⮐ state.toggleMode 'unype'
-        'alt+n'         'alt+z'             ➜ ⮐ state.toggleMode 'novim'
-        'alt+3'                             ➜ ⮐ state.toggleMode 'salter'
+        'alt+y'                             ➜ ⮐ @toggleMode 'unype'
+        'alt+n'         'alt+z'             ➜ ⮐ @toggleMode 'novim'
+        'alt+3'                             ➜ ⮐ @toggleMode 'salter'
 
-        'cmd+3'         'ctrl+3'            ➜ ⮐ state.insertAsciiHeaderForSelectionOrWordAtCursor()
-        'alt+cmd+d'     'alt+ctrl+d'        ➜ ⮐ state.selectWordAtCursor_highlightSelection_selectAllHighlights()
+        'cmd+3'         'ctrl+3'            ➜ ⮐ @insertAsciiHeaderForSelectionOrWordAtCursor()
+        'alt+cmd+d'     'alt+ctrl+d'        ➜ ⮐ @selectWordAtCursor_highlightSelection_selectAllHighlights()
                                                  
-        'cmd+/'         'ctrl+/'            ➜ ⮐ state.toggleCommentAtSelectionOrCursorLines()
-        'alt+cmd+/'     'ctrl+alt+/'        ➜ ⮐ state.toggleCommentTypeAtSelectionOrCursorLines()
+        'cmd+/'         'ctrl+/'            ➜ ⮐ @toggleCommentAtSelectionOrCursorLines()
+        'alt+cmd+/'     'ctrl+alt+/'        ➜ ⮐ @toggleCommentTypeAtSelectionOrCursorLines()
         
-        'ctrl+return'                       ➜ ⮐ state.jumpToWordAtCursor()
+        'ctrl+return'                       ➜ ⮐ @jumpToWordAtCursor()
                                                  
         'esc' 
-            state.finishNovimInsert()
-            if state.hasCursorsHighlightsOrSelections()                              
-                ⮐ state.clearCursorsHighlightsAndSelections()
+            @finishNovimInsert()
+            if @hasCursorsHighlightsOrSelections()                              
+                ⮐ @clearCursorsHighlightsAndSelections()
             else
                 if config.data.novim.autoEnableOnEscape
-                    state.toggleMode 'novim'
+                    @toggleMode 'novim'
     
     'unhandled'
 
-feedKey = (state key event) ->
-
-    result = handleKey state key event
-
-    state.recordMacroKey key event
-
-    ⮐ 'handled' if result != 'unhandled'
-    ⮐ 'unhandled' if not event
-
-    char  = event.char
-    combo = event.combo ? key
-
-    if valid char and \
-            (char == combo or \
-            combo in ['space' 'shift+space' 'return' 'tab'] or \
-            combo[0..-2] == 'shift+')
-        state.insert char
-        ⮐ 'inserted'
-
-    'unhandled'
-
-export
-    handleKey: handleKey
-    feedKey: feedKey
+export handleKey

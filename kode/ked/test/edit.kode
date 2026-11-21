@@ -1,7 +1,7 @@
 
 use ../../kxk    ▪ kseg immutable
 use ../util      ◆ harness
-use ../edit      ◆ editor keys
+use ../edit      ◆ editor
 use ../edit/tool ◆ belt
 use ../theme     ◆ color theme
 
@@ -22,15 +22,6 @@ editorFor = lines ->
     e
 
 ▸ edit
-
-  ▸ keys handle a state without the state handling keys
-
-        [h e] = hed()
-        e.state.loadLines ['abc']
-
-        keys.handleKey e.state 'right' {}
-
-        e.state.mainCursor() ▸ [1 0]
 
   ▸ delete cursor line
         

@@ -1,0 +1,84 @@
+use ../../../kxk ▪ post
+#!jump
+    
+export
+    
+    jumpEntry: pos ->
+
+        pos ?= @mainCursor()
+
+        file: @currentFile()
+        x:    pos[0]
+        y:    pos[1]
+
+    pushJump: pos ->
+
+        ⮐ false if @novim.jumps.keep
+
+        @novim.jumps.record(@jumpEntry(pos))
+
+        true
+
+    jumpOlder: (count=1) ->
+
+        n = max 1 (count ? 1)
+        moved = false
+
+        for i in 0...n
+            entry = @novim.jumps.older @jumpEntry()
+            break if not entry
+            @jumpToEntry entry
+            moved = true
+
+        moved
+
+    jumpNewer: (count=1) ->
+
+        n = max 1 (count ? 1)
+        moved = false
+
+        for i in 0...n
+            entry = @novim.jumps.newer()
+            break if not entry
+            @jumpToEntry entry
+            moved = true
+
+        moved
+
+    jumpToEntry: entry ->
+
+        file = @currentFile()
+
+        if valid entry.file and entry.file != file
+            post.emit 'file.open' entry.file entry.x entry.y
+        else
+            @setMainCursor entry.x entry.y
+
+        true
+
+    jumpChangeOlder: (count=1) ->
+
+        n = max 1 (count ? 1)
+        moved = false
+
+        for i in 0...n
+            pos = @novim.changes.older()
+            break if not pos
+            @setMainCursor pos[0] pos[1]
+            moved = true
+
+        moved
+
+    jumpChangeNewer: (count=1) ->
+
+        n = max 1 (count ? 1)
+        moved = false
+
+        for i in 0...n
+            pos = @novim.changes.newer()
+            break if not pos
+            @setMainCursor pos[0] pos[1]
+            moved = true
+
+        moved
+        

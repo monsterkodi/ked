@@ -2,9 +2,9 @@
 use ../../kxk ▪ immutable kstr kseg events absMin post
 use ../../kxk ◆ clip
 use ../util   ◆ syntax config
-use ./act     ◆ del insert select join indent multi main novim sort count range macro
+use ./act     ◆ del insert select join indent multi main novim sort count range macro jump
 use ./tool    ◆ belt colorspans jumplist changelist motion sue register
-use           ◆ mode
+use           ◆ mode keys
 
 ■state□events
     ###
@@ -21,17 +21,18 @@ use           ◆ mode
 
         @allowedModes   = {}
 
-        for act in [del insert select join indent multi main novim sort count range macro]
+        for act in [del insert select join indent multi main jump novim sort count range macro]
             for k,v of act
                 @[k] = v.bind @
+                
+        @handleKey = keys
+        @hasFocus  = false
 
-        @syntax   = new syntax @name + '.syntax'
-        @hasFocus = false
+        @syntax    = new syntax @name + '.syntax'
 
-        #  the display scale of markdown headings: syntax class -> rows
-        @scales     = {h1:3 h2:2}
-        @scaledExts = ['md' 'markdown' 'kode']
         @scaling    = true
+        @scales     = h1:3 h2:2
+        @scaledExts = ['md' 'markdown' 'kode']
 
         @rowCache       = null
         @rowCacheExt    = null
@@ -517,77 +518,6 @@ use           ◆ mode
     isValidLineIndex:   li => 0 <= li < @s.lines.length
     isInvalidLineIndex: li => not @isValidLineIndex li
 
-#!window
-
-    windowLine: kind count=1 ->
-
-        rows   = max 1 @cells.rows
-        top    = @lineAtRow 0
-        bottom = @lineAtRow rows-1
-        n      = max 1 (count ? 1)
-
-        switch kind
-            'windowTop'    ➜ clamp top bottom (top+n-1)
-            'windowBottom' ➜ clamp top bottom (bottom-n+1)
-            ➜ @lineAtRow int((rows-1)/2)
-
-    moveCursorsToWindowLine: kind count=1 ->
-
-        line = @windowLine kind count
-        x    = belt.lineIndentAtPos @s.lines [0 line]
-        cursors = @allCursors()
-
-        for c in cursors
-            c[0] = x
-            c[1] = line
-
-        @setCursors cursors main:@s.main
-
-    windowMotionRange: cursor spec ->
-
-        line = @windowLine spec.kind (spec.count ? 1)
-        y1   = min cursor[1] line
-        y2   = max cursor[1] line
-
-        [0 y1 kseg.width(@s.lines[y2]) y2]
-
-    rangeForMotion: cursor spec ->
-
-        if spec.kind in ['windowTop' 'windowMiddle' 'windowBottom']
-            ⮐ @windowMotionRange cursor spec
-
-        motion.range @s.lines cursor spec
-
-#!changes
-
-    jumpChangeOlder: (count=1) ->
-
-        n = max 1 (count ? 1)
-        moved = false
-
-        for i in 0...n
-            pos = @novim.changes.older()
-            break if not pos
-            @setMainCursor pos[0] pos[1]
-            moved = true
-
-        moved
-
-    jumpChangeNewer: (count=1) ->
-
-        n = max 1 (count ? 1)
-        moved = false
-
-        for i in 0...n
-            pos = @novim.changes.newer()
-            break if not pos
-            @setMainCursor pos[0] pos[1]
-            moved = true
-
-        moved
-
-#!jumps
-
     currentFile: ->
 
         session = global.ked_session
@@ -595,59 +525,6 @@ use           ◆ mode
         ⮐ if not session?.get
 
         session.get 'editor▸file'
-
-    jumpEntry: pos ->
-
-        pos ?= @mainCursor()
-
-        file: @currentFile()
-        x:    pos[0]
-        y:    pos[1]
-
-    pushJump: pos ->
-
-        ⮐ false if @novim.jumps.keep
-
-        @novim.jumps.record(@jumpEntry(pos))
-
-        true
-
-    jumpOlder: (count=1) ->
-
-        n = max 1 (count ? 1)
-        moved = false
-
-        for i in 0...n
-            entry = @novim.jumps.older @jumpEntry()
-            break if not entry
-            @jumpToEntry entry
-            moved = true
-
-        moved
-
-    jumpNewer: (count=1) ->
-
-        n = max 1 (count ? 1)
-        moved = false
-
-        for i in 0...n
-            entry = @novim.jumps.newer()
-            break if not entry
-            @jumpToEntry entry
-            moved = true
-
-        moved
-
-    jumpToEntry: entry ->
-
-        file = @currentFile()
-
-        if valid entry.file and entry.file != file
-            post.emit 'file.open' entry.file entry.x entry.y
-        else
-            @setMainCursor entry.x entry.y
-
-        true
 
 #!undo
 

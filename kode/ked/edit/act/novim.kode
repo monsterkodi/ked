@@ -1783,3 +1783,41 @@ export
 
         true
 
+    windowLine: kind count=1 ->
+
+        rows   = max 1 @cells.rows
+        top    = @lineAtRow 0
+        bottom = @lineAtRow rows-1
+        n      = max 1 (count ? 1)
+
+        switch kind
+            'windowTop'    ➜ clamp top bottom (top+n-1)
+            'windowBottom' ➜ clamp top bottom (bottom-n+1)
+            ➜ @lineAtRow int((rows-1)/2)
+
+    moveCursorsToWindowLine: kind count=1 ->
+
+        line = @windowLine kind count
+        x    = belt.lineIndentAtPos @s.lines [0 line]
+        cursors = @allCursors()
+
+        for c in cursors
+            c[0] = x
+            c[1] = line
+
+        @setCursors cursors main:@s.main
+
+    windowMotionRange: cursor spec ->
+
+        line = @windowLine spec.kind (spec.count ? 1)
+        y1   = min cursor[1] line
+        y2   = max cursor[1] line
+
+        [0 y1 kseg.width(@s.lines[y2]) y2]
+
+    rangeForMotion: cursor spec ->
+
+        if spec.kind in ['windowTop' 'windowMiddle' 'windowBottom']
+            ⮐ @windowMotionRange cursor spec
+
+        motion.range @s.lines cursor spec

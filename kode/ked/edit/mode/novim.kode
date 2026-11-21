@@ -2,7 +2,7 @@
 use ../../../kxk ◆ post keyinfo kseg
 use ../../theme  ◆ theme
 use ../tool      ◆ belt cmdlinehistory
-use ..           ◆ mode keys
+use ..           ◆ mode
 ■novim
 # maps keys to actions which are executed by edit▸act▸novim
 
@@ -480,12 +480,12 @@ use ..           ◆ mode keys
 
         for c in chars
 
+            event = { combo:c char:c }
             if @state.novim.insert
-                event = { combo:c char:c }
-                sr    = keys.handleKey @state c event
+                sr = @state.handleKey c event
                 @state.insert c if sr == 'unhandled'
             else
-                @handleKey c {combo:c char:c}
+                @handleKey c event
 
         if @state.novim.insert
             @state.finishNovimInsert()

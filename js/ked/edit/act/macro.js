@@ -3,34 +3,14 @@ var _k_ = {in: function (a,l) {return (typeof l === 'string' && typeof a === 'st
 import kxk from "../../../kxk.js"
 let post = kxk.post
 
-import keys from "../keys.js"
-
 export default {
     macroEvent:function (key, event)
     {
-        var char, combo, _8_29_
+        var char, combo, _7_29_
     
-        combo = ((_8_29_=(event != null ? event.combo : undefined)) != null ? _8_29_ : key)
+        combo = ((_7_29_=(event != null ? event.combo : undefined)) != null ? _7_29_ : key)
         char = (event != null ? event.char : undefined)
         return {key:key,combo:combo,char:char}
-    },
-    recordMacroKey:function (key, event)
-    {
-        if (this.novim.macroSkipKey)
-        {
-            this.novim.macroSkipKey = false
-            return false
-        }
-        if (this.novim.macroReplaying > 0)
-        {
-            return false
-        }
-        if (!this.macroRecording)
-        {
-            return false
-        }
-        this.macroRecording.keys.push(this.macroEvent(key,event))
-        return true
     },
     markMacroControlKey:function ()
     {
@@ -131,7 +111,7 @@ export default {
             for (var _c_ = 0; _c_ < list.length; _c_++)
             {
                 event = list[_c_]
-                keys.feedKey(this,event.key,event)
+                this.feedKey(event.key,event)
             }
         }
         catch (err)
@@ -143,8 +123,49 @@ export default {
             this.novim.macroReplaying -= 1
         }
         return true
+    },
+    recordMacroKey:function (key, event)
+    {
+        if (this.novim.macroSkipKey)
+        {
+            this.novim.macroSkipKey = false
+            return false
+        }
+        if (this.novim.macroReplaying > 0)
+        {
+            return false
+        }
+        if (!this.macroRecording)
+        {
+            return false
+        }
+        this.macroRecording.keys.push(this.macroEvent(key,event))
+        return true
+    },
+    feedKey:function (key, event)
+    {
+        var char, combo, result, _124_28_
+    
+        result = this.handleKey(key,event)
+        this.recordMacroKey(key,event)
+        if (result !== 'unhandled')
+        {
+            return 'handled'
+        }
+        if (!event)
+        {
+            return 'unhandled'
+        }
+        char = event.char
+        combo = ((_124_28_=event.combo) != null ? _124_28_ : key)
+        if (!_k_.empty(char) && (char === combo || _k_.in(combo,['space','shift+space','return','tab']) || combo.slice(0, -1) === 'shift+'))
+        {
+            this.insert(char)
+            return 'inserted'
+        }
+        return 'unhandled'
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFjcm8uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvYWN0L21hY3JvLmtvZGUiXSwibWFwcGluZ3MiOiI7O09BQWEsVUFBQTtJQUFNOztPQUNBLFdBQUE7OztJQUlmLHFCQUFhLEtBQUk7Ozs7UUFFYixrQkFBUSxnQkFBQSxNQUFPLHVDQUFRO1FBQ3ZCLFFBQVEsZ0JBQUEsTUFBTztnQkFFYixJQUFLLElBQUssTUFBTyxNQUFPLEtBQU07O0lBRXBDLHlCQUFpQixLQUFJOztZQUVkLEtBQUMsTUFBTTs7WUFDTixLQUFDLE1BQU0sZUFBZTttQkFDcEI7O1lBRUssS0FBQyxNQUFNLGlCQUFpQjs7bUJBQWpDOzthQUNhLEtBQUM7O21CQUFkOztRQUVGLEtBQUMsZUFBZSxLQUFLLEtBQUssS0FBQyxXQUFXLElBQUk7ZUFFMUM7O0lBRUo7O2VBQXdCLEtBQUMsTUFBTSxlQUFlOztJQUU5Qyw4QkFBcUIsVUFBUzs7OzthQUVYOzttQkFBYjs7UUFFRixPQUFPLFNBQVM7WUFFTCxLQUFLLFdBQVU7O21CQUF4Qjs7cUJBQ1MsS0FBWTs7bUJBQXJCOztRQUVGLEtBQUMsa0JBQ0csU0FBVSxLQUNWLE9BQVUsT0FDVjtRQUVKLEtBQUssS0FBSyxxQkFBb0IsTUFBTSxLQUFDLEtBQUssU0FBUyxLQUFLLE9BQU87ZUFFL0Q7O0lBRUo7Ozs7UUFFSSxZQUFZLEtBQUM7YUFFRTs7bUJBQWI7O2VBRUssS0FBQztRQUVSLE9BQU8sVUFBVTtZQUNZLFVBQVU7O1lBQXZDLE9BQU8sS0FBSzs7UUFFWixLQUFDLE1BQU0sU0FBUyxTQUFTLEtBQUssVUFBVTtRQUV4QyxLQUFLLEtBQUssb0JBQW1CLE1BQU0sS0FBQyxLQUFLLFNBQVMsVUFBVTtlQUU1RDs7SUFFSixxQkFBWTs7UUFFUixLQUFLLEtBQUssY0FBYztlQUV4Qjs7SUFFSix3QkFBZTs7YUFFK0IsS0FBQyxNQUFNOzttQkFBL0MsS0FBQyxXQUFXOztlQUVkLEtBQUMsVUFBVSxLQUFDLE1BQU0sa0JBQWtCOztJQUV4QyxvQkFBVyxVQUFTOzs7O2FBRXlCOzttQkFBdkMsS0FBQyxXQUFXOztRQUVkLFFBQVEsS0FBQyxNQUFNLFNBQVMsS0FBSzthQUV5Qjs7bUJBQXBELEtBQUMsdUJBQXVCOztRQUUxQixPQUFPLE1BQU07UUFFYixRQUFBLGVBQUEsT0FBUSxLQUFDLE1BQU0sU0FBUyxZQUFZLEtBQUMsTUFBTSxTQUFTLGFBQWE7c0JBRVQ7O21CQUF0RCxLQUFDLHVCQUF1Qjs7UUFFMUIsS0FBQyxNQUFNLG9CQUFvQjtRQUUzQixZQUFRLElBQUcsZ0JBQUEsUUFBUTt1QkFFZixJQUFLLFNBQUkscUJBQUEsUUFBQTs7WUFDVCxLQUFDLGdCQUFnQjs7ZUFFckI7O0lBRUosMEJBQWlCOzs7O1lBRVYsS0FBQyxNQUFNLGtCQUFrQjs7bUJBQ3RCLEtBQUMsV0FBVzs7UUFFbEIsS0FBQyxNQUFNLGtCQUFrQjs7O2dDQUdSOzs7Z0JBQVQ7Z0JBQ0EsS0FBSyxRQUFRLEtBQUUsTUFBTSxJQUFJOzs7ZUFDM0I7O1lBQ0YsS0FBQyw0QkFBNEIsSUFBSTs7OztZQUVqQyxLQUFDLE1BQU0sa0JBQWtCOztlQUU3QiJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFjcm8uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvYWN0L21hY3JvLmtvZGUiXSwibWFwcGluZ3MiOiI7O09BQWEsVUFBQTtJQUFNOzs7SUFJZixxQkFBYSxLQUFJOzs7O1FBRWIsa0JBQVEsZ0JBQUEsTUFBTyx1Q0FBUTtRQUN2QixRQUFRLGdCQUFBLE1BQU87Z0JBRWIsSUFBSyxJQUFLLE1BQU8sTUFBTyxLQUFNOztJQUVwQzs7ZUFBd0IsS0FBQyxNQUFNLGVBQWU7O0lBRTlDLDhCQUFxQixVQUFTOzs7O2FBRVg7O21CQUFiOztRQUVGLE9BQU8sU0FBUztZQUVMLEtBQUssV0FBVTs7bUJBQXhCOztxQkFDUyxLQUFZOzttQkFBckI7O1FBRUYsS0FBQyxrQkFDRyxTQUFVLEtBQ1YsT0FBVSxPQUNWO1FBRUosS0FBSyxLQUFLLHFCQUFvQixNQUFNLEtBQUMsS0FBSyxTQUFTLEtBQUssT0FBTztlQUUvRDs7SUFFSjs7OztRQUVJLFlBQVksS0FBQzthQUVFOzttQkFBYjs7ZUFFSyxLQUFDO1FBRVIsT0FBTyxVQUFVO1lBQ1ksVUFBVTs7WUFBdkMsT0FBTyxLQUFLOztRQUVaLEtBQUMsTUFBTSxTQUFTLFNBQVMsS0FBSyxVQUFVO1FBRXhDLEtBQUssS0FBSyxvQkFBbUIsTUFBTSxLQUFDLEtBQUssU0FBUyxVQUFVO2VBRTVEOztJQUVKLHFCQUFZOztRQUVSLEtBQUssS0FBSyxjQUFjO2VBRXhCOztJQUVKLHdCQUFlOzthQUUrQixLQUFDLE1BQU07O21CQUEvQyxLQUFDLFdBQVc7O2VBRWQsS0FBQyxVQUFVLEtBQUMsTUFBTSxrQkFBa0I7O0lBRXhDLG9CQUFXLFVBQVM7Ozs7YUFFeUI7O21CQUF2QyxLQUFDLFdBQVc7O1FBRWQsUUFBUSxLQUFDLE1BQU0sU0FBUyxLQUFLO2FBRXlCOzttQkFBcEQsS0FBQyx1QkFBdUI7O1FBRTFCLE9BQU8sTUFBTTtRQUViLFFBQUEsZUFBQSxPQUFRLEtBQUMsTUFBTSxTQUFTLFlBQVksS0FBQyxNQUFNLFNBQVMsYUFBYTtzQkFFVDs7bUJBQXRELEtBQUMsdUJBQXVCOztRQUUxQixLQUFDLE1BQU0sb0JBQW9CO1FBRTNCLFlBQVEsSUFBRyxnQkFBQSxRQUFRO3VCQUVmLElBQUssU0FBSSxxQkFBQSxRQUFBOztZQUNULEtBQUMsZ0JBQWdCOztlQUVyQjs7SUFFSiwwQkFBaUI7Ozs7WUFFVixLQUFDLE1BQU0sa0JBQWtCOzttQkFDdEIsS0FBQyxXQUFXOztRQUVsQixLQUFDLE1BQU0sa0JBQWtCOzs7Z0NBR1I7OztnQkFBVDtnQkFDQSxLQUFDLFFBQVEsTUFBTSxJQUFJOzs7ZUFDckI7O1lBQ0YsS0FBQyw0QkFBNEIsSUFBSTs7OztZQUVqQyxLQUFDLE1BQU0sa0JBQWtCOztlQUU3Qjs7SUFFSix5QkFBaUIsS0FBSTs7WUFFZCxLQUFDLE1BQU07O1lBQ04sS0FBQyxNQUFNLGVBQWU7bUJBQ3BCOztZQUVLLEtBQUMsTUFBTSxpQkFBaUI7O21CQUFqQzs7YUFDYSxLQUFDOzttQkFBZDs7UUFFRixLQUFDLGVBQWUsS0FBSyxLQUFLLEtBQUMsV0FBVyxJQUFJO2VBRTFDOztJQUVKLGtCQUFVLEtBQUk7Ozs7UUFFVixTQUFTLEtBQUMsVUFBVSxJQUFJO1FBRXhCLEtBQUMsZUFBZSxJQUFJO1lBRUwsV0FBVTs7bUJBQXZCOzthQUNtQjs7bUJBQW5COztRQUVGLE9BQVEsTUFBTTtRQUNkLG1CQUFRLE1BQU0sNEJBQVE7dUJBRWIsVUFDQSxTQUFRLGdCQUNULE9BQVUsUUFBUSxjQUFjLFNBQVMsV0FDekMsWUFBTSxXQUFVOztZQUNwQixLQUFDLE9BQU87bUJBQ047O2VBRU4ifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/act/macro.kode
