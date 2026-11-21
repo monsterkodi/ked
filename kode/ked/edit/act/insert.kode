@@ -125,9 +125,7 @@ export
 
         ⮐ null if not @rectree?
 
-        cells = {cols:@cells.cols rows:@cells.rows}
-
-        layout.absolutize cells @rectree
+        layout.absolutize @cells @rectree
 
         cursor = @mainCursor()
         node   = layout.topmostIn @rectree cursor
@@ -135,7 +133,7 @@ export
         ⮐ null if not node?
 
         oldRect = clone node.rect.abs
-        moved   = layout.moveNodeAt cells @rectree cursor dir
+        moved   = layout.moveNode @cells @rectree node dir
 
         ⮐ null if not moved?
 
@@ -147,15 +145,13 @@ export
         x = clamp rect.x maxX (rect.x + cursor[0] - oldRect.x)
         y = clamp rect.y maxY (rect.y + cursor[1] - oldRect.y)
 
-        @renderSheet @rectree cells [x y]
+        @renderSheet @rectree @cells [x y]
 
         moved
 
     resizeSheetNode: (dir) ->
 
         ⮐ null if not @rectree?
-
-        layout.absolutize @cells @rectree
 
         cursor = @mainCursor()
         node   = layout.topmostIn @rectree cursor

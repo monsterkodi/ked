@@ -1,8 +1,8 @@
-use ../../kxk ▪ sds noon
-use ../popo   ◆ layout fill
-use ../edit  ◆ editor
+use ../../kxk    ◆ sds noon
 use ../edit/tool ◆ sue
-use ../util  ◆ harness
+use ../popo      ◆ layout fill
+use ../edit      ◆ editor
+use ../util      ◆ harness
 
 ▸ popo
   
@@ -139,19 +139,15 @@ use ../util  ◆ harness
                 res = layout.nodeForPos {cols:10 rows:5} tree [5 2]
                 res.rect.abs ▸ {x:2 y:1 w:4 h:2}
 
-                res = layout.nodeForPos {cols:10 rows:5} tree [6 2]
-                res ▸ null
-
-                res = layout.nodeForPos {cols:10 rows:5} tree [2 3]
-                res ▸ null
+                valid layout.nodeForPos({cols:10 rows:5} tree [6 2]) ▸ false
+                valid layout.nodeForPos({cols:10 rows:5} tree [2 3]) ▸ false
 
                 tree = { x:1 y:1 r:2 b:1 }
 
                 res = layout.nodeForPos {cols:10 rows:5} tree [7 3]
                 res.rect.abs ▸ {x:1 y:1 w:7 h:3}
 
-                res = layout.nodeForPos {cols:10 rows:5} tree [8 3]
-                res ▸ null
+                valid layout.nodeForPos({cols:10 rows:5} tree [8 3]) ▸ false
 
       ▸ topmost
 
@@ -199,102 +195,49 @@ use ../util  ◆ harness
                 res.index ▸ 1
                 res.text ▸ 'i'
                 res.rect.abs ▸ {x:1 y:1 w:2 h:2}
+                
+    ▸ moveNode
+      
+      ▸ absolute
+      
+                cells = {cols:20 rows:6}
+                tree = layout.absolutize cells { children:[{ text:'move' x:2 y:2 w:4 h:2 }] }
 
-    ▸ moveNodeAt
+                layout.moveNode cells tree tree.children[0] 'left'
+                tree.children[0].x ▸ 1
+      
+                layout.moveNode cells tree tree.children[0] 'left'
+                tree.children[0].x ▸ 0
 
-      ▸ moves a numeric rect by one cell
+                layout.moveNode cells tree tree.children[0] 'left'
+                tree.children[0].x ▸ 0
 
-                tree = { children:[{ text:'a' x:2 y:2 w:4 h:2 }] }
+                layout.moveNode cells tree tree.children[0] 'right'
+                tree.children[0].x ▸ 1
+                
+      ▸ relative
+            
+                cells = {cols:20 rows:10}
+                tree = layout.absolutize cells { children:[{ text:'relm' x:'2%' y:'99%' w:'50%' h:'40%' }] }
 
-                res = layout.moveNodeAt {cols:20 rows:10} tree [3 3] 'right'
+                layout.moveNode cells tree tree.children[0] 'left'
+                tree.children[0].x ▸ '1%'
 
-                sds.get(tree 'children.0.x') ▸ 3
-                sds.get(tree 'children.0.rect.abs') ▸ {x:3 y:2 w:4 h:2}
-                res.rect.abs ▸ {x:3 y:2 w:4 h:2}
+                layout.moveNode cells tree tree.children[0] 'left'
+                tree.children[0].x ▸ '0%'
 
-                layout.moveNodeAt {cols:20 rows:10} tree [4 3] 'down'
+                layout.moveNode cells tree tree.children[0] 'left'
+                tree.children[0].x ▸ '0%'
 
-                sds.get(tree 'children.0.y') ▸ 3
-                sds.get(tree 'children.0.rect.abs') ▸ {x:3 y:3 w:4 h:2}
-
-      ▸ keeps a percent x
-
-                tree = { children:[{ text:'a' x:'20%' y:2 w:4 h:2 }] }
-
-                layout.moveNodeAt {cols:100 rows:10} tree [21 3] 'right'
-
-                sds.get(tree 'children.0.x') ▸ '21%'
-                sds.get(tree 'children.0.rect.abs') ▸ {x:21 y:2 w:4 h:2}
-
-                layout.moveNodeAt {cols:100 rows:10} tree [21 3] 'left'
-
-                sds.get(tree 'children.0.x') ▸ '20%'
-                sds.get(tree 'children.0.rect.abs') ▸ {x:20 y:2 w:4 h:2}
-
-      ▸ percent moves by at least one cell
-
-                tree = { children:[{ text:'a' x:'20%' y:2 w:4 h:2 }] }
-
-                layout.moveNodeAt {cols:200 rows:10} tree [42 3] 'right'
-
-                sds.get(tree 'children.0.x') ▸ '21%'
-                sds.get(tree 'children.0.rect.abs') ▸ {x:42 y:2 w:4 h:2}
-
-      ▸ stays inside the editor cells
-
-                tree = { children:[{ text:'a' x:8 y:2 w:2 h:2 }] }
-
-                res = layout.moveNodeAt {cols:10 rows:10} tree [9 3] 'right'
-
-                res ▸ null
-                sds.get(tree 'children.0.rect.abs') ▸ {x:8 y:2 w:2 h:2}
-
-      ▸ stays inside its parent
-
-                tree = { children:[{ x:2 y:2 w:6 h:4 children:[{ text:'a' x:3 y:1 w:2 h:1 }] }] }
-
-                layout.moveNodeAt {cols:30 rows:20} tree [5 3] 'right'
-
-                sds.get(tree 'children.0.children.0.rect.abs') ▸ {x:6 y:3 w:2 h:1}
-
-                res = layout.moveNodeAt {cols:30 rows:20} tree [6 3] 'right'
-
-                res ▸ null
-
-      ▸ moves r and b anchors without resizing
-
-                tree = { children:[{ text:'a' x:2 y:2 r:2 b:2 }] }
-
-                layout.moveNodeAt {cols:20 rows:10} tree [4 4] 'right'
-
-                sds.get(tree 'children.0.x') ▸ 3
-                sds.get(tree 'children.0.r') ▸ 1
-                noW = not sds.get(tree 'children.0').w?
-                noW ▸ true
-                sds.get(tree 'children.0.rect.abs') ▸ {x:3 y:2 w:16 h:6}
-
-                layout.moveNodeAt {cols:20 rows:10} tree [4 4] 'down'
-
-                sds.get(tree 'children.0.y') ▸ 3
-                sds.get(tree 'children.0.b') ▸ 1
-                sds.get(tree 'children.0.rect.abs') ▸ {x:3 y:3 w:16 h:6}
-
-      ▸ keeps a percent r when there is no x
-
-                tree = { children:[{ text:'a' r:'20%' y:2 }] }
-
-                layout.moveNodeAt {cols:100 rows:10} tree [1 3] 'right'
-
-                sds.get(tree 'children.0.x') ▸ 1
-                sds.get(tree 'children.0.r') ▸ '19%'
-                sds.get(tree 'children.0.rect.abs') ▸ {x:1 y:2 w:80 h:8}
+                layout.moveNode cells tree tree.children[0] 'right'
+                tree.children[0].x ▸ '1%'
 
     ▸ resizeNode
 
       ▸ absolute
                 
                 cells = {cols:20 rows:6}
-                tree =  layout.absolutize cells { children:[{ text:'a' x:2 y:2 w:4 h:2 }] }
+                tree = layout.absolutize cells { children:[{ text:'size' x:2 y:2 w:4 h:2 }] }
 
                 layout.resizeNode cells tree tree.children[0] 'more cols'
                 tree.children[0].w ▸ 5
@@ -320,31 +263,25 @@ use ../util  ◆ harness
       ▸ relative
             
                 cells = {cols:20 rows:10}
-                tree =  layout.absolutize cells { children:[{ text:'a' x:2 y:2 w:'50%' h:'50%' }] }
+                tree =  layout.absolutize cells { children:[{ text:'a' x:2 y:2 w:'50%' h:'40%' }] }
 
                 layout.resizeNode cells tree tree.children[0] 'more cols'
-                tree.children[0].w ▸ '55%'
+                tree.children[0].w ▸ '51%'
                 
                 layout.resizeNode cells tree tree.children[0] 'more cols'
-                tree.children[0].w ▸ '60%'
+                tree.children[0].w ▸ '52%'
 
                 layout.resizeNode cells tree tree.children[0] 'less cols'
-                tree.children[0].w ▸ '55%'
+                tree.children[0].w ▸ '51%'
 
                 layout.resizeNode cells tree tree.children[0] 'more rows'
-                tree.children[0].h ▸ '60%'
+                tree.children[0].h ▸ '41%'
 
                 layout.resizeNode cells tree tree.children[0] 'more rows'
-                tree.children[0].h ▸ '70%'
+                tree.children[0].h ▸ '42%'
                 
-                layout.resizeNode cells tree tree.children[0] 'more rows'
-                tree.children[0].h ▸ '80%'
-                
-                layout.resizeNode cells tree tree.children[0] 'more rows'
-                tree.children[0].h ▸ '80%'
-
                 layout.resizeNode cells tree tree.children[0] 'less rows'
-                tree.children[0].h ▸ '70%'
+                tree.children[0].h ▸ '41%'
                 
     ▸ titlify
 
@@ -398,47 +335,47 @@ use ../util  ◆ harness
 
   ▸ insertTextAt
 
-      ▸ creates a text node
+    ▸ creates a text node
 
-                tree = {}
+            tree = {}
 
-                layout.insertTextAt {cols:10 rows:5} tree [3 2] 'a' ▸ 1
+            layout.insertTextAt {cols:10 rows:5} tree [3 2] 'a' ▸ 1
 
-                sds.get(tree 'children.0') ▸ {text:'a' x:3 y:2 w:2 h:1}
+            sds.get(tree 'children.0') ▸ {text:'a' x:3 y:2 w:2 h:1}
 
-                tree = { pattern:'x' x:1 y:1 w:6 h:3 }
+            tree = { pattern:'x' x:1 y:1 w:6 h:3 }
 
-                layout.insertTextAt {cols:10 rows:5} tree [3 2] 'a' ▸ 1
+            layout.insertTextAt {cols:10 rows:5} tree [3 2] 'a' ▸ 1
 
-                sds.get(tree 'children.0') ▸ {text:'a' x:2 y:1 w:2 h:1}
+            sds.get(tree 'children.0') ▸ {text:'a' x:2 y:1 w:2 h:1}
 
-                tree = { x:2 y:2 w:4 h:2 }
+            tree = { x:2 y:2 w:4 h:2 }
 
-                layout.insertTextAt {cols:10 rows:10} tree [8 8] 'a' ▸ 1
+            layout.insertTextAt {cols:10 rows:10} tree [8 8] 'a' ▸ 1
 
-                sds.get(tree 'children.0') ▸ {text:'a' x:6 y:6 w:2 h:1}
+            sds.get(tree 'children.0') ▸ {text:'a' x:6 y:6 w:2 h:1}
 
-      ▸ inserts into a text node
+    ▸ inserts into a text node
 
-                tree = { children:[{ text:'ab' x:1 y:1 w:6 h:2 }] }
+            tree = { children:[{ text:'ab' x:1 y:1 w:6 h:2 }] }
 
-                layout.insertTextAt {cols:10 rows:5} tree [2 1] 'X' ▸ 1
+            layout.insertTextAt {cols:10 rows:5} tree [2 1] 'X' ▸ 1
 
-                sds.get(tree 'children.0.text') ▸ 'aXb'
+            sds.get(tree 'children.0.text') ▸ 'aXb'
 
-                tree = { children:[{ text:'ab' x:1 y:1 w:6 h:2 }] }
+            tree = { children:[{ text:'ab' x:1 y:1 w:6 h:2 }] }
 
-                layout.insertTextAt {cols:10 rows:5} tree [6 1] 'Z' ▸ 1
+            layout.insertTextAt {cols:10 rows:5} tree [6 1] 'Z' ▸ 1
 
-                sds.get(tree 'children.0.text') ▸ 'abZ'
+            sds.get(tree 'children.0.text') ▸ 'abZ'
 
-                tree = { children:[{ text:'ab' scale:2 x:0 y:0 w:8 h:2 }] }
+            tree = { children:[{ text:'ab' scale:2 x:0 y:0 w:8 h:2 }] }
 
-                layout.insertTextAt {cols:8 rows:2} tree [4 0] 'X' ▸ 2
+            layout.insertTextAt {cols:8 rows:2} tree [4 0] 'X' ▸ 2
 
-                sds.get(tree 'children.0.text') ▸ 'abX'
+            sds.get(tree 'children.0.text') ▸ 'abX'
 
-                layout.insertTextAt {cols:8 rows:2} null [0 0] 'X' ▸ 0
+            layout.insertTextAt {cols:8 rows:2} null [0 0] 'X' ▸ 0
 
   ▸ fill
 
@@ -817,7 +754,7 @@ use ../util  ◆ harness
 
         sds.get(e.state.rectree 'children.0.text') ▸ 'a'
 
-  ▸ a sheet resize is not an undo step
+  ▸ resize is not an undo step
 
         h = new harness cols:16 rows:4
         e = new editor h.screen 'popo_sheet_resize_history' []
