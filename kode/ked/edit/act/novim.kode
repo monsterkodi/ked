@@ -1,7 +1,7 @@
 
 use ../../../kxk ▪ kseg post
 use ../mode      ◆ novim
-use ../tool      ◆ belt motion register
+use ../tool      ◆ belt motion register jumplist changelist
 use ../../util   ◆ config
 #!act novim
 export
@@ -9,6 +9,8 @@ export
     novimState: ->
     
         register:           new register
+        jumps:              new jumplist
+        changes:            new changelist
         macroReplaying:     0
         macroLastRegister:  null
     
@@ -1228,21 +1230,21 @@ export
 
         ⮐ if empty rngs
 
-        clearTimeout @yankFlashTimer if @yankFlashTimer
+        clearTimeout @novim.yankFlashTimer if @novim.yankFlashTimer
 
-        flashMs = config.data?.novim?.yankFlashMs ? 500
-        @yankFlash      = rngs
-        @yankFlashTimer = setTimeout (=> @clearYankFlash()) flashMs
+        flashMs = config.data?.novim?.novim.yankFlashMs ? 500
+        @novim.yankFlash      = rngs
+        @novim.yankFlashTimer = setTimeout (=> @clearYankFlash()) flashMs
 
     clearYankFlash: ->
 
-        clearTimeout @yankFlashTimer if @yankFlashTimer
+        clearTimeout @novim.yankFlashTimer if @novim.yankFlashTimer
 
-        @yankFlashTimer = null
+        @novim.yankFlashTimer = null
 
-        ⮐ if not @yankFlash
+        ⮐ if not @novim.yankFlash
 
-        @yankFlash = null
+        @novim.yankFlash = null
 
         post.emit 'redraw'
 

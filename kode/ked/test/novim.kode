@@ -409,8 +409,8 @@ windowReset = (s) ->
         ns.insert 'x'
         ns.insert 'y'
 
-        ns.changes.entries.length ▸ 1
-        ns.changes.entries[0]     ▸ [1 0]
+        ns.novim.changes.entries.length ▸ 1
+        ns.novim.changes.entries[0]     ▸ [1 0]
 
         endSess()
 
@@ -428,7 +428,7 @@ windowReset = (s) ->
         press 'w'
         press 'l'
 
-        ns.changes.entries.length ▸ 0
+        ns.novim.changes.entries.length ▸ 0
 
         stopNovim ns
         endSess()
@@ -444,12 +444,12 @@ windowReset = (s) ->
 
         ns.insert 'x'
 
-        ns.changes.entries.length ▸ 1
+        ns.novim.changes.entries.length ▸ 1
 
         ns.undo()
 
-        ns.changes.entries.length ▸ 1
-        ns.changes.older()        ▸ [0 0]
+        ns.novim.changes.entries.length ▸ 1
+        ns.novim.changes.older()        ▸ [0 0]
 
         endSess()
 
@@ -465,8 +465,8 @@ windowReset = (s) ->
         nmv = mode.get ns 'novim'
         nmv.runEx 's/one/x/'
 
-        ns.changes.entries.length ▸ 1
-        ns.changes.entries[0]     ▸ [0 0]
+        ns.novim.changes.entries.length ▸ 1
+        ns.novim.changes.entries[0]     ▸ [0 0]
 
         stopNovim ns
         endSess()
@@ -482,11 +482,11 @@ windowReset = (s) ->
 
         ns.insert 'x'
 
-        ns.changes.entries.length ▸ 1
+        ns.novim.changes.entries.length ▸ 1
 
         ns.loadLines ['new']
 
-        ns.changes.entries.length ▸ 0
+        ns.novim.changes.entries.length ▸ 0
 
         endSess()
 
@@ -631,7 +631,7 @@ windowReset = (s) ->
         nmv = mode.get ns 'novim'
         nmv.runEx 'g/./normal G'
 
-        ns.jumps.entries.length ▸ 0
+        ns.novim.jumps.entries.length ▸ 0
 
         stopNovim ns
         endSess()
@@ -649,15 +649,15 @@ windowReset = (s) ->
 
         nmv.runEx 'e'
 
-        ns.jumps.entries.length ▸ 1
-        ns.jumps.entries[0].y   ▸ 1
+        ns.novim.jumps.entries.length ▸ 1
+        ns.novim.jumps.entries[0].y   ▸ 1
 
         ns.setMainCursor 0 0
 
         nmv.runEx 's/one/x/'
 
-        ns.jumps.entries.length ▸ 2
-        ns.jumps.entries[1].y   ▸ 0
+        ns.novim.jumps.entries.length ▸ 2
+        ns.novim.jumps.entries[1].y   ▸ 0
 
         stopNovim ns
         endSess()
@@ -1077,10 +1077,10 @@ windowReset = (s) ->
             loadText "one two three\nfour five"
         
             s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
-            s.yankFlash ▸ [[0 0 4 0]]
+            s.novim.yankFlash ▸ [[0 0 4 0]]
         
             s.clearYankFlash()
-            s.yankFlash ▸ null
+            s.novim.yankFlash ▸ null
         
             loadText "one two"
             s.startVisual 'char'
@@ -1088,18 +1088,18 @@ windowReset = (s) ->
             s.updateVisual()
         
             s.executeNovim {operator:'visualYank'}
-            s.yankFlash ▸ [[0 0 2 0]]
+            s.novim.yankFlash ▸ [[0 0 2 0]]
             s.visual ▸ null
         
             s.clearYankFlash()
-            s.yankFlash ▸ null
+            s.novim.yankFlash ▸ null
         
     ▸ yank flash fades
         
             loadText "one two"
         
             s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
-            s.yankFlash ▸ [[0 0 4 0]]
+            s.novim.yankFlash ▸ [[0 0 4 0]]
         
     ▸ yank flash is drawn
         

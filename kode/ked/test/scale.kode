@@ -1537,7 +1537,7 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
         before = blockArea scr
 
-        e.state.yankFlash = [[0 0 8 0]]
+        e.state.novim.yankFlash = [[0 0 8 0]]
 
         scr.init()
         e.draw()
@@ -1612,7 +1612,7 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
             e.state.setCursors [[0 0]]
             e.state.stepScales 2
             e.state.setCursors [[0 1]]
-            e.state.yankFlash = [[0 0 4 0]]
+            e.state.novim.yankFlash = [[0 0 4 0]]
 
         scr.get_bg(0 0) ▸ e.color.yank
         scr.get_bg(3 0) ▸ e.color.yank
@@ -1623,7 +1623,7 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
         [scr e] = runEd ['a' 'b' 'c' 'xx BIG yy'] {} (e) ->
             runScale e [[3 3 6 3]]
             e.state.setCursors [[0 2]]
-            e.state.yankFlash = [[3 3 6 3]]
+            e.state.novim.yankFlash = [[3 3 6 3]]
 
         scr.get_bg(3 1) ▸ e.color.yank
         scr.get_bg(4 1) ▸ e.color.yank

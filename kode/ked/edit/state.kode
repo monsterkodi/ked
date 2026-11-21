@@ -36,16 +36,11 @@ use           ◆ keys mode
         @scaledExts = ['md' 'markdown' 'kode']
         @scaling    = true
 
-        @yankFlash      = null
-        @yankFlashTimer = null
-
         @rowCache       = null
         @rowCacheExt    = null
         @maxWidthCache  = 0
         @gutterWidthOverride = null
 
-        @jumps   = new jumplist
-        @changes = new changelist
         @keepJumps = 0
 
         @clearSingle()
@@ -414,10 +409,10 @@ use           ◆ keys mode
         @lastVisual    = null
         @novimInsert   = null
 
-        clearTimeout @yankFlashTimer if @yankFlashTimer
+        clearTimeout @novim.yankFlashTimer if @novim.yankFlashTimer
 
-        @yankFlash      = null
-        @yankFlashTimer = null
+        @novim.yankFlash      = null
+        @novim.yankFlashTimer = null
     
         @s = immutable
             lines:       @segls
@@ -440,7 +435,7 @@ use           ◆ keys mode
         @h = []
         @r = []
 
-        @changes.reset()
+        @novim.changes.reset()
 
         @beginIndices = []
         delete @beginIndex
@@ -474,7 +469,7 @@ use           ◆ keys mode
         
         if oldLines != @s.lines
 
-            @changes.record @mainCursor() if @h.length
+            @novim.changes.record @mainCursor() if @h.length
 
             colors = @s.colors
 
@@ -694,7 +689,7 @@ use           ◆ keys mode
         moved = false
 
         for i in 0...n
-            pos = @changes.older()
+            pos = @novim.changes.older()
             break if not pos
             @setMainCursor pos[0] pos[1]
             moved = true
@@ -707,7 +702,7 @@ use           ◆ keys mode
         moved = false
 
         for i in 0...n
-            pos = @changes.newer()
+            pos = @novim.changes.newer()
             break if not pos
             @setMainCursor pos[0] pos[1]
             moved = true
@@ -736,7 +731,7 @@ use           ◆ keys mode
 
         ⮐ false if @keepJumps
 
-        @jumps.record(@jumpEntry(pos))
+        @novim.jumps.record(@jumpEntry(pos))
 
         true
 
@@ -746,7 +741,7 @@ use           ◆ keys mode
         moved = false
 
         for i in 0...n
-            entry = @jumps.older @jumpEntry()
+            entry = @novim.jumps.older @jumpEntry()
             break if not entry
             @jumpToEntry entry
             moved = true
@@ -759,7 +754,7 @@ use           ◆ keys mode
         moved = false
 
         for i in 0...n
-            entry = @jumps.newer()
+            entry = @novim.jumps.newer()
             break if not entry
             @jumpToEntry entry
             moved = true

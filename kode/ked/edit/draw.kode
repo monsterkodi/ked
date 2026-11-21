@@ -388,13 +388,13 @@ use              ◆ mode
 
     drawYank: ->
 
-        ⮐ if empty @state.yankFlash
+        ⮐ if empty @state.novim.yankFlash
 
         bg = @color.yank
 
         [vx vy] = @state.s.view
 
-        for rng in @state.yankFlash
+        for rng in @state.novim.yankFlash
 
             start = max rng[1], vy
             row   = @state.rowOfLine start
