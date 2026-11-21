@@ -45,7 +45,7 @@ use ../../util/img  ◆ rounded
 
         block = @screen.blockAt @wx(x) @wy(y)
 
-        ⮐ null if not block?
+        ⮐ if not block?
 
         [block[0]-@x block[1]-@y block[2] block[3] block[4]]
     

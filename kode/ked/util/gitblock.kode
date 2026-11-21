@@ -105,7 +105,7 @@
 
     @revert: block lines -> 
 
-        ⮐ null if not @matchesNew block lines
+        ⮐ if not @matchesNew block lines
 
         ops   = []
         delta = 0
@@ -138,7 +138,7 @@
 
     @restore: entry lines ->
 
-        ⮐ null if not @matchesOld entry lines
+        ⮐ if not @matchesOld entry lines
         entry.block
 
     @matchesNew: block lines ->
@@ -239,7 +239,7 @@
             delta += hunk.old.length - hunk.new.length
 
         d = @contextShift block.before block.after block.start lines
-        ⮐ null if not valid d
+        ⮐ if not valid d
         @entryAt block lines d
 
     @entryAt: block lines d ->
@@ -251,7 +251,7 @@
         for hunk in shifted.hunks
 
             for i in 0...hunk.old.length
-                ⮐ null if lines[hunk.start+delta+i] != hunk.old[i]
+                ⮐ if lines[hunk.start+delta+i] != hunk.old[i]
 
             delta += hunk.old.length - hunk.new.length
 
@@ -345,7 +345,7 @@
     @reanchorEntry: entry lines ->
 
         shift = @shiftForEntry entry lines
-        ⮐ null if not valid shift
+        ⮐ if not valid shift
         @shiftEntry entry shift
 
     @undoneBlock: entry lines ->
@@ -384,7 +384,7 @@
             shift = idx - op.oldStart
             ⮐ shift if @entryMatchesAt entry lines shift
 
-        ⮐ null if hasOld
+        ⮐ if hasOld
 
         @contextShift entry.before entry.after entry.start lines
 
@@ -414,8 +414,8 @@
 
     @findSequence: lines seq near ->
 
-        ⮐ null if empty seq
-        ⮐ null if seq.length > lines.length
+        ⮐ if empty seq
+        ⮐ if seq.length > lines.length
 
         near ?= 0
 
@@ -442,27 +442,24 @@
 
         if not valid before
 
-            ⮐ null if valid after and empty lines
+            ⮐ if valid after and empty lines
 
             if not valid after
                 ⮐ -start if empty lines
-                ⮐ null
+                ⮐
 
             if lines.length and lines[0] == after
                 ⮐ -start
-
-            ⮐ null
+            ⮐
 
         if not valid after
 
-            best = null
             for i in 0...lines.length
                 best = i if lines[i] == before
 
-            ⮐ null if best == null
-            ⮐ best+1-start
+            ⮐ best+1-start if valid best
+            ⮐ 
 
-        best = null
         dist = Infinity
 
         for i in 0...lines.length-1
@@ -473,8 +470,7 @@
                     dist = d
                     best = i+1
 
-        ⮐ null if best == null
-        best-start
+        ⮐ best-start if valid best
 
 #!overlap
 
@@ -484,9 +480,9 @@
 
     @intervalOverlap: aStart aEnd bStart bEnd ->
 
-        ⮐ true  if aStart == aEnd and bStart == bEnd and aStart == bStart
-        ⮐ true  if aStart == aEnd and bStart < aStart < bEnd
-        ⮐ true  if bStart == bEnd and aStart < bStart < aEnd
+        ⮐ true if aStart == aEnd and bStart == bEnd and aStart == bStart
+        ⮐ true if aStart == aEnd and bStart < aStart < bEnd
+        ⮐ true if bStart == bEnd and aStart < bStart < aEnd
         aStart < bEnd and bStart < aEnd
 
 export gitblock

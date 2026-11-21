@@ -18,9 +18,9 @@
 
         session = global.ked_session
 
-        ⮐ null if not valid session
-        ⮐ null if not valid session.get
-        ⮐ null if not valid session.set
+        ⮐ if not valid session
+        ⮐ if not valid session.get
+        ⮐ if not valid session.set
 
         session
 
@@ -79,14 +79,14 @@
 
         entries = @list()
 
-        ⮐ null if empty entries
+        ⮐ if empty entries
 
         if not @active
             @draft  = text ? ''
             @index  = entries.length
             @active = true
 
-        ⮐ null if @index <= 0
+        ⮐ if @index <= 0
 
         @index -= 1
 
@@ -94,7 +94,7 @@
 
     next: text ->
 
-        ⮐ null if not @active
+        ⮐ if not @active
 
         entries = @list()
 

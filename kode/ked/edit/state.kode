@@ -85,7 +85,7 @@ use           ◆ keys mode
     colorAtPos: (pos layer) =>
 
         colors = @s.colors
-        ⮐ null if not colors?
+        ⮐ if not colors?
 
         colorspans.colorAtPos (colors[layer] ? []) pos
 
@@ -324,7 +324,7 @@ use           ◆ keys mode
     sueAt: pos =>
 
         areas = @s.sue ? []
-        ⮐ null if empty areas
+        ⮐ if empty areas
 
         [x y] = pos
 
@@ -332,8 +332,6 @@ use           ◆ keys mode
             area = areas[i]
             if area.y == y and area.x <= x
                 ⮐ area
-
-        null
 
 #!cursors
 
@@ -734,7 +732,7 @@ use           ◆ keys mode
 
         session = global.ked_session
 
-        ⮐ null if not session?.get
+        ⮐ if not session?.get
 
         session.get 'editor▸file'
 

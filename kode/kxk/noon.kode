@@ -459,9 +459,9 @@ stringify = obj options={} ->
 
 parseStr = str p ext ->
 
-    ⮐ null if str.length <= 0
+    ⮐ if str.length <= 0
 
-    switch ext ? slash.ext p
+    switch ext ? slash.ext(p)
         'json' ➜ JSON.parse str
                ➜ parse str
 

@@ -327,13 +327,13 @@ insertionIndex = (oldLine newLine) ->
 
     @sueDecode: symbols ->
         arr = Array.from(symbols)
-        ⮐ null if empty arr
+        ⮐ if empty arr
         total = payloadTotal arr 0
-        ⮐ null if total == 0 or total != arr.length
+        ⮐ if total == 0 or total != arr.length
         try
             ⮐ JSON.parse(textOf(arr[1+LEN...total]))
         catch err
-            ⮐ null
+            ⮐ 
 
     @areasForColors: colors ->
 
@@ -381,10 +381,10 @@ insertionIndex = (oldLine newLine) ->
 
         value = area.value
 
-        ⮐ null if not (value is arr)
-        ⮐ null if value.length < 3
-        ⮐ null if not (value[1] is num)
-        ⮐ null if isMark value
+        ⮐ if not (value is arr)
+        ⮐ if value.length < 3
+        ⮐ if not (value[1] is num)
+        ⮐ if isMark value
 
         cols = value[1]
         h    = value[2] ? 1

@@ -315,7 +315,7 @@ toExport["gitblock"] = async function ()
     await section("a stale block cannot be reverted", async function ()
     {
         block = gitblock.fromDiff({changes:[{line:2,old:['b'],new:['B']}]})[0]
-        compare(gitblock.revert(block,['a','Z','c']),null)
+        compare(gitblock.revert(block,['a','Z','c']),undefined)
     })
     await section("the first line of a block is its first displayed line", async function ()
     {

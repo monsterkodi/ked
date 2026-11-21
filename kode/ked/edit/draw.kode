@@ -86,7 +86,7 @@ use              ◆ mode
 
     selectionBackgroundFor: (x y) ->
 
-        ⮐ null if empty @state.s.selections
+        ⮐ if empty @state.s.selections
 
         for rng in @state.s.selections
 
@@ -98,8 +98,6 @@ use              ◆ mode
             bg = @color.selection.span if belt.isSpanLineRange(@state.s.lines rng)
             bg = color.darken bg if not @cells.screen.t.hasFocus
             ⮐ color.values bg
-
-        null
 
     #  a cell carrying a scaled block belongs to the block, not to the text
     #  that the decorations of its row would paint over, so every decoration

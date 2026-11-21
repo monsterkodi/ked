@@ -899,8 +899,8 @@ use ../edit/tool ◆ belt
         belt.parseSubstitutePattern('/')          ▸ {pattern:'' open:true}
         belt.parseSubstitutePattern('/foo/bar')   ▸ {pattern:'foo' open:false}
         belt.parseSubstitutePattern('/a\\/b')     ▸ {pattern:'a/b' open:true}
-        belt.parseSubstitutePattern('foo')        ▸ null
-        belt.parseSubstitutePattern('')           ▸ null
+        belt.parseSubstitutePattern('foo')        ▸ undefined
+        belt.parseSubstitutePattern('')           ▸ undefined
 
         belt.parseSubstitute('/a/b').pattern ▸ 'a'
         belt.parseSubstitute('/a/b').tokens ▸ [{kind:'literal' text:'b'}]

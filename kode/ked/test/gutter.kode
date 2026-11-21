@@ -447,7 +447,7 @@ text = (e) -> kseg.str(e.state.segls)
 
         block = gitblock.fromDiff(changes:[{line:2 old:['b'] new:['B']}])[0]
 
-        gitblock.revert block ['a' 'Z' 'c'] ▸ null
+        gitblock.revert block ['a' 'Z' 'c'] ▸ undefined
 
   ▸ the first line of a block is its first displayed line
 

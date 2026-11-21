@@ -45,17 +45,17 @@
 
     older: current ->
 
-        ⮐ null if empty @entries
+        ⮐ if empty @entries
 
         if @index >= @entries.length
             @removeLine current
             @entries.push current
             @trim()
             @index = @entries.length - 2
-            ⮐ null if @index < 0
+            ⮐ if @index < 0
             ⮐ @entries[@index]
 
-        ⮐ null if @index <= 0
+        ⮐ if @index <= 0
 
         @index -= 1
 
@@ -63,7 +63,7 @@
 
     newer: ->
 
-        ⮐ null if @index >= @entries.length-1
+        ⮐ if @index >= @entries.length-1
 
         @index += 1
 

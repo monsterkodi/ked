@@ -27,7 +27,7 @@ use ../../../kxk  ▪ noon slash
         if result.status != 0
             error "fontmap: #{cmd} failed with #{result.status}"
             error String(result.stderr)
-            ⮐ null
+            ⮐
         
         result
 

@@ -48,7 +48,7 @@ decode = (code) ->
 
     mark = 'sourceMappingURL=data:application/json;base64,'
     at = code.lastIndexOf mark
-    ⮐ null if at < 0
+    ⮐ if at < 0
 
     b64 = ''
     i = at + mark.length

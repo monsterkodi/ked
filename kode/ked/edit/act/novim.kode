@@ -55,7 +55,7 @@ export
 
         spans = @s.highlights
 
-        ⮐ null if empty spans
+        ⮐ if empty spans
 
         pos = @mainCursor()
 

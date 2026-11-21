@@ -189,12 +189,12 @@ use ../../../kxk ▪ kseg
 
     @parseSubstitutePattern: args ->
 
-        ⮐ null if empty args
+        ⮐ if empty args
 
         delim = args[0]
 
-        ⮐ null if delim.length != 1
-        ⮐ null if /[a-zA-Z0-9\s\\|"]/.test delim
+        ⮐ if delim.length != 1
+        ⮐ if /[a-zA-Z0-9\s\\|"]/.test delim
 
         scan = @exScan args 1 delim
 

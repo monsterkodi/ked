@@ -209,7 +209,7 @@ windowReset = (s) ->
         h = new cmdlinehistory 'ex'
 
         h.list()        ▸ []
-        h.prev('draft') ▸ null
+        h.prev('draft') ▸ undefined
 
         endSess()
 
@@ -284,7 +284,7 @@ windowReset = (s) ->
 
         h.prev('draft') ▸ 'two'
         h.prev('two')   ▸ 'one'
-        h.prev('one')   ▸ null
+        h.prev('one')   ▸ undefined
 
         h.next('one')   ▸ 'two'
         h.next('two')   ▸ 'draft'
@@ -668,8 +668,8 @@ windowReset = (s) ->
 
         c = new changelist
 
-        c.older() ▸ null
-        c.newer() ▸ null
+        c.older() ▸ undefined
+        c.newer() ▸ undefined
 
   ▸ g; starts at the newest change
 
@@ -678,7 +678,7 @@ windowReset = (s) ->
         c.record [0 0]
 
         c.older() ▸ [0 0]
-        c.older() ▸ null
+        c.older() ▸ undefined
 
   ▸ changes are walked backwards and forwards
 
@@ -691,11 +691,12 @@ windowReset = (s) ->
         c.older() ▸ [0 2]
         c.older() ▸ [0 1]
         c.older() ▸ [0 0]
-        c.older() ▸ null
+        c.older() ▸ undefined
+        
 
         c.newer() ▸ [0 1]
         c.newer() ▸ [0 2]
-        c.newer() ▸ null
+        c.newer() ▸ undefined
 
   ▸ close changes on the same line keep only the last position
 
@@ -736,7 +737,7 @@ windowReset = (s) ->
         c.reset()
 
         c.entries.length ▸ 0
-        c.older()        ▸ null
+        c.older()        ▸ undefined
 
 ▸ jumplist
 
@@ -744,8 +745,8 @@ windowReset = (s) ->
 
         j = new jumplist
 
-        j.older {file:'a' x:0 y:0} ▸ null
-        j.newer()                  ▸ null
+        j.older {file:'a' x:0 y:0} ▸ undefined
+        j.newer()                  ▸ undefined
 
   ▸ ctrl o goes to the position before the last jump
 
@@ -767,12 +768,12 @@ windowReset = (s) ->
         j.older({file:'a' x:0 y:4}) ▸ {file:'a' x:0 y:3}
         j.older({file:'a' x:0 y:3}) ▸ {file:'a' x:0 y:2}
         j.older({file:'a' x:0 y:2}) ▸ {file:'a' x:0 y:1}
-        j.older({file:'a' x:0 y:1}) ▸ null
+        j.older({file:'a' x:0 y:1}) ▸ undefined
 
         j.newer() ▸ {file:'a' x:0 y:2}
         j.newer() ▸ {file:'a' x:0 y:3}
         j.newer() ▸ {file:'a' x:0 y:4}
-        j.newer() ▸ null
+        j.newer() ▸ undefined
 
   ▸ a jump from a newer position drops the positions after it
 
@@ -789,7 +790,7 @@ windowReset = (s) ->
 
         j.older({file:'a' x:0 y:5}) ▸ {file:'a' x:0 y:2}
         j.newer()                   ▸ {file:'a' x:0 y:5}
-        j.newer()                   ▸ null
+        j.newer()                   ▸ undefined
 
   ▸ positions on the same line are not repeated
 
@@ -936,17 +937,17 @@ windowReset = (s) ->
     
         wobj = (x area count) -> mrange(words, x, 0, {kind:'textObject', area:area, target:'word', count:count})
     
-        wobj(5, 'inner', 1)  ▸ [4 0 7 0]
-        wobj(5, 'around', 1) ▸ [4 0 8 0]
-        wobj(0, 'inner', 1)  ▸ [0 0 3 0]
-        wobj(0, 'around', 1) ▸ [0 0 4 0]
-        wobj(14, 'around', 1) ▸ [13 0 18 0]
-        wobj(3, 'inner', 1)  ▸ [3 0 4 0]
-        wobj(3, 'around', 1) ▸ [4 0 8 0]
-        wobj(0, 'inner', 2)  ▸ [0 0 7 0]
-        wobj(0, 'around', 2) ▸ [0 0 8 0]
-        wobj(0, 'inner', 3)  ▸ [0 0 13 0]
-        wobj(0, 'around', 4) ▸ [0 0 18 0]
+        wobj(5  'inner'  1) ▸ [4 0 7 0]
+        wobj(5  'around' 1) ▸ [4 0 8 0]
+        wobj(0  'inner'  1) ▸ [0 0 3 0]
+        wobj(0  'around' 1) ▸ [0 0 4 0]
+        wobj(14 'around' 1) ▸ [13 0 18 0]
+        wobj(3  'inner'  1) ▸ [3 0 4 0]
+        wobj(3  'around' 1) ▸ [4 0 8 0]
+        wobj(0  'inner'  2) ▸ [0 0 7 0]
+        wobj(0  'around' 2) ▸ [0 0 8 0]
+        wobj(0  'inner'  3) ▸ [0 0 13 0]
+        wobj(0  'around' 4) ▸ [0 0 18 0]
     
         mrange(kseg.segls("foo\nbar"), 0, 0, {kind:'textObject', area:'inner', target:'word', count:2}) ▸ [0 0 3 1]
     
@@ -968,7 +969,7 @@ windowReset = (s) ->
         qobj(7, 'around') ▸ [4 0 18 0]
         qobj(0, 'inner')  ▸ [5 0 16 0]
     
-        mrange(quoted, 20, 0, {kind:'textObject', area:'inner', target:'"', count:1}) ▸ null
+        mrange(quoted, 20, 0, {kind:'textObject', area:'inner', target:'"', count:1}) ▸ undefined
     
         lead = kseg.segls 'x = "abc"'
         lobj = (x area) -> mrange(lead, x, 0, {kind:'textObject', area:area, target:'"', count:1})
@@ -1007,7 +1008,7 @@ windowReset = (s) ->
         instring = kseg.segls "x = '[' + y]"
         iobj = (x) -> mrange(instring, x, 0, {kind:'textObject', area:'inner', target:'[', count:1})
     
-        iobj(5) ▸ null
+        iobj(5) ▸ undefined
     
         afterstring = kseg.segls "x = '[' ; a[b]"
         nobj = (x) -> mrange(afterstring, x, 0, {kind:'textObject', area:'inner', target:'[', count:1})
@@ -1023,7 +1024,7 @@ windowReset = (s) ->
         mrange(multiline, 3, 1, {kind:'textObject', area:'inner',  target:'(', count:1}) ▸ [4 0 0 2]
         mrange(multiline, 3, 1, {kind:'textObject', area:'around', target:'(', count:1}) ▸ [3 0 1 2]
     
-        mrange(kseg.segls('nothing here'), 0, 0, {kind:'textObject', area:'inner', target:'(', count:1}) ▸ null
+        mrange(kseg.segls('nothing here'), 0, 0, {kind:'textObject', area:'inner', target:'(', count:1}) ▸ undefined
     
   ▸ cursor to start and end of line
     

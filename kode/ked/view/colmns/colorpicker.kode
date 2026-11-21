@@ -348,7 +348,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
     sheetNodeAtCursor: =>
 
         state = @editor.state
-        ⮐ null if not state.rectree?
+        ⮐ if not state.rectree?
 
         layout.nodeForPos @editor.cells state.rectree state.mainCursor()
 

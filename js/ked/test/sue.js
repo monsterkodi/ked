@@ -61,11 +61,11 @@ toExport["sue"] = async function ()
     })
     await section("decode rejects a broken or a truncated payload", async function ()
     {
-        compare(sue.sueDecode(''),null)
-        compare(sue.sueDecode(sym('!')),null)
-        compare(sue.sueDecode(sym('!0001x')),null)
+        compare(sue.sueDecode(''),undefined)
+        compare(sue.sueDecode(sym('!')),undefined)
+        compare(sue.sueDecode(sym('!0001x')),undefined)
         trunc = sym('!0007{"a":')
-        compare(sue.sueDecode(trunc),null)
+        compare(sue.sueDecode(trunc),undefined)
     })
     await section("text without payloads is left alone", async function ()
     {
@@ -197,12 +197,12 @@ toExport["sue"] = async function ()
     await section("a mark has no box", async function ()
     {
         lines = [['a','b','c','d','e']]
-        compare(sue.boxForAreaAndLines({x:1,y:0,value:[41,-1,1,3]},lines),null)
+        compare(sue.boxForAreaAndLines({x:1,y:0,value:[41,-1,1,3]},lines),undefined)
     })
     await section("a value without geometry has no box", async function ()
     {
         lines = [['a','b','c','d','e']]
-        compare(sue.boxForAreaAndLines({x:1,y:0,value:[31,['#f00',8,1]]},lines),null)
+        compare(sue.boxForAreaAndLines({x:1,y:0,value:[31,['#f00',8,1]]},lines),undefined)
     })
     await section("a range cuts an area in two", async function ()
     {

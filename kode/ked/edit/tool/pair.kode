@@ -313,7 +313,7 @@ clos   = new Set([')' ']' '}'])
             c1 = @columnForCodeunitIndex line pair.rng[1]
             ⮐ [[c0 li c0+1] [c1 li c1+1]]
         
-        ⮐ null if @isRangeInString lines [pos[0] pos[1] pos[0]+1 pos[1]]
+        ⮐ if @isRangeInString lines [pos[0] pos[1] pos[0]+1 pos[1]]
         
         idx = @bracketIndex lines
         

@@ -65,7 +65,7 @@ use              ◆ belt
 
     @range: lines pos spec ->
     
-        ⮐ null if empty lines
+        ⮐ if empty lines
 
         [x y] = pos
 
@@ -347,7 +347,7 @@ use              ◆ belt
         i    = kseg.indexAtWidth segs x
 
         if forward
-            ⮐ null if i <= 0
+            ⮐ if i <= 0
             [kseg.widthAtSegi(segs, i-1) y]
         else
             [kseg.widthAtSegi(segs, i+1) y]
@@ -379,7 +379,7 @@ use              ◆ belt
 
             found.push(p) if p
 
-        ⮐ null if found.length < count
+        ⮐ if found.length < count
 
         if forward
             found[count-1]
@@ -395,7 +395,7 @@ use              ◆ belt
 
         pos = @charFindPosition lines [x y] target count till forward
 
-        ⮐ null if pos == null
+        ⮐ if pos == null
 
         msegs = lines[pos[1]]
         mi    = kseg.indexAtWidth msegs pos[0]
@@ -670,7 +670,7 @@ use              ◆ belt
         if open == '"' or open == "'"
             ⮐ @rangeForQuoteObject lines x y open inner
 
-        ⮐ null if not closes[open]
+        ⮐ if not closes[open]
 
         @rangeForBracketObject lines x y open inner
 
@@ -678,7 +678,7 @@ use              ◆ belt
 
         segs = lines[y]
 
-        ⮐ null if empty segs
+        ⮐ if empty segs
 
         xi = kseg.indexAtWidth segs x
         xi = segs.length-1 if xi >= segs.length
@@ -697,7 +697,7 @@ use              ◆ belt
                 pairs.push [open i]
                 open = -1
 
-        ⮐ null if empty pairs
+        ⮐ if empty pairs
 
         chosen = null
 
@@ -712,7 +712,7 @@ use              ◆ belt
                     chosen = pair
                     break
 
-        ⮐ null if not chosen
+        ⮐ if not chosen
 
         [o c] = chosen
 
@@ -764,7 +764,7 @@ use              ◆ belt
 
         spans = @pairSpansForPosition lines x y open
 
-        ⮐ null if not spans
+        ⮐ if not spans
 
         [osp csp] = spans
 

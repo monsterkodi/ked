@@ -1344,9 +1344,9 @@ for ext in ['html' 'htm' 'xml' 'svg' 'md']
     commentStyles[ext] = start:'<!--' end:'-->'
 
 commentStyle = (ext) ->
-    ⮐ null if not ext is str
+    ⮐ if not ext is str
     ext = ext[1..] if ext[0] == '.'
-    commentStyles[ext] ? null
+    commentStyles[ext]
 
 blocked = lines ->
 ###
