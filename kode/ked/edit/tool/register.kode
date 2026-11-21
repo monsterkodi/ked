@@ -2,6 +2,7 @@ use ../../../kxk ◆ clip
 ■register
 
     @: ->
+        
         @values = {}
 
     @cloneValue: value ->
@@ -153,6 +154,8 @@ use ../../../kxk ◆ clip
 
     write: name value operation='yank' ->
 
+        @value = value if name != '_'
+        
         target = register.target name
 
         ⮐ if not target

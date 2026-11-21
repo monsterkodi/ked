@@ -19,7 +19,6 @@ use           ◆ keys mode
         
         @novim = novim.novimState()
 
-        @novimRegister  = null
         @allowedModes   = {}
 
         for act in [del insert select join indent multi main novim sort count range macro]

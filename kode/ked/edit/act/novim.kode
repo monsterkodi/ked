@@ -1168,8 +1168,6 @@ export
 
         value = { lines: texts.join('\n').split('\n'), linewise: linewise }
 
-        @novimRegister = value if register != '_'
-
         @novim.register.write register value operation
 
         @copyRegisterToClipboard value if @usesClipboard(register) and not register
@@ -1253,7 +1251,7 @@ export
         ⮐ @novim.register.read('+') if @usesClipboard(register)
         ⮐ @novim.register.read(register) if register
 
-        @novimRegister
+        @novim.register.value
 
     putRegister: count after register ->
 

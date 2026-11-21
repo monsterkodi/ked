@@ -1048,24 +1048,24 @@ windowReset = (s) ->
             loadText "one two three\nfour five"
         
             s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
-            s.novimRegister.lines ▸ ['one ']
-            s.novimRegister.linewise ▸ false
+            s.novim.register.value.lines ▸ ['one ']
+            s.novim.register.value.linewise ▸ false
             cur 0 0
         
             s.setMainCursor 8 0
             s.executeNovim {operator:'yank', motion:{kind:'drow', count:1}}
-            s.novimRegister.lines ▸ ['two ']
+            s.novim.register.value.lines ▸ ['two ']
             cur 4 0
         
             loadText "alpha\nbeta\ngamma" 3 1
         
             s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
-            s.novimRegister.lines ▸ ['beta']
-            s.novimRegister.linewise ▸ true
+            s.novim.register.value.lines ▸ ['beta']
+            s.novim.register.value.linewise ▸ true
             cur 3 1
         
             s.executeNovim {operator:'yank', motion:{kind:'lineDown', count:1}}
-            s.novimRegister.lines ▸ ['beta' 'gamma']
+            s.novim.register.value.lines ▸ ['beta' 'gamma']
         
             history = s.h.length
             s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
@@ -1128,14 +1128,14 @@ windowReset = (s) ->
             loadText "one\ntwo\nthree" 1 1
             
             key 'Y'
-            s.novimRegister.lines ▸ ['two']
-            s.novimRegister.linewise ▸ true
+            s.novim.register.value.lines ▸ ['two']
+            s.novim.register.value.linewise ▸ true
             cur 1 1
             txt "one\ntwo\nthree"
             
             s.setMainCursor 0 0
             keys '2Y'
-            s.novimRegister.lines ▸ ['one' 'two']
+            s.novim.register.value.lines ▸ ['one' 'two']
     
   ▸ put
     
@@ -1179,20 +1179,20 @@ windowReset = (s) ->
         txt "abc\nabcdef"
         cur 3 1
     
-        s.novimRegister = { lines: ['one' 'two'], linewise: false }
+        s.novim.register.value = { lines: ['one' 'two'], linewise: false }
         loadText "ab"
         s.executeNovim {operator:'put', after:true}
         txt "one\ntwo\nab"
         cur 0 2
     
-        s.novimRegister = null
+        s.novim.register.value = null
         loadText "abc"
         s.executeNovim {operator:'put', after:true}
         txt "abc"
     
     ▸ put text at the cursor
     
-            s.novimRegister = { lines: ['X'], linewise: false }
+            s.novim.register.value = { lines: ['X'], linewise: false }
         
             loadText "abc"
             s.executeNovim {operator:'put', after:true}
@@ -1229,8 +1229,8 @@ windowReset = (s) ->
         loadText "one two\nthree"
     
         s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
-        s.novimRegister.lines ▸ ['one two']
-        s.novimRegister.linewise ▸ true
+        s.novim.register.value.lines ▸ ['one two']
+        s.novim.register.value.linewise ▸ true
         txt "three"
     
         s.executeNovim {operator:'put', after:false}
@@ -1238,20 +1238,20 @@ windowReset = (s) ->
     
         loadText "abc" 1 0
         s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
-        s.novimRegister.lines ▸ ['b']
-        s.novimRegister.linewise ▸ false
+        s.novim.register.value.lines ▸ ['b']
+        s.novim.register.value.linewise ▸ false
         txt "ac"
     
         loadText "one two" 3 0
         s.executeNovim {operator:'delete', motion:{kind:'eol'}}
-        s.novimRegister.lines ▸ [' two']
-        s.novimRegister.linewise ▸ false
+        s.novim.register.value.lines ▸ [' two']
+        s.novim.register.value.linewise ▸ false
         txt "one"
     
         loadText "abcd"
         s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
         s.executeNovim {operator:'repeat', count:1}
-        s.novimRegister.lines ▸ ['cd']
+        s.novim.register.value.lines ▸ ['cd']
         txt ""
 
   ▸ named registers
@@ -1264,7 +1264,7 @@ windowReset = (s) ->
 
         s.novim.register.read('a').lines  ▸ ['one']
         s.novim.register.read('a').linewise ▸ true
-        s.novimRegister.lines        ▸ ['one']
+        s.novim.register.value.lines        ▸ ['one']
 
         s.executeNovim {operator:'put', after:true, register:'a'}
         txt "one\none\ntwo"
@@ -1284,7 +1284,7 @@ windowReset = (s) ->
         b.executeNovim {operator:'delete', motion:{kind:'line', count:1}, register:'_'}
 
         kseg.str(b.s.lines)          ▸ 'two'
-        b.novimRegister.lines        ▸ ['one']
+        b.novim.register.value.lines        ▸ ['one']
         b.novim.register.read('1')   ▸ undefined
 
   ▸ macros
@@ -1467,7 +1467,7 @@ windowReset = (s) ->
     
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}, register:'clipboard'}
         copies[-1] ▸ 'alpha\n'
-        s.novimRegister.linewise ▸ true
+        s.novim.register.value.linewise ▸ true
     
         pasted = "plus\n"
         s.executeNovim {operator:'put', after:true, register:'clipboard'}
@@ -1480,7 +1480,7 @@ windowReset = (s) ->
     
         loadText "abc"
         s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
-        s.novimRegister.lines ▸ ['a']
+        s.novim.register.value.lines ▸ ['a']
     
         [m key keys] = novimKeysFor s
     
@@ -1488,7 +1488,7 @@ windowReset = (s) ->
     
         keys '"+yy'
         copies[-1] ▸ 'one\n'
-        s.novimRegister.lines ▸ ['one']
+        s.novim.register.value.lines ▸ ['one']
     
         keys '"*yy'
         copies[-1] ▸ 'one\n'
@@ -1736,7 +1736,7 @@ windowReset = (s) ->
     
     ▸ change only selects
     
-            s.novimRegister = { lines: ['keep'], linewise: false }
+            s.novim.register.value = { lines: ['keep'], linewise: false }
         
             loadText "one two three" 5 0
         
@@ -1745,7 +1745,7 @@ windowReset = (s) ->
             txt "one two three"
             s.s.selections ▸ [[4 0 7 0]]
             cur 7 0
-            s.novimRegister.lines ▸ ['two']
+            s.novim.register.value.lines ▸ ['two']
             s.novim.register.read('-').lines ▸ ['two']
         
             loadText "one two three" 5 0
@@ -1800,7 +1800,7 @@ windowReset = (s) ->
 
         cr.novim.register.read('-').lines   ▸ ['two']
         cr.novim.register.read('1')         ▸ undefined
-        cr.novimRegister.lines         ▸ ['two']
+        cr.novim.register.value.lines         ▸ ['two']
 
         loadTextOn cr "one two"
 
@@ -2063,7 +2063,7 @@ windowReset = (s) ->
     ▸ repeat put
         
             loadText "one\ntwo"
-            s.novimRegister = { lines: ['new'], linewise: true }
+            s.novim.register.value = { lines: ['new'], linewise: true }
         
             keys 'p'
             txt "one\nnew\ntwo"
@@ -2073,7 +2073,7 @@ windowReset = (s) ->
             txt "one\nnew\ntwo\nnew"
         
             loadText "one two"
-            s.novimRegister = { lines: ['X'], linewise: false }
+            s.novim.register.value = { lines: ['X'], linewise: false }
         
             keys 'p'
             txt "Xone two"
@@ -3054,8 +3054,8 @@ windowReset = (s) ->
             key 'd'
             txt "bcd\nfgh"
             s.visual ▸ null
-            s.novimRegister.lines ▸ ['a' 'e']
-            s.novimRegister.linewise ▸ false
+            s.novim.register.value.lines ▸ ['a' 'e']
+            s.novim.register.value.linewise ▸ false
         
             s.executeNovim {operator:'repeat', count:1}
             txt "cd\ngh"
@@ -3068,8 +3068,8 @@ windowReset = (s) ->
             keys 'lj'
             key 'y'
         
-            s.novimRegister.lines ▸ ['a' 'e']
-            s.novimRegister.linewise ▸ false
+            s.novim.register.value.lines ▸ ['a' 'e']
+            s.novim.register.value.linewise ▸ false
             s.visual ▸ null
             s.s.selections ▸ []
             cur 0 0
@@ -3148,12 +3148,12 @@ windowReset = (s) ->
         
     ▸ visual yank
         
-            s.novimRegister = null
+            s.novim.register.value = null
             loadText "one two"
         
             keys 'vlly'
-            s.novimRegister.lines ▸ ['on']
-            s.novimRegister.linewise ▸ false
+            s.novim.register.value.lines ▸ ['on']
+            s.novim.register.value.linewise ▸ false
             s.visual ▸ null
             s.s.selections ▸ []
             cur 0 0
@@ -3162,8 +3162,8 @@ windowReset = (s) ->
             loadText "one\ntwo\nthree" 1 1
         
             keys 'Vy'
-            s.novimRegister.lines ▸ ['two']
-            s.novimRegister.linewise ▸ true
+            s.novim.register.value.lines ▸ ['two']
+            s.novim.register.value.linewise ▸ true
         
     ▸ visual delete
         
@@ -3171,7 +3171,7 @@ windowReset = (s) ->
         
             keys 'vlld'
             txt "e two"
-            s.novimRegister.lines ▸ ['on']
+            s.novim.register.value.lines ▸ ['on']
             s.visual ▸ null
             cur 0 0
         
@@ -3179,8 +3179,8 @@ windowReset = (s) ->
         
             keys 'Vd'
             txt "one\nthree"
-            s.novimRegister.lines ▸ ['two']
-            s.novimRegister.linewise ▸ true
+            s.novim.register.value.lines ▸ ['two']
+            s.novim.register.value.linewise ▸ true
             cur 0 1
         
     ▸ visual change
