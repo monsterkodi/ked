@@ -32,12 +32,22 @@ hed = cols rows ext='md' feats=[]->
 
 #  a headless editor with text sizing for the scaled run tests
 
-runEd = name lines cols=40 rows=10 feats=[] textSizing=true ->
-    t = new ttio headless:true input:false textSizing:textSizing cols:cols rows:rows
+runName = 'test_run'
+
+runEd = lines opt={} setup=null ->
+    opt ?= {}
+    opt.cols ?= 40
+    opt.rows ?= 10
+    opt.feats ?= []
+    opt.textSizing ?= true
+    t = new ttio headless:true input:false textSizing:opt.textSizing cols:opt.cols rows:opt.rows
     scr = new screen t
-    e = new editor scr name feats
+    e = new editor scr runName opt.feats
     e.state.loadLines lines
-    e.layout 0 0 cols rows
+    e.layout 0 0 opt.cols opt.rows
+    setup e if setup?
+    scr.init()
+    e.draw()
     [scr e]
 
 runScale = e sel steps=2 clear=true ->
@@ -1350,11 +1360,8 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a sue scale run grows upwards from its line
 
-        [scr e] = runEd 'test_run' ['aaa' 'bbb' 'xx BIG yy']
-        runScale e [[3 2 6 2]]
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aaa' 'bbb' 'xx BIG yy'] {} (e) ->
+            runScale e [[3 2 6 2]]
 
         scr.get_char(3 0).includes(']66;s=3') ▸ true
         scr.get_char(4 0) ▸ null
@@ -1364,12 +1371,9 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a run does not shift the syntax after it
 
-        [scr e] = runEd 'test_run_syntax' ["x = 'hi' # note"] 60 10
-        e.state.syntax.setExt 'kode'
-        e.state.setMainCursor 0 8
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ["x = 'hi' # note"] (cols:60 rows:10) (e) ->
+            e.state.syntax.setExt 'kode'
+            e.state.setMainCursor 0 8
 
         plain = scr.get_fg(14 0)
 
@@ -1384,13 +1388,10 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a colour after a run lands on its grapheme
 
-        [scr e] = runEd 'test_run_colour' ['aa FOO bb'] 40 10 ['susan']
-        e.state.setMainCursor 0 8
-        runScale e [[3 0 6 0]] 1
-        e.state.setSue 7 0 [31 2 1 '#ff0000']
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aa FOO bb'] (feats:['susan']) (e) ->
+            e.state.setMainCursor 0 8
+            runScale e [[3 0 6 0]] 1
+            e.state.setSue 7 0 [31 2 1 '#ff0000']
 
         scr.get_fg(9 0)  ▸ [255 255 255]
         scr.get_fg(10 0) ▸ [255 0 0]
@@ -1398,8 +1399,8 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a cursor in a run grows with it, at both ends
 
-        [scr e] = runEd 'test_run_cursor' ['aaa' 'bbb' 'xx BIG yy']
-        runScale e [[3 2 6 2]]
+        [scr e] = runEd ['aaa' 'bbb' 'xx BIG yy'] {} (e) ->
+            runScale e [[3 2 6 2]]
 
         e.cursorRunScale([2 2]) ▸ 1
         e.cursorRunScale([3 2]) ▸ 3
@@ -1424,24 +1425,18 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ typing at the start of a run is drawn in the run
 
-        [scr e] = runEd 'test_run_type_start' ['aaa' 'bbb' 'xx BIG yy']
-        runScale e [[3 2 6 2]]
-        e.state.setMainCursor 3 2
-        e.state.insert 'X'
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aaa' 'bbb' 'xx BIG yy'] {} (e) ->
+            runScale e [[3 2 6 2]]
+            e.state.setMainCursor 3 2
+            e.state.insert 'X'
 
         scr.get_char(3 0).includes(']66;s=3') ▸ true
         scr.get_char(6 0).includes(']66;s=3') ▸ true
 
   ▸ cursors past the end of a line are drawn there
 
-        [scr e] = runEd 'test_cursor_past_end' ['abcdef' 'ab' 'abcd'] 40 8 [] false
-        e.state.setCursors [[5 0] [5 1] [5 2]] main:0
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['abcdef' 'ab' 'abcd'] (rows:8 textSizing:false) (e) ->
+            e.state.setCursors [[5 0] [5 1] [5 2]] main:0
 
         scr.c[0][5].mark ▸ 'main'
         scr.c[1][5].mark ▸ 'multi'
@@ -1452,23 +1447,17 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a selection over a run shows on the scaled text
 
-        [scr e] = runEd 'test_run_selection' ['aaa' 'bbb' 'xx BIG yy']
-        runScale e [[3 2 6 2]] 2 false
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aaa' 'bbb' 'xx BIG yy'] {} (e) ->
+            runScale e [[3 2 6 2]] 2 false
 
         scr.get_bg(3 0) ▸ e.color.selection.span
         scr.get_bg(9 0) ▸ e.color.selection.span
 
   ▸ a selection on a covered line does not paint the block
 
-        [scr e] = runEd 'test_run_covered' ['aaaaaaaa' 'bbb' 'xx BIG yy']
-        runScale e [[3 2 6 2]]
-        e.state.setCursors [[0 2]]
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aaaaaaaa' 'bbb' 'xx BIG yy'] {} (e) ->
+            runScale e [[3 2 6 2]]
+            e.state.setCursors [[0 2]]
 
         before = blockArea scr
 
@@ -1481,11 +1470,8 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ every cell of a block belongs to the block
 
-        [scr e] = runEd 'test_block_area' ['aaaaaaaa' 'bbb' 'xx BIG yy']
-        runScale e [[3 2 6 2]]
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aaaaaaaa' 'bbb' 'xx BIG yy'] {} (e) ->
+            runScale e [[3 2 6 2]]
 
         e.cells.isScaled(3 0) ▸ true
         e.cells.isScaled(4 0) ▸ true
@@ -1498,8 +1484,8 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ completion is skipped when a run follows the cursor
 
-        [scr e] = runEd 'test_run_complete' ['aa FOO bb'] 40 10 ['complete']
-        runScale e [[3 0 6 0]] 1
+        [scr e] = runEd ['aa FOO bb'] (feats:['complete']) (e) ->
+            runScale e [[3 0 6 0]] 1
 
         e.state.setCursors [[6 0]]
         e.complete.hasScaledTextAfterCursor() ▸ false
@@ -1515,12 +1501,9 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a colour on a covered line does not paint the block
 
-        [scr e] = runEd 'test_run_tint' ['aaaaaaaa' 'bbb' 'xx BIG yy']
-        runScale e [[3 2 6 2]]
-        e.state.setCursors [[0 2]]
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aaaaaaaa' 'bbb' 'xx BIG yy'] {} (e) ->
+            runScale e [[3 2 6 2]]
+            e.state.setCursors [[0 2]]
 
         before = blockArea scr
 
@@ -1533,12 +1516,9 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a highlight on a covered line does not paint the block
 
-        [scr e] = runEd 'test_run_highlight' ['aaaaaaaa' 'bbb' 'xx BIG yy']
-        runScale e [[3 2 6 2]]
-        e.state.setCursors [[0 2]]
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aaaaaaaa' 'bbb' 'xx BIG yy'] {} (e) ->
+            runScale e [[3 2 6 2]]
+            e.state.setCursors [[0 2]]
 
         before = blockArea scr
 
@@ -1551,12 +1531,9 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a yank flash on a covered line does not paint the block
 
-        [scr e] = runEd 'test_run_yank' ['aaaaaaaa' 'bbb' 'xx BIG yy']
-        runScale e [[3 2 6 2]]
-        e.state.setCursors [[0 2]]
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aaaaaaaa' 'bbb' 'xx BIG yy'] {} (e) ->
+            runScale e [[3 2 6 2]]
+            e.state.setCursors [[0 2]]
 
         before = blockArea scr
 
@@ -1569,14 +1546,11 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a selection reaches the blocks of a scaled line
 
-        [scr e] = runEd 'test_selection_line_scale' ['aaaa' 'bbbb']
-        e.state.setCursors [[0 0]]
-        e.state.stepScales 2
-        e.state.setSelections [[0 0 2 0]]
-        e.state.setCursors [[0 1]]
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aaaa' 'bbbb'] {} (e) ->
+            e.state.setCursors [[0 0]]
+            e.state.stepScales 2
+            e.state.setSelections [[0 0 2 0]]
+            e.state.setCursors [[0 1]]
 
         scr.get_bg(0 0) ▸ e.color.selection.span
         scr.get_bg(1 0) ▸ e.color.selection.span
@@ -1585,12 +1559,9 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a selection reaches the blocks of a run
 
-        [scr e] = runEd 'test_selection_run_blocks' ['a' 'b' 'c' 'xx BIG yy']
-        runScale e [[3 3 6 3]] 2 false
-        e.state.setCursors [[0 2]]
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['a' 'b' 'c' 'xx BIG yy'] {} (e) ->
+            runScale e [[3 3 6 3]] 2 false
+            e.state.setCursors [[0 2]]
 
         scr.get_bg(3 1) ▸ e.color.selection.span
         scr.get_bg(4 1) ▸ e.color.selection.span
@@ -1598,14 +1569,11 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a background colour fills the blocks of a scaled line
 
-        [scr e] = runEd 'test_bg_line_scale' ['aaaa' 'bbbb'] 40 10 ['susan']
-        e.state.setCursors [[0 0]]
-        e.state.stepScales 2
-        e.state.setSue 0 0 [32 2 1 '#00ff00']
-        e.state.setCursors [[0 1]]
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aaaa' 'bbbb'] (feats:['susan']) (e) ->
+            e.state.setCursors [[0 0]]
+            e.state.stepScales 2
+            e.state.setSue 0 0 [32 2 1 '#00ff00']
+            e.state.setCursors [[0 1]]
 
         scr.get_bg(0 0) ▸ [0 255 0]
         scr.get_bg(1 0) ▸ [0 255 0]
@@ -1614,14 +1582,11 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a colour reaches the blocks of a scaled line
 
-        [scr e] = runEd 'test_colour_line_scale' ['aaaa' 'bbbb'] 40 10 ['susan']
-        e.state.setCursors [[0 0]]
-        e.state.stepScales 2
-        e.state.setSue 0 0 [31 4 1 '#ff0000']
-        e.state.setCursors [[0 1]]
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aaaa' 'bbbb'] (feats:['susan']) (e) ->
+            e.state.setCursors [[0 0]]
+            e.state.stepScales 2
+            e.state.setSue 0 0 [31 4 1 '#ff0000']
+            e.state.setCursors [[0 1]]
 
         scr.get_fg(0 0) ▸ [255 0 0]
         scr.get_fg(3 0) ▸ [255 0 0]
@@ -1630,13 +1595,10 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a colour reaches the blocks of a run
 
-        [scr e] = runEd 'test_colour_run_blocks' ['a' 'b' 'c' 'xx BIG yy'] 40 10 ['susan']
-        runScale e [[3 3 6 3]]
-        e.state.setCursors [[0 2]]
-        e.state.setSue 3 3 [32 3 1 '#00ff00']
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['a' 'b' 'c' 'xx BIG yy'] (feats:['susan']) (e) ->
+            runScale e [[3 3 6 3]]
+            e.state.setCursors [[0 2]]
+            e.state.setSue 3 3 [32 3 1 '#00ff00']
 
         scr.get_bg(3 1) ▸ [0 255 0]
         scr.get_bg(4 1) ▸ [0 255 0]
@@ -1646,14 +1608,11 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a yank flash reaches the blocks of a scaled line
 
-        [scr e] = runEd 'test_yank_line_scale' ['aaaa' 'bbbb']
-        e.state.setCursors [[0 0]]
-        e.state.stepScales 2
-        e.state.setCursors [[0 1]]
-        e.state.yankFlash = [[0 0 4 0]]
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['aaaa' 'bbbb'] {} (e) ->
+            e.state.setCursors [[0 0]]
+            e.state.stepScales 2
+            e.state.setCursors [[0 1]]
+            e.state.yankFlash = [[0 0 4 0]]
 
         scr.get_bg(0 0) ▸ e.color.yank
         scr.get_bg(3 0) ▸ e.color.yank
@@ -1661,13 +1620,10 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
   ▸ a yank flash reaches the blocks of a run
 
-        [scr e] = runEd 'test_yank_run_blocks' ['a' 'b' 'c' 'xx BIG yy']
-        runScale e [[3 3 6 3]]
-        e.state.setCursors [[0 2]]
-        e.state.yankFlash = [[3 3 6 3]]
-
-        scr.init()
-        e.draw()
+        [scr e] = runEd ['a' 'b' 'c' 'xx BIG yy'] {} (e) ->
+            runScale e [[3 3 6 3]]
+            e.state.setCursors [[0 2]]
+            e.state.yankFlash = [[3 3 6 3]]
 
         scr.get_bg(3 1) ▸ e.color.yank
         scr.get_bg(4 1) ▸ e.color.yank
