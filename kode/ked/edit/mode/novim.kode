@@ -320,9 +320,9 @@ use ..           ◆ mode
         ⮐ @runSubstitute(parsed visualRange) if parsed.name in ['s' 'substitute']
 
         if parsed.name in ['g' 'v' 'global' 'vglobal']
-            @state.keepJumps += 1
+            @state.novim.jumps.keep += 1
             result = @runGlobal parsed visualRange
-            @state.keepJumps -= 1
+            @state.novim.jumps.keep -= 1
             ⮐ result
 
         ⮐ @runNormal(parsed visualRange)   if parsed.name in ['normal' 'norm']

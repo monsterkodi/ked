@@ -41,8 +41,6 @@ use           ◆ keys mode
         @maxWidthCache  = 0
         @gutterWidthOverride = null
 
-        @keepJumps = 0
-
         @clearSingle()
 
     toggleMode: name => mode.toggle @ name if @allowedModes[name]
@@ -729,7 +727,7 @@ use           ◆ keys mode
 
     pushJump: pos ->
 
-        ⮐ false if @keepJumps
+        ⮐ false if @novim.jumps.keep
 
         @novim.jumps.record(@jumpEntry(pos))
 

@@ -5,6 +5,7 @@
     @: ->
 
         @max     = 100
+        @keep    = 0
         @entries = []
         @index   = @entries.length
 
