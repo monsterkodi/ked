@@ -1,5 +1,5 @@
 
-use ../kxk        ▪ karg kstr kseg slash post nfs sleep watcher noon
+use ../kxk        ▪ keyinfo kstr slash post kseg karg nfs sleep watcher noon 
 use ./index       ◆ prjcts indexer
 use ./util        ◆ logfile session help frecent git config dumpstate leak fileutil
 use ./util/img    ◆ rounded squares sircels
@@ -657,13 +657,7 @@ use child_process ▪ spawn exec
         @saveSessionFile path 'saved'
         
         @redraw()
-    
-    onPaste: text => 
-    
-        @clippo.remember text
-        @editor.state.insert text
-        @redraw()
-                                    
+                                        
     onMouse: event =>
 
         if event.type == 'wheel'
@@ -763,7 +757,11 @@ use child_process ▪ spawn exec
         switch key
             'alt+,'                      ➜ ⮐ @goToPrevFunc()
             'alt+.'                      ➜ ⮐ @goToNextFunc()
-                                    
+
+    onPaste: text  => @fakeKey 'cmd+v'
+    
+    fakeKey: combo => @onKey combo keyinfo.forCombo(combo)
+        
     goToPrevFunc: =>
     
         if @searcher.visible() ➜ ⮐ @searcher.selectPrevFileHeader()
