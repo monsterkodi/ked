@@ -41,11 +41,7 @@ use ../theme    ◆ theme
             
             for segl,idx in segls
                 @lineDiss.set segl @diss[idx]
-    
-    #  the dissection of a line only depends on the line itself, so it is kept
-    #  by line reference. lines are immutable: a line keeps its dissection when
-    #  other lines are inserted, removed or changed.
-    
+        
     partialUpdate: segls =>
         
         ⮐ if @lineDiss.size == 0
@@ -143,5 +139,16 @@ use ../theme    ◆ theme
         clss ?= @getClass x y
         ⮐ '█' if 'header' in clss
         char
+        
+    scaleOfLine: scales scaling li =>
+
+        ⮐ 1 if not scaling or empty scales
+        ⮐ 1 if @ext not in Object.keys(scales)
+
+        for clss,scale of scales[@ext]
+            s = clamp 1 7 scale
+            if s > 1 and @hasPureClass(li clss)
+                ⮐ s
+        1
         
 export syntax

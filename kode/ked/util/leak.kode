@@ -78,16 +78,12 @@ use v8
         line += b2(" rss ")
         line += "#{leak.size(mem.rss)}"
         line += "#{leak.sign(mem.rss - before.rss)}"
-        # line += b2(" peak ")
-        # line += "#{leak.size(peak.rss)}"
         
         line += b2(" heap ")
         line += "#{leak.size(mem.heapUsed)}"
         line += "#{leak.sign(mem.heapUsed - before.heapUsed)}"
         line += b2(" total ")
         line += "#{leak.size(mem.heapTotal)}"
-        # line += b2(" peak ")
-        # line += "#{leak.size(peak.heapUsed)}"
         
         line += b2(" old ")
         line += "#{leak.size(mem.old)}"

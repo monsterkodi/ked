@@ -176,8 +176,6 @@
                 line = max 0 op.oldStart-1
                 marks[line] = 'del' if not marks[line]
 
-            # keep the line above a reverted deletion clickable
-            # so the same spot keeps toggling the block
             if op.new.length == 0
                 line = max 0 op.oldStart-1
                 marks[line] = 'del' if not marks[line]
@@ -218,10 +216,6 @@
 
         result
 
-    ###
-        makes an entry for a block whose old content is already in the buffer
-        used after undo and redo or after the buffer was changed by other means
-    ###
     @stashedBlock: block lines ->
 
         delta = 0

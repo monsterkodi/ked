@@ -1,6 +1,6 @@
 
 use ../../../kxk    ▪ kstr post
-use ../../util      ◆ prof syntax config scaling
+use ../../util      ◆ prof syntax config
 use ../../util/img  ◆ glyphs
 use ../../theme     ◆ color theme
 use ../../edit/tool ◆ colorspans
@@ -215,13 +215,18 @@ use ../base         ◆ view
         
         Buffer.alloc bytes
     
-    lineRows: y => scaling.scaleOfLine @syntax @scales @scaling y
+    lineRows: y => @syntax.scaleOfLine @scales @scaling y
 
     rowPrefix: =>
 
         ⮐ @rowCache if @rowCache and @rowCacheExt == @syntax?.ext
 
-        rows = scaling.rowPrefix (@getSegls() ? []) @lineRows
+        lines = @getSegls() ? []
+    
+        rows = [0]
+        for li in 0...lines.length
+            rows.push rows[li] + @lineRows(li)
+        rows
 
         @rowCacheExt = @syntax?.ext
         @rowCache    = rows
