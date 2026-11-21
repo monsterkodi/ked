@@ -9,10 +9,17 @@ use ../view/base   ◆ scroll
 use ../util/img    ◆ squares
 
 cells = cols:40 rows:20
-tstt = ext='md' -> 
-    s = new state cells 'test_scale'
+small = cols:20 rows:3
+
+tstt = ext='md' win=cells name='test_scale' ->
+    s = new state win name
     s.syntax.setExt ext
     s.applyScales {enable:true md:{h1:3 h2:2}}
+    s
+
+tsttLines = lines ext='md' ->
+    s = tstt ext
+    s.loadLines lines
     s
 
 hed = cols rows ext='md' feats=[]->     
@@ -22,6 +29,23 @@ hed = cols rows ext='md' feats=[]->
         e.state.syntax.setExt ext
         e.state.applyScales {enable:true md:{h1:3 h2:2}}
         [h e]
+
+#  a headless editor with text sizing for the scaled run tests
+
+runEd = name lines cols=40 rows=10 feats=[] textSizing=true ->
+    t = new ttio headless:true input:false textSizing:textSizing cols:cols rows:rows
+    scr = new screen t
+    e = new editor scr name feats
+    e.state.loadLines lines
+    e.layout 0 0 cols rows
+    [scr e]
+
+runScale = e sel steps=2 clear=true ->
+    e.state.setSelections sel
+    for i in 0...steps
+        e.state.stepScales 1
+    e.state.setSelections [] if clear
+    e
 
 #  the cells of the three 3x blocks in the run tests below: BIG after xx
 #  and before yy, so columns 3..11 on the three rows the run grows into
@@ -35,12 +59,40 @@ blockArea = scr ->
         rows.push row
     rows
 
+mapScr = e cols=12 rows=10 ->
+    m = new mapscr e
+    m.cells.layout 30 0 cols rows
+    m
+
+pixels = h csz=[10 20] ->
+    h.screen.t.pixels = [h.cols*csz[0] h.rows*csz[1]]
+    h.screen.t.cellsz = csz
+
+mapImages = h e cols=12 rows=10 csz=[10 20] ->
+    m = mapScr e cols rows
+    pixels h csz
+    m.createImages()
+    m
+
+mapCursors = h e csz=[10 20] ->
+    m = mapScr e
+    m.csz = csz
+    squares.onResize h.cols h.rows null csz
+    pixels h csz
+    m
+
+quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
+    m = new mapview h.screen e.state
+    m.setSyntaxSegls syntax e.state.s.lines
+    m.cells.layout 30 0 cols rows
+    m.csz = csz
+    m
+
 ▸ scale
 
   ▸ markdown headings scale by level
 
-        s = tstt()
-        s.loadLines ['# One' '## Two' '### Three' '#### Four' 'text']
+        s = tsttLines ['# One' '## Two' '### Three' '#### Four' 'text']
 
         s.lineHeight 0 ▸ 3
         s.lineHeight 1 ▸ 2
@@ -50,16 +102,14 @@ blockArea = scr ->
 
   ▸ headings in other files keep their size
 
-        s = tstt 'kode'
-        s.loadLines ['# One' '## Two']
+        s = tsttLines ['# One' '## Two'] 'kode'
 
         s.lineHeight 0 ▸ 1
         s.lineHeight 1 ▸ 1
 
   ▸ the configured scales change or disable the scaling
 
-        s = tstt()
-        s.loadLines ['# one' '## two' '### three' '#### four' '##### five']
+        s = tsttLines ['# one' '## two' '### three' '#### four' '##### five']
 
         s.applyScales {enable:true md:{h1:6 h2:5 h3:4 h4:3 h5:2}}
 
@@ -85,8 +135,7 @@ blockArea = scr ->
 
   ▸ the row map counts the scaled row of every line
 
-        s = tstt()
-        s.loadLines ['# One' 'a' '## Two' 'b']
+        s = tsttLines ['# One' 'a' '## Two' 'b']
 
         s.rowOfLine 0 ▸ 0
         s.rowOfLine 1 ▸ 3
@@ -95,8 +144,7 @@ blockArea = scr ->
 
   ▸ the row map finds the line at a row
 
-        s = tstt()
-        s.loadLines ['# One' 'a' '## Two' 'b']
+        s = tsttLines ['# One' 'a' '## Two' 'b']
 
         s.lineAtRow 0 ▸ 0
         s.lineAtRow 2 ▸ 0
@@ -108,8 +156,7 @@ blockArea = scr ->
 
   ▸ lines above the view have negative rows
 
-        s = tstt()
-        s.loadLines ['a' 'b' 'c' 'd' 'e' 'f']
+        s = tsttLines ['a' 'b' 'c' 'd' 'e' 'f']
         s.setView [0 4]
 
         s.rowOfLine 4 ▸ 0
@@ -144,8 +191,7 @@ blockArea = scr ->
 
   ▸ a cell position maps to a logical position
 
-        s = tstt()
-        s.loadLines ['# One' 'a' '## Two']
+        s = tsttLines ['# One' 'a' '## Two']
 
         s.posForCell 0 0 ▸ [0 0]
         s.posForCell 2 0 ▸ [0 0]
@@ -544,8 +590,7 @@ blockArea = scr ->
 
   ▸ the buffer height is measured in display rows
 
-        s = tstt()
-        s.loadLines ['# a' 'b' '## c' 'd']
+        s = tsttLines ['# a' 'b' '## c' 'd']
 
         s.totalRows() ▸ 7
 
@@ -580,8 +625,7 @@ blockArea = scr ->
         [h e] = hed  cols:40 rows:10
         e.state.loadLines ['a' 'b' 'c' 'd' 'e' '# h1' 'f' 'g' 'h' 'i' 'j']
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
+        m = mapScr e
         m.csz = [10 20]
 
         e.state.setView [0 0]
@@ -600,13 +644,8 @@ blockArea = scr ->
         e.state.setLines ['aaa' 'XXX' 'bbb' 'ccc']
         e.state.undo()
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
+        m = mapImages h e
         m.show()
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
-
-        m.createImages()
         m.reload()
         m.calcView()
         m.drawImages()
@@ -619,12 +658,8 @@ blockArea = scr ->
         [h e] = hed  cols:40 rows:10
         e.state.loadLines ['aaa' 'bbb' 'ccc']
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
+        m = mapImages h e
         m.show()
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
-        m.createImages()
 
         m.calcView()
         m.drawImages()
@@ -649,11 +684,9 @@ blockArea = scr ->
   ▸ a suspended map waits for the restored view
 
         [h e] = hed cols:40 rows:20
-        m = new mapscr e
-        m.cells.layout 30 0 12 20
+        m = mapScr e 12 20
         m.show()
-        h.screen.t.pixels = [400 400]
-        h.screen.t.cellsz = [10 20]
+        pixels h
 
         e.state.loadLines [("old #{i}") for i in 0...1000]
         m.reload()
@@ -683,12 +716,8 @@ blockArea = scr ->
         [h e] = hed cols:40 rows:10
         e.state.loadLines [("line #{i}") for i in 0...2000]
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
+        m = mapImages h e
         m.show()
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
-        m.createImages()
 
         e.state.setView [0 0]
         m.calcView()
@@ -701,12 +730,8 @@ blockArea = scr ->
         [h e] = hed cols:40 rows:10
         e.state.loadLines [("line #{i}") for i in 0...20]
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
+        m = mapImages h e
         m.show()
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
-        m.createImages()
         m.calcView()
         m.drawImages()
 
@@ -750,11 +775,7 @@ blockArea = scr ->
         [h e] = hed 40 10
         e.state.loadLines ['a' 'b' '# h1' 'c' 'd']
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
-        m.createImages()
+        m = mapImages h e
 
         id0 = m.ensureImage 0
         id2 = m.ensureImage 2
@@ -775,8 +796,7 @@ blockArea = scr ->
         e.state.loadLines ['#']
         e.state.applyScales {enable:true md:{h1:7}}
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
+        m = mapScr e
         m.csz = [10 20]
 
         bg = m.color.bg
@@ -809,12 +829,8 @@ blockArea = scr ->
         [h e] = hed  cols:40 rows:10
         e.state.loadLines ['a' 'b' 'c' 'd' 'e' '# h1' 'f' 'g']
 
-        m = new mapview h.screen e.state
-        m.setSyntaxSegls 'md' e.state.s.lines
+        m = quickMap h e 'md'
         m.setScales {enable:true md:{h1:3}}
-
-        m.cells.layout 30 0 12 10
-        m.csz = [10 20]
 
         m.lineRows(5) ▸ 3
         m.lineOffsetPixels(5) ▸ 20
@@ -831,14 +847,10 @@ blockArea = scr ->
         [h e] = hed  cols:40 rows:10
         e.state.loadLines ['# h1' 'text']
 
-        m = new mapview h.screen e.state
-        m.setSyntaxSegls 'md' e.state.s.lines
+        m = quickMap h e 'md'
         m.setScales {enable:true md:{h1:7}}
 
-        m.cells.layout 30 0 12 10
-
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
+        pixels h
         m.createImages()
 
         id = m.ensureImage 0
@@ -857,15 +869,10 @@ blockArea = scr ->
         [h e] = hed  cols:40 rows:10
         e.state.loadLines [("line #{i}") for i in 0...100]
 
-        m = new mapview h.screen e.state
-        m.setSyntaxSegls 'txt' e.state.s.lines
+        m = quickMap h e 'txt'
         m.rowOffset = 1
 
-        m.cells.layout 30 0 12 10
-        m.csz = [10 20]
-
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
+        pixels h
         h.screen.t.out = []
 
         m.createImages()
@@ -887,16 +894,11 @@ blockArea = scr ->
         e.state.loadLines lines
         e.state.applyScales {enable:true md:{h1:7}}
 
-        m = new mapview h.screen e.state
-        m.setSyntaxSegls 'md' e.state.s.lines
+        m = quickMap h e 'md'
         m.setScales {enable:true md:{h1:7}}
         m.rowOffset = 1
 
-        m.cells.layout 30 0 12 10
-        m.csz = [10 20]
-
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
+        pixels h
         h.screen.t.out = []
 
         m.createImages()
@@ -918,8 +920,7 @@ blockArea = scr ->
         e.state.loadLines lines
         e.state.applyScales {enable:true md:{h1:7}}
 
-        m = new mapscr e
-        m.cells.layout 30 0 8 10
+        m = mapScr e 8 10
         m.csz = [10 20]
 
         e.state.setView [0 0]
@@ -945,11 +946,7 @@ blockArea = scr ->
         e.state.loadLines lines
         e.state.applyScales {enable:true md:{h1:7}}
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
-        m.createImages()
+        m = mapImages h e
 
         e.state.setView [0 10]
         m.calcView()
@@ -978,11 +975,7 @@ blockArea = scr ->
         e.state.loadLines lines
         e.state.applyScales {enable:true md:{h1:7}}
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
-        m.createImages()
+        m = mapImages h e
 
         e.state.setView [0 0]
         m.calcView()
@@ -1005,13 +998,7 @@ blockArea = scr ->
         e.state.loadLines ['a' 'b' 'c' '# h1' 'd']
         e.state.applyScales {enable:true md:{h1:3}}
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
-        m.csz = [10 40]
-
-        squares.onResize 40 10 null [10 40]
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 40]
+        m = mapCursors h e [10 40]
 
         e.state.setCursors [[1 3] [1 1]] main:[1 3] adjust:false
         e.state.setView [0 0]
@@ -1031,13 +1018,7 @@ blockArea = scr ->
         [h e] = hed 40 10
         e.state.loadLines ['a' '# h1' 'b']
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
-        m.csz = [10 20]
-
-        squares.onResize 40 10 null [10 20]
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
+        m = mapCursors h e [10 20]
 
         e.state.setCursors [[1 0] [0 2]] main:0 adjust:false
         e.state.setView [0 0]
@@ -1060,13 +1041,7 @@ blockArea = scr ->
         e.state.loadLines lines
         e.state.applyScales {enable:true md:{h1:3}}
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
-        m.csz = [10 40]
-
-        squares.onResize 40 10 null [10 40]
-        h.screen.t.pixels = [400 400]
-        h.screen.t.cellsz = [10 40]
+        m = mapCursors h e [10 40]
 
         e.state.setView [0 55]
         m.calcView()
@@ -1090,13 +1065,7 @@ blockArea = scr ->
         e.state.loadLines ['a' 'b' '# h1' '## h2']
         e.state.applyScales {enable:true md:{h1:3 h2:2}}
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
-        m.csz = [10 40]
-
-        squares.onResize 40 10 null [10 40]
-        h.screen.t.pixels = [400 400]
-        h.screen.t.cellsz = [10 40]
+        m = mapCursors h e [10 40]
 
         e.state.setSelections [[0 2 4 2]]
         e.state.setHighlights [[0 3 4 3]]
@@ -1116,13 +1085,7 @@ blockArea = scr ->
         [h e] = hed 40 10
         e.state.loadLines ['a' 'b' 'c']
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
-        m.csz = [10 20]
-
-        squares.onResize 40 10 null [10 20]
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
+        m = mapCursors h e [10 20]
 
         e.state.setCursors [[100 0] [0 2]] main:[100 0] adjust:false
         e.state.setView [0 0]
@@ -1145,8 +1108,7 @@ blockArea = scr ->
             lines.push (i % 10 == 0) ? '# h1' : 'text'
         e.state.loadLines lines
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
+        m = mapScr e
         m.csz = [10 20]
 
         e.state.setView [0 100]
@@ -1207,10 +1169,7 @@ blockArea = scr ->
 
   ▸ the scroll offset moves the top of the view inside a line
 
-        small = cols:20 rows:3
-        s = new state small 'test_scale_scroll_offset'
-        s.syntax.setExt 'md'
-        s.applyScales {enable:true md:{h1:3 h2:2}}
+        s = tstt 'md' small 'test_scale_scroll_offset'
         s.loadLines ['# a' 'b' '## c' 'd']
 
         s.setScrollTop 2
@@ -1227,10 +1186,7 @@ blockArea = scr ->
 
   ▸ the wheel scrolls a scaled line one row at a time
 
-        small = cols:20 rows:3
-        s = new state small 'test_scale_wheel_rows'
-        s.syntax.setExt 'md'
-        s.applyScales {enable:true md:{h1:3 h2:2}}
+        s = tstt 'md' small 'test_scale_wheel_rows'
         s.loadLines ['# abc' 'a' 'b' 'c']
 
         s.scrollView 'down'
@@ -1376,11 +1332,7 @@ blockArea = scr ->
         [h e] = hed  cols:40 rows:10
         e.state.loadLines ['aaa' 'bbb' 'ccc']
 
-        m = new mapscr e
-        m.cells.layout 30 0 12 10
-        h.screen.t.pixels = [400 200]
-        h.screen.t.cellsz = [10 20]
-        m.createImages()
+        m = mapImages h e
 
         m.textLine(0) ▸ false
         m.imageHeight(0) ▸ 1
@@ -1398,15 +1350,8 @@ blockArea = scr ->
 
   ▸ a sue scale run grows upwards from its line
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_run' []
-        e.state.loadLines ['aaa' 'bbb' 'xx BIG yy']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 2 6 2]]
-        e.state.stepScales 1
-        e.state.stepScales 1
-        e.state.setSelections []
+        [scr e] = runEd 'test_run' ['aaa' 'bbb' 'xx BIG yy']
+        runScale e [[3 2 6 2]]
 
         scr.init()
         e.draw()
@@ -1419,12 +1364,8 @@ blockArea = scr ->
 
   ▸ a run does not shift the syntax after it
 
-        t = new ttio headless:true input:false textSizing:true cols:60 rows:10
-        scr = new screen t
-        e = new editor scr 'test_run_syntax' []
+        [scr e] = runEd 'test_run_syntax' ["x = 'hi' # note"] 60 10
         e.state.syntax.setExt 'kode'
-        e.state.loadLines ["x = 'hi' # note"]
-        e.layout 0 0 60 10
         e.state.setMainCursor 0 8
 
         scr.init()
@@ -1443,15 +1384,9 @@ blockArea = scr ->
 
   ▸ a colour after a run lands on its grapheme
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_run_colour' ['susan']
-        e.state.loadLines ['aa FOO bb']
-        e.layout 0 0 40 10
+        [scr e] = runEd 'test_run_colour' ['aa FOO bb'] 40 10 ['susan']
         e.state.setMainCursor 0 8
-        e.state.setSelections [[3 0 6 0]]
-        e.state.stepScales 1
-        e.state.setSelections []
+        runScale e [[3 0 6 0]] 1
         e.state.setSue 7 0 [31 2 1 '#ff0000']
 
         scr.init()
@@ -1463,15 +1398,8 @@ blockArea = scr ->
 
   ▸ a cursor in a run grows with it, at both ends
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_run_cursor' []
-        e.state.loadLines ['aaa' 'bbb' 'xx BIG yy']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 2 6 2]]
-        e.state.stepScales 1
-        e.state.stepScales 1
-        e.state.setSelections []
+        [scr e] = runEd 'test_run_cursor' ['aaa' 'bbb' 'xx BIG yy']
+        runScale e [[3 2 6 2]]
 
         e.cursorRunScale([2 2]) ▸ 1
         e.cursorRunScale([3 2]) ▸ 3
@@ -1496,15 +1424,8 @@ blockArea = scr ->
 
   ▸ typing at the start of a run is drawn in the run
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_run_type_start' []
-        e.state.loadLines ['aaa' 'bbb' 'xx BIG yy']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 2 6 2]]
-        e.state.stepScales 1
-        e.state.stepScales 1
-        e.state.setSelections []
+        [scr e] = runEd 'test_run_type_start' ['aaa' 'bbb' 'xx BIG yy']
+        runScale e [[3 2 6 2]]
         e.state.setMainCursor 3 2
         e.state.insert 'X'
 
@@ -1516,11 +1437,7 @@ blockArea = scr ->
 
   ▸ cursors past the end of a line are drawn there
 
-        t = new ttio headless:true input:false cols:40 rows:8
-        scr = new screen t
-        e = new editor scr 'test_cursor_past_end' []
-        e.state.loadLines ['abcdef' 'ab' 'abcd']
-        e.layout 0 0 40 8
+        [scr e] = runEd 'test_cursor_past_end' ['abcdef' 'ab' 'abcd'] 40 8 [] false
         e.state.setCursors [[5 0] [5 1] [5 2]] main:0
 
         scr.init()
@@ -1535,14 +1452,8 @@ blockArea = scr ->
 
   ▸ a selection over a run shows on the scaled text
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_run_selection' []
-        e.state.loadLines ['aaa' 'bbb' 'xx BIG yy']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 2 6 2]]
-        e.state.stepScales 1
-        e.state.stepScales 1
+        [scr e] = runEd 'test_run_selection' ['aaa' 'bbb' 'xx BIG yy']
+        runScale e [[3 2 6 2]] 2 false
 
         scr.init()
         e.draw()
@@ -1552,15 +1463,8 @@ blockArea = scr ->
 
   ▸ a selection on a covered line does not paint the block
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_run_covered' []
-        e.state.loadLines ['aaaaaaaa' 'bbb' 'xx BIG yy']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 2 6 2]]
-        e.state.stepScales 1
-        e.state.stepScales 1
-        e.state.setSelections []
+        [scr e] = runEd 'test_run_covered' ['aaaaaaaa' 'bbb' 'xx BIG yy']
+        runScale e [[3 2 6 2]]
         e.state.setCursors [[0 2]]
 
         scr.init()
@@ -1577,15 +1481,8 @@ blockArea = scr ->
 
   ▸ every cell of a block belongs to the block
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_block_area' []
-        e.state.loadLines ['aaaaaaaa' 'bbb' 'xx BIG yy']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 2 6 2]]
-        e.state.stepScales 1
-        e.state.stepScales 1
-        e.state.setSelections []
+        [scr e] = runEd 'test_block_area' ['aaaaaaaa' 'bbb' 'xx BIG yy']
+        runScale e [[3 2 6 2]]
 
         scr.init()
         e.draw()
@@ -1601,14 +1498,8 @@ blockArea = scr ->
 
   ▸ completion is skipped when a run follows the cursor
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_run_complete' ['complete']
-        e.state.loadLines ['aa FOO bb']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 0 6 0]]
-        e.state.stepScales 1
-        e.state.setSelections []
+        [scr e] = runEd 'test_run_complete' ['aa FOO bb'] 40 10 ['complete']
+        runScale e [[3 0 6 0]] 1
 
         e.state.setCursors [[6 0]]
         e.complete.hasScaledTextAfterCursor() ▸ false
@@ -1624,15 +1515,8 @@ blockArea = scr ->
 
   ▸ a colour on a covered line does not paint the block
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_run_tint' []
-        e.state.loadLines ['aaaaaaaa' 'bbb' 'xx BIG yy']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 2 6 2]]
-        e.state.stepScales 1
-        e.state.stepScales 1
-        e.state.setSelections []
+        [scr e] = runEd 'test_run_tint' ['aaaaaaaa' 'bbb' 'xx BIG yy']
+        runScale e [[3 2 6 2]]
         e.state.setCursors [[0 2]]
 
         scr.init()
@@ -1649,15 +1533,8 @@ blockArea = scr ->
 
   ▸ a highlight on a covered line does not paint the block
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_run_highlight' []
-        e.state.loadLines ['aaaaaaaa' 'bbb' 'xx BIG yy']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 2 6 2]]
-        e.state.stepScales 1
-        e.state.stepScales 1
-        e.state.setSelections []
+        [scr e] = runEd 'test_run_highlight' ['aaaaaaaa' 'bbb' 'xx BIG yy']
+        runScale e [[3 2 6 2]]
         e.state.setCursors [[0 2]]
 
         scr.init()
@@ -1674,15 +1551,8 @@ blockArea = scr ->
 
   ▸ a yank flash on a covered line does not paint the block
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_run_yank' []
-        e.state.loadLines ['aaaaaaaa' 'bbb' 'xx BIG yy']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 2 6 2]]
-        e.state.stepScales 1
-        e.state.stepScales 1
-        e.state.setSelections []
+        [scr e] = runEd 'test_run_yank' ['aaaaaaaa' 'bbb' 'xx BIG yy']
+        runScale e [[3 2 6 2]]
         e.state.setCursors [[0 2]]
 
         scr.init()
@@ -1699,11 +1569,7 @@ blockArea = scr ->
 
   ▸ a selection reaches the blocks of a scaled line
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_selection_line_scale' []
-        e.state.loadLines ['aaaa' 'bbbb']
-        e.layout 0 0 40 10
+        [scr e] = runEd 'test_selection_line_scale' ['aaaa' 'bbbb']
         e.state.setCursors [[0 0]]
         e.state.stepScales 2
         e.state.setSelections [[0 0 2 0]]
@@ -1719,14 +1585,8 @@ blockArea = scr ->
 
   ▸ a selection reaches the blocks of a run
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_selection_run_blocks' []
-        e.state.loadLines ['a' 'b' 'c' 'xx BIG yy']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 3 6 3]]
-        e.state.stepScales 1
-        e.state.stepScales 1
+        [scr e] = runEd 'test_selection_run_blocks' ['a' 'b' 'c' 'xx BIG yy']
+        runScale e [[3 3 6 3]] 2 false
         e.state.setCursors [[0 2]]
 
         scr.init()
@@ -1738,11 +1598,7 @@ blockArea = scr ->
 
   ▸ a background colour fills the blocks of a scaled line
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_bg_line_scale' ['susan']
-        e.state.loadLines ['aaaa' 'bbbb']
-        e.layout 0 0 40 10
+        [scr e] = runEd 'test_bg_line_scale' ['aaaa' 'bbbb'] 40 10 ['susan']
         e.state.setCursors [[0 0]]
         e.state.stepScales 2
         e.state.setSue 0 0 [32 2 1 '#00ff00']
@@ -1758,11 +1614,7 @@ blockArea = scr ->
 
   ▸ a colour reaches the blocks of a scaled line
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_colour_line_scale' ['susan']
-        e.state.loadLines ['aaaa' 'bbbb']
-        e.layout 0 0 40 10
+        [scr e] = runEd 'test_colour_line_scale' ['aaaa' 'bbbb'] 40 10 ['susan']
         e.state.setCursors [[0 0]]
         e.state.stepScales 2
         e.state.setSue 0 0 [31 4 1 '#ff0000']
@@ -1778,15 +1630,8 @@ blockArea = scr ->
 
   ▸ a colour reaches the blocks of a run
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_colour_run_blocks' ['susan']
-        e.state.loadLines ['a' 'b' 'c' 'xx BIG yy']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 3 6 3]]
-        e.state.stepScales 1
-        e.state.stepScales 1
-        e.state.setSelections []
+        [scr e] = runEd 'test_colour_run_blocks' ['a' 'b' 'c' 'xx BIG yy'] 40 10 ['susan']
+        runScale e [[3 3 6 3]]
         e.state.setCursors [[0 2]]
         e.state.setSue 3 3 [32 3 1 '#00ff00']
 
@@ -1801,11 +1646,7 @@ blockArea = scr ->
 
   ▸ a yank flash reaches the blocks of a scaled line
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_yank_line_scale' []
-        e.state.loadLines ['aaaa' 'bbbb']
-        e.layout 0 0 40 10
+        [scr e] = runEd 'test_yank_line_scale' ['aaaa' 'bbbb']
         e.state.setCursors [[0 0]]
         e.state.stepScales 2
         e.state.setCursors [[0 1]]
@@ -1820,15 +1661,8 @@ blockArea = scr ->
 
   ▸ a yank flash reaches the blocks of a run
 
-        t = new ttio headless:true input:false textSizing:true cols:40 rows:10
-        scr = new screen t
-        e = new editor scr 'test_yank_run_blocks' []
-        e.state.loadLines ['a' 'b' 'c' 'xx BIG yy']
-        e.layout 0 0 40 10
-        e.state.setSelections [[3 3 6 3]]
-        e.state.stepScales 1
-        e.state.stepScales 1
-        e.state.setSelections []
+        [scr e] = runEd 'test_yank_run_blocks' ['a' 'b' 'c' 'xx BIG yy']
+        runScale e [[3 3 6 3]]
         e.state.setCursors [[0 2]]
         e.state.yankFlash = [[3 3 6 3]]
 
