@@ -204,6 +204,8 @@ use ../menu      ◆ choices
         
     onMouse: event =>
 
+        ⮐ if @hidden()
+
         ret = super event
         ⮐ ret if ret?.redraw
         
