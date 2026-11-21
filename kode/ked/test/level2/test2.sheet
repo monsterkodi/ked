@@ -15,7 +15,7 @@ children
                 b           2
                 children
                     .
-                        text    HELLO world! sun shine happy
+                        text    |HELLO world! sun shine happy      |
                         x       10%
                         y       3
                         w       39%
@@ -23,4 +23,10 @@ children
                         scale   2
                         bg      |#000000|
                         fg      |#f5ff69|
+                    .
+                        text    test TESTTSST
+                        x       10
+                        y       9
+                        w       14
+                        h       1
 x           0

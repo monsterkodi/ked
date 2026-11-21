@@ -46,9 +46,6 @@ export
         @rectreeRows = rows
 
         @s = @s.set 'rectree' layout.plainNode(rectree)
-        @s = @s.set 'rectreeCols' cols
-        @s = @s.set 'rectreeRows' rows
-
         @
 
     clearSheet: ->
@@ -58,9 +55,6 @@ export
         delete @rectreeRows
 
         @s = @s.set 'rectree' null
-        @s = @s.set 'rectreeCols' null
-        @s = @s.set 'rectreeRows' null
-
         @
 
     restoreSheet: ->
@@ -68,8 +62,8 @@ export
         if @s.rectree?
 
             @rectree = @s.rectree.asMutable()
-            @rectreeCols = @s.rectreeCols ? @cells.cols
-            @rectreeRows = @s.rectreeRows ? @cells.rows
+            @rectreeCols = @cells.cols
+            @rectreeRows = @cells.rows
 
             layout.absolutize {cols:@rectreeCols rows:@rectreeRows} @rectree
 
@@ -97,8 +91,6 @@ export
 
         @s = @s.set 'sue' data.sue
         @s = @s.set 'rectree' layout.plainNode(rectree)
-        @s = @s.set 'rectreeCols' cells.cols
-        @s = @s.set 'rectreeRows' cells.rows
 
         if pos?
             @s = @s.set 'cursors' [pos]

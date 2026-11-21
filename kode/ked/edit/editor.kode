@@ -221,10 +221,10 @@ use                ◆ state draw complete mode susan
 
         if @state.rectree?
             dir = switch key
-                'shift+alt+h' ➜ 'left'
-                'shift+alt+j' ➜ 'down'
-                'shift+alt+k' ➜ 'up'
-                'shift+alt+l' ➜ 'right'
+                'shift+alt+h' 'ctrl+alt+left'   ➜ 'left'
+                'shift+alt+j' 'ctrl+alt+down'   ➜ 'down'
+                'shift+alt+k' 'ctrl+alt+up'     ➜ 'up'
+                'shift+alt+l' 'ctrl+alt+right'  ➜ 'right'
             if dir?
                 @state.moveSheetNode dir
                 ⮐ true
