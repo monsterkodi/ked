@@ -29,7 +29,7 @@ use ◆ colorspans
 #  rows, and data is whatever that feature needs.
 
 #  style areas carry flags, a string of b i u s
-#  two areas over the same cells stack, so flags are joined, not replaced
+#  flags are joined, so styles stack
 
 addFlags = (have add) ->
 
@@ -41,10 +41,6 @@ addFlags = (have add) ->
 
     have
 
-#  the codes of the features that use sue
-#  a value is [code, cols, lines, data...], the code says which feature it
-#  belongs to, the geometry is never part of data
-
 FG_COLOR    = 31
 BG_COLOR    = 32
 FG_BG_COLOR = 33
@@ -53,11 +49,7 @@ LINE_SCALE  = 40
 SCALE       = 41
 CLOSE       = 99
 
-#  marks are single positions, not boxes, so their geometry means nothing
-#  they write -1 cols and 1 line to keep every payload the same shape
-
-isMark = (value) ->
-    value[0] in [LINE_SCALE SCALE CLOSE]
+isMark = (value) -> value[0] in [LINE_SCALE SCALE CLOSE]
 
 TAG   = 0xE0000
 MAGIC = 0x21
@@ -93,9 +85,6 @@ hex4 = (n) ->
         s = '0' + s
     s
 
-#  the body is ascii, a space or anything above 0x7E is written as an
-#  escape so that the symbol alphabet stays free of whitespace
-
 escape = (body) ->
     out = ''
     for i in 0...body.length
@@ -114,9 +103,6 @@ digits = (n) ->
         n = floor(n / 10)
     out
 
-#  total number of symbols of the payload starting at arr[i], zero if there
-#  is no payload there
-
 payloadTotal = (arr i) ->
     ⮐ 0 if i + 1 + LEN > arr.length
     ⮐ 0 if arr[i].codePointAt(0) - TAG != MAGIC
@@ -127,19 +113,12 @@ payloadTotal = (arr i) ->
         n = n*10 + d
     1 + LEN + n
 
-#  a grapheme is a visible base plus the tag characters that attached to it
-
 splitTags = (seg) ->
     cps = Array.from(seg)
     i = cps.length
     while i > 0 and isTag(cps[i-1])
         i -= 1
     [cps[0...i].join('') cps[i...cps.length].join('')]
-
-#  collect the payloads of one line
-#
-#  pending holds the tag symbols seen so far, the anchor is the position of
-#  the next visible grapheme, which is exactly the index of the payload
 
 collect = (pending y x areas) ->
     arr = Array.from(pending)
@@ -158,10 +137,6 @@ collect = (pending y x areas) ->
             value = null
         areas.push({x: x y: y value: value}) if value != null
         i += total
-
-#  the index of a pure insertion on one line, or -1
-#  a pure insertion leaves every old grapheme in place, so a marker at
-#  the insertion point can keep its x and let the new text join its run
 
 insertionIndex = (oldLine newLine) ->
 
@@ -194,9 +169,6 @@ insertionIndex = (oldLine newLine) ->
 
     @addFlags: (have add) -> addFlags(have add)
 
-    #  the values of a style area are [flags] or [ul, flags]
-    #  the flag string comes first in the result, the underline colour second
-
     @styleOfValues: values ->
 
         values ?= []
@@ -205,8 +177,6 @@ insertionIndex = (oldLine newLine) ->
             [values[1] values[0]]
         else
             [values[0] null]
-
-    #  the flags and underline color in effect at a cell, from all areas
 
     @styleFlagsAt: (areas lines x y) ->
 
@@ -229,12 +199,6 @@ insertionIndex = (oldLine newLine) ->
             ul    = u if u?
 
         [flags ul]
-
-    #  toggle one flag over the ranges
-    #
-    #  the style areas are cut out of the ranges first and the range is
-    #  then covered by a single area with the joined flags, so applying a
-    #  flag a second time takes it away again
 
     @rangesWithToggledFlag: (ranges areas lines flag) ->
 
@@ -371,12 +335,6 @@ insertionIndex = (oldLine newLine) ->
         catch err
             ⮐ null
 
-    #  keep the anchors of areas attached to the text
-    #  a one cell span is enough to find the new x and y, the value is
-    #  never rewritten, so open ended areas stay open ended
-
-    #  a color span is [x1 y x2 color], the sue form is a fixed width area
-
     @areasForColors: colors ->
 
         areas = []
@@ -408,8 +366,6 @@ insertionIndex = (oldLine newLine) ->
             x = area.x
 
             if not (oldLine eql newLine)
-                #  text inserted exactly at an open marker joins the run, so
-                #  the marker keeps its x instead of sliding past the input
                 if area.value[0] == SCALE and insertionIndex(oldLine newLine) == area.x
                     result.push {x: x y: ny value: area.value}
                     continue
@@ -420,14 +376,6 @@ insertionIndex = (oldLine newLine) ->
             result.push {x: x y: ny value: area.value}
 
         result
-
-    #  geometry
-    #
-    #  the box of an area is its cols and lines, both explicit in the value.
-    #  a negative cols reaches to the end of its line. the rest of the value
-    #  after the geometry is the feature's own data.
-    #
-    #  marks are positions, not boxes, and are never cut.
 
     @boxForAreaAndLines: (area lines) ->
 
@@ -454,9 +402,6 @@ insertionIndex = (oldLine newLine) ->
     @areaWithBoxGeometry: (area box) ->
         cols = box.open ? -1 : box.w
         {x: box.x y: box.y value: [area.value[0] cols box.h].concat(box.values)}
-
-    #  the parts of a box that a range does not cover
-    #  a range is [x1 y1 x2 y2] with x2 exclusive and y2 inclusive
 
     @boxMinusRange: (box rng) ->
 
