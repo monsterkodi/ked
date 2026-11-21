@@ -144,95 +144,6 @@ use           ◆ keys mode
 
         @changeSue next
 
-    areasWithSteppedLineScales: (areas indices delta) =>
-
-        ⮐ areas if empty indices
-
-        scales = []
-
-        for y in indices
-            scales.push clamp(1 7 (@lineHeight(y) + delta))
-
-        keep = @areasWithoutLineScales(areas indices)
-
-        for y,i in indices
-            if scales[i] > 1
-                keep.push {x: 0 y: y value: [sue.LINE_SCALE -1 1 scales[i]]} 
-        keep
-
-    areasWithoutLineScales: (areas indices) =>
-
-        keep = []
-
-        for area in areas
-            continue if area.y in indices and area.value[0] == sue.LINE_SCALE
-            keep.push area
-
-        keep
-
-    areasWithRun: (areas y x1 x2 scale) =>
-
-        open  = {x: x1 y: y value: [sue.SCALE -1 1 scale]}
-        close = {x: x2 y: y value: [sue.CLOSE -1 1 sue.SCALE]}
-
-        areas.concat([open close])
-
-    areasWithRunScale: (areas y x1 scale) =>
-
-        out = []
-
-        for area in areas
-            if area.y == y and area.x == x1 and area.value[0] == sue.SCALE
-                out.push {x: area.x y: area.y value: [sue.SCALE -1 1 scale]}
-            else
-                out.push area
-
-        out
-
-    areasWithoutRun: (areas y x1 x2) =>
-
-        out = []
-
-        for area in areas
-
-            if area.y == y and area.x == x1 and area.value[0] == sue.SCALE
-                continue
-
-            if area.y == y and area.x == x2 and area.value[0] == sue.CLOSE
-                data = sue.dataOf(area.value)
-                continue if empty data or data[0] == sue.SCALE
-
-            out.push area
-
-        out
-
-    areasWithSteppedRuns: (areas pieces delta) =>
-
-        for piece in pieces
-
-            [x1 y x2] = piece
-
-            continue if x1 >= x2
-
-            run = null
-
-            for r in sue.runsForLine(areas @s.lines y)
-                if r[0] <= x1 and x2 <= r[1]
-                    run = r
-                    break
-
-            if run?
-                scale = clamp(1 7 (run[2] + delta))
-                if scale <= 1
-                    areas = @areasWithoutRun(areas y run[0] run[1])
-                else
-                    areas = @areasWithRunScale(areas y run[0] scale)
-            else if delta > 0
-                scale = clamp(1 7 (1 + delta))
-                areas = @areasWithRun(areas y x1 x2 scale) if scale > 1
-
-        areas
-
     stepScales: delta =>
 
         areas = @s.sue ? []
@@ -240,7 +151,7 @@ use           ◆ keys mode
 
         if empty @s.selections
             indices = belt.lineIndicesForPositions @s.cursors
-            next = @areasWithSteppedLineScales(areas indices delta)
+            next = sue.areasWithSteppedLineScales(areas indices delta @lineHeight)
         else
             lines = []
             runs  = []
@@ -251,8 +162,8 @@ use           ◆ keys mode
                 else
                     runs.push piece
 
-            next = @areasWithSteppedLineScales(next lines delta)
-            next = @areasWithSteppedRuns(next runs delta)
+            next = sue.areasWithSteppedLineScales(next lines delta @lineHeight)
+            next = sue.areasWithSteppedRunsInLines(next runs delta @s.lines)
 
         @applySueAreas next
 
@@ -261,13 +172,13 @@ use           ◆ keys mode
         areas = @s.sue ? []
         indices = belt.lineIndicesForRangesOrPositions @s.selections @s.cursors
 
-        next = @areasWithoutLineScales(areas indices)
+        next = sue.areasWithoutLineScales(areas indices)
 
         for piece in belt.splitLineRanges(@s.lines @s.selections false)
             continue if belt.isFullLineRange @s.lines piece
             for run in sue.runsForLine(next @s.lines piece[1])
                 if run[0] <= piece[0] and piece[2] <= run[1]
-                    next = @areasWithoutRun(next piece[1] run[0] run[1])
+                    next = sue.areasWithoutRun(next piece[1] run[0] run[1])
                     break
 
         @applySueAreas next

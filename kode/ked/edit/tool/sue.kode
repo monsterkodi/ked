@@ -335,20 +335,6 @@ insertionIndex = (oldLine newLine) ->
         catch err
             ⮐ 
 
-    @areasForColors: colors ->
-
-        areas = []
-
-        ⮐ areas if not colors?
-
-        for span in (colors.fg ? [])
-            areas.push {x: span[0] y: span[1] value: [FG_COLOR (span[2]-span[0]) 1 span[3]]}
-
-        for span in (colors.bg ? [])
-            areas.push {x: span[0] y: span[1] value: [BG_COLOR (span[2]-span[0]) 1 span[3]]}
-
-        areas
-
     @adjust: areas oldLines newLines ->
         ⮐ areas if empty areas
 
@@ -376,7 +362,7 @@ insertionIndex = (oldLine newLine) ->
             result.push {x: x y: ny value: area.value}
 
         result
-
+        
     @boxForAreaAndLines: (area lines) ->
 
         value = area.value
@@ -398,10 +384,6 @@ insertionIndex = (oldLine newLine) ->
             open = false
 
         {x: area.x y: area.y w: w h: h values: @dataOf(value) open: open}
-
-    @areaWithBoxGeometry: (area box) ->
-        cols = box.open ? -1 : box.w
-        {x: box.x y: box.y value: [area.value[0] cols box.h].concat(box.values)}
 
     @boxMinusRange: (box rng) ->
 
@@ -459,6 +441,114 @@ insertionIndex = (oldLine newLine) ->
                 result.push @areaWithBoxGeometry(area part)
 
         result
+
+    @areaWithBoxGeometry: (area box) ->
+        
+        cols = box.open ? -1 : box.w
+        {x: box.x y: box.y value: [area.value[0] cols box.h].concat(box.values)}
+        
+    @areasWithoutLineScales: (areas indices) ->
+
+        keep = []
+
+        for area in areas
+            continue if area.y in indices and area.value[0] == sue.LINE_SCALE
+            keep.push area
+
+        keep
+
+    @areasForColors: colors ->
+
+        areas = []
+
+        ⮐ areas if not colors?
+
+        for span in (colors.fg ? [])
+            areas.push {x: span[0] y: span[1] value: [FG_COLOR (span[2]-span[0]) 1 span[3]]}
+
+        for span in (colors.bg ? [])
+            areas.push {x: span[0] y: span[1] value: [BG_COLOR (span[2]-span[0]) 1 span[3]]}
+
+        areas
+
+    @areasWithRun: (areas y x1 x2 scale) ->
+
+        open  = {x: x1 y: y value: [sue.SCALE -1 1 scale]}
+        close = {x: x2 y: y value: [sue.CLOSE -1 1 sue.SCALE]}
+
+        areas.concat([open close])
+
+    @areasWithRunScale: (areas y x1 scale) ->
+
+        out = []
+
+        for area in areas
+            if area.y == y and area.x == x1 and area.value[0] == sue.SCALE
+                out.push {x: area.x y: area.y value: [sue.SCALE -1 1 scale]}
+            else
+                out.push area
+
+        out
+
+    @areasWithoutRun: (areas y x1 x2) ->
+
+        out = []
+
+        for area in areas
+
+            if area.y == y and area.x == x1 and area.value[0] == sue.SCALE
+                continue
+
+            if area.y == y and area.x == x2 and area.value[0] == sue.CLOSE
+                data = sue.dataOf(area.value)
+                continue if empty data or data[0] == sue.SCALE
+
+            out.push area
+
+        out
+
+    @areasWithSteppedRunsInLines: (areas pieces delta lines) ->
+
+        for piece in pieces
+
+            [x1 y x2] = piece
+
+            continue if x1 >= x2
+
+            run = null
+
+            for r in sue.runsForLine(areas lines y)
+                if r[0] <= x1 and x2 <= r[1]
+                    run = r
+                    break
+
+            if run?
+                scale = clamp(1 7 (run[2] + delta))
+                if scale <= 1
+                    areas = sue.areasWithoutRun(areas y run[0] run[1])
+                else
+                    areas = sue.areasWithRunScale(areas y run[0] scale)
+            else if delta > 0
+                scale = clamp(1 7 (1 + delta))
+                areas = sue.areasWithRun(areas y x1 x2 scale) if scale > 1
+
+        areas
+        
+    @areasWithSteppedLineScales: (areas indices delta lineHeight) ->
+
+        ⮐ areas if empty indices
+
+        scales = []
+
+        for y in indices
+            scales.push clamp(1 7 (lineHeight(y) + delta))
+
+        keep = sue.areasWithoutLineScales(areas indices)
+
+        for y,i in indices
+            if scales[i] > 1
+                keep.push {x: 0 y: y value: [sue.LINE_SCALE -1 1 scales[i]]} 
+        keep
 
     @desue: text ->
         lines = text.split('\n')
