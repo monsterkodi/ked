@@ -225,8 +225,19 @@ use                ◆ state draw complete mode susan
                 'shift+alt+j' 'ctrl+alt+down'   ➜ 'down'
                 'shift+alt+k' 'ctrl+alt+up'     ➜ 'up'
                 'shift+alt+l' 'ctrl+alt+right'  ➜ 'right'
+                
             if dir?
                 @state.moveSheetNode dir
+                ⮐ true
+
+            dir = switch key
+                'ctrl+alt+.' ➜ 'more cols'
+                'ctrl+alt+,' ➜ 'less cols'
+                "ctrl+alt+'" ➜ 'more rows'
+                'ctrl+alt+/' ➜ 'less rows'
+                
+            if dir?
+                @state.resizeSheetNode dir
                 ⮐ true
 
         result = @state.feedKey key event

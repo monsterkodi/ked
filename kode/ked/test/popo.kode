@@ -289,55 +289,112 @@ use ../util  ◆ harness
                 sds.get(tree 'children.0.r') ▸ '19%'
                 sds.get(tree 'children.0.rect.abs') ▸ {x:1 y:2 w:80 h:8}
 
+    ▸ resizeNode
+
+      ▸ absolute
+                
+                cells = {cols:20 rows:6}
+                tree =  layout.absolutize cells { children:[{ text:'a' x:2 y:2 w:4 h:2 }] }
+
+                layout.resizeNode cells tree tree.children[0] 'more cols'
+                tree.children[0].w ▸ 5
+                
+                layout.resizeNode cells tree tree.children[0] 'more cols'
+                tree.children[0].w ▸ 6
+                
+                layout.resizeNode cells tree tree.children[0] 'less cols'
+                tree.children[0].w ▸ 5
+                
+                layout.resizeNode cells tree tree.children[0] 'more rows'
+                tree.children[0].h ▸ 3
+
+                layout.resizeNode cells tree tree.children[0] 'more rows'
+                tree.children[0].h ▸ 4
+                
+                layout.resizeNode cells tree tree.children[0] 'more rows'
+                tree.children[0].h ▸ 4
+                
+                layout.resizeNode cells tree tree.children[0] 'less rows'
+                tree.children[0].h ▸ 3
+                
+      ▸ relative
+            
+                cells = {cols:20 rows:10}
+                tree =  layout.absolutize cells { children:[{ text:'a' x:2 y:2 w:'50%' h:'50%' }] }
+
+                layout.resizeNode cells tree tree.children[0] 'more cols'
+                tree.children[0].w ▸ '55%'
+                
+                layout.resizeNode cells tree tree.children[0] 'more cols'
+                tree.children[0].w ▸ '60%'
+
+                layout.resizeNode cells tree tree.children[0] 'less cols'
+                tree.children[0].w ▸ '55%'
+
+                layout.resizeNode cells tree tree.children[0] 'more rows'
+                tree.children[0].h ▸ '60%'
+
+                layout.resizeNode cells tree tree.children[0] 'more rows'
+                tree.children[0].h ▸ '70%'
+                
+                layout.resizeNode cells tree tree.children[0] 'more rows'
+                tree.children[0].h ▸ '80%'
+                
+                layout.resizeNode cells tree tree.children[0] 'more rows'
+                tree.children[0].h ▸ '80%'
+
+                layout.resizeNode cells tree tree.children[0] 'less rows'
+                tree.children[0].h ▸ '70%'
+                
     ▸ titlify
 
-        tree = { bg:'#000' x:2 y:2 w:20 h:10 children:[{ x:3 y:2 w:10 h:5 children:[{ text:'hi' x:1 y:1 w:3 h:1 }] }] }
-
-        layout.titlify {cols:30 rows:20} tree
-
-        tree.title ▸ '  bg'
-        tree.rect.abs ▸ {x:2 y:2 w:20 h:10}
-
-        container = sds.get(tree 'children.0')
-        containerTitle = container.title?
-        containerTitle ▸ false
-
-        text = sds.get(tree 'children.0.children.0')
-        text.title ▸ '      text'
-        text.rect.abs ▸ {x:6 y:5 w:3 h:1}
-
-        layout.typeOf(tree) ▸ 'bg'
-        layout.argOf(tree) ▸ '#000'
-        layout.typeOf(container) ▸ null
-        layout.typeOf(text) ▸ 'text'
-        layout.argOf(text) ▸ 'hi'
-
-        tree = { bg:'#000' children:[{ x:2 y:1 w:10 h:5 children:[{ text:'hi' x:1 y:1 r:1 b:1 }] }] }
-
-        layout.titlify {cols:30 rows:20} tree
-
-        sds.get(tree 'children.0.children.0.rect.abs') ▸ {x:3 y:2 w:8 h:3}
+            tree = { bg:'#000' x:2 y:2 w:20 h:10 children:[{ x:3 y:2 w:10 h:5 children:[{ text:'hi' x:1 y:1 w:3 h:1 }] }] }
+    
+            layout.titlify {cols:30 rows:20} tree
+    
+            tree.title ▸ '  bg'
+            tree.rect.abs ▸ {x:2 y:2 w:20 h:10}
+    
+            container = sds.get(tree 'children.0')
+            containerTitle = container.title?
+            containerTitle ▸ false
+    
+            text = sds.get(tree 'children.0.children.0')
+            text.title ▸ '      text'
+            text.rect.abs ▸ {x:6 y:5 w:3 h:1}
+    
+            layout.typeOf(tree) ▸ 'bg'
+            layout.argOf(tree) ▸ '#000'
+            layout.typeOf(container) ▸ null
+            layout.typeOf(text) ▸ 'text'
+            layout.argOf(text) ▸ 'hi'
+    
+            tree = { bg:'#000' children:[{ x:2 y:1 w:10 h:5 children:[{ text:'hi' x:1 y:1 r:1 b:1 }] }] }
+    
+            layout.titlify {cols:30 rows:20} tree
+    
+            sds.get(tree 'children.0.children.0.rect.abs') ▸ {x:3 y:2 w:8 h:3}
 
     ▸ sourceOf
 
-        tree = { bg:'#333' children:[{ text:'hi' x:1 y:1 w:3 h:1 }] }
-
-        layout.titlify {cols:10 rows:5} tree
-        layout.regionize {cols:10 rows:5} tree
-
-        source = layout.sourceOf tree
-        again  = noon.parse source
-
-        again ▸ {bg:'#333' children:[{text:'hi' x:1 y:1 w:3 h:1}]}
-
-        tree = { bg:'#333' }
-
-        layout.insertTextAt {cols:10 rows:5} tree [2 1] 'a'
-
-        source = layout.sourceOf tree
-        again  = noon.parse source
-
-        again ▸ {bg:'#333' children:[{text:'a' x:2 y:1 w:2 h:1}]}
+            tree = { bg:'#333' children:[{ text:'hi' x:1 y:1 w:3 h:1 }] }
+    
+            layout.titlify {cols:10 rows:5} tree
+            layout.regionize {cols:10 rows:5} tree
+    
+            source = layout.sourceOf tree
+            again  = noon.parse source
+    
+            again ▸ {bg:'#333' children:[{text:'hi' x:1 y:1 w:3 h:1}]}
+    
+            tree = { bg:'#333' }
+    
+            layout.insertTextAt {cols:10 rows:5} tree [2 1] 'a'
+    
+            source = layout.sourceOf tree
+            again  = noon.parse source
+    
+            again ▸ {bg:'#333' children:[{text:'a' x:2 y:1 w:2 h:1}]}
 
   ▸ insertTextAt
 
