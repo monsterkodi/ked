@@ -1,272 +1,274 @@
-var handleKey
+var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
+
+var feedKey, handleKey
 
 import config from "../util/config.js"
 
 import mode from "./mode.js"
 
 
-handleKey = function (key, event)
+handleKey = function (state, key, event)
 {
-    if ('unhandled' !== mode.handleKey(this,key,event))
+    if ('unhandled' !== mode.handleKey(state,key,event))
     {
         return
     }
     switch (key)
     {
         case 'up':
-            return this.moveCursors('up')
+            return state.moveCursors('up')
 
         case 'down':
-            return this.moveCursors('down')
+            return state.moveCursors('down')
 
         case 'left':
-            return this.moveCursors('left')
+            return state.moveCursors('left')
 
         case 'right':
-            return this.moveCursors('right')
+            return state.moveCursors('right')
 
         case 'ctrl+alt+up':
-            return this.singleCursorPage('up')
+            return state.singleCursorPage('up')
 
         case 'ctrl+alt+down':
-            return this.singleCursorPage('down')
+            return state.singleCursorPage('down')
 
         case 'shift+ctrl+alt+up':
-            return this.moveCursors('up',{count:16})
+            return state.moveCursors('up',{count:16})
 
         case 'shift+ctrl+alt+down':
-            return this.moveCursors('down',{count:16})
+            return state.moveCursors('down',{count:16})
 
         case 'cmd+left':
         case 'ctrl+left':
-            return this.moveCursors(['bos','ind_bol'])
+            return state.moveCursors(['bos','ind_bol'])
 
         case 'cmd+right':
         case 'ctrl+right':
-            return this.moveCursors(['eos','ind_eol'])
+            return state.moveCursors(['eos','ind_eol'])
 
         case 'alt+left':
-            return this.moveCursors('left',{jump:['ws','word','empty','punct']})
+            return state.moveCursors('left',{jump:['ws','word','empty','punct']})
 
         case 'alt+right':
-            return this.moveCursors('right',{jump:['ws','word','empty','punct']})
+            return state.moveCursors('right',{jump:['ws','word','empty','punct']})
 
         case 'shift+alt+right':
-            return this.moveCursorsAndSelect('right',{jump:['ws','word','empty','punct']})
+            return state.moveCursorsAndSelect('right',{jump:['ws','word','empty','punct']})
 
         case 'shift+alt+left':
-            return this.moveCursorsAndSelect('left',{jump:['ws','word','empty','punct']})
+            return state.moveCursorsAndSelect('left',{jump:['ws','word','empty','punct']})
 
         case 'shift+up':
-            return this.moveCursorsAndSelect('up')
+            return state.moveCursorsAndSelect('up')
 
         case 'shift+down':
-            return this.moveCursorsAndSelect('down')
+            return state.moveCursorsAndSelect('down')
 
         case 'shift+left':
-            return this.moveCursorsAndSelect('left')
+            return state.moveCursorsAndSelect('left')
 
         case 'shift+right':
-            return this.moveCursorsAndSelect('right')
+            return state.moveCursorsAndSelect('right')
 
         case 'shift+cmd+right':
-            return this.moveCursorsAndSelect('ind_eol')
+            return state.moveCursorsAndSelect('ind_eol')
 
         case 'shift+cmd+left':
-            return this.moveCursorsAndSelect('ind_bol')
+            return state.moveCursorsAndSelect('ind_bol')
 
         case 'shift+ctrl+h':
-            return this.moveCursorsAndSelect('bof')
+            return state.moveCursorsAndSelect('bof')
 
         case 'shift+ctrl+j':
-            return this.moveCursorsAndSelect('eof')
+            return state.moveCursorsAndSelect('eof')
 
         case 'shift+alt+cmd+up':
-            return this.moveMainCursorInDirection('up',{keep:true})
+            return state.moveMainCursorInDirection('up',{keep:true})
 
         case 'shift+alt+cmd+down':
-            return this.moveMainCursorInDirection('down',{keep:true})
+            return state.moveMainCursorInDirection('down',{keep:true})
 
         case 'shift+alt+cmd+left':
-            return this.moveMainCursorInDirection('left',{keep:true})
+            return state.moveMainCursorInDirection('left',{keep:true})
 
         case 'shift+alt+cmd+right':
-            return this.moveMainCursorInDirection('right',{keep:true})
+            return state.moveMainCursorInDirection('right',{keep:true})
 
         case 'alt+up':
         case 'shift+ctrl+up':
-            return this.moveSelectionOrCursorLines('up')
+            return state.moveSelectionOrCursorLines('up')
 
         case 'alt+down':
         case 'shift+ctrl+down':
-            return this.moveSelectionOrCursorLines('down')
+            return state.moveSelectionOrCursorLines('down')
 
         case 'shift+alt+up':
-            return this.cloneSelectionAndCursorLines('up')
+            return state.cloneSelectionAndCursorLines('up')
 
         case 'shift+alt+down':
-            return this.cloneSelectionAndCursorLines('down')
+            return state.cloneSelectionAndCursorLines('down')
 
         case 'cmd+up':
         case 'ctrl+up':
-            return this.expandCursors('up')
+            return state.expandCursors('up')
 
         case 'cmd+down':
         case 'ctrl+down':
-            return this.expandCursors('down')
+            return state.expandCursors('down')
 
         case 'shift+cmd+up':
-            return this.contractCursors('up')
+            return state.contractCursors('up')
 
         case 'shift+cmd+down':
-            return this.contractCursors('down')
+            return state.contractCursors('down')
 
         case 'pageup':
-            return this.singleCursorPage('up')
+            return state.singleCursorPage('up')
 
         case 'pagedown':
-            return this.singleCursorPage('down')
+            return state.singleCursorPage('down')
 
         case 'home':
-            return this.singleCursorAtIndentOrStartOfLine()
+            return state.singleCursorAtIndentOrStartOfLine()
 
         case 'end':
-            return this.singleCursorAtEndOfLine()
+            return state.singleCursorAtEndOfLine()
 
         case 'ctrl+h':
-            return this.setMainCursor(0,0)
+            return state.setMainCursor(0,0)
 
         case 'ctrl+j':
-            return this.setMainCursor(this.s.lines[this.s.lines.length - 1].length,this.s.lines.length - 1)
+            return state.setMainCursor(state.s.lines[state.s.lines.length - 1].length,state.s.lines.length - 1)
 
         case 'alt+d':
-            return this.delete('next',true)
+            return state.delete('next',true)
 
         case 'shift+ctrl+k':
         case 'entf':
-            return this.delete('next')
+            return state.delete('next')
 
         case 'ctrl+k':
-            return this.delete('eol')
+            return state.delete('eol')
 
         case 'delete':
-            return this.delete('back')
+            return state.delete('back')
 
         case 'ctrl+delete':
-            return this.delete('back',true)
+            return state.delete('back',true)
 
         case 'cmd+delete':
-            return this.delete('back',true)
+            return state.delete('back',true)
 
         case 'shift+tab':
-            return this.deindentSelectedOrCursorLines()
+            return state.deindentSelectedOrCursorLines()
 
         case 'tab':
-            return this.insert('\t')
+            return state.insert('\t')
 
         case 'cmd+x':
         case 'ctrl+x':
-            return this.cut()
+            return state.cut()
 
         case 'cmd+c':
         case 'ctrl+c':
-            return this.copy()
+            return state.copy()
 
         case 'cmd+v':
         case 'ctrl+v':
-            if (!mode.isActive(this,'novim'))
+            if (!mode.isActive(state,'novim'))
             {
-                return this.paste()
+                return state.paste()
             }
             break
         case 'cmd+z':
         case 'ctrl+z':
-            return this.undo()
+            return state.undo()
 
         case 'shift+cmd+z':
         case 'cmd+y':
         case 'ctrl+y':
-            return this.redo()
+            return state.redo()
 
         case 'cmd+a':
         case 'ctrl+a':
-            return this.selectAllLines()
+            return state.selectAllLines()
 
         case 'cmd+j':
-            return this.joinLines()
+            return state.joinLines()
 
         case 'cmd+l':
         case 'ctrl+l':
-            return this.selectMoreLines()
+            return state.selectMoreLines()
 
         case 'shift+cmd+l':
         case 'shift+ctrl+l':
-            return this.selectLessLines()
+            return state.selectLessLines()
 
         case 'cmd+e':
         case 'ctrl+e':
-            return this.highlightWordAtCursor_deselectCursorHighlight_moveCursorToNextHighlight()
+            return state.highlightWordAtCursor_deselectCursorHighlight_moveCursorToNextHighlight()
 
         case 'cmd+d':
         case 'ctrl+d':
-            return this.selectWordAtCursor_highlightSelection_addNextHighlightToSelection()
+            return state.selectWordAtCursor_highlightSelection_addNextHighlightToSelection()
 
         case 'cmd+g':
         case 'ctrl+g':
-            return this.selectWordAtCursor_highlightSelection_selectNextHighlight()
+            return state.selectWordAtCursor_highlightSelection_selectNextHighlight()
 
         case 'shift+cmd+e':
         case 'shift+ctrl+e':
-            return this.highlightWordAtCursor_deselectCursorHighlight_moveCursorToPrevHighlight()
+            return state.highlightWordAtCursor_deselectCursorHighlight_moveCursorToPrevHighlight()
 
         case 'shift+cmd+d':
         case 'shift+ctrl+d':
-            return this.selectWordAtCursor_highlightSelection_addPrevHighlightToSelection()
+            return state.selectWordAtCursor_highlightSelection_addPrevHighlightToSelection()
 
         case 'shift+cmd+g':
         case 'shift+ctrl+g':
-            return this.selectWordAtCursor_highlightSelection_selectPrevHighlight()
+            return state.selectWordAtCursor_highlightSelection_selectPrevHighlight()
 
         case 'alt+y':
-            return this.toggleMode('unype')
+            return state.toggleMode('unype')
 
         case 'alt+n':
         case 'alt+z':
-            return this.toggleMode('novim')
+            return state.toggleMode('novim')
 
         case 'alt+3':
-            return this.toggleMode('salter')
+            return state.toggleMode('salter')
 
         case 'cmd+3':
         case 'ctrl+3':
-            return this.insertAsciiHeaderForSelectionOrWordAtCursor()
+            return state.insertAsciiHeaderForSelectionOrWordAtCursor()
 
         case 'alt+cmd+d':
         case 'alt+ctrl+d':
-            return this.selectWordAtCursor_highlightSelection_selectAllHighlights()
+            return state.selectWordAtCursor_highlightSelection_selectAllHighlights()
 
         case 'cmd+/':
         case 'ctrl+/':
-            return this.toggleCommentAtSelectionOrCursorLines()
+            return state.toggleCommentAtSelectionOrCursorLines()
 
         case 'alt+cmd+/':
         case 'ctrl+alt+/':
-            return this.toggleCommentTypeAtSelectionOrCursorLines()
+            return state.toggleCommentTypeAtSelectionOrCursorLines()
 
         case 'ctrl+return':
-            return this.jumpToWordAtCursor()
+            return state.jumpToWordAtCursor()
 
         case 'esc':
-            this.finishNovimInsert()
-            if (this.hasCursorsHighlightsOrSelections())
+            state.finishNovimInsert()
+            if (state.hasCursorsHighlightsOrSelections())
             {
-                return this.clearCursorsHighlightsAndSelections()
+                return state.clearCursorsHighlightsAndSelections()
             }
             else
             {
                 if (config.data.novim.autoEnableOnEscape)
                 {
-                    this.toggleMode('novim')
+                    state.toggleMode('novim')
                 }
             }
             break
@@ -274,7 +276,34 @@ handleKey = function (key, event)
 
     return 'unhandled'
 }
-export default handleKey;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia2V5cy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvZWRpdC9rZXlzLmtvZGUiXSwibWFwcGluZ3MiOiI7O09BQ2MsYUFBUDs7T0FDRCxXQUFBOzs7QUFNTixzQkFBWSxLQUFJOztRQUlQLGdCQUFlLEtBQUssVUFBVSxLQUFFLElBQUk7Ozs7WUFFbEM7O2FBRUg7bUJBQXdDLEtBQUMsWUFBWTs7YUFDckQ7bUJBQXdDLEtBQUMsWUFBWTs7YUFDckQ7bUJBQXdDLEtBQUMsWUFBWTs7YUFDckQ7bUJBQXdDLEtBQUMsWUFBWTs7YUFFckQ7bUJBQXdDLEtBQUMsaUJBQWlCOzthQUMxRDttQkFBd0MsS0FBQyxpQkFBaUI7O2FBQzFEO21CQUF3QyxLQUFDLFlBQVksTUFBUSxNQUFNOzthQUNuRTttQkFBd0MsS0FBQyxZQUFZLFFBQVEsTUFBTTs7YUFFbkU7YUFBZ0I7bUJBQXdCLEtBQUMsYUFBYSxNQUFNOzthQUM1RDthQUFnQjttQkFBd0IsS0FBQyxhQUFhLE1BQU07O2FBRTVEO21CQUF3QyxLQUFDLFlBQVksUUFBUSxNQUFNLEtBQUssT0FBTyxRQUFROzthQUN2RjttQkFBd0MsS0FBQyxZQUFZLFNBQVEsTUFBTSxLQUFLLE9BQU8sUUFBUTs7YUFFdkY7bUJBQXdDLEtBQUMscUJBQXFCLFNBQVEsTUFBTSxLQUFLLE9BQU8sUUFBUTs7YUFDaEc7bUJBQXdDLEtBQUMscUJBQXFCLFFBQVEsTUFBTSxLQUFLLE9BQU8sUUFBUTs7YUFDaEc7bUJBQXdDLEtBQUMscUJBQXFCOzthQUM5RDttQkFBd0MsS0FBQyxxQkFBcUI7O2FBQzlEO21CQUF3QyxLQUFDLHFCQUFxQjs7YUFDOUQ7bUJBQXdDLEtBQUMscUJBQXFCOzthQUM5RDttQkFBd0MsS0FBQyxxQkFBcUI7O2FBQzlEO21CQUF3QyxLQUFDLHFCQUFxQjs7YUFDOUQ7bUJBQXdDLEtBQUMscUJBQXFCOzthQUM5RDttQkFBd0MsS0FBQyxxQkFBcUI7O2FBRTlEO21CQUF3QyxLQUFDLDBCQUEwQixNQUFRLEtBQUs7O2FBQ2hGO21CQUF3QyxLQUFDLDBCQUEwQixRQUFRLEtBQUs7O2FBQ2hGO21CQUF3QyxLQUFDLDBCQUEwQixRQUFRLEtBQUs7O2FBQ2hGO21CQUF3QyxLQUFDLDBCQUEwQixTQUFRLEtBQUs7O2FBRWhGO2FBQWdCO21CQUF3QixLQUFDLDJCQUE2Qjs7YUFDdEU7YUFBZ0I7bUJBQXdCLEtBQUMsMkJBQTZCOzthQUN0RTttQkFBd0MsS0FBQyw2QkFBNkI7O2FBQ3RFO21CQUF3QyxLQUFDLDZCQUE2Qjs7YUFFdEU7YUFBZ0I7bUJBQXdCLEtBQUMsY0FBZ0I7O2FBQ3pEO2FBQWdCO21CQUF3QixLQUFDLGNBQWdCOzthQUN6RDttQkFBd0MsS0FBQyxnQkFBZ0I7O2FBQ3pEO21CQUF3QyxLQUFDLGdCQUFnQjs7YUFFekQ7bUJBQXdDLEtBQUMsaUJBQWlCOzthQUMxRDttQkFBd0MsS0FBQyxpQkFBaUI7O2FBRTFEO21CQUF3QyxLQUFDOzthQUN6QzttQkFBd0MsS0FBQzs7YUFFekM7bUJBQXdDLEtBQUMsY0FBYyxFQUFFOzthQUN6RDttQkFBd0MsS0FBQyxjQUFjLEtBQUMsRUFBRSxNQUFNLEtBQUMsRUFBRSxNQUFNLFNBQU8sR0FBRyxPQUFPLEtBQUMsRUFBRSxNQUFNLFNBQU87O2FBRTFHO21CQUF3QyxLQUFDLE9BQU8sT0FBTzs7YUFDdkQ7YUFBZ0I7bUJBQXdCLEtBQUMsT0FBTzs7YUFDaEQ7bUJBQXdDLEtBQUMsT0FBTzs7YUFDaEQ7bUJBQXdDLEtBQUMsT0FBTzs7YUFDaEQ7bUJBQXdDLEtBQUMsT0FBTyxPQUFPOzthQUN2RDttQkFBd0MsS0FBQyxPQUFPLE9BQU87O2FBRXZEO21CQUF3QyxLQUFDOzthQUN6QzttQkFBd0MsS0FBQyxPQUFPOzthQUVoRDthQUFnQjttQkFBd0IsS0FBQzs7YUFDekM7YUFBZ0I7bUJBQXdCLEtBQUM7O2FBQ3pDO2FBQWdCO2lCQUF3QyxLQUFLLFNBQVMsS0FBRTs7dUJBQWhDLEtBQUM7OzthQUV6QzthQUFnQjttQkFBd0IsS0FBQzs7YUFDekM7YUFDQTthQUFnQjttQkFBd0IsS0FBQzs7YUFFekM7YUFBZ0I7bUJBQXdCLEtBQUM7O2FBQ3pDO21CQUF3QyxLQUFDOzthQUN6QzthQUFnQjttQkFBd0IsS0FBQzs7YUFDekM7YUFBZ0I7bUJBQXdCLEtBQUM7O2FBRXpDO2FBQWdCO21CQUF3QixLQUFDOzthQUN6QzthQUFnQjttQkFBd0IsS0FBQzs7YUFDekM7YUFBZ0I7bUJBQXdCLEtBQUM7O2FBRXpDO2FBQWdCO21CQUF3QixLQUFDOzthQUN6QzthQUFnQjttQkFBd0IsS0FBQzs7YUFDekM7YUFBZ0I7bUJBQXdCLEtBQUM7O2FBRXpDO21CQUF3QyxLQUFDLFdBQVc7O2FBQ3BEO2FBQWdCO21CQUF3QixLQUFDLFdBQVc7O2FBQ3BEO21CQUF3QyxLQUFDLFdBQVc7O2FBRXBEO2FBQWdCO21CQUF3QixLQUFDOzthQUN6QzthQUFnQjttQkFBd0IsS0FBQzs7YUFFekM7YUFBZ0I7bUJBQXdCLEtBQUM7O2FBQ3pDO2FBQWdCO21CQUF3QixLQUFDOzthQUV6QzttQkFBd0MsS0FBQzs7YUFFekM7WUFDSSxLQUFDO2dCQUNFLEtBQUM7O3VCQUNFLEtBQUM7Ozs7b0JBRUEsT0FBTyxLQUFLLE1BQU07O29CQUNqQixLQUFDLFdBQVc7Ozs7OztXQUU1Qjs7ZUFFRyJ9
+feedKey = function (state, key, event)
+{
+    var char, combo, result, _132_24_
+
+    result = handleKey(state,key,event)
+    state.recordMacroKey(key,event)
+    if (result !== 'unhandled')
+    {
+        return 'handled'
+    }
+    if (!event)
+    {
+        return 'unhandled'
+    }
+    char = event.char
+    combo = ((_132_24_=event.combo) != null ? _132_24_ : key)
+    if (!_k_.empty(char) && (char === combo || _k_.in(combo,['space','shift+space','return','tab']) || combo.slice(0, -1) === 'shift+'))
+    {
+        state.insert(char)
+        return 'inserted'
+    }
+    return 'unhandled'
+}
+export default {
+    handleKey:handleKey,
+    feedKey:feedKey
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoia2V5cy5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvZWRpdC9rZXlzLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYyxhQUFQOztPQUNELFdBQUE7OztBQU9OLHNCQUFhLE9BQU0sS0FBSTs7UUFJZCxnQkFBZSxLQUFLLFVBQVUsTUFBTSxJQUFJOzs7O1lBRXRDOzthQUVIO21CQUF3QyxNQUFNLFlBQVk7O2FBQzFEO21CQUF3QyxNQUFNLFlBQVk7O2FBQzFEO21CQUF3QyxNQUFNLFlBQVk7O2FBQzFEO21CQUF3QyxNQUFNLFlBQVk7O2FBRTFEO21CQUF3QyxNQUFNLGlCQUFpQjs7YUFDL0Q7bUJBQXdDLE1BQU0saUJBQWlCOzthQUMvRDttQkFBd0MsTUFBTSxZQUFZLE1BQVEsTUFBTTs7YUFDeEU7bUJBQXdDLE1BQU0sWUFBWSxRQUFRLE1BQU07O2FBRXhFO2FBQWdCO21CQUF3QixNQUFNLGFBQWEsTUFBTTs7YUFDakU7YUFBZ0I7bUJBQXdCLE1BQU0sYUFBYSxNQUFNOzthQUVqRTttQkFBd0MsTUFBTSxZQUFZLFFBQVEsTUFBTSxLQUFLLE9BQU8sUUFBUTs7YUFDNUY7bUJBQXdDLE1BQU0sWUFBWSxTQUFRLE1BQU0sS0FBSyxPQUFPLFFBQVE7O2FBRTVGO21CQUF3QyxNQUFNLHFCQUFxQixTQUFRLE1BQU0sS0FBSyxPQUFPLFFBQVE7O2FBQ3JHO21CQUF3QyxNQUFNLHFCQUFxQixRQUFRLE1BQU0sS0FBSyxPQUFPLFFBQVE7O2FBQ3JHO21CQUF3QyxNQUFNLHFCQUFxQjs7YUFDbkU7bUJBQXdDLE1BQU0scUJBQXFCOzthQUNuRTttQkFBd0MsTUFBTSxxQkFBcUI7O2FBQ25FO21CQUF3QyxNQUFNLHFCQUFxQjs7YUFDbkU7bUJBQXdDLE1BQU0scUJBQXFCOzthQUNuRTttQkFBd0MsTUFBTSxxQkFBcUI7O2FBQ25FO21CQUF3QyxNQUFNLHFCQUFxQjs7YUFDbkU7bUJBQXdDLE1BQU0scUJBQXFCOzthQUVuRTttQkFBd0MsTUFBTSwwQkFBMEIsTUFB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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/edit/keys.kode

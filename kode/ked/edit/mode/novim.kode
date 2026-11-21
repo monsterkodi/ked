@@ -2,7 +2,7 @@
 use ../../../kxk ◆ post keyinfo kseg
 use ../../theme  ◆ theme
 use ../tool      ◆ belt cmdlinehistory
-use ..           ◆ mode
+use ..           ◆ mode keys
 ■novim
 # maps keys to actions which are executed by edit▸act▸novim
 
@@ -325,9 +325,9 @@ use ..           ◆ mode
             @state.novim.jumps.keep -= 1
             ⮐ result
 
-        ⮐ @runNormal(parsed visualRange)   if parsed.name in ['normal' 'norm']
+        ⮐ @runNormal(parsed visualRange)     if parsed.name in ['normal' 'norm']
         ⮐ @deleteExRange(parsed visualRange) if parsed.name in ['d' 'delete']
-        ⮐ @runEdit(parsed)                 if parsed.name in ['e' 'edit']
+        ⮐ @runEdit(parsed)                   if parsed.name in ['e' 'edit']
 
         name = parsed.name
         name += '!' if parsed.bang
@@ -450,9 +450,9 @@ use ..           ◆ mode
 
     runNormal: parsed visualRange ->
 
-        keys = parsed.args
+        chars = parsed.args
 
-        ⮐ true if empty keys
+        ⮐ true if empty chars
 
         range    = @resolveExRange parsed.range visualRange
         wasActive = mode.isActive @state 'novim'
@@ -464,7 +464,7 @@ use ..           ◆ mode
             continue if y < 0 or y >= @state.s.lines.length
 
             @state.setMainCursor 0 y
-            @feedNormalKeys keys
+            @feedNormalKeys chars
 
             if wasActive and not mode.isActive(@state 'novim')
                 @state.startMode 'novim'
@@ -476,13 +476,13 @@ use ..           ◆ mode
 
         true
 
-    feedNormalKeys: keys ->
+    feedNormalKeys: chars ->
 
-        for c in keys
+        for c in chars
 
             if @state.novim.insert
                 event = { combo:c char:c }
-                sr    = @state.handleKey c event
+                sr    = keys.handleKey @state c event
                 @state.insert c if sr == 'unhandled'
             else
                 @handleKey c {combo:c char:c}

@@ -938,3 +938,11 @@ sel = r... -> s.allSelections() ▸ r
         st.setCursors [[2 2]] silent:true
         count ▸ 1
         st.mainCursor() ▸ [2 2]
+
+  ▸ the state does not handle keys
+
+        plain = new state {cols:20 rows:6} 'plain_state'
+
+        valid plain.keyHandler ▸ false
+        valid plain.handleKey   ▸ false
+        valid plain.feedKey     ▸ false

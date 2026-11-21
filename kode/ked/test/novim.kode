@@ -1292,12 +1292,16 @@ windowReset = (s) ->
         oldConfig = config.data
         config.data = { novim: { autoEnableOnEscape: true } }
 
-        mac = new state cells 'macros'
+        h = new harness cols:55 rows:66
+        e = new editor h.screen 'macro_keys_editor' []
+
+        mac = e.state
+        e.grabFocus()
 
         mac.allowedModes.novim = true
         startNovim mac
 
-        feed = c -> mac.feedKey c {combo:c, char: (c == 'esc' ? null : c)}
+        feed = c -> e.onKey c {combo:c, char: (c == 'esc' ? null : c)}
         mtxt = -> kseg.str mac.s.lines
 
         loadTextOn mac "one\ntwo"
