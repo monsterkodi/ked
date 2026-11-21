@@ -28,9 +28,6 @@ use           ◆ specs
         
         @visible = false
 
-    #  a run after the cursor moves the text that follows, and the popup
-    #  cannot follow it, so completion is skipped there
-
     hasScaledTextAfterCursor: =>
 
         [x y] = @editor.state.mainCursor()
@@ -114,9 +111,6 @@ use           ◆ specs
             @choices.layout x y mlw+3 h
             @choices.set @words.map((w) -> ' '+w)
             @choices.selectFirst()
-    
-    #  lines are immutable, so unchanged lines keep their reference and
-    #  only the edited line has to be split into chunks again
     
     chunksForLines: lines ->
         
@@ -260,8 +254,6 @@ use           ◆ specs
         
         w  = @choices.cells.cols+1
         h  = @choices.cells.rows
-
-        #  the frame needs a cell around the choices, keep it inside the editor
 
         fx = cx-@turd.length-2
         fx = max 0 fx

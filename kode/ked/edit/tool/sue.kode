@@ -320,9 +320,6 @@ insertionIndex = (oldLine newLine) ->
 
         runs
 
-    #  the cell column each grapheme of a line starts at
-    #  a run makes its graphemes take scale cells, the rest takes their width
-
     @cellPositionsForLine: (lines y runs) ->
 
         line  = lines[y] ? []
@@ -347,8 +344,6 @@ insertionIndex = (oldLine newLine) ->
                 ri += 1
 
         cells
-
-    #  the feature's own values are everything after code, cols and lines
 
     @dataOf: value ->
         value.slice(3)

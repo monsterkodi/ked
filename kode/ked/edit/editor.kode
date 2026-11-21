@@ -22,7 +22,6 @@ use                ◆ state draw complete mode susan
         @focusable = true
         
         @state  = new state @cells @name
-        @susan  = new susan @cells @state
         
         post.on 'focus' @onFocus
                 
@@ -31,6 +30,7 @@ use                ◆ state draw complete mode susan
         if @feats.mapview  ➜ @mapscr   = new mapview  @screen @state
         if @feats.gutter   ➜ @gutter   = new gutter   @
         if @feats.complete ➜ @complete = new complete @
+        if @feats.susan    ➜ @susan    = new susan    @
         
         @mouseItems = [@gutter @mapscr @scroll @complete]
             

@@ -14,14 +14,7 @@ use ./tool  ◆ sue
     @STYLE:       sue.STYLE
     @LINE_SCALE:  sue.LINE_SCALE
 
-    runsForLine: y =>
-
-        ⮐ [] if not @cells.screen.t.textSizing
-        ⮐ [] if @state.lineHeight(y) != 1
-
-        @state.scaleRunsForLine y
-
-    @: @cells @state ->
+    @: @editor -> @state = @editor.state
 
     draw: =>
 
@@ -43,7 +36,7 @@ use ./tool  ◆ sue
             continue if row < 0
 
             scale = @state.lineHeight y
-            continue if row + scale > @cells.rows
+            continue if row + scale > @editor.cells.rows
 
             code = area.value[0]
 
@@ -64,12 +57,12 @@ use ./tool  ◆ sue
             else
                 continue
 
-            runs  = @runsForLine y
-            cells = sue.cellPositionsForLine(lines y runs)
-            last  = cells.length-1
+            runs = @editor.runsForLine y
+            cpos = sue.cellPositionsForLine(lines y runs)
+            last = cpos.length-1
 
-            x1 = max 0 (cells[min(box.x last)]*scale - view[0])
-            x2 = min @cells.cols (cells[min(box.x + box.w last)]*scale - view[0])
+            x1 = max 0 (cpos[min(box.x last)]*scale - view[0])
+            x2 = min @editor.cells.cols (cpos[min(box.x + box.w last)]*scale - view[0])
             continue if x1 >= x2
 
             fg = color.values fg if fg?
@@ -78,28 +71,28 @@ use ./tool  ◆ sue
 
             seen = {}
 
-            for r in row...min(@cells.rows row + box.h*scale)
+            for r in row...min(@editor.cells.rows row + box.h*scale)
 
                 for x in x1...x2
 
-                    block = @cells.blockAt(x r)
+                    block = @editor.cells.blockAt(x r)
 
                     if block?
                         continue if block[4] != y
                         key = "#{block[0]},#{block[1]}"
                         continue if seen[key]
                         seen[key] = true
-                        @cells.bg_block block bg if bg?
-                        @cells.set_fg block[0] block[1] fg if fg?
+                        @editor.cells.bg_block block bg if bg?
+                        @editor.cells.set_fg block[0] block[1] fg if fg?
                         if attr? or ul?
-                            [have hul] = @cells.get_attr block[0] block[1]
-                            @cells.set_attr block[0] block[1] (sue.addFlags(have attr)) (ul ? hul)
+                            [have hul] = @editor.cells.get_attr block[0] block[1]
+                            @editor.cells.set_attr block[0] block[1] (sue.addFlags(have attr)) (ul ? hul)
                         continue
 
-                    @cells.set_bg x r bg if bg?
-                    @cells.set_fg x r fg if fg?
+                    @editor.cells.set_bg x r bg if bg?
+                    @editor.cells.set_fg x r fg if fg?
                     if attr? or ul?
-                        [have hul] = @cells.get_attr x r
-                        @cells.set_attr x r (sue.addFlags(have attr)) (ul ? hul)
+                        [have hul] = @editor.cells.get_attr x r
+                        @editor.cells.set_attr x r (sue.addFlags(have attr)) (ul ? hul)
 
 export susan

@@ -1445,7 +1445,7 @@ blockArea = scr ->
 
         t = new ttio headless:true input:false textSizing:true cols:40 rows:10
         scr = new screen t
-        e = new editor scr 'test_run_colour' []
+        e = new editor scr 'test_run_colour' ['susan']
         e.state.loadLines ['aa FOO bb']
         e.layout 0 0 40 10
         e.state.setMainCursor 0 8
@@ -1740,7 +1740,7 @@ blockArea = scr ->
 
         t = new ttio headless:true input:false textSizing:true cols:40 rows:10
         scr = new screen t
-        e = new editor scr 'test_bg_line_scale' []
+        e = new editor scr 'test_bg_line_scale' ['susan']
         e.state.loadLines ['aaaa' 'bbbb']
         e.layout 0 0 40 10
         e.state.setCursors [[0 0]]
@@ -1760,7 +1760,7 @@ blockArea = scr ->
 
         t = new ttio headless:true input:false textSizing:true cols:40 rows:10
         scr = new screen t
-        e = new editor scr 'test_colour_line_scale' []
+        e = new editor scr 'test_colour_line_scale' ['susan']
         e.state.loadLines ['aaaa' 'bbbb']
         e.layout 0 0 40 10
         e.state.setCursors [[0 0]]
@@ -1780,7 +1780,7 @@ blockArea = scr ->
 
         t = new ttio headless:true input:false textSizing:true cols:40 rows:10
         scr = new screen t
-        e = new editor scr 'test_colour_run_blocks' []
+        e = new editor scr 'test_colour_run_blocks' ['susan']
         e.state.loadLines ['a' 'b' 'c' 'xx BIG yy']
         e.layout 0 0 40 10
         e.state.setSelections [[3 3 6 3]]

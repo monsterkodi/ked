@@ -74,8 +74,6 @@ use              ◆ mode
         
 #!line
 
-    #  runs are only honoured on unscaled lines of a terminal with text sizing
-
     runsForLine: y =>
 
         ⮐ [] if not @cells.screen.t.textSizing

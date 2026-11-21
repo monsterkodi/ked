@@ -589,7 +589,7 @@ use ../util      ◆ harness
   ▸ editor
         
         h = new harness cols:16 rows:4
-        e = new editor h.screen 'popo_test_editor' []
+        e = new editor h.screen 'popo_test_editor' ['susan']
         e.layout 0 0 16 4
         
         tree = { bg:'#00f' children:[{ text:'hi' x:1 y:1 w:2 h:1 fg:'#ff0' }] }

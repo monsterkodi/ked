@@ -16,12 +16,13 @@ use                 ◆ mapscr
             'scroll'  # subviews
             'gutter' 
             'mapscr' 
-            'complete' 
+            'complete'
+             
+            'susan'   # font scaling
             
             'filepos' # autostart modes
             'replex' 
             'brckts' 
-            'susan'
             
             'unype'   # temporary modes
             'novim' 
