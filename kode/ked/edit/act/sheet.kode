@@ -5,6 +5,7 @@ use ../tool      ◆ belt sue
 use ..           ◆ mode
 #!sheet
 export
+    
     insertIntoSheet: text ->
 
         cells   = @sheetSize()
@@ -104,6 +105,12 @@ export
             if cx < cells[gi+1] ➜ ⮐ [gi y]
 
         [lastIndex y]
+        
+    sheetNodeAtCursor: ->
+
+        ⮐ if not @rectree?
+
+        layout.nodeForPos @sheetSize() @rectree @sheetCellForPos(@mainCursor())
 
     scaleSheetNode: delta ->
 
@@ -278,6 +285,8 @@ export
 
         moved
 
+        
+#!sue
     sueAt: pos ->
 
         areas = @s.sue ? []
@@ -346,7 +355,7 @@ export
         ⮐ if next eql @s.sue
 
         @changeSue next
-
+##scale
     stepScales: delta ->
 
         ⮐ if @rectree?
@@ -417,9 +426,3 @@ export
                     ⮐ area.value[3]
 
         null
-
-    sheetNodeAtCursor: ->
-
-        ⮐ if not @rectree?
-
-        layout.nodeForPos @sheetSize() @rectree @sheetCellForPos(@mainCursor())
