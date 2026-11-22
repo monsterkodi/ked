@@ -2,9 +2,9 @@ bg          |#333|
 children
             .
                 erase   bg
-                x       2
+                x       1
                 y       1
-                r       2
+                r       3
                 b       1
             .
                 pattern     .
@@ -16,17 +16,56 @@ children
                 children
                     .
                         text    |HELLO world! isn't this a really sun-shine happy day?     |
-                        x       9%
-                        y       5
-                        w       104
-                        h       12
-                        scale   4
+                        x       3%
+                        y       2
+                        w       119
+                        h       18
+                        scale   6
                         bg      |#000000|
                         fg      |#f5ff69|
                     .
-                        text    test TEST test
-                        x       3
-                        y       1
-                        w       15
+                        text    ||
+                        x       1
+                        y       0
+                        w       2
                         h       1
+            .
+                bg          |#333|
+                children
+                    .
+                        erase   bg
+                        x       2
+                        y       1
+                        r       2
+                        b       1
+                    .
+                        pattern     .
+                        fg          |#001eff|
+                        x           4
+                        y           2
+                        r           4
+                        b           2
+                        children
+                            .
+                                text    |HELLO world! isn't this a really sun-shine happy day?     |
+                                x       1%
+                                y       13
+                                w       75
+                                h       4
+                                scale   2
+                                bg      |#000000|
+                                fg      |#f5ff69|
+                            .
+                                text    |HELLO world! isn't this a really sun-shine happy day?     |
+                                x       0%
+                                y       0
+                                w       104
+                                h       12
+                                scale   4
+                                bg      |#000000|
+                                fg      |#f5ff69|
+                x           25
+                y           25
+                h           22
+                r           25
 x           0
