@@ -3,7 +3,6 @@ use ../../../kxk    ▪ post kseg kutil clip
 use ../../theme     ◆ color theme
 use ../../edit      ◆ susan
 use ../../edit/tool ◆ belt
-use ../../popo      ◆ layout
 use ../base         ◆ view colorslider rgbinput radio palette
 ■colorpicker□view
     
@@ -319,7 +318,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
     colorAtSelection: layer =>
 
-        if c = @sueColorAtSelection layer
+        if c = @editor.state.sueColorAtSelection layer
             ⮐ c
 
         for rng in @editor.state.s.selections
@@ -327,35 +326,12 @@ use ../base         ◆ view colorslider rgbinput radio palette
                 ⮐ c
         null
 
-    sueColorAtSelection: layer =>
-
-        fg = layer == 'fg'
-
-        for rng in @editor.state.s.selections
-            if area = @editor.state.sueAt [rng[0] rng[1]]
-                [code] = area.value
-                if code == susan.FG_BG_COLOR
-                    ⮐ area.value[fg ? 3 : 4]
-                if fg and code == susan.FG_COLOR
-                    ⮐ area.value[3]
-                if not fg and code == susan.BG_COLOR
-                    ⮐ area.value[3]
-
-        null
-        
-    sheetNodeAtCursor: =>
-
-        state = @editor.state
-        ⮐ if not state.rectree?
-
-        layout.nodeForPos @editor.cells state.rectree state.sheetCellForPos(state.mainCursor())
-
     hexAtCursor: =>
 
         state = @editor.state
 
         if state.rectree? and empty state.s.selections
-            if node = @sheetNodeAtCursor()
+            if node = state.sheetNodeAtCursor()
                 ⮐ {node:node colors:[node.fg node.bg]}
 
         mc    = state.mainCursor()
