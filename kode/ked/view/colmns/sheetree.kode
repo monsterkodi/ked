@@ -111,19 +111,23 @@ use ../menu         ◆ filterchoice
 
         @editor.deleteSheetNode @current()
 
-        ⮐ true if empty @fuzzied
-
-        @highlight min(row @fuzzied.length-1)
-        @showRect()
-
-        node = @current()
-        node.index = @currentIndex()
-        @emit 'tree.node' node
+        @jumpToRow min(row @fuzzied.length-1) if valid @fuzzied
 
         true
 
-    selectNext: -> super(); @jumpTo @current()
-    selectPrev: -> super(); @jumpTo @current()
+    jumpToRow: row =>
+
+        @select row
+        @jumpTo @current()
+
+    selectNext: -> @jumpToRow @nextRow()
+    selectPrev: ->
+
+        row = @prevRow()
+
+        ⮐ super() if empty row
+
+        @jumpToRow row
                 
     emitAction: action choice event  ->
     

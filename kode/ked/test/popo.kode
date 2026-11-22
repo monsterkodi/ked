@@ -947,7 +947,8 @@ showSue = data ->
         se.sheetree.reloadTree()
 
         se.sheetree.grabFocus()
-        se.sheetree.select 1
-        se.onKey 'delete' h.event('delete') ; rt('children').length ▸ 2 ; se.sheetree.current().text ▸ 'q'
-        se.onKey 'entf'   h.event('entf')   ; rt('children').length ▸ 1 ; se.sheetree.current().text ▸ 'abc'
+        se.sheetree.select 0
+        se.onKey 'down' h.event('down') ; mc() ▸ [10 0]
+        se.onKey 'delete' h.event('delete') ; rt('children').length ▸ 2 ; se.sheetree.current().text ▸ 'q'   ; mc() ▸ [10 4]
+        se.onKey 'entf'   h.event('entf')   ; rt('children').length ▸ 1 ; se.sheetree.current().text ▸ 'abc' ; mc() ▸ [2 1]
         se.onKey 'ctrl+alt+delete' h.event('ctrl+alt+delete') ; rt('children')? ▸ false
