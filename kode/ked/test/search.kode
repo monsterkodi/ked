@@ -1,4 +1,4 @@
-use fs
+use fs os
 use ../../kxk    ▪ post slash
 use ../edit      ◆ editor
 use ../util      ◆ harness config
@@ -6,11 +6,14 @@ use ../theme     ◆ theme
 use ../index     ◆ kacher prjcts
 use ../view/menu ◆ replacer searcher
 
+tmp = fs.mkdtempSync slash.path(os.tmpdir() 'ked-test-')
+process.on 'exit' -> fs.rmSync tmp recursive:true force:true
+
 ▸ searcher
 
   ▸ a multi file search appends its results once
 
-        root  = '/tmp/opencode/ked-searcher-append'
+        root  = slash.path(tmp 'ked-searcher-append')
         main  = slash.path root 'main.kode'
         other = slash.path root 'other.kode'
 
@@ -60,7 +63,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ results are appended as soon as the visible rows are filled
 
-        root = '/tmp/opencode/ked-searcher-threshold'
+        root = slash.path(tmp 'ked-searcher-threshold')
         files = []
 
         fs.rmSync root recursive:true force:true
@@ -113,7 +116,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ the gutter width follows the displayed line numbers
 
-        root = '/tmp/opencode/ked-searcher-gutter'
+        root = slash.path(tmp 'ked-searcher-gutter')
         files = []
 
         fs.rmSync root recursive:true force:true
@@ -168,7 +171,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ next and previous file headers jump and scroll to the top
 
-        root = '/tmp/opencode/ked-searcher-headers'
+        root = slash.path(tmp 'ked-searcher-headers')
         files = []
 
         fs.rmSync root recursive:true force:true
@@ -229,7 +232,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ the selected file separator is blue
 
-        root = '/tmp/opencode/ked-searcher-selected'
+        root = slash.path(tmp 'ked-searcher-selected')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -281,7 +284,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ the input is split into search and replacement fields
 
-        root = '/tmp/opencode/ked-replacer-split'
+        root = slash.path(tmp 'ked-replacer-split')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -327,7 +330,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ starting with a search text focuses the replacement field
 
-        root = '/tmp/opencode/ked-replacer-focus'
+        root = slash.path(tmp 'ked-replacer-focus')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -378,7 +381,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ tab switches between the search and replacement fields
 
-        root = '/tmp/opencode/ked-replacer-tab'
+        root = slash.path(tmp 'ked-replacer-tab')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -432,7 +435,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ typing goes into the focused replacement field
 
-        root = '/tmp/opencode/ked-replacer-type'
+        root = slash.path(tmp 'ked-replacer-type')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -473,7 +476,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ file separators are laid out and drawn with the results
 
-        root = '/tmp/opencode/ked-replacer-separators'
+        root = slash.path(tmp 'ked-replacer-separators')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -522,7 +525,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ file headers show checkmarks and space toggles exclusion
 
-        root = '/tmp/opencode/ked-replacer-exclude'
+        root = slash.path(tmp 'ked-replacer-exclude')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -591,7 +594,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ replacing changes included lines and skips excluded files and lines
 
-        root  = '/tmp/opencode/ked-replacer-submit'
+        root  = slash.path(tmp 'ked-replacer-submit')
         main  = slash.path root 'main.kode'
         other = slash.path root 'other.kode'
 
@@ -666,7 +669,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ showing the replacer again resets previous exclusions
 
-        root = '/tmp/opencode/ked-replacer-reset'
+        root = slash.path(tmp 'ked-replacer-reset')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -719,7 +722,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ toggling a file keeps the file order and the view
 
-        root = '/tmp/opencode/ked-replacer-order'
+        root = slash.path(tmp 'ked-replacer-order')
         files = []
 
         fs.rmSync root recursive:true force:true
@@ -776,7 +779,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ space on a result line excludes it from the replacement
 
-        root = '/tmp/opencode/ked-replacer-line-exclude'
+        root = slash.path(tmp 'ked-replacer-line-exclude')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -836,7 +839,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ excluding a line moves focus to the next result line
 
-        root = '/tmp/opencode/ked-replacer-line-repeat'
+        root = slash.path(tmp 'ked-replacer-line-repeat')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -905,7 +908,7 @@ use ../view/menu ◆ replacer searcher
 
 #   ▸ a second replacement is ignored while one is running
 # 
-#         root = '/tmp/opencode/ked-replacer-double'
+#         root = slash.path(tmp 'ked-replacer-double')
 #         main = slash.path root 'main.kode'
 # 
 #         fs.rmSync root recursive:true force:true
@@ -952,7 +955,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ included and excluded markers use theme colors
 
-        root = '/tmp/opencode/ked-replacer-theme'
+        root = slash.path(tmp 'ked-replacer-theme')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -1026,7 +1029,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ clicking toggles exclusion and keeps the replacer open
 
-        root = '/tmp/opencode/ked-replacer-click'
+        root = slash.path(tmp 'ked-replacer-click')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -1087,7 +1090,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ the selected file separator is blue
 
-        root = '/tmp/opencode/ked-replacer-selected'
+        root = slash.path(tmp 'ked-replacer-selected')
         main = slash.path root 'main.kode'
 
         fs.rmSync root recursive:true force:true
@@ -1139,7 +1142,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ caches the text of a file
 
-        root = '/tmp/opencode/ked-kacher-cache'
+        root = slash.path(tmp 'ked-kacher-cache')
         file = slash.path root 'a.kode'
 
         fs.rmSync root recursive:true force:true
@@ -1158,7 +1161,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ invalidates cached text on file change
 
-        root = '/tmp/opencode/ked-kacher-change'
+        root = slash.path(tmp 'ked-kacher-change')
         file = slash.path root 'a.kode'
 
         fs.rmSync root recursive:true force:true
@@ -1178,7 +1181,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ renames invalidate the old path
 
-        root = '/tmp/opencode/ked-kacher-rename'
+        root = slash.path(tmp 'ked-kacher-rename')
         oldFile = slash.path root 'old.kode'
         newFile = slash.path root 'new.kode'
 
@@ -1201,7 +1204,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ deletes invalidate the old path
 
-        root = '/tmp/opencode/ked-kacher-delete'
+        root = slash.path(tmp 'ked-kacher-delete')
         file = slash.path root 'a.kode'
 
         fs.rmSync root recursive:true force:true
@@ -1223,7 +1226,7 @@ use ../view/menu ◆ replacer searcher
 
   ▸ folder renames invalidate cached paths below the folder
 
-        root = '/tmp/opencode/ked-kacher-folder-rename'
+        root = slash.path(tmp 'ked-kacher-folder-rename')
         oldDir = slash.path root 'old'
         newDir = slash.path root 'new'
         oldFile = slash.path oldDir 'a.kode'
