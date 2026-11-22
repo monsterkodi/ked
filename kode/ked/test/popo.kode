@@ -240,6 +240,46 @@ showSue = data ->
                 layout.resizeNode cells tree tree.children[0] 'more rows' ; tree.children[0].h ▸ '41%'
                 layout.resizeNode cells tree tree.children[0] 'more rows' ; tree.children[0].h ▸ '42%'
                 layout.resizeNode cells tree tree.children[0] 'less rows' ; tree.children[0].h ▸ '41%'
+
+      ▸ limits
+
+                cells = {cols:20 rows:10}
+                node  = (tree) -> tree.children[0]
+                size  = (tree dir) -> layout.resizeNode cells tree node(tree) dir ; node(tree).rect.abs
+
+                tree = absol cells { children:[{ text:'a' x:2 y:2 w:1 h:1 }] }
+                layout.resizeNode(cells tree node(tree) 'less cols')? ▸ false
+                layout.resizeNode(cells tree node(tree) 'less rows')? ▸ false
+                node(tree).rect.abs ▸ {x:2 y:2 w:1 h:1}
+
+                tree = absol cells { children:[{ text:'a' x:2 y:2 r:2 h:1 }] }
+                size(tree 'more cols').w ▸ 17 ; node(tree).r ▸ 1
+                size(tree 'less cols').w ▸ 16 ; node(tree).r ▸ 2
+
+                tree = absol cells { children:[{ text:'a' x:2 y:2 r:2 b:2 }] }
+                size(tree 'more rows').h ▸ 7 ; node(tree).b ▸ 1
+
+                tree = absol cells { x:4 y:2 w:10 h:6 children:[{ x:2 y:1 w:3 h:2 }] }
+                for i in 0...9 ➜ size tree 'more cols'
+                node(tree).w ▸ 8
+                for i in 0...9 ➜ size tree 'more rows'
+                node(tree).h ▸ 5
+
+      ▸ scaled
+
+                cells = {cols:20 rows:10}
+                tree  = absol cells { children:[{ text:'ab' x:0 y:0 w:4 h:4 scale:2 }] }
+                node  = tree.children[0]
+
+                layout.resizeNode cells tree node 'more rows' ; node.rect.abs.h ▸ 6
+                layout.resizeNode cells tree node 'less rows' ; node.rect.abs.h ▸ 4
+                layout.resizeNode cells tree node 'less rows' ; node.rect.abs.h ▸ 2
+                layout.resizeNode(cells tree node 'less rows')? ▸ false
+                node.rect.abs.h ▸ 2
+                layout.resizeNode cells tree node 'more cols' ; node.rect.abs.w ▸ 6
+                layout.resizeNode cells tree node 'less cols' ; node.rect.abs.w ▸ 4
+                layout.resizeNode cells tree node 'less cols' ; node.rect.abs.w ▸ 2
+                layout.resizeNode(cells tree node 'less cols')? ▸ false
     
     ▸ titlify
 
@@ -604,6 +644,20 @@ showSue = data ->
         h.key e 'shift+alt+j' ; rt('children.0.rect.abs') ▸ {x:3 y:2 w:3 h:2}
         h.key e 'shift+alt+k' ; rt('children.0.rect.abs') ▸ {x:3 y:1 w:3 h:2}
         h.key e 'shift+alt+h' ; rt('children.0.rect.abs') ▸ {x:2 y:1 w:3 h:2}
+
+        key "ctrl+alt+'" ; rt('children.0.rect.abs') ▸ {x:2 y:1 w:3 h:3}
+        key 'ctrl+alt+/' ; rt('children.0.rect.abs') ▸ {x:2 y:1 w:3 h:2}
+        key 'ctrl+alt+/' ; rt('children.0.rect.abs') ▸ {x:2 y:1 w:3 h:1}
+        key 'ctrl+alt+/' ; rt('children.0.rect.abs') ▸ {x:2 y:1 w:3 h:1}
+        key 'ctrl+alt+,' ; key 'ctrl+alt+,' ; key 'ctrl+alt+,' ; rt('children.0.rect.abs') ▸ {x:2 y:1 w:1 h:1}
+        key 'ctrl+alt+.' ; rt('children.0.rect.abs') ▸ {x:2 y:1 w:2 h:1}
+
+        loadSheet {children:[{ text:'ab' x:2 y:0 w:4 h:2 scale:2 }]}
+
+        e.state.setCursors [[2 1]]
+        key "ctrl+alt+'" ; rt('children.0.h') ▸ 4 ; rt('children.0.rect.abs.h') ▸ 4
+        key 'ctrl+alt+/' ; rt('children.0.h') ▸ 2
+        key 'ctrl+alt+/' ; rt('children.0.h') ▸ 2
 
   ▸ sheet undo
 

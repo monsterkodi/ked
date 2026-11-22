@@ -289,20 +289,20 @@ use ../edit/tool ◆ sue
             maxRel = max 0 (box.w - rect.w)
 
             if node.w?
-                value = @incrValue node.x (rect.x - box.x) dx maxRel 
+                value = @incrValue node.x (rect.x - box.x) dx 0 maxRel 
                 if value? ➜ node.x = value
             else
                 oldRel = rect.x - box.x
                 oldEnd = maxRel - oldRel
 
                 if node.x?
-                    value = @incrValue node.x oldRel dx maxRel 
+                    value = @incrValue node.x oldRel dx 0 maxRel 
                     if value?
                         newRel = @offset box.w value
                         node.x = value
                         node.r = oldEnd - (newRel - oldRel)
                 else
-                    value = @incrValue node.r oldEnd -dx maxRel 
+                    value = @incrValue node.r oldEnd -dx 0 maxRel 
                     if value?
                         newEnd = @offset box.w value
                         node.r = value
@@ -313,20 +313,20 @@ use ../edit/tool ◆ sue
             maxRel = max 0 (box.h - rect.h)
 
             if node.h?
-                value = @incrValue node.y (rect.y - box.y) dy maxRel  
+                value = @incrValue node.y (rect.y - box.y) dy 0 maxRel  
                 if value? ➜ node.y = value
             else
                 oldRel = rect.y - box.y
                 oldEnd = maxRel - oldRel
 
                 if node.y?
-                    value = @incrValue node.y oldRel dy maxRel  
+                    value = @incrValue node.y oldRel dy 0 maxRel  
                     if value?
                         newRel = @offset box.h value
                         node.y = value
                         node.b = oldEnd - (newRel - oldRel)
                 else
-                    value = @incrValue node.b oldEnd -dy maxRel 
+                    value = @incrValue node.b oldEnd -dy 0 maxRel 
                     if value?
                         newEnd = @offset box.h value
                         node.b = value
@@ -341,43 +341,57 @@ use ../edit/tool ◆ sue
 
         box  = @parentOf(rectree node)?.rect.abs ? {x:0 y:0 w:cells.cols h:cells.rows}
         rect = node.rect.abs
+        step = @scaleOf node
+        roomW = box.w - (rect.x - box.x)
+        roomH = box.h - (rect.y - box.y)
 
         switch dir
-            'less cols' ➜ dw = -1
-            'more cols' ➜ dw =  1
-            'less rows' ➜ dh = -1
-            'more rows' ➜ dh =  1
+            'less cols' ➜ dw = -step
+            'more cols' ➜ dw =  step
+            'less rows' ➜ dh = -step
+            'more rows' ➜ dh =  step
+
+        before = {w:node.w r:node.r h:node.h b:node.b}
 
         if dw
 
             if node.w?
-                value = @incrValue node.w rect.w dw (box.w - rect.x)
+                value = @incrValue node.w rect.w dw step roomW
                 if value? ➜ node.w = value
             else
-                value = @incrValue node.r (box.w - rect.w) -dw (box.w - rect.x)
+                value = @incrValue node.r roomW-rect.w -dw 0 roomW-step
                 if value? ➜ node.r = value
 
         if dh
 
             if node.h?
-                value = @incrValue node.h rect.h dh (box.h - rect.y)
+                value = @incrValue node.h rect.h dh step roomH
                 if value? ➜ node.h = value
             else
-                value = @incrValue node.b (box.h - rect.h) -dh (box.h - rect.y)
+                value = @incrValue node.b roomH-rect.h -dh 0 roomH-step
                 if value? ➜ node.b = value
 
-        if valid value
+        ⮐ if not valid value
+
+        @absolutize cells rectree
+
+        if node.rect.abs.w < step or node.rect.abs.h < step
+
+            for key,val of before
+                if val? ➜ node[key] = val else delete node[key]
 
             @absolutize cells rectree
-            ⮐ node
-        
-    @incrValue: field old dir maxv ->
+            ⮐
+
+        node
+
+    @incrValue: field old dir minv maxv ->
 
         if field is str and field.endsWith '%'
-            rep = int(field) + dir
+            rep = int(field) + (dir > 0 ? 1 : -1)
             ⮐ "#{rep}%" if 0 <= rep <= 100
         else
-            res = clamp 0 maxv old+dir
+            res = clamp minv maxv old+dir
             ⮐ res if res != old
 
     @parentOf: node target ->
