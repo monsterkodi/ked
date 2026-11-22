@@ -9,6 +9,15 @@ setup = ->
     e.layout 0 0 40 10
     e
 
+diffed = (lines changes) ->
+
+    e = setup()
+    e.state.loadLines lines
+    e.gutter.onGitDiff
+        file:    'test.txt'
+        changes: changes
+    e
+
 press = (e line) ->
 
     e.onMouse
@@ -40,33 +49,9 @@ text = (e) -> kseg.str(e.state.segls)
 
 ▸ gutter
 
-  ▸ a modifier click reverts and restores a modified line
+  ▸ revert click
 
-        e = setup()
-
-        e.state.loadLines ['aa' 'B' 'cc']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [{line:2 old:['b'] new:['B']}]
-
-        press e 1
-
-        text(e) ▸ 'aa\nb\ncc'
-        e.gutter.entries.length ▸ 1
-
-        press e 1
-
-        text(e) ▸ 'aa\nB\ncc'
-        e.gutter.entries.length ▸ 0
-
-  ▸ a click without a modifier changes nothing
-
-        e = setup()
-
-        e.state.loadLines ['aa' 'B' 'cc']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [{line:2 old:['b'] new:['B']}]
+        e = diffed ['aa' 'B' 'cc'] [{line:2 old:['b'] new:['B']}]
 
         e.onMouse
             type:   'press'
@@ -77,88 +62,17 @@ text = (e) -> kseg.str(e.state.segls)
         text(e) ▸ 'aa\nB\ncc'
         e.gutter.entries.length ▸ 0
 
-  ▸ a click puts the cursor on the first line of the resulting block
-
-        e = setup()
-
-        e.state.loadLines ['aa' 'B1' 'B2' 'cc']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [{line:2 old:['b'] new:['B1' 'B2']}]
-
-        press e 2
-
-        text(e) ▸ 'aa\nb\ncc'
-        e.state.mainCursor() ▸ [0 1]
-
         press e 1
 
-        text(e) ▸ 'aa\nB1\nB2\ncc'
-        e.state.mainCursor() ▸ [0 1]
-
-  ▸ a click on a reverted addition puts the cursor above the gap
-
-        e = setup()
-
-        e.state.loadLines ['aa' 'X' 'cc']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [{line:2 new:['X']}]
-
-        press e 1
-
-        text(e) ▸ 'aa\ncc'
-        e.state.mainCursor() ▸ [0 0]
-
-  ▸ alt+g toggles the block at the main cursor
-
-        e = setup()
-
-        e.state.loadLines ['aa' 'B' 'cc']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [{line:2 old:['b'] new:['B']}]
-
-        e.state.setMainCursor 0 1
-
-        key e 'alt+g'
-
         text(e) ▸ 'aa\nb\ncc'
-        e.state.mainCursor() ▸ [0 1]
         e.gutter.entries.length ▸ 1
 
-        key e 'alt+g'
+        press e 1
 
         text(e) ▸ 'aa\nB\ncc'
         e.gutter.entries.length ▸ 0
 
-  ▸ repeated alt+g keeps toggling the same block
-
-        e = setup()
-
-        e.state.loadLines ['aa' 'B' 'cc']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [{line:2 old:['b'] new:['B']}]
-
-        e.state.setMainCursor 0 1
-
-        key e 'alt+g'
-        key e 'alt+g'
-        key e 'alt+g'
-
-        text(e) ▸ 'aa\nb\ncc'
-        e.state.mainCursor() ▸ [0 1]
-        e.gutter.entries.length ▸ 1
-
-  ▸ a click on the line above a deletion reverts the deletion
-
-        e = setup()
-
-        e.state.loadLines ['aa' 'cc']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [{line:1 old:['bb']}]
+        e = diffed ['aa' 'cc'] [{line:1 old:['bb']}]
 
         press e 0
 
@@ -168,17 +82,12 @@ text = (e) -> kseg.str(e.state.segls)
 
         text(e) ▸ 'aa\ncc'
 
-  ▸ a click reverts all changes of a visual block at once
+  ▸ block click
 
-        e = setup()
-
-        e.state.loadLines ['aa' 'B' 'cc' 'dd']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [
-                {line:2 old:['b'] new:['B']}
-                {line:2 old:['x']}
-                ]
+        e = diffed ['aa' 'B' 'cc' 'dd'] [
+            {line:2 old:['b'] new:['B']}
+            {line:2 old:['x']}
+            ]
 
         e.gutter.blocks.length ▸ 1
 
@@ -190,14 +99,54 @@ text = (e) -> kseg.str(e.state.segls)
 
         text(e) ▸ 'aa\nB\ncc\ndd'
 
-  ▸ modifier hover marks the block under the mouse
+  ▸ cursor after revert
 
-        e = setup()
+        e = diffed ['aa' 'B1' 'B2' 'cc'] [{line:2 old:['b'] new:['B1' 'B2']}]
 
-        e.state.loadLines ['aa' 'B' 'cc']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [{line:2 old:['b'] new:['B']}]
+        press e 2
+
+        text(e) ▸ 'aa\nb\ncc'
+        e.state.mainCursor() ▸ [0 1]
+
+        press e 1
+
+        text(e) ▸ 'aa\nB1\nB2\ncc'
+        e.state.mainCursor() ▸ [0 1]
+
+        e = diffed ['aa' 'X' 'cc'] [{line:2 new:['X']}]
+
+        press e 1
+
+        text(e) ▸ 'aa\ncc'
+        e.state.mainCursor() ▸ [0 0]
+
+  ▸ alt+g
+
+        e = diffed ['aa' 'B' 'cc'] [{line:2 old:['b'] new:['B']}]
+        e.state.setMainCursor 0 1
+
+        key e 'alt+g'
+
+        text(e) ▸ 'aa\nb\ncc'
+        e.state.mainCursor() ▸ [0 1]
+        e.gutter.entries.length ▸ 1
+
+        key e 'alt+g'
+
+        text(e) ▸ 'aa\nB\ncc'
+        e.gutter.entries.length ▸ 0
+
+        key e 'alt+g'
+        key e 'alt+g'
+        key e 'alt+g'
+
+        text(e) ▸ 'aa\nb\ncc'
+        e.state.mainCursor() ▸ [0 1]
+        e.gutter.entries.length ▸ 1
+
+  ▸ hover
+
+        e = diffed ['aa' 'B' 'cc'] [{line:2 old:['b'] new:['B']}]
 
         move e 1
 
@@ -209,31 +158,19 @@ text = (e) -> kseg.str(e.state.segls)
 
         e.gutter.hoverBlock ▸ null
 
-  ▸ a reverted block survives an edit above it
+  ▸ survives edits
 
-        e = setup()
-
-        e.state.loadLines ['aa' 'B' 'cc']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [{line:2 old:['b'] new:['B']}]
+        e = diffed ['aa' 'B' 'cc'] [{line:2 old:['b'] new:['B']}]
 
         press e 1
-
         e.state.setLines ['new' 'aa' 'b' 'cc']
-
         press e 2
 
         text(e) ▸ 'new\naa\nB\ncc'
 
-  ▸ undoing a revert makes the block clickable again
+  ▸ undo and redo
 
-        e = setup()
-
-        e.state.loadLines ['aa' 'B' 'cc']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [{line:2 old:['b'] new:['B']}]
+        e = diffed ['aa' 'B' 'cc'] [{line:2 old:['b'] new:['B']}]
 
         press e 1
         e.state.undo()
@@ -245,14 +182,7 @@ text = (e) -> kseg.str(e.state.segls)
 
         text(e) ▸ 'aa\nb\ncc'
 
-  ▸ redoing a revert shows the reverted block again
-
-        e = setup()
-
-        e.state.loadLines ['aa' 'B' 'cc']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [{line:2 old:['b'] new:['B']}]
+        e = diffed ['aa' 'B' 'cc'] [{line:2 old:['b'] new:['B']}]
 
         press e 1
         e.state.undo()
@@ -266,14 +196,7 @@ text = (e) -> kseg.str(e.state.segls)
 
         text(e) ▸ 'aa\nB\ncc'
 
-  ▸ redoing a revert of an addition shows the reverted block again
-
-        e = setup()
-
-        e.state.loadLines ['aa' 'X' 'cc']
-        e.gutter.onGitDiff
-            file:    'test.txt'
-            changes: [{line:2 new:['X']}]
+        e = diffed ['aa' 'X' 'cc'] [{line:2 new:['X']}]
 
         press e 1
         e.state.undo()
@@ -287,10 +210,9 @@ text = (e) -> kseg.str(e.state.segls)
 
         text(e) ▸ 'aa\nX\ncc'
 
-  ▸ a new file has no revertable blocks
+  ▸ new file
 
         e = setup()
-
         e.state.loadLines ['aa' 'B']
         e.gutter.onGitDiff
             file:    'test.txt'
@@ -302,18 +224,17 @@ text = (e) -> kseg.str(e.state.segls)
         text(e) ▸ 'aa\nB'
         e.gutter.entries.length ▸ 0
 
-  ▸ a diff refresh keeps a reverted block shadowed
+  ▸ diff refresh
 
         e = setup()
-
         e.state.loadLines ['aa' 'B' 'cc' 'dd']
+
         diff =
             file:    'test.txt'
             changes: [{line:2 old:['b'] new:['B']}]
 
         e.gutter.onGitDiff diff
         press e 1
-
         e.gutter.onGitDiff diff
 
         e.gutter.blocks.length ▸ 0
@@ -327,129 +248,111 @@ text = (e) -> kseg.str(e.state.segls)
 
 ▸ gitblock
 
-  ▸ a modified line becomes one block
+  ▸ fromDiff
 
-        blocks = gitblock.fromDiff changes:[{line:2 old:['b'] new:['B']}]
+        mod = gitblock.fromDiff changes:[{line:2 old:['b'] new:['B']}]
+        add = gitblock.fromDiff changes:[{line:2 new:['X']}]
+        del = gitblock.fromDiff changes:[{line:2 old:['X']}]
 
-        blocks.length ▸ 1
-        blocks[0].start ▸ 1
-        blocks[0].end ▸ 2
-        blocks[0].marks ▸ {'1':'mod'}
+        mod.length ▸ 1
+        add.length ▸ 1
+        del.length ▸ 1
 
-  ▸ an added line becomes one block
+        mod[0].start ▸ 1
+        mod[0].end   ▸ 2
+        mod[0].marks ▸ {'1':'mod'}
 
-        blocks = gitblock.fromDiff changes:[{line:2 new:['X']}]
+        add[0].start ▸ 1
+        add[0].end   ▸ 2
+        add[0].marks ▸ {'1':'add'}
 
-        blocks.length ▸ 1
-        blocks[0].start ▸ 1
-        blocks[0].end ▸ 2
-        blocks[0].marks ▸ {'1':'add'}
+        del[0].start ▸ 2
+        del[0].end   ▸ 2
+        del[0].marks ▸ {'1':'del'}
 
-  ▸ a deleted line is marked on the line above the gap
+  ▸ merging
 
-        blocks = gitblock.fromDiff changes:[{line:2 old:['X']}]
+        from = (changes) -> gitblock.fromDiff changes:changes
 
-        blocks.length ▸ 1
-        blocks[0].start ▸ 2
-        blocks[0].end ▸ 2
-        blocks[0].marks ▸ {'1':'del'}
+        b = from [{line:2 old:['b' 'x' 'y'] new:['B']}]
 
-  ▸ modified lines followed by deletions are one block
+        b.length ▸ 1
+        b[0].end ▸ 2
+        b[0].marks ▸ {'1':'mod'}
 
-        blocks = gitblock.fromDiff changes:[{line:2 old:['b' 'x' 'y'] new:['B']}]
-
-        blocks.length ▸ 1
-        blocks[0].end ▸ 2
-        blocks[0].marks ▸ {'1':'mod'}
-
-  ▸ adjacent changes are one block
-
-        blocks = gitblock.fromDiff changes:[
+        b = from [
             {line:2 old:['b'] new:['B']}
             {line:3 old:['c'] new:['C']}
             ]
 
-        blocks.length ▸ 1
-        blocks[0].marks ▸ {'1':'mod' '2':'mod'}
+        b.length ▸ 1
+        b[0].marks ▸ {'1':'mod' '2':'mod'}
 
-  ▸ one unchanged line separates blocks
-
-        blocks = gitblock.fromDiff changes:[
+        b = from [
             {line:2 old:['b'] new:['B']}
             {line:4 old:['d'] new:['D']}
             ]
 
-        blocks.length ▸ 2
-        blocks[0].marks ▸ {'1':'mod'}
-        blocks[1].marks ▸ {'3':'mod'}
+        b.length ▸ 2
+        b[0].marks ▸ {'1':'mod'}
+        b[1].marks ▸ {'3':'mod'}
 
-  ▸ a deletion directly after a change joins its block
-
-        blocks = gitblock.fromDiff changes:[
+        b = from [
             {line:2 old:['b'] new:['B']}
             {line:2 old:['x']}
             ]
 
-        blocks.length ▸ 1
-        blocks[0].end ▸ 2
+        b.length ▸ 1
+        b[0].end ▸ 2
 
-  ▸ deletions around one unchanged line join their block
-
-        blocks = gitblock.fromDiff changes:[
+        b = from [
             {line:1 old:['b']}
             {line:2 old:['c']}
             ]
 
-        blocks.length ▸ 1
-        blocks[0].start ▸ 1
-        blocks[0].end ▸ 2
+        b.length ▸ 1
+        b[0].start ▸ 1
+        b[0].end ▸ 2
 
-  ▸ reverting a modification restores the committed line
+  ▸ revert
 
-        lines = ['a' 'B' 'c']
-        block = gitblock.fromDiff(changes:[{line:2 old:['b'] new:['B']}])[0]
-        entry = gitblock.revert block lines
+        rv = (lines changes) ->
+            block = gitblock.fromDiff(changes:changes)[0]
+            entry = gitblock.revert block lines
+            reverted = gitblock.applyRevert entry lines
+            restored = gitblock.applyRestore entry reverted
+            [reverted restored]
 
-        gitblock.applyRevert entry lines ▸ ['a' 'b' 'c']
-        gitblock.applyRestore entry (gitblock.applyRevert(entry lines)) ▸ ['a' 'B' 'c']
+        [reverted restored] = rv ['a' 'B' 'c'] [{line:2 old:['b'] new:['B']}]
 
-  ▸ reverting an addition removes its lines and restoring re-adds them
+        reverted ▸ ['a' 'b' 'c']
+        restored ▸ ['a' 'B' 'c']
 
-        lines = ['a' 'X' 'b']
-        block = gitblock.fromDiff(changes:[{line:2 new:['X']}])[0]
-        entry = gitblock.revert block lines
+        [reverted restored] = rv ['a' 'X' 'b'] [{line:2 new:['X']}]
 
-        gitblock.applyRevert entry lines ▸ ['a' 'b']
-        gitblock.applyRestore entry (gitblock.applyRevert(entry lines)) ▸ ['a' 'X' 'b']
+        reverted ▸ ['a' 'b']
+        restored ▸ ['a' 'X' 'b']
 
-  ▸ reverting a deletion inserts its lines and restoring removes them
+        [reverted restored] = rv ['a' 'b'] [{line:1 old:['X']}]
 
-        lines = ['a' 'b']
-        block = gitblock.fromDiff(changes:[{line:1 old:['X']}])[0]
-        entry = gitblock.revert block lines
+        reverted ▸ ['a' 'X' 'b']
+        restored ▸ ['a' 'b']
 
-        gitblock.applyRevert entry lines ▸ ['a' 'X' 'b']
-        gitblock.applyRestore entry (gitblock.applyRevert(entry lines)) ▸ ['a' 'b']
-
-  ▸ reverting a block with a gap keeps the line between the hunks
-
-        lines = ['a' 'X' 'd']
-        blocks = gitblock.fromDiff changes:[
+        [reverted restored] = rv ['a' 'X' 'd'] [
             {line:1 old:['b']}
             {line:2 old:['c']}
             ]
-        entry = gitblock.revert blocks[0] lines
 
-        gitblock.applyRevert entry lines ▸ ['a' 'b' 'X' 'c' 'd']
-        gitblock.applyRestore entry (gitblock.applyRevert(entry lines)) ▸ ['a' 'X' 'd']
+        reverted ▸ ['a' 'b' 'X' 'c' 'd']
+        restored ▸ ['a' 'X' 'd']
 
-  ▸ a stale block cannot be reverted
+  ▸ stale
 
         block = gitblock.fromDiff(changes:[{line:2 old:['b'] new:['B']}])[0]
 
         gitblock.revert block ['a' 'Z' 'c'] ▸ undefined
 
-  ▸ the first line of a block is its first displayed line
+  ▸ firstLine
 
         mod = gitblock.fromDiff(changes:[{line:2 old:['b'] new:['B']}])[0]
         add = gitblock.fromDiff(changes:[{line:2 new:['X']}])[0]
@@ -459,48 +362,38 @@ text = (e) -> kseg.str(e.state.segls)
         gitblock.firstLine(add) ▸ 1
         gitblock.firstLine(del) ▸ 1
 
-  ▸ the first line of a reverted addition is the line above the gap
-
         block = gitblock.fromDiff(changes:[{line:2 new:['X']}])[0]
         entry = gitblock.revert block ['a' 'X' 'b']
 
         gitblock.firstLine(entry) ▸ 0
 
-  ▸ an entry moves with lines inserted above it
+  ▸ reanchor
 
         lines = ['a' 'B' 'c']
         block = gitblock.fromDiff(changes:[{line:2 old:['b'] new:['B']}])[0]
         entry = gitblock.revert block lines
 
         reverted = gitblock.applyRevert entry lines
-        withNew  = ['new'].concat reverted
-        moved = gitblock.reanchorEntry entry withNew
+        moved = gitblock.reanchorEntry entry ['new'].concat(reverted)
 
         moved.start ▸ 2
         moved.ops[0].oldStart ▸ 2
 
-  ▸ a reverted entry becomes a block again when its revert is undone
+  ▸ undone block
 
-        lines = ['a' 'B' 'c']
-        block = gitblock.fromDiff(changes:[{line:2 old:['b'] new:['B']}])[0]
-        entry = gitblock.revert block lines
+        undone = (lines changes) ->
+            block = gitblock.fromDiff(changes:changes)[0]
+            entry = gitblock.revert block lines
+            reverted = gitblock.applyRevert entry lines
+            back = gitblock.applyRestore entry reverted
+            gitblock.undoneBlock entry back
 
-        reverted = gitblock.applyRevert entry lines
-        back = gitblock.applyRestore entry reverted
-        again = gitblock.undoneBlock entry back
+        again = undone ['a' 'B' 'c'] [{line:2 old:['b'] new:['B']}]
 
         again.start ▸ 1
         again.marks ▸ {'1':'mod'}
 
-  ▸ a reverted deletion becomes a block again when its revert is undone
-
-        lines = ['a' 'b']
-        block = gitblock.fromDiff(changes:[{line:1 old:['X']}])[0]
-        entry = gitblock.revert block lines
-
-        reverted = gitblock.applyRevert entry lines
-        back = gitblock.applyRestore entry reverted
-        again = gitblock.undoneBlock entry back
+        again = undone ['a' 'b'] [{line:1 old:['X']}]
 
         again.start ▸ 1
         again.marks ▸ {'0':'del'}
