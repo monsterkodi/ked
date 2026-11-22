@@ -17,12 +17,29 @@ mk = (history current) ->
     c = new clippo h.screen e 'clippo' opt
     c.history = history
     [h e c]
+
+uni = (rows=16) ->
+    h = new harness cols:60 rows:30
+    e = new editor h.screen 'test_editor' []
+    e.state.loadLines ['abc']
+    e.state.setMainCursor 1 0
+    u = new uniko h.screen e 'test_uniko'
+    u.layout 0 0 60 rows
+    u.show()
+    [h e u]
+
+mat = (cols rows) ->
+    h = new harness cols:cols rows:rows
+    m = new matrix h.screen 'test_matrix'
+    m.layout 0 0 cols rows
+    [h m]
+
 #!clippo
 ▸ clippo
 
-  ▸ the current clipboard text is first and selected
+  ▸ entries
 
-        [h e c] = mk ['older' 'oldest'] 'current'
+        [h e c] = mk ['older' 'current' 'oldest'] 'current'
 
         c.show()
 
@@ -30,16 +47,6 @@ mk = (history current) ->
         c.choices.currentIndex() ▸ 0
         c.choices.hasFocus() ▸ true
         c.choices.state.s.selections ▸ []
-
-  ▸ a repeated clipboard text moves to the top
-
-        [h e c] = mk ['old' 'current'] 'current'
-
-        c.show()
-
-        c.history ▸ ['current' 'old']
-
-  ▸ history entries start with a divider line
 
         [h e c] = mk ['one\ntwo' 'old'] 'new'
 
@@ -49,15 +56,13 @@ mk = (history current) ->
         c.dividerRows ▸ [0 2 5]
         c.entryStart  ▸ [0 2 5]
 
-  ▸ history entries use the detected language for highlighting
-
         [h e c] = mk ['const greet = (name) => name' "use ../../kxk ▪ post"] 'current'
 
         c.show()
 
         c.choices.state.syntax.getClasses(3)[0] ▸ 'keyword'
 
-  ▸ the selected divider is blue with a yellow circle
+  ▸ divider color
 
         [h e c] = mk ['new' 'old'] 'new'
 
@@ -80,7 +85,7 @@ mk = (history current) ->
         h.screen.get_fg(x y1)     ▸ theme.cursor.main
         h.screen.get_fg(x+2 y1)   ▸ theme.selection.span
 
-  ▸ down and up move between entries
+  ▸ navigation
 
         [h e c] = mk ['new' 'middle' 'old'] 'new'
 
@@ -101,7 +106,7 @@ mk = (history current) ->
         h.key c 'alt+,'
         c.choices.currentIndex() ▸ c.entryStart[1]
 
-  ▸ tab moves the focus between input and history
+  ▸ search
 
         [h e c] = mk ['one'] 'one'
 
@@ -114,8 +119,6 @@ mk = (history current) ->
 
         h.key c 'tab'
         c.choices.hasFocus() ▸ true
-
-  ▸ typing highlights matches and down and up select them
 
         [h e c] = mk ['alpha' 'beta' 'alphabet'] 'gamma'
 
@@ -133,7 +136,7 @@ mk = (history current) ->
         h.key c 'up'
         c.choices.currentIndex() ▸ c.entryStart[1]
 
-  ▸ return inserts the selected entry and closes
+  ▸ insert
 
         [h e c] = mk ['hello'] 'hello'
 
@@ -145,8 +148,6 @@ mk = (history current) ->
         kseg.str(e.state.s.lines) ▸ 'hellostart'
         e.hasFocus() ▸ true
 
-  ▸ space inserts the selected entry without closing
-
         [h e c] = mk ['hello'] 'hello'
 
         c.show()
@@ -155,8 +156,6 @@ mk = (history current) ->
 
         c.hidden() ▸ false
         kseg.str(e.state.s.lines) ▸ 'hellostart'
-
-  ▸ return inserts the entry containing the selected match
 
         [h e c] = mk ['alpha' 'beta' 'alphabet'] 'gamma'
 
@@ -170,11 +169,11 @@ mk = (history current) ->
 
         c.hidden() ▸ true
         kseg.str(e.state.s.lines) ▸ 'alphabetstart'
-        
+
 #!detector
 ▸ detector
 
-  ▸ the language of a snippet is detected
+  ▸ languages
 
         detector.detectExt('') ▸ 'kode'
         detector.detectExt('ordinary words only') ▸ 'kode'
@@ -232,40 +231,24 @@ mk = (history current) ->
 #!uniko
 ▸ uniko
 
-  ▸ comments are searchable and the match is case insensitive
+  ▸ filter
 
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 16
-        u.show()
+        [h e u] = uni()
+
+        all = u.matrix.numItems()
 
         u.filter 'GREEK'
 
         u.matrix.numItems() > 0 ▸ true
-
-  ▸ an empty search shows the whole list again
-
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 16
-        u.show()
-
-        all = u.matrix.numItems()
 
         u.filter 'sqrt'
         u.filter ''
 
         u.matrix.numItems() ▸ all
 
-  ▸ the matrix starts focused and typing moves the focus to the input
+  ▸ focus
 
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 16
-        u.show()
+        [h e u] = uni()
 
         u.focus ▸ 'matrix'
         u.matrix.selectedIndex ▸ 0
@@ -275,76 +258,43 @@ mk = (history current) ->
         u.focus ▸ 'input'
         u.input.current() ▸ 's'
 
-  ▸ return inserts the selected character at the cursors but keeps the picker open
+  ▸ insert
 
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['abc']
-        e.state.setMainCursor 1 0
+        check = (e u) ->
+            kseg.str(e.state.s.lines[0]) ▸ 'a√bc'
+            u.hidden() ▸ false
+            u.focus ▸ 'matrix'
+            e.hasFocus() ▸ false
 
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 16
-        u.show()
+        [h e u] = uni()
 
         u.filter 'sqrt'
         h.key u 'return' ''
 
-        kseg.str(e.state.s.lines[0]) ▸ 'a√bc'
-        u.hidden() ▸ false
-        u.focus ▸ 'matrix'
-        e.hasFocus() ▸ false
+        check e u
 
-  ▸ space inserts the selected character and keeps the matrix focused
-
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['abc']
-        e.state.setMainCursor 1 0
-
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 16
-        u.show()
+        [h e u] = uni()
 
         u.filter 'sqrt'
         h.key u 'space' ' '
 
-        kseg.str(e.state.s.lines[0]) ▸ 'a√bc'
-        u.hidden() ▸ false
-        u.focus ▸ 'matrix'
-        e.hasFocus() ▸ false
+        check e u
 
-  ▸ a mouse click inserts the clicked character and keeps the matrix focused
-
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['abc']
-        e.state.setMainCursor 1 0
-
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 14
-        u.show()
+        [h e u] = uni 14
 
         u.filter 'sqrt'
 
         u.onMouse
-            type: 'press'
-            cell: [2 3]
+            type:   'press'
+            cell:   [2 3]
             button: 'left'
-            count: 1
+            count:  1
 
-        kseg.str(e.state.s.lines[0]) ▸ 'a√bc'
-        u.hidden() ▸ false
-        u.focus ▸ 'matrix'
-        e.hasFocus() ▸ false
+        check e u
 
-  ▸ copy writes the selected character to the clipboard
+  ▸ copy
 
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 16
-        u.show()
+        [h e u] = uni()
 
         copied = []
         before = clip.copy
@@ -358,16 +308,9 @@ mk = (history current) ->
 
         clip.copy = before
 
-  ▸ escape closes without a change and gives the focus back
+  ▸ escape
 
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['abc']
-        e.state.setMainCursor 1 0
-
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 16
-        u.show()
+        [h e u] = uni()
 
         h.key u 'esc' ''
 
@@ -375,13 +318,9 @@ mk = (history current) ->
         u.hidden() ▸ true
         e.hasFocus() ▸ true
 
-  ▸ scale change
+  ▸ scale
 
-        h = new harness cols:60 rows:30
-        e = new editor h.screen 'test_editor' []
-        u = new uniko h.screen e 'test_uniko'
-        u.layout 0 0 60 16
-        u.show()
+        [h e u] = uni()
 
         u.matrix.scale ▸ 2
 
@@ -402,14 +341,13 @@ mk = (history current) ->
         h.key u 'cmd+down' ''
 
         u.matrix.scale ▸ 1
+
 #!matrix
 ▸ matrix
 
-  ▸ selection moves through the items in reading order
+  ▸ selection
 
-        h = new harness cols:10 rows:5
-        m = new matrix h.screen 'test_matrix'
-        m.layout 0 0 10 5
+        [h m] = mat 10 5
         m.setItems ['a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l']
 
         m.selectedText() ▸ 'a'
@@ -425,31 +363,17 @@ mk = (history current) ->
         m.moveSelection 'down' ▸ true
         m.selectedIndex ▸ cols
 
-  ▸ left at the first item stays put
-
-        h = new harness cols:10 rows:5
-        m = new matrix h.screen 'test_matrix'
-        m.layout 0 0 10 5
         m.setItems ['a' 'b' 'c']
 
         m.moveSelection 'left' ▸ false
         m.selectedIndex ▸ 0
 
-  ▸ up in the first row stays put
-
-        h = new harness cols:10 rows:5
-        m = new matrix h.screen 'test_matrix'
-        m.layout 0 0 10 5
-        m.setItems ['a' 'b' 'c']
-
         m.moveSelection 'up' ▸ false
         m.selectedIndex ▸ 0
 
-  ▸ the matrix knows whether it has the focus
+  ▸ focus
 
-        h = new harness cols:10 rows:5
-        m = new matrix h.screen 'test_matrix'
-        m.layout 0 0 10 5
+        [h m] = mat 10 5
 
         not m.hasFocus() ▸ true
 
@@ -461,11 +385,9 @@ mk = (history current) ->
 
         not m.hasFocus() ▸ true
 
-  ▸ a larger scale uses more cell rows per logical row
+  ▸ scale
 
-        h = new harness cols:20 rows:20
-        m = new matrix h.screen 'test_matrix'
-        m.layout 0 0 20 20
+        [h m] = mat 20 20
 
         m.scale ▸ 2
         m.viewportRows() ▸ 10
@@ -488,13 +410,9 @@ mk = (history current) ->
         m.scale ▸ 1
         m.viewportRows() ▸ 20
 
-  ▸ scaled cells and the selection line up at every scale
-
         for s in [2 3]
 
-            h = new harness cols:24 rows:20
-            m = new matrix h.screen 'test_matrix'
-            m.layout 0 0 24 20
+            [h m] = mat 24 20
 
             while m.scale < s
                 m.incScale 1
