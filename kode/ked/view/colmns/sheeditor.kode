@@ -86,7 +86,7 @@ use              ◆ sheetree sheenode
 
         switch combo
             'tab' 'shift+tab'                 ➜ ⮐ @moveFocus()
-            'ctrl+alt+delete' 'ctrl+alt+entf' ➜ ⮐ @editor.deleteSheetNode @sheetree.current()
+            'ctrl+alt+delete' 'ctrl+alt+entf' ➜ ⮐ @sheetree.deleteCurrent()
 
         if @sheetree.hasFocus() ➜ ⮐ @sheetree.onKey key event
         if @sheenode.hasFocus() ➜ ⮐ @sheenode.onKey key event

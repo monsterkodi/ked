@@ -105,6 +105,23 @@ use ../menu         ◆ filterchoice
         node.index = @currentIndex()
         @emit 'tree.node' node
         
+    deleteCurrent: =>
+
+        row = @currentIndex()
+
+        @editor.deleteSheetNode @current()
+
+        ⮐ true if empty @fuzzied
+
+        @highlight min(row @fuzzied.length-1)
+        @showRect()
+
+        node = @current()
+        node.index = @currentIndex()
+        @emit 'tree.node' node
+
+        true
+
     selectNext: -> super(); @jumpTo @current()
     selectPrev: -> super(); @jumpTo @current()
                 
@@ -153,8 +170,7 @@ use ../menu         ◆ filterchoice
 
             'delete' 'entf'
 
-                @editor.deleteSheetNode choice
-                ⮐ true
+                ⮐ @deleteCurrent()
                 
             # ➜ log 'unhandled action?' action
                  

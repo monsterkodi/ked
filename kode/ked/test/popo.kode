@@ -943,7 +943,11 @@ showSue = data ->
         se.sheetree.select 1 ; se.sheetree.jumpTo se.sheetree.current() ; mc() ▸ [10 0]
         se.sheetree.select 0 ; se.sheetree.jumpTo se.sheetree.current() ; mc() ▸ [2 1]
 
+        loadSheet {children:[{ text:'abc' x:2 y:1 w:6 h:2 } { text:'z' x:10 y:0 w:2 h:1 } { text:'q' x:10 y:4 w:2 h:1 }]}
+        se.sheetree.reloadTree()
+
         se.sheetree.grabFocus()
         se.sheetree.select 1
-        se.onKey 'delete' h.event('delete') ; rt('children').length ▸ 1 ; rt('children.0.text') ▸ 'abc'
-        se.onKey 'entf'   h.event('entf')   ; rt('children')? ▸ false
+        se.onKey 'delete' h.event('delete') ; rt('children').length ▸ 2 ; se.sheetree.current().text ▸ 'q'
+        se.onKey 'entf'   h.event('entf')   ; rt('children').length ▸ 1 ; se.sheetree.current().text ▸ 'abc'
+        se.onKey 'ctrl+alt+delete' h.event('ctrl+alt+delete') ; rt('children')? ▸ false
