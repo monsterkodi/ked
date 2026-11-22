@@ -844,9 +844,9 @@ use child_process ▪ spawn exec
         ⮐ if cols < 1 or rows < 1
         ⮐ if @editor.state.rectreeCols == cols and @editor.state.rectreeRows == rows
 
-        mc = @editor.state.mainCursor()
+        cell = @editor.state.sheetCellForPos @editor.state.mainCursor()
 
-        @editor.state.renderSheet @editor.state.rectree {cols:cols rows:rows} mc history:false silent:true
+        @editor.state.renderSheet @editor.state.rectree {cols:cols rows:rows} cell history:false silent:true
                                       
     draw: =>
             

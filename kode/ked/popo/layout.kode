@@ -36,6 +36,7 @@ use ../edit/tool ◆ sue
 
         w = clamp 0 (box.w-x) (@extent(box.w x node.w node.r))
         h = clamp 0 (box.h-y) (@extent(box.h y node.h node.b))
+        h = @linesHeight node h box.h-y
 
         node.rect = {abs:{x:box.x+x y:box.y+y w:w h:h} rel:{x:x y:y w:w h:h}}
 
@@ -45,6 +46,54 @@ use ../edit/tool ◆ sue
                 @inBox inner child
 
         node
+
+    #  the height of scaled text is a whole number of logical lines
+    #  an explicit height holds at least one line, if it fits
+
+    @linesHeight: node h room ->
+
+        scale = @scaleOf node
+
+        ⮐ h if scale <= 1
+
+        h = max scale h if node.h?
+        h = min h room
+        h - h % scale
+
+    #  the height field of a node joins height and scale:
+    #
+    #      12     height 12, unscaled
+    #      3x2    3 lines of scale 2, height 6
+    #      x3     1 line of scale 3, height 3
+    #      50%x2  half of the parent, in lines of scale 2
+
+    @parseHeight: text ->
+
+        m = /^\s*(\d*%?)\s*(?:x\s*(\d*))?\s*$/i.exec String(text ? '')
+
+        ⮐ if not m?
+        ⮐ if empty m[1] and empty m[2]
+
+        scale = clamp 1 7 (valid(m[2]) ? int(m[2]) : 1)
+
+        if m[1].endsWith '%'
+            ⮐ {h:m[1] scale:scale}
+
+        lines = valid(m[1]) ? int(m[1]) : 1
+
+        {h:lines*scale scale:scale}
+
+    @heightText: node ->
+
+        ⮐ '' if not node?.h?
+
+        scale = max 1 int(node.scale ? 1)
+
+        ⮐ String(node.h) if scale <= 1
+
+        ⮐ "#{node.h}x#{scale}" if node.h is str and node.h.endsWith '%'
+
+        "#{max(1 floor(int(node.h) / scale))}x#{scale}"
 
     @offset: extent value ->
 
@@ -381,9 +430,21 @@ use ../edit/tool ◆ sue
         rect    = node.rect.abs
         scale   = @scaleOf node
         perLine = max 1 int(rect.w / scale)
-        offset  = (max(0 pos[1]-rect.y) * perLine) + int(max(0 pos[0]-rect.x) / scale)
+        line    = int(max(0 pos[1]-rect.y) / scale)
+        offset  = line * perLine + int(max(0 pos[0]-rect.x) / scale)
 
         clamp 0 length offset
+
+    #  the cell of a text offset: on the bottom row of its band, see textOffsetIn
+
+    @cellForTextOffset: node offset ->
+
+        rect    = node.rect.abs
+        scale   = @scaleOf node
+        perLine = max 1 int(rect.w / scale)
+        line    = floor(offset / perLine)
+
+        [rect.x + (offset % perLine) * scale, rect.y + line*scale + scale-1]
 
     @scaleOf: node ->
 
@@ -438,7 +499,7 @@ use ../edit/tool ◆ sue
                 if bottom == y
 
                     if block.x == x
-                        glyphs.push {char:block.char fg:cell.fg bg:cell.bg scale:block.scale}
+                        glyphs.push {char:block.char fg:cell.fg bg:cell.bg scale:block.scale node:block.node}
                         x += block.scale
                     else
                         x += 1
@@ -478,10 +539,24 @@ use ../edit/tool ◆ sue
 
                 i += width
 
-        for i in 0...glyphs.length
-            if glyphs[i].scale > 1
-                areas.push {x:i y:y value:[sue.SCALE -1 1 glyphs[i].scale]}
-                areas.push {x:i+1 y:y value:[sue.CLOSE -1 1 sue.SCALE]}
+        i = 0
+
+        while i < glyphs.length
+
+            scale = glyphs[i].scale
+
+            if scale <= 1
+                i += 1
+                continue
+
+            j = i+1
+            while j < glyphs.length and glyphs[j].scale == scale and glyphs[j].node == glyphs[i].node
+                j += 1
+
+            areas.push {x:i y:y value:[sue.SCALE -1 1 scale]}
+            areas.push {x:j y:y value:[sue.CLOSE -1 1 sue.SCALE]}
+
+            i = j
 
         areas
 
@@ -514,25 +589,23 @@ use ../edit/tool ◆ sue
 
         ⮐ if not node.regions?
 
+        masked = @channelMaskOf node
+
         strings = null
 
         if valid node.pattern
             strings = fill.pattern(node node.regions)
-        else if valid node.text
+        else if valid node.text and @scaleOf(node) == 1
             strings = fill.text(node node.regions)
-
-        scale  = 1
-        scale  = max(1 int(node.scale ? 1)) if valid node.text
-
-        masked = @channelMaskOf node
+        else if valid node.text
+            strings = node.regions.map (rng) -> fill.blank(rng[2] - rng[0])
 
         for i in 0...node.regions.length
 
             rng   = node.regions[i]
-            width = rng[2] - rng[0]
             chars = Array.from(strings?[i] ? '')
 
-            for j in 0...width
+            for j in 0...(rng[2] - rng[0])
 
                 x = rng[0] + j
                 y = rng[1]
@@ -543,30 +616,60 @@ use ../edit/tool ◆ sue
                 gone = masked["#{x},#{y}"] ? {}
 
                 if valid strings and not gone.char
+                    @unblock grid cell.block if cell.block?
                     cell.char = chars[j] ? ' '
 
                 cell.fg = node.fg if valid node.fg and not gone.fg
                 cell.bg = node.bg if valid node.bg and not gone.bg
 
-                continue if not (valid strings and scale > 1 and j % scale == 0)
-                continue if not cell.char? or cell.char == ' '
+        @paintScaled node grid masked if @scaleOf(node) > 1
 
-                @markBlock(grid x y scale cell.char node)
+    #  every glyph of scaled text is a block of scale×scale cells
+    #  the glyph lives in the top left cell, the other cells are reserved
+    #  a block is never cut: whatever is painted later replaces it as a whole
+
+    @paintScaled: node grid masked ->
+
+        scale = @scaleOf node
+
+        for [x y char] in fill.scaled(node node.regions node.rect.abs)
+
+            continue if @charMaskedIn masked x y scale
+
+            @markBlock grid x y scale char node
+
+    @charMaskedIn: masked x y scale ->
+
+        for r in y...y+scale
+            for c in x...x+scale
+                ⮐ true if masked["#{c},#{r}"]?.char
+
+        false
 
     @markBlock: (grid x y scale char node) ->
 
-        rect = node.rect.abs
-
-        ⮐ if x + scale > rect.x + rect.w
-        ⮐ if y + scale > rect.y + rect.h
+        block = {x:x y:y scale:scale char:char node:node}
 
         for r in y...min(grid.length y+scale)
             for c in x...min(grid[r].length x+scale)
 
                 cell = grid[r][c]
 
-                cell.block = {x:x y:y scale:scale char:char}
-                cell.char  = '' if c != x or r != y
+                @unblock grid cell.block if cell.block?
+
+                cell.block = block
+                cell.char  = (c == x and r == y) ? char : ''
+
+    @unblock: grid block ->
+
+        for r in block.y...min(grid.length block.y+block.scale)
+            for c in block.x...min(grid[r].length block.x+block.scale)
+
+                cell = grid[r][c]
+
+                if cell.block == block
+                    cell.block = null
+                    cell.char  = ' '
 
     @channelMaskOf: node ->
 

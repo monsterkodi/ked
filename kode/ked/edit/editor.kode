@@ -176,6 +176,14 @@ use                ◆ state draw complete mode susan keys
 
         @redraw()
  
+    scaleSheetNode: delta =>
+
+        @state.scaleSheetNode delta
+
+        @redraw()
+
+        true
+
     clearDecoration: =>
 
         @state.clearSueAtCursorOrSelection()
@@ -207,6 +215,12 @@ use                ◆ state draw complete mode susan keys
         
         if @complete?
             ⮐ true if @complete.handleKey(key event) != 'unhandled'
+
+        if @state.rectree?
+            switch key
+                'shift+alt+='                ➜ ⮐ @scaleSheetNode 1
+                'shift+alt+-'                ➜ ⮐ @scaleSheetNode -1
+                'shift+alt+0'                ➜ ⮐ @scaleSheetNode 0
 
         if @feats['susan']            
             switch key

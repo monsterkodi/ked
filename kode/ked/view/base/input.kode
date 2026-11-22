@@ -44,7 +44,13 @@ use ../../edit   ◆ editor
         @state.moveCursors 'eol'
         
     clampValue: v =>
-        
+
+        if @opt.scaled and v is str and v.includes 'x' # lines x scale, see layout.parseHeight
+            [n s] = v.split 'x'
+            n = @clampValue n if valid n
+            s = "#{clamp 1 7 int(s)}" if valid s
+            ⮐ "#{n}x#{s}"
+
         ⮐ "#{@opt.min ? 0}" if empty v
 
         p = @opt.percent and v is str and v.endsWith('%')
@@ -62,7 +68,10 @@ use ../../edit   ◆ editor
         
         ⮐ if not @opt.number
 
-        if typeof v == 'number' and @opt.percent and @current().endsWith '%'
+        if typeof v == 'number' and @opt.scaled and @current().includes 'x'
+            [n s] = @current().split 'x'
+            v = "#{v}#{n.endsWith('%') ? '%' : ''}x#{s}"
+        else if typeof v == 'number' and @opt.percent and @current().endsWith '%'
             v = "#{v}%"
 
         v = @clampValue v
@@ -71,7 +80,14 @@ use ../../edit   ◆ editor
         @emit 'valueChange' @current() @name
             
     getValue: -> @current()
-    int: -> int @current()
+    
+    int: ->
+
+        if @opt.scaled and @current().includes 'x'
+            n = @current().split('x')[0]
+            ⮐ valid(n) ? int(n) : 1
+
+        int @current()
     
     setValue: v =>
         

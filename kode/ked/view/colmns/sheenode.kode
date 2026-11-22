@@ -11,19 +11,20 @@ use ../../popo   ◆ layout
 
         super @editor.screen @name
 
-        @height = 9
+        @height = 7
 
         @setColor 'bg' theme.uniko.bg
 
         @typeArg    = new tripleinput @screen "#{@name}_typearg"  ['type' 'arg']
         @xwrInput   = new tripleinput @screen "#{@name}_xwr"  ['x' 'w' 'r'] number:true min:0 max:999 percent:true
         @yhbInput   = new tripleinput @screen "#{@name}_yhb"  ['y' 'h' 'b'] number:true min:0 max:999 percent:true
-        @scaleInput = new tripleinput @screen "#{@name}_scale" ['scale']    number:true min:1 max:7
-        
-        @items      = [@typeArg @xwrInput @yhbInput @scaleInput]
-        @focusRing  = @typeArg.inputs.concat(@xwrInput.inputs).concat(@yhbInput.inputs).concat(@scaleInput.inputs)
+
+        @yhbInput.inputs[1].opt = Object.assign {} @yhbInput.inputs[1].opt, scaled:true # h is lines x scale
+
+        @items      = [@typeArg @xwrInput @yhbInput]
+        @focusRing  = @typeArg.inputs.concat(@xwrInput.inputs).concat(@yhbInput.inputs)
         @mouseItems = @items
-        @wheelItems = [@xwrInput @yhbInput @scaleInput]
+        @wheelItems = [@xwrInput @yhbInput]
         
         for input in @focusRing
             input.on 'valueChange' @onInputChange
@@ -34,7 +35,10 @@ use ../../popo   ◆ layout
         @isVisible = false
         
     onInputChange: (value name) =>
-        
+
+        if name.endsWith 'yhb_h'
+            ⮐ @onHeightChange value
+
         if not (value is str and value.endsWith '%')
             value = int value
         
@@ -43,10 +47,26 @@ use ../../popo   ◆ layout
             name.endsWith 'xwr_w' ➜ @node.w = value ; delete @node.r ; @xwrInput.inputs[2].set ''
             name.endsWith 'xwr_r' ➜ @node.r = value ; delete @node.w ; @xwrInput.inputs[1].set ''
             name.endsWith 'yhb_y' ➜ @node.y = value
-            name.endsWith 'yhb_h' ➜ @node.h = value ; delete @node.b ; @yhbInput.inputs[2].set ''
             name.endsWith 'yhb_b' ➜ @node.b = value ; delete @node.h ; @yhbInput.inputs[1].set ''
-            name.endsWith 'scale_scale' ➜ @node.scale = value
-            
+
+        @emit 'shee.node' @node
+
+    onHeightChange: value =>
+
+        parsed = layout.parseHeight value
+
+        ⮐ if not parsed?
+
+        @node.h = parsed.h
+
+        if parsed.scale > 1
+            @node.scale = parsed.scale
+        else
+            delete @node.scale
+
+        delete @node.b
+        @yhbInput.inputs[2].set ''
+
         @emit 'shee.node' @node
 
     onTypeAction: action text =>
@@ -97,10 +117,8 @@ use ../../popo   ◆ layout
         @xwrInput.inputs[2].set String(node.r ? '')
 
         @yhbInput.inputs[0].set String(node.y ? '')
-        @yhbInput.inputs[1].set String(node.h ? '')
+        @yhbInput.inputs[1].set layout.heightText(node)
         @yhbInput.inputs[2].set String(node.b ? '')
-
-        @scaleInput.inputs[0].set String(node.scale ? '')
         
         idx = @node.bg and not @node.fg ? 1 : 0
         post.emit 'colorpicker.show' [@node.fg @node.bg] focus:false select:idx node:@node

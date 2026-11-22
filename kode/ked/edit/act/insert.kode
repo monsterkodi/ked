@@ -28,16 +28,94 @@ export
 
     insertIntoSheet: text ->
 
-        cells   = {cols:(@rectreeCols ? @cells.cols) rows:(@rectreeRows ? @cells.rows)}
+        cells   = @sheetSize()
         rectree = @rectree
-        pos     = @mainCursor()
-        advance = layout.insertTextAt cells rectree pos text
+        cell    = @sheetCellForPos @mainCursor()
+        advance = layout.insertTextAt cells rectree cell text
 
         ⮐ 0 if not advance
 
-        @renderSheet rectree cells [pos[0]+advance pos[1]]
+        @renderSheet rectree cells [cell[0]+advance cell[1]]
 
         advance
+
+    sheetSize: -> {cols:(@rectreeCols ? @cells.cols) rows:(@rectreeRows ? @cells.rows)}
+
+    sheetCellsForLine: y -> sue.cellPositionsForLine(@s.lines y @scaleRunsForLine(y))
+
+    sheetCellForPos: pos ->
+
+        [x y] = pos
+
+        cells = @sheetCellsForLine y
+        lastIndex  = cells.length-1
+
+        if x <= lastIndex ➜ ⮐ [cells[x] y]
+
+        [cells[lastIndex] + x - lastIndex y]
+
+    sheetPosForCell: cell ->
+
+        [cx cy] = cell
+
+        below = min @s.lines.length cy+7
+
+        for y in cy+1...below
+            break if y >= below # ranges count down when empty
+            for run in @scaleRunsForLine y
+                continue if y - cy >= run[2]
+                cells = @sheetCellsForLine y
+                if cells[run[0]] <= cx < cells[run[1]]
+                    ⮐ @sheetPosOnLine cx y cells
+
+        @sheetPosOnLine cx cy @sheetCellsForLine(cy)
+
+    sheetPosOnLine: (cx y cells) ->
+
+        lastIndex = cells.length-1
+
+        if cx >= cells[lastIndex] ➜ ⮐ [lastIndex + cx - cells[lastIndex] y]
+
+        for gi in 0...lastIndex
+            if cx < cells[gi+1] ➜ ⮐ [gi y]
+
+        [lastIndex y]
+
+    scaleSheetNode: delta ->
+
+        ⮐ if not @rectree?
+
+        cells = @sheetSize()
+        layout.absolutize cells @rectree
+
+        cell = @sheetCellForPos @mainCursor()
+        node = layout.topmostIn @rectree cell
+
+        ⮐ if not valid node?.text
+
+        old   = layout.scaleOf node
+        scale = delta == 0 ? 1 : clamp(1 7 old+delta)
+
+        ⮐ if scale == old
+
+        offset = layout.textOffsetIn node cell node.text.length
+        lines  = max 1 int(node.rect.abs.h / old)
+
+        if scale > 1
+            node.scale = scale
+        else
+            delete node.scale
+
+        pct = node.h is str and node.h.endsWith '%'
+
+        if node.h? and not pct
+            node.h = lines * scale
+
+        layout.absolutize cells @rectree
+
+        @renderSheet @rectree cells layout.cellForTextOffset(node offset)
+
+        node
 
     setSheetTree: (rectree cols rows) ->
 
@@ -74,7 +152,7 @@ export
 
         @
 
-    renderSheet: (rectree cells pos opt) ->
+    renderSheet: (rectree cells mc opt) ->
 
         # render a sheet rectree and commit it in one undoable step
 
@@ -92,7 +170,8 @@ export
         @s = @s.set 'sue' data.sue
         @s = @s.set 'rectree' layout.plainNode(rectree)
 
-        if pos?
+        if mc?
+            pos = @sheetPosForCell mc
             @s = @s.set 'cursors' [pos]
             @s = @s.set 'main' 0
 
@@ -127,7 +206,7 @@ export
 
         layout.absolutize @cells @rectree
 
-        cursor = @mainCursor()
+        cursor = @sheetCellForPos @mainCursor()
         node   = layout.topmostIn @rectree cursor
 
         ⮐ if not node?
@@ -153,7 +232,7 @@ export
 
         ⮐ if not @rectree?
 
-        cursor = @mainCursor()
+        cursor = @sheetCellForPos @mainCursor()
         node   = layout.topmostIn @rectree cursor
 
         ⮐ if not node?

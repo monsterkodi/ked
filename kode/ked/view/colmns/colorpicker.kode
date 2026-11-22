@@ -256,9 +256,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
         state = @editor.state
         ⮐ if not state.rectree?
 
-        cells = {cols:(state.rectreeCols ? @editor.cells.cols) rows:(state.rectreeRows ? @editor.cells.rows)}
-
-        state.renderSheet state.rectree cells state.mainCursor() silent:true
+        state.renderSheet state.rectree state.sheetSize() state.sheetCellForPos(state.mainCursor()) silent:true
 
     show: hexl opt={focus:true} =>
 
@@ -350,7 +348,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
         state = @editor.state
         ⮐ if not state.rectree?
 
-        layout.nodeForPos @editor.cells state.rectree state.mainCursor()
+        layout.nodeForPos @editor.cells state.rectree state.sheetCellForPos(state.mainCursor())
 
     hexAtCursor: =>
 

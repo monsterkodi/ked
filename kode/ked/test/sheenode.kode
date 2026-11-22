@@ -25,9 +25,8 @@ ked_sess = ->
 
         sn.onNode node
 
-        sn.items.length ▸ 4
-        sn.focusRing.length ▸ 9
-        sn.items[3] ▸ sn.scaleInput
+        sn.items.length ▸ 3
+        sn.focusRing.length ▸ 8
         sn.typeArg.inputs[0].current() ▸ 'text'
         sn.typeArg.inputs[1].current() ▸ 'hi'
 
@@ -123,19 +122,65 @@ ked_sess = ->
         sn.xwrInput.inputs[1].current() ▸ '50%'
         node.w ▸ '50%'
 
-  ▸ the scale row
+  ▸ the height field joins lines and scale
 
         ked_sess()
 
         h = new harness cols:40 rows:20
         e = new editor h.screen 'sheenode_test_scale' []
         sn = new sheenode h.screen e
-        sn.layout 0 0 40 9
+        sn.layout 0 0 40 7
 
-        node = { text:'hi' x:1 y:2 w:3 h:1 }
+        hin  = sn.yhbInput.inputs[1]
+        node = { text:'hi' x:1 y:2 w:3 h:4 b:1 }
 
         sn.onNode node
+        hin.current() ▸ '4'
 
-        sn.scaleInput.inputs[0].changeValue 3
+        hin.changeValue '3x2'
+        node.h ▸ 6
+        node.scale ▸ 2
+        node.b? ▸ false
+        hin.current() ▸ '3x2'
 
+        hin.changeValue 'x3'
+        node.h ▸ 3
         node.scale ▸ 3
+
+        hin.changeValue '12'
+        node.h ▸ 12
+        node.scale? ▸ false
+
+        hin.changeValue '2x9'
+        hin.current() ▸ '2x7'
+        node.h ▸ 14
+
+        sn.onNode { text:'hi' h:7 scale:3 }
+        hin.current() ▸ '2x3'
+
+      ▸ typing keeps partial values
+
+        hin.grabFocus()
+        hin.selectAll()
+        h.type hin '3x2'
+
+        hin.current() ▸ '3x2'
+        sn.node.h ▸ 6
+        sn.node.scale ▸ 2
+
+  ▸ parseHeight
+
+        layout.parseHeight('12')    ▸ {h:12 scale:1}
+        layout.parseHeight('3x2')   ▸ {h:6 scale:2}
+        layout.parseHeight('x3')    ▸ {h:3 scale:3}
+        layout.parseHeight('3x')    ▸ {h:3 scale:1}
+        layout.parseHeight('50%x2') ▸ {h:'50%' scale:2}
+        layout.parseHeight('x')?    ▸ false
+        layout.parseHeight('abc')?  ▸ false
+
+  ▸ heightText
+
+        layout.heightText({h:6 scale:2})     ▸ '3x2'
+        layout.heightText({h:5})             ▸ '5'
+        layout.heightText({h:'50%' scale:2}) ▸ '50%x2'
+        layout.heightText({b:2 scale:2})     ▸ ''

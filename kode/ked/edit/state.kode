@@ -118,6 +118,8 @@ use           ◆ mode keys
 
     clearSueForRanges: ranges =>
 
+        ⮐ if @rectree?
+
         areas = @s.sue ? []
         ⮐ if empty areas or empty ranges
 
@@ -131,6 +133,8 @@ use           ◆ mode keys
 
     toggleSueFlag: flag =>
 
+        ⮐ if @rectree?
+
         ranges = @selectionsOrCursorWordRanges()
         ⮐ if empty ranges
 
@@ -143,6 +147,8 @@ use           ◆ mode keys
         @changeSue next
 
     stepScales: delta =>
+
+        ⮐ if @rectree?
 
         areas = @s.sue ? []
         next  = areas
@@ -166,6 +172,8 @@ use           ◆ mode keys
         @applySueAreas next
 
     clearScales: =>
+
+        ⮐ if @rectree?
 
         areas = @s.sue ? []
         indices = belt.lineIndicesForRangesOrPositions @s.selections @s.cursors

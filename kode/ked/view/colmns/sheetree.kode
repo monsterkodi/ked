@@ -85,7 +85,8 @@ use ../menu         ◆ filterchoice
     onCursorsSet: =>
 
         if @editor.state.rectree?
-            if item = layout.nodeForPos(@editor.cells @editor.state.rectree @editor.state.mainCursor())
+            cell = @editor.state.sheetCellForPos @editor.state.mainCursor()
+            if item = layout.nodeForPos(@editor.cells @editor.state.rectree cell)
                 if item.index? and 0 <= item.index < @fuzzied.length
                     @highlight item.index
                     @showRect()
@@ -93,8 +94,10 @@ use ../menu         ◆ filterchoice
             
     jumpTo: choice => 
         
-        rect = choice.rect.abs
-        post.emit 'goto.line' rect.y rect.x
+        rect  = choice.rect.abs
+        scale = layout.scaleOf choice
+        pos   = @editor.state.sheetPosForCell [rect.x rect.y+scale-1] # scaled glyphs sit on the bottom row of their band
+        post.emit 'goto.line' pos[1] pos[0]
         node = @current()
         node.index = @currentIndex()
         @emit 'tree.node' node
