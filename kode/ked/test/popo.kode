@@ -251,8 +251,7 @@ showSue = data ->
             tree.rect.abs ▸ {x:2 y:2 w:20 h:10}
     
             container = sds.get(tree 'children.0')
-            containerTitle = container.title?
-            containerTitle ▸ false
+            container.title? ▸ false
     
             text = sds.get(tree 'children.0.children.0')
             text.title ▸ '      text'
@@ -589,7 +588,7 @@ showSue = data ->
         e.state.setCursors [[2 1]]
 
         e.state.insert 'a' ; rt('children.0.text') ▸ 'a'
-        e.state.undo()     ; (rt('children')?) ▸ false
+        e.state.undo()     ; rt('children')? ▸ false
         e.state.redo()     ; rt('children.0.text') ▸ 'a'
 
   ▸ resize is not an undo step
