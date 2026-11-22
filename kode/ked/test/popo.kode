@@ -292,7 +292,7 @@ showSue = data ->
             tree.rect.abs ▸ {x:2 y:2 w:20 h:10}
     
             container = sds.get(tree 'children.0')
-            container.title? ▸ false
+            container.title ▸ '    box'
     
             text = sds.get(tree 'children.0.children.0')
             text.title ▸ '      text'
@@ -309,6 +309,15 @@ showSue = data ->
             layout.titlify {cols:30 rows:20} tree
     
             sds.get(tree 'children.0.children.0.rect.abs') ▸ {x:3 y:2 w:8 h:3}
+
+            page = { children:[{ x:1 y:1 w:4 h:2 } { x:6 y:1 w:4 h:2 children:[{ x:0 y:0 w:1 h:1 }] }] }
+
+            layout.titlify {cols:30 rows:20} page
+
+            page.title? ▸ false
+            sds.get(page 'children.0.title') ▸ '  rect'
+            sds.get(page 'children.1.title') ▸ '  box'
+            sds.get(page 'children.1.children.0.title') ▸ '    rect'
 
     ▸ sourceOf
 
@@ -1052,3 +1061,18 @@ showSue = data ->
         se.sheetree.select 1 ; cmd 'delete' ; layouts() ▸ ['c']
 
         noon.parse(layout.sourceOf(e.state.rectree)) ▸ {children:[{text:'c' x:1 y:1 w:2 h:1}]}
+
+        loadSheet {children:[{ x:1 y:1 w:6 h:3 children:[{ text:'t' x:2 y:1 w:2 h:1 }] } { text:'z' x:10 y:0 w:2 h:1 }]}
+        se.sheetree.reloadTree()
+
+        titles = -> se.sheetree.fuzzied.map (n) -> n.title.trim()
+        titles() ▸ ['box' 'text' 'text']
+
+        e.state.setCursors [[1 1]]  ; se.sheetree.currentIndex() ▸ 0
+        e.state.setCursors [[3 2]]  ; se.sheetree.currentIndex() ▸ 1
+        e.state.setCursors [[10 0]] ; se.sheetree.currentIndex() ▸ 2
+        e.state.setCursors [[14 3]] ; se.sheetree.currentIndex() ▸ 2
+
+        se.sheetree.grabFocus()
+        se.sheetree.select 0
+        cmd 'delete' ; titles() ▸ ['text'] ; rt('children.0.text') ▸ 'z'

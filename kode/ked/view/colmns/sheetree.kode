@@ -72,9 +72,11 @@ use ../menu         ◆ filterchoice
 
     addItemsForTree: node items =>
 
-        node.index = items.length
-
-        items.push node if node.title?
+        if node.title?
+            node.index = items.length
+            items.push node
+        else
+            delete node.index
 
         for child in node.children ? []
             @addItemsForTree child items

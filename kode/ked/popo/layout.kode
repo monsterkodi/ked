@@ -235,15 +235,12 @@ use ../edit/tool ◆ sue
 
         ⮐ if not node?
 
-        type = @typeOf node
-
-        if type?
-            node.title = lpad(depth+2)+type
-        else
-            delete node.title
+        node.title = lpad(depth+2) + @roleOf(node)
 
         for child in node.children ? []
             @titleIn child depth+2
+
+    @roleOf: node -> @typeOf(node) ? (valid(node.children) ? 'box' : 'rect')
 
     @typeOf: node ->
 
