@@ -24,15 +24,9 @@ children
                         bg      |#000000|
                         fg      |#f5ff69|
                     .
-                        text    test TESTTSST
-                        x       11
-                        y       22
-                        w       30
-                        h       1
-                    .
-                        text    y
-                        x       73
-                        y       22
-                        w       1
+                        text    test TEST test
+                        x       3
+                        y       1
+                        w       15
                         h       1
 x           0

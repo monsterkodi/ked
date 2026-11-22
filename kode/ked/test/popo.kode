@@ -952,3 +952,9 @@ showSue = data ->
         se.onKey 'delete' h.event('delete') ; rt('children').length ▸ 2 ; se.sheetree.current().text ▸ 'q'   ; mc() ▸ [10 4]
         se.onKey 'entf'   h.event('entf')   ; rt('children').length ▸ 1 ; se.sheetree.current().text ▸ 'abc' ; mc() ▸ [2 1]
         se.onKey 'ctrl+alt+delete' h.event('ctrl+alt+delete') ; rt('children')? ▸ false
+
+        se.sheetree.grabFocus()
+        se.onKey 'cmd+z'       h.event('cmd+z')       ; rt('children.0.text') ▸ 'abc'
+        se.onKey 'ctrl+z'      h.event('ctrl+z')      ; rt('children').length ▸ 2
+        se.onKey 'shift+cmd+z' h.event('shift+cmd+z') ; rt('children').length ▸ 1
+        se.onKey 'ctrl+y'      h.event('ctrl+y')      ; rt('children')? ▸ false

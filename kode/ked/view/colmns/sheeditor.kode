@@ -88,7 +88,13 @@ use              ◆ sheetree sheenode
             'tab' 'shift+tab'                 ➜ ⮐ @moveFocus()
             'ctrl+alt+delete' 'ctrl+alt+entf' ➜ ⮐ @sheetree.deleteCurrent()
 
-        if @sheetree.hasFocus() ➜ ⮐ @sheetree.onKey key event
+        if @sheetree.hasFocus()
+
+            switch combo
+                'cmd+z' 'ctrl+z'                ➜ @editor.state.undo() ; @editor.redraw() ; ⮐ true
+                'shift+cmd+z' 'cmd+y' 'ctrl+y'  ➜ @editor.state.redo() ; @editor.redraw() ; ⮐ true
+
+            ⮐ @sheetree.onKey key event
         if @sheenode.hasFocus() ➜ ⮐ @sheenode.onKey key event
             
 export sheeditor
