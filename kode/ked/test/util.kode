@@ -8,10 +8,20 @@ use ../../kxk      ▪ kseg
 use ../../kxk      ◆ nfs slash watcher
 use ../edit        ◆ mode
 
+sample = (opt) ->
+    lines = []
+    keep = console.log
+    console.log = (args...) -> lines.push args
+    leak.start opt
+    clearInterval leak.timer if leak.timer
+    leak.timer = null
+    console.log = keep
+    lines.length
+
 #!startup
 ▸ startup
 
-  ▸ the modes announce when they are loaded
+  ▸ loaded
 
         (mode.loaded instanceof Promise) ▸ true
 
@@ -19,8 +29,6 @@ use ../edit        ◆ mode
 
         mode.names().includes('novim') ▸ true
         mode.pending.length ▸ 0
-
-  ▸ the config announces when it is loaded
 
         loading = config.load()
 
@@ -33,8 +41,6 @@ use ../edit        ◆ mode
 
         watcher.close()
 
-  ▸ the session announces when it is loaded
-
         s = new session fresh:true
 
         (s.loaded instanceof Promise) ▸ true
@@ -43,7 +49,7 @@ use ../edit        ◆ mode
 
 ▸ session
 
-  ▸ a terminal session uses the terminal session directory
+  ▸ directories
 
         s = new session fresh:true
 
@@ -51,22 +57,18 @@ use ../edit        ◆ mode
         s.dir ▸ slash.absolute("~/.config/ked/sessions/")
         s.file ▸ slash.path(s.dir "#{s.name}.noon")
 
-  ▸ a headless session uses its own directory
-
         s = new session fresh:true headless:true
 
         s.headless ▸ true
         s.dir ▸ slash.absolute("~/.config/ked/headless-sessions/")
         s.file ▸ slash.path(s.dir "#{s.name}.noon")
 
-  ▸ a colored headless session uses the headless directory
-
         s = new session fresh:true headless_colors:true
 
         s.headless ▸ true
         s.dir ▸ slash.absolute("~/.config/ked/headless-sessions/")
 
-  ▸ novim command line history is loaded again
+  ▸ history
 
         dir = '/tmp/opencode/ked-session-history-test'
 
@@ -99,7 +101,7 @@ use ../edit        ◆ mode
 #!harness
 ▸ harness
 
-  ▸ write and written
+  ▸ write
 
         h = new harness
 
@@ -109,7 +111,7 @@ use ../edit        ◆ mode
 
         h.t.written() ▸ 'hello'
 
-  ▸ crumbs are shown
+  ▸ views
 
         h = new harness
 
@@ -122,10 +124,7 @@ use ../edit        ◆ mode
 
         row.includes 'kodi' ▸ true
         row.includes 's' ▸ true
-
         h.row 1 ▸ ''
-
-  ▸ key presses
 
         h = new harness
 
@@ -140,8 +139,6 @@ use ../edit        ◆ mode
 
         c.currentIndex() ▸ 1
 
-  ▸ view focus
-
         h = new harness
 
         i = new input h.screen 'test_input'
@@ -151,20 +148,11 @@ use ../edit        ◆ mode
 
         i.hasFocus() ▸ true
 
-  ▸ view typing
-
-        h = new harness
-
-        i = new input h.screen 'test_input'
-        i.layout 0 0 20 1
-
-        h.focus i
-
         h.type i 'xyz'
 
         i.current() ▸ 'xyz'
 
-  ▸ the cursor is marked
+  ▸ marks
 
         h = new harness
 
@@ -179,16 +167,12 @@ use ../edit        ◆ mode
         h.row 0 ▸ 'abc'
         h.rowMarked 0 ▸ "a#{screen.MAIN_MARK}b#{screen.END_MARK}c"
 
-  ▸ selection is marked
-
         h = new harness
 
         h.screen.set 0 0 'a'
         h.screen.set_mark 0 0 'selection'
 
         h.rowMarked 0 ▸ "#{screen.SELECT_MARK}a#{screen.END_MARK}"
-
-  ▸ highlight is marked
 
         h = new harness
 
@@ -197,7 +181,47 @@ use ../edit        ◆ mode
 
         h.rowMarked 0 ▸ "#{screen.HILGHT_MARK}a#{screen.END_MARK}"
 
-  ▸ greeter blacks out the window
+  ▸ colors
+
+        h = new harness
+
+        h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+
+        line = h.screen.textColored()[0]
+
+        line.includes '\x1b[48;2;1;2;3m'   ▸ true
+        line.includes '\x1b[38;2;10;20;30m' ▸ true
+        line.includes 'a'                   ▸ true
+        line.endsWith '\x1b[0m'             ▸ true
+
+        h = new harness
+
+        h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+        h.screen.set_mark 0 0 'main'
+
+        line = h.screen.textColored()[0]
+
+        line.includes "#{screen.MAIN_MARK}a#{screen.END_MARK}" ▸ true
+
+        h = new harness
+
+        h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+        h.screen.set_mark 0 0 'selection'
+
+        line = h.screen.textColored()[0]
+
+        line.includes "#{screen.SELECT_MARK}a#{screen.END_MARK}" ▸ true
+
+        h = new harness
+
+        h.screen.set 0 0 'a' [10 20 30] [1 2 3]
+        h.screen.set_mark 0 0 'highlight'
+
+        line = h.screen.textColored()[0]
+
+        line.includes "#{screen.HILGHT_MARK}a#{screen.END_MARK}" ▸ true
+
+  ▸ greeter
 
         h = new harness
 
@@ -209,58 +233,10 @@ use ../edit        ◆ mode
         h.screen.get_bg 0  23 ▸ [0 0 0]
         h.screen.get_bg 79 0  ▸ [0 0 0]
 
-  ▸ colored screen 
-    
-    ▸ draws colors
-
-            h = new harness
-    
-            h.screen.set 0 0 'a' [10 20 30] [1 2 3]
-    
-            line = h.screen.textColored()[0]
-    
-            line.includes '\x1b[48;2;1;2;3m'   ▸ true
-            line.includes '\x1b[38;2;10;20;30m'  ▸ true
-            line.includes 'a'                  ▸ true
-            line.endsWith '\x1b[0m'            ▸ true
-    
-    ▸ marks the cursor
-    
-            h = new harness
-    
-            h.screen.set 0 0 'a' [10 20 30] [1 2 3]
-            h.screen.set_mark 0 0 'main'
-    
-            line = h.screen.textColored()[0]
-    
-            line.includes "#{screen.MAIN_MARK}a#{screen.END_MARK}" ▸ true
-    
-    ▸ marks the selection
-    
-            h = new harness
-    
-            h.screen.set 0 0 'a' [10 20 30] [1 2 3]
-            h.screen.set_mark 0 0 'selection'
-    
-            line = h.screen.textColored()[0]
-    
-            line.includes "#{screen.SELECT_MARK}a#{screen.END_MARK}" ▸ true
-    
-    ▸ marks the highlight
-    
-            h = new harness
-    
-            h.screen.set 0 0 'a' [10 20 30] [1 2 3]
-            h.screen.set_mark 0 0 'highlight'
-    
-            line = h.screen.textColored()[0]
-    
-            line.includes "#{screen.HILGHT_MARK}a#{screen.END_MARK}" ▸ true
-
 #!logfile
 ▸ logfile
 
-  ▸ a headless logfile leaves the console alone
+  ▸ headless
 
         before = [console.log console.warn console.error]
         log = new logfile 'test' true
@@ -270,13 +246,9 @@ use ../edit        ◆ mode
         (console.warn == before[1]) ▸ true
         (console.error == before[2]) ▸ true
 
-  ▸ a headless logfile writes nowhere
-
         log = new logfile 'test' true
 
         log.write 'nothing happens'
-
-  ▸ a headless logfile still closes
 
         log = new logfile 'test' true
         closed = false
@@ -287,39 +259,15 @@ use ../edit        ◆ mode
 
 ▸ leak
 
-  ▸ a headless run samples nothing
+  ▸ headless
 
-        lines = []
-        keep = console.log
-        console.log = (args...) -> lines.push args
+        sample(headless:true)        ▸ 0
+        sample(headless_colors:true) ▸ 0
 
-        leak.start headless:true
-
-        clearInterval leak.timer if leak.timer
-        leak.timer = null
-
-        console.log = keep
-
-        lines.length ▸ 0
-
-  ▸ a colored headless run samples nothing
-
-        lines = []
-        keep = console.log
-        console.log = (args...) -> lines.push args
-
-        leak.start headless_colors:true
-
-        clearInterval leak.timer if leak.timer
-        leak.timer = null
-
-        console.log = keep
-
-        lines.length ▸ 0
 #!syntax
 ▸ syntax
 
-  ▸ getClass argument
+  ▸ argument
 
         s = new syntax 'test'
         s.setExt 'kode'
@@ -346,7 +294,7 @@ use ../edit        ◆ mode
         s.getColor x y
         s.getChar x y ch
         calls ▸ 2
-        
+
   ▸ getClasses
 
         s = new syntax 'test'
@@ -375,7 +323,15 @@ use ../edit        ◆ mode
         hole ?= 'text'
         hole ▸ 'text'
 
-  ▸ setSegls reuses the dissection of unchanged lines
+  ▸ setSegls
+
+        same = (edited next) ->
+            fresh = new syntax 'test'
+            fresh.setExt 'kode'
+            fresh.setLines next
+            for y in 0...next.length
+                for x in 0...8
+                    edited.getClass(x y) ▸ fresh.getClass(x y)
 
         s = new syntax 'test'
         s.setExt 'kode'
@@ -390,15 +346,7 @@ use ../edit        ◆ mode
 
         s.diss[0] == keep ▸ true
 
-        fresh = new syntax 'test'
-        fresh.setExt 'kode'
-        fresh.setLines next
-
-        for y in 0...next.length
-            for x in 0...8
-                s.getClass(x y) ▸ fresh.getClass(x y)
-
-  ▸ setSegls falls back to a full dissection when lines are added
+        same s next
 
         s = new syntax 'test'
         s.setExt 'kode'
@@ -409,20 +357,13 @@ use ../edit        ◆ mode
         next = [lines[0] lines[1] (kseg 'c = 3')]
         s.setSegls next lines
 
-        fresh = new syntax 'test'
-        fresh.setExt 'kode'
-        fresh.setLines next
-
         s.diss.length ▸ 3
 
-        for y in 0...next.length
-            for x in 0...8
-                s.getClass(x y) ▸ fresh.getClass(x y)
-        
+        same s next
 
 ▸ number inputs
 
-  ▸ clamps to min and max
+  ▸ numbers
 
         h = new harness
 
@@ -445,8 +386,6 @@ use ../edit        ◆ mode
         i.onWheel {dir:'down' cell:[1 0]}
         i.getValue() ▸ '0'
 
-  ▸ stores values as strings
-
         h = new harness
 
         i = new input h.screen 'test_number_input_string' number:true min:0 max:5
@@ -457,7 +396,7 @@ use ../edit        ◆ mode
         i.getValue() ▸ '3'
         i.int() ▸ 3
 
-  ▸ percent values keep their suffix
+  ▸ percent
 
         h = new harness
 
@@ -476,7 +415,15 @@ use ../edit        ◆ mode
         i.changeValue '200'
         i.current() ▸ '200'
 
-  ▸ typing a percent sign keeps it visible
+        h = new harness
+
+        i = new input h.screen 'test_number_input_percent_wheel' number:true min:0 max:999 percent:true
+        i.layout 0 0 20 1
+
+        i.changeValue '50%'
+        i.onWheel {dir:'up' cell:[1 0]}
+
+        i.current() ▸ '51%'
 
         h = new harness
 
@@ -487,15 +434,3 @@ use ../edit        ◆ mode
         h.type i '50%'
 
         i.current() ▸ '50%'
-
-  ▸ wheel keeps the percent suffix
-
-        h = new harness
-
-        i = new input h.screen 'test_number_input_percent_wheel' number:true min:0 max:999 percent:true
-        i.layout 0 0 20 1
-
-        i.changeValue '50%'
-        i.onWheel {dir:'up' cell:[1 0]}
-
-        i.current() ▸ '51%'
