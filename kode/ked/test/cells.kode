@@ -1,54 +1,24 @@
+
 use ../../kxk ▪ post
 use ../view/screen ◆ screen ttio cells
 
+cell = ->
+    t = new ttio headless:true input:false cols:20 rows:6
+    s = new screen t
+    c = new cells s
+    c.layout 2 1 10 4
+    [s c]
+
 ▸ cells
 
-  ▸ a headless cell rect keeps its rect
+  ▸ rect
 
-        t = new ttio headless:true input:false cols:20 rows:6
-        s = new screen t
-        c = new cells s
-        c.layout 2 1 10 4
+        [s c] = cell()
 
         c.draw_cell_rect {x:1 y:1 w:4 h:3} ▸ []
 
         c.cellRect ▸ {x:1 y:1 w:4 h:3}
 
-  ▸ the corners of a headless cell rect are drawn
-
-        t = new ttio headless:true input:false cols:20 rows:6
-        s = new screen t
-        c = new cells s
-        c.layout 2 1 10 4
-
-        c.draw_cell_rect {x:1 y:1 w:4 h:3}
-        c.draw_cell_rect_corners()
-
-        s.get_char(3 2) ▸ '╭'
-        s.get_char(6 4) ▸ '╯'
-        s.get_char(4 2) ▸ ' '
-
-  ▸ corners outside the cells are skipped
-
-        t = new ttio headless:true input:false cols:20 rows:6
-        s = new screen t
-        c = new cells s
-        c.layout 2 1 10 4
-
-        c.draw_cell_rect {x:-1 y:0 w:3 h:2}
-        c.draw_cell_rect_corners()
-
-        s.get_char(3 2) ▸ '╯'
-        s.get_char(1 1) ▸ ' '
-
-  ▸ del clears the cell rect
-
-        t = new ttio headless:true input:false cols:20 rows:6
-        s = new screen t
-        c = new cells s
-        c.layout 2 1 10 4
-
-        c.draw_cell_rect {x:1 y:1 w:4 h:3}
         c.del_cell_rect []
 
         exists = c.cellRect?
@@ -57,3 +27,22 @@ use ../view/screen ◆ screen ttio cells
         c.draw_cell_rect_corners()
 
         s.get_char(3 2) ▸ ' '
+
+  ▸ corners
+
+        [s c] = cell()
+
+        c.draw_cell_rect {x:1 y:1 w:4 h:3}
+        c.draw_cell_rect_corners()
+
+        s.get_char(3 2) ▸ '╭'
+        s.get_char(6 4) ▸ '╯'
+        s.get_char(4 2) ▸ ' '
+
+        [s c] = cell()
+
+        c.draw_cell_rect {x:-1 y:0 w:3 h:2}
+        c.draw_cell_rect_corners()
+
+        s.get_char(3 2) ▸ '╯'
+        s.get_char(1 1) ▸ ' '
