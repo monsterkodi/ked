@@ -54,6 +54,10 @@ startNovim = (state) ->
 
 stopNovim = (state) -> mode.stop state 'novim'
 
+done = (state) ->
+    stopNovim state
+    endSess()
+
 pressKey = (state c) -> mode.handleKey state c {combo:c, char:c}
 
 pressFor = (state) -> (c) -> pressKey state c
@@ -65,7 +69,7 @@ for i in 0...30
     windowLines.push "  #{i}"
 
 windowSetup = (name) ->
-    store = ked_sess {'editor▸file':'/tmp/novimwindow'}
+    ked_sess {'editor▸file':'/tmp/novimwindow'}
     s = new state windowCells name
     startNovim s
     s.loadLines windowLines
@@ -81,9 +85,9 @@ windowReset = (s) ->
 
 ▸ novim history
 
-  ▸ ex commands go to the ex history
+  ▸ recording
 
-        store = ked_sess()
+        ked_sess()
 
         ns = new state cells 'novimhistory_ex'
         m = new novim ns
@@ -92,29 +96,12 @@ windowReset = (s) ->
 
         ked_session.get('novim▸history▸ex') ▸ ['foo']
 
-        endSess()
+        m.runEx 'bar', false
 
-  ▸ internal ex runs are not recorded
+        ked_session.get('novim▸history▸ex') ▸ ['foo']
 
-        store = ked_sess()
-
-        ns = new state cells 'novimhistory_internal'
-        m = new novim ns
-
-        m.runEx 'foo', false
-
-        ked_session.get('novim▸history▸ex') ▸ undefined
-
-        endSess()
-
-  ▸ committed searches go to the search history
-
-        store = ked_sess()
-
-        ns = new state cells 'novimhistory_search'
         ns.loadLines belt.linesForText("foo bar")
 
-        m = new novim ns
         m.startSearch()
         m.searchChanged 'bar'
         m.commitSearch()
@@ -123,9 +110,9 @@ windowReset = (s) ->
 
         endSess()
 
-  ▸ up and down navigate the ex history
+  ▸ navigation
 
-        store = ked_sess()
+        ked_sess()
 
         ns = new state cells 'novimhistory_exnav'
         m = new novim ns
@@ -148,11 +135,7 @@ windowReset = (s) ->
         m.historyUp 'ex'   ▸ false
         m.ex               ▸ 'foo'
 
-        endSess()
-
-  ▸ up and down navigate the search history
-
-        store = ked_sess()
+        ked_sess()
 
         ns = new state cells 'novimhistory_searchnav'
         ns.loadLines belt.linesForText("alpha beta")
@@ -180,9 +163,9 @@ windowReset = (s) ->
 
         endSess()
 
-  ▸ the histories do not share entries
+  ▸ separate
 
-        store = ked_sess()
+        ked_sess()
 
         ns = new state cells 'novimhistory_separate'
         ns.loadLines belt.linesForText("alpha beta")
@@ -202,20 +185,18 @@ windowReset = (s) ->
 
 ▸ cmdlinehistory
 
-  ▸ a new history is empty
+  ▸ empty
 
-        store = ked_sess()
+        ked_sess()
 
         h = new cmdlinehistory 'ex'
 
         h.list()        ▸ []
         h.prev('draft') ▸ undefined
 
-        endSess()
+  ▸ entries
 
-  ▸ added entries are stored in the session
-
-        store = ked_sess()
+        ked_sess()
 
         h = new cmdlinehistory 'ex'
 
@@ -225,45 +206,10 @@ windowReset = (s) ->
         h.list() ▸ ['w' 'q']
         ked_session.get('novim▸history▸ex') ▸ ['w' 'q']
 
-        endSess()
-
-  ▸ search and ex histories are separate
-
-        store = ked_sess()
-
-        search = new cmdlinehistory 'search'
-        ex     = new cmdlinehistory 'ex'
-
-        search.add 'foo'
-        ex.add 'w'
-
-        search.list() ▸ ['foo']
-        ex.list()     ▸ ['w']
-
-        ked_session.get('novim▸history▸search') ▸ ['foo']
-        ked_session.get('novim▸history▸ex')     ▸ ['w']
-
-        endSess()
-
-  ▸ an entry is not repeated but moved to the newest position
-
-        store = ked_sess()
-
-        h = new cmdlinehistory 'ex'
-
-        h.add 'w'
-        h.add 'q'
         h.add 'w'
 
         h.list() ▸ ['q' 'w']
 
-        endSess()
-
-  ▸ old entries fall off at the limit
-
-        store = ked_sess()
-
-        h = new cmdlinehistory 'ex'
         h.limit = 3
 
         for text in ['1' '2' '3' '4' '5']
@@ -271,11 +217,9 @@ windowReset = (s) ->
 
         h.list() ▸ ['3' '4' '5']
 
-        endSess()
+  ▸ navigation
 
-  ▸ navigation goes back and forward through the entries
-
-        store = ked_sess()
+        ked_sess()
 
         h = new cmdlinehistory 'ex'
 
@@ -292,38 +236,35 @@ windowReset = (s) ->
 
         h.prev('draft') ▸ 'two'
 
-        endSess()
-
-  ▸ adding an entry resets the navigation position
-
-        store = ked_sess()
-
-        h = new cmdlinehistory 'ex'
-
-        h.add 'one'
-        h.add 'two'
-        h.prev('draft') ▸ 'two'
-
         h.add 'three'
+
         h.prev('draft') ▸ 'three'
 
-        endSess()
+  ▸ session
 
-  ▸ a new instance sees the stored history
+        ked_sess()
 
-        store = ked_sess()
+        search = new cmdlinehistory 'search'
+        ex     = new cmdlinehistory 'ex'
+
+        search.add 'foo'
+        ex.add 'w'
+
+        search.list() ▸ ['foo']
+        ex.list()     ▸ ['w']
+
+        ked_session.get('novim▸history▸search') ▸ ['foo']
+        ked_session.get('novim▸history▸ex')     ▸ ['w']
+
+        ked_sess()
 
         h1 = new cmdlinehistory 'ex'
         h1.add 'one'
 
         h2 = new cmdlinehistory 'ex'
 
-        h2.list()      ▸ ['one']
-        h2.prev('')    ▸ 'one'
-
-        endSess()
-
-  ▸ without a session entries are not added
+        h2.list()   ▸ ['one']
+        h2.prev('') ▸ 'one'
 
         global.ked_session = null
 
@@ -336,7 +277,7 @@ windowReset = (s) ->
 
   ▸ g; and g, walk change positions
 
-        store = ked_sess {'editor▸file':'/tmp/novimchange'}
+        ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_walk'
         startNovim ns
@@ -364,12 +305,11 @@ windowReset = (s) ->
         press ','
         ns.mainCursor() ▸ [0 1]
 
-        stopNovim ns
-        endSess()
+        done ns
 
   ▸ a count walks several changes
 
-        store = ked_sess {'editor▸file':'/tmp/novimchange'}
+        ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_count'
         startNovim ns
@@ -394,12 +334,11 @@ windowReset = (s) ->
         press ','
         ns.mainCursor() ▸ [0 2]
 
-        stopNovim ns
-        endSess()
+        done ns
 
   ▸ typing on one line is one change
 
-        store = ked_sess {'editor▸file':'/tmp/novimchange'}
+        ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_typing'
 
@@ -416,7 +355,7 @@ windowReset = (s) ->
 
   ▸ motion does not add a change
 
-        store = ked_sess {'editor▸file':'/tmp/novimchange'}
+        ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_motion'
         startNovim ns
@@ -430,12 +369,11 @@ windowReset = (s) ->
 
         ns.novim.changes.entries.length ▸ 0
 
-        stopNovim ns
-        endSess()
+        done ns
 
   ▸ undo keeps the change position
 
-        store = ked_sess {'editor▸file':'/tmp/novimchange'}
+        ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_undo'
 
@@ -455,7 +393,7 @@ windowReset = (s) ->
 
   ▸ substitute adds a change
 
-        store = ked_sess {'editor▸file':'/tmp/novimchange'}
+        ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_substitute'
         startNovim ns
@@ -468,12 +406,11 @@ windowReset = (s) ->
         ns.novim.changes.entries.length ▸ 1
         ns.novim.changes.entries[0]     ▸ [0 0]
 
-        stopNovim ns
-        endSess()
+        done ns
 
   ▸ loading a file forgets the changes
 
-        store = ked_sess {'editor▸file':'/tmp/novimchange'}
+        ked_sess {'editor▸file':'/tmp/novimchange'}
 
         ns = new state cells 'novimchange_load'
 
@@ -494,7 +431,7 @@ windowReset = (s) ->
 
   ▸ G and gg make jump positions navigable
 
-        store = ked_sess {'editor▸file':'/tmp/novimjump'}
+        ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_gg'
         startNovim ns
@@ -517,12 +454,11 @@ windowReset = (s) ->
         tab()
         ns.mainCursor() ▸ [0 0]
 
-        stopNovim ns
-        endSess()
+        done ns
 
   ▸ a count walks several jumps
 
-        store = ked_sess {'editor▸file':'/tmp/novimjump'}
+        ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_count'
         startNovim ns
@@ -545,12 +481,11 @@ windowReset = (s) ->
         press 'ctrl+i'
         ns.mainCursor() ▸ [0 3]
 
-        stopNovim ns
-        endSess()
+        done ns
 
   ▸ a committed search is a jump
 
-        store = ked_sess {'editor▸file':'/tmp/novimjump'}
+        ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_search'
         startNovim ns
@@ -569,12 +504,11 @@ windowReset = (s) ->
         press 'ctrl+o'
         ns.mainCursor() ▸ [0 1]
 
-        stopNovim ns
-        endSess()
+        done ns
 
   ▸ percent is a jump
 
-        store = ked_sess {'editor▸file':'/tmp/novimjump'}
+        ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_percent'
         startNovim ns
@@ -590,8 +524,7 @@ windowReset = (s) ->
         press 'ctrl+o'
         ns.mainCursor() ▸ [4 0]
 
-        stopNovim ns
-        endSess()
+        done ns
 
   ▸ a jump to another file opens it
 
@@ -616,12 +549,11 @@ windowReset = (s) ->
 
         opens[-1] ▸ ['/tmp/novimjump-a' 2 0]
 
-        stopNovim ns
-        endSess()
+        done ns
 
   ▸ a global command does not add jumps
 
-        store = ked_sess {'editor▸file':'/tmp/novimjump'}
+        ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_global'
         startNovim ns
@@ -633,12 +565,11 @@ windowReset = (s) ->
 
         ns.novim.jumps.entries.length ▸ 0
 
-        stopNovim ns
-        endSess()
+        done ns
 
   ▸ substitute and edit add jumps
 
-        store = ked_sess {'editor▸file':'/tmp/novimjump'}
+        ked_sess {'editor▸file':'/tmp/novimjump'}
 
         ns = new state cells 'novimjump_ex'
         startNovim ns
@@ -659,28 +590,18 @@ windowReset = (s) ->
         ns.novim.jumps.entries.length ▸ 2
         ns.novim.jumps.entries[1].y   ▸ 0
 
-        stopNovim ns
-        endSess()
+        done ns
 
 ▸ changelist
 
-  ▸ an empty change list has no older or newer position
+  ▸ empty
 
         c = new changelist
 
         c.older() ▸ undefined
         c.newer() ▸ undefined
 
-  ▸ g; starts at the newest change
-
-        c = new changelist
-
-        c.record [0 0]
-
-        c.older() ▸ [0 0]
-        c.older() ▸ undefined
-
-  ▸ changes are walked backwards and forwards
+  ▸ walk
 
         c = new changelist
 
@@ -692,13 +613,12 @@ windowReset = (s) ->
         c.older() ▸ [0 1]
         c.older() ▸ [0 0]
         c.older() ▸ undefined
-        
 
         c.newer() ▸ [0 1]
         c.newer() ▸ [0 2]
         c.newer() ▸ undefined
 
-  ▸ close changes on the same line keep only the last position
+  ▸ record
 
         c = new changelist
 
@@ -708,16 +628,12 @@ windowReset = (s) ->
         c.entries.length ▸ 1
         c.entries[0]     ▸ [20 0]
 
-  ▸ changes far apart on the same line are kept
-
         c = new changelist
 
         c.record [10 0]
         c.record [95 0]
 
         c.entries.length ▸ 2
-
-  ▸ only the newest 100 changes are kept
 
         c = new changelist
 
@@ -727,8 +643,6 @@ windowReset = (s) ->
         c.entries.length ▸ 100
         c.entries[0][1]  ▸ 6
         c.entries[-1][1] ▸ 105
-
-  ▸ reset forgets the changes
 
         c = new changelist
 
@@ -741,14 +655,14 @@ windowReset = (s) ->
 
 ▸ jumplist
 
-  ▸ an empty jump list has no older or newer position
+  ▸ empty
 
         j = new jumplist
 
         j.older {file:'a' x:0 y:0} ▸ undefined
         j.newer()                  ▸ undefined
 
-  ▸ ctrl o goes to the position before the last jump
+  ▸ walk
 
         j = new jumplist
 
@@ -756,8 +670,6 @@ windowReset = (s) ->
 
         j.older({file:'a' x:2 y:2}) ▸ {file:'a' x:1 y:1}
         j.newer()                   ▸ {file:'a' x:2 y:2}
-
-  ▸ jumps are walked backwards and forwards
 
         j = new jumplist
 
@@ -775,8 +687,6 @@ windowReset = (s) ->
         j.newer() ▸ {file:'a' x:0 y:4}
         j.newer() ▸ undefined
 
-  ▸ a jump from a newer position drops the positions after it
-
         j = new jumplist
 
         j.record {file:'a' x:0 y:1}
@@ -792,7 +702,7 @@ windowReset = (s) ->
         j.newer()                   ▸ {file:'a' x:0 y:5}
         j.newer()                   ▸ undefined
 
-  ▸ positions on the same line are not repeated
+  ▸ record
 
         j = new jumplist
 
@@ -802,16 +712,12 @@ windowReset = (s) ->
         j.entries.length ▸ 1
         j.entries[0].x   ▸ 3
 
-  ▸ different files on the same line are kept
-
         j = new jumplist
 
         j.record {file:'a' x:0 y:1}
         j.record {file:'b' x:0 y:1}
 
         j.entries.length ▸ 2
-
-  ▸ only the newest 100 positions are kept
 
         j = new jumplist
 
@@ -3458,7 +3364,7 @@ windowReset = (s) ->
         dirty()
     
         m.runEx 'q'
-    
+        
         quits ▸ 1
         errors[-1] ▸ 'unsaved changes'
     
@@ -3987,82 +3893,54 @@ windowReset = (s) ->
     
 ▸ novim window motions
 
-  ▸ H goes to the first non blank of the top line
+  ▸ H M L
 
-        s = windowSetup 'novimwindow_h'
-
-        top = s.lineAtRow 0
-
-        windowPress s 'H'
-
-        s.mainCursor() ▸ [2 top]
-
-        stopNovim s
-        endSess()
-
-  ▸ M goes to the first non blank of the middle line
-
-        s = windowSetup 'novimwindow_m'
-
-        mid = s.lineAtRow int((s.cells.rows-1)/2)
-
-        windowPress s 'M'
-
-        s.mainCursor() ▸ [2 mid]
-
-        stopNovim s
-        endSess()
-
-  ▸ L goes to the first non blank of the bottom line
-
-        s = windowSetup 'novimwindow_l'
-
-        bottom = s.lineAtRow s.cells.rows-1
-
-        windowPress s 'L'
-
-        s.mainCursor() ▸ [2 bottom]
-
-        stopNovim s
-        endSess()
-
-  ▸ counts make H and L count lines from the window edge
-
-        s = windowSetup 'novimwindow_count'
+        s = windowSetup 'novimwindow_hml'
 
         top    = s.lineAtRow 0
+        mid    = s.lineAtRow int((s.cells.rows-1)/2)
         bottom = s.lineAtRow s.cells.rows-1
+
+        windowPress s 'H'
+        s.mainCursor() ▸ [2 top]
+
+        windowReset s
+
+        windowPress s 'M'
+        s.mainCursor() ▸ [2 mid]
+
+        windowReset s
+
+        windowPress s 'L'
+        s.mainCursor() ▸ [2 bottom]
+
+        windowReset s
 
         windowPress s '3'
         windowPress s 'H'
-
         s.mainCursor() ▸ [2 top+2]
 
         windowReset s
 
         windowPress s '3'
         windowPress s 'L'
-
         s.mainCursor() ▸ [2 bottom-2]
 
-        stopNovim s
-        endSess()
-
-  ▸ M ignores a count
-
-        s = windowSetup 'novimwindow_mcount'
-
-        mid = s.lineAtRow int((s.cells.rows-1)/2)
+        windowReset s
 
         windowPress s '2'
         windowPress s 'M'
-
         s.mainCursor() ▸ [2 mid]
 
-        stopNovim s
-        endSess()
+        windowReset s
 
-  ▸ dH deletes up to the top of the window
+        windowPress s 'L'
+        windowPress s 'ctrl+o'
+        s.mainCursor() ▸ [0 8]
+
+        done s
+
+  ▸ dH dL
 
         s = windowSetup 'novimwindow_dh'
 
@@ -4072,10 +3950,7 @@ windowReset = (s) ->
         s.s.lines.length ▸ 21
         kseg.str(s.s.lines[0]) ▸ '  9'
 
-        stopNovim s
-        endSess()
-
-  ▸ dL deletes down to the bottom of the window
+        done s
 
         s = windowSetup 'novimwindow_dl'
 
@@ -4085,17 +3960,4 @@ windowReset = (s) ->
         s.s.lines.length ▸ 18
         kseg.str(s.s.lines[8]) ▸ '  20'
 
-        stopNovim s
-        endSess()
-
-  ▸ H M and L are jumps
-
-        s = windowSetup 'novimwindow_jump'
-
-        windowPress s 'L'
-        windowPress s 'ctrl+o'
-
-        s.mainCursor() ▸ [0 8]
-
-        stopNovim s
-        endSess()
+        done s
