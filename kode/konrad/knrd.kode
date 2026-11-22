@@ -163,6 +163,12 @@ fingerprint = ◯-> # generates the fingerprint for the kode compiler
     joined = parts.join ''
     hash joined
 
+loadedFingerprint = null
+
+compilerFingerprint = -> loadedFingerprint ?= fingerprint() # the compiler this process has loaded, not the one on disk
+
+compilerFingerprint()
+
 loadCache = path ◯->
 
     text = ◯ nfs.read path
@@ -201,7 +207,7 @@ stale = ◯->
     ⮐ false if not kache
     ⮐ false if empty kache.kode
 
-    kache.kode != (◯ fingerprint())
+    kache.kode != (◯ compilerFingerprint())
 
 isCurrent = (kache, srcFile, tgtFile, srcText) ◯->
 
@@ -278,7 +284,7 @@ knrd = files=[] opt={} ◯->
     
     kpath  = cachePath()
     loaded = ◯ loadCache kpath
-    fp     = ◯ fingerprint()
+    fp     = ◯ compilerFingerprint()
     cache  = if usable loaded, fp, opt.map then loaded else null
     
     log w2('  ') w3('cache is for another compiler, ignoring it') if opt.verbose and loaded? and empty cache
@@ -348,6 +354,7 @@ knrd.stampSource = stampSource
 knrd.reconcile   = reconcile
 knrd.cachePath   = cachePath
 knrd.fingerprint = fingerprint
+knrd.compilerFingerprint = compilerFingerprint
 knrd.fingerprintFiles = fingerprintFiles
 knrd.stale       = stale
 knrd.hash        = hash

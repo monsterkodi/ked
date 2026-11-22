@@ -375,6 +375,25 @@ cached = fp ◯->
         
         fpOne != knrd.hash('')  ▸ true
 
+    ▸ the compiler fingerprint is taken when knrd loads, so a compiler that
+    ▸ changes on disk later does not pass for the one that is running
+
+        files  = ◯ knrd.fingerprintFiles()
+        probe  = slash.path(slash.dir(files[0]), 'zz_fingerprint_probe.js')
+        loaded = ◯ knrd.compilerFingerprint()
+        was    = ◯ knrd.stale()
+        
+        ◯ nfs.write probe, '// probe\n'
+        disk  = ◯ knrd.fingerprint()
+        after = ◯ knrd.compilerFingerprint()
+        still = ◯ knrd.stale()
+        ◯ nfs.remove probe
+        
+        loaded.length  ▸ 40
+        disk != loaded ▸ true
+        after          ▸ loaded
+        still          ▸ was
+
     ▸ the fingerprint leaves out test files
 
         files = ◯ knrd.fingerprintFiles()
