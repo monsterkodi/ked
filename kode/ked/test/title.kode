@@ -282,7 +282,7 @@ use ../view/title ◆ title
 
         press 'q'
 
-        t.titlenovim.novimText         ▸ ''
+        t.titlenovim.novimText         ▸ 'recorded @a'
 
         mode.stop e.state 'novim'
 

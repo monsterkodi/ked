@@ -37,16 +37,16 @@ use ../base      ◆ view input
         @pointerType = 'default'
         @novimText   = 'novim'
         
-        post.on 'novim.execute'      @onExecute
-        post.on 'novim.pending'      @onPending
-        post.on 'novim.error'        @onError
-        post.on 'novim.ex.start'     @onExStart
-        post.on 'novim.search.start' @onSearchStart
-        post.on 'novim.ex.text'      @onExText
-        post.on 'novim.search.text'  @onSearchText
+        post.on 'novim.execute'         @onExecute
+        post.on 'novim.pending'         @onPending
+        post.on 'novim.error'           @onError
+        post.on 'novim.ex.start'        @onExStart
+        post.on 'novim.search.start'    @onSearchStart
+        post.on 'novim.ex.text'         @onExText
+        post.on 'novim.search.text'     @onSearchText
         post.on 'novim.search.position' @onSearchPosition
-        post.on 'novim.macro.start'   @onMacroStart
-        post.on 'novim.macro.stop'    @onMacroStop
+        post.on 'novim.macro.start'     @onMacroStart
+        post.on 'novim.macro.stop'      @onMacroStop
 
     onExStart: start =>
         
@@ -178,7 +178,7 @@ use ../base      ◆ view input
         ⮐ if macro.state != @stateName
         ⮐ if not @novimText.startsWith 'recording @'
 
-        @novimText = ''
+        @novimText = "recorded @#{macro.register}"
 
     onError: err => 
 

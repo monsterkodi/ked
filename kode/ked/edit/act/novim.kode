@@ -1231,7 +1231,7 @@ export
 
         clearTimeout @novim.yankFlashTimer if @novim.yankFlashTimer
 
-        flashMs = config.data?.novim?.novim.yankFlashMs ? 500
+        flashMs = config.data?.novim?.yankFlashMs ? 500
         @novim.yankFlash      = rngs
         @novim.yankFlashTimer = setTimeout (=> @clearYankFlash()) flashMs
 

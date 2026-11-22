@@ -4,6 +4,8 @@ use ../popo      ◆ layout fill
 use ../edit      ◆ editor
 use ../util      ◆ harness
 
+absrect = cells tree -> layout.absolutize cells tree; tree.rect
+
 ▸ popo
   
   ▸ layout
@@ -12,40 +14,20 @@ use ../util      ◆ harness
     
       ▸ percentages
     
-                tree = { x:'20%' y:'10%' r:'20%' b:'10%' }
-                layout.absolutize {cols:100 rows:50} tree
-                tree.rect ▸ {abs:{x:20 y:5 w:60 h:40} rel:{x:20 y:5 w:60 h:40}}
-
-                tree = { x:'20%' y:'20%' r:'20%' b:'20%' }
-                layout.absolutize {cols:10 rows:5} tree
-                tree.rect ▸ {abs:{x:2 y:1 w:6 h:3} rel:{x:2 y:1 w:6 h:3}}
-
-                tree = { x:'20%' y:'20%' w:'60%' h:'60%' }
-                layout.absolutize {cols:10 rows:5} tree
-                tree.rect ▸ {abs:{x:2 y:1 w:6 h:3} rel:{x:2 y:1 w:6 h:3}}
+                absrect {cols:100 rows:50} { x:'20%' y:'10%' r:'20%' b:'10%' } ▸ {abs:{x:20 y:5 w:60 h:40} rel:{x:20 y:5 w:60 h:40}}
+                absrect {cols:10 rows:5}   { x:'20%' y:'20%' r:'20%' b:'20%' } ▸ {abs:{x:2 y:1 w:6 h:3} rel:{x:2 y:1 w:6 h:3}}
+                absrect {cols:10 rows:5}   { x:'20%' y:'20%' w:'60%' h:'60%' } ▸ {abs:{x:2 y:1 w:6 h:3} rel:{x:2 y:1 w:6 h:3}}
             
                 tree = { x:10 y:10 w:'100%' h:'100%' children:[{x:'50%' y:'50%' w:'50%' h:'25%'}]}
-                layout.absolutize {cols:100 rows:100} tree
-                tree.rect ▸ {abs:{x:10 y:10 w:90 h:90} rel:{x:10 y:10 w:90 h:90}}
+                absrect {cols:100 rows:100} tree ▸ {abs:{x:10 y:10 w:90 h:90} rel:{x:10 y:10 w:90 h:90}}
                 sds.get(tree 'children.0.rect') ▸ {abs:{x:55 y:55 w:45 h:22} rel:{x:45 y:45 w:45 h:22}}
             
       ▸ cells
     
-                tree = { x:3 y:4 w:20 h:10 }
-                layout.absolutize {cols:100 rows:50} tree
-                tree.rect ▸ {abs:{x:3 y:4 w:20 h:10} rel:{x:3 y:4 w:20 h:10}}
-
-                tree = { x:3 y:4 r:7 b:6 }
-                layout.absolutize {cols:100 rows:50} tree
-                tree.rect ▸ {abs:{x:3 y:4 w:90 h:40} rel:{x:3 y:4 w:90 h:40}}
-
-                tree = { x:'3' y:'4' w:'20' h:'10' }
-                layout.absolutize {cols:100 rows:50} tree
-                tree.rect ▸ {abs:{x:3 y:4 w:20 h:10} rel:{x:3 y:4 w:20 h:10}}
-
-                tree = { x:3 y:'10%' w:20 h:'20%' }
-                layout.absolutize {cols:100 rows:50} tree
-                tree.rect ▸ {abs:{x:3 y:5 w:20 h:10} rel:{x:3 y:5 w:20 h:10}}
+                absrect {cols:100 rows:50} { x:3 y:4 w:20 h:10 }         ▸ {abs:{x:3 y:4 w:20 h:10} rel:{x:3 y:4 w:20 h:10}}
+                absrect {cols:100 rows:50} { x:3 y:4 r:7 b:6 }           ▸ {abs:{x:3 y:4 w:90 h:40} rel:{x:3 y:4 w:90 h:40}}
+                absrect {cols:100 rows:50} { x:'3' y:'4' w:'20' h:'10' } ▸ {abs:{x:3 y:4 w:20 h:10} rel:{x:3 y:4 w:20 h:10}}
+                absrect {cols:100 rows:50} { x:3 y:'10%' w:20 h:'20%' }  ▸ {abs:{x:3 y:5 w:20 h:10} rel:{x:3 y:5 w:20 h:10}}
             
       ▸ nesting
     
@@ -153,24 +135,17 @@ use ../util      ◆ harness
 
                 tree = { bg:'#111' children:[{ text:'x' x:1 y:1 w:2 h:2 }] }
 
-                res = layout.nodeForPos {cols:4 rows:4} tree [2 2]
-                res.text ▸ 'x'
+                layout.nodeForPos({cols:4 rows:4} tree [2 2]) .text ▸ 'x'
 
                 tree = { children:[{ text:'a' x:0 y:0 w:4 h:2 } { text:'b' x:2 y:0 w:4 h:2 }] }
 
-                res = layout.nodeForPos {cols:6 rows:2} tree [1 0]
-                res.text ▸ 'a'
-
-                res = layout.nodeForPos {cols:6 rows:2} tree [3 0]
-                res.text ▸ 'b'
+                layout.nodeForPos({cols:6 rows:2} tree [1 0]).text ▸ 'a'
+                layout.nodeForPos({cols:6 rows:2} tree [3 0]).text ▸ 'b'
 
                 tree = { children:[{ text:'outer' x:0 y:0 w:4 h:2 children:[{ text:'inner' x:1 y:0 w:2 h:2 }] }] }
 
-                res = layout.nodeForPos {cols:4 rows:2} tree [1 0]
-                res.text ▸ 'inner'
-
-                res = layout.nodeForPos {cols:4 rows:2} tree [3 0]
-                res.text ▸ 'outer'
+                layout.nodeForPos({cols:4 rows:2} tree [1 0]).text ▸ 'inner'
+                layout.nodeForPos({cols:4 rows:2} tree [3 0]).text ▸ 'outer'
 
       ▸ nested
 
@@ -184,14 +159,11 @@ use ../util      ◆ harness
 
       ▸ empty and indexed
 
-                tree = { children:[{ text:'z' x:2 y:2 w:0 h:0 }] }
-
-                res = layout.nodeForPos {cols:4 rows:4} tree [2 2]
+                res = layout.nodeForPos {cols:4 rows:4} { children:[{ text:'z' x:2 y:2 w:0 h:0 }] } [2 2]
                 res.rect.abs ▸ {x:0 y:0 w:4 h:4}
                 sds.get(res 'children.0.rect.abs') ▸ {x:2 y:2 w:0 h:0}
 
-                node = { index:1 text:'i' x:1 y:1 w:2 h:2 }
-                res = layout.nodeForPos {cols:4 rows:4} node [2 2]
+                res = layout.nodeForPos {cols:4 rows:4} { index:1 text:'i' x:1 y:1 w:2 h:2 } [2 2]
                 res.index ▸ 1
                 res.text ▸ 'i'
                 res.rect.abs ▸ {x:1 y:1 w:2 h:2}
@@ -203,35 +175,21 @@ use ../util      ◆ harness
                 cells = {cols:20 rows:6}
                 tree = layout.absolutize cells { children:[{ text:'move' x:2 y:2 w:4 h:2 }] }
 
-                layout.moveNode cells tree tree.children[0] 'left'
-                tree.children[0].x ▸ 1
-      
-                layout.moveNode cells tree tree.children[0] 'left'
-                tree.children[0].x ▸ 0
+                layout.moveNode cells tree tree.children[0] 'left'  ; tree.children[0].x ▸ 1
+                layout.moveNode cells tree tree.children[0] 'left'  ; tree.children[0].x ▸ 0
+                layout.moveNode cells tree tree.children[0] 'left'  ; tree.children[0].x ▸ 0
+                layout.moveNode cells tree tree.children[0] 'right' ; tree.children[0].x ▸ 1
 
-                layout.moveNode cells tree tree.children[0] 'left'
-                tree.children[0].x ▸ 0
-
-                layout.moveNode cells tree tree.children[0] 'right'
-                tree.children[0].x ▸ 1
-                
       ▸ relative
             
                 cells = {cols:20 rows:10}
                 tree = layout.absolutize cells { children:[{ text:'relm' x:'2%' y:'99%' w:'50%' h:'40%' }] }
 
-                layout.moveNode cells tree tree.children[0] 'left'
-                tree.children[0].x ▸ '1%'
-
-                layout.moveNode cells tree tree.children[0] 'left'
-                tree.children[0].x ▸ '0%'
-
-                layout.moveNode cells tree tree.children[0] 'left'
-                tree.children[0].x ▸ '0%'
-
-                layout.moveNode cells tree tree.children[0] 'right'
-                tree.children[0].x ▸ '1%'
-
+                layout.moveNode cells tree tree.children[0] 'left'  ; tree.children[0].x ▸ '1%'
+                layout.moveNode cells tree tree.children[0] 'left'  ; tree.children[0].x ▸ '0%'
+                layout.moveNode cells tree tree.children[0] 'left'  ; tree.children[0].x ▸ '0%'
+                layout.moveNode cells tree tree.children[0] 'right' ; tree.children[0].x ▸ '1%'
+                
     ▸ resizeNode
 
       ▸ absolute
@@ -239,50 +197,26 @@ use ../util      ◆ harness
                 cells = {cols:20 rows:6}
                 tree = layout.absolutize cells { children:[{ text:'size' x:2 y:2 w:4 h:2 }] }
 
-                layout.resizeNode cells tree tree.children[0] 'more cols'
-                tree.children[0].w ▸ 5
-                
-                layout.resizeNode cells tree tree.children[0] 'more cols'
-                tree.children[0].w ▸ 6
-                
-                layout.resizeNode cells tree tree.children[0] 'less cols'
-                tree.children[0].w ▸ 5
-                
-                layout.resizeNode cells tree tree.children[0] 'more rows'
-                tree.children[0].h ▸ 3
-
-                layout.resizeNode cells tree tree.children[0] 'more rows'
-                tree.children[0].h ▸ 4
-                
-                layout.resizeNode cells tree tree.children[0] 'more rows'
-                tree.children[0].h ▸ 4
-                
-                layout.resizeNode cells tree tree.children[0] 'less rows'
-                tree.children[0].h ▸ 3
+                layout.resizeNode cells tree tree.children[0] 'more cols' ; tree.children[0].w ▸ 5
+                layout.resizeNode cells tree tree.children[0] 'more cols' ; tree.children[0].w ▸ 6
+                layout.resizeNode cells tree tree.children[0] 'less cols' ; tree.children[0].w ▸ 5
+                layout.resizeNode cells tree tree.children[0] 'more rows' ; tree.children[0].h ▸ 3
+                layout.resizeNode cells tree tree.children[0] 'more rows' ; tree.children[0].h ▸ 4
+                layout.resizeNode cells tree tree.children[0] 'more rows' ; tree.children[0].h ▸ 4
+                layout.resizeNode cells tree tree.children[0] 'less rows' ; tree.children[0].h ▸ 3
                 
       ▸ relative
             
                 cells = {cols:20 rows:10}
                 tree =  layout.absolutize cells { children:[{ text:'a' x:2 y:2 w:'50%' h:'40%' }] }
 
-                layout.resizeNode cells tree tree.children[0] 'more cols'
-                tree.children[0].w ▸ '51%'
-                
-                layout.resizeNode cells tree tree.children[0] 'more cols'
-                tree.children[0].w ▸ '52%'
-
-                layout.resizeNode cells tree tree.children[0] 'less cols'
-                tree.children[0].w ▸ '51%'
-
-                layout.resizeNode cells tree tree.children[0] 'more rows'
-                tree.children[0].h ▸ '41%'
-
-                layout.resizeNode cells tree tree.children[0] 'more rows'
-                tree.children[0].h ▸ '42%'
-                
-                layout.resizeNode cells tree tree.children[0] 'less rows'
-                tree.children[0].h ▸ '41%'
-                
+                layout.resizeNode cells tree tree.children[0] 'more cols' ; tree.children[0].w ▸ '51%'
+                layout.resizeNode cells tree tree.children[0] 'more cols' ; tree.children[0].w ▸ '52%'
+                layout.resizeNode cells tree tree.children[0] 'less cols' ; tree.children[0].w ▸ '51%'
+                layout.resizeNode cells tree tree.children[0] 'more rows' ; tree.children[0].h ▸ '41%'
+                layout.resizeNode cells tree tree.children[0] 'more rows' ; tree.children[0].h ▸ '42%'
+                layout.resizeNode cells tree tree.children[0] 'less rows' ; tree.children[0].h ▸ '41%'
+    
     ▸ titlify
 
             tree = { bg:'#000' x:2 y:2 w:20 h:10 children:[{ x:3 y:2 w:10 h:5 children:[{ text:'hi' x:1 y:1 w:3 h:1 }] }] }
