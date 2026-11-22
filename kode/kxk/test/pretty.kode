@@ -19,7 +19,20 @@ use .. ◆ pretty
 
         before = (new Date Date.now()-1000*60*60*24*30).toString()
         pretty.age    before ▸ '1 month'
-        
+
+    ▸ duration
+
+        pretty.duration 0                   ▸ '0 seconds'
+        pretty.duration 1000                ▸ '1 second'
+        pretty.duration 45000               ▸ '45 seconds'
+        pretty.duration 60000               ▸ '1 minute'
+        pretty.duration 50*60000            ▸ '50 minutes'
+        pretty.duration 60*60000            ▸ '1 hour'
+        pretty.duration 2.5*60*60000        ▸ '2.5 hours'
+        pretty.duration 24*60*60000         ▸ '1 day'
+        pretty.duration 2.5*24*60*60000     ▸ '2.5 days'
+        pretty.duration -50*60000           ▸ '50 minutes'
+
     ▸ number
     
         pretty.number 1 ▸ '1'

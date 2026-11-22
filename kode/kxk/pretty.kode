@@ -38,8 +38,22 @@ use ◆ klor slash
         else
             s.join ' '
         
+    @duration: ms ->            # 45000 ▸ 45 seconds  3000000 ▸ 50 minutes  9000000 ▸ 2.5 hours  216000000 ▸ 2.5 days
+
+        sec = Math.abs(ms) / 1000
+
+        [val unit decimals] = if
+            sec < 60        ➜ [sec           'seconds' 0]
+            sec < 60*60     ➜ [sec/60        'minutes' 0]
+            sec < 60*60*24  ➜ [sec/(60*60)   'hours'   1]
+                            ➜ [sec/(60*60*24) 'days'   1]
+
+        numStr = @number val, decimals:decimals
+        unit = unit[0...-1] if numStr == '1'
+        "#{numStr} #{unit}"
+
     @bytes: bytes ->
-        
+
         number = Math.abs parseInt(bytes)
         
         ⮐ '0 bytes' if not number is num or number == 0
