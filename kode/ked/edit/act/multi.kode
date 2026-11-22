@@ -90,8 +90,11 @@ export
             line = lines[c[1]]
             
             switch dir
-                'left'  
-                'right'     ➜ c[0] += belt.numCharsFromPosToWordOrPunctInDirection(lines c dir opt)
+                'left' 'right'
+                    if @rectree? and not opt.jump
+                        pos = @sheetPosInDirection c dir opt.count; c[0] = pos[0]; c[1] = pos[1]
+                    else
+                        c[0] += belt.numCharsFromPosToWordOrPunctInDirection(lines c dir opt)
                 'up' 'down'
                     if @rectree?
                         pos = @sheetPosInDirection c dir opt.count; c[0] = pos[0]; c[1] = pos[1]

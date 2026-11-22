@@ -60,14 +60,28 @@ export
 
         for i in 0...count
 
-            [top s] = @sheetBandAt cx cy
+            switch dir
 
-            row = dir == 'up' ? top-1 : top+s
-            row = clamp 0 @s.lines.length-1 row
+                'left'
 
-            [top s] = @sheetBandAt cx row
+                    [cx cy] = @sheetCellForPos @sheetPosForCell([max(0 cx-1) cy])
 
-            cy = top + s-1
+                'right'
+
+                    [x y]   = @sheetPosForCell [cx cy]
+                    [cx cy] = @sheetCellForPos [x+1 y]
+                    cx      = min cx @sheetSize().cols
+
+                'up' 'down'
+
+                    [top s] = @sheetBandAt cx cy
+
+                    row = dir == 'up' ? top-1 : top+s
+                    row = clamp 0 @s.lines.length-1 row
+
+                    [top s] = @sheetBandAt cx row
+
+                    cy = top + s-1
 
         @sheetPosForCell [cx cy]
 
