@@ -505,16 +505,22 @@ showSue = data ->
 
         data = desue {cols:12 rows:2} { children:[{ text:'ab cd' x:0 y:0 w:12 h:2 scale:2 }] }
 
-        data.text ▸ '            \nab cd  '
+        data.text ▸ '            \nab cd '
         runs = areas data sue.SCALE
         runs.length ▸ 1
         runs[0].x ▸ 0
-        areas(data sue.CLOSE)[0].x ▸ 5
+        areas(data sue.CLOSE)[0].x ▸ 6
 
         data = desue {cols:6 rows:4} { children:[{ text:'abcdef' x:0 y:0 w:6 h:4 scale:2 }] }
 
         data.text ▸ '      \nabc\n      \ndef'
         areas(data sue.SCALE).map((a) -> [a.x a.y]) ▸ [[0 1] [0 3]]
+
+        data = desue {cols:8 rows:4} { children:[{ text:'ab' x:0 y:0 w:8 h:4 scale:2 }] }
+
+        data.text ▸ '        \nab  \n        \n    '
+        areas(data sue.SCALE).map((a) -> [a.x a.y]) ▸ [[0 1] [0 3]]
+        areas(data sue.CLOSE).map((a) -> [a.x a.y]) ▸ [[4 1] [4 3]]
 
         data = desue {cols:8 rows:2} { children:[{ text:'ab' x:0 y:0 w:4 h:2 scale:2 } { text:'cd' x:4 y:0 w:4 h:2 scale:2 }] }
 
@@ -662,24 +668,24 @@ showSue = data ->
 
         loadSheet {children:[{ text:'AB' x:1 y:0 w:6 h:2 scale:2 } { text:'z' x:9 y:1 w:2 h:1 }]} [0 0]
 
-        kseg.str(e.state.s.lines[1]) ▸ ' AB    z      '
+        kseg.str(e.state.s.lines[1]) ▸ ' AB   z      '
 
-        e.state.sheetCellForPos([7 1]) ▸ [9 1]
+        e.state.sheetCellForPos([6 1]) ▸ [9 1]
         e.state.sheetCellForPos([2 1]) ▸ [3 1]
-        e.state.sheetCellForPos([9 1]) ▸ [11 1]
-        e.state.sheetPosForCell([9 1]) ▸ [7 1]
+        e.state.sheetCellForPos([8 1]) ▸ [11 1]
+        e.state.sheetPosForCell([9 1]) ▸ [6 1]
         e.state.sheetPosForCell([4 1]) ▸ [2 1]
-        e.state.sheetPosForCell([11 1]) ▸ [9 1]
+        e.state.sheetPosForCell([11 1]) ▸ [8 1]
 
         e.state.sheetPosForCell([3 0]) ▸ [2 1]
         e.state.sheetPosForCell([8 0]) ▸ [8 0]
 
-        e.state.setCursors [[8 1]]
+        e.state.setCursors [[7 1]]
         e.state.insert 'y'
 
         rt('children.1.text') ▸ 'zy'
         rt('children')?.length ▸ 2
-        e.state.mainCursor() ▸ [9 1]
+        e.state.mainCursor() ▸ [8 1]
 
         e.state.setCursors [[3 1]]
         e.state.insert 'C'
@@ -757,7 +763,8 @@ showSue = data ->
 
         e.state.setCursors [[7 3]] ; key 'down' ; mc() ▸ [7 5]
         e.state.setCursors [[7 3]] ; key 'up'   ; mc() ▸ [4 2]
-        e.state.setCursors [[5 4]] ; key 'up'   ; mc() ▸ [4 2]
+        e.state.setCursors [[5 4]] ; key 'up'   ; mc() ▸ [5 2]
+        e.state.setCursors [[4 4]] ; key 'right' ; e.state.sheetCellForPos(mc()) ▸ [8 4]
 
         e.state.setCursors [[2 0]] ; e.state.moveCursors 'down' count:2 ; mc() ▸ [2 4]
 
@@ -814,7 +821,7 @@ showSue = data ->
 
         click 5 2 ; mc() ▸ [3 2]
         click 5 1 ; mc() ▸ [3 2]
-        click 8 3 ; mc() ▸ [6 4]
+        click 8 3 ; mc() ▸ [5 4]
         click 3 6 ; mc() ▸ [3 6]
         click 3 5 ; mc() ▸ [3 5]
 

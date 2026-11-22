@@ -653,12 +653,22 @@ use ../edit/tool ◆ sue
     @paintScaled: node grid masked ->
 
         scale = @scaleOf node
+        rect  = node.rect.abs
+        chars = {}
 
-        for [x y char] in fill.scaled(node node.regions node.rect.abs)
+        for [x y char] in fill.scaled(node node.regions rect)
+            chars["#{x},#{y}"] = char
 
-            continue if @charMaskedIn masked x y scale
+        for [y x1 x2] in fill.bands(node node.regions rect)
 
-            @markBlock grid x y scale char node
+            x = x1
+
+            while x + scale <= x2
+
+                if not @charMaskedIn masked x y scale
+                    @markBlock grid x y scale (chars["#{x},#{y}"] ? ' ') node
+
+                x += scale
 
     @charMaskedIn: masked x y scale ->
 

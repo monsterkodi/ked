@@ -97,12 +97,11 @@ fill = (function ()
         return out
     }
 
-    fill["flow"] = function (conf, region, rect)
+    fill["bands"] = function (conf, region, rect)
     {
-        var b, cells, i, k, nl, out, rng, rows, scale, spans, tail, x, x1, x2, y, _60_37_, _61_37_, _77_28_, _80_52_
+        var b, k, out, rng, rows, scale, spans, x1, x2, y, _60_37_, _72_28_, _75_52_
 
-        cells = Array.from(((_60_37_=conf.text) != null ? _60_37_ : ''))
-        scale = _k_.max(1,parseInt(((_61_37_=conf.scale) != null ? _61_37_ : 1)))
+        scale = _k_.max(1,parseInt(((_60_37_=conf.scale) != null ? _60_37_ : 1)))
         rows = {}
         var list = _k_.list(region)
         for (var _a_ = 0; _a_ < list.length; _a_++)
@@ -115,52 +114,63 @@ fill = (function ()
             rows[rng[1]].push([rng[0],rng[2]])
         }
         out = []
-        i = 0
-        tail = false
         for (var _b_ = b = 0, _c_ = Math.floor(rect.h / scale); (_b_ <= _c_ ? b < Math.floor(rect.h / scale) : b > Math.floor(rect.h / scale)); (_b_ <= _c_ ? ++b : --b))
         {
-            if (tail)
-            {
-                break
-            }
             y = rect.y + b * scale
-            spans = ((_77_28_=rows[y]) != null ? _77_28_ : [])
+            spans = ((_72_28_=rows[y]) != null ? _72_28_ : [])
             for (var _d_ = k = 1, _e_ = scale; (_d_ <= _e_ ? k < scale : k > scale); (_d_ <= _e_ ? ++k : --k))
             {
-                spans = this.intersect(spans,(((_80_52_=rows[y + k]) != null ? _80_52_ : [])))
+                spans = this.intersect(spans,(((_75_52_=rows[y + k]) != null ? _75_52_ : [])))
             }
             var list1 = _k_.list(spans)
             for (var _f_ = 0; _f_ < list1.length; _f_++)
             {
                 x1 = list1[_f_][0]
                 x2 = list1[_f_][1]
-                if (x2 - x1 < scale)
+                if (x2 - x1 >= scale)
                 {
-                    continue
+                    out.push([y,x1,x2])
                 }
-                x = x1
-                nl = false
-                while (x + scale <= x2 && i < cells.length)
+            }
+        }
+        return out
+    }
+
+    fill["flow"] = function (conf, region, rect)
+    {
+        var cells, i, nl, out, scale, x, x1, x2, y, _84_37_, _85_37_
+
+        cells = Array.from(((_84_37_=conf.text) != null ? _84_37_ : ''))
+        scale = _k_.max(1,parseInt(((_85_37_=conf.scale) != null ? _85_37_ : 1)))
+        out = []
+        i = 0
+        var list = _k_.list(this.bands(conf,region,rect))
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            y = list[_a_][0]
+            x1 = list[_a_][1]
+            x2 = list[_a_][2]
+            x = x1
+            nl = false
+            while (x + scale <= x2 && i < cells.length)
+            {
+                if (cells[i] === '\n')
                 {
-                    if (cells[i] === '\n')
-                    {
-                        nl = true
-                        break
-                    }
-                    out.push([x,y,cells[i],i])
-                    i += 1
-                    x += scale
-                }
-                out.push([x,y,null,i])
-                if (nl)
-                {
-                    i += 1
-                }
-                else if (i >= cells.length)
-                {
-                    tail = true
+                    nl = true
                     break
                 }
+                out.push([x,y,cells[i],i])
+                i += 1
+                x += scale
+            }
+            out.push([x,y,null,i])
+            if (nl)
+            {
+                i += 1
+            }
+            else if (i >= cells.length)
+            {
+                break
             }
         }
         return out
@@ -226,5 +236,5 @@ fill = (function ()
 
 export default fill;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmlsbC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvcG9wby9maWxsLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7O0FBQUMsUUFBRDs7Ozs7SUFFSSxNQUFDLHNCQUFTLE1BQUs7Ozs7UUFFWCxRQUFRLE1BQU0sY0FBSyxLQUFLLDRCQUFVO3NCQUNQOzttQkFBekIsS0FBQyxPQUFPOztRQUVWLElBQUksTUFBTTtRQUNWOzRCQUVXOzs7WUFBUDtZQUVBLFFBQVEsSUFBSSxLQUFLLElBQUk7Z0JBRWxCLFNBQVM7O2dCQUNSLElBQUksS0FBSztnQkFDVDs7WUFFSixNQUFNOzJCQUNGLElBQUssU0FBSSx5QkFBQSxZQUFBOztnQkFDVCxPQUFPLFFBQVEsSUFBSSxLQUFLLEtBQUssSUFBSSxLQUFLOztZQUUxQyxJQUFJLEtBQUs7O2VBRWI7OztJQUVKLE1BQUMsbUJBQU0sTUFBSzs7OztzQkFFTTs7OztRQUVkLEtBQVEsT0FBTyxjQUFLOzttQkFBUSxJQUFJOztRQUNoQzs0QkFFZ0IsS0FBQyxLQUFLLEtBQUssUUFBUSxVQUFNLElBQUksVUFBTSxjQUFRLE1BQUk7OztZQUExRDtZQUFFO1lBQUU7aUJBQ3NCOztnQkFBM0IsU0FBUyxLQUFLLE9BQU87OztRQUV6Qjs2QkFFVzs7O1lBQVA7WUFDQSxNQUFNOzJCQUNGLElBQUssSUFBSSxVQUFLLElBQUksc0JBQUosSUFBSSxTQUFKLElBQUk7O2dCQUNsQixpQkFBTyxTQUFTLEtBQUssSUFBSSwyQkFBUTs7WUFDckMsSUFBSSxLQUFLOztlQUViOzs7SUFFSixNQUFDLHFCQUFRLE1BQUssUUFBTzs7OztRQUVqQjs0QkFFZ0IsS0FBQyxLQUFLLEtBQUssT0FBTzs7O1lBQTdCO1lBQUU7WUFBRTtpQkFDZ0I7O2dCQUFyQixJQUFJLE1BQU0sRUFBRSxFQUFFOzs7ZUFFbEI7OztJQUlKLE1BQUMsbUJBQU0sTUFBSyxRQUFPOzs7O1FBRWYsUUFBUSxNQUFNLGVBQUssS0FBSywwQkFBTztRQUMvQixnQkFBWSxxQkFBTSxLQUFLLDJCQUFRO1FBQy9COzRCQUVXOzs7WUFBUDtrQkFDeUIsS0FBSyxJQUFJOztnQkFBbEMsS0FBSyxJQUFJOztZQUNULEtBQUssSUFBSSxJQUFJLE1BQU0sSUFBSSxHQUFHLElBQUk7O1FBRWxDO1FBQ0EsSUFBTztRQUNQLE9BQU87dUJBRUgsSUFBSyxvQkFBVSxLQUFLLElBQUkscUNBQVQsS0FBSyxJQUFJLHdCQUFULEtBQUssSUFBSTs7Z0JBRWY7O2dCQUFUOztZQUVBLElBQVEsS0FBSyxJQUFJLElBQUU7WUFDbkIsa0JBQVEsS0FBSzsyQkFFVCxJQUFLLFNBQUkseUJBQUEsWUFBQTs7Z0JBQ1QsUUFBUSxLQUFDLFVBQVUsaUJBQU8sS0FBSyxJQUFFOztpQ0FFdEI7OztnQkFBVjtnQkFBRztvQkFFUSxLQUFLLEtBQUs7O29CQUF0Qjs7Z0JBRUEsSUFBSztnQkFDTCxLQUFLO3VCQUVDLElBQUksU0FBUyxNQUFPLElBQUksTUFBTTs7d0JBRTdCLE1BQU0sT0FBTTs7d0JBQ1gsS0FBSzt3QkFDTDs7b0JBRUosSUFBSSxNQUFNLEVBQUUsRUFBRSxNQUFNLEdBQUc7b0JBQ3ZCLEtBQUs7b0JBQ0wsS0FBSzs7Z0JBRVQsSUFBSSxNQUFNLEVBQUUsRUFBRSxLQUFLO29CQUVoQjs7b0JBQ0MsS0FBSzs7eUJBQ0QsS0FBSyxNQUFNOztvQkFDZixPQUFPO29CQUNQOzs7O2VBRVo7OztJQUVKLE1BQUMsd0JBQVcsR0FBRTs7OztRQUVWOzRCQUVlOzs7WUFBVjtZQUFHO2lDQUNXOzs7Z0JBQVY7Z0JBQUc7Z0JBQ0osYUFBUyxHQUFHO2dCQUNaLGFBQVMsR0FBRztvQkFDUSxLQUFLOztvQkFBekIsSUFBSSxNQUFNLEdBQUc7Ozs7ZUFFckIsSUFBSSxlQUFNLEdBQUU7O21CQUFNLEVBQUUsS0FBSyxFQUFFOzs7O0lBRS9CLE1BQUMsb0JBQU87Ozs7UUFFSjtlQUNNLElBQUksU0FBUzs7WUFDZixJQUFJLEtBQUs7O2VBQ2IsSUFBSSxLQUFLOzs7SUFFYixNQUFDLHFCQUFROzs7O1FBRUw7NEJBQ1c7OztZQUFQO1lBQ0EsSUFBSSxLQUFLOztlQUNiOzs7V0FwSVA7OztlQXNJTSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmlsbC5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvcG9wby9maWxsLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7O0FBQUMsUUFBRDs7Ozs7SUFFSSxNQUFDLHNCQUFTLE1BQUs7Ozs7UUFFWCxRQUFRLE1BQU0sY0FBSyxLQUFLLDRCQUFVO3NCQUNQOzttQkFBekIsS0FBQyxPQUFPOztRQUVWLElBQUksTUFBTTtRQUNWOzRCQUVXOzs7WUFBUDtZQUVBLFFBQVEsSUFBSSxLQUFLLElBQUk7Z0JBRWxCLFNBQVM7O2dCQUNSLElBQUksS0FBSztnQkFDVDs7WUFFSixNQUFNOzJCQUNGLElBQUssU0FBSSx5QkFBQSxZQUFBOztnQkFDVCxPQUFPLFFBQVEsSUFBSSxLQUFLLEtBQUssSUFBSSxLQUFLOztZQUUxQyxJQUFJLEtBQUs7O2VBRWI7OztJQUVKLE1BQUMsbUJBQU0sTUFBSzs7OztzQkFFTTs7OztRQUVkLEtBQVEsT0FBTyxjQUFLOzttQkFBUSxJQUFJOztRQUNoQzs0QkFFZ0IsS0FBQyxLQUFLLEtBQUssUUFBUSxVQUFNLElBQUksVUFBTSxjQUFRLE1BQUk7OztZQUExRDtZQUFFO1lBQUU7aUJBQ3NCOztnQkFBM0IsU0FBUyxLQUFLLE9BQU87OztRQUV6Qjs2QkFFVzs7O1lBQVA7WUFDQSxNQUFNOzJCQUNGLElBQUssSUFBSSxVQUFLLElBQUksc0JBQUosSUFBSSxTQUFKLElBQUk7O2dCQUNsQixpQkFBTyxTQUFTLEtBQUssSUFBSSwyQkFBUTs7WUFDckMsSUFBSSxLQUFLOztlQUViOzs7SUFFSixNQUFDLHFCQUFRLE1BQUssUUFBTzs7OztRQUVqQjs0QkFFZ0IsS0FBQyxLQUFLLEtBQUssT0FBTzs7O1lBQTdCO1lBQUU7WUFBRTtpQkFDZ0I7O2dCQUFyQixJQUFJLE1BQU0sRUFBRSxFQUFFOzs7ZUFFbEI7OztJQUlKLE1BQUMsb0JBQU8sTUFBSyxRQUFPOzs7O1FBRWhCLGdCQUFZLHFCQUFNLEtBQUssMkJBQVE7UUFDL0I7NEJBRVc7OztZQUFQO2tCQUN5QixLQUFLLElBQUk7O2dCQUFsQyxLQUFLLElBQUk7O1lBQ1QsS0FBSyxJQUFJLElBQUksTUFBTSxJQUFJLEdBQUcsSUFBSTs7UUFFbEM7dUJBRUksSUFBSyxvQkFBVSxLQUFLLElBQUkscUNBQVQsS0FBSyxJQUFJLHdCQUFULEtBQUssSUFBSTs7WUFFeEIsSUFBUSxLQUFLLElBQUksSUFBRTtZQUNuQixrQkFBUSxLQUFLOzJCQUVULElBQUssU0FBSSx5QkFBQSxZQUFBOztnQkFDVCxRQUFRLEtBQUMsVUFBVSxpQkFBTyxLQUFLLElBQUU7O2lDQUV0Qjs7O2dCQUFWO2dCQUFHO29CQUNrQixLQUFLLE1BQU07O29CQUFqQyxJQUFJLE1BQU0sRUFBRSxHQUFHOzs7O2VBRXZCOzs7SUFFSixNQUFDLG1CQUFNLE1BQUssUUFBTzs7OztRQUVmLFFBQVEsTUFBTSxlQUFLLEtBQUssMEJBQU87UUFDL0IsZ0JBQVkscUJBQU0sS0FBSywyQkFBUTtRQUMvQjtRQUNBLElBQVE7NEJBRVMsS0FBQyxNQUFNLEtBQUssT0FBTzs7O1lBQS9CO1lBQUU7WUFBRztZQUVOLElBQUs7WUFDTCxLQUFLO21CQUVDLElBQUksU0FBUyxNQUFPLElBQUksTUFBTTs7b0JBRTdCLE1BQU0sT0FBTTs7b0JBQ1gsS0FBSztvQkFDTDs7Z0JBRUosSUFBSSxNQUFNLEVBQUUsRUFBRSxNQUFNLEdBQUc7Z0JBQ3ZCLEtBQUs7Z0JBQ0wsS0FBSzs7WUFFVCxJQUFJLE1BQU0sRUFBRSxFQUFFLEtBQUs7Z0JBRWhCOztnQkFDQyxLQUFLOztxQkFDRCxLQUFLLE1BQU07O2dCQUNmOzs7ZUFFUjs7O0lBRUosTUFBQyx3QkFBVyxHQUFFOzs7O1FBRVY7NEJBRWU7OztZQUFWO1lBQUc7aUNBQ1c7OztnQkFBVjtnQkFBRztnQkFDSixhQUFTLEdBQUc7Z0JBQ1osYUFBUyxHQUFHO29CQUNRLEtBQUs7O29CQUF6QixJQUFJLE1BQU0sR0FBRzs7OztlQUVyQixJQUFJLGVBQU0sR0FBRTs7bUJBQU0sRUFBRSxLQUFLLEVBQUU7Ozs7SUFFL0IsTUFBQyxvQkFBTzs7OztRQUVKO2VBQ00sSUFBSSxTQUFTOztZQUNmLElBQUksS0FBSzs7ZUFDYixJQUFJLEtBQUs7OztJQUViLE1BQUMscUJBQVE7Ozs7UUFFTDs0QkFDVzs7O1lBQVA7WUFDQSxJQUFJLEtBQUs7O2VBQ2I7OztXQXhJUDs7O2VBMElNIn0=
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/popo/fill.kode
