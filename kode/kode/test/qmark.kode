@@ -3,7 +3,7 @@ use ./utils ▪ kc ke
 
 ▸ qmark
 
-    ▸ nullcmp
+  ▸ nullcmp
             
         kc  "a?"                    ▸   ";(a != null)"
         kc  "a.b.c?"                ▸   ";(a.b.c != null)"
@@ -37,13 +37,32 @@ use ./utils ▪ kc ke
             })
             """
             
-    # █████           
-    #    ███  ██████  
-    #  ███            
-    #         ██████  
-    #  ███            
+  ▸ nullcmp in comparison
+    
+        kc  "a? ▸ false"            ▸   "compare((a != null),false)"
+        kc  "a.b? ▸ false"          ▸   "compare((a.b != null),false)"
+        kc  "f(x)? ▸ false"         ▸   "compare((f(x) != null),false)"
+        kc  "true ▸ a?"             ▸   "compare(true,(a != null))"
+        kc  "a?.b ▸ 1"              ▸   "compare((a != null ? a.b : undefined),1)"
+        
+        n = null
+        o = {a:1}
+        f = -> o
+        
+        n? ▸ false
+        o? ▸ true
+        o.a? ▸ true
+        o.b? ▸ false
+        f()? ▸ true
+        f().b? ▸ false
+        true ▸ o.a?
+        n?.a ▸ undefined
+        o?.a ▸ 1
+        f() ; n? ▸ false
+        
     
     ▸ ?=
+ #!?=
         
         kc  "t.a ?= {}" ▸
             """
@@ -55,7 +74,7 @@ use ./utils ▪ kc ke
             x = t.b = ((_1_8_=t.b) != null ? _1_8_ : {})
             """
             
-    ▸ qmrkcolon
+  ▸ qmrkcolon
         
         kc  "a ? b : c" ▸
             """
@@ -102,7 +121,7 @@ use ./utils ▪ kc ke
         ke  "true or false ? a:'b' : 666" ▸
             {a:'b'}
             
-    ▸ assert
+  ▸ assert
         
         kc  "e?.d"                  ▸   ";(e != null ? e.d : undefined)"
         kc  "e?[1]"                 ▸   ";(e != null ? e[1] : undefined)"
@@ -131,7 +150,7 @@ use ./utils ▪ kc ke
         
         kc  "line.turd?[..1] == 'xxx'"  ▸ ";(line.turd != null ? line.turd.slice(0, 2) : undefined) === 'xxx'"
         
-        ▸ call
+    ▸ call
         
             kc  "e?()"                  ▸   ';(typeof e === "function" ? e() : undefined)'
             kc  """
@@ -145,7 +164,7 @@ use ./utils ▪ kc ke
                 }
                 """
                 
-        ▸ assign
+    ▸ assign
         
             kc  """
                 a? = 1
@@ -175,7 +194,7 @@ use ./utils ▪ kc ke
                 if ((a != null)) { a.b.c().d[1].e = 1 }
                 """
                 
-    ▸ combined
+  ▸ combined
         
         kc  "e?.col?"               ▸ ";((e != null ? e.col : undefined) != null)"
         
@@ -200,7 +219,7 @@ use ./utils ▪ kc ke
             x = ((_1_7_=a.b) != null ? typeof _1_7_[222] === "function" ? (_1_19_=_1_7_[222](333)) != null ? _1_19_.e : undefined : undefined : undefined)
             """ 
             
-    ▸ functions
+  ▸ functions
         
         kc  "f c ? '', 4"   ▸   "f((c != null ? c : ''),4)"
         

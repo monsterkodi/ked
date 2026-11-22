@@ -1,4 +1,6 @@
 var toExport = {}
+var f, n, o, _54_11_, _55_11_, _56_11_, _57_13_, _58_18_
+
 import utils from "./utils.js"
 let kc = utils.kc
 let ke = utils.ke
@@ -26,6 +28,31 @@ toExport["qmark"] = async function ()
 {
     return (m[1] != null)
 })`)
+    })
+    await section("nullcmp in comparison", async function ()
+    {
+        compare(kc("a? ▸ false"),"compare((a != null),false)")
+        compare(kc("a.b? ▸ false"),"compare((a.b != null),false)")
+        compare(kc("f(x)? ▸ false"),"compare((f(x) != null),false)")
+        compare(kc("true ▸ a?"),"compare(true,(a != null))")
+        compare(kc("a?.b ▸ 1"),"compare((a != null ? a.b : undefined),1)")
+        n = null
+        o = {a:1}
+        f = function ()
+        {
+            return o
+        }
+        compare((n != null),false)
+        compare((o != null),true)
+        compare((o.a != null),true)
+        compare((o.b != null),false)
+        compare((f() != null),true)
+        compare((f().b != null),false)
+        compare(true,(o.a != null))
+        compare((n != null ? n.a : undefined),undefined)
+        compare((o != null ? o.a : undefined),1)
+        f()
+        compare((n != null),false)
     })
     await section("?=", async function ()
     {
@@ -65,22 +92,22 @@ toExport["qmark"] = async function ()
 })`)
         compare(ke("e=1;e?[1]?.g"),undefined)
         compare(kc("line.turd?[..1] == 'xxx'"),";(line.turd != null ? line.turd.slice(0, 2) : undefined) === 'xxx'")
-        await section("call", async function ()
-        {
-            compare(kc("e?()"),';(typeof e === "function" ? e() : undefined)')
-            compare(kc(`if 1
+    })
+    await section("call", async function ()
+    {
+        compare(kc("e?()"),';(typeof e === "function" ? e() : undefined)')
+        compare(kc(`if 1
     a?()`),`if (1)
 {
     ;(typeof a === "function" ? a() : undefined)
 }`)
-        })
-        await section("assign", async function ()
-        {
-            compare(kc(`a? = 1`),`if ((a != null)) { a = 1 }`)
-            compare(kc(`a?.b = 1`),`if ((a != null)) { a.b = 1 }`)
-            compare(kc(`a?.b? = 1`),`if (((a != null ? a.b : undefined) != null)) { a.b = 1 }`)
-            compare(kc(`a?.b.c().d[1].e = 1`),`if ((a != null)) { a.b.c().d[1].e = 1 }`)
-        })
+    })
+    await section("assign", async function ()
+    {
+        compare(kc(`a? = 1`),`if ((a != null)) { a = 1 }`)
+        compare(kc(`a?.b = 1`),`if ((a != null)) { a.b = 1 }`)
+        compare(kc(`a?.b? = 1`),`if (((a != null ? a.b : undefined) != null)) { a.b = 1 }`)
+        compare(kc(`a?.b.c().d[1].e = 1`),`if ((a != null)) { a.b.c().d[1].e = 1 }`)
     })
     await section("combined", async function ()
     {
@@ -113,5 +140,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicW1hcmsuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva29kZS90ZXN0L3FtYXJrLmtvZGUiXSwibWFwcGluZ3MiOiI7T0FDTSxZQUFBO0lBQVE7SUFBRzs7Ozs7O2dCQU1ULEdBQUksTUFBNEI7Z0JBQ2hDLEdBQUksVUFBNEI7Z0JBQ2hDLEdBQUksWUFBNEI7Z0JBQ2hDLEdBQUksZUFBNEI7Z0JBQ2hDLEdBQUksWUFBNEI7Z0JBQ2hDLEdBQUksY0FBNEI7Z0JBRWhDLEdBQUksT0FBNEI7Z0JBRWhDLEdBQUksU0FDQTs7OztnQkFNSixHQUFJLHNCQUNBOzs7O2dCQU9KLEdBQUkseUNBQ0E7Ozs7Ozs7Z0JBZUosR0FBSSxhQUNBO2dCQUlKLEdBQUksaUJBQ0E7Ozs7Z0JBTUosR0FBSSxhQUNBO2dCQUlKLEdBQUksaUJBQ0E7Z0JBSUosR0FBSSxzQkFDQTtnQkFJSixHQUFJLGdDQUNBO2dCQUlKLEdBQUkseUNBQ0E7Z0JBSUosR0FBSSxpQkFDQTtnQkFFSixHQUFJLGlCQUNBO2dCQUVKLEdBQUksaUJBQ0E7Z0JBRUosR0FBSSxrQkFDQyxFQUFFO2dCQUVQLEdBQUksK0JBQ0E7Z0JBSUosR0FBSSxnQ0FDQyxFQUFFOzs7O2dCQUlQLEdBQUksUUFBNEI7Z0JBQ2hDLEdBQUksU0FBNEI7Z0JBQ2hDLEdBQUksV0FBNEI7Z0JBQ2hDLEdBQUksWUFBNEI7Z0JBQ2hDLEdBQUksV0FBNEI7Z0JBRWhDLEdBQUksU0FBNEI7Z0JBQ2hDLEdBQUksU0FBNEI7Z0JBQ2hDLEdBQUksV0FBNEI7Z0JBRWhDLEdBQUk7O1dBS0E7Ozs7O2dCQVFKLEdBQUksZ0JBQThCO2dCQUVsQyxHQUFJLDRCQUE4Qjs7O29CQUk5QixHQUFJLFFBQTRCO29CQUNoQyxHQUFJO1dBSUE7Ozs7Ozs7b0JBU0osR0FBSSxVQUdBO29CQUlKLEdBQUksWUFHQTtvQkFJSixHQUFJLGFBR0E7b0JBSUosR0FBSSx1QkFHQTs7Ozs7Z0JBTVIsR0FBSSxXQUEwQjtnQkFFOUIsR0FBSSxzQkFHQTtnQkFJSixHQUFJLDRCQUdBO2dCQUlKLEdBQUksMEJBR0E7Ozs7Z0JBTUosR0FBSSxlQUFvQjtnQkFFeEIsR0FBSTs7O1VBTUEifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicW1hcmsuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva29kZS90ZXN0L3FtYXJrLmtvZGUiXSwibWFwcGluZ3MiOiI7OztPQUNNLFlBQUE7SUFBUTtJQUFHOzs7Ozs7Z0JBTVQsR0FBSSxNQUE0QjtnQkFDaEMsR0FBSSxVQUE0QjtnQkFDaEMsR0FBSSxZQUE0QjtnQkFDaEMsR0FBSSxlQUE0QjtnQkFDaEMsR0FBSSxZQUE0QjtnQkFDaEMsR0FBSSxjQUE0QjtnQkFFaEMsR0FBSSxPQUE0QjtnQkFFaEMsR0FBSSxTQUNBOzs7O2dCQU1KLEdBQUksc0JBQ0E7Ozs7Z0JBT0osR0FBSSx5Q0FDQTs7Ozs7OztnQkFTSixHQUFJLGNBQTRCO2dCQUNoQyxHQUFJLGdCQUE0QjtnQkFDaEMsR0FBSSxpQkFBNEI7Z0JBQ2hDLEdBQUksYUFBNEI7Z0JBQ2hDLEdBQUksWUFBNEI7UUFFaEMsSUFBSTtRQUNKLEtBQUssRUFBRTtRQUNQOzttQkFBTzs7aUJBRVAsV0FBSztpQkFDTCxXQUFLO2lCQUNMLEVBQUUsV0FBSztpQkFDUCxFQUFFLFdBQUs7aUJBQ1AsYUFBTztpQkFDUCxJQUFJLFdBQUs7Z0JBQ1QsTUFBTyxFQUFFO2lCQUNULFlBQUEsRUFBRyxlQUFJO2lCQUNQLFlBQUEsRUFBRyxlQUFJO1FBQ1A7aUJBQU0sV0FBSzs7OztnQkFNWCxHQUFJLGFBQ0E7Z0JBSUosR0FBSSxpQkFDQTs7OztnQkFNSixHQUFJLGFBQ0E7Z0JBSUosR0FBSSxpQkFDQTtnQkFJSixHQUFJLHNCQUNBO2dCQUlKLEdBQUksZ0NBQ0E7Z0JBSUosR0FBSSx5Q0FDQTtnQkFJSixHQUFJLGlCQUNBO2dCQUVKLEdBQUksaUJBQ0E7Z0JBRUosR0FBSSxpQkFDQTtnQkFFSixHQUFJLGtCQUNDLEVBQUU7Z0JBRVAsR0FBSSwrQkFDQTtnQkFJSixHQUFJLGdDQUNDLEVBQUU7Ozs7Z0JBSVAsR0FBSSxRQUE0QjtnQkFDaEMsR0FBSSxTQUE0QjtnQkFDaEMsR0FBSSxXQUE0QjtnQkFDaEMsR0FBSSxZQUE0QjtnQkFDaEMsR0FBSSxXQUE0QjtnQkFFaEMsR0FBSSxTQUE0QjtnQkFDaEMsR0FBSSxTQUE0QjtnQkFDaEMsR0FBSSxXQUE0QjtnQkFFaEMsR0FBSTs7V0FLQTs7Ozs7Z0JBUUosR0FBSSxnQkFBOEI7Z0JBRWxDLEdBQUksNEJBQThCOzs7O2dCQUk5QixHQUFJLFFBQTRCO2dCQUNoQyxHQUFJO1dBSUE7Ozs7Ozs7Z0JBU0osR0FBSSxVQUdBO2dCQUlKLEdBQUksWUFHQTtnQkFJSixHQUFJLGFBR0E7Z0JBSUosR0FBSSx1QkFHQTs7OztnQkFNUixHQUFJLFdBQTBCO2dCQUU5QixHQUFJLHNCQUdBO2dCQUlKLEdBQUksNEJBR0E7Z0JBSUosR0FBSSwwQkFHQTs7OztnQkFNSixHQUFJLGVBQW9CO2dCQUV4QixHQUFJOzs7VUFNQSJ9
 //# sourceURL=file:///home/kodi/s/ked/kode/kode/test/qmark.kode

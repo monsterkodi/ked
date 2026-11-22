@@ -2147,8 +2147,8 @@ ${i}})(${this.node(n.lhs)})
     {
         var lhs, rhs, s
 
-        lhs = this.node(p.lhs)
-        rhs = this.node(p.rhs)
+        lhs = this.atom(p.lhs)
+        rhs = this.atom(p.rhs)
         if (p.async)
         {
             lhs = `await (${lhs})`

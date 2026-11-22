@@ -1480,8 +1480,8 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         
     compare: p ->
         
-        lhs = @node(p.lhs)
-        rhs = @node(p.rhs)
+        lhs = @atom(p.lhs)
+        rhs = @atom(p.rhs)
         
         if p.async
             lhs = "await (#{lhs})"
