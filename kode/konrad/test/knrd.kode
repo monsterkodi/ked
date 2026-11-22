@@ -382,17 +382,27 @@ cached = fp ◯->
         probe  = slash.path(slash.dir(files[0]), 'zz_fingerprint_probe.js')
         loaded = ◯ knrd.compilerFingerprint()
         was    = ◯ knrd.stale()
+        calm   = ◯ knrd.compilerMoved()
         
-        ◯ nfs.write probe, '// probe\n'
-        disk  = ◯ knrd.fingerprint()
-        after = ◯ knrd.compilerFingerprint()
-        still = ◯ knrd.stale()
-        ◯ nfs.remove probe
+        try
+            ◯ nfs.write probe, '// probe\n'
+            disk  = ◯ knrd.fingerprint()
+            after = ◯ knrd.compilerFingerprint()
+            still = ◯ knrd.stale()
+            moved = ◯ knrd.compilerMoved()
+        finally
+            ◯ nfs.remove probe
         
         loaded.length  ▸ 40
         disk != loaded ▸ true
         after          ▸ loaded
         still          ▸ was
+        
+    ▸ and it can tell when the compiler on disk is no longer the loaded one
+    
+        calm           ▸ false
+        moved          ▸ true
+        knrd.compilerMoved() ◯▸ false
 
     ▸ the fingerprint leaves out test files
 

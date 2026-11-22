@@ -169,6 +169,8 @@ compilerFingerprint = -> loadedFingerprint ?= fingerprint() # the compiler this 
 
 compilerFingerprint()
 
+compilerMoved = ◯-> (◯ fingerprint()) != (◯ compilerFingerprint())
+
 loadCache = path ◯->
 
     text = ◯ nfs.read path
@@ -355,6 +357,7 @@ knrd.reconcile   = reconcile
 knrd.cachePath   = cachePath
 knrd.fingerprint = fingerprint
 knrd.compilerFingerprint = compilerFingerprint
+knrd.compilerMoved = compilerMoved
 knrd.fingerprintFiles = fingerprintFiles
 knrd.stale       = stale
 knrd.hash        = hash
