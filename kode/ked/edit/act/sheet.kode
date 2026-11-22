@@ -222,7 +222,7 @@ export
 
     setSheetTree: (rectree cols rows) ->
 
-        @rectree = rectree
+        @rectree = layout.pageOf rectree
         @rectreeCols = cols
         @rectreeRows = rows
 

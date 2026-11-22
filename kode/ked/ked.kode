@@ -468,7 +468,7 @@ use child_process ▪ spawn exec
         @editor.state.clearSheet()
 
         if slash.ext(@currentFile) == 'sheet'
-            rectree = noon.parse text
+            rectree = layout.pageOf noon.parse(text)
             if valid rectree
                 cols = @editor.cells.cols
                 rows = @editor.cells.rows

@@ -211,13 +211,25 @@ use ../edit/tool ◆ sue
 
         lines.join '\n'
 
-    @titlify: cells rectree depth=0 -> # add titles for the sheetree
+    @pageOf: tree ->
 
-        @absolutize cells rectree
+        ⮐ tree if not tree?
 
-        @titleIn rectree depth
+        for key of tree
+            ⮐ {children:[tree]} if key != 'children'
 
-        rectree
+        tree
+
+    @titlify: cells page ->
+
+        @absolutize cells page
+
+        delete page.title
+
+        for child in page.children ? []
+            @titleIn child 0
+
+        page
 
     @titleIn: node depth ->
 
