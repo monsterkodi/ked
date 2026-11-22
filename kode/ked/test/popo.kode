@@ -958,3 +958,18 @@ showSue = data ->
         se.onKey 'ctrl+z'      h.event('ctrl+z')      ; rt('children').length ▸ 2
         se.onKey 'shift+cmd+z' h.event('shift+cmd+z') ; rt('children').length ▸ 1
         se.onKey 'ctrl+y'      h.event('ctrl+y')      ; rt('children')? ▸ false
+
+        undo = -> se.onKey 'cmd+z' h.event('cmd+z')
+
+        loadSheet {children:[{ text:'abc' x:2 y:1 w:6 h:2 } { text:'z' x:10 y:0 w:2 h:1 } { text:'q' x:10 y:4 w:2 h:1 }]}
+        se.sheetree.reloadTree()
+        se.sheetree.grabFocus()
+        se.sheetree.select 1
+        se.onKey 'delete' h.event('delete') ; se.sheetree.current().text ▸ 'q'
+        undo() ; rt('children').length ▸ 3 ; se.sheetree.current().text ▸ 'q' ; se.sheetree.currentIndex() ▸ 2
+
+        loadSheet {children:[{ pattern:'.' x:0 y:0 w:8 h:3 }]}
+        se.sheetree.reloadTree()
+        e.state.setCursors [[2 1]] ; e.state.insert 'x'
+        se.sheetree.select 1 ; se.sheetree.current().text ▸ 'x'
+        undo() ; rt('children.0.children')? ▸ false ; se.sheetree.current().pattern ▸ '.'

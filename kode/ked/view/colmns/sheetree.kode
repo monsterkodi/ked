@@ -115,6 +115,50 @@ use ../menu         ◆ filterchoice
 
         true
 
+    keepSelection: fn =>
+
+        old  = @current()
+        path = layout.pathOf(@editor.state.rectree old) if old?
+
+        fn()
+
+        ⮐ if empty @fuzzied
+
+        @jumpToRow @rowForRestore(old path ? [])
+
+    rowForRestore: (old path) =>
+
+        tree = @editor.state.rectree
+        best = null
+        most = -1
+
+        if old?
+            props = layout.ownProps old
+            for item,row in @fuzzied
+                continue if not (layout.ownProps(item) eql props)
+                shared = @sharedPrefix layout.pathOf(tree item) ? [], path
+                if shared > most
+                    best = row
+                    most = shared
+
+        ⮐ best if best?
+
+        path = path.slice()
+
+        while true
+            row = @fuzzied.indexOf layout.nodeAtPath(tree path)
+            ⮐ row if row >= 0
+            break if empty path
+            path.pop()
+
+        0
+
+    sharedPrefix: (a b) ->
+
+        n = 0
+        n += 1 while n < a.length and n < b.length and a[n] == b[n]
+        n
+
     jumpToRow: row =>
 
         @select row

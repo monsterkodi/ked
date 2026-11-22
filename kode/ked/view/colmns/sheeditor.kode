@@ -91,8 +91,8 @@ use              ◆ sheetree sheenode
         if @sheetree.hasFocus()
 
             switch combo
-                'cmd+z' 'ctrl+z'                ➜ @editor.state.undo() ; @editor.redraw() ; ⮐ true
-                'shift+cmd+z' 'cmd+y' 'ctrl+y'  ➜ @editor.state.redo() ; @editor.redraw() ; ⮐ true
+                'cmd+z' 'ctrl+z'                ➜ @sheetree.keepSelection(=> @editor.state.undo()) ; @editor.redraw() ; ⮐ true
+                'shift+cmd+z' 'cmd+y' 'ctrl+y'  ➜ @sheetree.keepSelection(=> @editor.state.redo()) ; @editor.redraw() ; ⮐ true
 
             ⮐ @sheetree.onKey key event
         if @sheenode.hasFocus() ➜ ⮐ @sheenode.onKey key event

@@ -405,6 +405,35 @@ use ../edit/tool ◆ sue
 
         parent
 
+    @pathOf: rectree node ->
+
+        ⮐ [] if node == rectree
+
+        parent = @parentOf rectree node
+
+        ⮐ if not parent?
+
+        path = @pathOf rectree parent
+
+        ⮐ if not path?
+
+        path.concat [parent.children.indexOf(node)]
+
+    @nodeAtPath: rectree path ->
+
+        node = rectree
+
+        for index in path
+            node = node?.children?[index]
+
+        node
+
+    @ownProps: node ->
+
+        props = @plainNode node
+        delete props.children
+        props
+
     @parentOf: node target ->
 
         for child in node.children ? []

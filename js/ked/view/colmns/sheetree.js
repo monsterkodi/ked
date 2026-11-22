@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, eql: function (a,b,s) { var i, k, v; s = (s != null ? s : []); if (Object.is(a,b)) { return true }; if (typeof(a) !== typeof(b)) { return false }; if (!(Array.isArray(a)) && !(typeof(a) === 'object')) { return false }; if (Array.isArray(a)) { if (a.length !== b.length) { return false }; var list = _k_.list(a); for (i = 0; i < list.length; i++) { v = list[i]; s.push(i); if (!_k_.eql(v,b[i],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } } else if (_k_.isStr(a)) { return a === b } else { if (!_k_.eql(Object.keys(a),Object.keys(b))) { return false }; for (k in a) { v = a[k]; s.push(k); if (!_k_.eql(v,b[k],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } }; return true }, isStr: function (o) {return typeof o === 'string' || o instanceof String}}
 
 var sheetree
 
@@ -29,6 +29,8 @@ sheetree = (function ()
         this.name = name
     
         this["jumpToRow"] = this["jumpToRow"].bind(this)
+        this["rowForRestore"] = this["rowForRestore"].bind(this)
+        this["keepSelection"] = this["keepSelection"].bind(this)
         this["deleteCurrent"] = this["deleteCurrent"].bind(this)
         this["jumpTo"] = this["jumpTo"].bind(this)
         this["onCursorsSet"] = this["onCursorsSet"].bind(this)
@@ -204,6 +206,82 @@ sheetree = (function ()
         return true
     }
 
+    sheetree.prototype["keepSelection"] = function (fn)
+    {
+        var old, path
+
+        old = this.current()
+        if ((old != null))
+        {
+            path = layout.pathOf(this.editor.state.rectree,old)
+        }
+        fn()
+        if (_k_.empty(this.fuzzied))
+        {
+            return
+        }
+        return this.jumpToRow(this.rowForRestore(old,(path != null ? path : [])))
+    }
+
+    sheetree.prototype["rowForRestore"] = function (old, path)
+    {
+        var best, item, most, props, row, shared, tree, _139_64_
+
+        tree = this.editor.state.rectree
+        best = null
+        most = -1
+        if ((old != null))
+        {
+            props = layout.ownProps(old)
+            var list = _k_.list(this.fuzzied)
+            for (row = 0; row < list.length; row++)
+            {
+                item = list[row]
+                if (!(_k_.eql(layout.ownProps(item), props)))
+                {
+                    continue
+                }
+                shared = this.sharedPrefix(((_139_64_=layout.pathOf(tree,item)) != null ? _139_64_ : []),path)
+                if (shared > most)
+                {
+                    best = row
+                    most = shared
+                }
+            }
+        }
+        if ((best != null))
+        {
+            return best
+        }
+        path = path.slice()
+        while (true)
+        {
+            row = this.fuzzied.indexOf(layout.nodeAtPath(tree,path))
+            if (row >= 0)
+            {
+                return row
+            }
+            if (_k_.empty(path))
+            {
+                break
+            }
+            path.pop()
+        }
+        return 0
+    }
+
+    sheetree.prototype["sharedPrefix"] = function (a, b)
+    {
+        var n
+
+        n = 0
+        while (n < a.length && n < b.length && a[n] === b[n])
+        {
+            n += 1
+        }
+        return n
+    }
+
     sheetree.prototype["jumpToRow"] = function (row)
     {
         this.select(row)
@@ -280,5 +358,5 @@ sheetree = (function ()
 
 export default sheetree;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZXRyZWUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWV0cmVlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQVM7SUFBSztJQUFNOztPQUNYLFlBQVo7T0FBa0IsWUFBbEI7T0FBd0IsWUFBeEI7O09BQ1ksV0FBUDs7T0FDTyxjQUFYOztPQUNXLGFBQVo7O09BQ1ksbUJBQWY7OztBQUVOLFlBQUQ7O3lCQUFVO2FBRU4sVUFBSSxRQUFRLE1BQUs7O1FBQWQ7UUFBUTs7Ozs7Ozs7Ozs7Ozs7Ozs7aURBRUQsS0FBQyxPQUFPLE9BQU8sS0FBQyxLQUFLO1FBRTNCLEtBQUMsT0FBTyxNQUFNLEdBQUcsYUFBYSxLQUFDO1FBRS9CLEtBQUssR0FBRyxnQkFBa0IsS0FBQztRQUMzQixLQUFLLEdBQUcsa0JBQWtCLEtBQUM7UUFDM0IsS0FBSyxHQUFHLGVBQWtCLEtBQUM7UUFDM0IsS0FBSyxHQUFHLGFBQWtCLEtBQUM7UUFDM0IsS0FBSyxHQUFHLGFBQWtCLEtBQUM7Ozt3QkFFL0I7O1FBQ0ksS0FBSyxLQUFLOzs7O3dCQUdkLHFCQUFROzs0Q0FFRTs7ZUFDTixLQUFDOzs7d0JBRUw7O2VBQWEsS0FBSyxLQUFLOzs7d0JBQ3ZCOztZQUFnQixLQUFDLE9BQU8sTUFBTSxXQUFZLEtBQUM7O21CQUFZLEtBQUssS0FBSyxhQUFhLEtBQUMsVUFBVSxLQUFLOzs7O3dCQUU5Rjs7WUFFUyxLQUFDLFlBQVksS0FBQzs7Ozs7Ozt3QkFHdkIscUJBQVE7O2VBRUcsS0FBQyxPQUFPLE1BQU07ZUFDZCxLQUFDLE9BQU8sTUFBTTtlQUNyQixLQUFDOzs7d0JBRUw7Ozs7WUFFUyxLQUFDLFlBQVksS0FBQzs7OztRQUVuQixNQUFNLEtBQUM7UUFDUCxLQUFDO1FBQ0QsS0FBQyxVQUFVO2VBQ1gsS0FBQzs7O3dCQUVMOzs7O2FBRU8sS0FBQyxPQUFPLE1BQU07O1lBQ2IsT0FBTyxRQUFRLEtBQUMsT0FBTyxNQUFNLEtBQUMsT0FBTyxNQUFNO1lBQzNDLFFBQVEsS0FBQyxhQUFhLEtBQUMsT0FBTyxNQUFNO21CQUNwQyxLQUFDLElBQUksTUFBTTs7OzttQkFFWCxLQUFDOzs7O3dCQUVULDJCQUFjOzs7O1FBRVY7UUFFQSxLQUFDLGdCQUFnQixLQUFLO2VBRXRCOzs7d0JBRUosOEJBQWlCLE1BQUs7Ozs7UUFFbEIsS0FBSyxRQUFRLE1BQU07YUFFQSxLQUFLOztZQUF4QixNQUFNLEtBQUs7OzZCQUVFLEtBQUs7OztZQUFkO1lBQ0EsS0FBQyxnQkFBZ0IsTUFBTTs7Ozt3QkFFL0I7O1FBRUksS0FBQztlQUNELEtBQUM7Ozt3QkFFTDs7OzthQUVPLEtBQUMsT0FBTyxNQUFNOztZQUNiLE9BQU8sS0FBQyxPQUFPLE1BQU0sZ0JBQWdCLEtBQUMsT0FBTyxNQUFNO2dCQUNoRCxPQUFPLE9BQU8sV0FBVyxLQUFDLE9BQU8sTUFBTSxLQUFDLE9BQU8sTUFBTSxRQUFROztxQkFDekQsS0FBSyxtQkFBVyxLQUFLLEtBQUssU0FBTCxLQUFLLFFBQVEsS0FBQyxRQUFROztvQkFDMUMsS0FBQyxVQUFVLEtBQUs7b0JBQ2hCLEtBQUM7MkJBQ0QsS0FBQyxLQUFLLFlBQVksS0FBQzs7Ozs7O3dCQUVuQyxxQkFBUTs7OztRQUVKLFFBQVEsS0FBQyxPQUFPO1FBQ2hCLE9BQVEsT0FBTyxLQUFLO2FBRWIsT0FBTyxNQUFNLE9BQVEsTUFBTSxnQkFBZ0IsTUFBTTs7WUFDcEQsTUFBTSxNQUFNLGlCQUFpQixLQUFLLEVBQUUsS0FBSyxJQUFFLE9BQU8sUUFBUSxVQUFRO1lBQ2xFLEtBQUssS0FBSyxZQUFZLElBQUksR0FBRyxJQUFJOztRQUNyQyxPQUFPLEtBQUM7UUFDUixLQUFLLFFBQVEsS0FBQztlQUNkLEtBQUMsS0FBSyxZQUFZOzs7d0JBRXRCOzs7O1FBRUksTUFBTSxLQUFDO1FBRVAsS0FBQyxPQUFPLGdCQUFnQixLQUFDO3VCQUVzQixLQUFDOztZQUFoRCxLQUFDLGtCQUFjLElBQUksS0FBQyxRQUFRLFNBQU87O2VBRW5DOzs7d0JBRUosd0JBQVc7O1FBRVAsS0FBQyxPQUFPO2VBQ1IsS0FBQyxPQUFPLEtBQUM7Ozt3QkFFYjs7ZUFBZSxLQUFDLFVBQVUsS0FBQzs7O3dCQUMzQjs7OztRQUVJLE1BQU0sS0FBQztzQkFFWTs7OztlQUVuQixLQUFDLFVBQVU7Ozt3QkFFZix5QkFBWSxRQUFPLFFBQU87O3NCQUViOztZQUNMLGNBQU0sK0NBQStDO1lBQ3JELGNBQU0sOENBQThDOzs7Z0JBR2pEOztpQkFFSDtnQkFFSSxLQUFDLE9BQU87Z0JBQ1IsS0FBQzs7O2lCQUdMO2dCQUVJLEtBQUM7Z0JBQ0QsU0FBUyxLQUFDLFlBQVksS0FBQztnQkFDdkIsS0FBQyxPQUFPO2dCQUNSLEtBQUM7OztpQkFHTDtnQkFFSSxLQUFDO2dCQUNELFNBQVMsS0FBQyxZQUFZLEtBQUM7Z0JBQ3ZCLEtBQUMsT0FBTztnQkFDUixLQUFDOzs7aUJBR0w7aUJBQ0E7Z0JBRUksS0FBQyxPQUFPO2dCQUNSLEtBQUssS0FBSyxRQUFROzs7aUJBR3RCO2dCQUVJLEtBQUMsT0FBTzs7O2lCQUdaO2lCQUFTO3VCQUVILEtBQUM7Ozs7dURBSUwsT0FBTyxPQUFPOzs7V0E1SzNCOzs7ZUE4S00ifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2hlZXRyZWUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3NoZWV0cmVlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQVM7SUFBSztJQUFNOztPQUNYLFlBQVo7T0FBa0IsWUFBbEI7T0FBd0IsWUFBeEI7O09BQ1ksV0FBUDs7T0FDTyxjQUFYOztPQUNXLGFBQVo7O09BQ1ksbUJBQWY7OztBQUVOLFlBQUQ7O3lCQUFVO2FBRU4sVUFBSSxRQUFRLE1BQUs7O1FBQWQ7UUFBUTs7Ozs7Ozs7Ozs7Ozs7Ozs7OztpREFFRCxLQUFDLE9BQU8sT0FBTyxLQUFDLEtBQUs7UUFFM0IsS0FBQyxPQUFPLE1BQU0sR0FBRyxhQUFhLEtBQUM7UUFFL0IsS0FBSyxHQUFHLGdCQUFrQixLQUFDO1FBQzNCLEtBQUssR0FBRyxrQkFBa0IsS0FBQztRQUMzQixLQUFLLEdBQUcsZUFBa0IsS0FBQztRQUMzQixLQUFLLEdBQUcsYUFBa0IsS0FBQztRQUMzQixLQUFLLEdBQUcsYUFBa0IsS0FBQzs7O3dCQUUvQjs7UUFDSSxLQUFLLEtBQUs7Ozs7d0JBR2QscUJBQVE7OzRDQUVFOztlQUNOLEtBQUM7Ozt3QkFFTDs7ZUFBYSxLQUFLLEtBQUs7Ozt3QkFDdkI7O1lBQWdCLEtBQUMsT0FBTyxNQUFNLFdBQVksS0FBQzs7bUJBQVksS0FBSyxLQUFLLGFBQWEsS0FBQyxVQUFVLEtBQUs7Ozs7d0JBRTlGOztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7Ozs7O3dCQUd2QixxQkFBUTs7ZUFFRyxLQUFDLE9BQU8sTUFBTTtlQUNkLEtBQUMsT0FBTyxNQUFNO2VBQ3JCLEtBQUM7Ozt3QkFFTDs7OztZQUVTLEtBQUMsWUFBWSxLQUFDOzs7O1FBRW5CLE1BQU0sS0FBQztRQUNQLEtBQUM7UUFDRCxLQUFDLFVBQVU7ZUFDWCxLQUFDOzs7d0JBRUw7Ozs7YUFFTyxLQUFDLE9BQU8sTUFBTTs7WUFDYixPQUFPLFFBQVEsS0FBQyxPQUFPLE1BQU0sS0FB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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/view/colmns/sheetree.kode
