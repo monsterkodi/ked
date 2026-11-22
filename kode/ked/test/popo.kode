@@ -829,6 +829,44 @@ showSue = data ->
 
         e.state.setCursors [[0 2]] ; key 'alt+right' ; mc() ▸ [2 2]
 
+  ▸ sheet backspace
+
+        sheet 'popo_sheet_backspace'
+        e.grabFocus()
+        loadSheet {children:[{ text:'abcdef' x:2 y:1 w:3 h:3 }]}
+
+        # the left edge of the first span stops it
+
+        e.state.setCursors [[2 1]] ; key 'delete' ; rt('children.0.text') ▸ 'abcdef' ; mc() ▸ [2 1]
+        e.state.setCursors [[3 1]] ; key 'delete' ; rt('children.0.text') ▸ 'bcdef'  ; mc() ▸ [2 1]
+
+        # at the left edge of a later span it joins the end of the span above
+
+        e.state.setCursors [[2 2]] ; key 'delete' ; rt('children.0.text') ▸ 'bcef' ; mc() ▸ [4 1]
+
+        # behind the last glyph, even when that is right of the rect
+
+        e.state.setCursors [[3 2]] ; key 'delete' ; rt('children.0.text') ▸ 'bce' ; mc() ▸ [5 1]
+        key 'delete' ; rt('children.0.text') ▸ 'bc' ; mc() ▸ [4 1]
+
+        # outside of text nodes nothing happens
+
+        e.state.setCursors [[10 3]] ; key 'delete' ; rt('children.0.text') ▸ 'bc' ; mc() ▸ [10 3]
+
+        e.state.undo() ; rt('children.0.text') ▸ 'bce'
+
+  ▸ sheet backspace over newlines and scaled text
+
+        sheet 'popo_sheet_backspace_nl'
+        e.grabFocus()
+        loadSheet {children:[{ text:'ab\ncd' x:2 y:1 w:4 h:2 }]}
+
+        e.state.setCursors [[2 2]] ; key 'delete' ; rt('children.0.text') ▸ 'abcd' ; mc() ▸ [4 1]
+
+        loadSheet {children:[{ text:'abcd' x:2 y:0 w:4 h:4 scale:2 }]}
+
+        e.state.setCursors [[2 3]] ; key 'delete' ; rt('children.0.text') ▸ 'acd' ; mc() ▸ [3 1]
+
   ▸ sheet clicks
 
         sheet 'popo_sheet_click' [] 8 fileeditor

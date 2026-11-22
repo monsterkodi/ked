@@ -129,7 +129,7 @@ export
 
         ⮐ if scale == old
 
-        offset = layout.textOffsetIn node cell node.text.length
+        offset = layout.textOffsetAt node cell
         lines  = max 1 int(node.rect.abs.h / old)
 
         if scale > 1
@@ -142,11 +142,43 @@ export
         if node.h? and not pct
             node.h = lines * scale
 
-        layout.absolutize cells @rectree
+        layout.regionize cells @rectree
 
         @renderSheet @rectree cells layout.cellForTextOffset(node offset)
 
         node
+
+    sheetBackspace: ->
+
+        cells = @sheetSize()
+        cell  = @sheetCellForPos @mainCursor()
+        node  = @sheetTextNodeAt cell
+
+        ⮐ if not node?
+
+        offset = layout.textOffsetAt node cell
+
+        ⮐ if offset <= 0
+
+        chars = Array.from node.text
+        chars.splice offset-1 1
+        node.text = chars.join ''
+
+        layout.regionize cells @rectree
+
+        @renderSheet @rectree cells layout.cellForTextOffset(node offset-1)
+
+    sheetTextNodeAt: cell ->
+
+        cells = @sheetSize()
+        node  = layout.nodeForPos cells @rectree cell
+
+        ⮐ node if node?.text?
+
+        node = layout.nodeForPos cells @rectree [cell[0]-1 cell[1]]
+
+        ⮐ if not node?.text?
+        ⮐ node if layout.cellForTextOffset(node node.text.length) eql cell
 
     setSheetTree: (rectree cols rows) ->
 

@@ -24,44 +24,38 @@
 
         out
 
-    @text: conf region -> # unscaled text, one string per region
+    @text: conf region ->
 
-        cells = Array.from(conf.text ? '')
-        out   = []
-        i     = 0
+        ⮐ [] if empty region
+
+        ys    = region.map (rng) -> rng[1]
+        chars = {}
+
+        for [x y ch] in @flow(conf region {y:min(ys) h:max(ys)-min(ys)+1})
+            chars["#{x},#{y}"] = ch if ch?
+
+        out = []
 
         for rng in region
-
-            width = rng[2] - rng[0]
-
-            if width <= 0
-                out.push ''
-                continue
-
-            row = []
-
-            while row.length < width and i < cells.length
-
-                if cells[i] == '\n'
-                    i += 1
-                    break
-
-                row.push cells[i]
-                i += 1
-
-            while row.length < width
-                row.push ' '
-
-            out.push(row.join(''))
+            row = ''
+            for x in rng[0]...rng[2]
+                row += chars["#{x},#{rng[1]}"] ? ' '
+            out.push row
 
         out
 
-    #  scaled text is laid out in logical lines of scale rows each
-    #  a logical line may only use the columns that are free in all of its rows
-    #  every glyph takes scale×scale cells, spaces included
-    #  returns the top left cell of every glyph: [[x y char] ...]
-
     @scaled: conf region rect ->
+
+        out = []
+
+        for [x y ch] in @flow(conf region rect)
+            out.push [x y ch] if ch?
+
+        out
+
+    #  [x y char offset] for every glyph, [x y null offset] behind the last glyph of a span
+
+    @flow: conf region rect ->
 
         cells = Array.from(conf.text ? '')
         scale = max 1 int(conf.scale ? 1)
@@ -71,10 +65,13 @@
             rows[rng[1]] = [] if not rows[rng[1]]?
             rows[rng[1]].push [rng[0] rng[2]]
 
-        out = []
-        i   = 0
+        out  = []
+        i    = 0
+        tail = false
 
         for b in 0...floor(rect.h / scale)
+
+            break if tail
 
             y     = rect.y + b*scale
             spans = rows[y] ? []
@@ -84,17 +81,28 @@
 
             for [x1 x2] in spans
 
-                x = x1
+                continue if x2 - x1 < scale
+
+                x  = x1
+                nl = false
 
                 while x + scale <= x2 and i < cells.length
 
                     if cells[i] == '\n'
-                        i += 1
+                        nl = true
                         break
 
-                    out.push [x y cells[i]]
+                    out.push [x y cells[i] i]
                     i += 1
                     x += scale
+
+                out.push [x y null i]
+
+                if nl
+                    i += 1
+                else if i >= cells.length
+                    tail = true
+                    break
 
         out
 

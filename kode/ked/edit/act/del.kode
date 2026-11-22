@@ -6,7 +6,9 @@ use ..           ◆ mode
 export
     
     delete: type jump ->
-                
+
+        ⮐ @sheetBackspace() if @rectree? and type == 'back'
+
         ⮐ @deleteSelection() if type in ['back' 'next'] and valid @s.selections
 
         @recordNovimBackspace() if type == 'back' and not jump
