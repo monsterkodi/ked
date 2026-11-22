@@ -478,8 +478,8 @@ load = p ext ◯->
                     
 save = p data strOpt ◯->
 
-    str = stringify data, Object.assign(ext:slash.ext(p), strOpt)
-    nfs.write p, str
+    str = stringify data Object.assign(ext:slash.ext(p) strOpt)
+    nfs.write p str
             
 export
     load:       load
