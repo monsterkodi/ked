@@ -130,23 +130,28 @@ export
         ⮐ if scale == old
 
         offset = layout.textOffsetAt node cell
-        lines  = max 1 int(node.rect.abs.h / old)
 
         if scale > 1
             node.scale = scale
         else
             delete node.scale
 
-        pct = node.h is str and node.h.endsWith '%'
-
-        if node.h? and not pct
-            node.h = lines * scale
+        if @sheetCellsValue node.w ➜ node.w = max(1 floor(int(node.w) / old)) * scale
+        if @sheetCellsValue node.h ➜ node.h = max(1 floor(int(node.h) / old)) * scale
 
         layout.regionize cells @rectree
 
         @renderSheet @rectree cells layout.cellForTextOffset(node offset)
 
         node
+
+    sheetCellsValue: value ->
+
+        ⮐ false if not value?
+
+        pct = value is str and value.endsWith '%'
+
+        not pct
 
     sheetBackspace: ->
 

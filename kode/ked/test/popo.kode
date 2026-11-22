@@ -712,6 +712,7 @@ showSue = data ->
 
         rt('children.0.scale') ▸ 2
         rt('children.0.h') ▸ 2
+        rt('children.0.w') ▸ 24
         e.state.mainCursor() ▸ [2 1]
         e.state.s.sue.filter((a) -> a.value[0] == sue.LINE_SCALE).length ▸ 0
         e.state.s.sue.filter((a) -> a.value[0] == sue.SCALE).length ▸ 1
@@ -720,21 +721,32 @@ showSue = data ->
 
         rt('children.0.scale') ▸ 3
         rt('children.0.h') ▸ 3
+        rt('children.0.w') ▸ 36
         e.state.mainCursor() ▸ [2 2]
 
         h.key e 'shift+alt+-'
 
         rt('children.0.scale') ▸ 2
         rt('children.0.h') ▸ 2
+        rt('children.0.w') ▸ 24
 
         h.key e 'shift+alt+0'
 
         rt('children.0.scale')? ▸ false
         rt('children.0.h') ▸ 1
+        rt('children.0.w') ▸ 12
         e.state.mainCursor() ▸ [2 0]
 
         e.state.undo()
         rt('children.0.scale') ▸ 2
+        rt('children.0.w') ▸ 24
+
+        loadSheet {children:[{ text:'abcdef' x:1 y:0 w:3 h:2 } { text:'p' x:'50%' w:'25%' y:2 h:1 }]}
+
+        e.state.setCursors [[1 0]] ; key 'shift+alt+=' ; rt('children.0.w') ▸ 6 ; rt('children.0.h') ▸ 4
+        key 'shift+alt+-' ; rt('children.0.w') ▸ 3 ; rt('children.0.h') ▸ 2
+
+        e.state.setCursors [[9 2]] ; key 'shift+alt+=' ; rt('children.1.w') ▸ '25%' ; rt('children.1.scale') ▸ 2
 
         before = e.state.s.sue
         h.key e 'shift+alt+b'
