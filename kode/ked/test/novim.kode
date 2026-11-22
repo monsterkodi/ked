@@ -1301,81 +1301,54 @@ windowReset = (s) ->
         mac.allowedModes.novim = true
         startNovim mac
 
-        feed = c -> e.onKey c {combo:c, char: (c == 'esc' ? null : c)}
+        feed = chars -> for c in chars ➜ e.onKey c {combo:c, char: (c == 'esc' ? null : c)}
         mtxt = -> kseg.str mac.s.lines
 
         loadTextOn mac "one\ntwo"
 
-        feed 'q'
-        feed 'a'
-        feed 'x'
-        feed 'q'
+        feed ['q' 'a' 'x' 'q']
 
         mac.novim.register.read('a').keys.length ▸ 1
         mtxt() ▸ "ne\ntwo"
 
-        feed '@'
-        feed 'a'
+        feed ['@' 'a']
 
         mtxt() ▸ "e\ntwo"
 
-        feed '@'
-        feed '@'
+        feed ['@' '@']
 
         mtxt() ▸ "\ntwo"
 
         loadTextOn mac "abcdef"
 
-        feed '3'
-        feed '@'
-        feed 'a'
+        feed ['3' '@' 'a']
 
         mtxt() ▸ "def"
 
         loadTextOn mac "one\ntwo"
 
-        feed 'q'
-        feed 'b'
-        feed 'A'
-        feed '!'
-        feed 'esc'
-        feed 'j'
-        feed 'q'
+        feed ['q' 'b' 'A' '!' 'esc' 'j' 'q']
 
         mtxt() ▸ "one!\ntwo"
 
-        feed '@'
-        feed 'b'
+        feed ['@' 'b']
 
         mtxt() ▸ "one!\ntwo!"
 
         loadTextOn mac "abc"
 
-        feed '"'
-        feed 'b'
-        feed 'p'
+        feed ['"' 'b' 'p']
 
         mtxt() ▸ "A!<Esc>jabc"
 
         loadTextOn mac "abc"
 
-        feed 'q'
-        feed 'c'
-        feed 'x'
-        feed 'q'
-
-        feed 'q'
-        feed 'C'
-        feed 'l'
-        feed 'q'
+        feed ['q' 'c' 'x' 'q']
+        feed ['q' 'C' 'l' 'q']
 
         mac.novim.register.read('c').keys.length ▸ 2
 
-        feed 'q'
-        feed 'd'
-        feed '@'
-        feed 'a'
-        feed 'q'
+        feed ['q' 'd' '@' 'a' 'q']
 
         mac.novim.register.read('d').keys.length ▸ 2
 
@@ -1383,8 +1356,7 @@ windowReset = (s) ->
 
         mode.get(mac, 'novim').runEx 'd'
 
-        feed '@'
-        feed ':'
+        feed ['@' ':']
 
         mtxt() ▸ "c"
 
@@ -1392,21 +1364,18 @@ windowReset = (s) ->
 
         mac.novim.register.write 'e' { lines: ['x'], linewise: false } 'yank'
 
-        feed '@'
-        feed 'e'
+        feed ['@' 'e']
 
         mtxt() ▸ "bc"
 
         macroErrors = []
         post.on 'novim.error' (err) -> macroErrors.push err
 
-        feed '@'
-        feed 'z'
-
+        feed ['@' 'z']
+        
         macroErrors[-1]    ▸ 'register z is empty'
 
-        feed 'q'
-        feed ':'
+        feed ['q' ':']
 
         macroErrors[-1]    ▸ 'command-line window not implemented'
         valid mac.macroRecording ▸ false
