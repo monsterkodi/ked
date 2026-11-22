@@ -16,82 +16,78 @@ pickr = ->
     p.show()
     p
 
-sheetPickr = ->
-
+sheetPickr = (colors=true) ->
     h = new harness cols:16 rows:9
     e = new editor h.screen 'test_editor_colorpicker_sheet' ['susan']
     e.layout 0 0 16 4
-
     e.state.loadLines ['                ' '                ' '                ' '                ']
-
-    tree = {children:[{ text:'hi' x:1 y:1 w:2 h:1 fg:'#ff0000' bg:'#0000ff' }]}
-
+    tree = {children:[{ text:'hi' x:1 y:1 w:2 h:1 bg:'#0000ff' }]}
+    tree.children[0].fg = '#ff0000' if colors
     e.state.setSheetTree tree 16 4
     e.state.renderSheet tree {cols:16 rows:4} [1 1] history:false silent:true
     e.state.clearHistory()
-
     p = new colorpicker h.screen e 'test_colorpicker_sheet'
     p.layout 0 0 16 9
     p.show()
-
     [h e p]
 
 pal = (cols colors) ->
-
     h = new harness cols:cols rows:2
     p = new palette h.screen 'test_palette'
-
     p.layout 0 0 cols 1
     p.setColors colors
     p.draw()
-
     [h p]
+
+rad = ->
+    h = new harness cols:20 rows:2
+    r = new radio h.screen 'test_radio'
+    r.layout 0 0 20 1
+    [h r]
 
 ▸ colorpicker
 
-  ▸ pressing a slider sets the value from the column
+  ▸ slider
 
         p = pickr()
 
         e =
-            type: 'press'
-            cell: [11 3]
+            type:   'press'
+            cell:   [11 3]
             button: 'left'
-            count: 1
+            count:  1
         p.onMouse e
 
         p.hue.getValue() ▸ 133
 
-  ▸ dragging a slider keeps tracking outside of it
-
         p = pickr()
 
         e =
-            type: 'press'
-            cell: [5 3]
+            type:   'press'
+            cell:   [5 3]
             button: 'left'
-            count: 1
+            count:  1
         p.onMouse e
 
         p.hue.getValue() ▸ 53
 
         e =
-            type: 'drag'
-            cell: [15 5]
+            type:   'drag'
+            cell:   [15 5]
             button: 'left'
-            count: 1
+            count:  1
         p.onMouse e
 
         p.hue.getValue() ▸ 187
 
         e =
-            type: 'release'
-            cell: [15 5]
+            type:   'release'
+            cell:   [15 5]
             button: 'left'
-            count: 1
+            count:  1
         p.onMouse e
 
-  ▸ a syntax color at the cursor seeds the picker
+  ▸ seeds
 
         h = new harness cols:30 rows:9
         e = new editor h.screen 'test_editor_colorpicker_syntax' []
@@ -105,39 +101,12 @@ pal = (cols colors) ->
 
         p.foregroundHex() ▸ (color.hex(theme.syntax.keyword))
 
-  ▸ an rgb input change updates the color
-
-        p = pickr()
-
-        p.setHex '#000000'
-        p.syncAll()
-
-        p.red.changeValue 255
-
-        p.foregroundHex() ▸ '#ff0000'
-
-  ▸ a sheet node at the cursor seeds the picker
-
         [h e p] = sheetPickr()
 
         p.foregroundHex() ▸ '#ff0000'
         p.backgroundHex() ▸ '#0000ff'
 
-  ▸ a sheet node with only a background selects it
-
-        h = new harness cols:16 rows:9
-        e = new editor h.screen 'test_editor_colorpicker_sheet_bg' []
-        e.layout 0 0 16 4
-
-        e.state.loadLines ['                ' '                ' '                ' '                ']
-        e.state.rectree = {children:[{ text:'hi' x:1 y:1 w:2 h:1 bg:'#0000ff' }]}
-        e.state.rectreeCols = 16
-        e.state.rectreeRows = 4
-        e.state.setCursors [[1 1]]
-
-        p = new colorpicker h.screen e 'test_colorpicker_sheet_bg'
-        p.layout 0 0 16 9
-        p.show()
+        [h e p] = sheetPickr false
 
         p.activeIndex() ▸ 1
         p.colorVoided 0 ▸ true
@@ -145,12 +114,39 @@ pal = (cols colors) ->
         p.radio.options[0].label ▸ 'none'
         p.radio.options[1].label ▸ '#0000ff'
 
-  ▸ a sheet node passed in is updated live
+  ▸ live
+
+        p = pickr()
+
+        p.setHex '#000000'
+        p.syncAll()
+        p.red.changeValue 255
+
+        p.foregroundHex() ▸ '#ff0000'
+
+        [h e p] = sheetPickr()
+
+        p.setHex '#00ff00' 0
+        p.setHex '#000000' 1
+        p.submit()
+
+        sds.get(e.state.rectree 'children.0.fg') ▸ '#00ff00'
+        sds.get(e.state.rectree 'children.0.bg') ▸ '#000000'
+
+        [h e p] = sheetPickr()
+
+        p.setHex '#123456' 0
+        p.emitChanged()
+
+        sds.get(e.state.rectree 'children.0.fg') ▸ '#123456'
+
+        e.draw()
+
+        h.screen.get_fg(2 1) ▸ [18 52 86]
 
         h = new harness cols:16 rows:9
         e = new editor h.screen 'test_editor_colorpicker_sheet_node' []
         e.layout 0 0 16 4
-
         e.state.loadLines ['                ' '                ' '                ' '                ']
         e.state.rectree = {bg:'#0000ff'}
         e.state.rectreeCols = 16
@@ -168,31 +164,7 @@ pal = (cols colors) ->
         noFg = not e.state.rectree.fg?
         noFg ▸ true
 
-  ▸ return sets the colors on the sheet node
-
-        [h e p] = sheetPickr()
-
-        p.setHex '#00ff00' 0
-        p.setHex '#000000' 1
-        p.submit()
-
-        sds.get(e.state.rectree 'children.0.fg') ▸ '#00ff00'
-        sds.get(e.state.rectree 'children.0.bg') ▸ '#000000'
-
-  ▸ changing a color updates the sheet live
-
-        [h e p] = sheetPickr()
-
-        p.setHex '#123456' 0
-        p.emitChanged()
-
-        sds.get(e.state.rectree 'children.0.fg') ▸ '#123456'
-
-        e.draw()
-
-        h.screen.get_fg(2 1) ▸ [18 52 86]
-
-  ▸ a sheet color change can be undone
+  ▸ undo
 
         [h e p] = sheetPickr()
 
@@ -204,8 +176,6 @@ pal = (cols colors) ->
         e.state.undo()
 
         sds.get(e.state.rectree 'children.0.fg') ▸ '#ff0000'
-
-  ▸ a color drag is one undo step
 
         [h e p] = sheetPickr()
 
@@ -219,7 +189,7 @@ pal = (cols colors) ->
 
         sds.get(e.state.rectree 'children.0.fg') ▸ '#ff0000'
 
-  ▸ a voided channel is removed from the sheet node
+  ▸ void
 
         [h e p] = sheetPickr()
 
@@ -231,39 +201,20 @@ pal = (cols colors) ->
 
 ▸ colorpicker palette
 
-  ▸ the palette starts empty
+  ▸ palette
 
         p = pickr()
 
         p.palette ▸ []
         p.pickerHeight() ▸ 9
-
-  ▸ the palette holds eight colors by default
-
-        p = pickr()
-
         p.paletteMax ▸ 8
 
-  ▸ the current color is added to the palette
-
-        p = pickr()
         p.setHex '#ff0000'
+        p.addCurrentColor()
         p.addCurrentColor()
 
         p.palette ▸ ['#ff0000']
 
-  ▸ a color is not added twice
-
-        p = pickr()
-        p.setHex '#ff0000'
-        p.addCurrentColor()
-        p.addCurrentColor()
-
-        p.palette.length ▸ 1
-
-  ▸ the leftmost color is dropped when the palette is full
-
-        p = pickr()
         p.paletteMax = 3
 
         for hex in ['#ff0000' '#00ff00' '#0000ff']
@@ -275,17 +226,21 @@ pal = (cols colors) ->
 
         p.palette ▸ ['#00ff00' '#0000ff' '#ffffff']
 
-  ▸ the picker grows by two rows when the palette is not empty
+  ▸ height
 
         p = pickr()
+
+        p.pickerHeight() ▸ 9
+
         p.setHex '#ff0000'
         p.addCurrentColor()
 
         p.pickerHeight() ▸ 11
 
-  ▸ enter on a palette cell sets the current color
+  ▸ enter
 
         p = pickr()
+
         p.setHex '#ff0000'
         p.addCurrentColor()
 
@@ -295,14 +250,14 @@ pal = (cols colors) ->
         p.paletteView.grabFocus()
 
         e =
-            type: 'press'
+            type:  'press'
             combo: 'return'
-            char: ''
+            char:  ''
         p.onKey 'return' e
 
         p.hex() ▸ '#ff0000'
 
-  ▸ the palette is not in the focus ring when it is empty
+  ▸ focus ring
 
         p = pickr()
 
@@ -318,88 +273,51 @@ pal = (cols colors) ->
 
 ▸ colorspans
 
-  ▸ overlay adds a span
+  ▸ overlay
 
         lines = [['a' 'b' 'c' 'd' 'e']]
 
-        spans = colorspans.overlay [] [[1 0 4 0]] '#f00' lines
+        colorspans.overlay [] [[1 0 4 0]] '#f00' lines ▸ [[1 0 4 '#f00']]
 
-        spans ▸ [[1 0 4 '#f00']]
-
-  ▸ overlay splits an existing span
-
-        lines = [['a' 'b' 'c' 'd' 'e']]
-
-        spans = colorspans.overlay [[0 0 5 '#00f']] [[2 0 3 0]] '#f00' lines
-
-        spans ▸ [[0 0 2 '#00f'] [2 0 3 '#f00'] [3 0 5 '#00f']]
-
-  ▸ overlay turns a multiline range into lines
+        spans = [[0 0 5 '#00f']]
+        colorspans.overlay spans [[2 0 3 0]] '#f00' lines ▸ [[0 0 2 '#00f'] [2 0 3 '#f00'] [3 0 5 '#00f']]
 
         lines = [['a' 'b' 'c' 'd' 'e'] ['a' 'b' 'c' 'd' 'e'] ['a' 'b' 'c' 'd' 'e']]
 
-        spans = colorspans.overlay [] [[2 0 3 2]] '#f00' lines
+        colorspans.overlay [] [[2 0 3 2]] '#f00' lines ▸ [[2 0 5 '#f00'] [0 1 5 '#f00'] [0 2 3 '#f00']]
 
-        spans ▸ [[2 0 5 '#f00'] [0 1 5 '#f00'] [0 2 3 '#f00']]
-
-  ▸ normalize merges touching spans of the same color
-
-        spans = colorspans.normalize [[0 0 2 '#f00'] [2 0 4 '#f00'] [5 0 6 '#0f0']]
-
-        spans ▸ [[0 0 4 '#f00'] [5 0 6 '#0f0']]
-
-  ▸ clear removes and splits
-
-        spans = colorspans.clear [[0 0 5 '#00f'] [6 0 9 '#00f']] [[2 0 7 0]]
-
-        spans ▸ [[0 0 2 '#00f'] [7 0 9 '#00f']]
-
-  ▸ an insertion inside a span stretches it
+  ▸ adjust
 
         oldLines = [['a' 'b' 'c' 'd']]
         newLines = [['a' 'b' 'X' 'c' 'd']]
 
-        spans = colorspans.adjust [[0 0 4 '#f00']] oldLines newLines
-
-        spans ▸ [[0 0 5 '#f00']]
-
-  ▸ an insertion before a span moves it
-
-        oldLines = [['a' 'b' 'c' 'd']]
-        newLines = [['a' 'b' 'X' 'c' 'd']]
-
-        spans = colorspans.adjust [[2 0 4 '#f00']] oldLines newLines
-
-        spans ▸ [[3 0 5 '#f00']]
-
-  ▸ a deletion inside a span shrinks it
+        colorspans.adjust [[0 0 4 '#f00']] oldLines newLines ▸ [[0 0 5 '#f00']]
+        colorspans.adjust [[2 0 4 '#f00']] oldLines newLines ▸ [[3 0 5 '#f00']]
 
         oldLines = [['a' 'b' 'c' 'd' 'e']]
         newLines = [['a' 'b' 'e']]
 
-        spans = colorspans.adjust [[0 0 5 '#f00']] oldLines newLines
-
-        spans ▸ [[0 0 3 '#f00']]
-
-  ▸ inserting a line moves spans below
+        colorspans.adjust [[0 0 5 '#f00']] oldLines newLines ▸ [[0 0 3 '#f00']]
 
         oldLines = [['a'] ['b'] ['c']]
         newLines = [['a'] ['x'] ['b'] ['c']]
 
-        spans = colorspans.adjust [[0 1 1 '#f00'] [0 2 1 '#0f0']] oldLines newLines
-
-        spans ▸ [[0 2 1 '#f00'] [0 3 1 '#0f0']]
-
-  ▸ deleting a line moves spans below
+        colorspans.adjust [[0 1 1 '#f00'] [0 2 1 '#0f0']] oldLines newLines ▸ [[0 2 1 '#f00'] [0 3 1 '#0f0']]
 
         oldLines = [['a'] ['x'] ['b'] ['c']]
         newLines = [['a'] ['b'] ['c']]
 
-        spans = colorspans.adjust [[0 2 1 '#f00'] [0 3 1 '#0f0']] oldLines newLines
+        colorspans.adjust [[0 2 1 '#f00'] [0 3 1 '#0f0']] oldLines newLines ▸ [[0 1 1 '#f00'] [0 2 1 '#0f0']]
 
-        spans ▸ [[0 1 1 '#f00'] [0 2 1 '#0f0']]
+  ▸ normalize
 
-  ▸ colorAtPos finds the span at a position
+        colorspans.normalize [[0 0 2 '#f00'] [2 0 4 '#f00'] [5 0 6 '#0f0']] ▸ [[0 0 4 '#f00'] [5 0 6 '#0f0']]
+
+  ▸ clear
+
+        colorspans.clear [[0 0 5 '#00f'] [6 0 9 '#00f']] [[2 0 7 0]] ▸ [[0 0 2 '#00f'] [7 0 9 '#00f']]
+
+  ▸ colorAtPos
 
         spans = [[1 2 4 '#f00'] [6 2 9 '#0f0']]
 
@@ -409,7 +327,7 @@ pal = (cols colors) ->
 
 ▸ colorstate
 
-  ▸ the map can use colors passed in for a preview
+  ▸ map preview
 
         h = new harness cols:20 rows:5
         e = new editor h.screen 'test_color_map' []
@@ -426,20 +344,18 @@ pal = (cols colors) ->
         data = Buffer.alloc 120
         m.imageForLine data e.state.s.lines[0] 0
 
-        data[6]  ▸ 0
-        data[7]  ▸ 255
-        data[8]  ▸ 0
+        data[6] ▸ 0
+        data[7] ▸ 255
+        data[8] ▸ 0
 
 ▸ palette
 
-  ▸ a cell shows its color
+  ▸ cells
 
         [h p] = pal 20 ['#ff0000' '#00ff00']
 
         h.screen.get_bg(5 0) ▸ [255 0 0]
         h.screen.get_bg(15 0) ▸ [0 255 0]
-
-  ▸ one narrow cell keeps all the cells from showing their hex value
 
         [h p] = pal 20 ['#ff0000' '#00ff00' '#0000ff']
 
@@ -447,21 +363,17 @@ pal = (cols colors) ->
         h.row(0).includes('#00ff00') ▸ false
         h.row(0).includes('#0000ff') ▸ false
 
-  ▸ a narrow cell shows no hex value
-
         [h p] = pal 10 ['#ff0000' '#00ff00']
 
         h.row(0).includes('#ff0000') ▸ false
         h.row(0).includes('#00ff00') ▸ false
 
-  ▸ the palette has rounded edges
+  ▸ edges
 
         [h p] = pal 20 ['#ff0000']
 
         h.screen.get_char(0 0) ▸ '◖'
         h.screen.get_char(19 0) ▸ '◗'
-
-  ▸ an empty palette has no cells
 
         [h p] = pal 20 []
 
@@ -470,12 +382,10 @@ pal = (cols colors) ->
 
 ▸ radio
 
-  ▸ a single option fills the row and shows its label
+  ▸ options
 
-        h = new harness cols:20 rows:2
-        r = new radio h.screen 'test_radio'
+        [h r] = rad()
 
-        r.layout 0 0 20 1
         r.setOptions [{color: [255 255 255] label: '#ffffff'}]
         r.draw()
 
@@ -484,14 +394,9 @@ pal = (cols colors) ->
         h.screen.get_char(19 0) ▸ '◗'
         h.screen.get_bg(10 0) ▸ [255 255 255]
 
-  ▸ only the active option shows a label
+        [h r] = rad()
 
-        h = new harness cols:20 rows:2
-        r = new radio h.screen 'test_radio'
-
-        r.layout 0 0 20 1
         r.setOptions [{color: [255 255 255] label: '#ffffff'} {color: [0 0 255] label: '#0000ff'}]
-
         r.draw()
 
         h.row(0).includes('#ffffff') ▸ true
@@ -505,12 +410,10 @@ pal = (cols colors) ->
         h.row(0).includes('#ffffff') ▸ false
         h.row(0).includes('#0000ff') ▸ true
 
-  ▸ the active label gets focus markers when they fit
+  ▸ focus
 
-        h = new harness cols:20 rows:2
-        r = new radio h.screen 'test_radio'
+        [h r] = rad()
 
-        r.layout 0 0 20 1
         r.setOptions [{color: [255 255 255] label: '#ffffff'} {color: [0 0 255] label: '#0000ff'}]
         r.setActive 1
         r.grabFocus()
