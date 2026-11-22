@@ -449,15 +449,10 @@ use ../edit/tool ◆ sue
 
         true
 
-    @insertNode: rectree ref node ->
+    @appendChild: parent node ->
 
-        parent = @parentOf rectree ref
-
-        if parent?
-            parent.children.splice parent.children.indexOf(ref)+1 0 node
-        else
-            rectree.children ?= []
-            rectree.children.push node
+        parent.children ?= []
+        parent.children.push node
 
         node
 

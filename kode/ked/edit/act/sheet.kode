@@ -169,13 +169,13 @@ export
 
         node
 
-    insertSheetNode: (node ref) ->
+    insertSheetNode: (node parent) ->
 
         ⮐ if not @rectree?
 
         cells = @sheetSize()
 
-        layout.insertNode @rectree (ref ? @rectree) node
+        layout.appendChild (parent ? @rectree) node
         layout.regionize cells @rectree
 
         @renderSheet @rectree cells @sheetCellForPos(@mainCursor())
