@@ -1,8 +1,9 @@
 use ../../kxk    ◆ sds noon
-use ../../kxk    ▪ kseg
+use ../../kxk    ▪ kseg post
 use ../edit/tool ◆ sue
 use ../popo      ◆ layout fill
 use ../edit      ◆ editor
+use ../view/editor ◆ fileeditor
 use ../util      ◆ harness
 
 absol   = cells tree -> layout.absolutize cells tree
@@ -801,3 +802,33 @@ showSue = data ->
         e.state.setCursors [[2 0]]
         e.state.moveCursors 'down' count:2
         e.state.mainCursor() ▸ [2 4]
+
+  ▸ sheet clicks
+
+        global.ked_session ?= get:(-> null) set:(->)
+
+        h = new harness cols:16 rows:8
+        e = new fileeditor h.screen 'popo_sheet_click'
+        e.layout 0 0 16 8
+
+        tree = {children:[{ text:'abcdef' x:2 y:1 w:8 h:4 scale:2 } { text:'xy' x:2 y:6 w:4 h:1 }]}
+
+        e.state.setSheetTree tree 16 8
+        e.state.renderSheet tree {cols:16 rows:8} [0 0] history:false silent:true
+
+        click = (x y) -> e.onMouse type:'press' cell:[x+e.cells.x y+e.cells.y] button:'left' count:1
+
+        # a click on a scaled glyph or into its band lands on the line of the band
+
+        click 5 2 ; e.state.mainCursor() ▸ [3 2]
+        click 5 1 ; e.state.mainCursor() ▸ [3 2]
+        click 8 3 ; e.state.mainCursor() ▸ [6 4]
+        click 3 6 ; e.state.mainCursor() ▸ [3 6]
+        click 3 5 ; e.state.mainCursor() ▸ [3 5]
+
+        # a click keeps the cell rect of the sheet node
+
+        post.emit 'cells.rect' {x:2 y:1 w:8 h:4}
+        e.cells.cellRect ▸ {x:2 y:1 w:8 h:4}
+        click 4 2
+        e.cells.cellRect ▸ {x:2 y:1 w:8 h:4}

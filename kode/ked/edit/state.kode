@@ -513,6 +513,8 @@ use           ◆ mode keys
 
     posForCell: x row =>
 
+        if @rectree? ➜ ⮐ @sheetPosForCell [x+@s.view[0] @lineAtRow(row)]
+
         li = @lineAtRow row
         h  = @lineHeight li
 

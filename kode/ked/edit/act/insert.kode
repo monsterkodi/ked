@@ -86,6 +86,9 @@ export
 
         [cx cy] = cell
 
+        [top s] = @sheetBandAt cx cy
+        cy = top + s-1
+
         below = min @s.lines.length cy+7
 
         for y in cy+1...below
