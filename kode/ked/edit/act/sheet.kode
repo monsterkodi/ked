@@ -8,16 +8,16 @@ export
     
     insertIntoSheet: text ->
 
-        cells   = @sheetSize()
-        rectree = @rectree
-        cell    = @sheetCellForPos @mainCursor()
-        advance = layout.insertTextAt cells rectree cell text
+        cells    = @sheetSize()
+        inserted = layout.insertTextAt cells @rectree @sheetCellForPos(@mainCursor()) text
 
-        ⮐ 0 if not advance
+        ⮐ false if not inserted?
 
-        @renderSheet rectree cells [cell[0]+advance cell[1]]
+        layout.regionize cells @rectree
 
-        advance
+        @renderSheet @rectree cells layout.cellForTextOffset(inserted.node inserted.offset)
+
+        true
 
     sheetSize: -> {cols:(@rectreeCols ? @cells.cols) rows:(@rectreeRows ? @cells.rows)}
 
@@ -168,17 +168,7 @@ export
 
         @renderSheet @rectree cells layout.cellForTextOffset(node offset-1)
 
-    sheetTextNodeAt: cell ->
-
-        cells = @sheetSize()
-        node  = layout.nodeForPos cells @rectree cell
-
-        ⮐ node if node?.text?
-
-        node = layout.nodeForPos cells @rectree [cell[0]-1 cell[1]]
-
-        ⮐ if not node?.text?
-        ⮐ node if layout.cellForTextOffset(node node.text.length) eql cell
+    sheetTextNodeAt: cell -> layout.textNodeAt @sheetSize() @rectree cell
 
     setSheetTree: (rectree cols rows) ->
 

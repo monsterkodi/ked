@@ -392,26 +392,39 @@ use ../edit/tool ◆ sue
 
     @insertTextAt: cells rectree pos text ->
 
-        ⮐ 0 if not rectree?
+        ⮐ if not rectree?
 
-        node = @nodeForPos cells rectree pos
-        node ?= rectree
+        node  = @textNodeAt(cells rectree pos) ? @nodeForPos(cells rectree pos) ? rectree
+        added = Array.from text
+        width = Array.from(text.split('\n')[0]).length
 
         if node.text?
-            scale = @scaleOf node
-            spare = node.text.length * scale + scale
+            chars  = Array.from node.text
+            scale  = @scaleOf node
+            spare  = chars.length * scale + scale
             offset = @textOffsetAt node pos
-            node.text = node.text[0...offset] + text + node.text[offset..]
+            node.text = chars[0...offset].concat(added).concat(chars[offset..]).join ''
             if int(node.w) == spare and int(node.h) == scale and not node.r? and not node.b?
-                node.w = spare + text.split('\n')[0].length * scale
-        else
-            width = text.split('\n')[0].length
-            rect = node.rect.abs
-            node.children ?= []
-            node.children.push {text:text x:pos[0]-rect.x y:pos[1]-rect.y w:width+1 h:1}
-            scale = 1
+                node.w = spare + width * scale
+            ⮐ node:node offset:offset+added.length
 
-        scale * text.split('\n')[0].length
+        rect  = node.rect.abs
+        child = {text:text x:pos[0]-rect.x y:pos[1]-rect.y w:width+1 h:1}
+        node.children ?= []
+        node.children.push child
+
+        node:child offset:added.length
+
+    @textNodeAt: cells rectree cell ->
+
+        node = @nodeForPos cells rectree cell
+
+        ⮐ node if node?.text?
+
+        node = @nodeForPos cells rectree [cell[0]-1 cell[1]]
+
+        ⮐ if not node?.text?
+        ⮐ node if @cellForTextOffset(node Array.from(node.text).length) eql cell
 
     @topmostIn: node pos ->
 
@@ -458,7 +471,7 @@ use ../edit/tool ◆ sue
         for slot in slots
             continue if slot[3] != offset
             if slot[2]? ➜ ⮐ [slot[0] slot[1]]
-            end ?= slot
+            end = slot
 
         ⮐ [end[0] end[1]] if end?
 
