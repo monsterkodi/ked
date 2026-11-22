@@ -1003,3 +1003,27 @@ showSue = data ->
 
         clip.copy  = savedCopy
         clip.paste = savedPaste
+
+        order = -> se.sheetree.fuzzied.map (n) -> n.text
+        rect  = (text) -> se.sheetree.fuzzied.find((n) -> n.text == text).rect.abs
+
+        loadSheet {children:[{ text:'a' x:0 y:0 w:2 h:1 } { text:'b' x:4 y:1 w:8 h:4 children:[{ text:'c' x:1 y:1 w:2 h:1 } { text:'e' x:'50%' y:2 r:1 b:1 }] } { text:'d' x:14 y:0 w:2 h:1 }]}
+        se.sheetree.reloadTree()
+        se.sheetree.grabFocus()
+        se.sheetree.select 0
+
+        cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'a' 'd'] ; se.sheetree.current().text ▸ 'a'
+        cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'd' 'a'] ; se.sheetree.current().text ▸ 'a'
+        cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'd' 'a']
+        cmd 'alt+up'   ; order() ▸ ['b' 'c' 'e' 'a' 'd']
+
+        se.sheetree.select 1 ; rect('c') ▸ {x:5 y:2 w:2 h:1}
+        cmd 'alt+down' ; order() ▸ ['b' 'e' 'c' 'a' 'd'] ; rect('c') ▸ {x:5 y:2 w:2 h:1}
+        cmd 'alt+down' ; order() ▸ ['b' 'e' 'c' 'a' 'd'] ; rt('children.1.text') ▸ 'c' ; rect('c') ▸ {x:5 y:2 w:2 h:1}
+        se.sheetree.current().text ▸ 'c'
+
+        se.sheetree.select 1 ; rect('e') ▸ {x:8 y:3 w:3 h:1}
+        cmd 'alt+up' ; order() ▸ ['e' 'b' 'c' 'a' 'd'] ; rt('children.1.children')? ▸ false ; se.sheetree.current().text ▸ 'e'
+        rect('e') ▸ {x:8 y:3 w:3 h:1}
+
+        undo() ; rt('children.0.children.0.text') ▸ 'e'

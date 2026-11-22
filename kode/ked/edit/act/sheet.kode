@@ -169,6 +169,22 @@ export
 
         node
 
+    shiftSheetNode: (node dir) ->
+
+        ⮐ if not @rectree?
+
+        cells = @sheetSize()
+
+        layout.absolutize cells @rectree
+
+        ⮐ if not layout.shiftNode @rectree node dir
+
+        layout.regionize cells @rectree
+
+        @renderSheet @rectree cells @sheetCellForPos(@mainCursor())
+
+        node
+
     insertSheetNode: (node parent) ->
 
         ⮐ if not @rectree?

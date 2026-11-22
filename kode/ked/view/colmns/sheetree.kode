@@ -56,7 +56,7 @@ use ../menu         ◆ filterchoice
     reloadTree: => 
         
         if @editor.state.rectree?
-            layout.titlify @editor.cells @editor.state.rectree
+            layout.titlify @editor.state.sheetSize() @editor.state.rectree
             items = @itemsForTree @editor.state.rectree
             @set items 'title'
         else
@@ -90,7 +90,7 @@ use ../menu         ◆ filterchoice
 
         if @editor.state.rectree?
             cell = @editor.state.sheetCellForPos @editor.state.mainCursor()
-            if item = layout.nodeForPos(@editor.cells @editor.state.rectree cell)
+            if item = layout.nodeForPos(@editor.state.sheetSize() @editor.state.rectree cell)
                 if item.index? and 0 <= item.index < @fuzzied.length
                     @highlight item.index
                     @showRect()
@@ -189,6 +189,16 @@ use ../menu         ◆ filterchoice
         row  = @fuzzied.indexOf node
 
         @jumpToRow row if row >= 0
+
+        true
+
+    moveCurrent: dir =>
+
+        node = @current()
+
+        if node? and @editor.state.shiftSheetNode node dir
+            row = @fuzzied.indexOf node
+            @jumpToRow row if row >= 0
 
         true
 

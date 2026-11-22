@@ -456,6 +456,52 @@ use ../edit/tool ◆ sue
 
         node
 
+    @shiftNode: rectree node dir ->
+
+        parent = @parentOf rectree node
+
+        ⮐ false if not parent?
+
+        siblings = parent.children
+        index    = siblings.indexOf node
+        target   = dir == 'up' ? index-1 : index+1
+
+        if 0 <= target < siblings.length
+            siblings.splice index 1
+            siblings.splice target 0 node
+            ⮐ true
+
+        grand = @parentOf rectree parent
+
+        ⮐ false if not grand?
+
+        @reframe node parent grand
+
+        siblings.splice index 1
+        delete parent.children if empty siblings
+
+        at = grand.children.indexOf parent
+        grand.children.splice (dir == 'up' ? at : at+1) 0 node
+
+        true
+
+    @reframe: node parent grand ->
+
+        inner = parent.rect.rel
+        outer = grand.rect.abs
+
+        cells = (value) -> value? and not (value is str)
+
+        node.x = node.x + inner.x if cells node.x
+        node.y = node.y + inner.y if cells node.y
+        node.r = node.r + outer.w - inner.x - inner.w if cells node.r
+        node.b = node.b + outer.h - inner.y - inner.h if cells node.b
+
+        node.x ?= inner.x
+        node.y ?= inner.y
+        node.r  = outer.w - inner.x - inner.w if not node.w? and not node.r?
+        node.b  = outer.h - inner.y - inner.h if not node.h? and not node.b?
+
     @parentOf: node target ->
 
         for child in node.children ? []
