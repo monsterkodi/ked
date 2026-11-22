@@ -434,6 +434,33 @@ use ../edit/tool ◆ sue
         delete props.children
         props
 
+    @isNodeData: data ->
+
+        ⮐ false if not data? or data is arr or typeof(data) != 'object'
+        ⮐ false if empty data
+
+        for key,value of data
+            ⮐ false if key not in ['x' 'y' 'w' 'h' 'r' 'b' 'text' 'pattern' 'image' 'erase' 'bg' 'fg' 'scale' 'flows' 'blocks' 'type' 'children']
+
+        if data.children?
+            ⮐ false if not (data.children is arr)
+            for child in data.children
+                ⮐ false if not @isNodeData child
+
+        true
+
+    @insertNode: rectree ref node ->
+
+        parent = @parentOf rectree ref
+
+        if parent?
+            parent.children.splice parent.children.indexOf(ref)+1 0 node
+        else
+            rectree.children ?= []
+            rectree.children.push node
+
+        node
+
     @parentOf: node target ->
 
         for child in node.children ? []

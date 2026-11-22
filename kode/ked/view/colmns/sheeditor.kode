@@ -93,6 +93,9 @@ use              ◆ sheetree sheenode
             switch combo
                 'cmd+z' 'ctrl+z'                ➜ @sheetree.keepSelection(=> @editor.state.undo()) ; @editor.redraw() ; ⮐ true
                 'shift+cmd+z' 'cmd+y' 'ctrl+y'  ➜ @sheetree.keepSelection(=> @editor.state.redo()) ; @editor.redraw() ; ⮐ true
+                'cmd+x' 'ctrl+x'                ➜ ⮐ @sheetree.cutCurrent()
+                'cmd+c' 'ctrl+c'                ➜ ⮐ @sheetree.copyCurrent()
+                'cmd+v' 'ctrl+v'                ➜ ⮐ @sheetree.pasteNode()
 
             ⮐ @sheetree.onKey key event
         if @sheenode.hasFocus() ➜ ⮐ @sheenode.onKey key event

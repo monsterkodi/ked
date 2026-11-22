@@ -1,4 +1,4 @@
-use ../../kxk    ◆ sds noon
+use ../../kxk    ◆ sds noon clip
 use ../../kxk    ▪ kseg post
 use ../edit/tool ◆ sue
 use ../popo      ◆ layout fill
@@ -973,3 +973,33 @@ showSue = data ->
         e.state.setCursors [[2 1]] ; e.state.insert 'x'
         se.sheetree.select 1 ; se.sheetree.current().text ▸ 'x'
         undo() ; rt('children.0.children')? ▸ false ; se.sheetree.current().pattern ▸ '.'
+
+        board = ''
+        savedCopy  = clip.copy
+        savedPaste = clip.paste
+        clip.copy  = (text) -> board = text
+        clip.paste = -> board
+        cmd = (combo) -> se.onKey combo h.event(combo)
+
+        loadSheet {children:[{ text:'abc' x:2 y:1 w:6 h:2 } { text:'z' x:10 y:0 w:2 h:1 children:[{ bg:'#f00' x:0 y:0 w:1 h:1 }] }]}
+        se.sheetree.reloadTree()
+        se.sheetree.grabFocus()
+
+        se.sheetree.select 1 ; cmd 'ctrl+c' ; JSON.parse(board) ▸ {text:'z' x:10 y:0 w:2 h:1 children:[{bg:'#f00' x:0 y:0 w:1 h:1}]}
+
+        se.sheetree.select 0 ; cmd 'cmd+v'
+        rt('children').length ▸ 3 ; rt('children.1.text') ▸ 'z' ; rt('children.1.children.0.bg') ▸ '#f00'
+        se.sheetree.current() == rt('children.1') ▸ true
+
+        se.sheetree.select 0 ; cmd 'cmd+x'
+        rt('children').length ▸ 2 ; JSON.parse(board).text ▸ 'abc' ; se.sheetree.current().text ▸ 'z'
+
+        cmd 'ctrl+v' ; rt('children').length ▸ 3 ; rt('children.1.text') ▸ 'abc'
+
+        for text in ['hello' '{"foo":1}' '[1]' '{}' '{"children":[{"x":"1","nope":2}]}']
+            board = text ; cmd 'cmd+v' ; rt('children').length ▸ 3
+
+        undo() ; rt('children').length ▸ 2
+
+        clip.copy  = savedCopy
+        clip.paste = savedPaste

@@ -169,6 +169,19 @@ export
 
         node
 
+    insertSheetNode: (node ref) ->
+
+        ⮐ if not @rectree?
+
+        cells = @sheetSize()
+
+        layout.insertNode @rectree (ref ? @rectree) node
+        layout.regionize cells @rectree
+
+        @renderSheet @rectree cells @sheetCellForPos(@mainCursor())
+
+        node
+
     sheetBackspace: ->
 
         cells = @sheetSize()
