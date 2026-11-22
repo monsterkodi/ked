@@ -751,3 +751,53 @@ showSue = data ->
         before = e.state.s.sue
         h.key e 'shift+alt+b'
         e.state.s.sue ▸ before
+
+  ▸ sheet cursor up and down
+
+        h = new harness cols:16 rows:8
+        e = new editor h.screen 'popo_sheet_updown' []
+        e.layout 0 0 16 8
+        e.grabFocus()
+
+        tree = {children:[{ text:'abcdef' x:2 y:1 w:8 h:4 scale:2 } { text:'xy' x:2 y:6 w:4 h:1 }]}
+
+        e.state.setSheetTree tree 16 8
+        e.state.renderSheet tree {cols:16 rows:8} [0 0] history:false silent:true
+
+        # 'abcd' sits on line 2, 'ef' on line 4, both bands are two rows high
+
+        kseg.str(e.state.s.lines[2]).trimEnd() ▸ '  abcd'
+        kseg.str(e.state.s.lines[4]).trimEnd() ▸ '  ef'
+
+        e.state.setCursors [[2 0]]
+        h.key e 'down' ; e.state.mainCursor() ▸ [2 2]
+        h.key e 'down' ; e.state.mainCursor() ▸ [2 4]
+        h.key e 'down' ; e.state.mainCursor() ▸ [2 5]
+        h.key e 'down' ; e.state.mainCursor() ▸ [2 6]
+        h.key e 'up'   ; e.state.mainCursor() ▸ [2 5]
+        h.key e 'up'   ; e.state.mainCursor() ▸ [2 4]
+        h.key e 'up'   ; e.state.mainCursor() ▸ [2 2]
+        h.key e 'up'   ; e.state.mainCursor() ▸ [2 0]
+
+        # the second column of a glyph lands on the glyph
+
+        e.state.setCursors [[3 0]]
+        h.key e 'down' ; e.state.mainCursor() ▸ [2 2]
+
+        # the empty part of a scaled rect moves by bands too
+
+        e.state.setCursors [[7 3]]
+        h.key e 'down' ; e.state.mainCursor() ▸ [7 5]
+
+        e.state.setCursors [[7 3]]
+        h.key e 'up'   ; e.state.mainCursor() ▸ [4 2]
+
+        e.state.setCursors [[5 4]]
+        e.state.sheetCellForPos(e.state.mainCursor()) ▸ [7 4]
+        h.key e 'up'   ; e.state.mainCursor() ▸ [4 2]
+
+        # counts step band by band
+
+        e.state.setCursors [[2 0]]
+        e.state.moveCursors 'down' count:2
+        e.state.mainCursor() ▸ [2 4]

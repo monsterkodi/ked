@@ -54,6 +54,34 @@ export
 
         [cells[lastIndex] + x - lastIndex y]
 
+    sheetPosInDirection: (pos dir count=1) ->
+
+        [cx cy] = @sheetCellForPos pos
+
+        for i in 0...count
+
+            [top s] = @sheetBandAt cx cy
+
+            row = dir == 'up' ? top-1 : top+s
+            row = clamp 0 @s.lines.length-1 row
+
+            [top s] = @sheetBandAt cx row
+
+            cy = top + s-1
+
+        @sheetPosForCell [cx cy]
+
+    sheetBandAt: (cx cy) ->
+
+        node  = layout.nodeForPos @sheetSize() @rectree [cx cy]
+        scale = layout.scaleOf node ? {}
+
+        if scale <= 1 ➜ ⮐ [cy 1]
+
+        rect = node.rect.abs
+
+        [rect.y + floor((cy - rect.y) / scale) * scale, scale]
+
     sheetPosForCell: cell ->
 
         [cx cy] = cell
