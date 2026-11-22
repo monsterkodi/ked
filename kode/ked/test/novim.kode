@@ -12,6 +12,8 @@ gm = null
 
 txt = t -> kseg.str(s.s.lines) ▸ t
 cur = x y -> s.mainCursor() ▸ [x y]
+ent = c -> s.executeNovim(c) ; kseg.str(s.s.lines)
+enc = c -> s.executeNovim(c) ; s.mainCursor()
 
 mrange = lines x y m -> motion.range lines [x y] m
 
@@ -22,6 +24,7 @@ novimKeysFor = (state) ->
         for c in cs
             key c
         cur x y if x?
+        kseg.str(s.s.lines)
     [m key keys]
 
 ked_sess = (store = {}) ->
@@ -936,16 +939,13 @@ windowReset = (s) ->
     
         loadText "one two\nfour"
     
-        s.executeNovim {operator:'move', motion:{kind:'eol'}}
-        cur 7 0
+        enc {operator:'move', motion:{kind:'eol'}} ▸ [7 0]
     
         s.setMainCursor 6 0
-        s.executeNovim {operator:'move', motion:{kind:'bol'}}
-        cur 0 0
+        enc {operator:'move', motion:{kind:'bol'}} ▸ [0 0]
     
         loadText "\nabc"
-        s.executeNovim {operator:'move', motion:{kind:'eol'}}
-        cur 0 0
+        enc {operator:'move', motion:{kind:'eol'}} ▸ [0 0]
         
   ▸ yank
     
@@ -953,30 +953,26 @@ windowReset = (s) ->
         
             loadText "one two three\nfour five"
         
-            s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
+            enc {operator:'yank', motion:{kind:'word', count:1}} ▸ [0 0]
             s.novim.register.value.lines ▸ ['one ']
             s.novim.register.value.linewise ▸ false
-            cur 0 0
         
             s.setMainCursor 8 0
-            s.executeNovim {operator:'yank', motion:{kind:'drow', count:1}}
+            enc {operator:'yank', motion:{kind:'drow', count:1}} ▸ [4 0]
             s.novim.register.value.lines ▸ ['two ']
-            cur 4 0
         
             loadText "alpha\nbeta\ngamma" 3 1
         
-            s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
+            enc {operator:'yank', motion:{kind:'line', count:1}} ▸ [3 1]
             s.novim.register.value.lines ▸ ['beta']
             s.novim.register.value.linewise ▸ true
-            cur 3 1
         
             s.executeNovim {operator:'yank', motion:{kind:'lineDown', count:1}}
             s.novim.register.value.lines ▸ ['beta' 'gamma']
         
             history = s.h.length
-            s.executeNovim {operator:'yank', motion:{kind:'word', count:1}}
+            ent {operator:'yank', motion:{kind:'word', count:1}} ▸ "alpha\nbeta\ngamma"
             s.h.length ▸ history
-            txt "alpha\nbeta\ngamma"
         
     ▸ yank flash
         
@@ -1049,75 +1045,63 @@ windowReset = (s) ->
     
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
     
-        s.executeNovim {operator:'put', after:true}
-        txt "alpha\nalpha\nbeta"
+        ent {operator:'put', after:true} ▸ "alpha\nalpha\nbeta"
         cur 0 1
     
-        s.executeNovim {operator:'put', after:false}
-        txt "alpha\nalpha\nalpha\nbeta"
+        ent {operator:'put', after:false} ▸ "alpha\nalpha\nalpha\nbeta"
         cur 0 1
     
         loadText "  alpha\nbeta" 2 0
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
         s.setMainCursor 0 1
-        s.executeNovim {operator:'put', after:false}
-        txt "  alpha\n  alpha\nbeta"
+        ent {operator:'put', after:false} ▸ "  alpha\n  alpha\nbeta"
         cur 2 1
     
         loadText "x\ny"
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
         s.setMainCursor 0 1
-        s.executeNovim {operator:'put', after:true, count:2}
-        txt "x\ny\nx\nx"
+        ent {operator:'put', after:true, count:2} ▸ "x\ny\nx\nx"
         cur 0 3
     
         loadText "abc\ndef"
         s.executeNovim {operator:'yank', motion:{kind:'eol'}}
         s.setMainCursor 3 1
-        s.executeNovim {operator:'put', after:true}
-        txt "abc\ndefabc"
+        ent {operator:'put', after:true} ▸ "abc\ndefabc"
         cur 6 1
     
         loadText "abc\ndef"
         s.executeNovim {operator:'yank', motion:{kind:'eol'}}
         s.setMainCursor 1 1
-        s.executeNovim {operator:'put', after:false}
-        txt "abc\nabcdef"
+        ent {operator:'put', after:false} ▸ "abc\nabcdef"
         cur 3 1
     
         s.novim.register.value = { lines: ['one' 'two'], linewise: false }
         loadText "ab"
-        s.executeNovim {operator:'put', after:true}
-        txt "one\ntwo\nab"
+        ent {operator:'put', after:true} ▸ "one\ntwo\nab"
         cur 0 2
     
         s.novim.register.value = null
         loadText "abc"
-        s.executeNovim {operator:'put', after:true}
-        txt "abc"
+        ent {operator:'put', after:true} ▸ "abc"
     
     ▸ put text at the cursor
     
             s.novim.register.value = { lines: ['X'], linewise: false }
         
             loadText "abc"
-            s.executeNovim {operator:'put', after:true}
-            txt "Xabc"
+            ent {operator:'put', after:true} ▸ "Xabc"
             cur 1 0
         
             loadText "abc" 1 0
-            s.executeNovim {operator:'put', after:true}
-            txt "aXbc"
+            ent {operator:'put', after:true} ▸ "aXbc"
             cur 2 0
         
             loadText "abc" 1 0
-            s.executeNovim {operator:'put', after:false}
-            txt "Xabc"
+            ent {operator:'put', after:false}▸ "Xabc"
             cur 1 0
         
             loadText "abc" 3 0
-            s.executeNovim {operator:'put', after:true}
-            txt "abcX"
+            ent {operator:'put', after:true} ▸ "abcX"
             cur 4 0
         
             loadText "abc\ndef"
@@ -1127,38 +1111,32 @@ windowReset = (s) ->
             s.executeNovim {operator:'put', after:true, count:3}
         
             (s.h.length - before) ▸ 1
-            s.executeNovim {operator:'undo', count:1}
-            txt "abc\ndef"
+            ent {operator:'undo', count:1} ▸ "abc\ndef"
     
   ▸ delete fills the register
     
         loadText "one two\nthree"
     
-        s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
+        ent {operator:'delete', motion:{kind:'line', count:1}} ▸ "three"
         s.novim.register.value.lines ▸ ['one two']
         s.novim.register.value.linewise ▸ true
-        txt "three"
     
-        s.executeNovim {operator:'put', after:false}
-        txt "one two\nthree"
+        ent {operator:'put', after:false} ▸ "one two\nthree"
     
         loadText "abc" 1 0
-        s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
+        ent {operator:'delete', motion:{kind:'char', count:1}} ▸ "ac"
         s.novim.register.value.lines ▸ ['b']
         s.novim.register.value.linewise ▸ false
-        txt "ac"
     
         loadText "one two" 3 0
-        s.executeNovim {operator:'delete', motion:{kind:'eol'}}
+        ent {operator:'delete', motion:{kind:'eol'}} ▸ "one"
         s.novim.register.value.lines ▸ [' two']
         s.novim.register.value.linewise ▸ false
-        txt "one"
     
         loadText "abcd"
         s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
-        s.executeNovim {operator:'repeat', count:1}
+        ent {operator:'repeat', count:1} ▸ ""
         s.novim.register.value.lines ▸ ['cd']
-        txt ""
 
   ▸ named registers
 
@@ -1172,8 +1150,7 @@ windowReset = (s) ->
         s.novim.register.read('a').linewise ▸ true
         s.novim.register.value.lines        ▸ ['one']
 
-        s.executeNovim {operator:'put', after:true, register:'a'}
-        txt "one\none\ntwo"
+        ent {operator:'put', after:true, register:'a'} ▸ "one\none\ntwo"
 
         loadText "one\ntwo"
 
@@ -1316,8 +1293,7 @@ windowReset = (s) ->
         s.executeNovim {operator:'yank', motion:{kind:'line', count:1}}
         copies ▸ []
     
-        s.executeNovim {operator:'put', after:true}
-        txt "one\none\ntwo"
+        ent {operator:'put', after:true} ▸ "one\none\ntwo"
     
         novim.toggleClipboard() ▸ true
         novim.clipboardEnabled() ▸ true
@@ -1327,13 +1303,11 @@ windowReset = (s) ->
         copies ▸ ['one\n']
     
         pasted = "shared\n"
-        s.executeNovim {operator:'put', after:true}
-        txt "one\nshared\ntwo"
+        ent {operator:'put', after:true} ▸ "one\nshared\ntwo"
     
         pasted = "XYZ"
         loadText "abc" 1 0
-        s.executeNovim {operator:'put', after:true}
-        txt "aXYZbc"
+        ent {operator:'put', after:true} ▸ "aXYZbc"
     
         loadText "gone\nkept"
         s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
@@ -1390,8 +1364,7 @@ windowReset = (s) ->
         clip.text ▸ 'fall\n'
     
         loadText "fall\nback"
-        s.executeNovim {operator:'put', after:true, register:'clipboard'}
-        txt "fall\nfall\nback"
+        ent {operator:'put', after:true, register:'clipboard'} ▸ "fall\nfall\nback"
     
         clip.tool  = 'wl'
         novim.clipboardSync = null
@@ -1409,53 +1382,44 @@ windowReset = (s) ->
         s.loadLines belt.linesForText(text)
     
         s.setMainCursor 0 0
-        s.executeNovim {operator:'delete', motion:{kind:'word', count:1}}
-    
+        enc {operator:'delete', motion:{kind:'word', count:1}} ▸ [0 0]
         txt """
             beta
             gamma delta
             """
-        cur 0 0
     
         s.setMainCursor 2 1
-        s.executeNovim {operator:'delete', motion:{kind:'eol'}}
-    
+        enc {operator:'delete', motion:{kind:'eol'}} ▸ [2 1]
         txt """
             beta
             ga
             """
-        cur 2 1
     
         s.setMainCursor 0 0
-        s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
-    
+        enc {operator:'delete', motion:{kind:'line', count:1}} ▸ [0 0]
         txt """
             ga
             """
-        cur 0 0
     
         s.loadLines belt.linesForText(text)
     
         s.setMainCursor 0 0
-        s.executeNovim {operator:'delete', motion:{kind:'char', count:3}}
-    
-        txt """
+        ent {operator:'delete', motion:{kind:'char', count:3}} ▸
+            """
             ha beta
             gamma delta
             """
     
         s.setMainCursor 5 1
-        s.executeNovim {operator:'delete', motion:{kind:'charBack', count:3}}
-    
-        txt """
+        ent {operator:'delete', motion:{kind:'charBack', count:3}} ▸
+            """
             ha beta
             ga delta
             """
     
         s.setMainCursor 0 0
-        s.executeNovim {operator:'delete', motion:{kind:'eol'}}
-    
-        txt """
+        ent {operator:'delete', motion:{kind:'eol'}} ▸
+            """
             
             ga delta
             """
@@ -1472,10 +1436,7 @@ windowReset = (s) ->
             before = s.h.length
         
             s.setMainCursor 0 0
-            s.executeNovim {operator:'delete', motion:{kind:'line', count:2}}
-        
-            txt """
-                """
+            ent {operator:'delete', motion:{kind:'line', count:2}} ▸ ''
             (s.h.length - before) ▸ 1
         
             s.undo()
@@ -1486,22 +1447,14 @@ windowReset = (s) ->
     
             loadText "alpha beta\ngamma delta"
         
-            s.executeNovim {operator:'delete', motion:{kind:'word', count:1}}
-            txt "beta\ngamma delta"
-        
-            s.executeNovim {operator:'undo', count:1}
-            txt "alpha beta\ngamma delta"
+            ent {operator:'delete', motion:{kind:'word', count:1}} ▸ "beta\ngamma delta"
+            ent {operator:'undo', count:1} ▸ "alpha beta\ngamma delta"
             cur 0 0
         
             s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
-            s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
-            txt ""
-        
-            s.executeNovim {operator:'undo', count:2}
-            txt "alpha beta\ngamma delta"
-        
-            s.executeNovim {operator:'undo', count:5}
-            txt "alpha beta\ngamma delta"
+            ent {operator:'delete', motion:{kind:'line', count:1}} ▸ ''
+            ent {operator:'undo', count:2} ▸ "alpha beta\ngamma delta"
+            ent {operator:'undo', count:5} ▸ "alpha beta\ngamma delta"
     
     ▸ execute command with multiple cursors
     
@@ -1514,9 +1467,8 @@ windowReset = (s) ->
         
             s.setCursors [[0 0] [0 1]]
         
-            s.executeNovim {operator:'delete', motion:{kind:'word', count:1}}
-        
-            txt """
+            ent {operator:'delete', motion:{kind:'word', count:1}} ▸
+                """
                 beta
                 delta
                 """
@@ -1525,72 +1477,57 @@ windowReset = (s) ->
             s.loadLines belt.linesForText("abc def")
             s.setCursors [[0 0] [1 0]]
         
-            s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
-        
-            txt " def"
+            ent {operator:'delete', motion:{kind:'char', count:2}} ▸ " def"
         
             loadText "\nalpha\nbeta"
         
-            s.executeNovim {operator:'delete', motion:{kind:'line', count:1}}
-        
-            txt "alpha\nbeta"
+            ent {operator:'delete', motion:{kind:'line', count:1}} ▸ "alpha\nbeta"
     
   ▸ execute text objects
     
         loadText "one two three four" 5 0
     
-        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
-        txt "one  three four"
+        ent {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}} ▸ "one  three four"
     
         loadText "one two three four" 5 0
     
-        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}}
-        txt "one three four"
+        ent {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}} ▸ "one three four"
     
         loadText "one two" 7 0
     
-        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
-        txt "one "
+        ent {operator:'delete', motion:{kind:'textObject', area:'inner', target:'word', count:1}} ▸ "one "
     
         loadText 'say "hello there" ok' 7 0
     
-        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'"', count:1}}
-        txt 'say "" ok'
+        ent {operator:'delete', motion:{kind:'textObject', area:'inner', target:'"', count:1}} ▸ 'say "" ok'
     
         loadText 'say "hello there" ok' 7 0
     
-        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'"', count:1}}
-        txt 'say ok'
+        ent {operator:'delete', motion:{kind:'textObject', area:'around', target:'"', count:1}} ▸ "say ok"
     
         loadText "if seg not in ['', undefined, ' ', '}', ']', ')']" 21 0
     
-        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'inner', target:'[', count:1}}
-        txt "if seg not in []"
+        ent {operator:'delete', motion:{kind:'textObject', area:'inner', target:'[', count:1}} ▸ "if seg not in []"
     
         loadText "if seg not in ['', undefined, ' ', '}', ']', ')']" 21 0
     
-        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'[', count:1}}
-        txt "if seg not in "
+        ent {operator:'delete', motion:{kind:'textObject', area:'around', target:'[', count:1}} ▸ "if seg not in "
     
         loadText "foo(\n  bar\n)" 3 1
     
-        s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'(', count:1}}
-        txt "foo"
+        ent {operator:'delete', motion:{kind:'textObject', area:'around', target:'(', count:1}} ▸ "foo"
     
         loadText "alpha" 3 0
     
-        s.executeNovim {operator:'delete', motion:{kind:'charBack', count:1}}
-        txt "alha"
+        ent {operator:'delete', motion:{kind:'charBack', count:1}} ▸ "alha"
     
         loadText "alpha"
     
-        s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
-        txt "lpha"
+        ent {operator:'delete', motion:{kind:'char', count:1}} ▸ "lpha"
     
         loadText "alpha"
     
-        s.executeNovim {operator:'delete', motion:{kind:'charBack', count:1}}
-        txt "alpha"
+        ent {operator:'delete', motion:{kind:'charBack', count:1}} ▸ "alpha"
     
   ▸ change
       
@@ -1619,9 +1556,8 @@ windowReset = (s) ->
         
             loadText "one two three" 5 0
         
-            s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
-        
-            txt "one two three"
+            ent {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}} ▸ "one two three"
+            
             s.s.selections ▸ [[4 0 7 0]]
             cur 7 0
             s.novim.register.value.lines ▸ ['two']
@@ -1629,34 +1565,30 @@ windowReset = (s) ->
         
             loadText "one two three" 5 0
         
-            s.executeNovim {operator:'change', motion:{kind:'textObject', area:'around', target:'word', count:1}}
-        
-            txt "one two three"
+            ent {operator:'change', motion:{kind:'textObject', area:'around', target:'word', count:1}} ▸ "one two three"
+            
             s.s.selections ▸ [[4 0 8 0]]
             cur 8 0
         
             s.loadLines belt.linesForText("one two\nthree four")
             s.setCursors [[0 0] [0 1]]
         
-            s.executeNovim {operator:'change', motion:{kind:'word', count:1}}
-        
-            txt "one two\nthree four"
+            ent {operator:'change', motion:{kind:'word', count:1}} ▸ "one two\nthree four"
+            
             s.s.selections ▸ [[0 0 4 0] [0 1 6 1]]
             s.allCursors() ▸ [[4 0] [6 1]]
         
             loadText "one two" 4 0
         
-            s.executeNovim {operator:'change', motion:{kind:'eol'}}
-        
-            txt "one two"
+            ent {operator:'change', motion:{kind:'eol'}} ▸ "one two"
+            
             s.s.selections ▸ [[4 0 7 0]]
             cur 7 0
         
             loadText "one\ntwo" 0 1
         
-            s.executeNovim {operator:'change', motion:{kind:'line', count:1}}
-        
-            txt "one\ntwo"
+            ent {operator:'change', motion:{kind:'line', count:1}} ▸ "one\ntwo"
+            
             s.s.selections ▸ [[0 1 3 1]]
             cur 3 1
     
@@ -1700,70 +1632,59 @@ windowReset = (s) ->
             loadText "alpha beta"
             before = s.h.length
         
-            s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+            ent {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}} ▸ "alpha beta"
         
-            txt "alpha beta"
             s.s.selections ▸ [[0 0 5 0]]
             (s.h.length - before) ▸ 0
     
     ▸ change commands and keys
     
             loadText "one two three" 5 0
-            keys 'ciw'
-            txt "one two three"
+            keys 'ciw' ▸ "one two three"
             s.s.selections ▸ [[4 0 7 0]]
             cur 7 0
             m.operator ▸ null
         
             loadText "one two three" 5 0
-            keys 'caw'
-            txt "one two three"
+            keys 'caw' ▸ "one two three"
             s.s.selections ▸ [[4 0 8 0]]
         
             loadText "one two" 4 0
-            keys 'C'
-            txt "one two"
+            keys 'C' ▸ "one two"
             s.s.selections ▸ [[4 0 7 0]]
             cur 7 0
         
             loadText "one\ntwo"
-            keys 'S'
-            txt "one\ntwo"
+            keys 'S' ▸ "one\ntwo"
             s.s.selections ▸ [[0 0 3 0]]
             cur 3 0
         
             loadText "abcdef"
-            keys 's'
-            txt "abcdef"
+            keys 's' ▸ "abcdef"
             s.s.selections ▸ [[0 0 1 0]]
             cur 1 0
         
             loadText "abcdef"
-            keys '2s'
-            txt "abcdef"
+            keys '2s' ▸ "abcdef"
             s.s.selections ▸ [[0 0 2 0]]
             cur 2 0
         
             loadText "one\ntwo"
-            keys 'cc'
-            txt "one\ntwo"
+            keys 'cc' ▸ "one\ntwo"
             s.s.selections ▸ [[0 0 3 0]]
             cur 3 0
         
             loadText "one two three"
-            keys 'dw'
-            txt "two three"
+            keys 'dw' ▸ "two three"
         
             loadText "one two three"
-            keys 'ciw'
-            txt "one two three"
+            keys 'ciw' ▸ "one two three"
             s.s.selections ▸ [[0 0 3 0]]
         
             s.lastChange = null
             s.novim.insert = null
         
-            keys '.'
-            txt "one two three"
+            keys '.' ▸ "one two three"
             s.s.selections ▸ [[0 0 3 0]]
         
     ▸ change exits novim
@@ -1775,10 +1696,10 @@ windowReset = (s) ->
         
             mode.isActive s 'novim' ▸ true
         
-            s.executeNovim {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}}
+            ent {operator:'change', motion:{kind:'textObject', area:'inner', target:'word', count:1}} ▸ "one two three"
         
             mode.isActive s 'novim' ▸ false
-            txt "one two three"
+             
             s.s.selections ▸ [[4 0 7 0]]
             cur 7 0
         
@@ -1790,52 +1711,41 @@ windowReset = (s) ->
     
             loadText "abcdef"
         
-            s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
-            txt "bcdef"
+            ent {operator:'delete', motion:{kind:'char', count:1}} ▸ "bcdef"
         
-            s.executeNovim {operator:'repeat', count:1}
-            txt "cdef"
+            ent {operator:'repeat', count:1} ▸ "cdef"
         
-            s.executeNovim {operator:'repeat', count:2}
-            txt "ef"
+            ent {operator:'repeat', count:2} ▸ "ef"
         
             loadText "abcdef"
         
-            s.executeNovim {operator:'delete', motion:{kind:'char', count:2}}
-            txt "cdef"
+            ent {operator:'delete', motion:{kind:'char', count:2}} ▸ "cdef"
         
-            s.executeNovim {operator:'repeat', count:1}
-            txt "ef"
+            ent {operator:'repeat', count:1} ▸ "ef"
         
             loadText "abcdef"
         
             s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
             s.executeNovim {operator:'move', motion:{kind:'right', count:1}}
-            s.executeNovim {operator:'repeat', count:1}
-            txt "bdef"
+            ent {operator:'repeat', count:1} ▸ "bdef"
         
             loadText "abcdef"
         
             s.executeNovim {operator:'delete', motion:{kind:'char', count:1}}
-            s.executeNovim {operator:'undo', count:1}
-            txt "abcdef"
+            ent {operator:'undo', count:1} ▸ "abcdef"
         
-            s.executeNovim {operator:'repeat', count:1}
-            txt "bcdef"
+            ent {operator:'repeat', count:1} ▸ "bcdef"
         
             loadText "one two three"
         
-            s.executeNovim {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}}
-            txt "two three"
+            ent {operator:'delete', motion:{kind:'textObject', area:'around', target:'word', count:1}} ▸ "two three"
         
-            s.executeNovim {operator:'repeat', count:1}
-            txt "three"
+            ent {operator:'repeat', count:1} ▸ "three"
         
             s.lastChange = null
             loadText "abc"
         
-            s.executeNovim {operator:'repeat', count:1}
-            txt "abc"
+            ent {operator:'repeat', count:1} ▸ "abc"
         
     ▸ repeat insert
         
@@ -1848,8 +1758,7 @@ windowReset = (s) ->
             txt "Xabc\ndef"
         
             s.setMainCursor 0 1
-            s.executeNovim {operator:'repeat', count:1}
-            txt "Xabc\nXdef"
+            ent {operator:'repeat', count:1} ▸ "Xabc\nXdef"
         
             loadText "one two"
         
@@ -1859,8 +1768,7 @@ windowReset = (s) ->
             txt "new one two"
         
             s.setMainCursor 0 4
-            s.executeNovim {operator:'repeat', count:2}
-            txt "new new new one two"
+            ent {operator:'repeat', count:2} ▸ "new new new one two"
         
     ▸ repeat insert with backspace
         
@@ -1874,8 +1782,7 @@ windowReset = (s) ->
             txt "XZabc\ndef"
         
             s.setMainCursor 0 1
-            s.executeNovim {operator:'repeat', count:1}
-            txt "XZabc\nXZdef"
+            ent {operator:'repeat', count:1} ▸ "XZabc\nXZdef"
         
     ▸ repeat append
         
@@ -1887,8 +1794,7 @@ windowReset = (s) ->
             txt "abc\ndefZ"
         
             s.setMainCursor 0 0
-            s.executeNovim {operator:'repeat', count:1}
-            txt "abcZ\ndefZ"
+            ent {operator:'repeat', count:1} ▸ "abcZ\ndefZ"
         
             loadText "abc"
         
@@ -1898,8 +1804,7 @@ windowReset = (s) ->
             txt "aXbc"
         
             s.setMainCursor 0 0
-            s.executeNovim {operator:'repeat', count:1}
-            txt "aXXbc"
+            ent {operator:'repeat', count:1} ▸ "aXXbc"
         
     ▸ repeat open line
         
@@ -1911,8 +1816,7 @@ windowReset = (s) ->
             txt "abc\nnew\ndef"
         
             s.setMainCursor 0 0
-            s.executeNovim {operator:'repeat', count:1}
-            txt "abc\nnew\nnew\ndef"
+            ent {operator:'repeat', count:1} ▸ "abc\nnew\nnew\ndef"
         
     ▸ repeat change with text
         
@@ -1924,8 +1828,7 @@ windowReset = (s) ->
             txt "one X three"
         
             s.setMainCursor 8 0
-            s.executeNovim {operator:'repeat', count:1}
-            txt "one X X"
+            ent {operator:'repeat', count:1} ▸ "one X X"
         
     ▸ repeat change without text
         
@@ -1936,51 +1839,41 @@ windowReset = (s) ->
             txt "one two"
         
             s.setMainCursor 0 0
-            s.executeNovim {operator:'repeat', count:1}
-            txt " two"
+            ent {operator:'repeat', count:1} ▸ " two"
         
     ▸ repeat put
         
             loadText "one\ntwo"
             s.novim.register.value = { lines: ['new'], linewise: true }
         
-            keys 'p'
-            txt "one\nnew\ntwo"
+            keys 'p' ▸ "one\nnew\ntwo"
         
             s.setMainCursor 0 2
-            s.executeNovim {operator:'repeat', count:1}
-            txt "one\nnew\ntwo\nnew"
+            ent {operator:'repeat', count:1} ▸ "one\nnew\ntwo\nnew"
         
             loadText "one two"
             s.novim.register.value = { lines: ['X'], linewise: false }
         
-            keys 'p'
-            txt "Xone two"
+            keys 'p' ▸ "Xone two"
         
             s.setMainCursor 4 0
-            s.executeNovim {operator:'repeat', count:1}
-            txt "XoneX two"
+            ent {operator:'repeat', count:1} ▸ "XoneX two"
         
     ▸ repeat visual delete
         
             loadText "abcdefg"
         
-            keys 'vlld'
-            txt "cdefg"
+            keys 'vlld' ▸ "cdefg"
         
-            s.executeNovim {operator:'repeat', count:1}
-            txt "efg"
+            ent {operator:'repeat', count:1} ▸ "efg"
         
-            s.executeNovim {operator:'repeat', count:1}
-            txt "g"
+            ent {operator:'repeat', count:1} ▸ "g"
         
             loadText "one\ntwo\nthree"
         
-            keys 'Vd'
-            txt "two\nthree"
+            keys 'Vd' ▸ "two\nthree"
         
-            s.executeNovim {operator:'repeat', count:1}
-            txt "three"
+            ent {operator:'repeat', count:1} ▸ "three"
         
     ▸ repeat visual change
         
@@ -1992,8 +1885,7 @@ windowReset = (s) ->
             txt "XYcdef"
         
             s.setMainCursor 2 0
-            s.executeNovim {operator:'repeat', count:1}
-            txt "XYXYef"
+            ent {operator:'repeat', count:1} ▸ "XYXYef"
         
             loadText "one\ntwo\nthree\nfour"
         
@@ -2003,8 +1895,7 @@ windowReset = (s) ->
             txt "Xtwo\nthree\nfour"
         
             s.setMainCursor 0 1
-            s.executeNovim {operator:'repeat', count:1}
-            txt "Xtwo\nXfour"
+            ent {operator:'repeat', count:1} ▸ "Xtwo\nXfour"
     
   ▸ keys
     
@@ -2017,8 +1908,8 @@ windowReset = (s) ->
     
         [m key keys] = novimKeysFor s
     
-        keys 'd2w'
-        txt """
+        keys 'd2w' ▸ 
+            """
             gamma delta
             """
     
@@ -2039,8 +1930,8 @@ windowReset = (s) ->
     
         loadText text
     
-        keys 'dw'
-        txt """
+        keys 'dw' ▸ 
+            """
             beta
             gamma delta
             """
@@ -2074,34 +1965,28 @@ windowReset = (s) ->
     
         loadText "alpha" 3 0
     
-        keys 'dh'
-        txt "alha"
+        keys 'dh' ▸ "alha"
     
         loadText "alpha"
     
-        keys 'dl'
-        txt "lpha"
+        keys 'dl' ▸ "lpha"
     
         loadText "one two three" 5 0
     
-        keys 'diw'
-        txt "one  three"
+        keys 'diw' ▸ "one  three"
         m.operator ▸ null
     
         loadText 'say "hello there" ok' 7 0
     
-        keys 'da"'
-        txt "say ok"
+        keys 'da"' ▸  "say ok"
     
         loadText "if seg not in ['', undefined, ' ', '}', ']', ')']" 21 0
     
-        keys 'di['
-        txt "if seg not in []"
+        keys 'di[' ▸ "if seg not in []"
     
         loadText "one two three"
     
-        keys 'd2iw'
-        txt " three"
+        keys 'd2iw' ▸ " three"
     
         s.loadLines belt.linesForText("abc")
     
@@ -2123,19 +2008,17 @@ windowReset = (s) ->
     
         loadText "abcdef"
     
-        keys 'xl.'
-        txt "bdef"
+        keys 'xl.' ▸ "bdef"
     
         loadText "one two three"
     
-        keys 'daw'
-        txt "two three"
+        keys 'daw' ▸ "two three"
     
         key '.'
         txt "three"
     
         loadText "one\n  two\n  three"
-        keys 'gg'   0 0
+        keys 'gg' 0 0
     
   ▸ open lines
     
@@ -2153,14 +2036,12 @@ windowReset = (s) ->
     
         loadText "abc"
     
-        keys '2o'
-        txt "abc\n\n"
+        keys '2o' ▸ "abc\n\n"
         cur 0 2
     
         loadText "abc"
     
-        keys '2O'
-        txt "\n\nabc"
+        keys '2O' ▸ "\n\nabc"
         cur 0 0
     
   ▸ insert at first non blank
@@ -2189,20 +2070,17 @@ windowReset = (s) ->
     
         loadText "abcdef"
     
-        keys '3rx'
-        txt "xxxdef"
+        keys '3rx' ▸ "xxxdef"
         cur 3 0
     
         loadText "ab" 1 0
     
-        keys '3rx'
-        txt "ab"
+        keys '3rx' ▸ "ab"
         cur 1 0
     
         loadText "abc"
     
-        keys 'rX.'
-        txt "XXc"
+        keys 'rX.' ▸ "XXc"
         cur 2 0
     
         loadText "abcdef"
@@ -2218,8 +2096,7 @@ windowReset = (s) ->
 
         [m key keys] = novimKeysFor s
 
-        keys 'RXY'
-        txt "XYcdef"
+        keys 'RXY' ▸ "XYcdef"
         cur 2 0
         s.novim.insert.kind ▸ 'replace'
 
@@ -2239,8 +2116,7 @@ windowReset = (s) ->
 
         loadText "abc" 2 0
 
-        keys 'RXY'
-        txt "abXY"
+        keys 'RXY' ▸ "abXY"
         cur 4 0
         key 'esc'
 
@@ -2254,8 +2130,7 @@ windowReset = (s) ->
         s.loadLines belt.linesForText("abc\ndef")
         s.setCursors [[0 0] [0 1]]
 
-        keys 'RX'
-        txt "Xbc\nXef"
+        keys 'RX' ▸ "Xbc\nXef"
 
         key 'delete'
         txt "abc\ndef"
@@ -2275,8 +2150,7 @@ windowReset = (s) ->
         keys 'RXY'
         key 'esc'
         s.setMainCursor 0 1
-        keys '.'
-        txt "XYcdef\nXYijkl"
+        keys '.' ▸ "XYcdef\nXYijkl"
         cur 2 1
 
         loadText "abcdef\nghijkl"
@@ -2284,8 +2158,7 @@ windowReset = (s) ->
         keys '2RXY'
         key 'esc'
         s.setMainCursor 0 1
-        keys '.'
-        txt "XYXYef\nXYXYkl"
+        keys '.' ▸ "XYXYef\nXYXYkl"
         cur 4 1
 
         loadText "one two"
@@ -2319,37 +2192,32 @@ windowReset = (s) ->
 
         [m key keys] = novimKeysFor s
 
-        keys 'vllrX'
-        txt "aXXd\nefgh\nijkl"
+        keys 'vllrX' ▸ "aXXd\nefgh\nijkl"
         s.novim.visual ▸ null
         cur 1 0
 
         loadText "abcd\nefgh\nijkl"
 
-        keys 'VjrX'
-        txt "XXXX\nXXXX\nijkl"
+        keys 'VjrX' ▸ "XXXX\nXXXX\nijkl"
         s.novim.visual ▸ null
         cur 0 0
 
         loadText "abcd\nefgh\nijkl" 1 0
 
         key 'ctrl+v'
-        keys 'jllrX'
-        txt "aXXd\neXXh\nijkl"
+        keys 'jllrX' ▸ "aXXd\neXXh\nijkl"
         s.novim.visual ▸ null
         cur 1 0
 
         loadText "abcd\nefgh\nijkl" 1 0
 
-        keys 'vllrXj.'
-        txt "aXXd\neXXh\nijkl"
+        keys 'vllrXj.' ▸ "aXXd\neXXh\nijkl"
         cur 1 1
 
         loadText "abcd\nefgh\nijkl" 1 0
 
         key 'ctrl+v'
-        keys 'jllrXj.'
-        txt "aXXd\neXXh\niXXl"
+        keys 'jllrXj.' ▸ "aXXd\neXXh\niXXl"
         cur 1 1
 
         loadText "abcd\nefgh" 1 0
@@ -2369,26 +2237,22 @@ windowReset = (s) ->
     
         loadText "abc"
     
-        key '~'
-        txt "Abc"
+        keys '~' ▸ "Abc"
         cur 1 0
     
         loadText "aBc"
     
-        keys '3~'
-        txt "AbC"
+        keys '3~' ▸ "AbC"
         cur 2 0
     
         loadText "abc" 2 0
     
-        key '~'
-        txt "abC"
+        keys '~' ▸ "abC"
         cur 2 0
     
         loadText "abcd"
     
-        keys '~l.'
-        txt "AbCd"
+        keys '~l.' ▸ "AbCd"
         cur 3 0
 
   ▸ case operators
@@ -2397,125 +2261,105 @@ windowReset = (s) ->
 
         [m key keys] = novimKeysFor s
 
-        keys 'guw'
-        txt "hello World"
+        keys 'guw' ▸ "hello World"
         cur 0 0
 
         loadText "Hello World"
 
-        keys 'gUiw'
-        txt "HELLO World"
+        keys 'gUiw' ▸ "HELLO World"
         cur 0 0
 
         loadText "Hello World"
 
-        keys 'g~w'
-        txt "hELLO World"
+        keys 'g~w' ▸ "hELLO World"
         cur 0 0
 
         loadText "Hello World"
 
-        keys 'guu'
-        txt "hello world"
+        keys 'guu' ▸ "hello world"
         cur 0 0
 
         loadText "hello world"
 
-        keys 'gUU'
-        txt "HELLO WORLD"
+        keys 'gUU' ▸ "HELLO WORLD"
         cur 0 0
 
         loadText "Hello World"
 
-        keys 'g~~'
-        txt "hELLO wORLD"
+        keys 'g~~' ▸ "hELLO wORLD"
         cur 0 0
 
         loadText "hello\nworld\nagain"
 
-        keys '3gUU'
-        txt "HELLO\nWORLD\nAGAIN"
+        keys '3gUU' ▸ "HELLO\nWORLD\nAGAIN"
         cur 0 0
 
         loadText "hello\nworld\nagain"
 
-        keys 'gUj'
-        txt "HELLO\nWORLD\nagain"
+        keys 'gUj' ▸ "HELLO\nWORLD\nagain"
         cur 0 0
 
         loadText "HELLO WORLD"
 
-        keys 'vllgu'
-        txt "heLLO WORLD"
+        keys 'vllgu' ▸ "heLLO WORLD"
         cur 0 0
 
         loadText "hello world"
 
-        keys 'vllU'
-        txt "HEllo world"
+        keys 'vllU' ▸ "HEllo world"
         cur 0 0
 
         loadText "Hello World"
 
-        keys 'vllg~'
-        txt "hEllo World"
+        keys 'vllg~' ▸ "hEllo World"
         cur 0 0
 
         loadText "hello world"
 
-        keys 'vllgU'
-        txt "HEllo world"
+        keys 'vllgU' ▸ "HEllo world"
         cur 0 0
 
         loadText "aBcD\neFgH"
 
         key 'ctrl+v'
-        keys 'ljgU'
-        txt "ABcD\nEFgH"
+        keys 'ljgU' ▸ "ABcD\nEFgH"
         cur 0 0
 
         loadText "HELLO WORLD"
 
-        keys 'vllguw.'
-        txt "heLLO woRLD"
+        keys 'vllguw.' ▸ "heLLO woRLD"
         cur 6 0
 
         loadText "HELLO WORLD"
 
-        keys 'guww.'
-        txt "hello world"
+        keys 'guww.' ▸ "hello world"
         cur 6 0
 
   ▸ join lines
     
         loadText "one\ntwo\nthree"
     
-        key 'J'
-        txt "one two\nthree"
+        keys 'J' ▸ "one two\nthree"
         cur 3 0
     
         loadText "one  \n   two\nthree"
     
-        key 'J'
-        txt "one two\nthree"
+        keys 'J' ▸ "one two\nthree"
         cur 3 0
     
         loadText "  one\n    two"
     
-        key 'J'
-        txt "  one two"
+        keys 'J' ▸ "  one two"
         cur 5 0
     
         loadText "one\ntwo\nthree"
     
-        keys '3J'
-        txt "one two three"
+        keys '3J' ▸ "one two three"
         cur 3 0
     
         loadText "one\ntwo\nthree" 0 1
     
-        key 'J'
-        txt "one\ntwo three"
+        keys 'J' ▸ "one\ntwo three"
         cur 3 1
     
   ▸ match bracket
@@ -2564,12 +2408,10 @@ windowReset = (s) ->
         cur 9 0
     
         loadText "one two. three four."
-        keys 'd)'
-        txt "three four."
+        keys 'd)' ▸ "three four."
     
         loadText "one two. three four." 9 0
-        keys 'd('
-        txt "three four."
+        keys 'd(' ▸ "three four."
     
         loadText "one two. three four."
         keys 'v)'
@@ -2600,16 +2442,14 @@ windowReset = (s) ->
         cur 0 4
     
         s.setMainCursor 0 2
-        keys 'd}'
-        txt "a\n\nd"
+        keys 'd}' ▸ "a\n\nd"
     
         loadText "hello world\nfoo bar\n\nbaz" 6 0
-        keys 'd}'
-        txt "hello \n\nbaz"
+        keys 'd}' ▸ "hello \n\nbaz"
         cur 6 0
     
         loadText "a\n\nb"
-        keys 'v}'
+        keys 'v}' 
         s.s.selections ▸ [[0 0 0 1]]
         cur 0 1
         key 'esc'
@@ -2638,20 +2478,16 @@ windowReset = (s) ->
         cur 1 2
     
         loadText "one\ntwo\nthree\nfour" 0 1
-        keys 'd+'
-        txt "one\nfour"
+        keys 'd+' ▸ "one\nfour"
     
         loadText "one\ntwo\nthree\nfour" 0 2
-        keys 'd-'
-        txt "one\nfour"
+        keys 'd-' ▸ "one\nfour"
     
         loadText "one\ntwo\nthree" 3 1
-        keys 'd_'
-        txt "one\nthree"
+        keys 'd_' ▸ "one\nthree"
     
         loadText "one\ntwo\nthree\nfour" 3 0
-        keys '2d_'
-        txt "three\nfour"
+        keys '2d_' ▸ "three\nfour"
     
   ▸ search word under cursor
     
@@ -2775,9 +2611,7 @@ windowReset = (s) ->
 
         loadText "aaa\nbbb\nccc\nddd" 0 1
 
-        keys 'Vj'
-        key 'd'
-        txt "aaa\nddd"
+        keys 'Vjd' ▸ "aaa\nddd"
         keys 'gv'
         s.novim.visual ▸ 'line'
         s.s.selections ▸ [[0 1 3 1]]
@@ -2832,8 +2666,7 @@ windowReset = (s) ->
         
             loadText "abcd\nefgh" 1 0
         
-            key 'v'
-            key 'j'
+            keys 'vj'
             s.s.selections ▸ [[1 0 1 1]]
             cur 1 1
         
@@ -2959,10 +2792,7 @@ windowReset = (s) ->
             loadText "abcd\nefgh"
         
             key 'ctrl+v'
-            keys 'lj'
-            key 'c'
-        
-            txt "abcd\nefgh"
+            keys 'ljc' ▸ "abcd\nefgh"
             s.s.selections ▸ [[0 0 1 0] [0 1 1 1]]
         
             s.insert 'XY'
@@ -2980,8 +2810,7 @@ windowReset = (s) ->
             loadText "abcd\nefgh"
         
             key 'ctrl+v'
-            keys 'lj'
-            key 'I'
+            keys 'ljI'
         
             s.novim.visual ▸ null
             s.s.selections ▸ []
@@ -2994,8 +2823,7 @@ windowReset = (s) ->
             loadText "abcd\nefgh"
         
             key 'ctrl+v'
-            keys 'lj'
-            key 'A'
+            keys 'ljA'
         
             s.novim.visual ▸ null
             s.s.selections ▸ []
@@ -3007,8 +2835,7 @@ windowReset = (s) ->
             loadText "abcd\nefgh\nijkl"
         
             key 'ctrl+v'
-            keys 'lj'
-            key 'I'
+            keys 'ljI'
             s.insert 'X'
             s.finishNovimInsert()
             txt "Xabcd\nXefgh\nijkl"
@@ -3018,8 +2845,7 @@ windowReset = (s) ->
             txt "Xabcd\nXefgh\nXijkl"
         
             key 'ctrl+v'
-            key 'j'
-            key 'I'
+            key 'jI'
             s.novim.visual ▸ 'block'
             s.s.selections ▸ []
         
@@ -3048,16 +2874,14 @@ windowReset = (s) ->
         
             loadText "one two"
         
-            keys 'vlld'
-            txt "e two"
+            keys 'vlld' ▸ "e two"
             s.novim.register.value.lines ▸ ['on']
             s.novim.visual ▸ null
             cur 0 0
         
             loadText "one\ntwo\nthree" 0 1
         
-            keys 'Vd'
-            txt "one\nthree"
+            keys 'Vd' ▸ "one\nthree"
             s.novim.register.value.lines ▸ ['two']
             s.novim.register.value.linewise ▸ true
             cur 0 1
@@ -3066,8 +2890,7 @@ windowReset = (s) ->
         
             loadText "one two"
         
-            keys 'vllc'
-            txt "one two"
+            keys 'vllc' ▸ "one two"
             s.s.selections ▸ [[0 0 2 0]]
             cur 2 0
             s.novim.visual ▸ null
@@ -3143,73 +2966,62 @@ windowReset = (s) ->
         
             loadText "one\ntwo\nthree"
         
-            keys '>>'
-            txt "    one\ntwo\nthree"
+            keys '>>' ▸ "    one\ntwo\nthree"
             cur 4 0
         
             loadText "one\ntwo\nthree"
         
-            keys '2>>'
-            txt "    one\n    two\nthree"
+            keys '2>>' ▸ "    one\n    two\nthree"
             cur 4 0
         
             loadText "one\ntwo\nthree"
         
-            keys '>j'
-            txt "    one\n    two\nthree"
+            keys '>j' ▸ "    one\n    two\nthree"
         
             loadText "one\ntwo\nthree"
         
-            keys '>>j.'
-            txt "    one\n    two\nthree"
+            keys '>>j.' ▸ "    one\n    two\nthree"
         
     ▸ deindent lines
         
             loadText "    one\n        two\n            three"
         
-            keys '<<'
-            txt "one\n        two\n            three"
+            keys '<<' ▸ "one\n        two\n            three"
             cur 0 0
         
             loadText "    one\n        two\n            three"
         
-            keys '2<<'
-            txt "one\n    two\n            three"
+            keys '2<<' ▸ "one\n    two\n            three"
             cur 0 0
         
             loadText "    one\n        two\n            three"
         
-            keys '<j'
-            txt "one\n    two\n            three"
+            keys '<j' ▸ "one\n    two\n            three"
         
     ▸ visual indent
         
             loadText "one\ntwo\nthree" 1 1
         
-            keys 'Vj>'
-            txt "one\n    two\n    three"
+            keys 'Vj>' ▸ "one\n    two\n    three"
             s.novim.visual ▸ 'line'
             s.s.selections ▸ [[0 1 9 2]]
             cur 5 2
         
-            key '>'
-            txt "one\n        two\n        three"
+            keys '>' ▸ "one\n        two\n        three"
             s.novim.visual ▸ 'line'
             s.s.selections ▸ [[0 1 13 2]]
             cur 9 2
         
             loadText "    one\n        two\n            three" 1 1
         
-            keys 'Vj<'
-            txt "    one\n    two\n        three"
+            keys 'Vj<' ▸ "    one\n    two\n        three"
             s.novim.visual ▸ 'line'
             s.s.selections ▸ [[0 1 13 2]]
             cur 0 2
         
             loadText "one\ntwo\nthree" 0 1
         
-            keys 'vlj>'
-            txt "one\n    two\n    three"
+            keys 'vlj>' ▸ "one\n    two\n    three"
             s.novim.visual ▸ 'char'
             s.s.selections ▸ [[4 1 5 2]]
             cur 5 2

@@ -121,7 +121,7 @@
 
 #### visual
 
-    v  V  ctrl+v                       select by char, line, block
+    v  V  ctrl+v                        select by char, line, block
     r{char}                             replace the selected chars with char
     gv                                  reselect the last visual area
 
