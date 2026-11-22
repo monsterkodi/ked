@@ -175,7 +175,7 @@ editorFor = lines ->
             belt.insertTextAtPositions lines 'ｔ'      [[0 0]] ▸ [kseg.segls('ｔline 1\nline 2') [[2 0]]]
             belt.insertTextAtPositions kseg.segls('ｔline 1\nline 2') 'ｔ'      [[2 0]] ▸ [kseg.segls('ｔｔline 1\nline 2') [[4 0]]]
             
-    ▸ multiple lines into single cursor
+    ▸ multiple lines 
          
             lines = belt.seglsForText 
                 """
@@ -189,8 +189,6 @@ editorFor = lines ->
             
             belt.insertTextAtPositions lines 'a\n'    [[0 1]]       ▸ [kseg.segls('line 1\na\nline 2') [[0 2]]]
 
-    ▸ multiple lines into multi cursor
-         
             lines = belt.seglsForText 
                 """
                 1234
@@ -237,18 +235,10 @@ editorFor = lines ->
                         ◆3
                 """
              
-      ▸ single span 
-         
-                belt.insertTextAtPositions lines '~!' [[4 1]] ▸ [kseg.segls('◆1\n    ~!◆2\n        ◆3') [[6 1]]]
-                belt.insertTextAtPositions lines '#{' [[2 2]] ▸ [kseg.segls('◆1\n    ◆2\n  #{      ◆3') [[4 2]]]
-                 
-      ▸ newline into single cursor
-     
-                belt.insertTextAtPositions lines '\n' [[4 1]] ▸ [kseg.segls('◆1\n    \n    ◆2\n        ◆3') [[4 2]]]
-             
-      ▸ multiple lines into single cursor
-             
-                belt.insertTextAtPositions lines 'a\nb' [[4 1]] ▸ [kseg.segls('◆1\n    a\n    b\n    ◆2\n        ◆3') [[4 3]]]
+            belt.insertTextAtPositions lines '~!'   [[4 1]] ▸ [kseg.segls('◆1\n    ~!◆2\n        ◆3') [[6 1]]]
+            belt.insertTextAtPositions lines '#{'   [[2 2]] ▸ [kseg.segls('◆1\n    ◆2\n  #{      ◆3') [[4 2]]]
+            belt.insertTextAtPositions lines '\n'   [[4 1]] ▸ [kseg.segls('◆1\n    \n    ◆2\n        ◆3') [[4 2]]]
+            belt.insertTextAtPositions lines 'a\nb' [[4 1]] ▸ [kseg.segls('◆1\n    a\n    b\n    ◆2\n        ◆3') [[4 3]]]
 
   ▸ insertSurroundAtRanges
 
@@ -299,7 +289,7 @@ editorFor = lines ->
         belt.moveLineRangesAndPositionsAtIndicesInDirection lines rngs immutable([[0 1] [0 2] [0 3]]) [1 2 3] 'up'   ▸ [['b' 'c' 'd' 'a' 'e'] [] [[0 0] [0 1] [0 2]]]
         belt.moveLineRangesAndPositionsAtIndicesInDirection lines rngs immutable([[0 1] [0 2] [0 3]]) [1 2 3] 'down' ▸ [['a' 'e' 'b' 'c' 'd'] [] [[0 2] [0 3] [0 4]]]
         
-  ▸ cachedWords keeps the segmentation of a chunk
+  ▸ cachedWords
     
         a = belt.cachedWords 'abc.def'
         b = belt.cachedWords 'abc.def'
@@ -375,23 +365,13 @@ editorFor = lines ->
      
 ▸ syntaxColorAtMainCursor
 
-  ▸ uses the character left of the cursor
-
         e = editorFor ['class Foo']
         e.state.setMainCursor 5 0
 
         e.syntaxColorAtMainCursor() ▸ (color.hex(theme.syntax.keyword))
 
-  ▸ falls back to the character right of the cursor
-
-        e = editorFor ['class Foo']
         e.state.setMainCursor 0 0
-
         e.syntaxColorAtMainCursor() ▸ (color.hex(theme.syntax.keyword))
 
-  ▸ returns null outside of the line
-
-        e = editorFor ['class Foo']
         e.state.setMainCursor 20 0
-
         e.syntaxColorAtMainCursor() ▸ null

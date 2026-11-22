@@ -260,7 +260,7 @@ pasteKeys = (chunks) ->
         keyscript.steps 'cmd+o down'    ▸ [['cmd+o' '\x1b[111;9u'] ['down' '\x1b[B']]
         keyscript.steps 'ab'            ▸ [['a' 'a'] ['b' 'b']]
         keyscript.steps ''              ▸ []
-
+#!cells
 cell = ->
     t = new ttio headless:true input:false cols:20 rows:6
     s = new screen t
