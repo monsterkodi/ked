@@ -2,7 +2,7 @@
 use ../../kxk ▪ immutable kstr kseg events absMin post
 use ../../kxk ◆ clip
 use ../util   ◆ syntax config
-use ./act     ◆ del insert select join indent multi main novim sort count range macro jump
+use ./act     ◆ del insert select join indent multi main novim sort count range macro jump sheet
 use ./tool    ◆ belt colorspans jumplist changelist motion sue register
 use           ◆ mode keys
 
@@ -21,7 +21,7 @@ use           ◆ mode keys
 
         @allowedModes   = {}
 
-        for act in [del insert select join indent multi main jump novim sort count range macro]
+        for act in [del insert select join indent multi main jump novim sort count range macro sheet]
             for k,v of act
                 @[k] = v.bind @
                 
