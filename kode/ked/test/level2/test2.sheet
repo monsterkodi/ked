@@ -15,24 +15,24 @@ children
                 b           2
                 children
                     .
-                        text    |HELLO world! isn't this a reallsun shine happy day?     |
+                        text    |HELLO world! isn't this a really sun-shine happy day?     |
                         x       9%
-                        y       3
-                        w       50%
-                        h       8
-                        scale   2
+                        y       5
+                        w       104
+                        h       12
+                        scale   4
                         bg      |#000000|
                         fg      |#f5ff69|
                     .
                         text    test TESTTSST
-                        x       7
-                        y       14
-                        w       14
+                        x       11
+                        y       22
+                        w       30
                         h       1
                     .
-                        text    ||
+                        text    y
                         x       73
-                        y       4
-                        w       2
+                        y       22
+                        w       1
                         h       1
 x           0

@@ -394,6 +394,17 @@ use ../edit/tool ◆ sue
             res = clamp minv maxv old+dir
             ⮐ res if res != old
 
+    @removeNode: rectree node ->
+
+        parent = @parentOf rectree node
+
+        ⮐ if not parent?
+
+        parent.children.splice parent.children.indexOf(node) 1
+        delete parent.children if empty parent.children
+
+        parent
+
     @parentOf: node target ->
 
         for child in node.children ? []

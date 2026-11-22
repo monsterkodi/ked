@@ -153,6 +153,22 @@ export
 
         not pct
 
+    deleteSheetNode: node ->
+
+        ⮐ if not @rectree?
+
+        cells = @sheetSize()
+        cell  = @sheetCellForPos @mainCursor()
+        node ?= layout.nodeForPos cells @rectree cell
+
+        ⮐ if not layout.removeNode(@rectree node)?
+
+        layout.regionize cells @rectree
+
+        @renderSheet @rectree cells cell
+
+        node
+
     sheetBackspace: ->
 
         cells = @sheetSize()

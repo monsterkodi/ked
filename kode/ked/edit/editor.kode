@@ -176,6 +176,14 @@ use                ◆ state draw complete mode susan keys
 
         @redraw()
  
+    deleteSheetNode: node =>
+
+        @state.deleteSheetNode node
+
+        @redraw()
+
+        true
+
     scaleSheetNode: delta =>
 
         @state.scaleSheetNode delta
@@ -218,6 +226,7 @@ use                ◆ state draw complete mode susan keys
 
         if @state.rectree?
             switch key
+                'ctrl+alt+delete' 'ctrl+alt+entf' ➜ ⮐ @deleteSheetNode()
                 'shift+alt+='                ➜ ⮐ @scaleSheetNode 1
                 'shift+alt+-'                ➜ ⮐ @scaleSheetNode -1
                 'shift+alt+0'                ➜ ⮐ @scaleSheetNode 0

@@ -81,6 +81,7 @@ use ../menu         ◆ filterchoice
     onSheetEdited: =>
 
         @reloadTree()
+        @showRect()
         
     onCursorsSet: =>
 
