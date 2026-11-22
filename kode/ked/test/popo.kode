@@ -15,18 +15,25 @@ areas   = data type -> data.sue.filter((area) -> area.value[0] == type)
 
 h = e = null
 
-sheet = name features=[] ->
-    h = new harness cols:16 rows:4
-    e = new editor h.screen name features
-    e.layout 0 0 16 4
-    e.state.loadLines ['                ' '                ' '                ' '                ']
+sheet = name features=[] rows=4 cls=editor ->
+    global.ked_session ?= get:(-> null) set:(->)
+    h = new harness cols:16 rows:rows
+    e = new cls h.screen name features
+    e.layout 0 0 16 rows
+    e.state.loadLines Array(rows).fill(' '.repeat(16))
 
-rt = path -> sds.get e.state.rectree path
+rt  = path -> sds.get e.state.rectree path
+mc  = -> e.state.mainCursor()
+key = combo -> h.key e combo
 
-loadSheet = tree cursor ->
-    e.state.setSheetTree tree 16 4
-    e.state.renderSheet tree {cols:16 rows:4} cursor history:false silent:true
+click = x y -> e.onMouse type:'press' cell:[x+e.cells.x y+e.cells.y] button:'left' count:1
+
+loadSheet = tree cursor=[0 0] ->
+    e.state.setSheetTree tree h.cols h.rows
+    e.state.renderSheet tree {cols:h.cols rows:h.rows} cursor history:false silent:true
     e.state.clearHistory()
+
+bands = -> {children:[{ text:'abcdef' x:2 y:1 w:8 h:4 scale:2 } { text:'xy' x:2 y:6 w:4 h:1 }]}
 
 showSue = data ->
     e.state.loadLines data.text.split('\n')
@@ -755,15 +762,9 @@ showSue = data ->
 
   ▸ sheet cursor up and down
 
-        h = new harness cols:16 rows:8
-        e = new editor h.screen 'popo_sheet_updown' []
-        e.layout 0 0 16 8
+        sheet 'popo_sheet_updown' [] 8
         e.grabFocus()
-
-        tree = {children:[{ text:'abcdef' x:2 y:1 w:8 h:4 scale:2 } { text:'xy' x:2 y:6 w:4 h:1 }]}
-
-        e.state.setSheetTree tree 16 8
-        e.state.renderSheet tree {cols:16 rows:8} [0 0] history:false silent:true
+        loadSheet bands()
 
         # 'abcd' sits on line 2, 'ef' on line 4, both bands are two rows high
 
@@ -771,64 +772,44 @@ showSue = data ->
         kseg.str(e.state.s.lines[4]).trimEnd() ▸ '  ef'
 
         e.state.setCursors [[2 0]]
-        h.key e 'down' ; e.state.mainCursor() ▸ [2 2]
-        h.key e 'down' ; e.state.mainCursor() ▸ [2 4]
-        h.key e 'down' ; e.state.mainCursor() ▸ [2 5]
-        h.key e 'down' ; e.state.mainCursor() ▸ [2 6]
-        h.key e 'up'   ; e.state.mainCursor() ▸ [2 5]
-        h.key e 'up'   ; e.state.mainCursor() ▸ [2 4]
-        h.key e 'up'   ; e.state.mainCursor() ▸ [2 2]
-        h.key e 'up'   ; e.state.mainCursor() ▸ [2 0]
+        key 'down' ; mc() ▸ [2 2]
+        key 'down' ; mc() ▸ [2 4]
+        key 'down' ; mc() ▸ [2 5]
+        key 'down' ; mc() ▸ [2 6]
+        key 'up'   ; mc() ▸ [2 5]
+        key 'up'   ; mc() ▸ [2 4]
+        key 'up'   ; mc() ▸ [2 2]
+        key 'up'   ; mc() ▸ [2 0]
 
         # the second column of a glyph lands on the glyph
 
-        e.state.setCursors [[3 0]]
-        h.key e 'down' ; e.state.mainCursor() ▸ [2 2]
+        e.state.setCursors [[3 0]] ; key 'down' ; mc() ▸ [2 2]
 
         # the empty part of a scaled rect moves by bands too
 
-        e.state.setCursors [[7 3]]
-        h.key e 'down' ; e.state.mainCursor() ▸ [7 5]
-
-        e.state.setCursors [[7 3]]
-        h.key e 'up'   ; e.state.mainCursor() ▸ [4 2]
-
-        e.state.setCursors [[5 4]]
-        e.state.sheetCellForPos(e.state.mainCursor()) ▸ [7 4]
-        h.key e 'up'   ; e.state.mainCursor() ▸ [4 2]
+        e.state.setCursors [[7 3]] ; key 'down' ; mc() ▸ [7 5]
+        e.state.setCursors [[7 3]] ; key 'up'   ; mc() ▸ [4 2]
+        e.state.setCursors [[5 4]] ; key 'up'   ; mc() ▸ [4 2]
 
         # counts step band by band
 
-        e.state.setCursors [[2 0]]
-        e.state.moveCursors 'down' count:2
-        e.state.mainCursor() ▸ [2 4]
+        e.state.setCursors [[2 0]] ; e.state.moveCursors 'down' count:2 ; mc() ▸ [2 4]
 
   ▸ sheet clicks
 
-        global.ked_session ?= get:(-> null) set:(->)
-
-        h = new harness cols:16 rows:8
-        e = new fileeditor h.screen 'popo_sheet_click'
-        e.layout 0 0 16 8
-
-        tree = {children:[{ text:'abcdef' x:2 y:1 w:8 h:4 scale:2 } { text:'xy' x:2 y:6 w:4 h:1 }]}
-
-        e.state.setSheetTree tree 16 8
-        e.state.renderSheet tree {cols:16 rows:8} [0 0] history:false silent:true
-
-        click = (x y) -> e.onMouse type:'press' cell:[x+e.cells.x y+e.cells.y] button:'left' count:1
+        sheet 'popo_sheet_click' [] 8 fileeditor
+        loadSheet bands()
 
         # a click on a scaled glyph or into its band lands on the line of the band
 
-        click 5 2 ; e.state.mainCursor() ▸ [3 2]
-        click 5 1 ; e.state.mainCursor() ▸ [3 2]
-        click 8 3 ; e.state.mainCursor() ▸ [6 4]
-        click 3 6 ; e.state.mainCursor() ▸ [3 6]
-        click 3 5 ; e.state.mainCursor() ▸ [3 5]
+        click 5 2 ; mc() ▸ [3 2]
+        click 5 1 ; mc() ▸ [3 2]
+        click 8 3 ; mc() ▸ [6 4]
+        click 3 6 ; mc() ▸ [3 6]
+        click 3 5 ; mc() ▸ [3 5]
 
         # a click keeps the cell rect of the sheet node
 
         post.emit 'cells.rect' {x:2 y:1 w:8 h:4}
-        e.cells.cellRect ▸ {x:2 y:1 w:8 h:4}
         click 4 2
         e.cells.cellRect ▸ {x:2 y:1 w:8 h:4}
