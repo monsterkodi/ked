@@ -95,10 +95,12 @@ use ../menu         ◆ filterchoice
             
     jumpTo: choice => 
         
+        state = @editor.state
         rect  = choice.rect.abs
-        scale = layout.scaleOf choice
-        pos   = @editor.state.sheetPosForCell [rect.x rect.y+scale-1] # scaled glyphs sit on the bottom row of their band
-        post.emit 'goto.line' pos[1] pos[0]
+
+        if not layout.holds choice, state.sheetCellForPos(state.mainCursor())
+            pos = state.sheetPosForCell [rect.x rect.y+layout.scaleOf(choice)-1]
+            post.emit 'goto.line' pos[1] pos[0]
         node = @current()
         node.index = @currentIndex()
         @emit 'tree.node' node

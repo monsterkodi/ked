@@ -930,3 +930,15 @@ showSue = data ->
         post.emit 'cells.rect' {x:2 y:1 w:8 h:4}
         click 4 2
         e.cells.cellRect ▸ {x:2 y:1 w:8 h:4}
+
+        se = new sheeditor h.screen e 'popo_sheeditor_jump'
+        se.show()
+        se.layout 0 0 16 8
+
+        loadSheet {children:[{ text:'abc' x:2 y:1 w:6 h:2 } { text:'z' x:10 y:0 w:2 h:1 }]}
+        se.sheetree.reloadTree()
+
+        e.state.setCursors [[4 2]]
+        se.sheetree.select 0 ; se.sheetree.jumpTo se.sheetree.current() ; mc() ▸ [4 2]
+        se.sheetree.select 1 ; se.sheetree.jumpTo se.sheetree.current() ; mc() ▸ [10 0]
+        se.sheetree.select 0 ; se.sheetree.jumpTo se.sheetree.current() ; mc() ▸ [2 1]
