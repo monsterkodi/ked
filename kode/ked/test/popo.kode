@@ -942,3 +942,8 @@ showSue = data ->
         se.sheetree.select 0 ; se.sheetree.jumpTo se.sheetree.current() ; mc() ▸ [4 2]
         se.sheetree.select 1 ; se.sheetree.jumpTo se.sheetree.current() ; mc() ▸ [10 0]
         se.sheetree.select 0 ; se.sheetree.jumpTo se.sheetree.current() ; mc() ▸ [2 1]
+
+        se.sheetree.grabFocus()
+        se.sheetree.select 1
+        se.onKey 'delete' h.event('delete') ; rt('children').length ▸ 1 ; rt('children.0.text') ▸ 'abc'
+        se.onKey 'entf'   h.event('entf')   ; rt('children')? ▸ false

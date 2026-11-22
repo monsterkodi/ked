@@ -150,6 +150,11 @@ use ../menu         ◆ filterchoice
             
                 @jumpTo choice
                 ⮐ 
+
+            'delete' 'entf'
+
+                @editor.deleteSheetNode choice
+                ⮐ true
                 
             # ➜ log 'unhandled action?' action
                  
