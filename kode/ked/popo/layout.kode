@@ -467,15 +467,24 @@ use ../edit/tool ◆ sue
         target   = dir == 'up' ? index-1 : index+1
 
         if 0 <= target < siblings.length
-            siblings.splice index 1
-            siblings.splice target 0 node
+
+            other = siblings[target]
+
+            if valid other.children
+                @reframe node parent.rect.abs other.rect.abs
+                siblings.splice index 1
+                if dir == 'up' ➜ other.children.push node else other.children.unshift node
+            else
+                siblings.splice index 1
+                siblings.splice target 0 node
+
             ⮐ true
 
         grand = @parentOf rectree parent
 
         ⮐ false if not grand?
 
-        @reframe node parent grand
+        @reframe node parent.rect.abs grand.rect.abs
 
         siblings.splice index 1
         delete parent.children if empty siblings
@@ -485,22 +494,24 @@ use ../edit/tool ◆ sue
 
         true
 
-    @reframe: node parent grand ->
+    @reframe: node from to ->
 
-        inner = parent.rect.rel
-        outer = grand.rect.abs
+        dx = from.x - to.x
+        dy = from.y - to.y
+        dr = (to.x + to.w) - (from.x + from.w)
+        db = (to.y + to.h) - (from.y + from.h)
 
         cells = (value) -> value? and not (value is str)
 
-        node.x = node.x + inner.x if cells node.x
-        node.y = node.y + inner.y if cells node.y
-        node.r = node.r + outer.w - inner.x - inner.w if cells node.r
-        node.b = node.b + outer.h - inner.y - inner.h if cells node.b
+        node.x = node.x + dx if cells node.x
+        node.y = node.y + dy if cells node.y
+        node.r = node.r + dr if cells node.r
+        node.b = node.b + db if cells node.b
 
-        node.x ?= inner.x
-        node.y ?= inner.y
-        node.r  = outer.w - inner.x - inner.w if not node.w? and not node.r?
-        node.b  = outer.h - inner.y - inner.h if not node.h? and not node.b?
+        node.x ?= dx
+        node.y ?= dy
+        node.r  = dr if not node.w? and not node.r?
+        node.b  = db if not node.h? and not node.b?
 
     @parentOf: node target ->
 

@@ -1012,18 +1012,20 @@ showSue = data ->
         se.sheetree.grabFocus()
         se.sheetree.select 0
 
-        cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'a' 'd'] ; se.sheetree.current().text ▸ 'a'
-        cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'd' 'a'] ; se.sheetree.current().text ▸ 'a'
+        cmd 'alt+down' ; order() ▸ ['b' 'a' 'c' 'e' 'd'] ; rt('children.0.children.0.text') ▸ 'a' ; rt('children.0.children.0.x') ▸ -4
+        cmd 'alt+down' ; order() ▸ ['b' 'c' 'a' 'e' 'd']
+        cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'a' 'd']
+        cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'a' 'd'] ; rt('children.1.text') ▸ 'a' ; rect('a') ▸ {x:0 y:0 w:2 h:1}
+        cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'd' 'a']
         cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'd' 'a']
         cmd 'alt+up'   ; order() ▸ ['b' 'c' 'e' 'a' 'd']
+        cmd 'alt+up'   ; order() ▸ ['b' 'c' 'e' 'a' 'd'] ; rt('children.0.children.2.text') ▸ 'a'
+        cmd 'alt+up'   ; order() ▸ ['b' 'c' 'a' 'e' 'd'] ; se.sheetree.current().text ▸ 'a'
 
         se.sheetree.select 1 ; rect('c') ▸ {x:5 y:2 w:2 h:1}
-        cmd 'alt+down' ; order() ▸ ['b' 'e' 'c' 'a' 'd'] ; rect('c') ▸ {x:5 y:2 w:2 h:1}
-        cmd 'alt+down' ; order() ▸ ['b' 'e' 'c' 'a' 'd'] ; rt('children.1.text') ▸ 'c' ; rect('c') ▸ {x:5 y:2 w:2 h:1}
-        se.sheetree.current().text ▸ 'c'
+        cmd 'alt+up'   ; order() ▸ ['c' 'b' 'a' 'e' 'd'] ; rect('c') ▸ {x:5 y:2 w:2 h:1}
 
-        se.sheetree.select 1 ; rect('e') ▸ {x:8 y:3 w:3 h:1}
-        cmd 'alt+up' ; order() ▸ ['e' 'b' 'c' 'a' 'd'] ; rt('children.1.children')? ▸ false ; se.sheetree.current().text ▸ 'e'
-        rect('e') ▸ {x:8 y:3 w:3 h:1}
+        se.sheetree.select 3 ; rect('e') ▸ {x:8 y:3 w:3 h:1}
+        cmd 'alt+down' ; order() ▸ ['c' 'b' 'a' 'e' 'd'] ; rt('children.2.text') ▸ 'e' ; rect('e') ▸ {x:8 y:3 w:3 h:1}
 
-        undo() ; rt('children.0.children.0.text') ▸ 'e'
+        undo() ; rt('children.1.children.1.text') ▸ 'e'
