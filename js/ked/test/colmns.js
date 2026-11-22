@@ -1,5 +1,5 @@
 var toExport = {}
-var baseFile, childFile, d, e, emitted, f, file, h, idx, ked_sess, originalEmit, root, supr
+var baseFile, capture, childFile, cppTree, d, dircolAt, e, f, funcolAt, h, ked_sess, orig, sent, supr, tree
 
 import fs from "fs"
 
@@ -37,125 +37,143 @@ ked_sess = function ()
     }
     return global.ked_session = {get:fakeGet,set:fakeSet}
 }
-toExport["dircol crumbs"] = async function ()
+
+dircolAt = async function (root)
 {
-    await section("a relative root shows the absolute folder path", async function ()
+    var d, e, h
+
+    ked_sess()
+    h = new harness({cols:100,rows:30})
+    e = new editor(h.screen,'test_editor',[])
+    d = new dircol(h.screen,e,[])
+    d.layout(0,0,100,30)
+    d.setRoot(root)
+    await sleep(10)
+    return d
+}
+
+funcolAt = function (lines, col)
+{
+    var e, f, h
+
+    ked_sess()
+    h = new harness({cols:100,rows:30})
+    e = new editor(h.screen,'test_editor',[])
+    e.state.loadLines(lines)
+    e.state.setMainCursor(col,0)
+    f = new funcol(h.screen,e,[])
+    return [h,e,f]
+}
+
+capture = function ()
+{
+    var orig, sent
+
+    sent = []
+    orig = post.emit
+    post.emit = function (event, ...args)
     {
-        ked_sess()
-        h = new harness({cols:100,rows:30})
-        e = new editor(h.screen,'test_editor',[])
-        d = new dircol(h.screen,e,[])
-        d.layout(0,0,100,30)
-        d.setRoot('kode')
+        return sent.push([event].concat(args))
+    }
+    return [sent,orig]
+}
+
+tree = async function (name, base, child)
+{
+    var baseFile, childFile, e, f, h, idx, root
+
+    ked_sess()
+    root = `/tmp/opencode/ked-funtree-${name}`
+    baseFile = slash.path(root,'base.kode')
+    childFile = slash.path(root,'child.kode')
+    fs.rmSync(root,{recursive:true,force:true})
+    fs.mkdirSync(root,{recursive:true})
+    fs.writeFileSync(baseFile,base)
+    fs.writeFileSync(childFile,child)
+    idx = new indexer
+    await idx.index(baseFile)
+    await idx.index(childFile)
+    h = new harness({cols:100,rows:30})
+    e = new editor(h.screen,'test_funtree_editor',[])
+    e.currentFile = childFile
+    f = new funtree(e,'test_funtree',[])
+    f.onFileIndexed(childFile,idx.files[childFile])
+    fs.rmSync(root,{recursive:true,force:true})
+    return [f,e,baseFile,childFile]
+}
+
+cppTree = async function (name, source)
+{
+    var e, f, file, h, idx, root
+
+    ked_sess()
+    root = `/tmp/opencode/ked-funtree-${name}`
+    file = slash.path(root,'main.cpp')
+    fs.rmSync(root,{recursive:true,force:true})
+    fs.mkdirSync(root,{recursive:true})
+    fs.writeFileSync(file,source)
+    idx = new indexer
+    await idx.index(file)
+    h = new harness({cols:100,rows:30})
+    e = new editor(h.screen,'test_funtree_cpp_editor',[])
+    e.currentFile = file
+    f = new funtree(e,'test_funtree_cpp',[])
+    f.onFileIndexed(file,idx.files[file])
+    fs.rmSync(root,{recursive:true,force:true})
+    return f
+}
+toExport["dircol"] = async function ()
+{
+    await section("roots", async function ()
+    {
+        d = await dircolAt('kode')
         compare(d.crumbs.path,slash.tilde(slash.path(process.cwd(),'kode')))
         compare(d.crumbs.split[0],'~')
-        await sleep(10)
-        delete global.ked_session
-    })
-    await section("a dot relative root shows the absolute folder path", async function ()
-    {
-        ked_sess()
-        h = new harness({cols:100,rows:30})
-        e = new editor(h.screen,'test_editor',[])
-        d = new dircol(h.screen,e,[])
-        d.layout(0,0,100,30)
-        d.setRoot('./kode')
+        d = await dircolAt('./kode')
         compare(d.crumbs.path,slash.tilde(slash.path(process.cwd(),'kode')))
         compare(d.crumbs.split[0],'~')
-        await sleep(10)
-        delete global.ked_session
-    })
-    await section("a tilde root stays where it is", async function ()
-    {
-        ked_sess()
-        h = new harness({cols:100,rows:30})
-        e = new editor(h.screen,'test_editor',[])
-        d = new dircol(h.screen,e,[])
-        d.layout(0,0,100,30)
-        d.setRoot('~/s/ked')
+        d = await dircolAt('~/s/ked')
         compare(d.crumbs.path,'~/s/ked')
         compare(d.crumbs.split[0],'~')
-        await sleep(10)
         delete global.ked_session
     })
 }
-toExport["dircol crumbs"]._section_ = true
+toExport["dircol"]._section_ = true
 toExport["funcol"] = async function ()
 {
-    await section("a cursor on the hash picks the color", async function ()
+    await section("seeding", async function ()
     {
-        ked_sess()
-        h = new harness({cols:100,rows:30})
-        e = new editor(h.screen,'test_editor',[])
-        e.state.loadLines(['x = #ff8000;'])
-        e.state.setMainCursor(4,0)
-        f = new funcol(h.screen,e,[])
+        var _a_ = funcolAt(['x = #ff8000;'],4); h = _a_[0]; e = _a_[1]; f = _a_[2]
+
         f.onColorPickerShow()
         compare(f.colorpicker.hex(),'#ff8000')
-        delete global.ked_session
-    })
-    await section("a word that is not a color keeps the default and no replace mode", async function ()
-    {
-        ked_sess()
-        h = new harness({cols:100,rows:30})
-        e = new editor(h.screen,'test_editor',[])
-        e.state.loadLines(['x = hello;'])
-        e.state.setMainCursor(6,0)
-        f = new funcol(h.screen,e,[])
+        var _b_ = funcolAt(['x = hello;'],6); h = _b_[0]; e = _b_[1]; f = _b_[2]
+
         f.onColorPickerShow()
         compare(f.colorReplace,null)
-        delete global.ked_session
-    })
-    await section("submitting without changes keeps the original color string", async function ()
-    {
-        ked_sess()
-        h = new harness({cols:100,rows:30})
-        e = new editor(h.screen,'test_editor',[])
-        e.state.loadLines(['c = #abc;'])
-        e.state.setMainCursor(6,0)
-        f = new funcol(h.screen,e,[])
+        var _c_ = funcolAt(['c = #abc;'],6); h = _c_[0]; e = _c_[1]; f = _c_[2]
+
         f.onColorPickerShow()
         f.colorpicker.submit(f.colorpicker.hex())
         compare(kseg.str(e.state.s.lines[0]),'c = #abc;')
         compare(f.colorReplace,null)
-        delete global.ked_session
-    })
-    await section("an explicit show does not replace anything", async function ()
-    {
-        ked_sess()
-        h = new harness({cols:100,rows:30})
-        e = new editor(h.screen,'test_editor',[])
-        e.state.loadLines(['x = #ff8000;'])
-        e.state.setMainCursor(6,0)
-        f = new funcol(h.screen,e,[])
+        var _d_ = funcolAt(['x = #ff8000;'],6); h = _d_[0]; e = _d_[1]; f = _d_[2]
+
         f.onColorPickerShow(['#123456'])
         compare(f.colorReplace,null)
         f.colorpicker.submit('#abcdef')
         compare(kseg.str(e.state.s.lines[0]),'x = #ff8000;')
         delete global.ked_session
     })
-    await section("an explicit color picker gets a width in a narrow terminal", async function ()
+    await section("size", async function ()
     {
-        ked_sess()
-        h = new harness({cols:80,rows:24})
-        e = new editor(h.screen,'test_editor',[])
-        e.state.loadLines([''])
-        f = new funcol(h.screen,e,[])
+        var _e_ = funcolAt([''],0); h = _e_[0]; e = _e_[1]; f = _e_[2]
+
         f.onColorPickerShow()
         compare(f.colorpicker.visible(),true)
         compare(f.cells.cols,16)
         f.layout(64,1,16,23)
         compare(f.colorpicker.cells.cols,16)
-        delete global.ked_session
-    })
-    await section("the color picker grows when the palette is not empty", async function ()
-    {
-        ked_sess()
-        h = new harness({cols:100,rows:30})
-        e = new editor(h.screen,'test_editor',[])
-        e.state.loadLines([''])
-        f = new funcol(h.screen,e,[])
-        f.onColorPickerShow()
         f.layout(0,0,16,29)
         compare(f.colorpicker.cells.rows,9)
         f.colorpicker.setHex('#ff0000')
@@ -168,29 +186,14 @@ toExport["funcol"] = async function ()
 toExport["funcol"]._section_ = true
 toExport["funtree"] = async function ()
 {
-    await section("base class chain", async function ()
+    await section("base chain", async function ()
     {
-        ked_sess()
-        root = '/tmp/opencode/ked-funtree-base'
-        baseFile = slash.path(root,'base.kode')
-        childFile = slash.path(root,'child.kode')
-        fs.rmSync(root,{recursive:true,force:true})
-        fs.mkdirSync(root,{recursive:true})
-        fs.writeFileSync(baseFile,`■Base□Root
+        var _f_ = await tree('base',`■Base□Root
     alpha: -> 1
     beta: => 2
 ■Root
-    gamma: -> 3`)
-        fs.writeFileSync(childFile,"■Child□Base\n")
-        idx = new indexer
-        await idx.index(baseFile)
-        await idx.index(childFile)
-        h = new harness({cols:100,rows:30})
-        e = new editor(h.screen,'test_funtree_editor',[])
-        e.currentFile = childFile
-        f = new funtree(e,'test_funtree',[])
-        f.onFileIndexed(childFile,idx.files[childFile])
-        fs.rmSync(root,{recursive:true,force:true})
+    gamma: -> 3`,"■Child□Base\n"); f = _f_[0]; e = _f_[1]; baseFile = _f_[2]; childFile = _f_[3]
+
         compare(f.showBases,true)
         compare(f.items.map(function (i)
         {
@@ -219,61 +222,33 @@ toExport["funtree"] = async function ()
         {
             return i.name
         }),[' ■ Child',' □',' ■ Base','   -> alpha','   => beta',' ■ Root','   -> gamma'])
-        emitted = []
-        originalEmit = post.emit
-        post.emit = function (event, ...args)
-        {
-            return emitted.push([event].concat(args))
-        }
+        var _10_ = capture(); sent = _10_[0]; orig = _10_[1]
+
         f.emitAction('right',f.items[1])
         f.emitAction('drag',f.items[1])
-        post.emit = originalEmit
-        compare(emitted.length,0)
+        post.emit = orig
+        compare(sent.length,0)
         supr = {clss:true,name:' ■ Child',line:1}
         compare(f.itemsForBaseClass(supr).length,0)
     })
-    await section("jump to inherited items", async function ()
+    await section("jump", async function ()
     {
-        ked_sess()
-        root = '/tmp/opencode/ked-funtree-jump'
-        baseFile = slash.path(root,'base.kode')
-        childFile = slash.path(root,'child.kode')
-        fs.rmSync(root,{recursive:true,force:true})
-        fs.mkdirSync(root,{recursive:true})
-        fs.writeFileSync(baseFile,`■Base
-    alpha: -> 1`)
-        fs.writeFileSync(childFile,"■Child□Base\n")
-        idx = new indexer
-        await idx.index(baseFile)
-        await idx.index(childFile)
-        h = new harness({cols:100,rows:30})
-        e = new editor(h.screen,'test_funtree_jump_editor',[])
-        e.currentFile = childFile
-        f = new funtree(e,'test_funtree_jump',[])
-        f.onFileIndexed(childFile,idx.files[childFile])
-        fs.rmSync(root,{recursive:true,force:true})
-        emitted = []
-        originalEmit = post.emit
-        post.emit = function (event, ...args)
-        {
-            return emitted.push([event].concat(args))
-        }
+        var _11_ = await tree('jump',`■Base
+    alpha: -> 1`,"■Child□Base\n"); f = _11_[0]; e = _11_[1]; baseFile = _11_[2]; childFile = _11_[3]
+
+        var _12_ = capture(); sent = _12_[0]; orig = _12_[1]
+
         f.emitAction('return',f.items[0])
         f.emitAction('return',f.items[3])
-        post.emit = originalEmit
-        compare(emitted[0],['goto.line',0,'ind','topDelta'])
-        compare(emitted[1],['focus','editor'])
-        compare(emitted[2],['file.open',baseFile,1,'ind','topDelta'])
-        compare(emitted[3],['focus','editor'])
+        post.emit = orig
+        compare(sent[0],['goto.line',0,'ind','topDelta'])
+        compare(sent[1],['focus','editor'])
+        compare(sent[2],['file.open',baseFile,1,'ind','topDelta'])
+        compare(sent[3],['focus','editor'])
     })
-    await section("cpp with unnamed index", async function ()
+    await section("cpp", async function ()
     {
-        ked_sess()
-        root = '/tmp/opencode/ked-funtree-cpp'
-        file = slash.path(root,'main.cpp')
-        fs.rmSync(root,{recursive:true,force:true})
-        fs.mkdirSync(root,{recursive:true})
-        fs.writeFileSync(file,`static JsonNode* route_info (const fs::path& path)
+        f = await cppTree('cpp',`static JsonNode* route_info (const fs::path& path)
 {
     struct stat st;
     if (::stat(path.c_str(), &st) != 0)
@@ -281,14 +256,6 @@ toExport["funtree"] = async function ()
         return node_null();
     }
 }`)
-        idx = new indexer
-        await idx.index(file)
-        h = new harness({cols:100,rows:30})
-        e = new editor(h.screen,'test_funtree_cpp_editor',[])
-        e.currentFile = file
-        f = new funtree(e,'test_funtree_cpp',[])
-        f.onFileIndexed(file,idx.files[file])
-        fs.rmSync(root,{recursive:true,force:true})
         compare(f.items.length,1)
         compare(f.items[0].name,' -> @route_info')
     })
@@ -298,5 +265,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29sbW5zLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC90ZXN0L2NvbG1ucy5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7T0FBSSxTQUFBOztPQUNNLFVBQUE7SUFBVztJQUFLO0lBQUs7SUFBTTs7T0FDaEIsYUFBZDs7T0FDYyxjQUFkOztPQUNjLGNBQWQ7O09BQ2MsYUFBVDtPQUFnQixhQUFoQjtPQUF1QixjQUF2Qjs7O0FBRVo7Ozs7SUFDSTtJQUNBLG9CQUFXLEtBQUk7Ozs7eUJBQVEsTUFBTSwwQkFBTzs7SUFDcEMsb0JBQVcsS0FBSTs7ZUFBVSxNQUFNLE9BQU87O1dBQ3RDLE9BQU8sZUFBYyxJQUFJLFFBQVEsSUFBSTs7Ozs7O1FBTWpDO1FBRUEsUUFBUSxTQUFRLEtBQUssSUFBSSxLQUFLO1FBQzlCLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFDeEIsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUN4QixFQUFFLE9BQU8sRUFBRSxFQUFFLElBQUk7UUFFakIsRUFBRSxRQUFRO2dCQUVWLEVBQUUsT0FBTyxLQUFPLE1BQU0sTUFBTSxNQUFNLEtBQUssUUFBUSxNQUFNO2dCQUNyRCxFQUFFLE9BQU8sTUFBTSxHQUFLO2NBRWxCLE1BQU07ZUFDRCxPQUFPOzs7O1FBSWQ7UUFFQSxRQUFRLFNBQVEsS0FBSyxJQUFJLEtBQUs7UUFDOUIsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUN4QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBQ3hCLEVBQUUsT0FBTyxFQUFFLEVBQUUsSUFBSTtRQUVqQixFQUFFLFFBQVE7Z0JBRVYsRUFBRSxPQUFPLEtBQU8sTUFBTSxNQUFNLE1BQU0sS0FBSyxRQUFRLE1BQU07Z0JBQ3JELEVBQUUsT0FBTyxNQUFNLEdBQUs7Y0FFbEIsTUFBTTtlQUNELE9BQU87Ozs7UUFJZDtRQUVBLFFBQVEsU0FBUSxLQUFLLElBQUksS0FBSztRQUM5QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBQ3hCLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFDeEIsRUFBRSxPQUFPLEVBQUUsRUFBRSxJQUFJO1FBRWpCLEVBQUUsUUFBUTtnQkFFVixFQUFFLE9BQU8sS0FBTztnQkFDaEIsRUFBRSxPQUFPLE1BQU0sR0FBSztjQUVsQixNQUFNO2VBQ0QsT0FBTzs7Ozs7Ozs7UUFNZDtRQUVBLFFBQVEsU0FBUSxLQUFLLElBQUksS0FBSztRQUM5QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBQ3hCLEVBQUUsTUFBTSxXQUFXO1FBQ25CLEVBQUUsTUFBTSxjQUFjLEVBQUU7UUFFeEIsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFO2dCQUVGLEVBQUUsWUFBWSxNQUFRO2VBRWYsT0FBTzs7OztRQUlkO1FBRUEsUUFBUSxTQUFRLEtBQUssSUFBSSxLQUFLO1FBQzlCLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFDeEIsRUFBRSxNQUFNLFdBQVc7UUFDbkIsRUFBRSxNQUFNLGNBQWMsRUFBRTtRQUV4QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBRXhCLEVBQUU7Z0JBRUYsRUFBRSxhQUFlO2VBRVYsT0FBTzs7OztRQUlkO1FBRUEsUUFBUSxTQUFRLEtBQUssSUFBSSxLQUFLO1FBQzlCLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFDeEIsRUFBRSxNQUFNLFdBQVc7UUFDbkIsRUFBRSxNQUFNLGNBQWMsRUFBRTtRQUV4QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBRXhCLEVBQUU7UUFFRixFQUFFLFlBQVksT0FBTyxFQUFFLFlBQVk7Z0JBRW5DLEtBQUssSUFBSSxFQUFFLE1BQU0sRUFBRSxNQUFNLElBQU07Z0JBQy9CLEVBQUUsYUFBZTtlQUVWLE9BQU87Ozs7UUFJZDtRQUVBLFFBQVEsU0FBUSxLQUFLLElBQUksS0FBSztRQUM5QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBQ3hCLEVBQUUsTUFBTSxXQUFXO1FBQ25CLEVBQUUsTUFBTSxjQUFjLEVBQUU7UUFFeEIsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFLG1CQUFtQjtnQkFFckIsRUFBRSxhQUFlO1FBRWpCLEVBQUUsWUFBWSxPQUFPO2dCQUVyQixLQUFLLElBQUksRUFBRSxNQUFNLEVBQUUsTUFBTSxJQUFNO2VBRXhCLE9BQU87Ozs7UUFJZDtRQUVBLFFBQVEsU0FBUSxLQUFLLEdBQUcsS0FBSztRQUM3QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBQ3hCLEVBQUUsTUFBTSxXQUFXO1FBRW5CLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFFeEIsRUFBRTtnQkFFRixFQUFFLFlBQVksVUFBWTtnQkFDMUIsRUFBRSxNQUFNLEtBQU87UUFFZixFQUFFLE9BQU8sR0FBRyxFQUFFLEdBQUc7Z0JBQ2pCLEVBQUUsWUFBWSxNQUFNLEtBQU87ZUFFcEIsT0FBTzs7OztRQUlkO1FBRUEsUUFBUSxTQUFRLEtBQUssSUFBSSxLQUFLO1FBQzlCLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFDeEIsRUFBRSxNQUFNLFdBQVc7UUFFbkIsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUV4QixFQUFFO1FBRUYsRUFBRSxPQUFPLEVBQUUsRUFBRSxHQUFHO2dCQUNoQixFQUFFLFlBQVksTUFBTSxLQUFPO1FBRTNCLEVBQUUsWUFBWSxPQUFPO1FBQ3JCLEVBQUUsWUFBWTtRQUVkLEVBQUUsT0FBTyxFQUFFLEVBQUUsR0FBRztnQkFDaEIsRUFBRSxZQUFZLE1BQU0sS0FBTztlQUVwQixPQUFPOzs7Ozs7OztRQU1kO1FBRUEsT0FBTztRQUNQLFdBQVcsTUFBTSxLQUFLLEtBQUs7UUFDM0IsWUFBWSxNQUFNLEtBQUssS0FBSztRQUU1QixHQUFHLE9BQU8sTUFBSyxVQUFVLEtBQUssTUFBTTtRQUNwQyxHQUFHLFVBQVUsTUFBSyxVQUFVO1FBQzVCLEdBQUcsY0FBYyxTQUFTOzs7OztRQU8xQixHQUFHLGNBQWMsVUFBVTtRQUUzQixVQUFVO2NBQ1IsSUFBSSxNQUFNO2NBQ1YsSUFBSSxNQUFNO1FBRVosUUFBUSxTQUFRLEtBQUssSUFBSSxLQUFLO1FBQzlCLFFBQVEsT0FBTyxFQUFFLE9BQU87UUFDeEIsRUFBRSxjQUFjO1FBRWhCLFFBQVEsUUFBUSxFQUFFO1FBRWxCLEVBQUUsY0FBYyxVQUFVLElBQUksTUFBTTtRQUVwQyxHQUFHLE9BQU8sTUFBSyxVQUFVLEtBQUssTUFBTTtnQkFFcEMsRUFBRSxVQUFZO2dCQUNkLEVBQUUsTUFBTSxjQUFLOzttQkFBTSxFQUFFO1lBQVMsV0FBVyxLQUFLLFVBQVUsY0FBYyxhQUFhLFVBQVU7Z0JBRTdGLEVBQUUsTUFBTSxHQUFHLFFBQVU7Z0JBRXJCLEVBQUUsTUFBTSxHQUFHLFVBQVk7Z0JBQ3ZCLEVBQUUsTUFBTSxHQUFHLEtBQU87Z0JBQ2xCLEVBQUUsTUFBTSxHQUFHLEtBQU87Z0JBRWxCLEVBQUUsTUFBTSxHQUFHLFVBQVk7Z0JBQ3ZCLEVBQUUsTUFBTSxHQUFHLEtBQU87Z0JBQ2xCLEVBQUUsTUFBTSxHQUFHLEtBQU87Z0JBQ2xCLEVBQUUsTUFBTSxHQUFHLE1BQVE7UUFFbkIsRUFBRSx1QkFBdUI7Z0JBQ3pCLEVBQUUsZUFBaUI7Z0JBQ25CLEVBQUUsc0JBQXdCO1FBRTFCLEVBQUUsV0FBVyxRQUFRLEVBQUUsTUFBTTtnQkFFN0IsRUFBRSxVQUFZO2dCQUNkLEVBQUUsTUFBTSxjQUFLOzttQkFBTSxFQUFFO1lBQVMsV0FBVztRQUV6QyxFQUFFLFdBQVcsU0FBUyxFQUFFLE1BQU07Z0JBRTlCLEVBQUUsVUFBWTtnQkFDZCxFQUFFLE1BQU0sY0FBSzs7bUJBQU0sRUFBRTtZQUFTLFdBQVcsS0FBSyxVQUFVLGNBQWMsYUFBYSxVQUFVO1FBRTdGO1FBQ0EsZUFBZSxLQUFLO1FBQ3BCLEtBQUssaUJBQVEsT0FBTTs7bUJBQVksUUFBUSxNQUFNLE9BQU8sT0FBTzs7UUFFM0QsRUFBRSxXQUFXLFFBQVEsRUFBRSxNQUFNO1FBQzdCLEVBQUUsV0FBVyxPQUFPLEVBQUUsTUFBTTtRQUU1QixLQUFLLE9BQU87Z0JBRVosUUFBUSxPQUFTO1FBRWpCLFFBQU8sS0FBSyxLQUFLLEtBQUssV0FBVyxLQUFLO2dCQUN0QyxFQUFFLGtCQUFrQixNQUFNLE9BQVM7Ozs7UUFJbkM7UUFFQSxPQUFPO1FBQ1AsV0FBVyxNQUFNLEtBQUssS0FBSztRQUMzQixZQUFZLE1BQU0sS0FBSyxLQUFLO1FBRTVCLEdBQUcsT0FBTyxNQUFLLFVBQVUsS0FBSyxNQUFNO1FBQ3BDLEdBQUcsVUFBVSxNQUFLLFVBQVU7UUFDNUIsR0FBRyxjQUFjLFNBQVM7O1FBSTFCLEdBQUcsY0FBYyxVQUFVO1FBRTNCLFVBQVU7Y0FDUixJQUFJLE1BQU07Y0FDVixJQUFJLE1BQU07UUFFWixRQUFRLFNBQVEsS0FBSyxJQUFJLEtBQUs7UUFDOUIsUUFBUSxPQUFPLEVBQUUsT0FBTztRQUN4QixFQUFFLGNBQWM7UUFFaEIsUUFBUSxRQUFRLEVBQUU7UUFDbEIsRUFBRSxjQUFjLFVBQVUsSUFBSSxNQUFNO1FBRXBDLEdBQUcsT0FBTyxNQUFLLFVBQVUsS0FBSyxNQUFNO1FBRXBDO1FBQ0EsZUFBZSxLQUFLO1FBQ3BCLEtBQUssaUJBQVEsT0FBTTs7bUJBQVksUUFBUSxNQUFNLE9BQU8sT0FBTzs7UUFFM0QsRUFBRSxXQUFXLFNBQVMsRUFBRSxNQUFNO1FBQzlCLEVBQUUsV0FBVyxTQUFTLEVBQUUsTUFBTTtRQUU5QixLQUFLLE9BQU87Z0JBRVosUUFBUSxJQUFNLFlBQVksRUFBRSxNQUFNO2dCQUNsQyxRQUFRLElBQU0sUUFBUTtnQkFDdEIsUUFBUSxJQUFNLFlBQVksU0FBUyxFQUFFLE1BQU07Z0JBQzNDLFFBQVEsSUFBTSxRQUFROzs7O1FBSXRCO1FBRUEsT0FBTztRQUNQLE9BQU8sTUFBTSxLQUFLLEtBQUs7UUFFdkIsR0FBRyxPQUFPLE1BQUssVUFBVSxLQUFLLE1BQU07UUFDcEMsR0FBRyxVQUFVLE1BQUssVUFBVTtRQUM1QixHQUFHLGNBQWMsS0FBSzs7Ozs7Ozs7UUFXdEIsVUFBVTtjQUNSLElBQUksTUFBTTtRQUVaLFFBQVEsU0FBUSxLQUFLLElBQUksS0FBSztRQUM5QixRQUFRLE9BQU8sRUFBRSxPQUFPO1FBQ3hCLEVBQUUsY0FBYztRQUVoQixRQUFRLFFBQVEsRUFBRTtRQUNsQixFQUFFLGNBQWMsS0FBSyxJQUFJLE1BQU07UUFFL0IsR0FBRyxPQUFPLE1BQUssVUFBVSxLQUFLLE1BQU07Z0JBRXBDLEVBQUUsTUFBTSxPQUFTO2dCQUNqQixFQUFFLE1BQU0sR0FBRyxLQUFPIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29sbW5zLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC90ZXN0L2NvbG1ucy5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7T0FBSSxTQUFBOztPQUNNLFVBQUE7SUFBVztJQUFLO0lBQUs7SUFBTTs7T0FDaEIsYUFBZDs7T0FDYyxjQUFkOztPQUNjLGNBQWQ7O09BQ2MsYUFBVDtPQUFnQixhQUFoQjtPQUF1QixjQUF2Qjs7O0FBRVo7Ozs7SUFDSTtJQUNBLG9CQUFXLEtBQUk7Ozs7eUJBQVEsTUFBTSwwQkFBTzs7SUFDcEMsb0JBQVcsS0FBSTs7ZUFBVSxNQUFNLE9BQU87O1dBQ3RDLE9BQU8sZUFBYyxJQUFJLFFBQVEsSUFBSTs7O0FBRXpDLDJCQUFZOzs7O0lBQ1I7SUFDQSxRQUFRLFNBQVEsS0FBSyxJQUFJLEtBQUs7SUFDOUIsUUFBUSxPQUFPLEVBQUUsT0FBTztJQUN4QixRQUFRLE9BQU8sRUFBRSxPQUFPO0lBQ3hCLEVBQUUsT0FBTyxFQUFFLEVBQUUsSUFBSTtJQUNqQixFQUFFLFFBQVE7VUFDUixNQUFNO1dBQ1I7OztBQUVKLHFCQUFZLE9BQU07Ozs7SUFDZDtJQUNBLFFBQVEsU0FBUSxLQUFLLElBQUksS0FBSztJQUM5QixRQUFRLE9BQU8sRUFBRSxPQUFPO0lBQ3hCLEVBQUUsTUFBTSxVQUFVO0lBQ2xCLEVBQUUsTUFBTSxjQUFjLElBQUk7SUFDMUIsUUFBUSxPQUFPLEVBQUUsT0FBTztZQUN2QixFQUFFLEVBQUU7OztBQUVUOzs7O0lBQ0k7SUFDQSxPQUFPLEtBQUs7SUFDWixLQUFLLGlCQUFRLE9BQU07O2VBQVksS0FBSyxNQUFNLE9BQU8sT0FBTzs7WUFDdkQsS0FBSzs7O0FBRVYsdUJBQVEsTUFBSyxNQUFLOzs7O0lBQ2Q7SUFDQSxvQ0FBb0M7SUFDcEMsV0FBVyxNQUFNLEtBQUssS0FBSztJQUMzQixZQUFZLE1BQU0sS0FBSyxLQUFLO0lBQzVCLEdBQUcsT0FBTyxNQUFLLFVBQVUsS0FBSyxNQUFNO0lBQ3BDLEdBQUcsVUFBVSxNQUFL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
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/test/colmns.kode

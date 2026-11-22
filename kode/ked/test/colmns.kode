@@ -11,125 +11,114 @@ ked_sess = ->
     fakeSet = (key value) -> store[key] = value
     global.ked_session = get:fakeGet set:fakeSet
 
-▸ dircol crumbs
+dircolAt = (root) ◯->
+    ked_sess()
+    h = new harness cols:100 rows:30
+    e = new editor h.screen 'test_editor' []
+    d = new dircol h.screen e []
+    d.layout 0 0 100 30
+    d.setRoot root
+    ◯ sleep 10
+    d
 
-  ▸ a relative root shows the absolute folder path
+funcolAt = (lines col) ->
+    ked_sess()
+    h = new harness cols:100 rows:30
+    e = new editor h.screen 'test_editor' []
+    e.state.loadLines lines
+    e.state.setMainCursor col 0
+    f = new funcol h.screen e []
+    [h e f]
 
-        ked_sess()
-        
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        d = new dircol h.screen e []
-        d.layout 0 0 100 30
+capture = ->
+    sent = []
+    orig = post.emit
+    post.emit = (event args...) -> sent.push [event].concat(args)
+    [sent orig]
 
-        d.setRoot 'kode'
+tree = (name base child) ◯->
+    ked_sess()
+    root = "/tmp/opencode/ked-funtree-#{name}"
+    baseFile = slash.path root 'base.kode'
+    childFile = slash.path root 'child.kode'
+    fs.rmSync root recursive:true force:true
+    fs.mkdirSync root recursive:true
+    fs.writeFileSync baseFile base
+    fs.writeFileSync childFile child
+    idx = new indexer
+    ◯ idx.index baseFile
+    ◯ idx.index childFile
+    h = new harness cols:100 rows:30
+    e = new editor h.screen 'test_funtree_editor' []
+    e.currentFile = childFile
+    f = new funtree e 'test_funtree' []
+    f.onFileIndexed childFile idx.files[childFile]
+    fs.rmSync root recursive:true force:true
+    [f e baseFile childFile]
+
+cppTree = (name source) ◯->
+    ked_sess()
+    root = "/tmp/opencode/ked-funtree-#{name}"
+    file = slash.path root 'main.cpp'
+    fs.rmSync root recursive:true force:true
+    fs.mkdirSync root recursive:true
+    fs.writeFileSync file source
+    idx = new indexer
+    ◯ idx.index file
+    h = new harness cols:100 rows:30
+    e = new editor h.screen 'test_funtree_cpp_editor' []
+    e.currentFile = file
+    f = new funtree e 'test_funtree_cpp' []
+    f.onFileIndexed file idx.files[file]
+    fs.rmSync root recursive:true force:true
+    f
+
+▸ dircol
+
+  ▸ roots
+
+        d = ◯ dircolAt 'kode'
 
         d.crumbs.path ▸ slash.tilde(slash.path(process.cwd() 'kode'))
         d.crumbs.split[0] ▸ '~'
 
-        ◯ sleep 10
-        delete global.ked_session
-
-  ▸ a dot relative root shows the absolute folder path
-
-        ked_sess()
-        
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        d = new dircol h.screen e []
-        d.layout 0 0 100 30
-
-        d.setRoot './kode'
+        d = ◯ dircolAt './kode'
 
         d.crumbs.path ▸ slash.tilde(slash.path(process.cwd() 'kode'))
         d.crumbs.split[0] ▸ '~'
 
-        ◯ sleep 10
-        delete global.ked_session
-
-  ▸ a tilde root stays where it is
-
-        ked_sess()
-        
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        d = new dircol h.screen e []
-        d.layout 0 0 100 30
-
-        d.setRoot '~/s/ked'
+        d = ◯ dircolAt '~/s/ked'
 
         d.crumbs.path ▸ '~/s/ked'
         d.crumbs.split[0] ▸ '~'
 
-        ◯ sleep 10
         delete global.ked_session
-        
+
 ▸ funcol
 
-  ▸ a cursor on the hash picks the color
+  ▸ seeding
 
-        ked_sess()
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['x = #ff8000;']
-        e.state.setMainCursor 4 0
-
-        f = new funcol h.screen e []
+        [h e f] = funcolAt ['x = #ff8000;'] 4
 
         f.onColorPickerShow()
 
         f.colorpicker.hex() ▸ '#ff8000'
 
-        delete global.ked_session
-
-  ▸ a word that is not a color keeps the default and no replace mode
-
-        ked_sess()
-        
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['x = hello;']
-        e.state.setMainCursor 6 0
-
-        f = new funcol h.screen e []
+        [h e f] = funcolAt ['x = hello;'] 6
 
         f.onColorPickerShow()
 
         f.colorReplace ▸ null
 
-        delete global.ked_session
-
-  ▸ submitting without changes keeps the original color string
-
-        ked_sess()
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['c = #abc;']
-        e.state.setMainCursor 6 0
-
-        f = new funcol h.screen e []
+        [h e f] = funcolAt ['c = #abc;'] 6
 
         f.onColorPickerShow()
-
         f.colorpicker.submit f.colorpicker.hex()
 
         kseg.str(e.state.s.lines[0]) ▸ 'c = #abc;'
         f.colorReplace ▸ null
 
-        delete global.ked_session
-
-  ▸ an explicit show does not replace anything
-
-        ked_sess()
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['x = #ff8000;']
-        e.state.setMainCursor 6 0
-
-        f = new funcol h.screen e []
+        [h e f] = funcolAt ['x = #ff8000;'] 6
 
         f.onColorPickerShow ['#123456']
 
@@ -141,15 +130,9 @@ ked_sess = ->
 
         delete global.ked_session
 
-  ▸ an explicit 󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀵󠀬󠀱󠀬󠀢󠀣󠁥󠁥󠁦󠁦󠀰󠀰󠀢󠀬󠀢󠀣󠁦󠀵󠀱󠀱󠀱󠀱󠀢󠁝color picker gets a width in a narrow terminal
+  ▸ size
 
-        ked_sess()
-        
-        h = new harness cols:80 rows:24
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['']
-
-        f = new funcol h.screen e []
+        [h e f] = funcolAt [''] 0
 
         f.onColorPickerShow()
 
@@ -157,67 +140,32 @@ ked_sess = ->
         f.cells.cols ▸ 16
 
         f.layout 64 1 16 23
+
         f.colorpicker.cells.cols ▸ 16
 
-        delete global.ked_session
-
-  ▸ the 󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀵󠀬󠀱󠀬󠀢󠀣󠀰󠀰󠁦󠁦󠀳󠁣󠀢󠀬󠀢󠀣󠀸󠀰󠀰󠀰󠀰󠀰󠀢󠁝color picker grows when the palette is not empty
-
-        ked_sess()
-        
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_editor' []
-        e.state.loadLines ['']
-
-        f = new funcol h.screen e []
-
-        f.onColorPickerShow()
-
         f.layout 0 0 16 29
+
         f.colorpicker.cells.rows ▸ 9
 
         f.colorpicker.setHex '#ff0000'
         f.colorpicker.addCurrentColor()
-
         f.layout 0 0 16 29
+
         f.colorpicker.cells.rows ▸ 11
 
         delete global.ked_session
 
 ▸ funtree
 
-  ▸ base class chain
+  ▸ base chain
 
-        ked_sess()
-
-        root = '/tmp/opencode/ked-funtree-base'
-        baseFile = slash.path root 'base.kode'
-        childFile = slash.path root 'child.kode'
-
-        fs.rmSync root recursive:true force:true
-        fs.mkdirSync root recursive:true
-        fs.writeFileSync baseFile """
+        [f e baseFile childFile] = ◯ tree 'base' """
             ■Base□Root
                 alpha: -> 1
                 beta: => 2
             ■Root
                 gamma: -> 3
-            """
-        fs.writeFileSync childFile "■Child□Base\n"
-
-        idx = new indexer
-        ◯ idx.index baseFile
-        ◯ idx.index childFile
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_funtree_editor' []
-        e.currentFile = childFile
-
-        f = new funtree e 'test_funtree' []
-
-        f.onFileIndexed childFile idx.files[childFile]
-
-        fs.rmSync root recursive:true force:true
+            """ "■Child□Base\n"
 
         f.showBases ▸ true
         f.items.map((i) -> i.name) ▸ [' ■ Child' ' □' ' ■ Base' '   -> alpha' '   => beta' ' ■ Root' '   -> gamma']
@@ -234,6 +182,7 @@ ked_sess = ->
         f.items[3].class ▸ 'Base'
 
         f.selectItemForLineIndex 3
+
         f.currentIndex() ▸ 0
         f.lineIndexOfNextFunc() ▸ undefined
 
@@ -247,73 +196,40 @@ ked_sess = ->
         f.showBases ▸ true
         f.items.map((i) -> i.name) ▸ [' ■ Child' ' □' ' ■ Base' '   -> alpha' '   => beta' ' ■ Root' '   -> gamma']
 
-        emitted = []
-        originalEmit = post.emit
-        post.emit = (event args...) -> emitted.push [event].concat(args)
+        [sent orig] = capture()
 
         f.emitAction 'right' f.items[1]
         f.emitAction 'drag' f.items[1]
 
-        post.emit = originalEmit
+        post.emit = orig
 
-        emitted.length ▸ 0
+        sent.length ▸ 0
 
         supr = clss:true name:' ■ Child' line:1
         f.itemsForBaseClass(supr).length ▸ 0
 
-  ▸ jump to inherited items
+  ▸ jump
 
-        ked_sess()
-
-        root = '/tmp/opencode/ked-funtree-jump'
-        baseFile = slash.path root 'base.kode'
-        childFile = slash.path root 'child.kode'
-
-        fs.rmSync root recursive:true force:true
-        fs.mkdirSync root recursive:true
-        fs.writeFileSync baseFile """
+        [f e baseFile childFile] = ◯ tree 'jump' """
             ■Base
                 alpha: -> 1
-            """
-        fs.writeFileSync childFile "■Child□Base\n"
+            """ "■Child□Base\n"
 
-        idx = new indexer
-        ◯ idx.index baseFile
-        ◯ idx.index childFile
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_funtree_jump_editor' []
-        e.currentFile = childFile
-
-        f = new funtree e 'test_funtree_jump' []
-        f.onFileIndexed childFile idx.files[childFile]
-
-        fs.rmSync root recursive:true force:true
-
-        emitted = []
-        originalEmit = post.emit
-        post.emit = (event args...) -> emitted.push [event].concat(args)
+        [sent orig] = capture()
 
         f.emitAction 'return' f.items[0]
         f.emitAction 'return' f.items[3]
 
-        post.emit = originalEmit
+        post.emit = orig
 
-        emitted[0] ▸ ['goto.line' 0 'ind' 'topDelta']
-        emitted[1] ▸ ['focus' 'editor']
-        emitted[2] ▸ ['file.open' baseFile 1 'ind' 'topDelta']
-        emitted[3] ▸ ['focus' 'editor']
+        sent[0] ▸ ['goto.line' 0 'ind' 'topDelta']
+        sent[1] ▸ ['focus' 'editor']
+        sent[2] ▸ ['file.open' baseFile 1 'ind' 'topDelta']
+        sent[3] ▸ ['focus' 'editor']
 
-  ▸ cpp with unnamed index
+  ▸ cpp
 
-        ked_sess()
-
-        root = '/tmp/opencode/ked-funtree-cpp'
-        file = slash.path root 'main.cpp'
-
-        fs.rmSync root recursive:true force:true
-        fs.mkdirSync root recursive:true
-        fs.writeFileSync file """
+        f = ◯ cppTree 'cpp' """
             static JsonNode* route_info (const fs::path& path)
             {
                 struct stat st;
@@ -323,18 +239,6 @@ ked_sess = ->
                 }
             }
             """
-
-        idx = new indexer
-        ◯ idx.index file
-
-        h = new harness cols:100 rows:30
-        e = new editor h.screen 'test_funtree_cpp_editor' []
-        e.currentFile = file
-
-        f = new funtree e 'test_funtree_cpp' []
-        f.onFileIndexed file idx.files[file]
-
-        fs.rmSync root recursive:true force:true
 
         f.items.length ▸ 1
         f.items[0].name ▸ ' -> @route_info'
