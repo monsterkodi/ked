@@ -35,7 +35,7 @@ use child_process ▪ spawn exec
 
             """ preHelp:help.header() version:@version
 
-        @args.headless = true if @args.live and not @args.headless_colors
+        @args.headless_colors = true if @args.live and not @args.headless
 
         process.on 'uncaughtException' @quit
         @session = new session @args
