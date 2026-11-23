@@ -56,7 +56,7 @@ use ../popo ◆ layout
             out.push line
 
         if valid info.images
-            out.push "    images #{@imageBoxes(info.images info.names).join '  '}"
+            out.push "    images #{@imageBoxes(info.images info.names info.cellh).join '  '}"
 
         logs = info.logs ? []
         if rows?
@@ -77,26 +77,32 @@ use ../popo ◆ layout
         text
 
     #  placements of one named image (e.g. the tiles of a scrollbar) as one cell box:
-    #  name x:y-x:y×count
+    #  name x:y-x:y×count hN
+    #  hN: scaled cursors span N rows, boxed per height
 
-    @imageBoxes: images names ->
+    @imageBoxes: images names cellh ->
 
         boxes = {}
         for img in images
             name = names?[img.i] ? img.i
-            if box = boxes[name]
+            rows = 1
+            if name in ['cursor' 'multi'] and cellh and img.h > cellh
+                rows = round(img.h / cellh)
+            key  = "#{name} #{rows}"
+            if box = boxes[key]
                 box.x1 = min box.x1 img.x
                 box.y1 = min box.y1 img.y
                 box.x2 = max box.x2 img.x
                 box.y2 = max box.y2 img.y
                 box.n += 1
             else
-                boxes[name] = name:name x1:img.x y1:img.y x2:img.x y2:img.y n:1
+                boxes[key] = name:name x1:img.x y1:img.y x2:img.x y2:img.y n:1 rows:rows
 
         Object.values(boxes).map (b) ->
             s = "#{b.name} #{b.x1}:#{b.y1}"
             s += "-#{b.x2}:#{b.y2}" if b.x2 != b.x1 or b.y2 != b.y1
             s += "×#{b.n}" if b.n > 1
+            s += " h#{b.rows}" if b.rows > 1
             s
 
 export dumpstate

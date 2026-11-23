@@ -244,6 +244,7 @@ use child_process ▪ spawn exec
             file:     @currentFile
             images:   @vterm.placements()
             names:    @t.imgNames
+            cellh:    @t.cellsz?[1]
             focus:    @focusName
             selected: selected
             logs:     @logfile.take()

@@ -851,6 +851,13 @@ sel = r... -> s.allSelections() ▸ r
         dumpstate.tags(s, '/tmp/x') ▸ '[dirty] [undo 1] [file: /tmp/x]'
         dumpstate.tags(s, '/tmp/x', 'editor') ▸ '[focus: editor] [dirty] [undo 1] [file: /tmp/x]'
 
+  ▸ scaled cursors show their height
+
+        imgs  = [{i:1 x:4 y:2 h:60} {i:2 x:1 y:0 h:20} {i:2 x:3 y:0 h:40} {i:2 x:5 y:1 h:20} {i:3 x:0 y:0 h:200}]
+        names = {1:'cursor' 2:'multi' 3:'cellrect'}
+
+        dumpstate.imageBoxes(imgs names 20) ▸ ['cursor 4:2 h3' 'multi 1:0-5:1×2' 'multi 3:0 h2' 'cellrect 0:0']
+
 ▸ registers
 
   ▸ named and unnamed registers

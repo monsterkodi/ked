@@ -186,7 +186,7 @@ use ../../../kxk ▪ kseg
         switch args.a
 
             'p'
-                @images["#{args.i}:#{args.p ? 1}"] = {i:int(args.i) p:int(args.p ? 1) x:@x y:@y}
+                @images["#{args.i}:#{args.p ? 1}"] = {i:int(args.i) p:int(args.p ? 1) x:@x y:@y h:int(args.h ? 0)}
 
             'd'
                 for key,img of @images
