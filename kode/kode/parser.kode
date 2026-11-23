@@ -1131,6 +1131,7 @@ use ./utils ▪ firstLineCol lastLineCol
             lhs: lhs
             rhs: @exp(tokens)
             async: tok.async
+            arrow: tok
 
     error: o tokens ->
         

@@ -68,16 +68,16 @@ args = karg """
     
     @test: files opt ◯->
         
-        if ◯ knrd.stale()
-            log y5('⚠ ') r5('kk -k')
-            ◯ knrd [] 
-        
+        #  tests run from js: transpile what changed first
+
+        ◯ knrd [] quiet:true
+
         ok = true
-        
-        if 
+
+        if
             ◯ nfs.exists "js/test.js"
-                
-                cmd = "node js/test.js"
+
+                cmd = "node --enable-source-maps js/test.js"
                 cmd += ' ' + files.join(' ') if valid files
                 cmd += ' silent' if opt?.silent
                 opt = shell:true cwd:kk.bundleDir()

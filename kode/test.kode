@@ -4,70 +4,68 @@ use ./kode ◆ tester
 
 mods = ['kxk' 'kode' 'kolor' 'ked' 'konrad']
 
-lastArg = process.argv[-1]
 columns = 60
 
-if lastArg == 'help'
-    
+usage = ->
+
     log """
-    
+
         test runner
-        
+
         usage
 
             kk -t                    run all tests
             kk -t brief|silent       set verbosity
+            kk -t plain              only failures: file:line, actual and expected, no colors
             kk -t #{mods.join('|')}  test a single module
-            kk -t .../file.js        run a single test file
-    
+            kk -t .../file.js|kode   run a single test file
+            kk -t ked popo/cursor    run the sections whose names contain the terms, level by level
+
     """
     process.exit 0
 
-tests = {}; for m in mods ➜ tests[m] = true
+selected = []
+files    = []
+
+for arg in process.argv[2..]
+    if
+        arg == 'help'        ➜ usage()
+        arg == 'brief'       ➜ tester.logSections = false
+        arg == 'silent'      ➜ tester.logSections = false ; tester.logModules = false
+        arg == 'plain'       ➜ tester.plain = true ; tester.logSections = false ; tester.logModules = false
+        arg in mods          ➜ selected.push arg
+        slash.ext(arg) == 'js'   ➜ files.push arg
+        slash.ext(arg) == 'kode' ➜ files.push arg.replace(/^kode\//, 'js/').replace(/\.kode$/, '.js')
+                             ➜ tester.setFilter arg
+
+tests = {}; for m in mods ➜ tests[m] = empty(files) and (empty(selected) or m in selected)
 moduleTimes = []
 
 fail = false
 
-hdr = h -> log B5(y5(' ' + kstr.crop(h, columns) + ' '))
+hdr = h -> log B5(y5(' ' + kstr.crop(h, columns) + ' ')) if not tester.plain
 
-if 
-    lastArg == 'brief'
-    
-        tester.logSections = false
+for f in files
 
-    lastArg == 'silent'
-    
-        tester.logSections = false
-        tester.logModules = false
-    
-    lastArg in mods
-    
-        for m in mods ➜ tests[m] = m == lastArg
-    
-    lastArg != ◆file
-    
-        for m in mods ➜ tests[m] = false
-            
-        hdr process.argv[-1]
-        
-        file = slash.path ◆dir '..' lastArg
-        test =◯ import(file)
-        result =◯ tester.test test.default
-        fail = fail or not (result ? true)
-    
+    hdr f
+
+    test =◯ import(slash.path(◆dir '..' f))
+    result =◯ tester.test test.default
+    fail = fail or not (result ? true)
+
 for mod in mods
-    
+
     if tests[mod]
         start = Date.now()
         hdr mod
-        files =◯ nfs.list(slash.path(◆dir mod 'test'))
-        for file in files
+        list =◯ nfs.list(slash.path(◆dir mod 'test'))
+        for file in list
             continue if file.type == 'dir' # ignore subdirectories for now
             test =◯ import(file.path) # shouldn't the file type be checked here?
             result =◯ tester.test test.default
             fail = fail or not (result ? true)
         moduleTimes.push {name:mod ms:Date.now() - start}
-        
+
 tester.summarize moduleTimes
 
 if fail

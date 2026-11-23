@@ -1487,8 +1487,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
             lhs = "await (#{lhs})"
             rhs = "await (#{rhs})"
         
-        s = 'compare(' + lhs + ',' + rhs + ')'
-        s
+        @mark('compare' p.arrow) + '(' + lhs + ',' + rhs + ')'
         
     arrayAssign: items rhs tok ->
 

@@ -28,8 +28,10 @@ usage: `./kk <flag>`
 | `kk -i`          | dry run: transpiles to memory, **writes nothing**. Safe.                |
 | `kk -k`          | transpiles `kode/**` → `js/**`; `*.kode` → `*.js` ; `*.noon` → `*.json` |
 | `kk -k <file>`   | transpiles a single source file                                         |
-| `kk -t`          | runs all tests                                                          |
+| `kk -t`          | transpiles what changed, then runs all tests                            |
 | `kk -t <module>` | tests one module: `kode` `kxk` `kolor` `ked`                            |
+| `kk -t ked a/b`  | only sections whose names contain `a`, then subsections containing `b`  |
+| `kk -t plain`    | only failures: `file:line`, actual and expected on one line, no colors  |
 
 ## files outside the transpiler
 
