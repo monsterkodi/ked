@@ -221,7 +221,20 @@ use ./utils ▪ kc ke
         
     ▸ assign
         
-        kc  "{x} = o"                   ▸   "x = o.x\n"
-        kc  "{x,y} = o"                 ▸   "x = o.x\ny = o.y\n"
-        kc  "{x,y} = require 'sthg'"    ▸   "x = require('sthg').x\ny = require('sthg').y\n"
+        kc  "{x} = o"                   ▸   ";({x} = o)"
+        kc  "{x,y} = o"                 ▸   ";({x, y} = o)"
+        kc  "{x,y} = require 'sthg'"    ▸   ";({x, y} = require('sthg'))"
+        kc  "{a b} = o"                 ▸   ";({a, b} = o)"
+        kc  "{a, b} = o"                ▸   ";({a, b} = o)"
+        kc  "{a:x b} = o"               ▸   ";({a: x, b} = o)"
+        kc  "{from to} = r"             ▸   ";({from, to} = r)"
+        kc  "x = 1\n{a b} = o"          ▸   "x = 1\n;({a, b} = o)"
+
+        ke  "o = a:1 b:2\ng = ->\n    {a b} = o\n    a+b\ng()"         ▸ 3
+        kc  "{empty noon} = kxk"        ▸   ";({empty, noon} = kxk)"
+
+        ke  "n = 0\nf = -> n++; {a:1 b:2}\n{a b:c} = f()\n[a c n]"   ▸ [1 2 1]
+
+        kc  "x = {a:1}"                 ▸   "x = {a:1}"
+        kc  "x = {a:1}['a']"            ▸   "x = {a:1}['a']"
         

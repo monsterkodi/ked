@@ -387,8 +387,61 @@ use ./utils ▪ firstLineCol lastLineCol
         import:
             args: toImport
             
+#!destruct
+
+    # {a b:c} = o ▸ ;({a, b: c} = o) ▸ the names go through to js unparsed, like import
+
+    destructAhead: tokens ->
+
+        depth = 0
+        for t,i in tokens
+            ⮐ false if t.type in ['nl' 'block']
+            if t.text == '{'
+                depth++
+            else if t.text == '}'
+                if depth == 0
+                    ⮐ tokens[i+1]?.text == '=' and tokens[i+1].type == 'op'
+                depth--
+        false
+
+    destruct: open tokens ->
+
+        keys = []
+
+        nameError = tok => @onError "only names and renames can be destructured from an object" tok:tok
+        isName    = tok -> tok?.type in ['var' 'keyword' 'op'] and /^[A-Za-z_$][\w$]*$/.test(tok.text) # noon is an op
+
+        while tokens[0]?.text != '}'
+
+            key = tokens.shift()
+            continue if key.text == ','
+            nameError key if not isName(key)
+
+            target = key
+            if tokens[0]?.text == ':'
+                tokens.shift()
+                target = tokens.shift()
+                if not isName(target) ➜ nameError target or key
+
+            @firstLastError target if target.text in ['first' 'last'] and target.type == 'keyword'
+            @nameIsReserved target
+
+            keys.push key:key target:target
+
+        close = tokens.shift()
+        nameError close if empty keys
+        tokens.shift() # =
+
+        rhs = @exp tokens
+        if not rhs
+            @onError "missing expression on the right" tok:close
+
+        destruct:
+            keys: keys
+            rhs:  rhs
+
 #!use
-    
+
     use: obj tokens ->
         
         toUse = []

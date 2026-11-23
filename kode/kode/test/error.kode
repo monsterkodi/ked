@@ -542,6 +542,18 @@ plain = c ->
         codemsg 'for i in 0..3 by 0 ➜ log i'    "'by' step can't be 0"
         codemsg 'for i in 0..3 by'              "'by' is missing the step"
 
+    ▸ object destructuring
+
+        codemsg '{a = 1} = o'       'only names and renames can be destructured'
+        codemsg '{a {b}} = o'       'only names and renames can be destructured'
+        codemsg '{...r} = o'        'only names and renames can be destructured'
+        codemsg '{a:@x} = o'        'only names and renames can be destructured'
+        codemsg "{'a'} = o"         'only names and renames can be destructured'
+        codemsg '{} = o'            'only names and renames can be destructured'
+        codemsg '{a:class} = o'     'class is a javascript reserved word'
+        codemsg '{last} = o'        "'last' is an operator"
+        codemsg '{a b} ='           'missing expression on the right'
+
     ▸ the message is the last line
 
         plain('a = [1, 2').split('\n')[-1]  ▸ 'array is missing closing ]'

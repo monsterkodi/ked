@@ -1255,14 +1255,6 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         if 
             o == '='
             
-                if op.lhs.object # lhs is curly, eg. {x,y} = require ''
-                    s = ''
-                    for keyval in op.lhs.object.keyvals
-                        ind = if op.lhs.object.keyvals.indexOf(keyval) > 0 then @indent else ''
-                        s += ind + "#{@mark keyval.text, keyval} = #{@atom(op.rhs)}.#{keyval.text}\n"
-                    ⮐ s
-                    
-                
                 if op.lhs.array # lhs is aray, eg. [x,y] = require ''
                     ⮐ @arrayPattern(op.lhs.array.items) + ' = ' + @atom(op.rhs)
                     
@@ -1364,6 +1356,15 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         lhs = if op.lhs ➜ (if isAssign then @assignee(op.lhs) else @atom(op.lhs)) + sep else ''
         
         prfx + lhs + o + sep + open + kstr.lstrip(@atom(op.rhs) + close)
+
+    destruct: p ->
+
+        keys = p.keys.map (k) =>
+            if k.key.text == k.target.text
+                @mark k.target.text, k.target
+            else
+                k.key.text + ': ' + @mark(k.target.text, k.target)
+        "({#{keys.join ', '}} = #{@atom p.rhs})"
 
     incond: p ->
         

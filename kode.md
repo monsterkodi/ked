@@ -260,6 +260,17 @@ Ranges with two number literals count in the direction they are written.
 All other ranges only count up, unless a step is given with `by`.
 `by` is only a keyword directly after a range in a `for`; elsewhere it is a plain name.
 
+### destructuring
+
+```kode
+[a b] = [1 2]                                                       ▸ a = 1, b = 2
+{a b} = o                                                           ▸ ;({a, b} = o)
+{a:x b} = o                                                         ▸ x = o.a, b = o.b
+```
+
+Object destructuring is passed through to JS as is, so the right side is evaluated once.
+Only names and renames are allowed between the braces, and only as a statement.
+
 ### empty
 
 ```kode

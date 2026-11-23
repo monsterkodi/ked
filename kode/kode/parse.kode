@@ -367,8 +367,11 @@ closers = '(':')' '[':']' '{':'}'
                 if tok.text in wantsLeft or tok.text in wantsSlice or tok.text in wantsOperand
                     @onError "#{tok.text} is missing an operand" tok:tok
 
+        if tok.text == '{' and not @stack[-1]?.startsWith('op') and @destructAhead(tokens)
+            ⮐ @destruct tok tokens
+
         switch tok.type
-                        
+
             'block'     ➜ ⮐ @onError "unexpected block token in exp!" tok:tok
             'nl'        ➜ ⮐ @onError "unexpected nl token in exp!" tok:tok
             ';'         ➜ ⮐ @onError "unexpected ; token in exp!" tok:tok

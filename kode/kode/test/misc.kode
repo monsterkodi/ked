@@ -230,20 +230,15 @@ use ../../kxk ◆ slash
             """
             if (true)
             {
-                m = require('bla').m
-                n = require('bla').n
-            
+                ;({m, n} = require('bla'))
             }
             """
-            
+
         kc  """
             { empty, noon, valid } = kxk
             """ ▸
             """
-            empty = kxk.empty
-            noon = kxk.noon
-            valid = kxk.valid
-            
+            ;({empty, noon, valid} = kxk)
             """
         
     ▸ in condition

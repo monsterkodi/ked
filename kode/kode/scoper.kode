@@ -81,13 +81,13 @@
                 if op.operator.text == '='
                     if op.lhs?.text
                         insert op.lhs.text, op.operator.text
-                    else if op.lhs.object
-                        for keyval in op.lhs.object.keyvals
-                            if keyval.type == 'var'
-                                insert keyval.text, 'curly'
                     else if op.lhs.array
                         insertArray op.lhs.array.items
                             
+            if e.destruct
+                for k in e.destruct.keys
+                    insert k.target.text, 'curly'
+
             if fv = e.for?.vals
                 
                 if fv.text
