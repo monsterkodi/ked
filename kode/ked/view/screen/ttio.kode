@@ -40,6 +40,8 @@ use ../../util/img ◆ rounded
         @plargs     = {}
         @hiddenImgs = {}
         
+        @APC_END    = Buffer.from '\x1b\\'
+
         @modifiers  = ['cmd' 'ctrl' 'alt' 'shift']
         @activeMods = {}
         
@@ -62,7 +64,7 @@ use ../../util/img ◆ rounded
                 process.on 'exit' ->
                     process.stdout.write '\x1b[<u\x1b[?7h\x1b[?1049l'
                     process.stdin.setRawMode false
-                process.stdin.on 'data' (data) => @emit 'live' data
+                process.stdin.on 'data' @onData
                 @reserve = opt.reserve ? 0
                 @liveSize()
                 process.stdout.on 'resize' => @liveSize() ; @onHeadlessResize()
@@ -153,7 +155,7 @@ use ../../util/img ◆ rounded
 
     onHeadlessResize: =>
         
-        @emit 'resize' @cols() @rows() null ([])
+        @emit 'resize' @cols() @rows() @pixels @cellsz
     
     onInputData: data =>
         
@@ -687,11 +689,21 @@ use ../../util/img ◆ rounded
         
             type = if
                 data[s] == 0x1b and data[s+1] == 0x5b ➜ 'csi'
+                data[s] == 0x1b and data[s+1] == 0x5f ➜ 'apc'
                 data[s] == 0x1b                       ➜ 'esc'
                                                       ➜ 'raw'
             e = s+1
-            
-            if type == 'csi'
+
+            if type == 'apc'
+
+                e = data.indexOf(@APC_END s+2)
+                if e < 0
+                    @apcOpen = true
+                    e = data.length
+                else
+                    e += 2
+
+            else if type == 'csi'
 
                 e = s+2
                 
@@ -724,7 +736,14 @@ use ../../util/img ◆ rounded
 #!data
     
     onData: data =>
-    
+
+        if @apcOpen
+            end = data.indexOf @APC_END
+            ⮐ if end < 0
+            delete @apcOpen
+            data = data[end+2..]
+            ⮐ if data.length == 0
+
         startMarker = Buffer.from '\x1b[200~'
         endMarker   = Buffer.from '\x1b[201~'
         
@@ -773,7 +792,9 @@ use ../../util/img ◆ rounded
             ⮐ 
         
         for seq in @parseData data
-        
+
+            continue if seq.type == 'apc' # kitty graphics response
+
             data = seq.data
             csi  = seq.csi
             esc  = seq.esc

@@ -40,9 +40,29 @@ use ../edit ◆ mode
             out.push "    rect #{rect.x}:#{rect.y} #{rect.w}x#{rect.h}"
 
         if valid images
-            places = images.map (img) -> "#{img.x}:#{img.y}"
-            out.push "    images #{places.join ' '}"
+            out.push "    images #{@imageBoxes(images).join ' '}"
 
         out
+
+    #  placements of one image (e.g. the tiles of a frame) as one cell box: x:y-x:y×count
+
+    @imageBoxes: images ->
+
+        boxes = {}
+        for img in images
+            if box = boxes[img.i]
+                box.x1 = min box.x1 img.x
+                box.y1 = min box.y1 img.y
+                box.x2 = max box.x2 img.x
+                box.y2 = max box.y2 img.y
+                box.n += 1
+            else
+                boxes[img.i] = x1:img.x y1:img.y x2:img.x y2:img.y n:1
+
+        Object.values(boxes).map (b) ->
+            s = "#{b.x1}:#{b.y1}"
+            s += "-#{b.x2}:#{b.y2}" if b.x2 != b.x1 or b.y2 != b.y1
+            s += "×#{b.n}" if b.n > 1
+            s
 
 export dumpstate

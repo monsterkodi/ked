@@ -37,6 +37,11 @@ pasteKeys = (chunks) ->
         seqs[0].esc ▸ 'OP'
         seqs[1].csi ▸ 'B'
 
+  ▸ graphics replies
+
+        pasteKeys(['\x1b_Gi=101;ENOENT:no image\x1b\\x']).keys ▸ [['x' 'x']]
+        pasteKeys(['\x1b_Gi=101;ENOENT:no ' 'image\x1b\\x' 'y']).keys ▸ [['x' 'x'] ['y' 'y']]
+
   ▸ hide and show images
 
         t = new ttio headless:true input:false

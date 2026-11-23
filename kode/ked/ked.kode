@@ -177,9 +177,8 @@ use child_process ▪ spawn exec
         @dump 'start'
 
         if @t.live
-            @t.on 'key'    (combo) => @liveCombo = combo
-            @t.on 'live'   (data)  => @liveQueue = (@liveQueue ? Promise.resolve()).then => @playLive data
-            @t.on 'resize'         => @liveQueue = (@liveQueue ? Promise.resolve()).then => @dump 'resize'
+            @t.on 'key'    (combo) => @liveDump combo
+            @t.on 'resize'         => @liveDump 'resize'
             ⮐
 
         for step in @t.steps()
@@ -192,17 +191,23 @@ use child_process ▪ spawn exec
         
         @quit()
     
-    playLive: data ◯=>
+    #  events that arrive while a dump settles are shown together in the next one
 
-        @liveCombo = null
+    liveDump: label ◯=>
 
-        @t.play data
+        @liveLabels ?= []
+        @liveLabels.push label
 
-        ⮐ if not @liveCombo?
+        ⮐ if @liveDumping
+        @liveDumping = true
 
-        ◯ @settle()
+        while @liveLabels.length
+            ◯ @settle()
+            labels = @liveLabels
+            @liveLabels = []
+            @dump labels.join(' ')
 
-        @dump @liveCombo
+        @liveDumping = false
 
     #  let the work a key started finish before the screen is written out
     
@@ -228,15 +233,19 @@ use child_process ▪ spawn exec
         @vterm.resize @t.cols() @t.rows()
         @vterm.feed frame
 
-        section = dumpstate.section(label @editor.state @editor.cells @currentFile @vterm.placements()).join '\n'
+        section = dumpstate.section label @editor.state @editor.cells @currentFile @vterm.placements()
 
         if @t.live
-            process.stdout.write '\x1b[2J' + frame + "\x1b[0m\x1b[#{@t.rows()+1};1H" + section
+            #  erasing the whole screen would delete kitty's image placements too
+            below = ''
+            for i in 0...dumpstate.ROWS
+                below += "\x1b[#{@t.rows()+1+i};1H\x1b[2K" + (section[i] ? '')
+            process.stdout.write frame + '\x1b[0m' + below
             ⮐
 
         text = @args.headless_colors ? @vterm.colored() : @vterm.text()
 
-        process.stdout.write '\n' + text.join('\n') + '\n' + section + '\n'
+        process.stdout.write '\n' + text.join('\n') + '\n' + section.join('\n') + '\n'
 
     startup: ◯=>
         
