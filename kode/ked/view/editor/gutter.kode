@@ -364,12 +364,12 @@ use ../base        ◆ view
     
             if gb[2] and gb[2] < gb[1]
                 mh = int gb[2]*pixelsPerRow 
-                squares.place sx sy sw mh modColor
+                squares.place sx sy sw mh modColor null 'gutter'
                 sy += mh
                 ah  = sh-mh
-                squares.place sx sy sw ah addColor
+                squares.place sx sy sw ah addColor null 'gutter'
             else
-                squares.place sx sy sw sh fg
+                squares.place sx sy sw sh fg null 'gutter'
         
     draw: ->
         

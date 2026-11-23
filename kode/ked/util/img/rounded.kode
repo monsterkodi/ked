@@ -203,8 +203,10 @@ use ◆ png
             'bottom' ➜ @fill img 0   h-1 w 0 fg
             'left'   ➜ @fill img 0   0   0 h fg
             'right'  ➜ @fill img w-1 0   0 h fg
-        
-        @encode img
+
+        img = @encode img
+        img.name = 'cellrect'
+        img
         
 #!cursor
 
@@ -251,6 +253,7 @@ use ◆ png
                 'rounded.border.br_ns'  ➜ @borderBottomRightNoShadow    csz[0] csz[1] fg bg
                 'rounded.cursor'        ➜ @cursor                   int(csz[0]/5 )*2+1 csz[1]*scale fg
                 'rounded.multi'         ➜ @multi                    int(csz[0]/10)*2+1 csz[1]*scale fg
+            img.name = name.split('.')[1]
             @cache[key] = img
 
         idpl = switch name 

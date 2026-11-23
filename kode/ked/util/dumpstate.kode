@@ -1,10 +1,13 @@
 
 use ../edit ◆ mode
+use ../popo ◆ layout
 ■dumpstate
-    @tags: (state file) ->
-        
+    @tags: (state file focus) ->
+
         tags = []
-        
+
+        tags.push "focus: #{focus}" if valid focus
+
         names = (mode.active[state.name] ? []).map((m) -> m.name).sort()
         tags.push "modes: #{names.join ' '}" if valid names
         
@@ -12,16 +15,22 @@ use ../edit ◆ mode
         tags.push "pending: :#{novim.ex}" if novim?.ex?
         
         tags.push 'dirty' if state.isDirty()
+        tags.push "undo #{state.h.length-1}" if state.h.length > 1
+        tags.push "redo #{state.r.length}" if valid state.r
         tags.push "file: #{file}" if valid file
         
         tags.map((tag) -> "[#{tag}]").join ' '
 
-    @ROWS: 6
+    @ROWS: 10
 
-    @section: (label state cells file images) ->
+    #  info: label state cells file images names focus selected logs
+    #  rows limits the lines: the newest log lines that fit are kept
 
-        out  = ["=== #{label}"]
-        tags = @tags state file
+    @section: info rows ->
+
+        state = info.state
+        out   = ["=== #{info.label}"]
+        tags  = @tags state info.file info.focus
 
         out.push "    #{tags}" if valid tags
 
@@ -36,31 +45,56 @@ use ../edit ◆ mode
             ranges = state.s.selections.map (r) -> "#{r[0]}:#{r[1]}-#{r[2]}:#{r[3]}"
             out.push "    select #{ranges.join ' '}"
 
-        if rect = cells?.cellRect
+        if rect = info.cells?.cellRect
             out.push "    rect #{rect.x}:#{rect.y} #{rect.w}x#{rect.h}"
 
-        if valid images
-            out.push "    images #{@imageBoxes(images).join ' '}"
+        if state.rectree?
+            selected = @nodeText state.rectree info.selected
+            atCursor = @nodeText state.rectree state.sheetNodeAtCursor()
+            line = "    node #{selected}"
+            line += " · at cursor #{atCursor}" if atCursor != selected
+            out.push line
+
+        if valid info.images
+            out.push "    images #{@imageBoxes(info.images info.names).join '  '}"
+
+        logs = info.logs ? []
+        if rows?
+            logs = logs.slice max(0 logs.length - (rows - out.length))
+            logs = [] if out.length >= rows
+        out = out.concat logs.map((l) -> "    log #{l}")
 
         out
 
-    #  placements of one image (e.g. the tiles of a frame) as one cell box: x:y-x:y×count
+    @nodeText: rectree node ->
 
-    @imageBoxes: images ->
+        ⮐ '-' if not node?
+
+        path = layout.pathOf(rectree node) ? []
+        text = "#{path.join('.')} #{layout.roleOf(node)}"
+        if rect = node.rect?.abs
+            text += " #{rect.x}:#{rect.y} #{rect.w}x#{rect.h}"
+        text
+
+    #  placements of one named image (e.g. the tiles of a scrollbar) as one cell box:
+    #  name x:y-x:y×count
+
+    @imageBoxes: images names ->
 
         boxes = {}
         for img in images
-            if box = boxes[img.i]
+            name = names?[img.i] ? img.i
+            if box = boxes[name]
                 box.x1 = min box.x1 img.x
                 box.y1 = min box.y1 img.y
                 box.x2 = max box.x2 img.x
                 box.y2 = max box.y2 img.y
                 box.n += 1
             else
-                boxes[img.i] = x1:img.x y1:img.y x2:img.x y2:img.y n:1
+                boxes[name] = name:name x1:img.x y1:img.y x2:img.x y2:img.y n:1
 
         Object.values(boxes).map (b) ->
-            s = "#{b.x1}:#{b.y1}"
+            s = "#{b.name} #{b.x1}:#{b.y1}"
             s += "-#{b.x2}:#{b.y2}" if b.x2 != b.x1 or b.y2 != b.y1
             s += "×#{b.n}" if b.n > 1
             s

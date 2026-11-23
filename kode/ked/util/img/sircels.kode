@@ -28,14 +28,16 @@ use ◆ png
         img.png = Buffer.from png.encode([@sircArr.buffer] img.w img.h 2)
         img
         
-    @place: sx sy sd fg z ->
-    
+    @place: sx sy sd fg z name='circle' ->
+
         ⮐ if empty @csz
-        
-        img = @cache[fg]
+
+        key = name + fg + sd
+        img = @cache[key]
         if empty img
             img = @sircImg sd fg
-            @cache[fg] = img
+            img.name = name
+            @cache[key] = img
             
         ty = floor sy / @csz[1]
         tx = floor sx / @csz[0]

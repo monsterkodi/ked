@@ -39,9 +39,10 @@ use child_process ▪ spawn exec
 
         process.on 'uncaughtException' @quit
         @session = new session @args
-        @logfile = new logfile @session.name (@args.headless or @args.headless_colors)
-        
-        log w2("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #{b8 @session.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
+        headless = @args.headless or @args.headless_colors
+        @logfile = new logfile @session.name headless headless
+
+        log w2("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #{b8 @session.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓") if not headless
         
         config.load()
 
@@ -97,7 +98,7 @@ use child_process ▪ spawn exec
         post.on 'file.change'       @onFileChange
         post.on 'git.status'        @onGitStatus
         post.on 'config.loaded'     @onConfigLoaded
-        # post.on 'focus'         (name) -> log "focus: '#{name}'"
+        post.on 'focus'             (name) => @focusName = name
         
         @contextHandlers = [                                                                                                         @dircol @funcol @editor        ]
         @mouseHandlers   = [ @input @context @finder @searcher @replacer @clippo @differ @quicky @browse @saveas @droop @menu @macro @dircol @funcol @editor @title ]
@@ -233,7 +234,21 @@ use child_process ▪ spawn exec
         @vterm.resize @t.cols() @t.rows()
         @vterm.feed frame
 
-        section = dumpstate.section label @editor.state @editor.cells @currentFile @vterm.placements()
+        selected = @funcol.sheeditor.sheetree.current() if @editor.state.rectree?
+        rows     = @t.live ? dumpstate.ROWS : null
+
+        info =
+            label:    label
+            state:    @editor.state
+            cells:    @editor.cells
+            file:     @currentFile
+            images:   @vterm.placements()
+            names:    @t.imgNames
+            focus:    @focusName
+            selected: selected
+            logs:     @logfile.take()
+
+        section = dumpstate.section info rows
 
         if @t.live
             #  erasing the whole screen would delete kitty's image placements too
@@ -299,7 +314,7 @@ use child_process ▪ spawn exec
         
         ◯ @session.save()
         
-        log w2("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #{b8 @session.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
+        log w2("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #{b8 @session.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛") if not @logfile.headless
 
         if msg?
             error msg.stack if msg.stack

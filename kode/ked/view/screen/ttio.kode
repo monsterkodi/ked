@@ -35,6 +35,7 @@ use ../../util/img ◆ rounded
         @hasFocus = true
         
         @imgIds     = 100
+        @imgNames   = {}
         @lastplImgs = {}
         @placedImgs = {}
         @plargs     = {}
@@ -203,13 +204,13 @@ use ../../util/img ◆ rounded
 
     placeImageOverlay: id x y py pw ph ->
         
-        @overlayID ?= @sendImg rounded.rect(300 400 0 [255 255 255 2])
-        
+        @overlayID ?= @sendImg rounded.rect(300 400 0 [255 255 255 2]) null 'overlay'
+
         @placeOverlay @overlayID id x y py pw ph
 
     placeCellRectOverlay: id x y py pw ph ->
         
-        @cellRectOverlayID ?= @sendImg rounded.rect(300 400 0 [255 255 255 100])
+        @cellRectOverlayID ?= @sendImg rounded.rect(300 400 0 [255 255 255 100]) null 'cellrect'
         
         @placeOverlay @cellRectOverlayID id x y py pw ph
 
@@ -231,12 +232,14 @@ use ../../util/img ◆ rounded
         
         @write "\x1b_Gq=1,a=d,d=i,i=#{imgId},p=#{id}\x1b\\"
         
-    sendImg: img id ->
-    
+    sendImg: img id name ->
+
         if empty id
             @imgIds += 1
             id = @imgIds
-            
+
+        @imgNames[id] = name ? img.name ? 'image'
+
         base64 = img.png.toString 'base64'
         @write "\x1b_Gq=1,i=#{id},f=100;#{base64}\x1b\\"
         img.id = id
@@ -345,6 +348,8 @@ use ../../util/img ◆ rounded
         @write "\x1b_Gq=2,a=d,d=R,x=#{start},y=#{end}\x1b\\"
     
     sendImageData: data id w h bytesperpixel=3 ->
+
+        @imgNames[id] = 'map'
         
         ###
             q=1  don't send OK q=2 don't send OK and failure

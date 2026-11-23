@@ -239,9 +239,9 @@ use                 ◆ view
         w = int csz[0]/2
         h = int kh
 
-        squares.place x int(y+w/2) w h-w fg
+        squares.place x int(y+w/2) w h-w fg null 'scrollbar'
 
-        sircels.place x y     w (ky ? fg : @color.scroll_dot) 1111
-        sircels.place x y+h-w w ((y+h < (@cells.y+@cells.rows)*csz[1]-1) ? fg : @color.scroll_dot) 1111
+        sircels.place x y     w (ky ? fg : @color.scroll_dot) 1111 'scrollbar'
+        sircels.place x y+h-w w ((y+h < (@cells.y+@cells.rows)*csz[1]-1) ? fg : @color.scroll_dot) 1111 'scrollbar'
 
 export matrix

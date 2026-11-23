@@ -4,7 +4,7 @@ var _k_ = {dir: function () { let url = import.meta.url.substring(7); let si = u
     var pretty = function (o, ind, seen) { var k, kl, l, v, mk = 4; if (Object.keys(o).length > 1) { for (k in o) { if (Object.hasOwn(o,k)) { kl = parseInt(Math.ceil((k.length + 2) / 4) * 4); mk = Math.max(mk,kl); if (mk > 32) { mk = 32; break } } } }; l = []; var keyValue = function (k, v) { var i, ks, s, vs; s = ind; k = esc(k,true); if (k.indexOf('  ') > 0 && k[0] !== '|') { k = '|'+k+'|' } else if (k[0] !== '|' && k[k.length - 1] === '|') { k = '|' + k } else if (k[0] === '|' && k[k.length - 1] !== '|') { k += '|' }; ks = pad(k,Math.max(mk,k.length + 2)); i = pad(ind + '    ',mk); s += ks; vs = toStr(v,i,false,seen); if (vs[0] === '\n') { while (s[s.length - 1] === ' ') { s = s.substr(0,s.length - 1) } }; s += vs; while (s[s.length - 1] === ' ') { s = s.substr(0,s.length - 1) }; return s }; for (k in o) { if (Object.hasOwn(o,k)) { l.push(keyValue(k,o[k])) } }; return l.join('\n') }; 
     var toStr = function (o, ind = '', arry = false, seen = []) { var s, t, v; if (!(o != null)) { if (o === null) { return 'null' }; if (o === undefined) { return 'undefined' }; return '<?>' }; switch (t = typeof(o)) { case 'string': {return esc(o,arry)}; case 'object': { if (_k_.in(o,seen)) { return '<v>' }; seen.push(o); if ((o.constructor != null ? o.constructor.name : undefined) === 'Array') { s = ind !== '' && arry && '.' || ''; if (o.length && ind !== '') { s += '\n' }; s += (function () { var result = []; var list = _k_.list(o); for (var li = 0; li < list.length; li++)  { v = list[li];result.push(ind + toStr(v,ind + '    ',true,seen))  } return result }).bind(this)().join('\n') } else if ((o.constructor != null ? o.constructor.name : undefined) === 'RegExp') { return o.source } else { s = (arry && '.\n') || ((ind !== '') && '\n' || ''); s += pretty(o,ind,seen) }; return s } default: return String(o) }; return '<???>' }; 
     return toStr(obj);
-}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}};_k_.r4=_k_.k.F256(_k_.k.r(4));_k_.r5=_k_.k.F256(_k_.k.r(5));_k_.m6=_k_.k.F256(_k_.k.m(6));_k_.y8=_k_.k.F256(_k_.k.y(8));_k_.w2=_k_.k.F256(_k_.k.w(2))
+}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}};_k_.r4=_k_.k.F256(_k_.k.r(4));_k_.r5=_k_.k.F256(_k_.k.r(5));_k_.m6=_k_.k.F256(_k_.k.m(6));_k_.y8=_k_.k.F256(_k_.k.y(8));_k_.w2=_k_.k.F256(_k_.k.w(2))
 
 var logfile
 
@@ -13,15 +13,31 @@ import fs from "fs"
 
 logfile = (function ()
 {
-    function logfile (name, headless = false)
+    function logfile (name, headless = false, capture = false)
     {
         this.name = name
     
         var logfile
 
         this.headless = headless
+        this.lines = []
         if (this.headless)
         {
+            if (capture)
+            {
+                console.log = (function (...args)
+                {
+                    return this.capture(args)
+                }).bind(this)
+                console.warn = (function (...args)
+                {
+                    return this.capture(args)
+                }).bind(this)
+                console.error = (function (...args)
+                {
+                    return this.capture(args)
+                }).bind(this)
+            }
             return
         }
         logfile = _k_.dir() + '/../../../ked.log'
@@ -67,6 +83,30 @@ logfile = (function ()
         }).bind(this)
     }
 
+    logfile.prototype["capture"] = function (args)
+    {
+        var txt
+
+        txt = args.map(function (a)
+        {
+            return (_k_.isStr(a) ? a : _k_.noon((a)))
+        }).join(' ')
+        txt = txt.replace(/\x1b\[[0-9;]*m/g,'')
+        return this.lines = this.lines.concat(txt.split('\n').filter(function (l)
+        {
+            return l.trim().length
+        }))
+    }
+
+    logfile.prototype["take"] = function ()
+    {
+        var lines
+
+        lines = this.lines
+        this.lines = []
+        return lines
+    }
+
     logfile.prototype["write"] = function (txt)
     {
         if (this.headless || this.stream.closed || !this.stream.writable)
@@ -78,8 +118,18 @@ logfile = (function ()
 
     logfile.prototype["close"] = function (cb)
     {
+        var lines
+
         if (this.headless)
         {
+            lines = this.take()
+            if (!_k_.empty(lines))
+            {
+                process.on('exit',function ()
+                {
+                    return process.stderr.write(lines.join('\n') + '\n')
+                })
+            }
             cb()
             return
         }
@@ -92,5 +142,5 @@ logfile = (function ()
 
 export default logfile;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibG9nZmlsZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdXRpbC9sb2dmaWxlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7T0FDSSxTQUFBOzs7QUFFSCxXQUFEOzthQUVJLFNBQUksTUFBSyxXQUFTOztRQUFmOzs7O1FBRUMsS0FBQyxXQUFXO1lBS1AsS0FBQzs7OztRQUVOLFVBQVcsWUFBTTtRQUVqQixLQUFDLFNBQVMsR0FBRyxrQkFBa0IsU0FBUSxNQUFNLElBQUksVUFBVTtRQUMzRCxRQUFRLGlCQUFNOzs7O2dCQUVQLEtBQUssVUFBc0IsVUFBWCxLQUFLOztvQkFDakIsS0FBSyxTQUFTOztvQkFDYixNQUFNLFdBQUs7O3lCQUNQLEtBQUssV0FBVTs7b0JBQ25CLE1BQU0sS0FBSzs7Z0JBQ2YsS0FBQyxNQUFNLE9BQUcsUUFBUSxPQUFHLEtBQUs7b0JBQ04sS0FBSyxTQUFTOzsyQkFBbEMsS0FBQyxnQkFBVzs7Ozs7dUJBRVosS0FBQyxNQUFNLGtCQUFXOzs7UUFFMUIsUUFBUSxrQkFBTzs7bUJBRVgsS0FBQyxNQUFNLE9BQUcsS0FBSyxjQUFLOzt1QkFBTSxPQUFHLGtCQUFXO2VBQUksS0FBSzs7UUFFckQsUUFBUSxtQkFBUTs7bUJBRVosS0FBQyxNQUFNLE9BQUcsS0FBSyxjQUFLOzt1QkFBTSxPQUFHLGtCQUFXO2VBQUksS0FBSzs7Ozt1QkFFekQsb0JBQU87O1lBRUUsS0FBQyxZQUFZLEtBQUMsT0FBTyxXQUFjLEtBQUMsT0FBTzs7OztlQUVoRCxLQUFDLE9BQU8sTUFBTSxNQUFNOzs7dUJBRXhCLG9CQUFPOztZQUVBLEtBQUM7O1lBQ0E7OztRQUdKLEtBQUMsT0FBTyxJQUFJLE9BQUc7ZUFDZixLQUFDLE9BQU8sTUFBTTs7O1dBL0NyQjs7O2VBaURNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibG9nZmlsZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9rZWQvdXRpbC9sb2dmaWxlLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7T0FDSSxTQUFBOzs7QUFFSCxXQUFEOzthQUVJLFNBQUksTUFBSyxXQUFTLE9BQU0sVUFBUTs7UUFBN0I7Ozs7UUFFQyxLQUFDLFdBQVc7UUFDWixLQUFDO1lBS0UsS0FBQzs7Z0JBQ0c7O2dCQUNDLFFBQVEsaUJBQVE7OzJCQUFXLEtBQUMsUUFBUTs7Z0JBQ3BDLFFBQVEsa0JBQVE7OzJCQUFXLEtBQUMsUUFBUTs7Z0JBQ3BDLFFBQVEsbUJBQVE7OzJCQUFXLEtBQUMsUUFBUTs7Ozs7UUFHNUMsVUFBVyxZQUFNO1FBRWpCLEtBQUMsU0FBUyxHQUFHLGtCQUFrQixTQUFRLE1BQU0sSUFBSSxVQUFVO1FBQzNELFFBQVEsaUJBQU07Ozs7Z0JBRVAsS0FBSyxVQUFzQixVQUFYLEtBQUs7O29CQUNqQixLQUFLLFNBQVM7O29CQUNiLE1BQU0sV0FBSzs7eUJBQ1AsS0FBSyxXQUFVOztvQkFDbkIsTUFBTSxLQUFLOztnQkFDZixLQUFDLE1BQU0sT0FBRyxRQUFRLE9BQUcsS0FBSztvQkFDTixLQUFLLFNBQVM7OzJCQUFsQyxLQUFDLGdCQUFXOzs7Ozt1QkFFWixLQUFDLE1BQU0sa0JBQVc7OztRQUUxQixRQUFRLGtCQUFPOzttQkFFWCxLQUFDLE1BQU0sT0FBRyxLQUFLLGNBQUs7O3VCQUFNLE9BQUcsa0JBQVc7ZUFBSSxLQUFLOztRQUVyRCxRQUFRLG1CQUFROzttQkFFWixLQUFDLE1BQU0sT0FBRyxLQUFLLGNBQUs7O3VCQUFNLE9BQUcsa0JBQVc7ZUFBSSxLQUFLOzs7O3VCQUV6RCxzQkFBUzs7OztRQUVMLE1BQU0sS0FBSyxjQUFLOztvQkFBVyxVQUFMLEtBQVcsY0FBUztXQUFJLEtBQUs7UUFDbkQsTUFBTSxJQUFJLFFBQVEsa0JBQWtCO2VBQ3BDLEtBQUMsUUFBUSxLQUFDLE1BQU0sT0FBTyxJQUFJLE1BQU0sTUFBTSxpQkFBUTs7bUJBQU0sRUFBRSxPQUFPOzs7O3VCQUVsRTs7OztRQUVJLFFBQVEsS0FBQztRQUNULEtBQUM7ZUFDRDs7O3VCQUVKLG9CQUFPOztZQUVFLEtBQUMsWUFBWSxLQUFDLE9BQU8sV0FBYyxLQUFDLE9BQU87Ozs7ZUFFaEQsS0FBQyxPQUFPLE1BQU0sTUFBTTs7O3VCQUV4QixvQkFBTzs7OztZQUVBLEtBQUM7O1lBQ0EsUUFBUSxLQUFDOzJCQUNBOztnQkFDTCxRQUFRLEdBQUc7OzJCQUFVLFFBQVEsT0FBTyxNQUFNLE1BQU0sS0FBSyxRQUFROzs7WUFDakU7OztRQUdKLEtBQUMsT0FBTyxJQUFJLE9BQUc7ZUFDZixLQUFDLE9BQU8sTUFBTTs7O1dBcEVyQjs7O2VBc0VNIn0=
 //# sourceURL=../../../kode/ked/util/logfile.kode

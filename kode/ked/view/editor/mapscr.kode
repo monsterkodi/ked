@@ -306,7 +306,7 @@ use                 ◆ mapview
             sh = min sh (@mapY + @mapHeight - sy)
 
             if isMain
-                squares.place @cells.x*@csz[0]+@mapWidth-@pixelsPerCol*4 sy @pixelsPerCol*4 sh fg 2002
+                squares.place @cells.x*@csz[0]+@mapWidth-@pixelsPerCol*4 sy @pixelsPerCol*4 sh fg 2002 'map.cursor'
 
             continue if sx < @mapX or sx >= @mapX + @mapWidth
 
@@ -316,7 +316,7 @@ use                 ◆ mapview
             else
                 sw = @pixelsPerCol
                 
-            squares.place sx sy sw sh fg
+            squares.place sx sy sw sh fg null 'map.cursor'
 
     drawHighlights: =>
         
@@ -339,7 +339,7 @@ use                 ◆ mapview
             else
                 clr = @color.fullysel
                 
-            squares.place xoff-selw sy selw sh clr 2000
+            squares.place xoff-selw sy selw sh clr 2000 'map.select'
     
         for li in belt.lineIndicesForSpans @state.s.highlights
         
@@ -349,6 +349,6 @@ use                 ◆ mapview
             sh = @lineRows(li) * @pixelsPerRow
             sh = min sh (@mapY + @mapHeight - sy)
 
-            squares.place xoff-hlw sy hlw sh @color.highlight 2001
+            squares.place xoff-hlw sy hlw sh @color.highlight 2001 'map.highlight'
 
 export mapscr

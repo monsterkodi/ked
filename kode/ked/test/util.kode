@@ -257,6 +257,19 @@ sample = (opt) ->
 
         closed ▸ true
 
+  ▸ capture
+
+        before = [console.log console.warn console.error]
+        lf = new logfile 'test' true true
+        console.log 'a' {b:1}
+        console.error "#{r5 'red'}\nnext"
+        console.log   = before[0]
+        console.warn  = before[1]
+        console.error = before[2]
+
+        lf.take() ▸ ['a b   1' 'red' 'next']
+        lf.take() ▸ []
+
 ▸ leak
 
   ▸ headless

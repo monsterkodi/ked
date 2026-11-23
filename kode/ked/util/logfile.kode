@@ -3,14 +3,20 @@ use fs
 
 ■logfile
 
-    @: @name headless=false ->
-        
+    @: @name headless=false capture=false ->
+
         @headless = headless
-        
-        #  a headless run has no terminal to take over: the console stays
-        #  as it is and there is no log file
-        
-        ⮐ if @headless
+        @lines    = []
+
+        #  a headless run has no log file. ked's headless dumps capture
+        #  the console instead, to show it below each dump
+
+        if @headless
+            if capture
+                console.log   = args... => @capture args
+                console.warn  = args... => @capture args
+                console.error = args... => @capture args
+            ⮐
         
         logfile = ◆dir + '/../../../ked.log'
 
@@ -35,6 +41,18 @@ use fs
             
             @write r5(args.map((a) -> r5("▴ ")+noon(a)).join(' '))
         
+    capture: args ->
+
+        txt = args.map((a) -> a is str ? a : noon(a)).join ' '
+        txt = txt.replace /\x1b\[[0-9;]*m/g ''
+        @lines = @lines.concat txt.split('\n').filter((l) -> l.trim().length)
+
+    take: ->
+
+        lines = @lines
+        @lines = []
+        lines
+
     write: txt ->
         
         ⮐ if @headless or @stream.closed or not @stream.writable
@@ -44,6 +62,9 @@ use fs
     close: cb ->
         
         if @headless
+            lines = @take()
+            if valid lines
+                process.on 'exit' -> process.stderr.write lines.join('\n') + '\n'
             cb()
             ⮐
         

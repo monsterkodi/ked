@@ -848,7 +848,8 @@ sel = r... -> s.allSelections() ▸ r
         s.clearHistory()
         s.pushState()
 
-        dumpstate.tags(s, '/tmp/x') ▸ '[dirty] [file: /tmp/x]'
+        dumpstate.tags(s, '/tmp/x') ▸ '[dirty] [undo 1] [file: /tmp/x]'
+        dumpstate.tags(s, '/tmp/x', 'editor') ▸ '[focus: editor] [dirty] [undo 1] [file: /tmp/x]'
 
 ▸ registers
 
