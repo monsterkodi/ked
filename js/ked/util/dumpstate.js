@@ -42,10 +42,48 @@ dumpstate = (function ()
         }).join(' ')
     }
 
+    dumpstate["ROWS"] = 5
+    dumpstate["section"] = function (label, state, cells, file)
+    {
+        var cursors, out, ranges, rect, tags
+
+        out = [`=== ${label}`]
+        tags = this.tags(state,file)
+        if (!_k_.empty(tags))
+        {
+            out.push(`    ${tags}`)
+        }
+        cursors = state.s.cursors.map(function (c)
+        {
+            return `${c[0]}:${c[1]}`
+        })
+        if (cursors.length === 1)
+        {
+            out.push(`    cursor ${cursors[0]}`)
+        }
+        else
+        {
+            out.push(`    cursors ${cursors.join(' ')} main ${state.s.main}`)
+        }
+        if (!_k_.empty(state.s.selections))
+        {
+            ranges = state.s.selections.map(function (r)
+            {
+                return `${r[0]}:${r[1]}-${r[2]}:${r[3]}`
+            })
+            out.push(`    select ${ranges.join(' ')}`)
+        }
+        if (rect = (cells != null ? cells.cellRect : undefined))
+        {
+            out.push(`    rect ${rect.x}:${rect.y} ${rect.w}x${rect.h}`)
+        }
+        return out
+    }
+
     return dumpstate
 })()
 
 export default dumpstate;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZHVtcHN0YXRlLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL2R1bXBzdGF0ZS5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2MsV0FBUDs7O0FBQ04sYUFBRDs7Ozs7SUFDSSxXQUFDLG1CQUFPLE9BQU07Ozs7UUFFVjtRQUVBLGtCQUFTLEtBQUssT0FBTyxNQUFNLCtCQUFZLGNBQUs7O21CQUFNLEVBQUU7V0FBTTt1QkFDWjs7WUFBOUMsS0FBSyxlQUFlLE1BQU0sS0FBSzs7UUFFL0IsUUFBUSxLQUFLLElBQUksTUFBTTtjQUNjLGdCQUFBLE1BQU87O1lBQTVDLEtBQUssa0JBQWtCLE1BQU07O1lBRVIsTUFBTTs7WUFBM0IsS0FBSyxLQUFLOzt1QkFDeUI7O1lBQW5DLEtBQUssY0FBYzs7ZUFFbkIsS0FBSyxjQUFLOzt1QkFBWTtXQUFRLEtBQUs7OztXQWQxQzs7O2VBZ0JNIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZHVtcHN0YXRlLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi9rb2RlL2tlZC91dGlsL2R1bXBzdGF0ZS5rb2RlIl0sIm1hcHBpbmdzIjoiOzs7O09BQ2MsV0FBUDs7O0FBQ04sYUFBRDs7Ozs7SUFDSSxXQUFDLG1CQUFPLE9BQU07Ozs7UUFFVjtRQUVBLGtCQUFTLEtBQUssT0FBTyxNQUFNLCtCQUFZLGNBQUs7O21CQUFNLEVBQUU7V0FBTTt1QkFDWjs7WUFBOUMsS0FBSyxlQUFlLE1BQU0sS0FBSzs7UUFFL0IsUUFBUSxLQUFLLElBQUksTUFBTTtjQUNjLGdCQUFBLE1BQU87O1lBQTVDLEtBQUssa0JBQWtCLE1BQU07O1lBRVIsTUFBTTs7WUFBM0IsS0FBSyxLQUFLOzt1QkFDeUI7O1lBQW5DLEtBQUssY0FBYzs7ZUFFbkIsS0FBSyxjQUFLOzt1QkFBWTtXQUFRLEtBQUs7OztJQUV2QyxXQUFDLFNBQU07SUFFUCxXQUFDLHNCQUFVLE9BQU0sT0FBTSxPQUFNOzs7O1FBRXpCLGNBQWU7UUFDZixPQUFPLEtBQUMsS0FBSyxNQUFNO3VCQUVhOztZQUFoQyxJQUFJLFlBQVk7O1FBRWhCLFVBQVUsTUFBTSxFQUFFLFFBQVEsY0FBSzs7c0JBQVMsRUFBRSxNQUFNLEVBQUU7O1lBRS9DLFFBQVEsV0FBVTs7WUFDakIsSUFBSSxtQkFBbUIsUUFBUTs7OztZQUUvQixJQUFJLG9CQUFvQixRQUFRLEtBQUssYUFBWSxNQUFNLEVBQUU7O3VCQUVwRCxNQUFNLEVBQUU7O1lBQ2IsU0FBUyxNQUFNLEVBQUUsV0FBVyxjQUFLOzswQkFBUyxFQUFFLE1BQU0sRUFBRSxNQUFNLEVBQUUsTUFBTSxFQUFFOztZQUNwRSxJQUFJLG1CQUFtQixPQUFPLEtBQUs7O1lBRXBDLFFBQU8sZ0JBQUEsTUFBTzs7WUFDYixJQUFJLGlCQUFpQixLQUFLLEtBQUssS0FBSyxLQUFLLEtBQUssS0FBSyxLQUFLOztlQUU1RDs7O1dBdkNQOzs7ZUF5Q00ifQ==
 //# sourceURL=file:///home/kodi/s/ked/kode/ked/util/dumpstate.kode

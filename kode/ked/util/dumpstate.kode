@@ -16,4 +16,29 @@ use ../edit ◆ mode
         
         tags.map((tag) -> "[#{tag}]").join ' '
 
+    @ROWS: 5
+
+    @section: (label state cells file) ->
+
+        out  = ["=== #{label}"]
+        tags = @tags state file
+
+        out.push "    #{tags}" if valid tags
+
+        cursors = state.s.cursors.map (c) -> "#{c[0]}:#{c[1]}"
+
+        if cursors.length == 1
+            out.push "    cursor #{cursors[0]}"
+        else
+            out.push "    cursors #{cursors.join ' '} main #{state.s.main}"
+
+        if valid state.s.selections
+            ranges = state.s.selections.map (r) -> "#{r[0]}:#{r[1]}-#{r[2]}:#{r[3]}"
+            out.push "    select #{ranges.join ' '}"
+
+        if rect = cells?.cellRect
+            out.push "    rect #{rect.x}:#{rect.y} #{rect.w}x#{rect.h}"
+
+        out
+
 export dumpstate

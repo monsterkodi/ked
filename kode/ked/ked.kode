@@ -47,7 +47,7 @@ use child_process ▪ spawn exec
 
         global.ked_session = @session
         
-        @t = new ttio headless:(@args.headless or @args.headless_colors) textSizing:true live:@args.live
+        @t = new ttio headless:(@args.headless or @args.headless_colors) textSizing:true live:@args.live reserve:dumpstate.ROWS
         
         @screen   = new screen @t
         
@@ -177,8 +177,9 @@ use child_process ▪ spawn exec
         @dump 'start'
 
         if @t.live
-            @t.on 'key' (combo) => @liveCombo = combo
-            @t.on 'live' (data) => @liveQueue = (@liveQueue ? Promise.resolve()).then => @playLive data
+            @t.on 'key'    (combo) => @liveCombo = combo
+            @t.on 'live'   (data)  => @liveQueue = (@liveQueue ? Promise.resolve()).then => @playLive data
+            @t.on 'resize'         => @liveQueue = (@liveQueue ? Promise.resolve()).then => @dump 'resize'
             ⮐
 
         for step in @t.steps()
@@ -217,21 +218,26 @@ use child_process ▪ spawn exec
         ◯ sleep 15
     
     dump: label =>
-        
+
+        mark = @t.out.length
+
         @draw()
 
-        @editor.cells.draw_cell_rect_corners()
-        
-        state = dumpstate.tags @editor.state @currentFile
-        line  = valid state ? "#{label} #{state}" : label
-        
-        process.stdout.write '\x1b[2J\x1b[H' if @t.live
-        process.stdout.write "\n=== #{line}\n"
-        
+        frame  = @t.out[mark..].join ''
+        @t.out = []
+
+        section = dumpstate.section(label @editor.state @editor.cells @currentFile).join '\n'
+
+        if @t.live
+            process.stdout.write '\x1b[2J' + frame + "\x1b[0m\x1b[#{@t.rows()+1};1H" + section
+            ⮐
+
         if @args.headless_colors
-            process.stdout.write @screen.textColored().join('\n') + '\n'
+            text = @screen.textColored()
         else
-            process.stdout.write @screen.textMarked().join('\n') + '\n'
+            text = @screen.textMarked()
+
+        process.stdout.write '\n' + text.join('\n') + '\n' + section + '\n'
 
     startup: ◯=>
         
@@ -895,6 +901,7 @@ use child_process ▪ spawn exec
         @input.draw()
         # ●▪ draw
         # ●▸ render
+        @editor.cells.draw_cell_rect_corners() if @t.headless
         erases = @screen.eraseRects
         @screen.render()
         @t.removeImgs()
