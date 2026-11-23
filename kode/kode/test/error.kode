@@ -557,7 +557,8 @@ plain = c ->
     ▸ spread
 
         codemsg 'f 1…'              '… spreads arrays'
-        codemsg "f 'a'…"            '… spreads arrays'
+        codemsg 'f true…'           '… spreads arrays'
+        codemsg 'f /a/…'            '… spreads arrays'
         codemsg 'x = [1 … 5]'       '… spreads arrays'
         codemsg 'f null…'           '… spreads arrays'
         codemsg 'f a + b…'          '… only spreads into call arguments and arrays'

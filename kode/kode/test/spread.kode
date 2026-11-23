@@ -31,6 +31,16 @@ use ./utils ▪ kc ke
         ke 'a = [1 2]\n[0 a… 3]'                        ▸ [0 1 2 3]
         ke 'a = [1 2]\n[a… a…]'                         ▸ [1 2 1 2]
 
+    ▸ string
+
+        kc "x = ['ab'…]"            ▸ "x = [...'ab']"
+        kc 'f "ab"…'                ▸ 'f(..."ab")'
+
+        ke "['abc'…]"                                   ▸ ['a' 'b' 'c']
+        ke 's = "a😀"\n[s…]'                             ▸ ['a' '😀']
+        ke 'x = 1\n["a#{x}"…]'                          ▸ ['a' '1']
+        ke "Math.max '193'…"                            ▸ 9
+
     ▸ rest
 
         kc 'm: (a b…) -> 1'         ▸ '{m:function (a, ...b)\n{\n    return 1\n}}'

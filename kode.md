@@ -283,7 +283,8 @@ f = args... -> log args…                                            ▸ args..
 `…` (one character, not `...`) goes after what it spreads and binds to its left,
 so spaces don't matter: `[a … b]` is `[...a, b]`.
 It works in call arguments and array literals, and on the last parameter as a rest parameter.
-Spreading a literal (`1…`) is an error: ranges are written `1..5`.
+Strings spread into their characters (code points): `['ab'…]` is `['a', 'b']`.
+Spreading a number, boolean, regex or `null` (`1…`) is an error: ranges are written `1..5`.
 
 ### empty
 
