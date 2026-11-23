@@ -49,8 +49,14 @@ export
                 'right'
 
                     [x y]   = @sheetPosForCell [cx cy]
-                    [cx cy] = @sheetCellForPos [x+1 y]
-                    cx      = min cx @sheetSize().cols
+                    [nx ny] = @sheetCellForPos [x+1 y]
+
+                    if @sheetSnapCell([nx ny])[0] <= cx # stuck in the fraction of scaled text
+                        node = layout.nodeForPos @sheetSize() @rectree [cx ny]
+                        nx = node.rect.abs.x + node.rect.abs.w if layout.scaleOf(node ? {}) > 1
+
+                    cx = min nx @sheetSize().cols
+                    cy = ny
 
                 'up' 'down'
 

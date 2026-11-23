@@ -908,6 +908,15 @@ showSue = data ->
         e.state.setCursors [[9 0]] ; key 'left' ; mc() ▸ [5 1]
         e.state.setCursors [[8 2]] ; key 'up'   ; mc() ▸ [5 1]
 
+        loadSheet {children:[{ text:'ab' x:2 y:0 w:8 h:3 scale:3 }]}
+
+        e.state.setCursors [[3 2]]
+        key 'right' ; mc() ▸ [4 2]
+        key 'right' ; mc() ▸ [6 2] ; e.state.sheetCellForPos(mc()) ▸ [10 2]
+        key 'right' ; mc() ▸ [7 2]
+        key 'left'  ; mc() ▸ [6 2]
+        key 'left'  ; mc() ▸ [4 2]
+
   ▸ sheet editing
 
         sheet 'popo_sheet_editing'
