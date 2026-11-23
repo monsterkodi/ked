@@ -617,6 +617,8 @@ showSue = data ->
         
         h.at(1 1).includes(']66;s=3') ▸ true
         h.screen.blockAt(1 1) ▸ [1 1 3 1 3]
+        h.screen.text()[1..3] ▸ [' A··' ' ···' ' ···']
+        h.screen.textMarked()[1] ▸ ' A··'
 
   ▸ sheet typing
 

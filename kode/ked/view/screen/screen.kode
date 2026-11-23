@@ -10,6 +10,7 @@ use ../../edit/tool ◆ belt
     @SELECT_MARK: '\x1b[7;4:3m'
     @HILGHT_MARK: '\x1b[7;4:4m'
     @END_MARK:    '\x1b[0m'
+    @BLOCK_MARK:  '·'
 
     @: @t -> 
     
@@ -219,16 +220,23 @@ use ../../edit/tool ◆ belt
             line = ''
             
             for x in 0...@cols
-                
-                ch = @c[y][x].char
-                ch = ' ' if not valid ch
-                
-                line += ch
-            
+
+                line += @dumpChar x y
+
             lines.push line.replace(/\s+$/ '')
-        
+
         lines
-    
+
+    dumpChar: x y =>
+
+        cell = @c[y][x]
+
+        if block = cell.block
+            ⮐ screen.BLOCK_MARK if x != block[0] or y != block[1]
+            ⮐ (cell.char ? '').replace(/^\x1b\]66;[^;]*;/ '').replace(/\x07$/ '')
+
+        valid(cell.char) ? cell.char : ' '
+
     #  the buffer as uncolored text, with the cursors, selections and highlights marked
     
     textMarked: =>
@@ -240,10 +248,9 @@ use ../../edit/tool ◆ belt
             line = ''
             
             for x in 0...@cols
-                
-                ch = @c[y][x].char
-                ch = ' ' if not valid ch
-                
+
+                ch = @dumpChar x y
+
                 if mark = @c[y][x].mark
                     switch mark
                         'selection' ➜ line += screen.SELECT_MARK
@@ -275,8 +282,7 @@ use ../../edit/tool ◆ belt
             for x in 0...@cols
                 
                 cell = @c[y][x]
-                ch = cell.char
-                ch = ' ' if not valid ch
+                ch = @dumpChar x y
 
                 if cell.attr != pattr or cell.ul != pul
                     line += screen.END_MARK

@@ -31,9 +31,12 @@ use child_process ▪ spawn exec
                 version    log version                      = false
                 headless   run without a terminal           = false -H
                 headless_colors    headless with terminal colors    = false -C --headless-colors
-                
+                live       headless with keys typed live    = false -L
+
             """ preHelp:help.header() version:@version
-        
+
+        @args.headless = true if @args.live and not @args.headless_colors
+
         process.on 'uncaughtException' @quit
         @session = new session @args
         @logfile = new logfile @session.name (@args.headless or @args.headless_colors)
@@ -44,7 +47,7 @@ use child_process ▪ spawn exec
 
         global.ked_session = @session
         
-        @t = new ttio headless:(@args.headless or @args.headless_colors)
+        @t = new ttio headless:(@args.headless or @args.headless_colors) textSizing:true live:@args.live
         
         @screen   = new screen @t
         
@@ -172,7 +175,12 @@ use child_process ▪ spawn exec
         ◯ mode.loaded
         
         @dump 'start'
-        
+
+        if @t.live
+            @t.on 'key' (combo) => @liveCombo = combo
+            @t.on 'live' (data) => @liveQueue = (@liveQueue ? Promise.resolve()).then => @playLive data
+            ⮐
+
         for step in @t.steps()
             
             @t.play step[1]
@@ -183,6 +191,18 @@ use child_process ▪ spawn exec
         
         @quit()
     
+    playLive: data ◯=>
+
+        @liveCombo = null
+
+        @t.play data
+
+        ⮐ if not @liveCombo?
+
+        ◯ @settle()
+
+        @dump @liveCombo
+
     #  let the work a key started finish before the screen is written out
     
     settle: ◯=>
@@ -205,6 +225,7 @@ use child_process ▪ spawn exec
         state = dumpstate.tags @editor.state @currentFile
         line  = valid state ? "#{label} #{state}" : label
         
+        process.stdout.write '\x1b[2J\x1b[H' if @t.live
         process.stdout.write "\n=== #{line}\n"
         
         if @args.headless_colors
