@@ -149,8 +149,6 @@ rad = ->
         e.layout 0 0 16 4
         e.state.loadLines ['                ' '                ' '                ' '                ']
         e.state.rectree = {bg:'#0000ff'}
-        e.state.rectreeCols = 16
-        e.state.rectreeRows = 4
         e.state.setCursors [[1 1]]
 
         p = new colorpicker h.screen e 'test_colorpicker_sheet_node'

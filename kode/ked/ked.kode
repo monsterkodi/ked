@@ -470,10 +470,8 @@ use child_process ▪ spawn exec
         if slash.ext(@currentFile) == 'sheet'
             rectree = layout.pageOf noon.parse(text)
             if valid rectree
-                cols = @editor.cells.cols
-                rows = @editor.cells.rows
-                @editor.state.setSheetTree rectree cols rows
-                text = layout.sueify {cols:cols rows:rows} rectree
+                @editor.state.setSheetTree rectree
+                text = layout.sueify @editor.state.sheetSize() rectree
 
         sueData = sue.desue text
         text    = sueData.text
@@ -834,20 +832,6 @@ use child_process ▪ spawn exec
         clearImmediate @redrawId
         @redrawId = setImmediate @draw
 
-    sheetCheck: => # temporary hack to inject and relayout sheets
-
-        ⮐ if not @editor.state.rectree?
-
-        cols = @editor.cells.cols
-        rows = @editor.cells.rows
-
-        ⮐ if cols < 1 or rows < 1
-        ⮐ if @editor.state.rectreeCols == cols and @editor.state.rectreeRows == rows
-
-        cell = @editor.state.sheetCellForPos @editor.state.mainCursor()
-
-        @editor.state.renderSheet @editor.state.rectree {cols:cols rows:rows} cell history:false silent:true
-                                      
     draw: =>
             
         ⮐ if @quitting
@@ -865,8 +849,6 @@ use child_process ▪ spawn exec
         @screen.init()
         
         @arrange()
-        
-        @sheetCheck() 
         
         editorDrawn = @menu.greet.hidden() and not @differ.visible() and not @editor.hidden()
         

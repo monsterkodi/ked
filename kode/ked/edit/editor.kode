@@ -76,6 +76,7 @@ use                ◆ state draw complete mode susan keys
         @complete?.onEditorLayout()
         
         @state.initView()
+        @state.fitSheet()
                 
     onWheel: event =>
         

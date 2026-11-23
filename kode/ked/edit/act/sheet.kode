@@ -19,7 +19,7 @@ export
 
         true
 
-    sheetSize: -> {cols:(@rectreeCols ? @cells.cols) rows:(@rectreeRows ? @cells.rows)}
+    sheetSize: -> {cols:@cells.cols rows:@cells.rows}
 
     sheetCellsForLine: y -> sue.cellPositionsForLine(@s.lines y @scaleRunsForLine(y))
 
@@ -220,40 +220,43 @@ export
 
     sheetTextNodeAt: cell -> layout.textNodeAt @sheetSize() @rectree cell
 
-    setSheetTree: (rectree cols rows) ->
+    setSheetTree: rectree ->
 
         @rectree = layout.pageOf rectree
-        @rectreeCols = cols
-        @rectreeRows = rows
 
-        @s = @s.set 'rectree' layout.plainNode(rectree)
+        @s = @s.set 'rectree' layout.plainNode(@rectree)
         @
 
     clearSheet: ->
 
         delete @rectree
-        delete @rectreeCols
-        delete @rectreeRows
 
         @s = @s.set 'rectree' null
         @
 
     restoreSheet: ->
 
-        if @s.rectree?
+        ⮐ @clearSheet() if not @s.rectree?
 
-            @rectree = @s.rectree.asMutable()
-            @rectreeCols = @cells.cols
-            @rectreeRows = @cells.rows
+        cell = @sheetCellForPos @mainCursor()
 
-            layout.absolutize {cols:@rectreeCols rows:@rectreeRows} @rectree
+        @rectree = @s.rectree.asMutable()
 
-            post.emit 'sheet.edited'
+        @renderSheet @rectree @sheetSize() cell history:false silent:true
 
-        else
-            @clearSheet()
+    fitSheet: ->
 
-        @
+        ⮐ if not @rectree?
+        ⮐ if @cells.cols < 1 or @cells.rows < 1
+        ⮐ if @rectree.rendered eql @sheetSize()
+
+        @renderSheet @rectree @sheetSize() @sheetCellForPos(@mainCursor()) history:false silent:true
+
+    commitSheet: ->
+
+        ⮐ if not @rectree?
+
+        @renderSheet @rectree @sheetSize() @sheetCellForPos(@mainCursor()) silent:true
 
     renderSheet: (rectree cells mc opt) ->
 
@@ -279,12 +282,10 @@ export
             @s = @s.set 'main' 0
 
         @rectree = rectree
-        @rectreeCols = cells.cols
-        @rectreeRows = cells.rows
 
         @segls = @s.lines.slice()
         @rowCache = null
-        @r = []
+        @r = [] if opt.history != false
 
         @emit 'sue.changed'
 

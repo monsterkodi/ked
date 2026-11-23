@@ -39,10 +39,13 @@ use ../menu         ◆ filterchoice
         super()
         
     onNode: node =>
-    
-        delete @editor.state.rectreeCols
-        delete @editor.state.rectreeRows
-        @onEditorResize()
+
+        row = @currentIndex()
+
+        @editor.state.commitSheet()
+
+        @highlight row
+        @showRect()
 
     onEditorResize: =>
         

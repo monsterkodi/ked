@@ -18,9 +18,10 @@ h = e = null
 
 sheet = name features=[] rows=4 cls=editor ->
     global.ked_session ?= get:(-> null) set:(->)
-    h = new harness cols:16 rows:rows
+    h = new harness cols:32 rows:rows
     e = new cls h.screen name features
     e.layout 0 0 16 rows
+    e.layout 0 0 32-e.cells.cols rows
     e.state.loadLines Array(rows).fill(' '.repeat(16))
 
 rt  = path -> sds.get e.state.rectree path
@@ -30,8 +31,8 @@ key = combo -> h.key e combo
 click = x y -> e.onMouse type:'press' cell:[x+e.cells.x y+e.cells.y] button:'left' count:1
 
 loadSheet = tree cursor=[0 0] ->
-    e.state.setSheetTree tree h.cols h.rows
-    e.state.renderSheet e.state.rectree {cols:h.cols rows:h.rows} cursor history:false silent:true
+    e.state.setSheetTree tree
+    e.state.renderSheet e.state.rectree e.state.sheetSize() cursor history:false silent:true
     e.state.clearHistory()
 
 bands = -> {children:[{ text:'abcdef' x:2 y:1 w:8 h:4 scale:2 } { text:'xy' x:2 y:6 w:4 h:1 }]}
@@ -620,42 +621,29 @@ showSue = data ->
   ▸ sheet typing
 
         sheet 'popo_sheet_typing'
+        loadSheet {}
 
-        e.state.rectree = {bg:'#000'}
-        e.state.setCursors [[2 1]]
-        e.state.insert 'a'
-        e.draw()
-
-        e.state.mainCursor() ▸ [3 1]
-        h.at(2 1) ▸ 'a'
+        e.state.setCursors [[2 1]] ; e.state.insert 'a' ; e.draw()
+        mc() ▸ [3 1] ; h.at(2 1) ▸ 'a'
         rt('children.0.text') ▸ 'a'
         rt('children.0.rect.abs') ▸ {x:2 y:1 w:2 h:1}
 
-        e.state.insert 'b'
-        e.draw()
-
-        e.state.mainCursor() ▸ [4 1]
-        h.at(3 1) ▸ 'b'
+        e.state.insert 'b' ; e.draw()
+        mc() ▸ [4 1] ; h.at(3 1) ▸ 'b'
         rt('children.0.text') ▸ 'ab'
         rt('children.0.w') ▸ 3
 
-        e.state.rectree = {x:2 y:1 w:6 h:2}
-        e.state.setCursors [[10 3]]
-        e.state.insert 'c'
+        loadSheet {children:[{ x:2 y:1 w:6 h:2 }]}
 
-        rt('children.0.text') ▸ 'c'
-        rt('children.0.x') ▸ 8
-        rt('children.0.y') ▸ 2
+        e.state.setCursors [[5 2]] ; e.state.insert 'c'
+        layout.plainNode(rt('children.0.children.0')) ▸ {text:'c' x:3 y:1 w:2 h:1}
 
   ▸ sheet move keys
 
         sheet 'popo_sheet_move'
         e.grabFocus()
 
-        e.state.rectree = {children:[{ text:'a' x:2 y:1 w:3 h:2 }]}
-        e.state.rectreeCols = 16
-        e.state.rectreeRows = 4
-        e.state.setCursors [[3 1]]
+        loadSheet {children:[{ text:'a' x:2 y:1 w:3 h:2 }]} [3 1]
 
         h.key e 'shift+alt+l' ; rt('children.0.rect.abs') ▸ {x:3 y:1 w:3 h:2}
         e.state.mainCursor() ▸ [4 1]
@@ -717,6 +705,9 @@ showSue = data ->
         e.state.redo()
         rt('children.0.x') ▸ 3
 
+        rt('children.0').w = 5 ; e.state.commitSheet() ; rt('children.0.rect.abs.w') ▸ 5
+        e.state.undo() ; rt('children.0.w') ▸ 3 ; rt('children.0.rect.abs.w') ▸ 3
+
   ▸ sheet text undo
 
         sheet 'popo_sheet_text_undo'
@@ -728,30 +719,29 @@ showSue = data ->
         e.state.undo()     ; rt('children.0.children')? ▸ false
         e.state.redo()     ; rt('children.0.children.0.text') ▸ 'a'
 
-  ▸ resize is not an undo step
+  ▸ sheet resize
 
-        sheet 'popo_sheet_resize_history'
-        e.grabFocus()
-        
-        tree = {children:[{ text:'a' x:2 y:1 w:3 h:2 }]}
-        loadSheet tree [3 1]
+        sheet 'popo_sheet_resize'
+        loadSheet {children:[{ pattern:'x' x:'50%' y:0 w:'50%' h:2 }]} [9 0]
+
+        rt('children.0.rect.abs') ▸ {x:8 y:0 w:8 h:2}
 
         before = e.state.h.length
-        e.state.renderSheet tree {cols:10 rows:4} [3 1] history:false silent:true
+        e.layout 0 0 10 4
+        rt('children.0.rect.abs') ▸ {x:5 y:0 w:5 h:2}
+        kseg.str(e.state.s.lines[0]) ▸ '     xxxxx'
         e.state.h.length ▸ before
 
-  ▸ sheet render size
-
-        sheet 'popo_sheet_render_size'
-
-        e.state.rectree = {children:[{pattern:'x' x:'50%' y:0 w:'50%' h:2}]}
-        e.state.rectreeCols = 10
-        e.state.rectreeRows = 4
-        e.state.setCursors [[6 0]]
-        e.state.insert 'a'
-
-        rt('children.0.rect.abs') ▸ {x:5 y:0 w:5 h:2}
+        e.state.setCursors [[6 0]] ; e.state.insert 'a'
         rt('children.0.children.0.rect.abs') ▸ {x:6 y:0 w:2 h:1}
+
+        e.layout 0 0 16 4
+        rt('children.0.children.0.rect.abs') ▸ {x:9 y:0 w:2 h:1}
+
+        e.state.undo() ; rt('children.0.children')? ▸ false ; kseg.str(e.state.s.lines[0]) ▸ '        xxxxxxxx'
+
+        e.layout 0 0 12 4
+        e.state.redo() ; rt('children.0.children.0.text') ▸ 'a' ; e.state.s.lines[0].length ▸ 12
 
   ▸ sheet cells and cursors
 

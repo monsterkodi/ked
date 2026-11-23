@@ -255,7 +255,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
         state = @editor.state
         ⮐ if not state.rectree?
 
-        state.renderSheet state.rectree state.sheetSize() state.sheetCellForPos(state.mainCursor()) silent:true
+        state.commitSheet()
 
     show: hexl opt={focus:true} =>
 

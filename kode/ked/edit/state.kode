@@ -185,8 +185,6 @@ use           ◆ mode keys
             colors:      {fg: [], bg: []}
             sue:         []
             rectree:     null
-            rectreeCols: null
-            rectreeRows: null
             
         @syntax.clear()
 

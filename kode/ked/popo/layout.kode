@@ -266,7 +266,7 @@ use ../edit/tool ◆ sue
         out = {}
 
         for key,value of node
-            continue if key in ['rect' 'title' 'index' 'regions']
+            continue if key in ['rect' 'title' 'index' 'regions' 'rendered']
             if key == 'children'
                 out.children = []
                 for child in value
@@ -642,6 +642,8 @@ use ../edit/tool ◆ sue
         root = @regionize cells rectree
 
         ⮐ '' if not root?
+
+        root.rendered = {cols:cells.cols rows:cells.rows}
 
         grid  = @gridOf root
         lines = []
