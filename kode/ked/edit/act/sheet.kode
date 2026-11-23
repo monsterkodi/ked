@@ -76,12 +76,25 @@ export
 
         [rect.y + floor((cy - rect.y) / scale) * scale, scale]
 
-    sheetPosForCell: cell ->
+    #  inside scaled text a cell snaps to the bottom left of its block,
+    #  the fraction at the right edge of the rect snaps to the end of the last block
+
+    sheetSnapCell: cell ->
 
         [cx cy] = cell
 
-        [top s] = @sheetBandAt cx cy
-        cy = top + s-1
+        node  = layout.nodeForPos @sheetSize() @rectree [cx cy]
+        scale = layout.scaleOf node ? {}
+
+        ⮐ cell if scale <= 1
+
+        rect = node.rect.abs
+
+        [rect.x + floor((cx - rect.x) / scale) * scale, rect.y + floor((cy - rect.y) / scale) * scale + scale-1]
+
+    sheetPosForCell: cell ->
+
+        [cx cy] = @sheetSnapCell cell
 
         below = min @s.lines.length cy+7
 

@@ -898,6 +898,16 @@ showSue = data ->
 
         e.state.setCursors [[0 2]] ; key 'alt+right' ; mc() ▸ [2 2]
 
+        loadSheet {children:[{ text:'ab' x:2 y:0 w:7 h:2 scale:2 }]}
+
+        e.state.setCursors [[6 1]]
+        key 'left'  ; mc() ▸ [5 1] ; e.state.scaleRunsForLine(1) ▸ [[2 5 2]]
+        key 'left'  ; mc() ▸ [4 1]
+        key 'right' ; mc() ▸ [5 1]
+        key 'right' ; mc() ▸ [6 1]
+        e.state.setCursors [[9 0]] ; key 'left' ; mc() ▸ [5 1]
+        e.state.setCursors [[8 2]] ; key 'up'   ; mc() ▸ [5 1]
+
   ▸ sheet editing
 
         sheet 'popo_sheet_editing'
