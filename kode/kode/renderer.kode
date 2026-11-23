@@ -996,7 +996,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         for e in n.then
             prefix = if lastPrefix and e == n.then[-1] then lastPrefix else ''
             postfix = if lastPostfix and e == n.then[-1] then lastPostfix else ''
-            s += g2 + prefix+@node(e)+postfix + nl
+            s += g2 + @stmt(e, prefix)+postfix + nl
         s += gi+"}"
 
         @ded() if not lineBreak
@@ -1056,7 +1056,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         for e in n.then
             prefix = if lastPrefix and e == n.then[-1] then lastPrefix else ''
             postfix = if lastPostfix and e == n.then[-1] then lastPostfix else ''
-            s += g2 + prefix+@node(e)+postfix + nl
+            s += g2 + @stmt(e, prefix)+postfix + nl
         s += gi+"}"
             
         @ded() if not lineBreak
@@ -1084,7 +1084,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         for e in n.then
             prefix = if lastPrefix and e == n.then[-1] then lastPrefix else ''
             postfix = if lastPostfix and e == n.then[-1] then lastPostfix else ''
-            s += g2+ prefix+@node(e)+postfix + nl
+            s += g2+ @stmt(e, prefix)+postfix + nl
             
         s += gi+"}"
 
@@ -1137,7 +1137,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         if valid n.else
             s += @indent+'default:\n'
             for e in n.else
-                s += @indent+'    '+ @node(e) + '\n'
+                s += @indent+'    '+ (if e == n.else[0] then @node(e) else @stmt(e)) + '\n'
                 
         s += gi+"}\n"
 
@@ -1154,7 +1154,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
             s += i+'case ' + @node(e) + ':\n'
         for e in n.then
             gi = @ind()
-            s += gi + '    ' + @node(e) + '\n'
+            s += gi + '    ' + (if e == n.then[0] then @node(e) else @stmt(e)) + '\n'
             @ded()
         if not (n.then and n.then[-1] and n.then[-1].return)
             s += @indent + '    ' + 'break' 
@@ -1253,7 +1253,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
                     
                 
                 if op.lhs.array # lhs is aray, eg. [x,y] = require ''
-                    ⮐ @arrayAssign(op.lhs.array.items, @atom(op.rhs), op.operator) + '\n'
+                    ⮐ @arrayPattern(op.lhs.array.items) + ' = ' + @atom(op.rhs)
                     
                 if op.lhs and @containsAssert op.lhs
                     # dbg op.lhs
@@ -1347,7 +1347,8 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         first = firstLineCol op.lhs
         prfx = if first.col == 0 and op.rhs?.func then '\n' else ''
  
-        lhs = if op.lhs ➜ @atom(op.lhs) + sep else ''
+        isAssign = o.endsWith('=') and o not in ['==' '!=' '===' '!==' '<=' '>=']
+        lhs = if op.lhs ➜ (if isAssign then @assignee(op.lhs) else @atom(op.lhs)) + sep else ''
         
         prfx + lhs + o + sep + open + kstr.lstrip(@atom(op.rhs) + close)
 
@@ -1489,21 +1490,46 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         
         @mark('compare' p.arrow) + '(' + lhs + ',' + rhs + ')'
         
-    arrayAssign: items rhs tok ->
+    # a statement in a block: a leading ( or [ would continue the line above it
+    stmt: e prefix='' ->
 
-        v = @makeVar tok
-        s = "var #{v} = #{rhs}"
-        for i in 0...items.length
-            s += '; ' + @arrayTarget(items[i], "#{v}[#{i}]", tok)
-        s
+        s = @node e
+        if not prefix and kstr.lstrip(s)[0] in '(['
+            s = ';' + s
+        prefix + s
 
-    arrayTarget: val src tok ->
+    arrayPattern: items ->
 
-        if val.type in ['var' 'keyword'] ➜ ⮐ "#{@mark val.text, val} = #{src}"
-        if val.array         ➜ ⮐ @arrayAssign val.array.items, src, tok
+        "[#{(@arrayTarget(val) for val in items).join ','}]"
+
+    arrayTarget: val ->
+
+        if val.type in ['var' 'keyword'] ➜ ⮐ @mark val.text, val
+        if val.array ➜ ⮐ @arrayPattern val.array.items
+        if @negativeIndex val
+            @onError "negative indices can't be destructured into" firstLineCol(val)
         if (val.prop or val.index) and not @containsAssert(val)
-            ⮐ "#{@node val} = #{src}"
+            ⮐ @node val
         @onError "invalid destructuring target: only names, members, indices and arrays can be assigned" firstLineCol(val)
+
+    negativeIndex: e -> e?.index and not e.index.slidx.slice and e.index.slidx.text?[0] == '-'
+
+    # a[-1] = v ▸ a[a.length-1] = v, the receiver is rendered twice, so it must be free of side effects
+    assignee: e ->
+
+        ⮐ @atom e if not @negativeIndex e
+        if not @plainChain e.index.idxee
+            @onError "negative index assignment needs a plain receiver (names, members and indices)" firstLineCol(e)
+        obj = @node e.index.idxee
+        "#{obj}[#{obj}.length#{e.index.slidx.text}]"
+
+    plainChain: e ->
+
+        ⮐ false if not e
+        ⮐ true  if e.type in ['var' 'keyword' 'this' 'num' 'single' 'double']
+        ⮐ @plainChain e.prop.obj if e.prop
+        ⮐ @plainChain(e.index.idxee) and @plainChain(e.index.slidx) if e.index
+        false
 
     containsAssert: e ->
         

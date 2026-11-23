@@ -22,8 +22,7 @@ export default {
             }
             this.deleteSelection()
         }
-        var _a_ = belt.insertTextAtPositions(this.s.lines,text,this.s.cursors); lines = _a_[0]; cursors = _a_[1]
-    
+        ;[lines,cursors] = belt.insertTextAtPositions(this.s.lines,text,this.s.cursors)
         this.recordNovimInsert(text)
         this.clearHighlights()
         this.setLines(lines)
@@ -34,8 +33,7 @@ export default {
     {
         var cursors, lines, selections
     
-        var _b_ = belt.insertAsciiHeaderForPositionsAndRanges(this.s.lines,this.s.cursors,this.s.selections); lines = _b_[0]; cursors = _b_[1]; selections = _b_[2]
-    
+        ;[lines,cursors,selections] = belt.insertAsciiHeaderForPositionsAndRanges(this.s.lines,this.s.cursors,this.s.selections)
         this.clearHighlights()
         this.setLines(lines)
         this.setSelections(selections)
@@ -45,13 +43,12 @@ export default {
     {
         var lines, posl
     
-        var _c_ = belt.insertSurroundAtRanges(this.s.lines,this.s.selections,trigger,pair); lines = _c_[0]; posl = _c_[1]
-    
+        ;[lines,posl] = belt.insertSurroundAtRanges(this.s.lines,this.s.selections,trigger,pair)
         this.setLines(lines)
         this.setSelections([])
         return this.setCursors(posl)
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5zZXJ0LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L2FjdC9pbnNlcnQua29kZSJdLCJtYXBwaW5ncyI6Ijs7T0FDYyxXQUFQOztPQUNPLFdBQUE7OztJQUdWLGlCQUFROzs7O1FBRUosT0FBTyxLQUFLLE9BQU8sS0FBRTthQUVoQixLQUFDLG9CQUFhLEtBQUMsZ0JBQWdCOzs7O3VCQUUzQixLQUFDLEVBQUU7O2dCQUNvQixTQUFROzt1QkFBbEMsS0FBQzs7WUFDSCxLQUFDOztrQkFFYSxLQUFLLHNCQUFzQixLQUFDLEVBQUUsTUFBTSxLQUFLLEtBQUMsRUFBRSxVQUE3RCxnQkFBTTs7UUFFUCxLQUFDLGtCQUFrQjtRQUVuQixLQUFDO1FBQ0QsS0FBQyxTQUFXO1FBQ1osS0FBQyxXQUFXO2VBRVosS0FBSyxXQUFXOztJQUVwQjs7OztrQkFFaUMsS0FBSyx1Q0FBdUMsS0FBQyxFQUFFLE1BQU0sS0FBQyxFQUFFLFFBQVEsS0FBQyxFQUFFLGFBQS9GLGdCQUFNLGtCQUFROztRQUVmLEtBQUM7UUFDRCxLQUFDLFNBQWM7UUFDZixLQUFDLGNBQWM7ZUFDZixLQUFDLFdBQWM7O0lBRW5CLDRCQUFtQixTQUFROzs7O2tCQUVSLEtBQUssdUJBQXVCLEtBQUMsRUFBRSxNQUFNLEtBQUMsRUFBRSxXQUFXLFFBQVEsT0FBekUsZ0JBQU07O1FBRVAsS0FBQyxTQUFjO1FBQ2YsS0FBQztlQUNELEtBQUMsV0FBYyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5zZXJ0LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L2FjdC9pbnNlcnQua29kZSJdLCJtYXBwaW5ncyI6Ijs7T0FDYyxXQUFQOztPQUNPLFdBQUE7OztJQUdWLGlCQUFROzs7O1FBRUosT0FBTyxLQUFLLE9BQU8sS0FBRTthQUVoQixLQUFDLG9CQUFhLEtBQUMsZ0JBQWdCOzs7O3VCQUUzQixLQUFDLEVBQUU7O2dCQUNvQixTQUFROzt1QkFBbEMsS0FBQzs7WUFDSCxLQUFDOztVQUVKLE1BQU0sV0FBVyxLQUFLLHNCQUFzQixLQUFDLEVBQUUsTUFBTSxLQUFLLEtBQUMsRUFBRTtRQUU5RCxLQUFDLGtCQUFrQjtRQUVuQixLQUFDO1FBQ0QsS0FBQyxTQUFXO1FBQ1osS0FBQyxXQUFXO2VBRVosS0FBSyxXQUFXOztJQUVwQjs7OztVQUVLLE1BQU0sUUFBUSxjQUFjLEtBQUssdUNBQXVDLEtBQUMsRUFBRSxNQUFNLEtBQUMsRUFBRSxRQUFRLEtBQUMsRUFBRTtRQUVoRyxLQUFDO1FBQ0QsS0FBQyxTQUFjO1FBQ2YsS0FBQyxjQUFjO2VBQ2YsS0FBQyxXQUFjOztJQUVuQiw0QkFBbUIsU0FBUTs7OztVQUV0QixNQUFNLFFBQVEsS0FBSyx1QkFBdUIsS0FBQyxFQUFFLE1BQU0sS0FBQyxFQUFFLFdBQVcsUUFBUTtRQUUxRSxLQUFDLFNBQWM7UUFDZixLQUFDO2VBQ0QsS0FBQyxXQUFjIn0=
 //# sourceURL=../../../../kode/ked/edit/act/insert.kode

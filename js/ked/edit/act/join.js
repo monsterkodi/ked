@@ -15,8 +15,7 @@ export default {
         var cursors, indices, lines, selections
     
         indices = belt.lineIndicesForRangesOrPositions(this.s.selections,this.s.cursors)
-        var _a_ = belt.moveLineRangesAndPositionsAtIndicesInDirection(this.s.lines,this.s.selections,this.s.cursors,indices,dir); lines = _a_[0]; selections = _a_[1]; cursors = _a_[2]
-    
+        ;[lines,selections,cursors] = belt.moveLineRangesAndPositionsAtIndicesInDirection(this.s.lines,this.s.selections,this.s.cursors,indices,dir)
         this.setLines(lines)
         this.setSelections(selections)
         return this.setCursors(cursors)
@@ -26,8 +25,7 @@ export default {
         var blocks, cursors, lines, selections
     
         blocks = belt.blockRangesForRangesAndPositions(this.s.lines,this.s.selections,this.s.cursors)
-        var _b_ = belt.cloneLineBlockRangesAndMoveRangesAndPositionsInDirection(this.s.lines,blocks,this.s.selections,this.s.cursors,dir); lines = _b_[0]; selections = _b_[1]; cursors = _b_[2]
-    
+        ;[lines,selections,cursors] = belt.cloneLineBlockRangesAndMoveRangesAndPositionsInDirection(this.s.lines,blocks,this.s.selections,this.s.cursors,dir)
         this.setLines(lines)
         this.setSelections(selections)
         return this.setCursors(cursors)
@@ -37,8 +35,7 @@ export default {
         var cursors, indices, lines, selections
     
         indices = belt.lineIndicesForRangesOrPositions(this.s.selections,this.s.cursors)
-        var _c_ = belt.toggleCommentsInLineRangesAtIndices(this.s.lines,this.s.selections,this.s.cursors,indices); lines = _c_[0]; selections = _c_[1]; cursors = _c_[2]
-    
+        ;[lines,selections,cursors] = belt.toggleCommentsInLineRangesAtIndices(this.s.lines,this.s.selections,this.s.cursors,indices)
         this.setLines(lines)
         this.setSelections(selections)
         return this.setCursors(cursors)
@@ -48,13 +45,12 @@ export default {
         var cursors, indices, lines, selections
     
         indices = belt.lineIndicesForRangesOrPositions(this.s.selections,this.s.cursors)
-        var _d_ = belt.toggleCommentTypesInLineRangesAtIndices(this.s.lines,this.s.selections,this.s.cursors,indices); lines = _d_[0]; selections = _d_[1]; cursors = _d_[2]
-    
+        ;[lines,selections,cursors] = belt.toggleCommentTypesInLineRangesAtIndices(this.s.lines,this.s.selections,this.s.cursors,indices)
         this.setLines(lines)
         this.setSelections(selections)
         return this.setCursors(cursors)
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiam9pbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvZWRpdC9hY3Qvam9pbi5rb2RlIl0sIm1hcHBpbmdzIjoiT0FDYyxXQUFQOzs7SUFJSDs7OztRQUVJLEtBQUM7UUFFRCxPQUFPLEtBQUssd0JBQXdCLEtBQUMsRUFBRTtRQUN2QyxPQUFPLEtBQUssc0JBQXNCLEtBQUMsRUFBRSxNQUFNO2VBRTNDLEtBQUMsYUFBYSxLQUFLLEtBQUM7O0lBRXhCLHFDQUE0Qjs7OztRQUV4QixVQUFVLEtBQUssZ0NBQWdDLEtBQUMsRUFBRSxXQUFXLEtBQUMsRUFBRTtrQkFFbkMsS0FBSywrQ0FBK0MsS0FBQyxFQUFFLE1BQU0sS0FBQyxFQUFFLFdBQVcsS0FBQyxFQUFFLFFBQVEsUUFBUSxNQUExSCxnQkFBTSxxQkFBVzs7UUFFbEIsS0FBQyxTQUFTO1FBQ1YsS0FBQyxjQUFjO2VBQ2YsS0FBQyxXQUFXOztJQUVoQix1Q0FBOEI7Ozs7UUFFMUIsU0FBUyxLQUFLLGlDQUFpQyxLQUFDLEVBQUUsTUFBTSxLQUFDLEVBQUUsV0FBVyxLQUFDLEVBQUU7a0JBRTVDLEtBQUsseURBQXlELEtBQUMsRUFBRSxNQUFNLE9BQU8sS0FBQyxFQUFFLFdBQVcsS0FBQyxFQUFFLFFBQVEsTUFBbkksZ0JBQU0scUJBQVc7O1FBRWxCLEtBQUMsU0FBUztRQUNWLEtBQUMsY0FBYztlQUNmLEtBQUMsV0FBVzs7SUFFaEI7Ozs7UUFFSSxVQUFVLEtBQUssZ0NBQWdDLEtBQUMsRUFBRSxXQUFXLEtBQUMsRUFBRTtrQkFFbkMsS0FBSyxvQ0FBb0MsS0FBQyxFQUFFLE1BQU0sS0FBQyxFQUFFLFdBQVcsS0FBQyxFQUFFLFFBQVEsVUFBdkcsZ0JBQU0scUJBQVc7O1FBRWxCLEtBQUMsU0FBUztRQUNWLEtBQUMsY0FBYztlQUNmLEtBQUMsV0FBVzs7SUFFaEI7Ozs7UUFFSSxVQUFVLEtBQUssZ0NBQWdDLEtBQUMsRUFBRSxXQUFXLEtBQUMsRUFBRTtrQkFFbkMsS0FBSyx3Q0FBd0MsS0FBQyxFQUFFLE1BQU0sS0FBQyxFQUFFLFdBQVcsS0FBQyxFQUFFLFFBQVEsVUFBM0csZ0JBQU0scUJBQVc7O1FBRWxCLEtBQUMsU0FBUztRQUNWLEtBQUMsY0FBYztlQUNmLEtBQUMsV0FBVyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiam9pbi5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4va29kZS9rZWQvZWRpdC9hY3Qvam9pbi5rb2RlIl0sIm1hcHBpbmdzIjoiT0FDYyxXQUFQOzs7SUFJSDs7OztRQUVJLEtBQUM7UUFFRCxPQUFPLEtBQUssd0JBQXdCLEtBQUMsRUFBRTtRQUN2QyxPQUFPLEtBQUssc0JBQXNCLEtBQUMsRUFBRSxNQUFNO2VBRTNDLEtBQUMsYUFBYSxLQUFLLEtBQUM7O0lBRXhCLHFDQUE0Qjs7OztRQUV4QixVQUFVLEtBQUssZ0NBQWdDLEtBQUMsRUFBRSxXQUFXLEtBQUMsRUFBRTtVQUUvRCxNQUFNLFdBQVcsV0FBVyxLQUFLLCtDQUErQyxLQUFDLEVBQUUsTUFBTSxLQUFDLEVBQUUsV0FBVyxLQUFDLEVBQUUsUUFBUSxRQUFRO1FBRTNILEtBQUMsU0FBUztRQUNWLEtBQUMsY0FBYztlQUNmLEtBQUMsV0FBVzs7SUFFaEIsdUNBQThCOzs7O1FBRTFCLFNBQVMsS0FBSyxpQ0FBaUMsS0FBQyxFQUFFLE1BQU0sS0FBQyxFQUFFLFdBQVcsS0FBQyxFQUFFO1VBRXhFLE1BQU0sV0FBVyxXQUFXLEtBQUsseURBQXlELEtBQUMsRUFBRSxNQUFNLE9BQU8sS0FBQyxFQUFFLFdBQVcsS0FBQyxFQUFFLFFBQVE7UUFFcEksS0FBQyxTQUFTO1FBQ1YsS0FBQyxjQUFjO2VBQ2YsS0FBQyxXQUFXOztJQUVoQjs7OztRQUVJLFVBQVUsS0FBSyxnQ0FBZ0MsS0FBQyxFQUFFLFdBQVcsS0FBQyxFQUFFO1VBRS9ELE1BQU0sV0FBVyxXQUFXLEtBQUssb0NBQW9DLEtBQUMsRUFBRSxNQUFNLEtBQUMsRUFBRSxXQUFXLEtBQUMsRUFBRSxRQUFRO1FBRXhHLEtBQUMsU0FBUztRQUNWLEtBQUMsY0FBYztlQUNmLEtBQUMsV0FBVzs7SUFFaEI7Ozs7UUFFSSxVQUFVLEtBQUssZ0NBQWdDLEtBQUMsRUFBRSxXQUFXLEtBQUMsRUFBRTtVQUUvRCxNQUFNLFdBQVcsV0FBVyxLQUFLLHdDQUF3QyxLQUFDLEVBQUUsTUFBTSxLQUFDLEVBQUUsV0FBVyxLQUFDLEVBQUUsUUFBUTtRQUU1RyxLQUFDLFNBQVM7UUFDVixLQUFDLGNBQWM7ZUFDZixLQUFDLFdBQVcifQ==
 //# sourceURL=../../../../kode/ked/edit/act/join.kode

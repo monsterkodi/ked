@@ -11,9 +11,9 @@ use ./utils ▪ kc ke
         kc '[1,2][1]'       ▸ ';[1,2][1]'
         kc '[1 2][1]'       ▸ ';[1,2][1]'
         kc '{a:1}["a"]'     ▸ '{a:1}["a"]'
-        kc ';[d,k,v,e] = f' ▸ 'var _a_ = f; d = _a_[0]; k = _a_[1]; v = _a_[2]; e = _a_[3]\n'
-        kc '[d,k,v,e] = f'  ▸ 'var _a_ = f; d = _a_[0]; k = _a_[1]; v = _a_[2]; e = _a_[3]\n'
-        kc '[d k v e] = f'  ▸ 'var _a_ = f; d = _a_[0]; k = _a_[1]; v = _a_[2]; e = _a_[3]\n'
+        kc ';[d,k,v,e] = f' ▸ ';[d,k,v,e] = f'
+        kc '[d,k,v,e] = f'  ▸ ';[d,k,v,e] = f'
+        kc '[d k v e] = f'  ▸ ';[d,k,v,e] = f'
 
     ▸ slice
 
@@ -173,8 +173,8 @@ use ./utils ▪ kc ke
         
   ▸ assign
         
-        kc  '[l, r] = a'    ▸   'var _a_ = a; l = _a_[0]; r = _a_[1]\n'
-        kc  '[l r] = a'     ▸   'var _a_ = a; l = _a_[0]; r = _a_[1]\n'
+        kc  '[l, r] = a'    ▸   ';[l,r] = a'
+        kc  '[l r] = a'     ▸   ';[l,r] = a'
         
         ke  """
             a = [1,2]
@@ -204,11 +204,50 @@ use ./utils ▪ kc ke
             """ ▸
             -3
 
-        kc  '[a.b c.d e] = f()'     ▸ 'var _a_ = f(); a.b = _a_[0]; c.d = _a_[1]; e = _a_[2]\n'
-        kc  '[a[0] b] = f()'        ▸ 'var _a_ = f(); a[0] = _a_[0]; b = _a_[1]\n'
-        kc  '[@x @y z] = f()'       ▸ 'var _a_ = f(); this.x = _a_[0]; this.y = _a_[1]; z = _a_[2]\n'
-        kc  '[from to] = [to from]' ▸ 'var _a_ = [to,from]; from = _a_[0]; to = _a_[1]\n'
-        kc  '[[a b] c] = f()'       ▸ 'var _a_ = f(); var _b_ = _a_[0]; a = _b_[0]; b = _b_[1]; c = _a_[1]\n'
+        kc  '[a.b c.d] = [c.d a.b]' ▸ ';[a.b,c.d] = [c.d,a.b]'
+        kc  '[a[0] b] = f()'        ▸ ';[a[0],b] = f()'
+        kc  '[@x @y] = f()'         ▸ ';[this.x,this.y] = f()'
+        kc  '[from to] = [to from]' ▸ ';[from,to] = [to,from]'
+        kc  '[[a b] c] = f()'       ▸ ';[[a,b],c] = f()'
+        kc  'x = [a b] = f()'       ▸ 'x = [a,b] = f()'
+
+        kc  """
+            for x in y
+                a = 1
+                [a b] = f()
+            """ ▸
+            """
+            var list = _k_.list(y)
+            for (var _a_ = 0; _a_ < list.length; _a_++)
+            {
+                x = list[_a_]
+                a = 1
+                ;[a,b] = f()
+            }
+            """
+
+        ke  """
+            r = []
+            for p in [[1 2] [3 4]]
+                a = 0
+                [a b] = p
+                r.push b
+            r
+            """ ▸
+            [2,4]
+
+        kc  'a[-1] = 1'             ▸ 'a[a.length-1] = 1'
+        kc  'a.b[-2] += 1'          ▸ 'a.b[a.b.length-2] += 1'
+        kc  '@c[i][-1] = 0'         ▸ 'this.c[i][this.c[i].length-1] = 0'
+        kc  'y = a[-1]'             ▸ 'y = a.slice(-1)[0]'
+
+        ke  """
+            a = [1 2 3]
+            a[-1] = 4
+            a[-2] += 3
+            a
+            """ ▸
+            [1,5,4]
 
         ke  """
             a = b:1

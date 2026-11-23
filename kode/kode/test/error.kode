@@ -494,6 +494,9 @@ plain = c ->
         codemsg '[f() c] = g()'     'invalid destructuring target'
         codemsg '[1 c] = g()'       'invalid destructuring target'
         codemsg '[a [b.c()]] = g()' 'invalid destructuring target'
+        codemsg '[a[-1] b] = f()'   "negative indices can't be destructured into"
+        codemsg 'f()[-1] = 1'       'negative index assignment needs a plain receiver'
+        codemsg 'a[f()][-1] = 1'    'negative index assignment needs a plain receiver'
 
     ▸ the message is the last line
 

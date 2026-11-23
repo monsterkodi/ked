@@ -12,8 +12,7 @@ export default {
             return
         }
         indices = belt.lineIndicesForRangesOrPositions(this.s.selections,this.s.cursors)
-        var _a_ = belt.indentLineRangesAndPositionsAtIndices(this.s.lines,this.s.selections,this.s.cursors,indices); lines = _a_[0]; selections = _a_[1]; cursors = _a_[2]
-    
+        ;[lines,selections,cursors] = belt.indentLineRangesAndPositionsAtIndices(this.s.lines,this.s.selections,this.s.cursors,indices)
         this.setLines(lines)
         this.setSelections(selections)
         return this.setCursors(cursors)
@@ -23,13 +22,12 @@ export default {
         var cursors, indices, lines, selections
     
         indices = belt.lineIndicesForRangesOrPositions(this.s.selections,this.s.cursors)
-        var _b_ = belt.deindentLineRangesAndPositionsAtIndices(this.s.lines,this.s.selections,this.s.cursors,indices); lines = _b_[0]; selections = _b_[1]; cursors = _b_[2]
-    
+        ;[lines,selections,cursors] = belt.deindentLineRangesAndPositionsAtIndices(this.s.lines,this.s.selections,this.s.cursors,indices)
         this.setLines(lines)
         this.setSelections(selections)
         return this.setCursors(cursors)
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZW50LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L2FjdC9pbmRlbnQua29kZSJdLCJtYXBwaW5ncyI6Ijs7T0FDYyxXQUFQOzs7SUFJSDs7OztzQkFFZSxLQUFDLEVBQUU7Ozs7UUFFZCxVQUFVLEtBQUssZ0NBQWdDLEtBQUMsRUFBRSxXQUFXLEtBQUMsRUFBRTtrQkFFbkMsS0FBSyxzQ0FBc0MsS0FBQyxFQUFFLE1BQU0sS0FBQyxFQUFFLFdBQVcsS0FBQyxFQUFFLFFBQVEsVUFBekcsZ0JBQU0scUJBQVc7O1FBRWxCLEtBQUMsU0FBUztRQUNWLEtBQUMsY0FBYztlQUNmLEtBQUMsV0FBVzs7SUFFaEI7Ozs7UUFFSSxVQUFVLEtBQUssZ0NBQWdDLEtBQUMsRUFBRSxXQUFXLEtBQUMsRUFBRTtrQkFFbkMsS0FBSyx3Q0FBd0MsS0FBQyxFQUFFLE1BQU0sS0FBQyxFQUFFLFdBQVcsS0FBQyxFQUFFLFFBQVEsVUFBM0csZ0JBQU0scUJBQVc7O1FBRWxCLEtBQUMsU0FBUztRQUNWLEtBQUMsY0FBYztlQUNmLEtBQUMsV0FBVyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZW50LmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L2FjdC9pbmRlbnQua29kZSJdLCJtYXBwaW5ncyI6Ijs7T0FDYyxXQUFQOzs7SUFJSDs7OztzQkFFZSxLQUFDLEVBQUU7Ozs7UUFFZCxVQUFVLEtBQUssZ0NBQWdDLEtBQUMsRUFBRSxXQUFXLEtBQUMsRUFBRTtVQUUvRCxNQUFNLFdBQVcsV0FBVyxLQUFLLHNDQUFzQyxLQUFDLEVBQUUsTUFBTSxLQUFDLEVBQUUsV0FBVyxLQUFDLEVBQUUsUUFBUTtRQUUxRyxLQUFDLFNBQVM7UUFDVixLQUFDLGNBQWM7ZUFDZixLQUFDLFdBQVc7O0lBRWhCOzs7O1FBRUksVUFBVSxLQUFLLGdDQUFnQyxLQUFDLEVBQUUsV0FBVyxLQUFDLEVBQUU7VUFFL0QsTUFBTSxXQUFXLFdBQVcsS0FBSyx3Q0FBd0MsS0FBQyxFQUFFLE1BQU0sS0FBQyxFQUFFLFdBQVcsS0FBQyxFQUFFLFFBQVE7UUFFNUcsS0FBQyxTQUFTO1FBQ1YsS0FBQyxjQUFjO2VBQ2YsS0FBQyxXQUFXIn0=
 //# sourceURL=../../../../kode/ked/edit/act/indent.kode
