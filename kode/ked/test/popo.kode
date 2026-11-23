@@ -1037,6 +1037,12 @@ showSue = data ->
         se.sheetree.select 1 ; se.sheetree.jumpTo se.sheetree.current() ; mc() ▸ [10 0]
         se.sheetree.select 0 ; se.sheetree.jumpTo se.sheetree.current() ; mc() ▸ [2 1]
 
+        e.grabFocus()
+        e.state.setCursors [[11 0]] ; se.sheetree.current().text ▸ 'z'
+        e.state.insert 'x' ; se.sheetree.current() == rt('children.1') ▸ true ; rt('children.1.text') ▸ 'zx'
+        key 'delete' ; se.sheetree.current() == rt('children.1') ▸ true
+        e.state.undo() ; se.sheetree.current() == rt('children.1') ▸ true
+
         loadSheet {children:[{ text:'abc' x:2 y:1 w:6 h:2 } { text:'z' x:10 y:0 w:2 h:1 } { text:'q' x:10 y:4 w:2 h:1 }]}
         se.sheetree.reloadTree()
 

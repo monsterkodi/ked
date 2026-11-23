@@ -84,22 +84,38 @@ use ../menu         ◆ filterchoice
         for child in node.children ? []
             @addItemsForTree child items
 
+    #  reloading resets the highlight: while the editor has focus it follows the main cursor,
+    #  otherwise the row is kept
+
     onSheetEdited: =>
 
+        row = @currentIndex()
+
         @reloadTree()
+
+        if @editor.hasFocus()
+            @highlightCursorNode()
+        else if valid @fuzzied
+            @highlight min(row @fuzzied.length-1)
+
         @showRect()
-        
+
     onCursorsSet: =>
 
         ⮐ if @jumping
 
-        if @editor.state.rectree?
-            cell = @editor.state.sheetCellForPos @editor.state.mainCursor()
-            if item = layout.nodeForPos(@editor.state.sheetSize() @editor.state.rectree cell)
-                if item.index? and 0 <= item.index < @fuzzied.length
-                    @highlight item.index
-                    @showRect()
-                    @emit 'tree.node' @current()
+        @highlightCursorNode()
+
+    highlightCursorNode: =>
+
+        ⮐ if not @editor.state.rectree?
+
+        cell = @editor.state.sheetCellForPos @editor.state.mainCursor()
+        if item = layout.nodeForPos(@editor.state.sheetSize() @editor.state.rectree cell)
+            if item.index? and 0 <= item.index < @fuzzied.length
+                @highlight item.index
+                @showRect()
+                @emit 'tree.node' @current()
             
     jumpTo: choice => 
         
