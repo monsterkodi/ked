@@ -209,6 +209,16 @@ f(a(b))   ▸ f(a(b))
 
 only in top-level function calls can the parens be omitted. 
 
+`( )` is for calls glued to the callee and for grouping operators, not a scope for a list of
+expressions. A space before the `(` of a call, or a list inside `( )`, is an error:
+
+```kode
+f a (b)       ▸ did you mean a(b)?
+f a (g b)     ▸ did you mean a(g b)?
+x = (g b)     ▸ did you mean [g b]?
+f a (b + c)   ▸ f(a, (b + c))
+```
+
 An operator inside an argument list does not end the argument list:
 
 ```kode

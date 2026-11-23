@@ -34,7 +34,7 @@ columns  = 60
 
     location: err =>
 
-        for line in (err ? new Error()).stack.split('\n')[1..]
+        for line in (err?.stack ? new Error().stack).split('\n')[1..] # the compiler throws strings
             continue if /tester\.(js|kode)/.test line
             continue if line.includes 'node:'
             if m = /\(?([^\s(]+):(\d+):\d+\)?$/.exec line

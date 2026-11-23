@@ -1602,7 +1602,7 @@ export
 
             block[2] = kseg.width first
 
-            lines.splice y take (kseg joined)
+            lines.splice y take kseg(joined)
 
         newCursors = []
 

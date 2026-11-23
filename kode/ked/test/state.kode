@@ -659,8 +659,8 @@ sel = r... -> s.allSelections() ▸ r
         s.loadLines ['a' 'b' 'c' 'd' 'e']
 
         s.replaceLineRanges [
-            [1 1 [(kseg 'B')]]
-            [3 1 [(kseg 'D1') (kseg 'D2')]]
+            [1 1 [kseg('B')]]
+            [3 1 [kseg('D1') kseg('D2')]]
             ]
 
         txt 'a\nB\nc\nD1\nD2\ne'
@@ -674,7 +674,7 @@ sel = r... -> s.allSelections() ▸ r
         s.loadLines ['a' 'b' 'c' 'd']
         s.setCursors [[0 0] [2 3]]
 
-        s.replaceLineRanges [[1 1 [(kseg 'B1') (kseg 'B2')]]]
+        s.replaceLineRanges [[1 1 [kseg('B1') kseg('B2')]]]
 
         s.allCursors() ▸ [[0 0] [1 4]]
 

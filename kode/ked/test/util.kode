@@ -354,7 +354,7 @@ sample = (opt) ->
 
         keep = s.diss[0]
 
-        next = [lines[0] (kseg 'bee = 22') (kseg 'c = 333')]
+        next = [lines[0] kseg('bee = 22') kseg('c = 333')]
         s.setSegls next lines
 
         s.diss[0] == keep ▸ true
@@ -367,7 +367,7 @@ sample = (opt) ->
         lines = ['a = 1' 'b = 2']
         s.setLines lines
 
-        next = [lines[0] lines[1] (kseg 'c = 3')]
+        next = [lines[0] lines[1] kseg('c = 3')]
         s.setSegls next lines
 
         s.diss.length ▸ 3

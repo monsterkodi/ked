@@ -381,7 +381,7 @@ use           ◆ mode keys
         conf = config.data?.cursor
         ⮐ fallback if not valid conf
 
-        @marginValue (conf[name]) fallback
+        @marginValue conf[name] fallback
 
     posForCell: x row =>
 

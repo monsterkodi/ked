@@ -174,14 +174,14 @@ use ./utils ▪ kc ke
   ▸ positional
         
         kc  'a b'          ▸ 'a(b)'
-        kc  'a (b)'        ▸ 'a((b))'
         kc  'a (b + 1)'    ▸ 'a((b + 1))'
         kc  'a (b) + 1'    ▸ 'a((b) + 1)'
         kc  'a b {x:1}'    ▸ 'a(b,{x:1})'
-        
-        kc  '(a (b))'      ▸ ';(a,(b))'
-        kc  '[a (b)]'      ▸ ';[a,(b)]'
-        kc  'c a (b)'      ▸ 'c(a,(b))'
+        kc  'f a g b'      ▸ 'f(a,g,b)'
+        kc  'f a (b + c)'  ▸ 'f(a,(b + c))'
+        kc  'f a (x) -> x' ▸ 'f(a,function (x)\n{\n    return x\n})'
+        kc  '(a b) -> a'   ▸ '(function (a, b)\n{\n    return a\n})'
+        kc  '(a, b)'       ▸ ';(a,b)'
         
   ▸ obj, func
       

@@ -488,6 +488,25 @@ plain = c ->
         m = plain 'a = 1\nb = (1 + 2'
         m.startsWith slash.tilde(slash.path(process.cwd(), 'err.kode')) + ':2' ▸ true
 
+    ▸ a space before (
+
+        codemsg 'f a (b)'             'did you mean a(b)?'
+        codemsg 'f a (g b)'           'did you mean a(g b)?'
+        codemsg 'a (b)'               'did you mean a(b)?'
+        codemsg 'a (g b)'             'did you mean a(g b)?'
+        codemsg 'f(a (b))'            'did you mean a(b)?'
+        codemsg '[a (b)]'             'did you mean a(b)?'
+        codemsg '(a (b))'             'did you mean a(b)?'
+        codemsg 'f x.y (@z)'          'did you mean x.y(@z)?'
+        codemsg '[l[0] (k "b")]'      'did you mean l[0](k "b")?'
+
+    ▸ a list in ( )
+
+        codemsg 'x = (g b)'           'did you mean [g b]?'
+        codemsg '[(g b) c]'           'did you mean [g b]?'
+        codemsg 'f a, (g b)'          'did you mean [g b]?'
+        codemsg '(g b) + 1'           'did you mean [g b]?'
+
     ▸ destructuring target
 
         codemsg '[a?.b c] = f()'    'invalid destructuring target'

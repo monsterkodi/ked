@@ -80,9 +80,71 @@ closers = '(':')' '[':']' '{':'}'
 
         @stack = []
         @sheap = []
+        @seps  = []
+        @juxta = []
 
-        vars: [] 
-        exps: @exps('tl' block.tokens)
+        @collectSeps block.tokens
+
+        ast =
+            vars: []
+            exps: @exps('tl' block.tokens)
+
+        for p in @juxta
+            @onError "did you mean [#{@groupText p}]?" tok:p.parens.open
+
+        ast
+
+#!parens
+
+    # ( ) is for calls glued to the callee and for grouping operators, not a scope for a list of
+    # expressions. a (b) and (g b) are reported, since commas are dropped they would compile silently
+
+    collectSeps: tokens ->
+
+        for t in tokens
+            if t.type == 'block'
+                @collectSeps t.tokens
+            else if t.text in [',' ';']
+                @seps.push t
+
+    separated: a b -> # a , or ; between the end of a and the start of b
+
+        e = lastLineCol a
+        s = firstLineCol b
+        for t in @seps
+            after  = t.line > e.line or t.line == e.line and t.col >= e.col
+            before = t.line < s.line or t.line == s.line and t.col < s.col
+            ⮐ true if after and before
+        false
+
+    juxtaposed: exps -> # two expressions in a group without a separator
+
+        for i in 1...exps.length
+            ⮐ true if not @separated exps[i-1], exps[i]
+        false
+
+    srcText: from to ->
+
+        ⮐ '' if from.line != to.line
+        line = (@kode.text ? '').split('\n')[from.line-1] ? ''
+        line[from.col...to.col]
+
+    groupText: p -> @srcText {line:p.parens.open.line, col:p.parens.open.col+1}, p.parens.close
+
+    callable: e -> e and (e.type in ['var' 'keyword'] or e.prop or e.index or e.call)
+
+    plainGroup: e -> # (b) (a.b) (a[0])
+
+        ⮐ false if e.parens.exps.length != 1
+        x = e.parens.exps[0]
+        x.type in ['var' 'keyword'] or x.prop or x.index
+
+    checkGlued: prev e -> # a (b) and a (g b) are calls with a space too many
+
+        ⮐ if not e?.parens or not @callable(prev)
+        ⮐ if lastLineCol(prev).line != e.parens.open.line or @separated(prev, e)
+        ⮐ if not (e in @juxta or @plainGroup(e))
+        @onError "did you mean #{@srcText firstLineCol(prev), lastLineCol(prev)}(#{@groupText e})?" tok:e.parens.open
 
 #!exps
 
@@ -229,8 +291,9 @@ closers = '(':')' '[':']' '{':'}'
                     'if'    ➜ e = @ifTail    e tokens.shift() tokens
                     'for'   ➜ e = @forTail   e tokens.shift() tokens
                     'while' ➜ e = @whileTail e tokens.shift() tokens
-                    
-            
+
+            @checkGlued es[-1], e if es.length
+
             if tokens[0]?.text == '▸'
                 if @stack[-1] in ['▸args' '{']
                     es.push e
