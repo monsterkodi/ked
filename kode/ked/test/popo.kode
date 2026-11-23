@@ -282,7 +282,21 @@ showSue = data ->
                 layout.resizeNode cells tree node 'less cols' ; node.rect.abs.w ▸ 4
                 layout.resizeNode cells tree node 'less cols' ; node.rect.abs.w ▸ 2
                 layout.resizeNode(cells tree node 'less cols')? ▸ false
-    
+
+                tree = absol cells { children:[{ text:'ab' x:0 y:0 w:7 h:3 scale:3 }] }
+                node = tree.children[0]
+                layout.resizeNode cells tree node 'more cols' ; node.w ▸ 9
+                layout.resizeNode cells tree node 'less cols' ; node.w ▸ 6
+                tree = absol cells { children:[{ text:'ab' x:0 y:0 w:7 h:3 scale:3 }] }
+                node = tree.children[0]
+                layout.resizeNode cells tree node 'less cols' ; node.w ▸ 6
+
+                tree = absol cells { children:[{ text:'ab' x:4 y:0 w:15 h:3 scale:3 }] }
+                node = tree.children[0]
+                layout.resizeNode cells tree node 'more cols' ; node.w ▸ 18 ; node.rect.abs.w ▸ 16
+                layout.resizeNode(cells tree node 'more cols')? ▸ false
+                layout.resizeNode cells tree node 'less cols' ; node.w ▸ 15 ; node.rect.abs.w ▸ 15
+
     ▸ titlify
 
             tree = { bg:'#000' x:2 y:2 w:20 h:10 children:[{ x:3 y:2 w:10 h:5 children:[{ text:'hi' x:1 y:1 w:3 h:1 }] }] }

@@ -365,7 +365,7 @@ use ../edit/tool ◆ sue
         if dw
 
             if node.w?
-                value = @incrValue node.w rect.w dw step roomW
+                value = @stepWidth node rect.w dw step roomW
                 if value? ➜ node.w = value
             else
                 value = @incrValue node.r roomW-rect.w -dw 0 roomW-step
@@ -393,6 +393,18 @@ use ../edit/tool ◆ sue
             ⮐
 
         node
+
+    #  the logical width of scaled text steps along multiples of the scale
+    #  it may grow one step past the room, the visible rect is cropped there
+
+    @stepWidth: node old dir step room ->
+
+        ⮐ @incrValue(node.w old dir step room) if node.w is str and node.w.endsWith '%'
+
+        w = dir > 0 ? (floor(old / step) + 1) * step : (ceil(old / step) - 1) * step
+        w = clamp step ceil(room / step)*step w
+
+        ⮐ w if w != old and w != int(node.w)
 
     @incrValue: field old dir minv maxv ->
 
