@@ -53,15 +53,23 @@
         ⮐ if not e
             
         insert = (v,t) =>
-            
+
             ⮐ if map[v] for map in @maps
             ⮐ if arg[v] for arg in @args
-                
+
             @verb yellow(v), red(t)
-            
+
             @vars[-1].push text:v, type:t
             @maps[-1][v] = t
-        
+
+        insertArray = (items) =>
+
+            for val in items
+                if val.type in ['var' 'keyword']
+                    insert val.text, 'array'
+                else if val.array
+                    insertArray val.array.items
+
         if e.type 
             if e.type == 'code'
                 @exp e.exps
@@ -78,9 +86,7 @@
                             if keyval.type == 'var'
                                 insert keyval.text, 'curly'
                     else if op.lhs.array
-                        for val in op.lhs.array.items
-                            if val.type == 'var'
-                                insert val.text, 'array'
+                        insertArray op.lhs.array.items
                             
             if fv = e.for?.vals
                 

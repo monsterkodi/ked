@@ -1248,12 +1248,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
                     
                 
                 if op.lhs.array # lhs is aray, eg. [x,y] = require ''
-                    v = @makeVar op.operator
-                    s = "var #{v} = #{@atom(op.rhs)}"
-                    for val in op.lhs.array.items
-                        i = op.lhs.array.items.indexOf val
-                        s += "; #{@mark val.text, val} = #{v}[#{i}]"
-                    ⮐ s + '\n'
+                    ⮐ @arrayAssign(op.lhs.array.items, @atom(op.rhs), op.operator) + '\n'
                     
                 if op.lhs and @containsAssert op.lhs
                     # dbg op.lhs
@@ -1490,6 +1485,22 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         s = 'compare(' + lhs + ',' + rhs + ')'
         s
         
+    arrayAssign: items rhs tok ->
+
+        v = @makeVar tok
+        s = "var #{v} = #{rhs}"
+        for i in 0...items.length
+            s += '; ' + @arrayTarget(items[i], "#{v}[#{i}]", tok)
+        s
+
+    arrayTarget: val src tok ->
+
+        if val.type in ['var' 'keyword'] ➜ ⮐ "#{@mark val.text, val} = #{src}"
+        if val.array         ➜ ⮐ @arrayAssign val.array.items, src, tok
+        if (val.prop or val.index) and not @containsAssert(val)
+            ⮐ "#{@node val} = #{src}"
+        @onError "invalid destructuring target: only names, members, indices and arrays can be assigned" firstLineCol(val)
+
     containsAssert: e ->
         
         ⮐ false if not e

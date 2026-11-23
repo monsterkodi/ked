@@ -488,6 +488,13 @@ plain = c ->
         m = plain 'a = 1\nb = (1 + 2'
         m.startsWith '~/s/ked/err.kode:2' ▸ true
 
+    ▸ destructuring target
+
+        codemsg '[a?.b c] = f()'    'invalid destructuring target'
+        codemsg '[f() c] = g()'     'invalid destructuring target'
+        codemsg '[1 c] = g()'       'invalid destructuring target'
+        codemsg '[a [b.c()]] = g()' 'invalid destructuring target'
+
     ▸ the message is the last line
 
         plain('a = [1, 2').split('\n')[-1]  ▸ 'array is missing closing ]'

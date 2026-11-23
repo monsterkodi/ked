@@ -201,9 +201,36 @@ use ./utils ▪ kc ke
             a = [-1 -2 -3]
             [a a a] = a
             a
-            """ ▸   
+            """ ▸
             -3
-            
+
+        kc  '[a.b c.d e] = f()'     ▸ 'var _a_ = f(); a.b = _a_[0]; c.d = _a_[1]; e = _a_[2]\n'
+        kc  '[a[0] b] = f()'        ▸ 'var _a_ = f(); a[0] = _a_[0]; b = _a_[1]\n'
+        kc  '[@x @y z] = f()'       ▸ 'var _a_ = f(); this.x = _a_[0]; this.y = _a_[1]; z = _a_[2]\n'
+        kc  '[from to] = [to from]' ▸ 'var _a_ = [to,from]; from = _a_[0]; to = _a_[1]\n'
+        kc  '[[a b] c] = f()'       ▸ 'var _a_ = f(); var _b_ = _a_[0]; a = _b_[0]; b = _b_[1]; c = _a_[1]\n'
+
+        ke  """
+            a = b:1
+            c = d:2
+            [a.b c.d] = [c.d a.b]
+            [a.b c.d]
+            """ ▸
+            [2,1]
+
+        ke  """
+            c = [0 0]
+            [c[0] c[1]] = [3 4]
+            c
+            """ ▸
+            [3,4]
+
+        ke  """
+            [[a b] c] = [[1 2] 3]
+            [c b a]
+            """ ▸
+            [3,2,1]
+
   ▸ blocks
 
         kc  """
