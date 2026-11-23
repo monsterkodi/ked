@@ -10,7 +10,7 @@ use ./edit/mode   ◆ filepos
 use ./view/base   ◆ view input
 use ./view/title  ◆ title 
 use ./view/editor ◆ fileeditor
-use ./view/screen ◆ screen ttio
+use ./view/screen ◆ screen ttio vterm
 use ./view/menu   ◆ context menu macro finder searcher replacer clippo differ
 use ./view/colmns ◆ browse dircol funcol quicky droop saveas
 use ./popo        ◆ layout
@@ -219,23 +219,22 @@ use child_process ▪ spawn exec
     
     dump: label =>
 
-        mark = @t.out.length
-
         @draw()
 
-        frame  = @t.out[mark..].join ''
+        frame  = @t.out.join ''
         @t.out = []
 
-        section = dumpstate.section(label @editor.state @editor.cells @currentFile).join '\n'
+        @vterm ?= new vterm @t.cols() @t.rows()
+        @vterm.resize @t.cols() @t.rows()
+        @vterm.feed frame
+
+        section = dumpstate.section(label @editor.state @editor.cells @currentFile @vterm.placements()).join '\n'
 
         if @t.live
             process.stdout.write '\x1b[2J' + frame + "\x1b[0m\x1b[#{@t.rows()+1};1H" + section
             ⮐
 
-        if @args.headless_colors
-            text = @screen.textColored()
-        else
-            text = @screen.textMarked()
+        text = @args.headless_colors ? @vterm.colored() : @vterm.text()
 
         process.stdout.write '\n' + text.join('\n') + '\n' + section + '\n'
 
@@ -901,7 +900,6 @@ use child_process ▪ spawn exec
         @input.draw()
         # ●▪ draw
         # ●▸ render
-        @editor.cells.draw_cell_rect_corners() if @t.headless
         erases = @screen.eraseRects
         @screen.render()
         @t.removeImgs()

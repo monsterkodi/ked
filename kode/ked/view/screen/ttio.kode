@@ -50,7 +50,7 @@ use ../../util/img ◆ rounded
             @live  = opt.live and process.stdin.isTTY
             @input = @input and not process.stdin.isTTY
 
-            @cellsz = []
+            @cellsz = opt.cellsz ? [10 20]
 
             if @input
                 process.stdin.on 'data' @onInputData
@@ -145,7 +145,11 @@ use ../../util/img ◆ rounded
     cols: => @headless ? @size[0] : process.stdout.columns
     rows: => @headless ? @size[1] : process.stdout.rows  
     
-    liveSize: => @size = [process.stdout.columns, max(1 process.stdout.rows - @reserve)]
+    liveSize: =>
+
+        @size = [process.stdout.columns, max(1 process.stdout.rows - @reserve)]
+
+        process.stdout.write '\x1b[14t'
 
     onHeadlessResize: =>
         
@@ -783,7 +787,9 @@ use ../../util/img ◆ rounded
                     
                     pxs = csi[2..-2].split(';').map (p) -> int(p)
                     @pixels = [pxs[1] pxs[0]]
-                    @cellsz = [int(@pixels[0]/@cols()) int(@pixels[1]/@rows())]
+                    cols = @live ? process.stdout.columns : @cols()
+                    rows = @live ? process.stdout.rows    : @rows()
+                    @cellsz = [int(@pixels[0]/cols) int(@pixels[1]/rows)]
                     
                     # log "ttio.cellsz #{@cellsz[0]} #{@cellsz[1]} #{@cellsz[1]/@cellsz[0]}"
     

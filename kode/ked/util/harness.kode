@@ -1,6 +1,6 @@
 
 use ../../kxk       ▪ post
-use ../view/screen ◆ screen ttio
+use ../view/screen ◆ screen ttio vterm
 ■harness
     # an editor without a terminal
     
@@ -47,5 +47,9 @@ use ../view/screen ◆ screen ttio
     at: x y => @screen.get_char x y
     
     written: => @t.written()
+
+    placements: => new vterm(@cols @rows).feed(@t.written()).placements()
+
+    placedAt: x y => @placements().some (img) -> img.x == x and img.y == y
 
 export harness

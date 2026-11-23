@@ -16,9 +16,9 @@ use ../edit ◆ mode
         
         tags.map((tag) -> "[#{tag}]").join ' '
 
-    @ROWS: 5
+    @ROWS: 6
 
-    @section: (label state cells file) ->
+    @section: (label state cells file images) ->
 
         out  = ["=== #{label}"]
         tags = @tags state file
@@ -38,6 +38,10 @@ use ../edit ◆ mode
 
         if rect = cells?.cellRect
             out.push "    rect #{rect.x}:#{rect.y} #{rect.w}x#{rect.h}"
+
+        if valid images
+            places = images.map (img) -> "#{img.x}:#{img.y}"
+            out.push "    images #{places.join ' '}"
 
         out
 

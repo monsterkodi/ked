@@ -44,8 +44,6 @@ use                 ◆ view
 
     clearArea: ->
 
-        ⮐ if @cells.screen.t.headless
-
         t = @cells.screen.t
 
         for row in 0...@cells.rows
@@ -196,7 +194,7 @@ use                 ◆ view
 
     scaledCell: x y char fg bg ->
     
-        if @cells.screen.t.headless
+        if not @cells.screen.t.textSizing
             @cells.set x y char fg bg
             for j in 0...@scale
                 for i in 0...@scale

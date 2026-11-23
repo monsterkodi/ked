@@ -1,0 +1,214 @@
+
+use ../../../kxk ▪ kseg
+
+■vterm
+
+    @BLOCK_MARK: '·'
+
+    @: @cols @rows -> @reset()
+
+    reset: =>
+
+        @grid   = []
+        @images = {}
+        @x      = 0
+        @y      = 0
+        @style  = ''
+        @saved  = [0 0]
+
+        for y in 0...@rows
+            @grid.push @blankRow()
+
+    blankRow: =>
+
+        row = []
+        for x in 0...@cols
+            row.push char:' ' style:''
+        row
+
+    resize: cols rows =>
+
+        ⮐ if cols == @cols and rows == @rows
+
+        @cols = cols
+        @rows = rows
+        @reset()
+
+    feed: bytes =>
+
+        i = 0
+        n = bytes.length
+
+        while i < n
+
+            ch = bytes[i]
+
+            if ch == '\x1b'
+
+                kind = bytes[i+1]
+
+                if kind == '['
+                    j = i+2
+                    j += 1 while j < n and not /[@-~]/.test(bytes[j])
+                    @csi bytes[i+2...j] bytes[j]
+                    i = j+1
+                    continue
+
+                if kind == ']'
+                    bel = bytes.indexOf '\x07' i
+                    st  = bytes.indexOf '\x1b\\' i
+                    if bel >= 0 and (st < 0 or bel < st)
+                        @osc bytes[i+2...bel]
+                        i = bel+1
+                    else
+                        st = n if st < 0
+                        @osc bytes[i+2...st]
+                        i = st+2
+                    continue
+
+                if kind == '_'
+                    st = bytes.indexOf '\x1b\\' i
+                    st = n if st < 0
+                    @apc bytes[i+2...st]
+                    i = st+2
+                    continue
+
+                if kind == '7' ➜ @saved = [@x @y]
+                if kind == '8' ➜ @x = @saved[0] ; @y = @saved[1]
+
+                i += 2
+                continue
+
+            if ch == '\n'
+                @x  = 0
+                @y += 1
+                i  += 1
+                continue
+
+            if ch == '\r'
+                @x = 0
+                i += 1
+                continue
+
+            j = i
+            j += 1 while j < n and bytes[j] not in '\x1b\n\r'
+
+            for seg in kseg(bytes[i...j])
+                @put seg max(1 kseg.segWidth(seg))
+
+            i = j
+
+        @
+
+    csi: params final =>
+
+        nums = params.split(';').map (p) -> int(p)
+
+        switch final
+
+            'H'
+                @y = max 0 (nums[0] or 1)-1
+                @x = max 0 (nums[1] or 1)-1
+
+            'C' ➜ @x += nums[0] or 1
+
+            'X'
+                for k in 0...(nums[0] or 1)
+                    @set @x+k @y ' ' @style
+
+            'J'
+                @reset() if params == '2'
+
+            'm'
+                if params in ['' '0']
+                    @style = ''
+                else
+                    @style += "\x1b[#{params}m"
+
+    osc: body =>
+
+        ⮐ if not body.startsWith '66;'
+
+        semi  = body.indexOf ';' 3
+        meta  = body[3...semi]
+        text  = body[semi+1..]
+        scale = 1
+        width = 1
+
+        for pair in meta.split ':'
+            [key value] = pair.split '='
+            scale = int(value) if key == 's'
+            width = int(value) if key == 'w'
+
+        for r in 0...scale
+            for c in 0...scale*width
+                @set @x+c @y+r vterm.BLOCK_MARK @style
+
+        @set @x @y text @style
+
+        @x += scale*width
+
+    apc: body =>
+
+        ⮐ if not body.startsWith 'G'
+
+        semi = body.indexOf ';'
+        semi = body.length if semi < 0
+        args = {}
+
+        for pair in body[1...semi].split ','
+            [key value] = pair.split '='
+            args[key] = value
+
+        switch args.a
+
+            'p'
+                @images["#{args.i}:#{args.p ? 1}"] = {i:int(args.i) p:int(args.p ? 1) x:@x y:@y}
+
+            'd'
+                for key,img of @images
+                    continue if args.i? and img.i != int(args.i)
+                    continue if args.p? and img.p != int(args.p)
+                    delete @images[key]
+
+    set: x y char style =>
+
+        ⮐ if x < 0 or y < 0 or x >= @cols or y >= @rows
+
+        @grid[y][x] = char:char style:style
+
+    put: char width =>
+
+        @set @x @y char @style
+        @set @x+1 @y '' @style if width > 1
+
+        @x += width
+
+    text: =>
+
+        @grid.map (row) -> row.map((cell) -> cell.char).join('').replace(/\s+$/ '')
+
+    colored: =>
+
+        lines = []
+
+        for row in @grid
+
+            line  = ''
+            style = null
+
+            for cell in row
+                if cell.style != style
+                    line += '\x1b[0m' + cell.style
+                    style = cell.style
+                line += cell.char
+
+            lines.push line + '\x1b[0m'
+
+        lines
+
+    placements: =>
+
+        Object.values(@images).sort (a b) -> a.y - b.y or a.x - b.x
+
+export vterm

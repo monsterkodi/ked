@@ -192,12 +192,8 @@ use ../../util/img  ◆ rounded
         opt ?= {}
         fg     = opt.fg ? '#888'
         zLayer = opt.zLayer ? 1000
-        
-        if @screen.t.headless
-            @draw_frame x1 y1 x2 y2 opt
-            ⮐
-        
-        @img x1 y1 'rounded.border.tl' fg zLayer  
+
+        @img x1 y1 'rounded.border.tl' fg zLayer
         @img x2 y1 'rounded.border.tr' fg zLayer  
         @img x1 y2 'rounded.border.bl' fg zLayer  
         @img x2 y2 'rounded.border.br' fg zLayer  
@@ -248,9 +244,7 @@ use ../../util/img  ◆ rounded
         t = @screen.t
         csz = t.cellsz
 
-        if t.headless
-            @cellRect = rect
-            ⮐ []
+        @cellRect = rect
 
         ⮐ [] if empty csz
         
@@ -284,46 +278,20 @@ use ../../util/img  ◆ rounded
         for [imgId pid] in rectid
             @screen.t.hideOverlay imgId pid
 
-    draw_cell_rect_corners: =>
-
-        # a headless dump has no images, so mark the rect with corner glyphs
-
-        ⮐ if not @cellRect?
-
-        rect = @cellRect
-
-        @set_char rect.x              rect.y              '╭'
-        @set_char rect.x+rect.w-1     rect.y+rect.h-1     '╯'
-            
     draw_rounded_cursor: x y fg scale=1 =>
-        
-        if @screen.t.headless
-            @set_mark x y 'main'
-            @swap_fg_bg x y
-            ⮐
-            
+
+        @set_mark x y 'main'
         rounded.place @wx(x) @wy(y) "rounded.cursor" fg null null 1000 null scale
-        
+
     draw_rounded_multi_cursor: x y fg scale=1 =>
-        
-        if @screen.t.headless
-            @set_mark x y 'multi'
-            @swap_fg_bg x y
-            ⮐
-            
+
+        @set_mark x y 'multi'
         rounded.place @wx(x) @wy(y) "rounded.multi" fg null null 1000 null scale
-        
+
     set_mark: x y kind =>
-        
+
         if @inside(x y) ➜ @screen.set_mark @wx(x) @wy(y) kind
-        
-    swap_fg_bg: x y =>
-        
-        fg = @get_fg x y
-        bg = @get_bg x y
-        
-        @set_fg_bg x y bg fg
-        
+
     img: x y name fg zLayer=1000 xe ye =>
     
         ⮐ if @outside x y

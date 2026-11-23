@@ -301,10 +301,7 @@ use              ◆ mode
                     for i in 0...scale
                         @cells.set_bg cx+i r bgc
 
-                if @cells.screen.t.headless
-                    @cells.set_char cx row hlc
-                else
-                    @cells.set_char cx row color.ul_rgb(ulc)+'\x1b[4:1m'+hlc+'\x1b[4:0m'
+                @cells.set_char cx row color.ul_rgb(ulc)+'\x1b[4:1m'+hlc+'\x1b[4:0m'
                 @cells.set_mark cx row 'highlight'
                 @cells.adjustContrastForHighlight cx row bgc
                     

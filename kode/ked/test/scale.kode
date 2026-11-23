@@ -416,8 +416,8 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
         h.screen.init()
         e.draw()
 
-        h.row(3).startsWith('╭') ▸ true
-        h.row(6).startsWith('╰') ▸ true
+        h.placedAt(0 3) ▸ true
+        h.placedAt(0 6) ▸ true
 
         [h e] = hed 20 12 'kode' ['complete']
         e.state.loadLines ['funky1 = 1' 'funky2 = 2' '...........funky']
@@ -428,9 +428,9 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
         h.screen.init()
         e.draw()
 
-        h.row(3).startsWith('         ╭') ▸ true
-        h.row(3).endsWith('╮') ▸ true
-        h.row(3).length ▸ 20
+        h.placedAt(9 3)  ▸ true
+        h.placedAt(8 3)  ▸ false
+        h.placedAt(19 3) ▸ true
 
   ▸ the completion frame moves below a scaled line
 
@@ -445,10 +445,9 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
 
         e.state.lineHeight(0) ▸ 3
 
-        h.row(1) ▸ ''
-        h.row(2) ▸ ''
-        h.row(3).startsWith('        ╭') ▸ true
-        h.row(6).startsWith('        ╰') ▸ true
+        h.placements().filter((img) -> img.y in [1 2]).length ▸ 0
+        h.placedAt(8 3) ▸ true
+        h.placedAt(8 6) ▸ true
 
   ▸ an erased area is cleared in the cells and on the screen
 
