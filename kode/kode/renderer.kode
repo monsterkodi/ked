@@ -811,10 +811,10 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
 
     if: n ->
 
-        first = firstLineCol n
-        last  = lastLineCol n
+        flc = firstLineCol n
+        llc = lastLineCol n
 
-        if (first.line == last.line and n.else and not n.returns) or n.inline
+        if (flc.line == llc.line and n.else and not n.returns) or n.inline
             ⮐ @ifInline n
 
         gi = @ind()
@@ -1344,8 +1344,8 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
                         else
                             ⮐ "#{@atom op.lhs} instanceof #{@atom op.rhs}"
             
-        first = firstLineCol op.lhs
-        prfx = if first.col == 0 and op.rhs?.func then '\n' else ''
+        flc  = firstLineCol op.lhs
+        prfx = if flc.col == 0 and op.rhs?.func then '\n' else ''
  
         isAssign = o.endsWith('=') and o not in ['==' '!=' '===' '!==' '<=' '>=']
         lhs = if op.lhs ➜ (if isAssign then @assignee(op.lhs) else @atom(op.lhs)) + sep else ''

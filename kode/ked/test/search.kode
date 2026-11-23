@@ -879,11 +879,11 @@ process.on 'exit' -> fs.rmSync tmp recursive:true force:true
 
         r.choices.select lineIndices[0]
 
-        first = r.choices.current()
+        choice = r.choices.current()
 
-        ◯ r.onChoicesAction 'space' first
+        ◯ r.onChoicesAction 'space' choice
 
-        first.excluded ▸ true
+        choice.excluded ▸ true
         r.choices.currentIndex() ▸ lineIndices[1]
 
         second = r.choices.current()

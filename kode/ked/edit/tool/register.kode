@@ -123,8 +123,8 @@ use ../../../kxk ◆ clip
         if value.linewise
             old.lines = old.lines.concat value.lines
         else
-            last = old.lines.length-1
-            old.lines[last] = old.lines[last] + value.lines[0]
+            lastIndex = old.lines.length-1
+            old.lines[lastIndex] = old.lines[lastIndex] + value.lines[0]
             old.lines = old.lines.concat value.lines[1..]
 
         old.keys = null

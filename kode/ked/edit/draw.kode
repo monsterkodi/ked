@@ -229,12 +229,12 @@ use              ◆ mode
 
         view  = @state.s.view
         cells = @cellsForLine y
-        last  = cells.length-1
+        lastIndex = cells.length-1
 
         for span in spans
 
-            x1 = max 0 (cells[min(span[0] last)]*scale - view[0])
-            x2 = min @cells.cols (cells[min(span[1] last)]*scale - view[0])
+            x1 = max 0 (cells[min(span[0] lastIndex)]*scale - view[0])
+            x2 = min @cells.cols (cells[min(span[1] lastIndex)]*scale - view[0])
 
             continue if x1 >= x2
 
@@ -280,11 +280,11 @@ use              ◆ mode
             continue if xs >= xe
 
             cells = @cellsForLine li
-            last  = cells.length-1
+            lastIndex = cells.length-1
 
             for x in xs...xe
 
-                cx = cells[min(x last)]*scale - vx
+                cx = cells[min(x lastIndex)]*scale - vx
                 continue if cx < 0
                 continue if cx+scale > @cells.cols
 
@@ -357,10 +357,10 @@ use              ◆ mode
                     continue
 
                 cells = @cellsForLine li
-                last  = cells.length-1
+                lastIndex = cells.length-1
 
                 for x in xs...xe
-                    cx = cells[min(x last)]*scale - vx
+                    cx = cells[min(x lastIndex)]*scale - vx
                     continue if cx < 0
                     continue if cx+scale > @cells.cols
 
@@ -427,10 +427,10 @@ use              ◆ mode
                     continue
 
                 cells = @cellsForLine li
-                last  = cells.length-1
+                lastIndex = cells.length-1
 
                 for x in xs...xe
-                    cx = cells[min(x last)]*scale - vx
+                    cx = cells[min(x lastIndex)]*scale - vx
                     continue if cx < 0
                     continue if cx+scale > @cells.cols
 
@@ -482,11 +482,11 @@ use              ◆ mode
 
         cells = @cellsForLine y
         scale = @state.lineHeight y
-        last  = cells.length-1
+        lastIndex = cells.length-1
 
-        ⮐ (cells[x] * scale) if x <= last
+        ⮐ (cells[x] * scale) if x <= lastIndex
 
-        ⮐ (cells[last] + (x - last)) * scale
+        ⮐ (cells[lastIndex] + (x - lastIndex)) * scale
 
     drawCursors: ->
         

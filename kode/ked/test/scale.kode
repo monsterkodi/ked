@@ -342,9 +342,9 @@ quickMap = h e syntax cols=12 rows=10 csz=[10 20] ->
         h.screen.init()
         e.draw()
 
-        first = h.screen.renderString()
+        frame = h.screen.renderString()
 
-        first.startsWith('\x1b[H') ▸ true
+        frame.startsWith('\x1b[H') ▸ true
 
         e.state.scrollView 'down'
 

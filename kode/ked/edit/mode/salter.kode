@@ -129,13 +129,13 @@ use ..           ◆ mode
             stripped.push @uncommentedLine(txt)
         
         bang = '#!' + salter.desalt(stripped)
-        first = selections[0][1]
-        
+        top = selections[0][1]
+
         newLines = lines.map (l) -> l
-        newLines.splice first, selections.length, bang
-        
+        newLines.splice top, selections.length, bang
+
         @state.setLines newLines
-        @state.setCursors [[2 first]]
+        @state.setCursors [[2 top]]
         @state.deselect()
         true
     

@@ -1,7 +1,7 @@
 var toExport = {}
 var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
-var before, bg, blockArea, bx, by, c, cells, csz, cx, data, e, first, h, hed, i, id, id0, id2, ink, j, lines, m, mapCursors, mapImages, mapScr, old, out, pixels, plain, quickMap, rect, removals, remove, runEd, runName, runScale, s, saved, sc, scale, scr, second, send, small, t, tstt, tsttLines, uploads, w, x, xx, y, yy
+var before, bg, blockArea, bx, by, c, cells, csz, cx, data, e, frame, h, hed, i, id, id0, id2, ink, j, lines, m, mapCursors, mapImages, mapScr, old, out, pixels, plain, quickMap, rect, removals, remove, runEd, runName, runScale, s, saved, sc, scale, scr, second, send, small, t, tstt, tsttLines, uploads, w, x, xx, y, yy
 
 import kxk from "../../kxk.js"
 let kseg = kxk.kseg
@@ -355,8 +355,8 @@ toExport["scale"] = async function ()
         e.state.loadLines(['# big','a','b','c','d','e','f','g','h'])
         h.screen.init()
         e.draw()
-        first = h.screen.renderString()
-        compare(first.startsWith('\x1b[H'),true)
+        frame = h.screen.renderString()
+        compare(frame.startsWith('\x1b[H'),true)
         e.state.scrollView('down')
         h.screen.init()
         e.draw()

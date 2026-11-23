@@ -21,8 +21,8 @@
             count = newLines.length
             start = if count > 0 ➜ change.line-1 else change.line
 
-            first = if count > 0 ➜ start else max 0 start-1
-            last  = if count > 0 ➜ start+count-1 else max 0 start-1
+            firstLine = if count > 0 ➜ start else max 0 start-1
+            lastLine  = if count > 0 ➜ start+count-1 else max 0 start-1
 
             hunk =
                 start:    start
@@ -35,16 +35,16 @@
 
             block = last blocks
 
-            if block? and first <= block.last+1
+            if block? and firstLine <= block.last+1
                 block.hunks.push hunk
                 block.end  = max block.end hunk.end
-                block.last = max block.last last
+                block.last = max block.last lastLine
             else
                 blocks.push
-                    start: first
+                    start: firstLine
                     end:   hunk.end
-                    first: first
-                    last:  last
+                    first: firstLine
+                    last:  lastLine
                     hunks: [hunk]
 
         for block in blocks

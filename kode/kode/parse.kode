@@ -279,12 +279,12 @@ closers = '(':')' '[':']' '{':'}'
                 
             e = @exp tokens
 
-            last = lastLineCol e
-            
-            while ( tokens[0]?.text in ['if' 'for' 'while'] and 
+            llc = lastLineCol e
+
+            while ( tokens[0]?.text in ['if' 'for' 'while'] and
                     @noThenAhead(tokens) and
                     @stack[-1] not in ['▸args' '▸return'] and
-                    last.line == tokens[0].line )
+                    llc.line == tokens[0].line )
 
                 @verb "exps #{tokens[0].text }Tail" e @stack
                 switch tokens[0].text
@@ -304,10 +304,10 @@ closers = '(':')' '[':']' '{':'}'
             es.push e
             
             if  (   tokens[0]?.text in ['if''then''for''while'] and 
-                    tokens[0].col > last.col and
-                    es.length and 
+                    tokens[0].col > llc.col and
+                    es.length and
                     not blocked and
-                    last.line == tokens[0].line)
+                    llc.line == tokens[0].line)
                     
                 @verb 'exps break on if|then|for|while' 
                 break 
@@ -356,6 +356,8 @@ closers = '(':')' '[':']' '{':'}'
                 alone = false
 
             if alone
+                if tok.text in ['first' 'last'] and tok.type == 'keyword'
+                    @firstLastError tok
                 if m = needsPair[tok.text]
                     @onError m tok:tok
                 if tok.text in ['++' '--']
@@ -564,8 +566,11 @@ closers = '(':')' '[':']' '{':'}'
                         e.text == '{'   ➜ e = @curly  e tokens
                         e.text in ['not'] and (nxt.type not in ['op'] or nxt.text in ['++' '--' '+' '-' ]) ➜ e = @operation(null, e, tokens)
                         e.text in ['delete''new''empty''valid''noon''copy''clone'] and (nxt.type not in ['op''nl'] and nxt.text not in ',.}])') ➜ e = @operation(null, e, tokens)
-                        # nxt can be a block, and a block token has no text
-                        e.text in ['first''last'] and (nxt.type not in ['op''nl'] and nxt.text?[0] not in ',.}])') ➜ e = @operation(null, e, tokens)
+                        e.text in ['first''last'] and e.type == 'keyword'
+                            if @firstLastOperand e nxt, unspaced
+                                e = @operation(null, e, tokens)
+                            else
+                                @firstLastError e
                         e.text in ['++''--'] and unspaced
                             @verb 'rhs increment'
                             e = @operation null e tokens
@@ -602,9 +607,24 @@ closers = '(':')' '[':']' '{':'}'
             if numTokens == tokens.length
                 @verb 'rhs no token consumed, break!'
                 break
-                            
+
+        @firstLastError e if e?.text in ['first''last'] and e.type == 'keyword' # alone at the end
+
         @sheapPop 'rhs' 'rhs'
         e
+
+    # first and last are operators: first [1 2 3] ▸ 1, last(a) ▸ a[a.length-1]
+
+    firstLastOperand: op nxt unspaced ->
+
+        ⮐ nxt.text == '(' if unspaced
+        ⮐ false if nxt.type in ['op' 'nl' 'block'] or not nxt.text
+        ⮐ false if nxt.text[0] in ',.}])?=:;'
+        nxt.text not in ['in' 'of' 'if' 'then' 'else' 'for' 'while' 'when' '➜' '▸']
+
+    firstLastError: tok ->
+
+        @onError "'#{tok.text}' is an operator (#{tok.text} [1 2 3] ▸ #{tok.text == 'first' ? 1 : 3}) and can't be a variable name" tok:tok
         
 #!lhs
     
@@ -626,9 +646,9 @@ closers = '(':')' '[':']' '{':'}'
             if not e
                 @onError 'missing expression on the right' tok:nxt
             
-            last  = lastLineCol  e
-            first = firstLineCol e
-            unspaced = last.col == nxt.col and last.line == nxt.line
+            llc = lastLineCol  e
+            flc = firstLineCol e
+            unspaced = llc.col == nxt.col and llc.line == nxt.line
             spaced = not unspaced
 
             b = switch @stack[-1]
@@ -715,11 +735,11 @@ closers = '(':')' '[':']' '{':'}'
                 # which is the reason this is uglier than one would normally expect:
                         
                 (   spaced and 
-                    (nxt.line == last.line or (nxt.col > first.col and @stack[-1] not in ['if''when'])) and
+                    (nxt.line == llc.line or (nxt.col > flc.col and @stack[-1] not in ['if''when'])) and
                     '◯rgs' not in @stack and
                     '[' not in @stack and
                     @stack[-1] not in ['(' 'call' 'args(' 'op|' 'op&' 'op/' 'op*' 'op+' 'op-'] and
-                    (@stack[-1] not in ['▸args' ':'] or (nxt.line > last.line and nxt.col > first.col)) and
+                    (@stack[-1] not in ['▸args' ':'] or (nxt.line > llc.line and nxt.col > flc.col)) and
                     nxt.text not in ['then' 'when' 'else' 'break' 'continue' 'in' 'of' 'for' 'while'] and
                     (nxt.text not in ['if'] or not @noThenAhead(tokens)) and
                     nxt.text not in ',.;:)}]' and
@@ -730,7 +750,7 @@ closers = '(':')' '[':']' '{':'}'
 
                     @verb 'lhs is lhs of implicit call! e' e, @stack[-1]
                     @verb '    is lhs of implicit call! nxt' nxt
-                    @verb '    is lhs first' first 
+                    @verb '    is lhs first' flc
                     e = @call e tokens
                     break
 

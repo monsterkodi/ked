@@ -55,13 +55,13 @@ use .. ◆ nfs slash
         file = slash.path root 'test.txt'
         fs.writeFileSync file 'hello'
 
-        first  =◯ nfs.duplicate file
+        one    =◯ nfs.duplicate file
         second =◯ nfs.duplicate file
         third  =◯ nfs.duplicate file
 
         fs.rmSync root recursive:true force:true
 
-        slash.file(first)  ▸ 'test-copy.txt'
+        slash.file(one)    ▸ 'test-copy.txt'
         slash.file(second) ▸ 'test-copy2.txt'
         slash.file(third)  ▸ 'test-copy3.txt'
 

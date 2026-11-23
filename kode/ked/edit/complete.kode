@@ -66,9 +66,9 @@ use           ◆ specs
         state = @editor.state
         scale = state.lineHeight cursor[1]
         cells = @editor.cellsForLine cursor[1]
-        last  = cells.length-1
+        lastIndex = cells.length-1
 
-        [cells[min(cursor[0] last)]*scale - state.s.view[0], state.rowOfLine(cursor[1])]
+        [cells[min(cursor[0] lastIndex)]*scale - state.s.view[0], state.rowOfLine(cursor[1])]
 #!word
     word: @turd ->
     

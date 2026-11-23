@@ -1304,8 +1304,8 @@ export
 
             lines = lines[0...at].concat(segls).concat(lines[at..])
 
-            first = segls[0]
-            x     = min belt.numIndent(first) max(0 kseg.width(first)-1)
+            head = segls[0]
+            x    = min belt.numIndent(head) max(0 kseg.width(head)-1)
 
             newCursors.push [x at]
             offset += segls.length
@@ -1588,8 +1588,8 @@ export
         for block in blocks
 
             [y take] = block
-            first    = kseg.str(lines[y]).replace(/\s+$/ '')
-            parts    = [first]
+            head     = kseg.str(lines[y]).replace(/\s+$/ '')
+            parts    = [head]
 
             for j in 1...take
                 text = kseg.str(lines[y+j]).replace(/^\s+/ '').replace(/\s+$/ '')
@@ -1600,7 +1600,7 @@ export
                 continue if empty part
                 joined = empty(joined) ? part : joined + ' ' + part
 
-            block[2] = kseg.width first
+            block[2] = kseg.width head
 
             lines.splice y take kseg(joined)
 
@@ -1753,7 +1753,7 @@ export
 
         lines = @s.lines.map (l) -> kseg.str l
         total = 0
-        last  = null
+        lastPos = null
 
         for entry in entries
 
@@ -1761,13 +1761,13 @@ export
 
             for m in entry.matches
                 total += 1
-                last = [m.x1 entry.y]
+                lastPos = [m.x1 entry.y]
 
         ⮐ 0 if not total
 
         @begin()
         @setLines lines
-        @setCursors [last]
+        @setCursors [lastPos]
         @end()
 
         total

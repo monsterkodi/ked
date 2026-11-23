@@ -507,6 +507,22 @@ plain = c ->
         codemsg 'f a, (g b)'          'did you mean [g b]?'
         codemsg '(g b) + 1'           'did you mean [g b]?'
 
+    ▸ first and last are operators
+
+        codemsg 'for i in 0...last\n    log i'  "'last' is an operator"
+        codemsg 'x = last?'                     "'last' is an operator"
+        codemsg 'a = b if last?'                "'last' is an operator"
+        codemsg 'x = [last[0] last[1]]'         "'last' is an operator"
+        codemsg 'f = last[0]'                   "'last' is an operator"
+        codemsg 'last = 3'                      "'last' is an operator"
+        codemsg 'log last'                      "'last' is an operator"
+        codemsg 'x = last - 1'                  "'last' is an operator"
+        codemsg 'x = first.length'              "'first' is an operator"
+        codemsg 'f = (a last) ->'               "'last' is an operator"
+        codemsg 'for last in xs\n    log 1'     "'last' is an operator"
+        codemsg '[a first] = f()'               "'first' is an operator"
+        codemsg 'use ./x ▪ last'                "'last' is an operator"
+
     ▸ destructuring target
 
         codemsg '[a?.b c] = f()'    'invalid destructuring target'

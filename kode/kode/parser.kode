@@ -427,7 +427,9 @@ use ./utils ▪ firstLineCol lastLineCol
                 while tokens.length and tokens[0].type != 'nl' and tokens[0].col == token.col + token.text.length
                     token = tokens.shift()
                     item += token.text
-                
+
+                @firstLastError itemTok if item in ['first' 'last']
+
                 items.push
                     type: 'var'
                     text: item
@@ -619,8 +621,8 @@ use ./utils ▪ firstLineCol lastLineCol
         
         tok = tok.token if tok.token
                         
-        last = lastLineCol tok
-        if tokens[0].text == '(' and tokens[0].line == last.line and tokens[0].col == last.col
+        llc = lastLineCol tok
+        if tokens[0].text == '(' and tokens[0].line == llc.line and tokens[0].col == llc.col
             open = tokens.shift()
             if tokens[0]?.text == ')'
                 args = []
@@ -934,8 +936,8 @@ use ./utils ▪ firstLineCol lastLineCol
 
         @push '{'
 
-        first = firstLineCol key
-        
+        flc = firstLineCol key
+
         exps = [@keyval(key tokens)]
         
         literals = @kode.atoms.concat ['keyword''op']
@@ -946,18 +948,18 @@ use ./utils ▪ firstLineCol lastLineCol
                 break if tokens[1]?.type not in literals
                 break if tokens[2]?.text not in ': ' # ◂ the space checks for newline!
                 
-                if tokens[1]?.col >= first.col and tokens[1].text not in '])'
+                if tokens[1]?.col >= flc.col and tokens[1].text not in '])'
                     @shiftNewline 'continue implicit object on nl...' tokens
                     exps.push @exp(tokens)
                     continue
                 break
             else if tokens[0]?.type == 'block'
-                if tokens[0].col >= first.col or @stack[-1] == '{' and 'section' in @stack
+                if tokens[0].col >= flc.col or @stack[-1] == '{' and 'section' in @stack
                     block = tokens.shift()
                     tokens = block.tokens
                     exps = exps.concat @exps('object' block.tokens)
                 break
-            else if tokens[0]?.line == first.line and tokens[0].text not in '])};'
+            else if tokens[0]?.line == flc.line and tokens[0].text not in '])};'
                 
                 rest = tokens.length
                 exps = exps.concat @exps('object' tokens, ';')

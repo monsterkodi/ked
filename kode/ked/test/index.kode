@@ -275,18 +275,18 @@ indexed = (name content ext='kode') ◯->
 
   ▸ existing
 
-        first  = slash.tmpfile 'txt'
+        one    = slash.tmpfile 'txt'
         second = slash.tmpfile 'txt'
         gone   = slash.tmpfile 'txt'
 
-        ◯ nfs.write first,  'first'
+        ◯ nfs.write one,    'first'
         ◯ nfs.write second, 'second'
 
-        names = [slash.file(first), slash.file(second), slash.file(gone), slash.file(first)]
+        names = [slash.file(one), slash.file(second), slash.file(gone), slash.file(one)]
 
-        files =◯ fileutil.existingFiles names slash.dir(first)
+        files =◯ fileutil.existingFiles names slash.dir(one)
 
-        files ▸ [first, second]
+        files ▸ [one, second]
 
-        ◯ nfs.remove first
+        ◯ nfs.remove one
         ◯ nfs.remove second

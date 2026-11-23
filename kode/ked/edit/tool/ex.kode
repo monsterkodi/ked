@@ -277,15 +277,15 @@ use ../../../kxk ▪ kseg
 
     @joinSubstitution: line matches tokens ->
 
-        out  = ''
-        last = 0
+        out = ''
+        pos = 0
 
         for m in matches
-            out += line[last...m.index]
+            out += line[pos...m.index]
             out += @exExpandReplacement tokens m.groups
-            last = m.index + m.length
+            pos = m.index + m.length
 
-        out += line[last..]
+        out += line[pos..]
 
         out
 

@@ -288,10 +288,10 @@ writeJs = c file=JS_FILE ◯->
 
         k = new kode header:false, map:true
 
-        first = k.compile c, SRCFILE
+        once  = k.compile c, SRCFILE
         again = k.compile c, SRCFILE
 
-        eq = body(first) == body(again)
+        eq = body(once) == body(again)
         eq ▸ true
 
     ▸ points at the token it maps

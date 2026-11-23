@@ -304,9 +304,9 @@ cached = fp ◯->
 
     ▸ a build that compiled nothing writes nothing
 
-        first = ◯ built fpA, cksrc, cktgt, no
+        once = ◯ built fpA, cksrc, cktgt, no
         before = ◯ nfs.read ckache
-        compiledNo = ◯ knrd.saveCache ckache, first.cache, fpA, true, {}, {}
+        compiledNo = ◯ knrd.saveCache ckache, once.cache, fpA, true, {}, {}
         afterNo = ◯ nfs.read ckache
 
         compiledNo  ▸ false
@@ -354,7 +354,7 @@ cached = fp ◯->
     ▸ files it did not compile lose their entry and the next build has to
     ▸ rebuild the tree to write them back
 
-        first = ◯ built fpA, cksrc, cktgt, no
+        once = ◯ built fpA, cksrc, cktgt, no
         merged = ◯ built fpA, more, cktgt, no
         whole = ◯ built fpB, cksrc, cktgt, yes
         still = ◯ built fpA, cksrc, cktgt, no

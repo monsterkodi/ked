@@ -15,7 +15,6 @@ parse = s ->
     FLOAT   = /^(\-|\+)?([0-9]+(\.[0-9]+)?|Infinity)$/
     INT     = /^(\-|\+)?([0-9]+|Infinity)$/
 
-    last = (a) -> a?[a.length-1]
     isArray = (a) -> a? and typeof(a) == 'object' and a.constructor.name == 'Array'
 
     undense = d s -> # undenses string s at depth d. Returns list of padded lines

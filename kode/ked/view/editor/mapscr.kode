@@ -179,13 +179,13 @@ use                 ◆ mapview
 
         bottom = @topRow + @linesInMap
         li     = @topLine
-        last   = @topLine-1
+        bot    = @topLine-1
 
         while li < @state.s.lines.length and @state.rowsBeforeLine(li) < bottom
-            last = li
-            li  += 1
+            bot = li
+            li += 1
 
-        @botLine = last
+        @botLine = bot
 
     lineRows: y => @state.lineHeight y
 
