@@ -32,7 +32,7 @@ use ◆ text cell edit misc pair salt ex sue
         
         ⮐ posl if posl.length <= 1
         
-        for i in posl.length-1..1
+        for i in posl.length-1..1 by -1
             if @samePos posl[i] posl[i-1]
                 posl.splice i 1
         posl
@@ -213,7 +213,7 @@ use ◆ text cell edit misc pair salt ex sue
         ⮐ spans[-1] if @isPosBeforeSpan pos spans[0]
         ⮐ spans[-1] if @isPosInsideSpan pos spans[0]
             
-        for index in spans.length-1..0
+        for index in spans.length-1..0 by -1
             span = spans[index]
             if @isPosAfterSpan pos span
                 ⮐ span

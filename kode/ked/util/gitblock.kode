@@ -200,7 +200,7 @@
 
         result = lines.slice()
 
-        for i in entry.ops.length-1..0
+        for i in entry.ops.length-1..0 by -1
             op = entry.ops[i]
             result = result[0...op.start].concat(op.old).concat(result[op.start+op.new.length..])
 
@@ -210,7 +210,7 @@
 
         result = lines.slice()
 
-        for i in entry.ops.length-1..0
+        for i in entry.ops.length-1..0 by -1
             op = entry.ops[i]
             result = result[0...op.oldStart].concat(op.new).concat(result[op.oldStart+op.old.length..])
 

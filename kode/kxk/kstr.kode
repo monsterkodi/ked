@@ -339,7 +339,7 @@ str.rgbaToHexColor = s ->
 str.hash = s -> 
 
     h = 9
-    for i in s.length..0 
+    for i in s.length..0 by -1
         h = Math.imul h^s.charCodeAt(i), 9**9
     h^h >> 9
 

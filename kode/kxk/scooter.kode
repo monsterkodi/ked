@@ -51,7 +51,7 @@ deg = str ->
         if val[0] == '(' and val[-1] == ')'
             str = "rad#{val}" + deg(splt[1..].join('°'))
         else
-            for i in val.length-1..0
+            for i in val.length-1..0 by -1
                 if val[i] not in '0.123456789'
                     pre  = val[0..i] 
                     val = val[i+1..-1]

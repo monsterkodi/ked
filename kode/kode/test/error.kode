@@ -537,6 +537,11 @@ plain = c ->
 
         codemsg 'v = a is new B'    "'is' expects a type on its right side"
 
+    ▸ range step
+
+        codemsg 'for i in 0..3 by 0 ➜ log i'    "'by' step can't be 0"
+        codemsg 'for i in 0..3 by'              "'by' is missing the step"
+
     ▸ the message is the last line
 
         plain('a = [1, 2').split('\n')[-1]  ▸ 'array is missing closing ]'

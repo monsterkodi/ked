@@ -10,7 +10,7 @@ export default {
         ranges = this.selectionsOrCursorLineRanges()
         len = `${start + (ranges.length - 1) * step}`.length
         nums = []
-        for (var _a_ = i = 0, _b_ = ranges.length; (_a_ <= _b_ ? i < ranges.length : i > ranges.length); (_a_ <= _b_ ? ++i : --i))
+        for (i = 0; i < ranges.length; i++)
         {
             nums.push(_k_.lpad(len,`${start + i * step}`,'0'))
         }
@@ -22,5 +22,5 @@ export default {
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY291bnQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvYWN0L2NvdW50LmtvZGUiXSwibWFwcGluZ3MiOiI7O09BQ2MsV0FBUDs7O0lBSUgsdUNBQThCLFFBQU0sR0FBRSxPQUFLOzs7O1FBRXZDLFNBQVMsS0FBQztRQUVWLFNBQVMsU0FBUyxPQUFPLFNBQU8sS0FBSyxPQUFPO1FBQzVDO3VCQUNJLElBQUssU0FBSSxPQUFPLDBCQUFQLE9BQU8sYUFBUCxPQUFPOztZQUNoQixLQUFLLGNBQVUsT0FBTyxRQUFRLElBQUksT0FBTzs7UUFFN0MsT0FBTyxLQUFLLEtBQUs7VUFFaEIsTUFBTSxXQUFXLEtBQUssc0JBQXNCLEtBQUMsRUFBRSxNQUFNLEtBQUssS0FBQyxFQUFFO1FBRTlELEtBQUMsU0FBUztRQUNWLEtBQUM7ZUFDRCxLQUFDLFdBQVcifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY291bnQuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvYWN0L2NvdW50LmtvZGUiXSwibWFwcGluZ3MiOiI7O09BQ2MsV0FBUDs7O0lBSUgsdUNBQThCLFFBQU0sR0FBRSxPQUFLOzs7O1FBRXZDLFNBQVMsS0FBQztRQUVWLFNBQVMsU0FBUyxPQUFPLFNBQU8sS0FBSyxPQUFPO1FBQzVDO2FBQ0ksSUFBSyxPQUFJLE9BQU87O1lBQ2hCLEtBQUssY0FBVSxPQUFPLFFBQVEsSUFBSSxPQUFPOztRQUU3QyxPQUFPLEtBQUssS0FBSztVQUVoQixNQUFNLFdBQVcsS0FBSyxzQkFBc0IsS0FBQyxFQUFFLE1BQU0sS0FBSyxLQUFDLEVBQUU7UUFFOUQsS0FBQyxTQUFTO1FBQ1YsS0FBQztlQUNELEtBQUMsV0FBVyJ9
 //# sourceURL=../../../../kode/ked/edit/act/count.kode

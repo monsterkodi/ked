@@ -737,6 +737,7 @@ closers = '(':')' '[':']' '{':'}'
                 (   spaced and 
                     (nxt.line == llc.line or (nxt.col > flc.col and @stack[-1] not in ['if''when'])) and
                     '◯rgs' not in @stack and
+                    (nxt.text != 'by' or @stack[-1] != '▸by' and not e.slice) and
                     '[' not in @stack and
                     @stack[-1] not in ['(' 'call' 'args(' 'op|' 'op&' 'op/' 'op*' 'op+' 'op-'] and
                     (@stack[-1] not in ['▸args' ':'] or (nxt.line > llc.line and nxt.col > flc.col)) and

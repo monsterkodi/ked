@@ -56,7 +56,7 @@ util =
         
     pullIf: arr pred ->
         
-        for index in arr.length-1..0
+        for index in arr.length-1..0 by -1
             if pred(arr[index])
                 arr.splice index 1
         arr
@@ -87,7 +87,7 @@ util =
         if valid arr and arr is arr
         
             for item in items
-                for index in arr.length-1..0
+                for index in arr.length-1..0 by -1
                     if cmp arr[index], item
                         arr.splice index, 1
         arr

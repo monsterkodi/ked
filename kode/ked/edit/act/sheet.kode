@@ -86,7 +86,6 @@ export
         below = min @s.lines.length cy+7
 
         for y in cy+1...below
-            break if y >= below # ranges count down when empty
             for run in @scaleRunsForLine y
                 continue if y - cy >= run[2]
                 cells = @sheetCellsForLine y
@@ -371,7 +370,7 @@ export
 
         [x y] = pos
 
-        for i in areas.length-1..0
+        for i in areas.length-1..0 by -1
             area = areas[i]
             if area.y == y and area.x <= x
                 ⮐ area

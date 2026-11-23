@@ -166,7 +166,7 @@ dissect = ranges opt=join:false ->
         delete i.cls
         
     if d.length > 1
-        for i in [d.length-2..0]
+        for i in d.length-2..0 by -1
             if d[i].start + d[i].match.length == d[i+1].start
                 if d[i].clss == d[i+1].clss
                     d[i].match += d[i+1].match

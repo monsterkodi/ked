@@ -26,7 +26,7 @@ export
                 rng = belt.rangeOfWhitespaceLeftToPos lines cursor
                 minBeforeWs = min minBeforeWs rng[2]-rng[0]
                 
-        for ci in cursors.length-1..0
+        for ci in cursors.length-1..0 by -1
             
             cursor = cursors[ci]
             

@@ -14,7 +14,7 @@ export
 
         lines = @s.lines.map (l) -> l
 
-        for i in sorted.length-1..0
+        for i in sorted.length-1..0 by -1
             [start count segls] = sorted[i]
             lines = lines[0...start].concat(segls).concat(lines[start+count..])
 

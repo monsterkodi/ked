@@ -249,7 +249,16 @@ They are `not` `delete` `new` `noon` `copy` `clone` `empty`
 ```kode
 for i in 0..2                                                       ▸ i : [0,1,2]
     a = 1...3                                                       ▸ a = [1,2]
+for i in 3...0                                                      ▸ i : [3,2,1]
+for i in a...b                                                      ▸ empty when a >= b
+for i in a...b by -1                                                ▸ counts down from a
+for i in 0..10 by 5                                                 ▸ i : [0,5,10]
 ```
+
+`..` includes the end, `...` excludes it.
+Ranges with two number literals count in the direction they are written.
+All other ranges only count up, unless a step is given with `by`.
+`by` is only a keyword directly after a range in a `for`; elsewhere it is a plain name.
 
 ### empty
 

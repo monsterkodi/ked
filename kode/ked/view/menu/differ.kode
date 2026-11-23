@@ -111,7 +111,7 @@ use                 ◆ searcher searcherfile
     pageUpRow: =>
         
         if @choices.currentIndex() > 0
-            for idx in @choices.currentIndex()-1..0
+            for idx in @choices.currentIndex()-1..0 by -1
                 if @choices.items[idx].type in ['file''commit']
                     ⮐ idx
         @choices.currentIndex()

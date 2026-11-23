@@ -126,7 +126,7 @@ use ../../util   ◆ prof
         
         ⮐ [lines posl] if empty rngs
         
-        for ri in rngs.length-1..0
+        for ri in rngs.length-1..0 by -1
         
             rng = rngs[ri]
             
@@ -168,7 +168,7 @@ use ../../util   ◆ prof
         
         ⮐ posl if empty posl
         
-        for pi in posl.length-1..0
+        for pi in posl.length-1..0 by -1
             pos = posl[pi]
             
             if @isPosTouchingRange pos rng
@@ -264,7 +264,7 @@ use ../../util   ◆ prof
             'down' ➜ 1
             'up'   ➜ -1
             
-        for ii in rs..re
+        for ii in rs..re by -d
             index = indices[ii]
             
             switch dir 
@@ -301,7 +301,7 @@ use ../../util   ◆ prof
             'down' ➜ 1
             'up'   ➜ -1
             
-        for bi in rs..re
+        for bi in rs..re by -d
             block = blocks[bi]
   
             text = @textForLineRange newLines block

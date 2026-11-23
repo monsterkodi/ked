@@ -149,15 +149,30 @@ use ./utils ▪ firstLineCol lastLineCol
         if not list
             @onError "for is missing the list to iterate" tok:tok
 
-        thn  = @then 'for' tokens
-        
-        @pop 'for' 
+        step = @forStep list tokens
 
-        for:
+        thn  = @then 'for' tokens
+
+        @pop 'for'
+
+        f =
             vals:   vals
             inof:   inof
             list:   list
             then:   thn
+        f.step = step if step
+        for:f
+
+    forStep: list tokens ->
+
+        ⮐ if tokens[0]?.text != 'by'
+        by = tokens.shift()
+        if not (list.slice or list.array?.items[0]?.slice)
+            @onError "'by' needs a range (for i in a..b by -1)" tok:by
+        step = @exp tokens
+        if not step
+            @onError "'by' is missing the step" tok:by
+        step
             
 #!each
     
@@ -193,13 +208,17 @@ use ./utils ▪ firstLineCol lastLineCol
         if not list
             @onError "for is missing the list to iterate" tok:tok
 
-        @pop 'for' 
-        
-        for:
+        step = @forStep list tokens
+
+        @pop 'for'
+
+        f =
             vals:  vals
             inof:  inof
             list:  list
             then: [e]
+        f.step = step if step
+        for:f
             
 #!while
     
@@ -778,7 +797,10 @@ use ./utils ▪ firstLineCol lastLineCol
         if tokens[0]?.text == ']'
             upto = null
         else
+            inFor = @stack[-1] == 'for'
+            @push '▸by' if inFor # for i in a...b by -1 ▸ b is not called with by
             upto = @exp tokens
+            @pop '▸by' if inFor
             if not upto
                 @onError "slice is missing the end" tok:dots
 

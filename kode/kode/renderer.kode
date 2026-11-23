@@ -1020,34 +1020,45 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         iterStart = @node slice.from
         iterEnd   = @node slice.upto
         
-        start = parseInt iterStart
-        end   = parseInt iterEnd
-        
-        iterCmp = if slice.dots.text == '...' then '<' else '<='
-        invCmp  = if slice.dots.text == '...' then '>' else '>='
-        iterDir = '++'
-        
-        if Number.isFinite(start) and Number.isFinite(end)
-            
-            if start > end
-                iterCmp = if slice.dots.text == '...' then '>' else '>='
-                iterDir = '--'
-                
-            loopStart = "#{@mark iterVar, iterTok} = #{iterStart}"
-            loopCheck = "#{iterVar} #{iterCmp} #{iterEnd}"
-            loopUpdate = "#{iterVar}#{iterDir}"
-            
+        # literal ranges count in their own direction, others only up unless a step is given
+
+        literal = s => /^-?\d+(\.\d+)?$/.test @plain(s)
+
+        excl   = slice.dots.text == '...'
+        upCmp  = if excl then '<' else '<='
+        dnCmp  = if excl then '>' else '>='
+
+        loopStart = "#{@mark iterVar, iterTok} = #{iterStart}"
+
+        if n.step
+
+            iterStep = @node n.step
+
+            if literal iterStep
+                step = Number @plain(iterStep)
+                if step == 0 ➜ @onError "'by' step can't be 0" firstLineCol(n.step)
+                iterCmp    = if step > 0 then upCmp else dnCmp
+                loopUpdate = if
+                    step ==  1 ➜ "#{iterVar}++"
+                    step == -1 ➜ "#{iterVar}--"
+                    step >   0 ➜ "#{iterVar} += #{step}"
+                               ➜ "#{iterVar} -= #{-step}"
+                loopCheck  = "#{iterVar} #{iterCmp} #{iterEnd}"
+            else
+                sv = @makeVar()
+                loopStart  = "var #{sv} = #{iterStep}, #{loopStart}"
+                loopCheck  = "(#{sv} > 0 ? #{iterVar} #{upCmp} #{iterEnd} : #{iterVar} #{dnCmp} #{iterEnd})"
+                loopUpdate = "#{iterVar} += #{sv}"
+
+        else if literal(iterStart) and literal(iterEnd) and Number(@plain(iterStart)) > Number(@plain(iterEnd))
+
+            loopCheck  = "#{iterVar} #{dnCmp} #{iterEnd}"
+            loopUpdate = "#{iterVar}--"
+
         else
-            
-            llc = firstLineCol slice.from
-            rlc = firstLineCol slice.upto
-            
-            lv = @makeVar llc
-            rv = @makeVar rlc
-            
-            loopStart  = "var #{lv} = #{@mark iterVar, iterTok} = #{iterStart}, #{rv} = #{iterEnd}"
-            loopCheck  = "(#{lv} <= #{rv} ? #{iterVar} #{iterCmp} #{iterEnd} : #{iterVar} #{invCmp} #{iterEnd})"
-            loopUpdate = "(#{lv} <= #{rv} ? ++#{iterVar} : --#{iterVar})"
+
+            loopCheck  = "#{iterVar} #{upCmp} #{iterEnd}"
+            loopUpdate = "#{iterVar}++"
                 
         s = ''
         s += "for (#{loopStart}; #{loopCheck}; #{loopUpdate})" + nl
@@ -1432,12 +1443,20 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         if p.from.type == 'num' == p.upto?.type
             from = parseInt p.from.text
             upto = parseInt p.upto.text
-            if upto-from <= 10
-                if p.dots.text == '...' then upto--
-                '['+((x for x in [from..upto]).join(','))+']'
+            d = if from <= upto then 1 else -1
+            if p.dots.text == '...' then upto -= d
+            if Math.abs(upto-from) <= 10
+                r = []
+                x = from
+                while x*d <= upto*d
+                    r.push x
+                    x += d
+                '[' + r.join(',') + ']'
             else
                 o = if p.dots.text == '...' then '<' else '<='
-                "(function() { var r = []; for (var i = #{from}; i #{o} #{upto}; i++){ r.push(i); } return r; }).apply(this)"
+                o = if d > 0 then o else o.replace '<' '>'
+                i = if d > 0 then 'i++' else 'i--'
+                "(function() { var r = []; for (var i = #{from}; i #{o} #{p.upto.text}; #{i}){ r.push(i); } return r; }).apply(this)"
         else
             o = if p.dots.text == '...' then '<' else '<='
             "(function() { var r = []; for (var i = #{@node p.from}; i #{o} #{@node p.upto}; i++){ r.push(i); } return r; }).apply(this)"

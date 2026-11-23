@@ -684,7 +684,7 @@ urlPunct = ->
 
         if chunk.match == '/'
 
-            for i in chunkIndex..0
+            for i in chunkIndex..0 by -1
                 break if line.chunks[i].start+line.chunks[i].length < line.chunks[i+1]?.start
                 break if line.chunks[i].clss.endsWith 'dir'
                 break if line.chunks[i].clss.startsWith 'url'
@@ -749,7 +749,7 @@ jsonPunct = ->
     if chunk.match == ':'
         if prev = getChunk -1
             if prev.match == '"'
-                for i in Math.max(0 chunkIndex-2)..0
+                for i in Math.max(0 chunkIndex-2)..0 by -1
                     if line.chunks[i]?.clss == 'punct string double'
                         line.chunks[i].clss = 'punct dictionary'
                         break

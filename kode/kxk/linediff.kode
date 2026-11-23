@@ -29,7 +29,7 @@ lineDiff = oldLine newLine ->
                     oldFillet.shift()
 
         if changes.length > 1
-            for i in changes.length-1..1
+            for i in changes.length-1..1 by -1
                 if changes[i-1].index + changes[i-1].length == changes[i].index
                     changes[i-1].length += changes[i].length
                     changes.pop()
