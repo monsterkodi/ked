@@ -100,6 +100,29 @@ use ../../../kxk ▪ kseg
 
         @
 
+    #  only what image placements need: ttio moves the cursor right before each graphics command
+
+    feedPlacements: bytes =>
+
+        re = /\x1b\[(\d*);?(\d*)H|\x1b_(G[^\x1b]*)\x1b\\|\x1b([78])/g
+
+        m = re.exec bytes
+        while m
+            if m[3]?
+                @apc m[3]
+            else if m[4] == '7'
+                @saved = [@x @y]
+            else if m[4] == '8'
+                @x = @saved[0]
+                @y = @saved[1]
+            else
+                row = int(m[1]) or 1
+                col = int(m[2]) or 1
+                @y  = row-1
+                @x  = col-1
+            m = re.exec bytes
+        @
+
     csi: params final =>
 
         nums = params.split(';').map (p) -> int(p)

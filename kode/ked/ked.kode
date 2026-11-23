@@ -175,12 +175,17 @@ use child_process ▪ spawn exec
         ◯ config.loaded if config.loaded
         ◯ mode.loaded
         
-        @dump 'start'
+        #  live: every draw writes its frame, like in the terminal mode.
+        #  the label of a frame lists the events since the previous one
 
         if @t.live
-            @t.on 'key'    (combo) => @liveDump combo
-            @t.on 'resize'         => @liveDump 'resize'
+            @liveLabels = ['start']
+            @t.on 'key'    (combo) => @liveLabels.push combo ; @redraw()
+            @t.on 'resize'         => @liveLabels.push 'resize'
+            @draw()
             ⮐
+
+        @dump 'start'
 
         for step in @t.steps()
             
@@ -192,24 +197,6 @@ use child_process ▪ spawn exec
         
         @quit()
     
-    #  events that arrive while a dump settles are shown together in the next one
-
-    liveDump: label ◯=>
-
-        @liveLabels ?= []
-        @liveLabels.push label
-
-        ⮐ if @liveDumping
-        @liveDumping = true
-
-        while @liveLabels.length
-            ◯ @settle()
-            labels = @liveLabels
-            @liveLabels = []
-            @dump labels.join(' ')
-
-        @liveDumping = false
-
     #  let the work a key started finish before the screen is written out
     
     settle: ◯=>
@@ -226,13 +213,26 @@ use child_process ▪ spawn exec
     dump: label =>
 
         @draw()
+        @writeFrame label
+
+    liveFrame: =>
+
+        label = valid(@liveLabels) ? @liveLabels.join(' ') : 'redraw'
+        @liveLabels = []
+        @writeFrame label
+
+    writeFrame: label =>
 
         frame  = @t.out.join ''
         @t.out = []
 
         @vterm ?= new vterm @t.cols() @t.rows()
         @vterm.resize @t.cols() @t.rows()
-        @vterm.feed frame
+
+        if @t.live
+            @vterm.feedPlacements frame
+        else
+            @vterm.feed frame
 
         selected = @funcol.sheeditor.sheetree.current() if @editor.state.rectree?
         rows     = @t.live ? dumpstate.ROWS : null
@@ -931,7 +931,9 @@ use child_process ▪ spawn exec
         # ●▪ render
         
         @t.syncEnd()
-        
+
+        @liveFrame() if @t.live and @liveLabels?
+
         @title.time = process.hrtime(start)[1]
         
         if not (editorRect eql @editor.cells.rect())
