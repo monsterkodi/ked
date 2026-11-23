@@ -533,6 +533,10 @@ plain = c ->
         codemsg 'f()[-1] = 1'       'negative index assignment needs a plain receiver'
         codemsg 'a[f()][-1] = 1'    'negative index assignment needs a plain receiver'
 
+    ▸ is needs a type
+
+        codemsg 'v = a is new B'    "'is' expects a type on its right side"
+
     ▸ the message is the last line
 
         plain('a = [1, 2').split('\n')[-1]  ▸ 'array is missing closing ]'

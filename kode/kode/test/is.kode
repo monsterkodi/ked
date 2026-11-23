@@ -184,3 +184,29 @@ use ./utils ▪ kc ke
             }
             """
         
+  ▸ in conditions
+
+        kc 'v = a and not (h is str and b)'         ▸ 'v = a && !(_k_.isStr(h) && b)'
+        kc 'v = (h is str and b) or c'              ▸ 'v = (_k_.isStr(h) && b) || c'
+        kc 'v = f(h is str and b) or c'             ▸ 'v = f(_k_.isStr(h) && b) || c'
+        kc 'if not (h is str and b) ➜ 1'            ▸ 'if (!(_k_.isStr(h) && b))\n{\n    1\n}'
+        kc 'if a and (h is str) ➜ 1'                ▸ 'if (a && (_k_.isStr(h)))\n{\n    1\n}'
+        kc 'if a and not (h is str) ➜ 1'            ▸ 'if (a && !(_k_.isStr(h)))\n{\n    1\n}'
+        kc 'if a and not (h is str and b) ➜ 1'      ▸ 'if (a && !(_k_.isStr(h) && b))\n{\n    1\n}'
+        kc 'if a and not (h is str or b) ➜ 1'       ▸ 'if (a && !(_k_.isStr(h) || b))\n{\n    1\n}'
+        kc 'if a and not (h is num and b) ➜ 1'      ▸ 'if (a && !(_k_.isNum(h) && b))\n{\n    1\n}'
+        kc 'if (h is str and b) or c ➜ 1'           ▸ 'if ((_k_.isStr(h) && b) || c)\n{\n    1\n}'
+        kc 'if a and not (h == 1 and b) ➜ 1'        ▸ 'if (a && !(h === 1 && b))\n{\n    1\n}'
+        kc 'while a and not (h is str and b) ➜ 1'   ▸ 'while (a && !(_k_.isStr(h) && b))\n{\n    1\n}'
+        kc 'x = if a and not (h is str and b) ➜ 1'  ▸ 'x = a && !(_k_.isStr(h) && b) ? 1 : undefined'
+        
+        kc  """
+            if a and not (h is str and b)
+                1
+            """ ▸
+            """
+            if (a && !(_k_.isStr(h) && b))
+            {
+                1
+            }
+            """

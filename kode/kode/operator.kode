@@ -19,8 +19,8 @@ precedence = o ->
         '*' '/' '%'                               ➜  2
         '+' '-'                                   ➜  3
         '<<' '>>' '>>>'                           ➜  4
-        '<' '<=' '>' '>='                         ➜  5
-        '==' '!=' 'eql'                           ➜  6
+        '<' '<=' '>' '>='
+        '==' '!=' 'eql'                           ➜  5 # same level: compchains like 0 <= a == b < c
         '&'                                       ➜  7
         '^'                                       ➜  8
         '|'                                       ➜  9
@@ -56,18 +56,18 @@ assign = ['=''+=''-=''*=''/=''%=''^=''&=''|=''&&=''||=']
             not e       ➜ ⮐ 
             e.type      ➜ ⮐ 
             e is Array  ➜ @exp v for v in e if e.length
-            e.operation 
+            e.operation
                 @op e
-                if e.operation?.rhs 
-                    @exp e.operation.rhs 
-                else if e.qmrkcolon 
-                    @exp e.qmrkcolon.mid 
+                if e.operation
+                    @exp e.operation.lhs
+                    @exp e.operation.rhs
+                else if e.qmrkcolon
+                    @exp e.qmrkcolon.lhs
+                    @exp e.qmrkcolon.mid
                     @exp e.qmrkcolon.rhs
             e is Object
                 for key,val of e
-                    if val
-                        if val.operation then @op val
-                        else @exp val
+                    @exp val if val
                                     
     op: e ->
         
@@ -88,10 +88,7 @@ assign = ['=''+=''-=''*=''/=''%=''^=''&=''|=''&&=''||=']
                 if p[i] > p[i-1]
                     @fixPrec e
                     break
-                    
-        else
-            @exp e.operation.rhs
-                    
+
     fixPrec: e ->
         
         op = e.operation or e.qmrkcolon

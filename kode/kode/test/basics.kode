@@ -128,6 +128,10 @@ use ./utils ▪ kc
                 """
                 a = (b === c && c === d)
                 """
+
+            kc 'a = 0 <= b == c < d'            ▸ 'a = (0 <= b && (b === c && c < d))'
+            kc 'a = (0 <= b == c < d) and e'    ▸ 'a = ((0 <= b && (b === c && c < d))) && e'
+            kc 'a = e and (0 <= b == c < d)'    ▸ 'a = e && ((0 <= b && (b === c && c < d)))'
     
             kc  """
                 a = b != c != d
