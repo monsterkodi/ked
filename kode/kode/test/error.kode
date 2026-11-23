@@ -1,6 +1,6 @@
 
 use ./utils ▪ kf kc errmsg codemsg
-use ../../kxk ◆ ansi
+use ../../kxk ◆ ansi slash
 
 plain = c ->
 
@@ -486,7 +486,7 @@ plain = c ->
     ▸ every report carries a location
 
         m = plain 'a = 1\nb = (1 + 2'
-        m.startsWith '~/s/ked/err.kode:2' ▸ true
+        m.startsWith slash.tilde(slash.path(process.cwd(), 'err.kode')) + ':2' ▸ true
 
     ▸ destructuring target
 

@@ -237,6 +237,24 @@ writeJs = c file=JS_FILE ◯->
 
         back ▸ SRCFILE
 
+    ▸ and the sourceURL is relative to where it is written
+
+        dir = slash.path ◆dir, '..', '..'
+        tgt = slash.path dir, 'probe.js'
+
+        for map in [true false]
+            out = (new kode header:false, map:map).compile 'a = 1', SRCFILE, tgt
+            url = out.split('\n').find (l) -> l.startsWith '//# sourceURL='
+            url = url.replace '//# sourceURL=', ''
+            slash.isAbsolute url  ▸ false
+            slash.absolute(url, slash.dir(tgt)) ▸ SRCFILE
+
+    ▸ asserts name their source relative to the cwd
+
+        src = slash.path process.cwd(), 'kode', 'probe.kode'
+        out = (new kode header:false).compile '▴ a', src, slash.path(process.cwd(), 'js', 'probe.js')
+        out.includes '_k_.assert("kode/probe.kode", 1, 0,' ▸ true
+
     ▸ writes the same js either way
 
         snips = [

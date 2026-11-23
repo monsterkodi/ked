@@ -170,7 +170,7 @@ NodeSourceMap = module.SourceMap
         encoded = @base64encode JSON.stringify(v3Map)
         dataURL = "//# sourceMappingURL=data:application/json;base64,#{encoded}"
         
-        sourceURL = "//# sourceURL=file://#{@source}"
+        sourceURL = if @name then "//# sourceURL=#{@name}" else "//# sourceURL=file://#{@source}"
         "\n\n#{dataURL}\n#{sourceURL}\n"
         
     decodejs: (encoded) ->

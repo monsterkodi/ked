@@ -1,3 +1,4 @@
+var toExport = {}
 var events
 
 import fs from "fs"
@@ -20,6 +21,21 @@ post.on('file.change',(function (info)
 }).bind(this))
 watcher.debounce = 10
 watcher.maxDelay = 40
+toExport["ignore"] = async function ()
+{
+    compare(watcher.ignoredPath('/p/.claude/worktrees'),true)
+    compare(watcher.ignoredPath('/p/node_modules'),true)
+    compare(watcher.ignoredPath('/p/.git'),true)
+    compare(watcher.ignoredPath('/p/.claude'),false)
+    compare(watcher.ignoredPath('/p/.claude/worktrees/w'),false)
+    compare(watcher.ignoredPath('/p/.claude/worktrees/w/kode/a.kode'),false)
+    compare(watcher.ignoredPath('/p/AGENTS.md'),false)
+    compare(watcher.ignoredPath('/p/js/a.js'),false)
+}
+toExport["ignore"]._section_ = true
+toExport._test_ = true
+export default toExport
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoid2F0Y2hlci5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9reGsvdGVzdC93YXRjaGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7O09BQ0ksU0FBQTs7T0FDSyxZQUFBO09BQU0sV0FBQTtPQUFLLFVBQUE7T0FBSSxjQUFBOztPQUNqQixXQUFBO0lBQU87O0FBRWQ7QUFDQSxLQUFLLEdBQUcseUJBQWU7O1FBQ0M7O2VBQXBCLE9BQU8sS0FBSzs7O0FBR2hCLFFBQVEsV0FBVztBQUNuQixRQUFRLFdBQVcifQ==
-//# sourceURL=file:///home/kodi/s/ked/kode/kxk/test/watcher.kode
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoid2F0Y2hlci5qcyIsInNvdXJjZXMiOlsiLi4vLi4vLi4va29kZS9reGsvdGVzdC93YXRjaGVyLmtvZGUiXSwibWFwcGluZ3MiOiI7OztPQUNJLFNBQUE7O09BQ0ssWUFBQTtPQUFNLFdBQUE7T0FBSyxVQUFBO09BQUksY0FBQTs7T0FDakIsV0FBQTtJQUFPOztBQUVkO0FBQ0EsS0FBSyxHQUFHLHlCQUFlOztRQUNDOztlQUFwQixPQUFPLEtBQUs7OztBQUdoQixRQUFRLFdBQVc7QUFDbkIsUUFBUSxXQUFXOzs7WUFJZixRQUFRLFlBQVksd0JBQTRCO1lBQ2hELFFBQVEsWUFBWSxtQkFBNEI7WUFDaEQsUUFBUSxZQUFZLFdBQTRCO1lBQ2hELFFBQVEsWUFBWSxjQUE0QjtZQUNoRCxRQUFRLFlBQVksMEJBQTRCO1lBQ2hELFFBQVEsWUFBWSxzQ0FBdUM7WUFDM0QsUUFBUSxZQUFZLGdCQUE0QjtZQUNoRCxRQUFRLFlBQVksY0FBNEIifQ==
+//# sourceURL=../../../kode/kxk/test/watcher.kode

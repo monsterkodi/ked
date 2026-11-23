@@ -197,7 +197,8 @@ export new Tester
         tester = new Tester
         tester.logSections = false
         tester.logModules = false
-        fail = fail or not (◯ tester.test(test.default))
+        ok =◯ tester.test test.default
+        fail = true if ok == false # undefined: not a test module
     tester.summarize()
     if fail
         process.exit 1

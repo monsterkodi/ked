@@ -18,6 +18,7 @@ use fs
     @maxDelay: 250
     @ignoreDirs: ['node_modules' '.git']
     @ignoreFiles: ['.DS_Store' '.localized' 'ked.log']
+    @ignorePaths: ['.claude/worktrees'] # other checkouts of the project, watched by their own sessions
     @ignoredWatchErrors: ['EACCES' 'EPERM' 'ENOENT' 'ENOSPC']
     
     @watch: path opt ◯->
@@ -100,7 +101,7 @@ use fs
     @watchDir: dir recursive ->
 
         ⮐ if empty dir
-        ⮐ if slash.file(dir) in @ignoreDirs
+        ⮐ if @ignoredPath dir
 
         if @watchers[dir]
             if recursive and not @recurse[dir]
@@ -124,7 +125,7 @@ use fs
 
         for dirent in @readdir dir
             continue if not dirent.isDirectory()
-            continue if dirent.name in @ignoreDirs
+            continue if @ignoredPath slash.path(dir dirent.name)
             @watchDir slash.path(dir dirent.name) true
 
     @readdir: dir ->
@@ -150,16 +151,18 @@ use fs
     @seedDir: dir ->
 
         for dirent in @readdir dir
-            continue if dirent.name in @ignoreFiles
-            continue if dirent.name in @ignoreDirs
             p = slash.path dir dirent.name
+            continue if @ignoredPath p
             if info = @statPath p
                 @known[p] = info
 
     @ignoredPath: p ->
 
         file = slash.file p
-        file in @ignoreFiles or file in @ignoreDirs
+        ⮐ true if file in @ignoreFiles or file in @ignoreDirs
+        for ip in @ignorePaths
+            ⮐ true if p.endsWith '/' + ip
+        false
 
     @markPending: path ->
 

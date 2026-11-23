@@ -22,17 +22,20 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
 
         if @verbose ➜ log noon ast
         
-        @file = source
+        @file   = source
+        @name   = null
+        @where  = null
         if source and globalThis.process
-            @source = slash.absolute source, globalThis.process.cwd()
-        
+            cwd     = globalThis.process.cwd()
+            @source = slash.absolute source, cwd
+            @where  = if @source.startsWith(cwd + '/') then @source[cwd.length+1..] else @source
+            @name   = slash.relative(source, slash.dir(target)) if target
+
         @srcmap = null
-        
+
         if @kode.args.map and @source
-            
-            name = if target then slash.relative(source, slash.dir(target))
-            
-            @srcmap = new srcmap @source, name
+
+            @srcmap = new srcmap @source, @name
             @srcmap.verbose = @trace
         
         @ast = ast
@@ -74,6 +77,8 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
 
             s += @srcmap.jscode sm
 
+        else if @name
+            s += "\n//# sourceURL=#{@name}\n"
         else if @source
             s += "\n//# sourceURL=file://#{@source}\n"
 
@@ -772,7 +777,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
                         msg += @node p.args[0]
                         msg += '"'
                     else msg = 'null'
-                    "_k_.dbg(#{'\"' + (@source or '???') + '\"'}, #{p.callee.line}, #{p.callee.col}, #{msg}, #{@nodes p.args, ','})"
+                    "_k_.dbg(#{'\"' + (@where or '???') + '\"'}, #{p.callee.line}, #{p.callee.col}, #{msg}, #{@nodes p.args, ','})"
                     
                 'clamp' 'min' 'max' 'lpad' 'rpad' 'trim' 'ltrim' 'rtrim' # 'first' 'last' ???
                     @hint._k_[name] = true
@@ -785,7 +790,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
                         p.args.shift()
                     else msg = '"assert failed!"'
                     msg += ' + " ' + @nodes(p.args, ',') + '"'
-                    "_k_.assert(#{'\"' + (@source or '???') + '\"'}, #{p.callee.line}, #{p.callee.col}, #{msg}, #{@nodes p.args, ','})"
+                    "_k_.assert(#{'\"' + (@where or '???') + '\"'}, #{p.callee.line}, #{p.callee.col}, #{msg}, #{@nodes p.args, ','})"
                     
                 ➜
                     "#{callee}(#{@nodes p.args, ','})"

@@ -3,6 +3,7 @@ use ../knrd
 use ../../kxk ◆ nfs slash
 
 stamped = src -> "var a\n\n//# sourceURL=file://#{src}\n"
+relURL  = src -> "var a\n\n//# sourceURL=#{src}\n"
 
 mapped = src ->
 
@@ -66,6 +67,10 @@ setup = ◯->
 
         knrd.stampSource(stamped(kp('here.kode')), jdir)  ▸ kp('here.kode')
 
+    ▸ a relative sourceURL is read from the folder of the js file
+
+        knrd.stampSource(relURL('../kode/here.kode'), jp('x.js'))  ▸ kp('here.kode')
+
     ▸ and the sourcemap still works on its own
 
         knrd.stampSource mapHereText, jp('x.js')  ▸ kp('here.kode')
@@ -99,6 +104,14 @@ setup = ◯->
         ◯ knrd.reconcile dirs opt
 
         isFile jp('abs.js') ◯▸ false
+
+    ▸ and a file stamped with a relative path goes too
+
+        ◯ setup()
+        ◯ nfs.write(jp('rel.js'), relURL('../kode/gone.kode'))
+        ◯ knrd.reconcile dirs opt
+
+        isFile jp('rel.js') ◯▸ false
 
     ▸ and it is the right two
 

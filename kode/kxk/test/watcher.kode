@@ -11,6 +11,17 @@ post.on 'file.change' (info) =>
 watcher.debounce = 10
 watcher.maxDelay = 40
 
+▸ ignore
+
+    watcher.ignoredPath '/p/.claude/worktrees'    ▸ true
+    watcher.ignoredPath '/p/node_modules'         ▸ true
+    watcher.ignoredPath '/p/.git'                 ▸ true
+    watcher.ignoredPath '/p/.claude'              ▸ false
+    watcher.ignoredPath '/p/.claude/worktrees/w'  ▸ false
+    watcher.ignoredPath '/p/.claude/worktrees/w/kode/a.kode' ▸ false
+    watcher.ignoredPath '/p/AGENTS.md'            ▸ false
+    watcher.ignoredPath '/p/js/a.js'              ▸ false
+
 ###
 ▸ watcher
   

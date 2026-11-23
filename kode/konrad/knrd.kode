@@ -65,10 +65,13 @@ stampSource = (text, file) =>
 
     for line in lines
 
-        src = line.replace '//# sourceURL=file://' ''
+        continue if not line.startsWith '//# sourceURL='
+        src = line['//# sourceURL='.length..]
 
-        if src != line
-            from = slash.absolute src, process.cwd()
+        if src.startsWith 'file://'
+            from = slash.absolute src['file://'.length..], process.cwd()
+        else
+            from = slash.absolute src, slash.dir(file)
 
     if from
         ⮐ from

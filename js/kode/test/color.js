@@ -30,4 +30,4 @@ export default toExport
 
 
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29sb3IuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva29kZS90ZXN0L2NvbG9yLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7O09BQ00sWUFBQTtJQUFRO0lBQUc7Ozs7WUFJYixHQUFJLDJCQUE2Qjs7U0FJN0IsSUFBSyxRQUFHOztRQUNSLElBQUk7NEJBQ0s7OztZQUFMO1lBQ0EsSUFBSSxFQUFFO1lBQ04sS0FBSyxNQUFNLElBQUksSUFBSSxPQUFPLElBQUksSUFBSTs7UUFDdEMsWUFBSSJ9
-//# sourceURL=file:///home/kodi/s/ked/kode/kode/test/color.kode
+//# sourceURL=../../../kode/kode/test/color.kode
