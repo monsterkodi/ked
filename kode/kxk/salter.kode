@@ -23,7 +23,7 @@ salter = text opt ->
             
     ⮐ '' if empty cs
             
-    zs = util.zip.apply null cs
+    zs = util.zip cs…
     
     if opt.char != '█'
         zs = zs.map (j) -> j.map (k) -> k.replace /[0]/g opt.char

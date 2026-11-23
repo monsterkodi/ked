@@ -12,6 +12,7 @@ Patterns =
     single: "'(?:\\\\['\\\\]|[^\\n'])*'"
     regex: "(?<!\\d\\s*)\\/(?:\\\\[\\/]|\\([^\\n\\s]*\\)|[^\\n\\s\\)])*\\/[gimsuy]*(?!\\s*\\d)"
     dots: "(?<!\\.)\\.\\.\\.?(?!\\.)"
+    spread: "…"
     paren: "[\\(\\)\\[\\]\\{\\}]"
     func: "(◯->|◯=>|->|=>)" # use ◯-> and ◯=> instead
     then: "➜"
@@ -297,7 +298,7 @@ jsOnly =
                     org[0][1] += kstr.lcnt splt[0], ' '
                     tok.text = '"""' + kstr.lstrip(splt[0]) + '"""'
                 else
-                    minind = Math.min.apply 0 splt.map((s) -> if empty(trim(s)) then Infinity else kstr.lcnt(s ' '))
+                    minind = Math.min splt.map((s) -> if empty(trim(s)) then Infinity else kstr.lcnt(s ' '))…
                     
                     if Infinity > minind > 0
                         splt = splt.map (s) -> s[minind..]

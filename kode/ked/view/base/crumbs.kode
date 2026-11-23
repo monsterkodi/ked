@@ -89,7 +89,7 @@ use              ◆ view
         
     pathAtSplitIndex: idx ->
     
-        path = slash.path.apply null @split[0..idx]
+        path = slash.path @split[0..idx]…
         path = slash.path @root path
         path = '/' + path if not path[0] in '~/'
         path

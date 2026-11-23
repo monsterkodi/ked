@@ -209,6 +209,7 @@ use ./print
         not e.keyval and
         not e.operation and
         not e.incond and
+        not e.spread and
         not e.qmrkop
         
     ifSuitableForInline: e ->
@@ -293,6 +294,6 @@ use ./print
         if @debug
             print.stack @stack p (s) -> W1(w1(s))
 
-    verb: -> if @debug then console.log.apply console.log arguments 
+    verb: args… -> console.log args… if @debug 
 
 export ParseUtils

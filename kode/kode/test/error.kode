@@ -554,6 +554,22 @@ plain = c ->
         codemsg '{last} = o'        "'last' is an operator"
         codemsg '{a b} ='           'missing expression on the right'
 
+    ▸ spread
+
+        codemsg 'f 1…'              '… spreads arrays'
+        codemsg "f 'a'…"            '… spreads arrays'
+        codemsg 'x = [1 … 5]'       '… spreads arrays'
+        codemsg 'f null…'           '… spreads arrays'
+        codemsg 'f a + b…'          '… only spreads into call arguments and arrays'
+        codemsg 'x = y…'            '… only spreads into call arguments and arrays'
+        codemsg 'y…'                '… only spreads into call arguments and arrays'
+        codemsg 'x[a…]'             '… only spreads into call arguments and arrays'
+        codemsg 'x = (a…)'          '… only spreads into call arguments and arrays'
+        codemsg 'x = a:b…'          '… only spreads into call arguments and arrays'
+        codemsg 'x = [… a]'         '… goes after what it spreads'
+        codemsg 'f = (a… b) -> 1'   'rest parameters are written (a b…) -> and go last'
+        codemsg 'f = (a ...b) -> 1' 'rest parameters are written (a b…) -> and go last'
+
     ▸ the message is the last line
 
         plain('a = [1, 2').split('\n')[-1]  ▸ 'array is missing closing ]'

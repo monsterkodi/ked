@@ -163,6 +163,6 @@ assign = ['=''+=''-=''*=''/=''%=''^=''&=''|=''&&=''||=']
         s += ' ' + rndr(chain[-1].operation?.rhs) ? '...'
         log w4('▪') s g3(p) if @debug
         
-    verb: -> if @debug then console.log.apply console.log arguments 
+    verb: args… -> console.log args… if @debug 
 
 export Operator

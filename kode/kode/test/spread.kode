@@ -1,0 +1,42 @@
+
+use ./utils ▪ kc ke
+
+▸ spread
+
+    ▸ call
+
+        kc 'f a…'                   ▸ 'f(...a)'
+        kc 'f a… b'                 ▸ 'f(...a,b)'
+        kc 'f a … b'                ▸ 'f(...a,b)'
+        kc 'f(a, b…)'               ▸ 'f(a,...b)'
+        kc 'f(a b…)'                ▸ 'f(a,...b)'
+        kc 'new A b…'               ▸ 'new A(...b)'
+        kc 'f (a+b)…'               ▸ 'f(...(a + b))'
+        kc 'f a.b(c)[0]…'           ▸ 'f(...a.b(c)[0])'
+        kc 'f @a…'                  ▸ 'f(...this.a)'
+        kc 'Math.max xs…'           ▸ 'Math.max(...xs)'
+
+        ke 'Math.max [3 9 4]…'                          ▸ 9
+        ke 'a = [1]\na.push [2 3]…\na'                  ▸ [1 2 3]
+        ke 'a = [1 4]\na.splice 1 0 [2 3]…\na'          ▸ [1 2 3 4]
+
+    ▸ array
+
+        kc 'x = [a b…]'             ▸ 'x = [a,...b]'
+        kc 'x = [a… b]'             ▸ 'x = [...a,b]'
+        kc 'x = [a … b … c]'        ▸ 'x = [...a,...b,c]'
+        kc 'x = a:[b…]'             ▸ 'x = {a:[...b]}'
+        kc 'x = [@a… [y… z…]]'      ▸ 'x = [...this.a,[...y,...z]]'
+
+        ke 'a = [1 2]\n[0 a… 3]'                        ▸ [0 1 2 3]
+        ke 'a = [1 2]\n[a… a…]'                         ▸ [1 2 1 2]
+
+    ▸ rest
+
+        kc 'm: (a b…) -> 1'         ▸ '{m:function (a, ...b)\n{\n    return 1\n}}'
+        kc 'm: (a b...) -> 1'       ▸ '{m:function (a, ...b)\n{\n    return 1\n}}'
+        kc 'm: args… -> 1'          ▸ '{m:function (...args)\n{\n    return 1\n}}'
+
+        ke 'f = (a b…) -> [a b]\nf 1 2 3'               ▸ [1 [2 3]]
+        ke 'f = args… -> Math.max args…\nf 1 5 2'       ▸ 5
+        ke 'f = args... -> [0 args…]\nf 1 2'            ▸ [0 1 2]

@@ -29,7 +29,7 @@ use ../../kxk ▪ kstr
         
         [key til rst] = prof.til args
         if valid til
-            prof.time.apply prof [key rst] 
+            prof.time key rst
             log key lpad(5) prof.tstr(til 0)
 
 export prof

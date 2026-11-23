@@ -9,7 +9,7 @@ expand = (l) ->
         if match = /^\-(\w\w+)$/.exec a
             a = match[1].split('').map (i) -> '-'+i
             a.unshift l.indexOf(match.input), 1
-            l.splice.apply l, a
+            l.splice a…
             return expand l
     l
 

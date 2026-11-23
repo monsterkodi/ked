@@ -271,6 +271,20 @@ All other ranges only count up, unless a step is given with `by`.
 Object destructuring is passed through to JS as is, so the right side is evaluated once.
 Only names and renames are allowed between the braces, and only as a statement.
 
+### spread and rest
+
+```kode
+Math.max nums…                                                      ▸ Math.max(...nums)
+a = [x ys… z]                                                       ▸ [x, ...ys, z]
+f = (a b…) -> g b…                                                  ▸ function (a, ...b) { return g(...b) }
+f = args... -> log args…                                            ▸ args... is the same as args…
+```
+
+`…` (one character, not `...`) goes after what it spreads and binds to its left,
+so spaces don't matter: `[a … b]` is `[...a, b]`.
+It works in call arguments and array literals, and on the last parameter as a rest parameter.
+Spreading a literal (`1…`) is an error: ranges are written `1..5`.
+
 ### empty
 
 ```kode

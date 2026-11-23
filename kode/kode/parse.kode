@@ -367,6 +367,9 @@ closers = '(':')' '[':']' '{':'}'
                 if tok.text in wantsLeft or tok.text in wantsSlice or tok.text in wantsOperand
                     @onError "#{tok.text} is missing an operand" tok:tok
 
+        if tok.type == 'spread'
+            @onError "… goes after what it spreads (a…)" tok:tok
+
         if tok.text == '{' and not @stack[-1]?.startsWith('op') and @destructAhead(tokens)
             ⮐ @destruct tok tokens
 
@@ -674,6 +677,7 @@ closers = '(':')' '[':']' '{':'}'
                 
             if      
                 nxt.text == '.'    ➜ e = @prop(e tokens)
+                nxt.type == 'spread' ➜ e = @spread(e tokens)
                 nxt.type == 'dots' and not @stack[-1]?.startsWith('op') and @stack[-1] != '(' and '◯rgs' not in @stack ➜ e = @slice(e tokens)
                 nxt.text == 'each' ➜ e = @each(e tokens)
                 nxt.text == '?' 

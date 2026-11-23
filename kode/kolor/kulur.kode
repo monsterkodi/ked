@@ -98,7 +98,7 @@ chunked = segls ext ->
                 
                 isUniko = ch cc -> 
                     isu = cc >= 2000
-                    if isu ➜ ⮐ false if ch in '■□▪◆●◯▸➜⮐'
+                    if isu ➜ ⮐ false if ch in '■□▪◆●◯▸➜⮐…'
                     isu
                 
                 b = base s
@@ -384,7 +384,7 @@ kodePunct = ->
 
     ⮐ if notCode
 
-    if chunk.match in '▸➜'
+    if chunk.match in '▸➜…'
         ⮐ addValue 0 'keyword'
         
     if chunk.match in '⮐'

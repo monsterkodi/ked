@@ -16,7 +16,7 @@ NodeSourceMap = module.SourceMap
         @stripped = 0  # tags read back out of the finished js
         @verbose  = false
 
-    verb: -> if @verbose then console.log.apply console.log, arguments
+    verb: args… -> console.log args… if @verbose
 
     # tag a token's rendered text with its own number
     
@@ -244,7 +244,7 @@ NodeSourceMap = module.SourceMap
         @columns = []
         @verbose = false
 
-    verb: -> if @verbose then console.log.apply console.log, arguments
+    verb: args… -> console.log args… if @verbose
     
     add: (column, srcloc, jsstr) ->
         [sourceLine, sourceColumn] = srcloc

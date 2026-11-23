@@ -261,6 +261,13 @@ lang 'kode'
         
         rgs = ranges "➜"
         inc rgs, 0 "➜"      ▸ 'punct keyword'
+
+    ▸ spread
+
+        rgs = ranges "f a… [b…]"
+        inc rgs, 2 "a"      ▸ 'text'
+        inc rgs, 3 "…"      ▸ 'punct keyword'
+        inc rgs, 7 "…"      ▸ 'punct keyword'
         
     ▸ is
         

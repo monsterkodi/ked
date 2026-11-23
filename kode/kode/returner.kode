@@ -122,6 +122,6 @@ use ./print
                             else
                                 @exp v for k,v of val
         
-    verb: -> if @debug ➜ console.log.apply console.log, arguments 
+    verb: args… -> console.log args… if @debug 
 
 export Returner

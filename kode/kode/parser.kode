@@ -841,6 +841,23 @@ use ./utils ▪ firstLineCol lastLineCol
             items: items
             close: close
 
+#!spread
+
+    # f a… ▸ f(...a), [a… b] ▸ [...a, b], args… -> ▸ function (...args)
+
+    spread: e tokens ->
+
+        dots = tokens.shift()
+        if e.type in ['num' 'single' 'double' 'triple' 'regex' 'bool'] or e.text in ['null' 'undefined' 'Infinity' 'NaN']
+            @onError "… spreads arrays (ranges are written 1..5)" tok:dots
+
+        if @stack[-1] not in ['▸args' 'args(' '[' '◯rgs' '(']
+            @onError "… only spreads into call arguments and arrays" tok:dots
+
+        spread:
+            exp:  e
+            dots: dots
+
 #!slice
     
     slice: from tokens ->

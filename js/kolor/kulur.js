@@ -107,7 +107,7 @@ chunked = function (segls, ext)
                     isu = cc >= 2000
                     if (isu)
                     {
-                        if (_k_.in(ch,'■□▪◆●◯▸➜⮐'))
+                        if (_k_.in(ch,'■□▪◆●◯▸➜⮐…'))
                         {
                             return false
                         }
@@ -572,7 +572,7 @@ kodePunct = function ()
     {
         return
     }
-    if (_k_.in(chunk.match,'▸➜'))
+    if (_k_.in(chunk.match,'▸➜…'))
     {
         return addValue(0,'keyword')
     }

@@ -39,6 +39,8 @@
                 @args[-1][t] = t
             else if t = arg.operation?.lhs?.text
                 @args[-1][t] = t
+            else if t = arg.spread?.exp.text
+                @args[-1][t] = t
             else
                 @verb 'todo: scoper handle complex arg?' arg if arg.prop?.obj?.text != '@'
 
@@ -115,6 +117,6 @@
                 @exp val for key,val of e
         ⮐ 
         
-    verb: -> if @debug ➜ console.log.apply console.log arguments 
+    verb: args… -> console.log args… if @debug 
 
 export Scoper

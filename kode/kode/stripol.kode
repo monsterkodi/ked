@@ -160,6 +160,6 @@ use ./print
                 
         chunks
                                 
-    verb: -> if @debug ➜ console.log.apply console.log arguments 
+    verb: args… -> console.log args… if @debug 
 
 export Stripol

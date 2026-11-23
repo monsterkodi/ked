@@ -221,7 +221,7 @@ flatMap = iterator ->
     
         if Array.isArray iteratorResult
             # Concatenate Array results into the return value we're building up.
-            result.push.apply result, iteratorResult
+            result.push iteratorResult…
         else
             # Handle non-Array results the same way map() does.
             result.push iteratorResult
@@ -437,11 +437,10 @@ objectSet = property value config ->
     mutable[property] = Immutable value
     makeImmutableObject mutable
 
-update = property updater ->
-    
-    restArgs = Array.prototype.slice.call arguments, 2
+update = property updater restArgs… ->
+
     initialVal = @[property]
-    Immutable.set @, property, updater.apply(initialVal, [initialVal].concat(restArgs))
+    Immutable.set @, property, updater.call(initialVal, initialVal, restArgs…)
 
 getInPath = obj path ->
   
@@ -451,12 +450,11 @@ getInPath = obj path ->
   
     (i == path.length) ? obj : undefined
 
-updateIn = path updater ->
-    
-    restArgs = Array.prototype.slice.call arguments, 2
+updateIn = path updater restArgs… ->
+
     initialVal = getInPath @, path
 
-    Immutable.setIn @, path, updater.apply(initialVal, [initialVal].concat(restArgs))
+    Immutable.setIn @, path, updater.call(initialVal, initialVal, restArgs…)
 
 getIn = path defaultValue ->
     

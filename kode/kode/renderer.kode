@@ -684,6 +684,12 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         ths  = []
         used = {}
 
+        for a,i in args
+            atEnd = i == args.length-1
+            if  a.spread and not atEnd or
+                a.text == '...' and (not atEnd or i == 0 or args[i-1].type != 'var')
+                    @onError "rest parameters are written (a b…) -> and go last" a.spread?.dots ? a
+
         if args.length > 1 and args[-1].text == '...' and args[-2].type == 'var'
             args.pop()
             args[-1].text = '...' + args[-1].text
@@ -1371,9 +1377,13 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         @hint._k_.in = true
         "_k_.in(#{@atom p.lhs},#{@atom p.rhs})"
 
-    parens: p -> 
+    parens: p ->
 
+        for e in p.exps
+            if e.spread ➜ @onError "… only spreads into call arguments and arrays" e.spread.dots
         "(#{@nodes p.exps})"
+
+    spread: p -> '...' + @atom(p.exp)
 
 #!object
 
@@ -1618,7 +1628,7 @@ kolorNames = ['r' 'g' 'b' 'c' 'm' 'y' 'w']
         @varcontext[ctx] = @varcontext[ctx] + 1
         "_#{(@varcontext[ctx]+9).toString(16)}_"
         
-    verb: -> if @debug ➜ console.log.apply console.log, arguments
+    verb: args… -> console.log args… if @debug
     
     ind: ->
 

@@ -43,8 +43,8 @@ util =
     
     reversed: arr -> arr.slice(0).reverse()
     
-    max:      arr -> Math.max.apply null arr
-    min:      arr -> Math.min.apply null arr
+    max:      arr -> Math.max arr…
+    min:      arr -> Math.min arr…
     
     pull:     arr item -> 
         
@@ -145,7 +145,7 @@ util =
     replace: array index numToRemove arrayToInsert ->
         
         if array is arr
-            array.splice.apply array [index numToRemove].concat(arrayToInsert)
+            array.splice index numToRemove arrayToInsert…
         
     insert: array index arrayToInsert -> util.replace array index 0 arrayToInsert
         
