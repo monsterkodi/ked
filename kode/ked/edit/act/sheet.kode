@@ -8,8 +8,14 @@ export
     
     insertIntoSheet: text ->
 
-        cells    = @sheetSize()
-        inserted = layout.insertTextAt cells @rectree @sheetCellForPos(@mainCursor()) text
+        cells = @sheetSize()
+        cell  = @sheetCellForPos @mainCursor()
+
+        if sel = @sheetSelection()
+            @sheetCutText sel
+            cell = layout.cellForTextOffset sel.node sel.from
+
+        inserted = layout.insertTextAt cells @rectree cell text
 
         ⮐ false if not inserted?
 
@@ -216,27 +222,136 @@ export
 
         node
 
-    sheetBackspace: ->
+    #  back removes the glyph before the cursor, next the one behind it
+    #  a selection is removed as a whole
 
-        cells = @sheetSize()
-        cell  = @sheetCellForPos @mainCursor()
-        node  = @sheetTextNodeAt cell
+    sheetDelete: type ->
+
+        if sel = @sheetSelection()
+            @sheetCutText sel
+            @renderSheet @rectree @sheetSize() layout.cellForTextOffset(sel.node sel.from)
+            ⮐
+
+        cell = @sheetCellForPos @mainCursor()
+        node = @sheetTextNodeAt cell
 
         ⮐ if not node?
 
         offset = layout.textOffsetAt node cell
+        from   = type == 'back' ? offset-1 : offset
 
-        ⮐ if offset <= 0
+        ⮐ if from < 0 or from >= Array.from(node.text).length
 
-        chars = Array.from node.text
-        chars.splice offset-1 1
-        node.text = chars.join ''
+        @sheetCutText node:node from:from to:from+1
+        @renderSheet @rectree @sheetSize() layout.cellForTextOffset(node from)
 
-        layout.regionize cells @rectree
+    sheetCutText: sel ->
 
-        @renderSheet @rectree cells layout.cellForTextOffset(node offset-1)
+        chars = Array.from sel.node.text
+        chars.splice sel.from sel.to-sel.from
+        sel.node.text = chars.join ''
+
+        layout.regionize @sheetSize() @rectree
 
     sheetTextNodeAt: cell -> layout.textNodeAt @sheetSize() @rectree cell
+
+    #  a sheet selection is a range of text offsets in the text node at the main cursor.
+    #  it is kept as line ranges over the glyphs of the range, so it draws like any selection,
+    #  and read back from whatever line ranges select glyphs of that node
+
+    sheetSelection: ->
+
+        ⮐ if empty @s.selections
+
+        node = @sheetTextNodeAt @sheetCellForPos(@mainCursor())
+
+        ⮐ if not node?
+
+        inside = (x y r) -> (y > r[1] or y == r[1] and x >= r[0]) and (y < r[3] or y == r[3] and x < r[2])
+
+        from = to = null
+
+        for slot in layout.textSlots node
+            continue if not slot[2]?
+            [x y] = @sheetPosForCell [slot[0] slot[1]]
+            for rng in @s.selections
+                if inside x y rng
+                    from = min (from ? slot[3]) slot[3]
+                    to   = max (to ? slot[3]+1) slot[3]+1
+                    break
+
+        ⮐ if not from?
+
+        node:node from:from to:to
+
+    sheetRangesForText: (node from to) ->
+
+        ranges = []
+
+        for slot in layout.textSlots node
+            continue if not slot[2]? or slot[3] < from or slot[3] >= to
+            [x y] = @sheetPosForCell [slot[0] slot[1]]
+            prev  = last ranges
+            if prev? and prev[1] == y and prev[2] == x
+                prev[2] = x+1
+            else
+                ranges.push [x y x+1 y]
+
+        ranges
+
+    sheetSelectedText: ->
+
+        if sel = @sheetSelection()
+            Array.from(sel.node.text).slice(sel.from sel.to).join ''
+
+    #  selects all text of the text node at the cursor, a second time deselects
+
+    sheetSelectAll: ->
+
+        node = @sheetTextNodeAt @sheetCellForPos(@mainCursor())
+
+        ⮐ if not node?
+
+        len    = Array.from(node.text).length
+        ranges = @sheetRangesForText node 0 len
+
+        if empty(ranges) or ranges eql @s.selections
+            @deselect()
+            ⮐
+
+        @setSelections ranges
+        @setCursors [@sheetPosForCell(layout.cellForTextOffset(node len))]
+
+    #  moves the main cursor through the text of its node and selects from the anchor:
+    #  the end of the selection the cursor is not at, or where the cursor was.
+    #  left and right step through the text, up and down through the rows,
+    #  moving out of the node selects to its start or end
+
+    sheetMoveAndSelect: dir ->
+
+        cell = @sheetCellForPos @mainCursor()
+        sel  = @sheetSelection()
+        node = sel?.node ? @sheetTextNodeAt(cell)
+
+        ⮐ if not node? or dir not in ['left' 'right' 'up' 'down']
+
+        at     = layout.textOffsetAt node cell
+        anchor = at
+        anchor = (at == sel.from ? sel.to : sel.from) if sel?
+
+        len = Array.from(node.text).length
+
+        if dir in ['left' 'right']
+            to = clamp 0 len (dir == 'left' ? at-1 : at+1)
+        else
+            next = @sheetCellForPos @sheetPosInDirection(@mainCursor() dir)
+            if layout.holds(node next) or @sheetTextNodeAt(next) == node
+                to = layout.textOffsetAt node next
+            else
+                to = dir == 'up' ? 0 : len
+
+        @setSelections @sheetRangesForText(node min(anchor to) max(anchor to))
+        @setCursors [@sheetPosForCell(layout.cellForTextOffset(node to))]
 
     setSheetTree: rectree ->
 
@@ -298,6 +413,8 @@ export
             pos = @sheetPosForCell mc
             @s = @s.set 'cursors' [pos]
             @s = @s.set 'main' 0
+
+        @s = @s.set 'selections' [] if opt.history != false # line ranges don't survive a new layout
 
         @rectree = rectree
 

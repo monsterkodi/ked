@@ -467,8 +467,14 @@ use           ◆ mode keys
 
         opt ?= {}
 
+        if @rectree?
+            if text = @sheetSelectedText()
+                clip.copy text
+                @delete 'back'
+            ⮐
+
         @copy deselect:false
-        
+
         if empty @s.selections
             @selectCursorLines()
         @deleteSelection()
@@ -476,7 +482,11 @@ use           ◆ mode keys
     copy: opt =>
 
         opt ?= {}
-        
+
+        if @rectree?
+            if text = @sheetSelectedText() ➜ clip.copy text
+            ⮐
+
         clip.copy @textOfSelectionOrCursorLines()
 
         @deselect() if opt.deselect != false

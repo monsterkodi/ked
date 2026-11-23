@@ -292,7 +292,9 @@ export
         @setSelections selections true
         
     selectAllLines: ->
-        
+
+        ⮐ @sheetSelectAll() if @rectree?
+
         allsel = [[0 0 kseg.width(@s.lines[@s.lines.length-1]) @s.lines.length-1]]
         
         if allsel eql @s.selections

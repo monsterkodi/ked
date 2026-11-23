@@ -958,6 +958,58 @@ showSue = data ->
 
         e.state.setCursors [[4 1]] ; e.state.insert 'c' ; rt('children.0.text') ▸ 'abc' ; mc() ▸ [2 3]
 
+  ▸ sheet selection
+
+        sheet 'popo_sheet_select'
+        e.grabFocus()
+        sel = -> e.state.sheetSelectedText()
+
+        loadSheet {children:[{ text:'abcdef' x:2 y:1 w:3 h:3 } { pattern:'.' x:8 y:0 w:2 h:2 }]}
+
+        e.state.setCursors [[3 1]]
+        key 'cmd+a' ; sel() ▸ 'abcdef' ; e.state.s.selections ▸ [[2 1 5 1] [2 2 5 2]]
+        key 'cmd+a' ; e.state.s.selections ▸ []
+
+        key 'cmd+a' ; e.state.insert 'X'
+        rt('children.0.text') ▸ 'X' ; e.state.s.selections ▸ [] ; mc() ▸ [3 1]
+        e.state.undo() ; rt('children.0.text') ▸ 'abcdef'
+
+        e.state.deselect() ; e.state.setCursors [[3 1]]
+        key 'shift+right' ; key 'shift+right' ; sel() ▸ 'bc'
+        key 'shift+left' ; sel() ▸ 'b'
+        key 'shift+right' ; key 'shift+down' ; sel() ▸ 'bcdef'
+        e.state.insert 'Y' ; rt('children.0.text') ▸ 'aY' ; mc() ▸ [4 1]
+
+        loadSheet {children:[{ text:'abcdef' x:2 y:1 w:3 h:3 }]}
+
+        e.state.setCursors [[5 2]]
+        key 'shift+left' ; key 'shift+up' ; sel() ▸ 'cdef'
+        key 'shift+up' ; sel() ▸ 'abcdef'
+        key 'delete' ; rt('children.0.text') ▸ '' ; e.state.s.selections ▸ []
+        e.state.undo() ; rt('children.0.text') ▸ 'abcdef' ; sel() ▸ 'abcdef'
+        e.state.deselect()
+
+        e.state.setCursors [[3 1]] ; key 'entf' ; rt('children.0.text') ▸ 'acdef' ; mc() ▸ [3 1]
+        e.state.setCursors [[2 2]] ; key 'shift+right' ; key 'entf' ; rt('children.0.text') ▸ 'acdf'
+
+        e.state.setCursors [[12 3]] ; key 'cmd+a' ; e.state.s.selections ▸ []
+        key 'shift+right' ; e.state.s.selections ▸ []
+
+        board = ''
+        savedCopy  = clip.copy
+        savedPaste = clip.paste
+        clip.copy  = (text) -> board = text
+        clip.paste = -> board
+
+        e.state.setCursors [[2 1]] ; key 'shift+right' ; key 'shift+right'
+        e.state.copy() ; board ▸ 'ac'
+        e.state.cut()  ; board ▸ 'ac' ; rt('children.0.text') ▸ 'df'
+        e.state.setCursors [[3 1]] ; e.state.paste() ; rt('children.0.text') ▸ 'dacf'
+        e.state.setCursors [[12 3]] ; e.state.cut() ; rt('children.0.text') ▸ 'dacf'
+
+        clip.copy  = savedCopy
+        clip.paste = savedPaste
+
   ▸ sheet clicks
 
         sheet 'popo_sheet_click' [] 8 fileeditor

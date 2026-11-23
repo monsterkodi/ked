@@ -184,7 +184,9 @@ export
     chunksBeforeCursors: -> @s.cursors.map (c) => belt.chunkBeforePos(@s.lines c)
             
     moveCursorsAndSelect: dir opt ->
-        
+
+        ⮐ @sheetMoveAndSelect(dir) if @rectree?
+
         if empty @anchors
             @anchors = @allCursors()
         
