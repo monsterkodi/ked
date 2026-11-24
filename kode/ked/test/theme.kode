@@ -26,6 +26,7 @@ missing = lines ext filter ->
 
         lines = [
             '<img src="./img/kode.svg" />'
-            'see https://example.com/a/b'
+            'see https://sub.example.com/a/b'
+            '<a href="https://example.com/x">'
             ]
         missing(lines, 'md', (c) -> true) ▸ []

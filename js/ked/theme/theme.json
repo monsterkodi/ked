@@ -206,6 +206,7 @@
     "punct function class": "#220",
     "punct keyword extends": "#220",
     "url domain": "#d00",
+    "url subdomain": "#a00",
     "url tld": "#900",
     "url protocol": "#700",
     "punct url tld": "#400",

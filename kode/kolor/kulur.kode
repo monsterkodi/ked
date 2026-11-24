@@ -668,13 +668,19 @@ urlPunct = ->
 
     if prev = getChunk -1
         if chunk.turd == '://'
-            if getmatch(4) == '.' and getChunk(5)
+            d = 3 # last host label: sub.sub.domain.tld
+            while getmatch(d+1) == '.' and getChunk(d+2) and not getValue(d+2).startsWith('punct')
+                d += 2
+            if d > 3
                 setValue -1 'url protocol'
-                addValues 3 'url'
-                setValue  3 'url domain'
-                setValue  4 'punct url tld'
-                setValue  5 'url tld'
-                ⮐ 6
+                setValue s 'punct url' for s in 0...3
+                for s in 3...d-2 by 2
+                    setValue s   'url subdomain'
+                    setValue s+1 'punct url'
+                setValue  d-2 'url domain'
+                setValue  d-1 'punct url tld'
+                setValue  d   'url tld'
+                ⮐ d+1
 
         if chunk.match == '.'
             if not prev.clss.startsWith('number') and prev.clss != 'semver' and prev.match not in '\\./' and not /\d+/.test(prev.match) and (empty(topType) or mdSpan and prev.match != '*')
@@ -711,6 +717,9 @@ urlWord = ->
         if prev.match in '\\/'
             next = getChunk 1
             if not next or next.start > chunk.start+chunk.length or next.match not in '\\./'
+                if ext == 'md'
+                    setValue 0 'dir_leaf'
+                    ⮐ 1
                 addValue 0, 'file'
 
 ##js
@@ -1175,9 +1184,16 @@ mdTag = -> # tags the name and attributes of a <tag …> that is closed on the s
         ⮐ if chunks[j].match == '<'
         if chunks[j].match == '>'
             chunks[i].clss = 'keyword'
+            str = false # attribute values, urls and paths in them get their classes later
             for k in i+1...j
-                if not chunks[k].clss.startsWith('punct') and chunks[k+1].match == '=' and adjacent k+1
-                    chunks[k].clss = 'property'
+                c = chunks[k]
+                if c.match == '"'
+                    c.clss = 'punct string double'
+                    str = not str
+                else if str
+                    c.clss = if c.clss.startsWith('punct') ➜ 'punct string double' else 'string double'
+                else if not c.clss.startsWith('punct') and chunks[k+1].match == '=' and adjacent k+1
+                    c.clss = 'property'
             ⮐
 
 xmlPunct = ->

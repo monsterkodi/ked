@@ -58,7 +58,16 @@ lang 'noon'
     inc rgs, 17 '.'         ▸ 'punct url tld'
     inc rgs, 18 'com'       ▸ 'url tld'
     inc rgs, 21 '/'         ▸ 'punct dir'
-    
+
+    rgs = ranges "    http://a.b.domain.com/x"
+    inc rgs, 11 'a'         ▸ 'url subdomain'
+    inc rgs, 12 '.'         ▸ 'punct url'
+    inc rgs, 13 'b'         ▸ 'url subdomain'
+    inc rgs, 15 'domain'    ▸ 'url domain'
+    inc rgs, 21 '.'         ▸ 'punct url tld'
+    inc rgs, 22 'com'       ▸ 'url tld'
+    inc rgs, 25 '/'         ▸ 'punct dir'
+
     rgs = ranges "    file.coffee"
     inc rgs, 4 'file'       ▸ 'file_coffee'
     inc rgs, 8 '.'          ▸ 'file_punct_coffee'

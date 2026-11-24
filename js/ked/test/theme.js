@@ -44,7 +44,7 @@ toExport["theme"] = async function ()
     })
     await section("md files and urls", async function ()
     {
-        lines = ['<img src="./img/kode.svg" />','see https://example.com/a/b']
+        lines = ['<img src="./img/kode.svg" />','see https://sub.example.com/a/b','<a href="https://example.com/x">']
         compare(missing(lines,'md',function (c)
         {
             return true
@@ -56,5 +56,5 @@ toExport._test_ = true
 export default toExport
 
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGhlbWUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL3Rlc3QvdGhlbWUua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7T0FBa0IsWUFBUjs7T0FDUSxZQUFYOzs7QUFFUCxvQkFBVSxPQUFNLEtBQUk7Ozs7SUFDaEI7d0JBQ1ksTUFBTSxRQUFRLE1BQU87OztRQUE3Qjs2QkFDYTs7O1lBQVQ7Z0JBQ0csT0FBTyxNQUFNLFVBQWMsTUFBTSxPQUFPLE1BQU07OzZCQUNwQixNQUFNLEtBQVk7O29CQUEzQyxNQUFNLEtBQUssTUFBTTs7Ozs7V0FDN0I7Ozs7OztRQU1JLFNBQ0kseUNBQ0Esd0RBQ0EsUUFDQSxtQkFDQTtRQUU4QyxRQUFsRCxRQUFRLE1BQU8sZUFBTzs7bUJBQU0sRUFBRSxXQUFXOzs7OztRQUl6QyxTQUNJLCtCQUNBO1FBRThCLFFBQWxDLFFBQVEsTUFBTyxlQUFPOzttQkFBTSJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGhlbWUuanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL3Rlc3QvdGhlbWUua29kZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7T0FBa0IsWUFBUjs7T0FDUSxZQUFYOzs7QUFFUCxvQkFBVSxPQUFNLEtBQUk7Ozs7SUFDaEI7d0JBQ1ksTUFBTSxRQUFRLE1BQU87OztRQUE3Qjs2QkFDYTs7O1lBQVQ7Z0JBQ0csT0FBTyxNQUFNLFVBQWMsTUFBTSxPQUFPLE1BQU07OzZCQUNwQixNQUFNLEtBQVk7O29CQUEzQyxNQUFNLEtBQUssTUFBTTs7Ozs7V0FDN0I7Ozs7OztRQU1JLFNBQ0kseUNBQ0Esd0RBQ0EsUUFDQSxtQkFDQTtRQUU4QyxRQUFsRCxRQUFRLE1BQU8sZUFBTzs7bUJBQU0sRUFBRSxXQUFXOzs7OztRQUl6QyxTQUNJLCtCQUNBLGtDQUNBO1FBRThCLFFBQWxDLFFBQVEsTUFBTyxlQUFPOzttQkFBTSJ9
 //# sourceURL=../../../kode/ked/test/theme.kode
