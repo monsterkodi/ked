@@ -65,7 +65,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         @isVisible = false
 
-    activeIndex: => @radio.active
+    activeIndex: => @radio.selectedIndex
     
     onRadioActiveChanged: => @syncAll()
     
@@ -114,14 +114,14 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
     removePaletteColor: =>
 
-        idx = @paletteView.active
+        idx = @paletteView.selectedIndex
         ⮐ if idx < 0 or idx >= @palette.length
 
         @palette.splice idx 1
 
         @syncPalette()
 
-        @paletteView.setActive clamp(0 @palette.length-1 idx) if @palette.length
+        @paletteView.setSelectedIndex clamp(0 @palette.length-1 idx) if @palette.length
 
         @blue.grabFocus() if empty @palette
 
@@ -131,7 +131,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
     applyPaletteColor: =>
 
-        opt = @paletteView.options[@paletteView.active]
+        opt = @paletteView.options[@paletteView.selectedIndex]
         ⮐ if empty opt
 
         @setHex opt.label
@@ -175,7 +175,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
             opts.push {color: color.values(col), label: (@voided[idx] ? 'none' : col)} if col?
 
         @radio.setOptions opts
-        @radio.setActive @activeIndex()
+        @radio.setSelectedIndex @activeIndex()
         @radio.setFocusable opts.length > 1
 
     syncSliders: =>
@@ -204,7 +204,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
     setActiveColor: idx =>
 
-        @radio.changeActive clamp(0 1 int(idx))
+        @radio.select clamp(0 1 int(idx))
         
     sliderChanged: =>
 
@@ -263,7 +263,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
         @voided       = [false false]
         @colorStates  = []
         @sheetNode    = opt.node ? null
-        @radio.active = opt.select ? 0
+        @radio.selectedIndex = opt.select ? 0
         
         if valid hexl
             if @sheetNode?
@@ -314,7 +314,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
             else
                 @setHex hex idx
 
-        @radio.active = 1 if @colorVoided 0 and not @colorVoided 1
+        @radio.selectedIndex = 1 if @colorVoided 0 and not @colorVoided 1
 
     colorAtSelection: layer =>
 

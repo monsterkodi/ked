@@ -244,7 +244,7 @@ rad = ->
 
         p.setHex '#00ff00'
 
-        p.paletteView.setActive 0
+        p.paletteView.setSelectedIndex 0
         p.paletteView.grabFocus()
 
         e =
@@ -402,18 +402,36 @@ rad = ->
         h.screen.get_bg(2 0) ▸ [255 255 255]
         h.screen.get_bg(17 0) ▸ [0 0 255]
 
-        r.setActive 1
+        r.setSelectedIndex 1
+        r.selectedIndex ▸ 1
         r.draw()
 
         h.row(0).includes('#ffffff') ▸ false
         h.row(0).includes('#0000ff') ▸ true
+
+  ▸ select
+
+        [h r] = rad()
+
+        r.setOptions [{color: [255 255 255] label: '#ffffff'} {color: [0 0 255] label: '#0000ff'}]
+        r.selectedIndex ▸ 0
+
+        changes = []
+        r.on 'activeChange' (idx) -> changes.push idx
+
+        r.select 0
+        r.select 1
+        r.select 1
+
+        r.selectedIndex ▸ 1
+        changes ▸ [1]
 
   ▸ focus
 
         [h r] = rad()
 
         r.setOptions [{color: [255 255 255] label: '#ffffff'} {color: [0 0 255] label: '#0000ff'}]
-        r.setActive 1
+        r.setSelectedIndex 1
         r.grabFocus()
         r.draw()
 

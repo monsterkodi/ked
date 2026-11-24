@@ -19,7 +19,7 @@ use             ◆ radio
             @options.push {color: rgb label: hex} if rgb?
 
         if empty @options
-            @active  = 0
+            @selectedIndex = 0
             ⮐
 
     draw: =>
@@ -52,7 +52,7 @@ use             ◆ radio
 
     drawCell: idx start segw =>
 
-        if @focused and idx == @active
+        if @focused and idx == @selectedIndex
             fg = color.subtle @options[idx].color 35
             x = start + max(0 int((segw - 1)/2))
             @cells.set x 0 '●' fg @options[idx].color

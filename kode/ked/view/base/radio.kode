@@ -10,28 +10,28 @@ use             ◆ view
         @setColor 'fg' theme.colorpicker.fg
 
         @options = []
-        @active  = 0
+        @selectedIndex = 0
         @pointerType = 'pointer'
-        
+
         @setFocusable()
 
     setOptions: @options =>
 
-        @setActive @active
+        @setSelectedIndex @selectedIndex
 
-    setActive: idx =>
+    setSelectedIndex: idx =>
 
         ▴ valid @options
-        @active = clamp 0 (@options.length-1) int(idx)
-        
-    changeActive: idx =>
-        
-        if idx != @active
-            @setActive idx
-            @emit 'activeChange' @active
+        @selectedIndex = clamp 0 (@options.length-1) int(idx)
+
+    select: idx =>
+
+        if idx != @selectedIndex
+            @setSelectedIndex idx
+            @emit 'activeChange' @selectedIndex
         true
 
-    getActive: => @active
+    getActive: => @selectedIndex
 
     optionAt: x =>
 
@@ -50,20 +50,20 @@ use             ◆ view
 
         if event.type == 'press' and @hover and @focusable
 
-            @changeActive @optionAt(@eventPos(event)[0])
+            @select @optionAt(@eventPos(event)[0])
             ⮐ redraw:true
 
         @hover
-        
+
     onKey: key event =>
-    
+
         ⮐ false if not @hasFocus()
         ⮐ false if @hidden() or @collapsed()
-        
+
         switch event.combo
-            'left'  ➜ ⮐ @changeActive Math.max(@active-1, 0)
-            'right' ➜ ⮐ @changeActive Math.min(@active+1, @options.length-1)
-        
+            'left'  ➜ ⮐ @select Math.max(@selectedIndex-1, 0)
+            'right' ➜ ⮐ @select Math.min(@selectedIndex+1, @options.length-1)
+
         false
 
     draw: =>
@@ -88,8 +88,8 @@ use             ◆ view
                 @cells.set_bg x 0 @options[idx].color
 
         used = []
-        hex  = @options[@active].label ? ''
-        segw = ends[@active]-starts[@active]
+        hex  = @options[@selectedIndex].label ? ''
+        segw = ends[@selectedIndex]-starts[@selectedIndex]
 
         label = hex
 
@@ -102,11 +102,11 @@ use             ◆ view
         label = label[0...min(segw label.length)]
 
         pad = max 0 int((segw - label.length)/2)
-        x = starts[@active] + pad
-        fg = color.adjustForBackground @color.fg @options[@active].color
+        x = starts[@selectedIndex] + pad
+        fg = color.adjustForBackground @color.fg @options[@selectedIndex].color
 
         for ch, i in label
-            @cells.set x+i 0 ch fg @options[@active].color
+            @cells.set x+i 0 ch fg @options[@selectedIndex].color
             used[x+i] = true
 
         if w > 1
