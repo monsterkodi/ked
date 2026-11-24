@@ -18,7 +18,7 @@ use                 ◆ funtree sheeditor colorpicker uniko
         
         @knob        = new knob        @screen         "#{@name}_knob"
         @funtree     = new funtree             @editor "#{@name}_funtree" ['scrllr']
-        @sheeditor   = new sheeditor   @screen @editor "#{@name}_sheeditor"
+        @sheeditor   = new sheeditor   @screen @editor "#{@name}_sheeditor" @
         @colorpicker = new colorpicker @screen @editor "#{@name}_colorpicker"
         @uniko       = new uniko       @screen @editor "#{@name}_uniko"
         
@@ -52,6 +52,7 @@ use                 ◆ funtree sheeditor colorpicker uniko
         else
             @sheeditor.hide()
             @funtree.show()
+            @colorpicker.hide()
         
     onSessionMerge: recent =>
     

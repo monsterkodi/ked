@@ -130,7 +130,7 @@ use child_process ▪ spawn exec
         @editor.show()
         @title.show() if not config.data?.zen?.enable
         @dircol.show()
-        @funcol.show()
+        @funcol.show() if @funcol.active
 
     hideEditor: -> 
     
@@ -840,7 +840,7 @@ use child_process ▪ spawn exec
             @dircol.cells.cols = mcw
             @funcol.cells.cols = mcw
             @dircol.show()
-            @funcol.show()
+            @funcol.show() if @funcol.active
         else
             @dircol.hide()
             @funcol.hide()

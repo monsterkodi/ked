@@ -7,7 +7,7 @@ use ../../popo   ◆ layout
 ■sheenode□view
     # editor for a single sheetree node
     
-    @: @editor @name ->
+    @: @editor @name @funcol ->
 
         super @editor.screen @name
 
@@ -121,7 +121,8 @@ use ../../popo   ◆ layout
         @yhbInput.inputs[2].set String(node.b ? '')
         
         idx = @node.bg and not @node.fg ? 1 : 0
-        post.emit 'colorpicker.show' [@node.fg @node.bg] focus:false select:idx node:@node
+        if @funcol?.visible() and @funcol.active and not @funcol.collapsed()
+            post.emit 'colorpicker.show' [@node.fg @node.bg] focus:false select:idx node:@node
         
     layout: x y w h =>
 

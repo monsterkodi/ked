@@ -405,7 +405,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
                 @submitSue ranges fg bg voided
 
-        @hide()
+        @hide() if not @editor.state.rectree?
 
     submitSue: (ranges fg bg voided) =>
 
@@ -463,6 +463,17 @@ use ../base         ◆ view colorslider rgbinput radio palette
         post.emit 'colorpicker.hide'
         @hide()
 
+    onEsc: =>
+
+        #  while a sheet is displayed the picker stays open, esc only moves the focus
+
+        if @editor.state.rectree?
+            post.emit 'focus' 'editor'
+            post.emit 'redraw'
+            ⮐ true
+
+        @cancel()
+
     onKey: key event =>
 
         ⮐ false if @hidden() or @collapsed()
@@ -471,7 +482,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
         switch event.combo
             'down''tab'      ➜ ⮐ @focusNext() 
             'up''shift+tab'  ➜ ⮐ @focusPrev()
-            'esc'            ➜ ⮐ @cancel()
+            'esc'            ➜ ⮐ @onEsc()
             'return'         ➜ ⮐ @onReturn()
             'cmd+delete'     
             'cmd+backspace'  ➜ ⮐ @onDelete()

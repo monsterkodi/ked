@@ -5,14 +5,14 @@ use              ◆ sheetree sheenode
 
 ■sheeditor□view
 
-    @: @screen @editor @name ->
-        
+    @: @screen @editor @name @funcol ->
+    
         super @screen @name
         
         @isVisible = false
         
         @sheetree = new sheetree @editor "#{@name}_sheetree" ['scrllr']
-        @sheenode = new sheenode @editor "#{@name}_sheenode" 
+        @sheenode = new sheenode @editor "#{@name}_sheenode" @funcol
         
         @mouseItems = [@sheetree @sheenode]
         @wheelItems = @mouseItems

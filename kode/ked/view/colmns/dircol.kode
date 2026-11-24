@@ -6,7 +6,9 @@ use ../../util      ◆ config
 use ../base         ◆ view knob crumbs input
 use ../menu         ◆ context
 use                 ◆ dirtree
+
 ■dircol□view
+
     @: screen @editor features ->
         
         super screen 'dircol' features
@@ -115,7 +117,7 @@ use                 ◆ dirtree
         if root
             @setRoot root
 
-        if recent.funcol?.active            
+        if recent.dircol?.active            
             @active = true
             @show()
             
