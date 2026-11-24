@@ -9,7 +9,7 @@ mapScroll
                         enable          true
                         clickOffset     5
 scale
-                        enable  true
+                        enable  false
                         md
                             h1      7
                             h2      6
