@@ -58,24 +58,24 @@ use ../base         ◆ view colorslider rgbinput radio palette
         @green.on  'valueChange' @rgbChanged
         @blue.on   'valueChange' @rgbChanged
         
-        @radio.on 'activeChange' @onRadioActiveChanged
+        @radio.on 'selectedChange' @onRadioSelectedChanged
 
         @setColor 'bg' theme.colorpicker.bg
         @setColor 'fg' theme.colorpicker.fg
 
         @isVisible = false
 
-    activeIndex: => @radio.selectedIndex
-    
-    onRadioActiveChanged: => @syncAll()
+    selectedIndex: => @radio.selectedIndex
+
+    onRadioSelectedChanged: => @syncAll()
     
     backgroundChanged: => @bgChanged
 
     colorVoided: idx => @voided[idx] ? false
 
-    voidActiveColor: =>
+    voidSelectedColor: =>
 
-        @voided[@activeIndex()] = true
+        @voided[@selectedIndex()] = true
 
         @syncRadio()
         @updateSheet()
@@ -144,7 +144,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         true
 
-    rgb: => @colorStates[@activeIndex()]
+    rgb: => @colorStates[@selectedIndex()]
     hex: => color.hex @rgb()
     hsv: => color.rgbToHsv @rgb()
     h: => @hsv()[0]
@@ -175,7 +175,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
             opts.push {color: color.values(col), label: (@voided[idx] ? 'none' : col)} if col?
 
         @radio.setOptions opts
-        @radio.setSelectedIndex @activeIndex()
+        @radio.setSelectedIndex @selectedIndex()
         @radio.setFocusable opts.length > 1
 
     syncSliders: =>
@@ -194,7 +194,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
         hex ?= "#000"
         rgb = color.values hex
         ⮐ if empty rgb
-        idx ?= @activeIndex()
+        idx ?= @selectedIndex()
         
         @colorStates[idx] = rgb
         
@@ -202,13 +202,13 @@ use ../base         ◆ view colorslider rgbinput radio palette
         @bgChanged = true if idx == 1
         true
 
-    setActiveColor: idx =>
+    setSelectedColor: idx =>
 
         @radio.select clamp(0 1 int(idx))
         
     sliderChanged: =>
 
-        @colorStates[@activeIndex()] = color.hsvToRgb [@hue.getValue() @sat.getValue() @val.getValue()]
+        @colorStates[@selectedIndex()] = color.hsvToRgb [@hue.getValue() @sat.getValue() @val.getValue()]
 
         @syncRadio()
         @syncInputs()
@@ -216,7 +216,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
     rgbChanged: =>
 
-        @colorStates[@activeIndex()] = [@red.int() @green.int() @blue.int()]
+        @colorStates[@selectedIndex()] = [@red.int() @green.int() @blue.int()]
 
         @syncRadio()
         @syncSliders()
@@ -224,8 +224,8 @@ use ../base         ◆ view colorslider rgbinput radio palette
         
     emitChanged: =>
 
-        @voided[@activeIndex()] = false
-        @bgChanged = true if @activeIndex() == 1
+        @voided[@selectedIndex()] = false
+        @bgChanged = true if @selectedIndex() == 1
 
         @updateSheet()
 
@@ -504,7 +504,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
         ⮐ @removePaletteColor() if @paletteFocused()
 
-        @voidActiveColor()
+        @voidSelectedColor()
 
     layout: x y w h =>
 

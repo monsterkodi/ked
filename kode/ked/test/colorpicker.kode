@@ -108,7 +108,10 @@ rad = ->
 
         [h e p] = sheetPickr false
 
-        p.activeIndex() ▸ 1
+        p.selectedIndex() ▸ 1
+        p.setSelectedColor 0
+        p.selectedIndex() ▸ 0
+        p.setSelectedColor 1
         p.colorVoided 0 ▸ true
         p.backgroundHex() ▸ '#0000ff'
         p.radio.options[0].label ▸ 'none'
@@ -191,7 +194,7 @@ rad = ->
 
         [h e p] = sheetPickr()
 
-        p.voidActiveColor()
+        p.voidSelectedColor()
         p.submit()
 
         noFg = not sds.get(e.state.rectree 'children.0.fg')?
@@ -417,7 +420,7 @@ rad = ->
         r.selectedIndex ▸ 0
 
         changes = []
-        r.on 'activeChange' (idx) -> changes.push idx
+        r.on 'selectedChange' (idx) -> changes.push idx
 
         r.select 0
         r.select 1

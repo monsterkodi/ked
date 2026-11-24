@@ -28,10 +28,8 @@ use             ◆ view
 
         if idx != @selectedIndex
             @setSelectedIndex idx
-            @emit 'activeChange' @selectedIndex
+            @emit 'selectedChange' @selectedIndex
         true
-
-    getActive: => @selectedIndex
 
     optionAt: x =>
 
