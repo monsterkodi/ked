@@ -112,6 +112,17 @@ lang 'md'
     inc rgs, 17 'a'         ▸ 'keyword'
     inc rgs, 18 '>'         ▸ 'punct keyword'
 
+    rgs = ranges '`(a b) ->` and `x =>`'
+    inc rgs, 7 '-'          ▸ 'punct function'
+    inc rgs, 8 '>'          ▸ 'punct function'
+    inc rgs, 9 '`'          ▸ 'punct code'
+    inc rgs, 18 '='         ▸ 'punct function bound'
+    inc rgs, 19 '>'         ▸ 'punct function bound'
+
+    rgs = ranges '<!-- x -->'
+    inc rgs, 8 '-'          ▸ 'punct'
+    inc rgs, 9 '>'          ▸ 'punct keyword'
+
     rgs = ranges 'a < b and c > d'
     inc rgs, 0 'a'          ▸ 'text'
     inc rgs, 4 'b'          ▸ 'text'

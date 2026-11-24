@@ -1068,6 +1068,14 @@ mdPunct = ->
                     pushStack merge:true fill:true type:'h5'
                     ⮐ addValues 5 'h5'
 
+    prev = getChunk -1
+    stuck = prev and prev.start+prev.length == chunk.start and prev.match in '-=' # like the end of <!-- -->
+    if (chunk.turd?.startsWith('->') or chunk.turd?.startsWith('=>')) and not stuck # function arrows, before xmlPunct sees the >
+        type = chunk.match == '-' ? 'punct function' : 'punct function bound'
+        setValue 0 type
+        setValue 1 type
+        ⮐ 2
+
     if chunk.match == '*' and not topType?.endsWith('code') # code spans are literal
 
         if chunk.turd?[..1] == '**'
