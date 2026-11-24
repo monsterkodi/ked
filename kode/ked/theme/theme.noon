@@ -173,8 +173,8 @@ syntax
     comment ligature                        #333   
     punct define                            #333   
     punct comment triple                    #222   
-    punct code triple                       #444   
-    code lang                               #888   
+    punct code triple                       #333   
+    code lang                               #444   
     punct comment                           #222   
     section                                 #ccf   
     argument                                #bbf   
