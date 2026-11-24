@@ -32,6 +32,7 @@ LI      = /(\sli\d\s|\sh\d\s)/
 UNICODE =
 
     kode:        '■□▪◆●◯▸➜⮐…'                        # kode's own syntax symbols
+    latin:       [[0x00c0 0x00d6] [0x00d8 0x00f6] [0x00f8 0x024f] [0x1e00 0x1eff]] # latin-1 letters, extended-a/b, extended additional
     greek:       [[0x0370 0x03ff] [0x1f00 0x1fff]]   # greek and coptic, greek extended
     cyrillic:    [[0x0400 0x052f] [0x2de0 0x2dff] [0xa640 0xa69f]] # cyrillic, supplement, extended-a/b
     symbol:      [[0x00a1 0x00bf] [0x00d7 0x00d7] [0x00f7 0x00f7]] # latin-1 symbols like © ° ± × ÷
@@ -52,6 +53,17 @@ unicodeKey = ch -> # the UNICODE key of a character or null, sets win over range
             for r in val
                 ⮐ key if r[0] <= cp <= r[1]
     null
+
+wordKey = segs -> # the UNICODE key shared by all characters of a word that has no ascii, or null
+
+    key = null
+    for sg in segs
+        ch = kseg.str sg
+        ⮐ null if ch.codePointAt(0) < 0x80
+        k = unicodeKey ch
+        ⮐ null if not k or (key and k != key)
+        key = k
+    key
 
 codeTypes = ['interpolation' 'code triple']
 
@@ -115,7 +127,9 @@ chunked = segls ext ->
         pushLastWord = ->
             
             if lastWord != null
-                chnks.chunks.push start:widths[lastWordIndex] length:kseg.width(lastWord) match:kseg.str(lastWord) text:kseg.str(lastWord) clss:'text'
+                wk = wordKey lastWord
+                clss = wk ? 'text unicode ' + wk : 'text'
+                chnks.chunks.push start:widths[lastWordIndex] length:kseg.width(lastWord) match:kseg.str(lastWord) text:kseg.str(lastWord) clss:clss
                 lastWord = null
                 lastWordIndex = -1
         

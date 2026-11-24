@@ -13,6 +13,10 @@ lang 'noon'
     inc rgs, 0 '✔'          ▸ 'text unicode'
     inc rgs, 7 'symbol'     ▸ 'text'
 
+    rgs = ranges "Å      AA"
+    inc rgs, 0 'Å'          ▸ 'text unicode latin'
+    inc rgs, 7 'AA'         ▸ 'text'
+
     rgs = ranges "▸      x"
     inc rgs, 0 '▸'          ▸ 'text unicode kode'
 

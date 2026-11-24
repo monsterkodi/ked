@@ -832,11 +832,11 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
 
         lang 'noon'
 
-        rgs = ranges "AA    Å"
-        inc rgs 6 'Å' ▸ 'text'
+        rgs = ranges "AA    Å"                 # lone latin letters are words with the latin class
+        inc rgs 6 'Å' ▸ 'text unicode latin'
 
         rgs = ranges "DH    Ð"
-        inc rgs 6 'Ð' ▸ 'text'
+        inc rgs 6 'Ð' ▸ 'text unicode latin'
 
   ▸ longlines
 

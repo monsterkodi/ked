@@ -19,6 +19,18 @@ use ./util ▪ inc ranges dissect lang
         inc rgs, 16 '✔'         ▸ 'text unicode'
         inc rgs, 18 '¬'         ▸ 'text unicode symbol'
 
+        rgs = ranges 'Å ß ħ Œ ƀ ạ åæ Straße naïve x×y'   # words made only of latin letters
+        inc rgs, 0  'Å'         ▸ 'text unicode latin'
+        inc rgs, 2  'ß'         ▸ 'text unicode latin'
+        inc rgs, 4  'ħ'         ▸ 'text unicode latin'
+        inc rgs, 6  'Œ'         ▸ 'text unicode latin'
+        inc rgs, 8  'ƀ'         ▸ 'text unicode latin'
+        inc rgs, 10 'ạ'         ▸ 'text unicode latin'
+        inc rgs, 12 'åæ'        ▸ 'text unicode latin'
+        inc rgs, 15 'Straße'    ▸ 'text'
+        inc rgs, 22 'naïve'     ▸ 'text'
+        inc rgs, 29 '×'         ▸ 'text unicode symbol'
+
         rgs = ranges '中 x'
         inc rgs, 0  '中'        ▸ 'text unicode cjk'
         inc rgs, 3  'x'         ▸ 'text'
