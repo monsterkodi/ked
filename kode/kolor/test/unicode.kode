@@ -7,8 +7,14 @@ use ..     ◆ kulur
 
     ▸ doc                                   # node js/kolor/kulur.js writes this to kode/kolor/kulur.md
 
+        doc = kulur.unicodeDoc()
+
+        doc.includes('0x2de0 - 0x2dff  ■ 32 combining marks\n\nа аⷠ  о оⷡ')    ▸ true  # base, then base with mark
+        doc.includes('combining marks  ■ 7\n\nа а҃  о о҄')                     ▸ true  # marks inside a range with letters
+        doc.includes('holds only combining marks')                              ▸ false
+
         md = fs.readFileSync path.join(◆dir, '../../../kode/kolor/kulur.md'), 'utf8'
-        kulur.unicodeDoc() ▸ md
+        doc ▸ md
 
     ▸ md
 

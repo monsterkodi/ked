@@ -1,8 +1,11 @@
-#!KULUR
 use fs path
 use ../kxk/kseg
 use ../kxk/klor
 use ./extlang ▪ exts lang
+
+#!KULUR
+
+# node js/kolor/kulur.js regenerates kode/kolor/kulur.md
 
 swtch =
     pug:
@@ -76,24 +79,40 @@ unicodeDoc = -> # the markdown of kulur.md: every set and up to 320 printable ch
             r.push cs.slice(i i+32).join(' ')
         r.join '\n'
 
+    BASES = cyrillic:'аоеи' greek:'αοει' latin:'aoei' cjk:'あいうえ' # common letters that carry the combining marks
+    pairs = ps ->
+        r = []
+        for i in 0...ps.length by 10
+            r.push ps.slice(i i+10).join('  ')
+        r.join '\n'
+
     s = '# kulur\n\n'
     for key,val of UNICODE
         s += "## #{key}\n\n"
         if val is str
             s += Array.from(val).join(' ') + '\n\n'
             continue
+        bases = BASES[key] ? 'aoei'
         for r in val
             head = "#{hex r[0]} - #{hex r[1]}"
             cs = []
+            ms = [] # combining marks as 'base base+mark' pairs, unless normalization would merge them
             for cp in r[0]..r[1]
                 ch = String.fromCodePoint cp
-                cs.push ch if printable ch
+                if printable ch
+                    cs.push ch
+                else if /^\p{M}$/u.test ch
+                    b = bases[ms.length % bases.length]
+                    ms.push b + ' ' + b + ch if (b + ch).normalize('NFC') == b + ch
             if empty cs
-                s += head + ' holds only combining marks, which are not shown here.\n\n'
-            else if cs.length > 320
+                s += head + "  ■ #{ms.length} combining marks\n\n" + pairs(ms) + '\n\n'
+                continue
+            if cs.length > 320
                 s += head + "  ■ 320 □ #{cs.length}\n\n" + rows(cs.slice(0 160)) + '\n...\n' + rows(cs.slice(-160)) + '\n\n'
             else
                 s += head + "  ■ #{cs.length}\n\n" + rows(cs) + '\n\n'
+            if valid ms
+                s += "combining marks  ■ #{ms.length}\n\n" + pairs(ms) + '\n\n'
     s += '## outside of the table\n\n'
     s += '✔ ✘ ☀ ★ 😀 🌈 get plain `text unicode`, © ° ± are `symbol`, ASCII like , ; ( ) stays `punct`.\n'
     s
