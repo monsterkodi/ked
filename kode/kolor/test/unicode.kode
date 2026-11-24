@@ -1,7 +1,14 @@
 
+use fs path
 use ./util ▪ inc ranges dissect lang
+use ..     ◆ kulur
 
 ▸ unicode
+
+    ▸ doc                                   # node js/kolor/kulur.js writes this to kode/kolor/kulur.md
+
+        md = fs.readFileSync path.join(◆dir, '../../../kode/kolor/kulur.md'), 'utf8'
+        kulur.unicodeDoc() ▸ md
 
     ▸ md
 

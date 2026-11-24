@@ -1,4 +1,5 @@
 #!KULUR
+use fs path
 use ../kxk/kseg
 use ../kxk/klor
 use ./extlang ▪ exts lang
@@ -64,6 +65,38 @@ wordKey = segs -> # the UNICODE key shared by all characters of a word that has 
         ⮐ null if not k or (key and k != key)
         key = k
     key
+
+unicodeDoc = -> # the markdown of kulur.md: every set and up to 320 printable characters of every range
+
+    printable = c -> not /[\p{Cn}\p{M}\p{Cs}\p{Co}\p{Cc}\p{Cf}\p{Z}]/u.test(c) and c.normalize('NFC') == c
+    hex  = n -> '0x' + n.toString(16).padStart(4 '0')
+    rows = cs ->
+        r = []
+        for i in 0...cs.length by 32
+            r.push cs.slice(i i+32).join(' ')
+        r.join '\n'
+
+    s = '# kulur\n\n'
+    for key,val of UNICODE
+        s += "## #{key}\n\n"
+        if val is str
+            s += Array.from(val).join(' ') + '\n\n'
+            continue
+        for r in val
+            head = "#{hex r[0]} - #{hex r[1]}"
+            cs = []
+            for cp in r[0]..r[1]
+                ch = String.fromCodePoint cp
+                cs.push ch if printable ch
+            if empty cs
+                s += head + ' holds only combining marks, which are not shown here.\n\n'
+            else if cs.length > 320
+                s += head + "  ■ 320 □ #{cs.length}\n\n" + rows(cs.slice(0 160)) + '\n...\n' + rows(cs.slice(-160)) + '\n\n'
+            else
+                s += head + "  ■ #{cs.length}\n\n" + rows(cs) + '\n\n'
+    s += '## outside of the table\n\n'
+    s += '✔ ✘ ☀ ★ 😀 🌈 get plain `text unicode`, © ° ± are `symbol`, ASCII like , ; ( ) stays `punct`.\n'
+    s
 
 codeTypes = ['interpolation' 'code triple']
 
@@ -1673,3 +1706,10 @@ export
     commentStyle:   commentStyle
     commentStyles:  commentStyles
     UNICODE:        UNICODE
+    unicodeDoc:     unicodeDoc
+
+◆main # node js/kolor/kulur.js regenerates kode/kolor/kulur.md
+
+    file = path.resolve ◆dir, '../../kode/kolor/kulur.md'
+    fs.writeFileSync file, unicodeDoc()
+    log file
