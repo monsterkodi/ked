@@ -44,7 +44,7 @@ edits
 width and height
 - wrap width = editor cells width minus the gutter. no configurable cap.
 - the row cache is dropped on resize and when wrapped lines change.
-- scaled lines: a line at scale s wraps at cols/s. height = s × visual rows.
+- scaled lines: a line at scale s wraps at cols / s. height = s × visual rows.
 - partial scale runs (SCALE areas) inside wrapped lines may be skipped, whatever is simplest.
 
 word vs character

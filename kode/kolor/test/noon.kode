@@ -9,6 +9,29 @@ lang 'noon'
     inc rgs, 4 'property'   ▸ 'property'
     inc rgs, 14 'value'     ▸ 'text'
 
+    rgs = ranges "✔      symbol ok"         # unicode in keys keeps its class
+    inc rgs, 0 '✔'          ▸ 'text unicode'
+    inc rgs, 7 'symbol'     ▸ 'text'
+
+    rgs = ranges "▸      x"
+    inc rgs, 0 '▸'          ▸ 'text unicode kode'
+
+    rgs = ranges "a→b    x"
+    inc rgs, 0 'a'          ▸ 'obj'
+    inc rgs, 1 '→'          ▸ 'text unicode arrow'
+    inc rgs, 2 'b'          ▸ 'obj'
+    inc rgs, 7 'x'          ▸ 'text'
+
+    rgs = ranges "→ab    x"
+    inc rgs, 0 '→'          ▸ 'text unicode arrow'
+    inc rgs, 1 'ab'         ▸ 'obj'
+
+    rgs = ranges "    aαb  value"
+    inc rgs, 4 'a'          ▸ 'property'
+    inc rgs, 5 'α'          ▸ 'text unicode greek'
+    inc rgs, 6 'b'          ▸ 'property'
+    inc rgs, 9 'value'      ▸ 'text'
+
     rgs = ranges "top" 'noon'
     inc rgs, 0 'top'        ▸ 'obj'
 

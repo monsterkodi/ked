@@ -50,12 +50,15 @@ missing = lines ext filter ->
 
     ▸ unicode fallback
 
-        syntax.themeColor('text unicode arrow bold')  ▸ theme.syntax['text unicode bold']
-        syntax.themeColor('text unicode greek')       ▸ theme.syntax['text unicode']
-        syntax.themeColor('text unicode bold')        ▸ theme.syntax['text unicode bold']
+        own = c -> theme.syntax[c]                    # a key's own color wins once the theme has one
+
+        syntax.themeColor('text unicode arrow bold')  ▸ own('text unicode arrow bold') ? own('text unicode bold')
+        syntax.themeColor('text unicode box')         ▸ own('text unicode box') ? own('text unicode')
+        syntax.themeColor('text unicode greek')       ▸ own('text unicode greek') ? own('text unicode')
+        syntax.themeColor('text unicode bold')        ▸ own('text unicode bold')
         syntax.themeColor('text unicode h9')          ▸ undefined
         syntax.themeColor('no such class')            ▸ undefined
 
         s = new syntax 'test'
-        s.getColor('text unicode math code')          ▸ theme.syntax['text unicode code'] ? [255 0 0]
+        s.getColor('text unicode math code')          ▸ own('text unicode math code') ? own('text unicode code') ? [255 0 0]
         s.getColor('no such class')                   ▸ [255 0 0]
