@@ -68,6 +68,14 @@ cursor
 2. selection, highlight and yank drawing on wrapped rows.
 3. edit rules: enter, join, copy/paste stripping.
 
+all three done. notes:
+- copy is plain text already, so the stripping is done by sue.adjust: a WRAP mark stays on the
+  line where the changed block starts (wrapLineIndex), other WRAP marks of the block vanish.
+- LINE_SCALE marks are lost on enter in the middle of a line and on joins (sue.adjust maps them by diff).
+  not fixed, they could use wrapLineIndex too.
+- tall wrapped lines (taller than the screen) draw the rows that fit, and the view follows the cursor row.
+- a cursor past the end of a full wrapped row is clamped to the last cell of that row.
+
 scope
 - active in every editor instance. only the fileeditor binds the shortcuts.
 - the headless state dump shows wrap state.
