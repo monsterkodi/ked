@@ -254,6 +254,10 @@ syntax
     comment bang!                           #0c0   
 
 ##md
+
+    text bold                               #ff8   
+    text code                               #fa8   
+    text bold code                          #ff0   
     
     text h1                                 #0c0   
     text h2                                 #0a0   
@@ -267,15 +271,12 @@ syntax
     punct h4                                #336   
     punct h5                                #224   
                                                         
-    text bold                               #ff8   
-    text code                               #fa8
-    text bold code                          #ff0
-    punct bold                              #884
-    punct minor bold                        #553
-    punct code                              #854
-    punct minor code                        #543
-    punct bold code                         #854
-    punct li1 marker                       #66a   
+    punct bold                              #884   
+    punct minor bold                        #553   
+    punct code                              #854   
+    punct minor code                        #543   
+    punct bold code                         #854   
+    punct li1 marker                        #66a   
     punct li2 marker                        #448   
     punct li3 marker                        #337   
     punct li4 marker                        #226   
