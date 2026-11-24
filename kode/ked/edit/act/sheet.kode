@@ -577,7 +577,7 @@ export
 
         if empty @s.selections
             indices = belt.lineIndicesForPositions @s.cursors
-            next = sue.areasWithSteppedLineScales(areas indices delta @lineHeight)
+            next = sue.areasWithSteppedLineScales(areas indices delta @lineScale)
         else
             lines = []
             runs  = []
@@ -588,7 +588,7 @@ export
                 else
                     runs.push piece
 
-            next = sue.areasWithSteppedLineScales(next lines delta @lineHeight)
+            next = sue.areasWithSteppedLineScales(next lines delta @lineScale)
             next = sue.areasWithSteppedRunsInLines(next runs delta @s.lines)
 
         @applySueAreas next

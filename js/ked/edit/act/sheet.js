@@ -720,7 +720,7 @@ export default {
         if (_k_.empty(this.s.selections))
         {
             indices = belt.lineIndicesForPositions(this.s.cursors)
-            next = sue.areasWithSteppedLineScales(areas,indices,delta,this.lineHeight)
+            next = sue.areasWithSteppedLineScales(areas,indices,delta,this.lineScale)
         }
         else
         {
@@ -742,7 +742,7 @@ export default {
                     runs.push(piece)
                 }
             }
-            next = sue.areasWithSteppedLineScales(next,lines,delta,this.lineHeight)
+            next = sue.areasWithSteppedLineScales(next,lines,delta,this.lineScale)
             next = sue.areasWithSteppedRunsInLines(next,runs,delta,this.s.lines)
         }
         return this.applySueAreas(next)

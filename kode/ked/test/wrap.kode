@@ -19,6 +19,19 @@ cell  = x y -> e.posCell x y
 pos   = x row -> e.state.posForCell x row
 wrap  = (s c w) -> sue.wrapStarts kseg(s) c w
 
+cellsWhere = test ->
+    h.screen.init() ; e.draw()
+    out = []
+    for y in 0...h.rows
+        line = ''
+        for x in 0...h.cols
+            line += test(x y) ? h.at(x y).replace(/\x1b\[[^m]*m/g '') : ' '
+        out.push line.trimEnd()
+    out
+
+marked = kind -> cellsWhere (x y) -> h.screen.c[y][x].mark == kind
+withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
+
 ▸ wrap
 
   ▸ starts
@@ -145,3 +158,39 @@ wrap  = (s c w) -> sue.wrapStarts kseg(s) c w
         e.cells.cols ▸ 10
         key 'ctrl+w'
         rows().map((r) -> r.trim()) ▸ ['1 0123456789' 'abcdefghij' 'k' '2 next' '' '']
+
+  ▸ selection
+
+        wed ['0123456789abcdefghijk' 'next']
+        key 'ctrl+w'
+        e.state.setMainCursor 0 1
+        e.state.setSelections [[8 0 12 0]]
+        marked('selection') ▸ ['        89' 'ab' '' '' '' '']
+        e.state.setSelections [[19 0 2 1]]
+        marked('selection') ▸ ['' '         j' 'k' ' e' '' '']
+        e.state.setSelections [[0 0 4 1]]
+        marked('selection')[0...3] ▸ ['0123456789' 'abcdefghij' 'k']
+
+  ▸ highlight
+
+        wed ['0123456789abcdefghijk' 'next']
+        key 'ctrl+w'
+        e.state.setMainCursor 0 1
+        e.state.setHighlights [[9 0 11 0]]
+        marked('highlight')[0...2] ▸ ['         9' 'a']
+
+  ▸ yank
+
+        wed ['0123456789abcdefghijk' 'next']
+        key 'ctrl+w'
+        e.state.setMainCursor 0 1
+        e.state.novim.yankFlash = [[18 0 21 0]]
+        withBg(e.color.yank)[0...3] ▸ ['' '        ij' 'k']
+
+  ▸ sue
+
+        wed ['0123456789abcdefghijk' 'next'] 10 6 ['susan']
+        e.state.setSue 8 0 [sue.BG_COLOR 4 1 '#ff0000']
+        key 'ctrl+w'
+        e.state.setMainCursor 0 1
+        withBg([255 0 0])[0...2] ▸ ['        89' 'ab']

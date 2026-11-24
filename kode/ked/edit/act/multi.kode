@@ -12,8 +12,8 @@ export
         if config.get 'cursor.scaleAdjustCol'
             oline = pos[1] - dir
             if oline
-                ocol = @lineHeight(oline) * pos[0]
-                ⮐ int(ocol / @lineHeight(pos[1]))
+                ocol = @lineScale(oline) * pos[0]
+                ⮐ int(ocol / @lineScale(pos[1]))
         pos[0]
     
     expandCursors: dir ->

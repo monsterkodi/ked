@@ -24,7 +24,7 @@ susan = (function ()
 
     susan.prototype["draw"] = function ()
     {
-        var area, areas, attr, bg, block, box, code, cpos, fg, have, hul, key, lastIndex, lines, r, row, runs, scale, seen, ul, view, x, x1, x2, y, _21_29_
+        var area, areas, attr, bg, box, code, cpos, fg, lastIndex, lines, r, row, runs, scale, style, ul, view, x, x1, x2, y, _21_29_
 
         areas = ((_21_29_=this.state.s.sue) != null ? _21_29_ : [])
         if (_k_.empty(areas))
@@ -52,8 +52,8 @@ susan = (function ()
             {
                 continue
             }
-            scale = this.state.lineHeight(y)
-            if (row + scale > this.editor.cells.rows)
+            scale = this.state.lineScale(y)
+            if (row + this.state.lineHeight(y) > this.editor.cells.rows)
             {
                 continue
             }
@@ -83,15 +83,6 @@ susan = (function ()
             {
                 continue
             }
-            runs = this.editor.runsForLine(y)
-            cpos = sue.cellPositionsForLine(lines,y,runs)
-            lastIndex = cpos.length - 1
-            x1 = _k_.max(0,(cpos[_k_.min(box.x,lastIndex)] * scale - view[0]))
-            x2 = _k_.min(this.editor.cells.cols,(cpos[_k_.min(box.x + box.w,lastIndex)] * scale - view[0]))
-            if (x1 >= x2)
-            {
-                continue
-            }
             if ((fg != null))
             {
                 fg = color.values(fg)
@@ -104,54 +95,120 @@ susan = (function ()
             {
                 ul = color.values(ul)
             }
-            seen = {}
+            style = {y:y,fg:fg,bg:bg,attr:attr,ul:ul,seen:{}}
+            if (this.isBoxWrapped(box))
+            {
+                this.drawWrappedBox(box,style)
+                continue
+            }
+            runs = this.editor.runsForLine(y)
+            cpos = sue.cellPositionsForLine(lines,y,runs)
+            lastIndex = cpos.length - 1
+            x1 = _k_.max(0,(cpos[_k_.min(box.x,lastIndex)] * scale - view[0]))
+            x2 = _k_.min(this.editor.cells.cols,(cpos[_k_.min(box.x + box.w,lastIndex)] * scale - view[0]))
+            if (x1 >= x2)
+            {
+                continue
+            }
             for (r = row; r < _k_.min(this.editor.cells.rows,row + box.h * scale); r++)
             {
                 for (x = x1; x < x2; x++)
                 {
-                    block = this.editor.cells.blockAt(x,r)
-                    if ((block != null))
+                    this.styleCell(x,r,style)
+                }
+            }
+        }
+    }
+
+    susan.prototype["isBoxWrapped"] = function (box)
+    {
+        var li
+
+        for (li = box.y; li < box.y + box.h; li++)
+        {
+            if (this.state.isWrapped(li))
+            {
+                return true
+            }
+        }
+        return false
+    }
+
+    susan.prototype["drawWrappedBox"] = function (box, style)
+    {
+        var cells, cols, cr, cx, gx, li, lines, r, row, scale, x
+
+        lines = this.state.s.lines
+        cols = this.editor.cells.cols
+        for (li = box.y; li < _k_.min(box.y + box.h,lines.length); li++)
+        {
+            row = this.state.rowOfLine(li)
+            if (row < 0 || row + this.state.lineHeight(li) > this.editor.cells.rows)
+            {
+                continue
+            }
+            scale = this.state.lineScale(li)
+            cells = this.editor.cellsForLine(li)
+            style.y = li
+            for (gx = box.x; gx < _k_.min(box.x + box.w,lines[li].length); gx++)
+            {
+                ;[cx,cr] = this.editor.posCell(gx,li,cells)
+                for (r = cr; r < cr + scale; r++)
+                {
+                    for (x = _k_.max(0,cx); x < _k_.min(cols,cx + scale); x++)
                     {
-                        if (block[4] !== y)
-                        {
-                            continue
-                        }
-                        key = `${block[0]},${block[1]}`
-                        if (seen[key])
-                        {
-                            continue
-                        }
-                        seen[key] = true
-                        if ((bg != null))
-                        {
-                            this.editor.cells.bg_block(block,bg)
-                        }
-                        if ((fg != null))
-                        {
-                            this.editor.cells.set_fg(block[0],block[1],fg)
-                        }
-                        if ((attr != null) || (ul != null))
-                        {
-                            ;[have,hul] = this.editor.cells.get_attr(block[0],block[1])
-                            this.editor.cells.set_attr(block[0],block[1],(sue.addFlags(have,attr)),((ul != null ? ul : hul)))
-                        }
-                        continue
-                    }
-                    if ((bg != null))
-                    {
-                        this.editor.cells.set_bg(x,r,bg)
-                    }
-                    if ((fg != null))
-                    {
-                        this.editor.cells.set_fg(x,r,fg)
-                    }
-                    if ((attr != null) || (ul != null))
-                    {
-                        ;[have,hul] = this.editor.cells.get_attr(x,r)
-                        this.editor.cells.set_attr(x,r,(sue.addFlags(have,attr)),((ul != null ? ul : hul)))
+                        this.styleCell(x,r,style)
                     }
                 }
             }
+        }
+    }
+
+    susan.prototype["styleCell"] = function (x, r, style)
+    {
+        var attr, bg, block, fg, have, hul, key, seen, ul, y
+
+        ;({y, fg, bg, attr, ul, seen} = style)
+        block = this.editor.cells.blockAt(x,r)
+        if ((block != null))
+        {
+            if (block[4] !== y)
+            {
+                return
+            }
+            key = `${block[0]},${block[1]}`
+            if (seen[key])
+            {
+                return
+            }
+            seen[key] = true
+            if ((bg != null))
+            {
+                this.editor.cells.bg_block(block,bg)
+            }
+            if ((fg != null))
+            {
+                this.editor.cells.set_fg(block[0],block[1],fg)
+            }
+            if ((attr != null) || (ul != null))
+            {
+                ;[have,hul] = this.editor.cells.get_attr(block[0],block[1])
+                this.editor.cells.set_attr(block[0],block[1],(sue.addFlags(have,attr)),((ul != null ? ul : hul)))
+            }
+            return
+        }
+        if ((bg != null))
+        {
+            this.editor.cells.set_bg(x,r,bg)
+        }
+        if ((fg != null))
+        {
+            this.editor.cells.set_fg(x,r,fg)
+        }
+        if ((attr != null) || (ul != null))
+        {
+            ;[have,hul] = this.editor.cells.get_attr(x,r)
+            return this.editor.cells.set_attr(x,r,(sue.addFlags(have,attr)),((ul != null ? ul : hul)))
         }
     }
 
@@ -160,5 +217,5 @@ susan = (function ()
 
 export default susan;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3VzYW4uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2VkaXQvc3VzYW4ua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUFlLFlBQVI7O09BQ08sVUFBUjs7O0FBRUwsU0FBRDs7SUFPSSxPQUFDLGFBQWEsSUFBSTtJQUNsQixPQUFDLGFBQWEsSUFBSTtJQUNsQixPQUFDLGdCQUFhLElBQUk7SUFDbEIsT0FBQyxVQUFhLElBQUk7SUFDbEIsT0FBQyxlQUFhLElBQUk7YUFFbEIsT0FBSTs7UUFBRDs7O1FBQVcsS0FBQyxRQUFRLEtBQUMsT0FBTzs7O3FCQUUvQjs7OztRQUVJLGtCQUFRLEtBQUMsTUFBTSxFQUFFO3NCQUNOOzs7O1FBRVgsT0FBUSxLQUFDLE1BQU0sRUFBRTtRQUNqQixRQUFRLEtBQUMsTUFBTSxFQUFFOzRCQUVMOzs7WUFBUjtZQUVBLE1BQU0sSUFBSSxtQkFBbUIsS0FBSztrQkFDbEI7O2dCQUFoQjs7WUFFQSxJQUFJLElBQUk7Z0JBQ0ksSUFBSSxLQUFLLEtBQUssTUFBTTs7Z0JBQWhDOztZQUVBLE1BQU0sS0FBQyxNQUFNLFVBQVU7Z0JBQ1gsTUFBTTs7Z0JBQWxCOztZQUVBLFFBQVEsS0FBQyxNQUFNLFdBQVc7Z0JBQ2QsTUFBTSxRQUFRLEtBQUMsT0FBTyxNQUFNOztnQkFBeEM7O1lBRUEsT0FBTyxLQUFLLE1BQU07WUFFbEIsS0FBTztZQUNQLEtBQU87WUFDUCxPQUFPO1lBQ1AsS0FBTztnQkFFSixTQUFRLElBQUk7O2dCQUNYLEtBQUssSUFBSSxPQUFPOztxQkFDWixTQUFRLElBQUk7O2dCQUNoQixLQUFLLElBQUksT0FBTzs7cUJBQ1osU0FBUSxJQUFJOztnQkFDaEIsS0FBSyxJQUFJLE9BQU87Z0JBQ2hCLEtBQUssSUFBSSxPQUFPOztxQkFDWixTQUFRLElBQUk7O2tCQUNmLEtBQUssTUFBTSxJQUFJLGNBQWMsSUFBSTs7OztnQkFFbEM7O1lBRUosT0FBTyxLQUFDLE9BQU8sWUFBWTtZQUMzQixPQUFPLElBQUkscUJBQXFCLE1BQU0sRUFBRTtZQUN4QyxZQUFZLEtBQUssU0FBTztZQUV4QixhQUFTLEdBQUcsYUFBUyxJQUFJLEVBQUUsY0FBWSxRQUFRLEtBQUs7WUFDcEQsYUFBUyxLQUFDLE9BQU8sTUFBTSxNQUFNLGFBQVMsSUFBSSxJQUFJLElBQUksRUFBRSxjQUFZLFFBQVEsS0FBSztnQkFDakUsTUFBTTs7Z0JBQWxCOztpQkFFd0I7O2dCQUF4QixLQUFLLE1BQU0sT0FBTzs7aUJBQ007O2dCQUF4QixLQUFLLE1BQU0sT0FBTzs7aUJBQ007O2dCQUF4QixLQUFLLE1BQU0sT0FBTzs7WUFFbEI7aUJBRUksSUFBSyxpQkFBVSxLQUFDLE9BQU8sTUFBTSxLQUFLLE1BQU0sSUFBSSxJQUFFOztxQkFFMUMsSUFBSyxRQUFLOztvQkFFVixRQUFRLEtBQUMsT0FBTyxNQUFNLFFBQVEsRUFBRTt5QkFFN0I7OzRCQUNhLE1BQU0sT0FBTTs7NEJBQXhCOzt3QkFDQSxTQUFTLE1BQU0sTUFBTSxNQUFNOzRCQUNmLEtBQUs7OzRCQUFqQjs7d0JBQ0EsS0FBSyxPQUFPOzZCQUN1Qjs7NEJBQW5DLEtBQUMsT0FBTyxNQUFNLFNBQVMsTUFBTTs7NkJBQ2dCOzs0QkFBN0MsS0FBQyxPQUFPLE1BQU0sT0FBTyxNQUFNLEdBQUcsTUFBTSxHQUFHOzs2QkFDcEMsa0JBQVM7OzhCQUNQLEtBQUssT0FBTyxLQUFDLE9BQU8sTUFBTSxTQUFTLE1BQU0sR0FBRyxNQUFNOzRCQUNuRCxLQUFDLE9BQU8sTUFBTSxTQUFTLE1BQU0sR0FBRyxNQUFNLElBQUksSUFBSSxTQUFTLEtBQUssU0FBUSxhQUFBLEtBQUs7O3dCQUM3RTs7eUJBRTJCOzt3QkFBL0IsS0FBQyxPQUFPLE1BQU0sT0FBTyxFQUFFLEVBQUU7O3lCQUNNOzt3QkFBL0IsS0FBQyxPQUFPLE1BQU0sT0FBTyxFQUFFLEVBQUU7O3lCQUN0QixrQkFBUzs7MEJBQ1AsS0FBSyxPQUFPLEtBQUMsT0FBTyxNQUFNLFNBQVMsRUFBRTt3QkFDdEMsS0FBQyxPQUFPLE1BQU0sU0FBUyxFQUFFLEdBQUcsSUFBSSxTQUFTLEtBQUssU0FBUSxhQUFBLEtBQUs7Ozs7Ozs7V0E1RmxGOzs7ZUE4Rk0ifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3VzYW4uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2tvZGUva2VkL2VkaXQvc3VzYW4ua29kZSJdLCJtYXBwaW5ncyI6Ijs7OztPQUFlLFlBQVI7O09BQ08sVUFBUjs7O0FBRUwsU0FBRDs7SUFPSSxPQUFDLGFBQWEsSUFBSTtJQUNsQixPQUFDLGFBQWEsSUFBSTtJQUNsQixPQUFDLGdCQUFhLElBQUk7SUFDbEIsT0FBQyxVQUFhLElBQUk7SUFDbEIsT0FBQyxlQUFhLElBQUk7YUFFbEIsT0FBSTs7UUFBRDs7O1FBQVcsS0FBQyxRQUFRLEtBQUMsT0FBTzs7O3FCQUUvQjs7OztRQUVJLGtCQUFRLEtBQUMsTUFBTSxFQUFFO3NCQUNOOzs7O1FBRVgsT0FBUSxLQUFDLE1BQU0sRUFBRTtRQUNqQixRQUFRLEtBQUMsTUFBTSxFQUFFOzRCQUVMOzs7WUFBUjtZQUVBLE1BQU0sSUFBSSxtQkFBbUIsS0FBSztrQkFDbEI7O2dCQUFoQjs7WUFFQSxJQUFJLElBQUk7Z0JBQ0ksSUFBSSxLQUFLLEtBQUssTUFBTTs7Z0JBQWhDOztZQUVBLE1BQU0sS0FBQyxNQUFNLFVBQVU7Z0JBQ1gsTUFBTTs7Z0JBQWxCOztZQUVBLFFBQVEsS0FBQyxNQUFNLFVBQVU7Z0JBQ2IsTUFBTSxLQUFDLE1BQU0sV0FBVyxLQUFLLEtBQUMsT0FBTyxNQUFNOztnQkFBdkQ7O1lBRUEsT0FBTyxLQUFLLE1BQU07WUFFbEIsS0FBTztZQUNQLEtBQU87WUFDUCxPQUFPO1lBQ1AsS0FBTztnQkFFSixTQUFRLElBQUk7O2dCQUNYLEtBQUssSUFBSSxPQUFPOztxQkFDWixTQUFRLElBQUk7O2dCQUNoQixLQUFLLElBQUksT0FBTzs7cUJBQ1osU0FBUSxJQUFJOztnQkFDaEIsS0FBSyxJQUFJLE9BQU87Z0JBQ2hCLEtBQUssSUFBSSxPQUFPOztxQkFDWixTQUFRLElBQUk7O2tCQUNmLEtBQUssTUFBTSxJQUFJLGNBQWMsSUFBSTs7OztnQkFFbEM7O2lCQUVvQjs7Z0JBQXhCLEtBQUssTUFBTSxPQUFPOztp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
 //# sourceURL=../../../kode/ked/edit/susan.kode

@@ -35,8 +35,8 @@ use ./tool  ◆ sue
             row = @state.rowOfLine y
             continue if row < 0
 
-            scale = @state.lineHeight y
-            continue if row + scale > @editor.cells.rows
+            scale = @state.lineScale y
+            continue if row + @state.lineHeight(y) > @editor.cells.rows
 
             code = area.value[0]
 
@@ -57,6 +57,16 @@ use ./tool  ◆ sue
             else
                 continue
 
+            fg = color.values fg if fg?
+            bg = color.values bg if bg?
+            ul = color.values ul if ul?
+
+            style = {y:y fg:fg bg:bg attr:attr ul:ul seen:{}}
+
+            if @isBoxWrapped box
+                @drawWrappedBox box style
+                continue
+
             runs = @editor.runsForLine y
             cpos = sue.cellPositionsForLine(lines y runs)
             lastIndex = cpos.length-1
@@ -65,34 +75,60 @@ use ./tool  ◆ sue
             x2 = min @editor.cells.cols (cpos[min(box.x + box.w lastIndex)]*scale - view[0])
             continue if x1 >= x2
 
-            fg = color.values fg if fg?
-            bg = color.values bg if bg?
-            ul = color.values ul if ul?
-
-            seen = {}
-
             for r in row...min(@editor.cells.rows row + box.h*scale)
-
                 for x in x1...x2
+                    @styleCell x r style
 
-                    block = @editor.cells.blockAt(x r)
+    isBoxWrapped: box ->
 
-                    if block?
-                        continue if block[4] != y
-                        key = "#{block[0]},#{block[1]}"
-                        continue if seen[key]
-                        seen[key] = true
-                        @editor.cells.bg_block block bg if bg?
-                        @editor.cells.set_fg block[0] block[1] fg if fg?
-                        if attr? or ul?
-                            [have hul] = @editor.cells.get_attr block[0] block[1]
-                            @editor.cells.set_attr block[0] block[1] (sue.addFlags(have attr)) (ul ? hul)
-                        continue
+        for li in box.y...box.y+box.h
+            ⮐ true if @state.isWrapped li
+        false
 
-                    @editor.cells.set_bg x r bg if bg?
-                    @editor.cells.set_fg x r fg if fg?
-                    if attr? or ul?
-                        [have hul] = @editor.cells.get_attr x r
-                        @editor.cells.set_attr x r (sue.addFlags(have attr)) (ul ? hul)
+    #  the box of a wrapped line follows the graphemes, line by line
+
+    drawWrappedBox: (box style) ->
+
+        lines = @state.s.lines
+        cols  = @editor.cells.cols
+
+        for li in box.y...min(box.y+box.h lines.length)
+
+            row = @state.rowOfLine li
+            continue if row < 0 or row + @state.lineHeight(li) > @editor.cells.rows
+
+            scale = @state.lineScale li
+            cells = @editor.cellsForLine li
+            style.y = li
+
+            for gx in box.x...min(box.x+box.w lines[li].length)
+                [cx cr] = @editor.posCell gx li cells
+                for r in cr...cr+scale
+                    for x in max(0 cx)...min(cols cx+scale)
+                        @styleCell x r style
+
+    styleCell: (x r style) ->
+
+        {y fg bg attr ul seen} = style
+
+        block = @editor.cells.blockAt(x r)
+
+        if block?
+            ⮐ if block[4] != y
+            key = "#{block[0]},#{block[1]}"
+            ⮐ if seen[key]
+            seen[key] = true
+            @editor.cells.bg_block block bg if bg?
+            @editor.cells.set_fg block[0] block[1] fg if fg?
+            if attr? or ul?
+                [have hul] = @editor.cells.get_attr block[0] block[1]
+                @editor.cells.set_attr block[0] block[1] (sue.addFlags(have attr)) (ul ? hul)
+            ⮐
+
+        @editor.cells.set_bg x r bg if bg?
+        @editor.cells.set_fg x r fg if fg?
+        if attr? or ul?
+            [have hul] = @editor.cells.get_attr x r
+            @editor.cells.set_attr x r (sue.addFlags(have attr)) (ul ? hul)
 
 export susan

@@ -251,6 +251,15 @@ use              ◆ mode
         cells = @cellsForLine y
         lastIndex = cells.length-1
 
+        if @state.isWrapped y
+            for span in spans
+                for x in span[0]...min(span[1] lastIndex)
+                    [cx cr] = @posCell x y cells
+                    continue if cx+scale > @cells.cols
+                    for r in cr...min(@cells.rows cr+scale)
+                        @cells.bg_rect cx r cx+scale-1 r span[2]
+            ⮐
+
         for span in spans
 
             x1 = max 0 (cells[min(span[0] lastIndex)]*scale - view[0])
@@ -279,23 +288,18 @@ use              ◆ mode
         bg = @color.highlight.bg
         ul = @color.highlight.ul
         bg = color.darken bg if not @cells.screen.t.hasFocus
-        
-        [vx vy] = @state.s.view
-        
+
         for highlight in @state.s.highlights
 
             li    = highlight[1]
             row   = @state.rowOfLine li
-            scale = @state.lineHeight li
+            scale = @state.lineScale li
             
             break if row >= @cells.rows
             continue if row < 0
-            continue if row + scale > @cells.rows
+            continue if row + @state.lineHeight(li) > @cells.rows
                 
-            # clip the span to the visible columns - a bracket pair spanning
-            xs = max highlight[0] int(vx/scale)
-            xe = min highlight[2] (int((vx+@cells.cols-1)/scale)+1)
-            xe = min xe (@state.s.lines[li] ? []).length
+            [xs xe] = @clipToView li highlight[0] min(highlight[2] (@state.s.lines[li] ? []).length)
 
             continue if xs >= xe
 
@@ -304,26 +308,26 @@ use              ◆ mode
 
             for x in xs...xe
 
-                cx = cells[min(x lastIndex)]*scale - vx
+                [cx cr] = @posCell min(x lastIndex) li cells
                 continue if cx < 0
                 continue if cx+scale > @cells.cols
 
-                hlc = @cells.get_char cx row
+                hlc = @cells.get_char cx cr
 
-                continue if @cells.isScaled(cx row)
+                continue if @cells.isScaled(cx cr)
 
                 switch hlc
                     '{' '[' '(' ')' ']' '}' ➜ ulc = @color.highlight.bracket_ul ; bgc = @color.highlight.bracket
                     "'" '"'                 ➜ ulc = @color.highlight.string_ul  ; bgc = @color.highlight.string
                                             ➜ ulc = ul ; bgc = bg
                 
-                for r in row...min(@cells.rows, row+scale)
+                for r in cr...min(@cells.rows, cr+scale)
                     for i in 0...scale
                         @cells.set_bg cx+i r bgc
 
-                @cells.set_char cx row color.ul_rgb(ulc)+'\x1b[4:1m'+hlc+'\x1b[4:0m'
-                @cells.set_mark cx row 'highlight'
-                @cells.adjustContrastForHighlight cx row bgc
+                @cells.set_char cx cr color.ul_rgb(ulc)+'\x1b[4:1m'+hlc+'\x1b[4:0m'
+                @cells.set_mark cx cr 'highlight'
+                @cells.adjustContrastForHighlight cx cr bgc
                     
 #!selections
     
@@ -342,64 +346,7 @@ use              ◆ mode
                 
             bg = belt.isSpanLineRange(@state.s.lines selection) ? spanbg : linebg
             
-            start = max selection[1] @state.s.view[1]
-            row   = @state.rowOfLine start
-
-            continue if start > selection[3]
-
-            for li in start..selection[3]
-                
-                scale = @state.lineHeight li
-                vx    = @state.s.view[0]
-
-                if row < 0
-                    row += scale
-                    continue
-
-                break if row >= @cells.rows
-                break if row + scale > @cells.rows
-                
-                if li == selection[1]
-                    xs = selection[0]
-                else
-                    xs = 0
-                    
-                if li == selection[3]
-                    xe = selection[2]
-                else
-                    xe = (@state.s.lines[li] ? []).length
-                
-                xs = max xs int(vx/scale)
-                xe = min xe (int((vx+@cells.cols-1)/scale)+1)
-
-                if xs >= xe
-                    row += scale
-                    continue
-
-                cells = @cellsForLine li
-                lastIndex = cells.length-1
-
-                for x in xs...xe
-                    cx = cells[min(x lastIndex)]*scale - vx
-                    continue if cx < 0
-                    continue if cx+scale > @cells.cols
-
-                    block = @cells.blockAt(cx row)
-
-                    if block?
-                        continue if block[4] != li
-                        @cells.bg_block block bg
-                        @cells.adjustContrastForHighlight block[0] block[1] bg
-                        @cells.set_mark block[0] block[1] 'selection'
-                        continue
-
-                    for r in row...min(@cells.rows, row+scale)
-                        for i in 0...scale
-                            @cells.set_bg cx+i r bg 
-                            @cells.adjustContrastForHighlight cx+i r bg
-                    @cells.set_mark cx row 'selection'
-
-                row += scale
+            @drawRange selection bg 'selection'
                     
         # prof.end 'selection'
 
@@ -407,67 +354,72 @@ use              ◆ mode
 
         ⮐ if empty @state.novim.yankFlash
 
-        bg = @color.yank
-
-        [vx vy] = @state.s.view
-
         for rng in @state.novim.yankFlash
+            @drawRange rng @color.yank
 
-            start = max rng[1], vy
-            row   = @state.rowOfLine start
+    #  the graphemes of a line range get the background bg, scaled lines
+    #  and the blocks of runs as a whole, mark names the cell mark
 
-            continue if start > rng[3]
+    drawRange: (rng bg mark) ->
 
-            for li in start..rng[3]
+        start = max rng[1] @state.s.view[1]
 
-                scale = @state.lineHeight li
+        ⮐ if start > rng[3]
 
-                if row < 0
-                    row += scale
+        for li in start..rng[3]
+
+            row = @state.rowOfLine li
+
+            continue if row < 0
+            break if row + @state.lineHeight(li) > @cells.rows
+
+            xs = 0
+            xs = rng[0] if li == rng[1]
+            xe = (@state.s.lines[li] ? []).length
+            xe = rng[2] if li == rng[3]
+
+            [xs xe] = @clipToView li xs xe
+
+            continue if xs >= xe
+
+            scale = @state.lineScale li
+            cells = @cellsForLine li
+            lastIndex = cells.length-1
+
+            for x in xs...xe
+
+                [cx cr] = @posCell min(x lastIndex) li cells
+
+                continue if cx < 0
+                continue if cx+scale > @cells.cols
+
+                block = @cells.blockAt(cx cr)
+
+                if block?
+                    continue if block[4] != li
+                    @cells.bg_block block bg
+                    @cells.adjustContrastForHighlight block[0] block[1] bg
+                    @cells.set_mark block[0] block[1] mark if mark
                     continue
 
-                break if row >= @cells.rows
-                break if row + scale > @cells.rows
+                for r in cr...min(@cells.rows, cr+scale)
+                    for i in 0...scale
+                        @cells.set_bg cx+i r bg
+                        @cells.adjustContrastForHighlight cx+i r bg
 
-                if li == rng[1]
-                    xs = rng[0]
-                else
-                    xs = 0
+                @cells.set_mark cx cr mark if mark
 
-                if li == rng[3]
-                    xe = rng[2]
-                else
-                    xe = (@state.s.lines[li] ? []).length
+    #  the graphemes of xs...xe in line y that can be visible
+    #  wrapped lines are always visible in full
 
-                xs = max xs int(vx/scale)
-                xe = min xe (int((vx+@cells.cols-1)/scale)+1)
+    clipToView: (y xs xe) ->
 
-                if xs >= xe
-                    row += scale
-                    continue
+        ⮐ [xs xe] if @state.isWrapped y
 
-                cells = @cellsForLine li
-                lastIndex = cells.length-1
+        vx    = @state.s.view[0]
+        scale = @state.lineScale y
 
-                for x in xs...xe
-                    cx = cells[min(x lastIndex)]*scale - vx
-                    continue if cx < 0
-                    continue if cx+scale > @cells.cols
-
-                    block = @cells.blockAt(cx row)
-
-                    if block?
-                        continue if block[4] != li
-                        @cells.bg_block block bg
-                        @cells.adjustContrastForHighlight block[0] block[1] bg
-                        continue
-
-                    for r in row...min(@cells.rows, row+scale)
-                        for i in 0...scale
-                            @cells.set_bg cx+i r bg
-                            @cells.adjustContrastForHighlight cx+i r bg
-
-                row += scale
+        [max(xs int(vx/scale)) min(xe int((vx+@cells.cols-1)/scale)+1)]
 
 #!cursors
     
