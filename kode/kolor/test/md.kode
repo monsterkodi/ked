@@ -147,6 +147,15 @@ lang 'md'
     inc rgs, 14 'png'       ▸ 'file_ext_png'
     inc rgs, 22 '1'         ▸ 'number float'
 
+    rgs = ranges '(I assume yes.)'
+    inc rgs, 10 'yes'       ▸ 'text'
+    inc rgs, 13 '.'         ▸ 'punct'
+
+    rgs = ranges 'i.e. see readme.md'
+    inc rgs, 0 'i'          ▸ 'text'
+    inc rgs, 2 'e'          ▸ 'text'
+    inc rgs, 9 'readme'     ▸ 'file_md'
+
     rgs = ranges 'like `~/a/files`, ok'
     inc rgs, 10 'files'     ▸ 'dir_leaf'
     inc rgs, 15 '`'         ▸ 'punct code'
