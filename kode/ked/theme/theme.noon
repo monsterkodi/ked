@@ -176,7 +176,8 @@ syntax
     punct code triple                       #222   
     punct comment                           #222   
     section                                 #ccf   
-    argument                                #bbf   
+    argument                                #bbf
+    punct argument                          #668
     number hex                              #aaf   
     keyword                                 #99f   
     number                                  #88f   
@@ -267,7 +268,16 @@ syntax
     punct h5                                #224   
                                                         
     text bold                               #ff8   
-    text code                               #fa8   
+    text code                               #fa8
+    punct bold                              #884
+    punct minor bold                        #553
+    punct code                              #854
+    punct minor code                        #543
+    punct li1 bold                          #884
+    punct minor li1 bold                    #553
+    punct li1 code                          #854
+    punct minor li1 code                    #543
+    punct li1 bold code                     #854
     text unicode li1                        #aaa   
     text unicode li2                        #888   
     text unicode li3                        #666   

@@ -1,0 +1,23 @@
+use ../../kolor ◆ kulur
+use ../theme    ◆ theme
+
+missingPunct = lines ext ->
+    missing = []
+    for line in kulur.dissect lines, ext
+        for chunk in line
+            if chunk.clss.startsWith('punct') and not theme.syntax[chunk.clss]
+                missing.push chunk.clss if chunk.clss not in missing
+    missing
+
+▸ theme
+
+    ▸ md punct
+
+        lines = [
+            "A `code` span, `f(a, b)` and **bold**."
+            "- **bold, item** and `code; item` and **`bold code`**"
+            "```sh"
+            "out=$(mktemp -d)"
+            "```"
+            ]
+        missingPunct(lines, 'md') ▸ []
