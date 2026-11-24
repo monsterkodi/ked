@@ -84,9 +84,6 @@ use ../menu         ◆ filterchoice
         for child in node.children ? []
             @addItemsForTree child items
 
-    #  reloading resets the highlight: while the editor has focus it follows the main cursor,
-    #  otherwise the row is kept
-
     onSheetEdited: =>
 
         row = @currentIndex()

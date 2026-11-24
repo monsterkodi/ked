@@ -2,6 +2,7 @@
 use ../../../kxk ◆ post
 use ../base      ◆ view
 use              ◆ sheetree sheenode
+
 ■sheeditor□view
 
     @: @screen @editor @name ->

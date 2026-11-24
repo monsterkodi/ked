@@ -288,9 +288,9 @@ use child_process ▪ spawn exec
         dcw = @dircol.cells.cols
         fcw = @funcol.cells.cols
         
-        zen = config.data?.zen?.enable
-        if not zen
-            dcw = 0 if @dircol.hidden() or not @dircol.active
+        # zen = config.data?.zen?.enable
+        # if not zen
+        dcw = 0 if @dircol.hidden() or not @dircol.active
         fcw = 0 if @funcol.hidden() or not @funcol.active
         
         if @viewSizeDelta
@@ -392,10 +392,8 @@ use child_process ▪ spawn exec
     
         if data?.zen?.enable
             @title.hide()
-            @dircol.hide()
         else
             @title.show()
-            @dircol.show()
         
     reloadFile: => 
         

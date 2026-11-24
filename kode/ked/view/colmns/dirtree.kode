@@ -32,6 +32,9 @@ import rgxs from './quicky.json' with { type: "json" }
     
         for item in @items
             
+            inRepo = status.gitDir == '/' or slash.samePath(item.path, status.gitDir) or item.path.startsWith(status.gitDir + '/')
+            if not inRepo ➜ continue
+
             if item.tilde.endsWith '..' ➜ continue
             
             else if item.type == 'dir'
@@ -67,14 +70,20 @@ import rgxs from './quicky.json' with { type: "json" }
                     redraw = true
                     
                 if item.modified and item.path not in status.changed or item.added and item.path not in status.added
-                    delete item.modified
+                    if item.path not in status.changed ➜ delete item.modified
+                    if item.path not in status.added   ➜ delete item.added
                     @tilde item
                     redraw = true
                 
         if redraw
             @set @items @currentIndex()        
             post.emit 'redraw' 
-                
+
+    applyGitStatusCache: =>
+
+        for gitDir,status of git.statusCache
+            @onGitStatus status
+
     onFileChange: info =>
         
         ⮐ if not info.path.startsWith @currentRoot
@@ -171,6 +180,7 @@ import rgxs from './quicky.json' with { type: "json" }
                 tilde: ' ' + icons.dir + '\u00A0..'
         
         @set items opt.index ? 0
+        @applyGitStatusCache()
         
         ◯ @restoreSessionState opt
         
@@ -233,6 +243,7 @@ import rgxs from './quicky.json' with { type: "json" }
             index = @items.indexOf opt.select
         
         @set @items index
+        @applyGitStatusCache()
         
         ked_session.set "#{@name}▸open▸#{dirItem.path}" '✔'
         

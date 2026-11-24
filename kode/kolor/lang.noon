@@ -269,7 +269,7 @@ swift
 # ███   ███       ███  ███   ███  ███  ████        ███  ████  ███   ███  ███   ███  ███  ████  
 #  ███████   ███████    ███████   ███   ███        ███   ███   ███████    ███████   ███   ███  
 
-json noon yml yaml
+json noon yml yaml conf
     keyword
         true
     nil

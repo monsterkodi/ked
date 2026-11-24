@@ -1,3 +1,5 @@
+# wrap
+
 how to get ked to handle word/line-wrapping.
   
   a rough sketch:

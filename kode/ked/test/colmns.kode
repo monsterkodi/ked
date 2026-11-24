@@ -1,9 +1,9 @@
 use fs
-use ../../kxk      ▪ kseg post slash sleep
+use ../../kxk      ▪ kseg post slash sleep watcher
 use ../edit        ◆ editor
-use ../util        ◆ harness
+use ../util        ◆ harness git
 use ../index       ◆ indexer
-use ../view/colmns ◆ dircol funcol funtree
+use ../view/colmns ◆ dircol dirtree funcol funtree
 
 ked_sess = ->
     store = {}
@@ -93,6 +93,93 @@ cppTree = (name source) ◯->
         d.crumbs.split[0] ▸ '~'
 
         delete global.ked_session
+# 
+#   ▸ git status
+# 
+#         ked_sess()
+#         h = new harness cols:100 rows:30
+#         d = new dirtree h.screen 'test_dirtree' []
+# 
+#         rootA = '/tmp/opencode/ked-dirtree-a'
+#         rootB = '/tmp/opencode/ked-dirtree-b'
+#         fileA = slash.path rootA 'sub/dirty.kode'
+#         fileB = slash.path rootB 'dirty.kode'
+#         dirA  = type:'dir'  path:slash.dir(fileA) depth:0
+#         itemA = type:'file' path:fileA depth:1
+#         itemB = type:'file' path:fileB depth:0
+#         items = [dirA itemA itemB]
+# 
+#         d.tilde item for item in items
+#         d.set items
+# 
+#         statusA = gitDir:rootA changed:[fileA] added:[] deleted:[] dirs:[dirA.path] files:{}
+#         statusA.files[fileA] = 'changed'
+#         d.onGitStatus statusA
+# 
+#         dirA.modified  ▸ true
+#         itemA.modified ▸ true
+# 
+#         statusB = gitDir:rootB changed:[fileB] added:[] deleted:[] dirs:[] files:{}
+#         statusB.files[fileB] = 'changed'
+#         d.onGitStatus statusB
+# 
+#         dirA.modified  ▸ true
+#         itemA.modified ▸ true
+#         itemB.modified ▸ true
+#         dirA.tilde.endsWith(' ✔')  ▸ true
+#         itemA.tilde.endsWith(' ✔') ▸ true
+#         itemB.tilde.endsWith(' ✔') ▸ true
+# 
+#         itemA.added = true
+#         d.onGitStatus statusA
+# 
+#         itemA.modified ▸ true
+#         itemA.added    ▸ undefined
+#         itemA.tilde.endsWith(' ✔') ▸ true
+# 
+#         delete global.ked_session
+# 
+#   ▸ git status cache
+# 
+#         ked_sess()
+#         h = new harness cols:100 rows:30
+#         d = new dirtree h.screen 'test_dirtree_cache' []
+# 
+#         root     = '/tmp/opencode/ked-dirtree-cache'
+#         dirPath  = slash.path root 'sub'
+#         filePath = slash.path dirPath 'dirty.kode'
+#         rootDir  = type:'dir'  path:dirPath
+#         child    = type:'file' path:filePath
+#         status   = gitDir:root changed:[filePath] added:[] deleted:[] dirs:[dirPath] files:{}
+#         status.files[filePath] = 'changed'
+#         git.statusCache[root] = status
+# 
+#         d.dirItems = (dir info) ◯->
+#             if dir == root ➜ ⮐ [rootDir]
+#             [child]
+# 
+#         origWatch  = watcher.watch
+#         origStatus = git.status
+#         watcher.watch = ->
+#         git.status = ->
+# 
+#         ◯ d.setRoot root
+#         rootDecorated = rootDir.modified and rootDir.tilde.endsWith(' ✔')
+#         rootLineMarked = d.state.s.lines.some (line) -> kseg.str(line).includes('sub ✔')
+# 
+#         ◯ d.openDir rootDir
+#         childLineMarked = d.state.s.lines.some (line) -> kseg.str(line).includes('dirty ✔')
+# 
+#         watcher.watch = origWatch
+#         git.status = origStatus
+#         delete git.statusCache[root]
+#         delete global.ked_session
+# 
+#         rootDecorated  ▸ true
+#         rootLineMarked ▸ true
+#         child.modified ▸ true
+#         child.tilde.endsWith(' ✔') ▸ true
+#         childLineMarked ▸ true
 
 ▸ funcol
 

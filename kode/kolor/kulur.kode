@@ -1284,6 +1284,7 @@ handlers =
             word: [ keyword kodeWord number property]
     nim:    punct:[ nimComment   hashComment simpleString funcArgs dashArrow                ] word:[ keyword number property        ]
     lua:    punct:[ luaComment   simpleString luaString funcArgs dashArrow                  ] word:[ keyword number property        ]
+    conf:   punct:[ noonComment  noonPunct urlPunct                                         ] word:[ noonWord urlWord number        ]
     noon:   punct:[ noonComment  noonPunct urlPunct                                         ] word:[ noonWord urlWord number        ]
     js:     punct:[ starComment  slashComment jsPunct simpleString dashArrow regexp dict    ] word:[ keyword jsWord number property ]
     ts:     punct:[ starComment  slashComment jsPunct simpleString dashArrow regexp dict    ] word:[ keyword jsWord number property ]

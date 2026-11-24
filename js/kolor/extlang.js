@@ -11,6 +11,7 @@ export default {
         "noon",
         "yml",
         "yaml",
+        "conf",
         "cpp",
         "hpp",
         "cxx",
@@ -441,6 +442,11 @@ export default {
             "false": "nil"
         },
         "yaml": {
+            "true": "keyword",
+            "null": "nil",
+            "false": "nil"
+        },
+        "conf": {
             "true": "keyword",
             "null": "nil",
             "false": "nil"
