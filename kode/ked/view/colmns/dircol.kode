@@ -14,7 +14,7 @@ use                 ◆ dirtree
         super screen 'dircol' features
         
         @isVisible = false
-        @setActive true
+        # @setActive true
         
         @contextItem = null
         @pointerType = 'pointer'
@@ -53,7 +53,7 @@ use                 ◆ dirtree
         root = ked_session.get 'dircol▸root' process.cwd()
         
         @setRoot root
-        
+
     @isParentItem: item -> valid item?.tilde and item.tilde.endsWith '..'
     
     @isRootItem: item root -> valid item and slash.samePath item.path root
