@@ -116,7 +116,14 @@ lang 'md'
     
     rgs = ranges '```coffeescript'
     inc rgs, 0 '`'      ▸ 'punct code triple'
-    inc rgs, 3 'coffeescript' ▸ 'comment'
+    inc rgs, 3 'coffeescript' ▸ 'code lang'
+
+    rgs = ranges '```kode'
+    inc rgs, 2 '`'      ▸ 'punct code triple'
+    inc rgs, 3 'kode'   ▸ 'code lang'
+
+    rgs = ranges '```sh'
+    inc rgs, 3 'sh'     ▸ 'code lang'
         
     rgs = ranges "- li"
     inc rgs, 0 '-'      ▸ 'punct li1 marker'

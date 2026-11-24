@@ -1097,8 +1097,10 @@ mdPunct = ->
 
             type = 'code triple'
 
+            if (lng = getChunk 3) and lng.start == chunk.start+3 and not lng.clss.startsWith 'punct'
+                setValue 3 'code lang' # language argument
+
             if getmatch(3) in ['coffeescript''javascript''js']
-                setValue 3 'comment'
                 ⮐ addValues 3 type
 
             pushStack weak:true type:type

@@ -654,7 +654,7 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         
         rgs = ranges '```coffeescript'
         inc rgs 0 '`'      ▸ 'punct code triple'
-        inc rgs 3 'coffeescript' ▸ 'comment'
+        inc rgs 3 'coffeescript' ▸ 'code lang'
             
   ▸ md2
         

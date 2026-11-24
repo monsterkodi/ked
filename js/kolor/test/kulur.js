@@ -557,7 +557,7 @@ toExport["kulur"] = async function ()
         compare(inc(rgs,1,'.'),'punct')
         rgs = ranges('```coffeescript')
         compare(inc(rgs,0,'`'),'punct code triple')
-        compare(inc(rgs,3,'coffeescript'),'comment')
+        compare(inc(rgs,3,'coffeescript'),'code lang')
     })
     await section("md2", async function ()
     {
