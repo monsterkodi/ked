@@ -22,6 +22,23 @@
 A refactor with no change in behaviour (renames, moving code) also starts with
 the tests: switch them to the new names first, and watch them fail.
 
+## how tests read
+
+- **No comments in tests.** The `▸` section name and the cases are the
+  documentation. Explain the reasons in the chat or in the commit message.
+- **Setup must not hide the cases.** Put harness, editor and fixture setup in
+  small helpers at the top of the file, and extend the existing ones instead of
+  duplicating them.
+- Don't open a new section just to repeat the same setup: add the cases to the
+  section that already has that fixture.
+- **Short, topical section names**: `sheet cursor`, not a sentence.
+- **Compact cases**, one per line: `key 'down' ; mc() ▸ [2 2]`.
+- Plain prose lines in a `▸` file are parsed as code (a word like `do` breaks
+  it), which is one more reason for no comments.
+- **Visual changes** are also checked with a headless dump (`bin/ked -H file`,
+  keys piped on stdin), not only with unit tests: the unit-test harness has no
+  text sizing.
+
 ## the problem: shared paths in tests
 
 Tests used fixed scratch paths like `/tmp/opencode/kodeknrd`, and set them up

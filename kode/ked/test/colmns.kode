@@ -184,9 +184,6 @@ cppTree = (name source) ◯->
 
 ▸ dircol active
 
-    # startup with an inactive dircol: the screen resize must not make it visible,
-    # otherwise the first toggle hides it and show only focuses the hidden tree
-
     newDircol = ->
         ked_sess()
         h = new harness cols:100 rows:30

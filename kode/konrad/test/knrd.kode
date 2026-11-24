@@ -391,12 +391,6 @@ cached = fp ◯->
     ▸ the fingerprint can be taken of a copy of the compiler, and a faithful
     ▸ copy of that copy has the same fingerprint
 
-        # the probes below go into private copies. writing into the live js/kode
-        # would change the fingerprint of every kk that starts meanwhile
-
-        # the paths come from testdir directly: a variable that a failing
-        # step left undefined would make them relative to the repo
-
         copyA = testdir 'compilerA'
         copyB = testdir 'compilerB'
 
