@@ -30,3 +30,11 @@ missing = lines ext filter ->
             '<a href="https://example.com/x">'
             ]
         missing(lines, 'md', (c) -> true) ▸ []
+
+    ▸ md headings
+
+        lines = []
+        for h in ['#' '##' '###' '####' '#####']
+            lines.push h + ' a, (b) `c-d` e'
+        lines.push '**a → b**'
+        missing(lines, 'md', (c) -> true) ▸ []

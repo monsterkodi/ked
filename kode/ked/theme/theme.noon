@@ -263,7 +263,8 @@ syntax
 
     text bold                               #ff8   
     text code                               #fa8   
-    text bold code                          #ff0   
+    text bold code                          #ff0
+    text unicode bold                       #ff8
     
     text h1                                 #0c0   
     text h2                                 #0a0   
@@ -275,7 +276,24 @@ syntax
     punct h2                                #040   
     punct h3                                #030   
     punct h4                                #336   
-    punct h5                                #224   
+    punct h5                                #224
+
+    punct minor h1                          #050
+    punct minor h2                          #040
+    punct minor h3                          #030
+    punct minor h4                          #336
+    punct minor h5                          #224
+
+    text h1 code                            #fa8
+    text h2 code                            #fa8
+    text h3 code                            #fa8
+    text h4 code                            #fa8
+    text h5 code                            #fa8
+    punct h1 code                           #854
+    punct h2 code                           #854
+    punct h3 code                           #854
+    punct h4 code                           #854
+    punct h5 code                           #854
                                                         
     punct bold                              #440   
     punct minor bold                        #553   
