@@ -61,7 +61,7 @@ args = karg """
                 log b5('🔧') w3(info.path)
                 ◯ knrd info.path
                 if ◯ knrd.compilerMoved()
-                    log y5('⚠ ') r5('the compiler changed on disk, restart kk -w')
+                    log y5('⚠ ') #r5('the compiler changed on disk, restart kk -w')
                 ◯ kk.test args.files silent:true
     
 #!test

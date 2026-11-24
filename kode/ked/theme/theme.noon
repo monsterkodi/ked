@@ -173,12 +173,12 @@ syntax
     comment ligature                        #333   
     punct define                            #333   
     punct comment triple                    #222   
-    punct code triple                       #444
-    code lang                               #888
+    punct code triple                       #444   
+    code lang                               #888   
     punct comment                           #222   
     section                                 #ccf   
-    argument                                #bbf
-    punct argument                          #668
+    argument                                #bbf   
+    punct argument                          #668   
     number hex                              #aaf   
     keyword                                 #99f   
     number                                  #88f   
@@ -272,7 +272,7 @@ syntax
     punct h4                                #336   
     punct h5                                #224   
                                                         
-    punct bold                              #884   
+    punct bold                              #440   
     punct minor bold                        #553   
     punct code                              #854   
     punct minor code                        #543   
@@ -285,13 +285,13 @@ syntax
             
 ##files
     
-    file                                    #aaa   
+    file                                    #bbf   
     ext                                     #444   
                                                         
     dir_leaf                                #aaf   
     text dir                                #88f   
-    dir                                     #66d   
-    punct dir                               #55a   
+    dir                                     #77e   
+    punct dir                               #44a   
     dir_punct                               #226   
     file_log                                #bbf   
     file_txt                                #aaf   
