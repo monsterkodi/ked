@@ -19,9 +19,6 @@
 2. Run them and check that they **fail**, and fail for the expected reason.
 3. Then do the implementation, and run the tests again until they pass.
 
-A refactor with no change in behaviour (renames, moving code) also starts with
-the tests: switch them to the new names first, and watch them fail.
-
 ## how tests read
 
 - **No comments in tests.** The `▸` section name and the cases are the
@@ -39,33 +36,7 @@ the tests: switch them to the new names first, and watch them fail.
   keys piped on stdin), not only with unit tests: the unit-test harness has no
   text sizing.
 
-## the problem: shared paths in tests
-
-Tests used fixed scratch paths like `/tmp/opencode/kodeknrd`, and set them up
-with `nfs.remove root` followed by `mkdir`. Run alone, they all passed. With
-two runs at once, one process removed the directory while the other was between
-writing a file and reading it back. The result was random failures like
-`Cannot read properties of null (reading 'source')`. With four parallel
-`kk -t konrad` runs, every single run failed.
-
-Worse, one konrad test wrote a probe file into the **live** compiler (`js/kode`)
-to check that the compiler fingerprint notices changes. While that file
-existed:
-
-- every `kk` that started got a wrong compiler fingerprint
-- that `kk` rejected the real `.kkache`, rebuilt everything, and saved the cache
-  under the wrong fingerprint
-- a `kk -w` could print a false "the compiler changed on disk"
-
-Once, that test failed halfway, and the probe was written into the repo itself
-(`kode/zz_fingerprint_probe.js`): `slash.path(undefined, 'kode', …)` is a path
-relative to the cwd, which is the repo.
-
-The build itself is fine with parallel runs. `nfs.write` is atomic (temp file
-plus rename), and a lost `.kkache` entry only causes a recompile with the same
-output. The clashes all came from the tests.
-
-## the rule: every file a test touches is private to its process
+## file handling in tests
 
 - **Get every scratch path from `testdir`** (`kode/kxk/testdir.kode`):
 
@@ -107,7 +78,7 @@ output. The clashes all came from the tests.
   which hides the one real failure. Restore them in a `try` / `finally`, or put
   them back before the first assertion that can throw.
 
-## checking a fix for parallel runs
+## checking parallel runs
 
 Run a module several times at once, and compare with a single run:
 

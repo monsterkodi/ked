@@ -1,4 +1,4 @@
-# KED - terminal editor
+# KED
 
       crumbs  crumbs file infos novim status
     ┏━━━━━━━━┳━━━━┳━━━━┳━━━━┳━━━━┳━━━━┳━━━━━┓
@@ -13,7 +13,7 @@
     ┃        ┃                      ┃       ┃
     ┗━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━┛
 
-## Headless mode
+## Headless
 
 The editor runs without a terminal:
 
@@ -72,7 +72,7 @@ cursor scaling.
 The console is captured: `console.log`, `warn` and `error` show up as `log`
 lines below the dump they happened in, and no `ked.log` is written.
 
-### live mode
+## Live
 
 ```sh
 node bin/ked -L <file>

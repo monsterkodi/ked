@@ -493,6 +493,4 @@ instead. A `(g b)` in kode code is a bug, usually a CoffeeScript or Lisp habit.
 
 This is the price for leaving out commas almost everywhere
 (`f a b`, `[a b]`, `(a b) ->`). The trade-off was made on purpose when
-**kode** replaced CoffeeScript: it is bold, unusual and painful while getting
-used to it, and it is not up for debate. The aim is only to make it
-frictionless, with compile errors instead of silent comma expressions.
+**kode** replaced CoffeeScript and it is not up for debate. 
