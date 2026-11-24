@@ -269,6 +269,7 @@ syntax
                                                         
     text bold                               #ff8   
     text code                               #fa8
+    text bold code                          #ff0
     punct bold                              #884
     punct minor bold                        #553
     punct code                              #854
