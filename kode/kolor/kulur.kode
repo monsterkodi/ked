@@ -24,6 +24,29 @@ HEX     = /^[a-fA-F\d]+$/
 NEWLINE = /\r?\n/
 LI      = /(\sli\d\s|\sh\d\s)/
 
+# classes for unicode characters, by exact character or by code point range.
+# sets are checked before ranges, so a set can carve characters out of a range.
+# ranges are inclusive [first last] code points; compare with codePointAt, since
+# emoji and other characters above 0xFFFF are two UTF-16 units.
+
+UNICODE =
+
+    sets:
+        'text unicode kode':        '■□▪◆●◯▸➜⮐…'                  # kode's own syntax symbols
+
+    ranges:
+        'text unicode greek':       [[0x0370 0x03FF] [0x1F00 0x1FFF]]   # greek and coptic, greek extended
+        'text unicode cyrillic':    [[0x0400 0x052F] [0x2DE0 0x2DFF] [0xA640 0xA69F]] # cyrillic, supplement, extended-a/b
+        'text unicode symbol':      [[0x00A1 0x00BF] [0x00D7 0x00D7] [0x00F7 0x00F7]] # latin-1 symbols like © ° ± × ÷
+        'text unicode punct':       [[0x2010 0x205E]]                   # general punctuation like – — • ‰
+        'text unicode arrow':       [[0x2190 0x21FF] [0x27F0 0x27FF] [0x2900 0x297F] [0x2B00 0x2BFF]] # arrows, supplemental arrows, misc symbols and arrows
+        'text unicode math':        [[0x2200 0x22FF] [0x2A00 0x2AFF]]   # mathematical operators, supplemental
+        'text unicode box':         [[0x2500 0x259F]]                   # box drawing, block elements
+        'text unicode geometric':   [[0x25A0 0x25FF]]                   # geometric shapes
+        'text unicode dingbat':     [[0x2600 0x27BF]]                   # misc symbols, dingbats like ✔ ✘
+        'text unicode cjk':         [[0x3040 0x30FF] [0x4E00 0x9FFF] [0xAC00 0xD7AF]] # kana, cjk ideographs, hangul
+        'text unicode emoji':       [[0x1F300 0x1FAFF]]                 # pictographs, emoticons, transport, supplemental
+
 codeTypes = ['interpolation' 'code triple']
 
 base = s ->
