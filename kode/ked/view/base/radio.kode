@@ -28,7 +28,7 @@ use             ◆ view
 
         if idx != @selectedIndex
             @setSelectedIndex idx
-            @emit 'selectedChange' @selectedIndex
+            @emit 'selected' @selectedIndex
         true
 
     optionAt: x =>

@@ -50,15 +50,15 @@ use ../base         ◆ view colorslider rgbinput radio palette
         @radio.setColor 'bg' theme.colorpicker.bg
         @radio.setColor 'fg' theme.colorpicker.fg
 
-        @hue.on    'valueChange' @sliderChanged
-        @val.on    'valueChange' @sliderChanged
-        @sat.on    'valueChange' @sliderChanged
+        @hue.on   'valueChange' @sliderChanged
+        @val.on   'valueChange' @sliderChanged
+        @sat.on   'valueChange' @sliderChanged
 
-        @red.on    'valueChange' @rgbChanged
-        @green.on  'valueChange' @rgbChanged
-        @blue.on   'valueChange' @rgbChanged
+        @red.on   'valueChange' @rgbChanged
+        @green.on 'valueChange' @rgbChanged
+        @blue.on  'valueChange' @rgbChanged
         
-        @radio.on 'selectedChange' @onRadioSelectedChanged
+        @radio.on 'selected'    @onRadioSelected
 
         @setColor 'bg' theme.colorpicker.bg
         @setColor 'fg' theme.colorpicker.fg
@@ -67,7 +67,7 @@ use ../base         ◆ view colorslider rgbinput radio palette
 
     selectedIndex: => @radio.selectedIndex
 
-    onRadioSelectedChanged: => @syncAll()
+    onRadioSelected: => @syncAll()
     
     backgroundChanged: => @bgChanged
 

@@ -420,7 +420,7 @@ rad = ->
         r.selectedIndex ▸ 0
 
         changes = []
-        r.on 'selectedChange' (idx) -> changes.push idx
+        r.on 'selected' (idx) -> changes.push idx
 
         r.select 0
         r.select 1
