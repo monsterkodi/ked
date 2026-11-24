@@ -39,8 +39,8 @@ use                 ◆ funtree sheeditor colorpicker uniko
         post.on 'funcol.toggle'     @onFuncolToggle
         post.on 'funcol.show'       @onFuncolShow
         post.on 'funcol.focus'      @focusTree
-        post.on 'colorpicker.show'  @onColorPickerShow
-        post.on 'uniko.show'        @onUnikoShow
+        post.on 'colorpicker.show'  @showColorpicker
+        post.on 'uniko.show'        @showUniko
         post.on 'file.loaded'       @onFileLoaded
         
     onFileLoaded: path =>
@@ -63,7 +63,7 @@ use                 ◆ funtree sheeditor colorpicker uniko
             
         ked_session.set 'funcol' recent.funcol
 
-    onColorPickerShow: hexl opt=focus:true =>
+    showColorpicker: hexl opt=focus:true =>
 
         @setActive true
 
@@ -76,7 +76,7 @@ use                 ◆ funtree sheeditor colorpicker uniko
         ked_session.set 'funcol▸active' @active
         post.emit 'redraw'
 
-    onUnikoShow: =>
+    showUniko: =>
 
         @setActive true
         @show() if @hidden()

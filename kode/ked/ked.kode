@@ -129,7 +129,7 @@ use child_process ▪ spawn exec
     
         @editor.show()
         @title.show() if not config.data?.zen?.enable
-        @dircol.show()
+        @dircol.show() if @dircol.active
         @funcol.show() if @funcol.active
 
     hideEditor: -> 

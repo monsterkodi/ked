@@ -187,19 +187,19 @@ cppTree = (name source) ◯->
 
         [h e f] = funcolAt ['x = #ff8000;'] 4
 
-        f.onColorPickerShow()
+        f.showColorpicker()
 
         f.colorpicker.hex() ▸ '#ff8000'
 
         [h e f] = funcolAt ['x = hello;'] 6
 
-        f.onColorPickerShow()
+        f.showColorpicker()
 
         f.colorReplace ▸ null
 
         [h e f] = funcolAt ['c = #abc;'] 6
 
-        f.onColorPickerShow()
+        f.showColorpicker()
         f.colorpicker.submit f.colorpicker.hex()
 
         kseg.str(e.state.s.lines[0]) ▸ 'c = #abc;'
@@ -207,7 +207,7 @@ cppTree = (name source) ◯->
 
         [h e f] = funcolAt ['x = #ff8000;'] 6
 
-        f.onColorPickerShow ['#123456']
+        f.showColorpicker ['#123456']
 
         f.colorReplace ▸ null
 
@@ -221,7 +221,7 @@ cppTree = (name source) ◯->
 
         [h e f] = funcolAt [''] 0
 
-        f.onColorPickerShow()
+        f.showColorpicker()
 
         f.colorpicker.visible() ▸ true
         f.cells.cols ▸ 16
@@ -252,7 +252,7 @@ cppTree = (name source) ◯->
 
         f.setActive true
         f.setActive true
-        f.onUnikoShow()
+        f.showUniko()
         f.visible() ▸ true
         f.onFuncolToggle()
 
