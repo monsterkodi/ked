@@ -1051,6 +1051,30 @@ cssWord = ->
 
 ##md
 
+mdString = -> # 'quoted' or "quoted" prose on one line, apostrophes like it's stay text
+
+    ⮐ 0 if chunk.match not in ['"' "'"] or chunk.clss != 'punct' or not empty topType
+
+    chunks  = line.chunks
+    word    = c -> c and not c.clss.startsWith 'punct'
+    touches = a b -> a.start+a.length == b.start
+
+    prev = chunks[chunkIndex-1]
+    ⮐ 0 if prev and touches(prev, chunk) and prev.match not in '(['
+    next = chunks[chunkIndex+1]
+    ⮐ 0 if not word(next) or not touches(chunk, next)
+
+    for j in chunkIndex+2...chunks.length
+        c = chunks[j]
+        if c.match == chunk.match and word(chunks[j-1]) and touches(chunks[j-1], c)
+            after = chunks[j+1]
+            continue if word(after) and touches(c, after) # apostrophe inside the quote
+            type = chunk.match == '"' ? 'string double' : 'string single'
+            for k in chunkIndex..j
+                chunks[k].clss = (k == chunkIndex or k == j or chunks[k].clss.startsWith('punct')) ? 'punct ' + type : type
+            ⮐ j - chunkIndex + 1
+    0
+
 mdPunct = ->
 
     if chunkIndex == 0
@@ -1084,6 +1108,9 @@ mdPunct = ->
         setValue 0 type
         setValue 1 type
         ⮐ 2
+
+    adv = mdString()
+    ⮐ adv if adv
 
     if chunk.match == '*' and not topType?.endsWith('code') # code spans are literal
 

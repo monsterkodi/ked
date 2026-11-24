@@ -147,6 +147,29 @@ lang 'md'
     inc rgs, 14 'png'       ▸ 'file_ext_png'
     inc rgs, 22 '1'         ▸ 'number float'
 
+    rgs = ranges "carry a 'wrap' flag"
+    inc rgs, 8 "'"          ▸ 'punct string single'
+    inc rgs, 9 'wrap'       ▸ 'string single'
+    inc rgs, 13 "'"         ▸ 'punct string single'
+    inc rgs, 15 'flag'      ▸ 'text'
+
+    rgs = ranges 'say "hi there" now'
+    inc rgs, 4 '"'          ▸ 'punct string double'
+    inc rgs, 5 'hi'         ▸ 'string double'
+    inc rgs, 8 'there'      ▸ 'string double'
+    inc rgs, 13 '"'         ▸ 'punct string double'
+    inc rgs, 15 'now'       ▸ 'text'
+
+    rgs = ranges "the lines' end, don't 'stop"
+    inc rgs, 9 "'"          ▸ 'punct'
+    inc rgs, 11 'end'       ▸ 'text'
+    inc rgs, 22 "'"         ▸ 'punct'
+    inc rgs, 23 'stop'      ▸ 'text'
+
+    rgs = ranges "(`'x'`)"
+    inc rgs, 2 "'"          ▸ 'punct code'
+    inc rgs, 3 'x'          ▸ 'text code'
+
     rgs = ranges '(I assume yes.)'
     inc rgs, 10 'yes'       ▸ 'text'
     inc rgs, 13 '.'         ▸ 'punct'
