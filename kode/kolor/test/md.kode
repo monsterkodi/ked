@@ -56,6 +56,44 @@ lang 'md'
     inc rgs, 8 '`'          ▸ 'punct code'
     inc rgs, 10 'c'         ▸ 'text'
 
+    rgs = ranges "`konrad/test/knrd.kode` x"
+    inc rgs, 0 '`'          ▸ 'punct code'
+    inc rgs, 1 'konrad'     ▸ 'text dir'
+    inc rgs, 7 '/'          ▸ 'punct dir'
+    inc rgs, 8 'test'       ▸ 'text dir'
+    inc rgs, 13 'knrd'      ▸ 'file_kode'
+    inc rgs, 17 '.'         ▸ 'file_punct_kode'
+    inc rgs, 18 'kode'      ▸ 'file_ext_kode'
+    inc rgs, 22 '`'         ▸ 'punct code'
+    inc rgs, 24 'x'         ▸ 'text'
+
+    rgs = ranges "`knrd.kode`"
+    inc rgs, 0 '`'          ▸ 'punct code'
+    inc rgs, 1 'knrd'       ▸ 'file_kode'
+    inc rgs, 5 '.'          ▸ 'file_punct_kode'
+    inc rgs, 6 'kode'       ▸ 'file_ext_kode'
+    inc rgs, 10 '`'         ▸ 'punct code'
+
+    rgs = ranges "`Date.now()` `slash.home` `a.png`"
+    inc rgs, 1 'Date'       ▸ 'text code'
+    inc rgs, 5 '.'          ▸ 'punct code'
+    inc rgs, 6 'now'        ▸ 'text code'
+    inc rgs, 14 'slash'     ▸ 'text code'
+    inc rgs, 20 'home'      ▸ 'text code'
+    inc rgs, 27 'a'         ▸ 'file_png'
+    inc rgs, 29 'png'       ▸ 'file_ext_png'
+
+    rgs = ranges "**a/knrd.kode** x"
+    inc rgs, 0 '*'          ▸ 'punct bold'
+    inc rgs, 1 '*'          ▸ 'punct bold'
+    inc rgs, 2 'a'          ▸ 'text dir'
+    inc rgs, 3 '/'          ▸ 'punct dir'
+    inc rgs, 4 'knrd'       ▸ 'file_kode'
+    inc rgs, 8 '.'          ▸ 'file_punct_kode'
+    inc rgs, 9 'kode'       ▸ 'file_ext_kode'
+    inc rgs, 13 '*'         ▸ 'punct bold'
+    inc rgs, 16 'x'         ▸ 'text'
+
     rgs = ranges "it's good"
     inc rgs, 0 'it'         ▸ 'text'
     inc rgs, 2 "'"          ▸ 'punct'

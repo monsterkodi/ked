@@ -659,7 +659,12 @@ noonWord = ->
     noonProp()
 
 ##url
+MDSPAN = /(code|bold|italic)$/ # md inline styles that may contain file paths
+FILEXT = exts.concat ['png' 'gif' 'jpg' 'jpeg' 'bmp' 'tiff' 'icns' 'mov' 'toml' 'cast' 'text'] # known file extensions
+
 urlPunct = ->
+
+    mdSpan = ext == 'md' and MDSPAN.test topType
 
     if prev = getChunk -1
         if chunk.turd == '://'
@@ -672,11 +677,11 @@ urlPunct = ->
                 ⮐ 6
 
         if chunk.match == '.'
-            if not prev.clss.startsWith('number') and prev.clss != 'semver' and prev.match not in '\\./' and not /\d+/.test(prev.match) and empty topType
+            if not prev.clss.startsWith('number') and prev.clss != 'semver' and prev.match not in '\\./' and not /\d+/.test(prev.match) and (empty(topType) or mdSpan and prev.match != '*')
                 if next = getChunk 1
                     if next.start == chunk.start+chunk.length
                         fileext = next.match
-                        if fileext not in '\\./*+'
+                        if fileext not in '\\./*+' and (not mdSpan or fileext in FILEXT) # md spans contain code like obj.prop
                             setValue -1 'file_'+fileext
                             setValue  0 'file_punct_'+fileext
                             setValue  1 'file_ext_'+fileext
@@ -689,6 +694,7 @@ urlPunct = ->
                 break if line.chunks[i].clss.endsWith 'dir'
                 break if line.chunks[i].clss.startsWith 'url'
                 break if line.chunks[i].match == '"'
+                break if mdSpan and line.chunks[i].match in '`*' # opening delimiter of the md span
                 if line.chunks[i].clss.startsWith 'punct'
                     line.chunks[i].clss = 'punct dir'
                 else
