@@ -660,19 +660,19 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         
         rgs = ranges "- li"
         inc rgs 0 '-'      ▸ 'punct li1 marker'
-        inc rgs 2 'li'     ▸ 'text li1'
-    
+        inc rgs 2 'li'     ▸ 'text'
+
         rgs = ranges "    - **bold**"
         inc rgs 4 '-'      ▸ 'punct li2 marker'
-        inc rgs 8 'bold'   ▸ 'text li2 bold'
-        
+        inc rgs 8 'bold'   ▸ 'text bold'
+
         rgs = ranges "        - **bold**"
         inc rgs 8 '-'      ▸ 'punct li3 marker'
-        inc rgs 12 'bold'  ▸ 'text li3 bold'
-    
+        inc rgs 12 'bold'  ▸ 'text bold'
+
         rgs = ranges "        * **bold**"
         inc rgs 8 '*'      ▸ 'punct li3 marker'
-        inc rgs 12 'bold'  ▸ 'text li3 bold'
+        inc rgs 12 'bold'  ▸ 'text bold'
     
         dss = dissect """
             - li1

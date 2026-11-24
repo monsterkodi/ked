@@ -1040,7 +1040,6 @@ mdPunct = ->
 
         if chunk.turd.length <= 1 and chunk.match in '-*' and getChunk(1)?.start > chunk.start+1
             type = ['li1''li2''li3''li4''li5'][parseInt chunk.start/4]
-            pushStack merge:true fill:true type:type
             ⮐ addValue 0 type + ' marker'
 
         if chunk.match == '#'

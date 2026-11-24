@@ -273,30 +273,8 @@ syntax
     punct minor bold                        #553
     punct code                              #854
     punct minor code                        #543
-    punct li1 bold                          #884
-    punct minor li1 bold                    #553
-    punct li1 code                          #854
-    punct minor li1 code                    #543
-    punct li1 bold code                     #854
-    text unicode li1                        #aaa   
-    text unicode li2                        #888   
-    text unicode li3                        #666   
-    text li1                                #99f   
-    text li2                                #66a   
-    text li3                                #447   
-    text li4                                #336   
-    text li5                                #225   
-    punct li1                               #448   
-    punct li2                               #336   
-    punct li3                               #224   
-    punct li4                               #113   
-    punct li5                               #113   
-    punct minor li1                         #448   
-    punct minor li2                         #336   
-    punct minor li3                         #224   
-    punct minor li4                         #113   
-    punct minor li5                         #113   
-    punct li1 marker                        #66a   
+    punct bold code                         #854
+    punct li1 marker                       #66a   
     punct li2 marker                        #448   
     punct li3 marker                        #337   
     punct li4 marker                        #226   
