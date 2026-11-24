@@ -1,13 +1,13 @@
 use ../../kolor ◆ kulur
 use ../theme    ◆ theme
 
-missingPunct = lines ext ->
-    missing = []
+missing = lines ext filter ->
+    clsss = []
     for line in kulur.dissect lines, ext
         for chunk in line
-            if chunk.clss.startsWith('punct') and not theme.syntax[chunk.clss]
-                missing.push chunk.clss if chunk.clss not in missing
-    missing
+            if filter(chunk.clss) and not theme.syntax[chunk.clss]
+                clsss.push chunk.clss if chunk.clss not in clsss
+    clsss
 
 ▸ theme
 
@@ -20,4 +20,12 @@ missingPunct = lines ext ->
             "out=$(mktemp -d)"
             "```"
             ]
-        missingPunct(lines, 'md') ▸ []
+        missing(lines, 'md', (c) -> c.startsWith 'punct') ▸ []
+
+    ▸ md files and urls
+
+        lines = [
+            '<img src="./img/kode.svg" />'
+            'see https://example.com/a/b'
+            ]
+        missing(lines, 'md', (c) -> true) ▸ []

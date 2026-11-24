@@ -201,7 +201,11 @@ syntax
     punct keyword                           #44c   
     punct function class                    #220   
     punct keyword extends                   #220   
-    url domain                              #d00   
+    url domain                              #d00
+    url tld                                 #900
+    url protocol                            #700
+    punct url tld                           #400
+    punct url                               #400
     punct regexp start                      #c00   
     punct regexp end                        #c00   
     text unicode regexp                     #f85   
@@ -317,7 +321,8 @@ syntax
     file_kua                                #0e0   
     file_mm                                 #0d0   
     file_h                                  #090   
-    file_png                                #0a0   
+    file_svg                                #0b6
+    file_png                                #0a0
     file_gif                                #070   
     file_jpg                                #060   
     file_icns                               #060   
