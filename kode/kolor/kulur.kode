@@ -687,7 +687,7 @@ urlPunct = ->
                             setValue  1 'file_ext_'+fileext
                             ⮐ 2
 
-        if chunk.match == '/'
+        if chunk.match == '/' and not chunk.turd?.startsWith('/>') # leave self-closing tags to xmlPunct
 
             for i in chunkIndex..0 by -1
                 break if line.chunks[i].start+line.chunks[i].length < line.chunks[i+1]?.start
@@ -704,6 +704,8 @@ urlPunct = ->
     0
 
 urlWord = ->
+
+    ⮐ if chunk.clss in ['keyword' 'property'] # tag and attribute names in md
 
     if prev = getChunk -1
         if prev.match in '\\/'
@@ -1152,7 +1154,31 @@ keyword = ->
         chunk.clss = lang[ext][chunk.match]
         ⮐ # give coffeeFunc a chance, number bails for us
 
+mdTag = -> # tags the name and attributes of a <tag …> that is closed on the same line
+
+    chunks = line.chunks
+    adjacent = k -> chunks[k] and chunks[k-1] and chunks[k-1].start+chunks[k-1].length == chunks[k].start
+
+    i = chunkIndex+1
+    i++ if chunks[i]?.match == '/' and adjacent i
+    ⮐ if not adjacent(i) or chunks[i].clss.startsWith 'punct'
+
+    for j in i+1...chunks.length
+        ⮐ if chunks[j].match == '<'
+        if chunks[j].match == '>'
+            chunks[i].clss = 'keyword'
+            for k in i+1...j
+                if not chunks[k].clss.startsWith('punct') and chunks[k+1].match == '=' and adjacent k+1
+                    chunks[k].clss = 'property'
+            ⮐
+
 xmlPunct = ->
+
+    if ext == 'md' and chunk.match == '<' and empty topType
+        mdTag()
+
+    if chunk.turd?.startsWith('/>')
+        ⮐ addValues 2 'keyword'
 
     if chunk.turd == '</'
         ⮐ addValues 2 'keyword'
