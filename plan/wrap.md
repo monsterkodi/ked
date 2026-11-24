@@ -25,6 +25,13 @@ storage
 - toggling wrap is an undo step.
 - alt+w is a global toggle that overrides the per-line flags while it is set.
 - ctrl+alt+w switches between character and word wrap for the whole state.
+- both globals live on the state as @wrap = {all:false word:false}, outside the immutable s.
+  not undoable. they reset on reload for now.
+
+ctrl+w
+- toggles every line that has a cursor or selection.
+- the main cursor's line decides the new state: all of those lines are set to the opposite of its flag.
+- does nothing while wrap.all is set.
 
 edits
 - enter: the new line after a wrapped line is unwrapped.
@@ -50,8 +57,16 @@ view
 
 cursor
 - up/down move by logical lines, so the cursor may jump over continuation rows. home/end stay logical.
-- the logical↔visual mapping is the main goal of the first step. it lives with the existing
-  sue scaling logic and is used by cursor, selection, highlight and yank drawing and by posForCell.
+- the logical↔visual mapping is the main goal of the first step. it lives in state.kode,
+  next to lineHeight/rowPrefix, and is used by cursor, selection, highlight and yank drawing and by posForCell.
+
+## steps
+
+1. state: @wrap, wrap sue, wrapRows li (row start indices), lineHeight uses the row count,
+   logical↔visual lookups, posForCell. headless tests for toggling, drawing, cursor cell
+   and posForCell. wrap state in the headless dump.
+2. selection, highlight and yank drawing on wrapped rows.
+3. edit rules: enter, join, copy/paste stripping.
 
 scope
 - active in every editor instance. only the fileeditor binds the shortcuts.
