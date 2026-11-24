@@ -194,3 +194,44 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         key 'ctrl+w'
         e.state.setMainCursor 0 1
         withBg([255 0 0])[0...2] ▸ ['        89' 'ab']
+
+  ▸ edits
+
+        wraps = -> dumpstate.tags(e.state).split('[wrap: ')[1]?.split(']')[0]
+        wed ['aaaa bbbb cccc' 'dddd' 'eeee']
+        key 'ctrl+w'
+        e.state.setMainCursor 4 0
+        e.state.insert '\n'
+        e.state.s.lines.length ▸ 4
+        wraps() ▸ '0'
+        e.state.delete 'back'
+        e.state.s.lines.length ▸ 3
+        wraps() ▸ '0'
+        e.state.setMainCursor 0 0
+        e.state.insert 'x'
+        wraps() ▸ '0'
+        e.state.setMainCursor 0 1
+        key 'ctrl+w'
+        wraps() ▸ '0 1'
+        e.state.delete 'back'
+        wraps() ▸ '0'
+        e.state.setMainCursor 0 1
+        key 'ctrl+w'
+        e.state.setMainCursor 0 0
+        key 'ctrl+w'
+        wraps() ▸ '1'
+        e.state.setMainCursor 0 1
+        e.state.delete 'back'
+        wraps() ▸ undefined
+        e.state.undo()
+        wraps() ▸ '1'
+        e.state.setMainCursor 2 1
+        e.state.insert 'one\ntwo\nthree'
+        e.state.s.lines.length ▸ 4
+        wraps() ▸ '1'
+        e.state.setMainCursor 0 1
+        e.state.insert '\n'
+        wraps() ▸ '2'
+        e.state.setMainCursor 2 2
+        e.state.joinLines()
+        wraps() ▸ '2'
