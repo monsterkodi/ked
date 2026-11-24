@@ -34,11 +34,11 @@ parse   = (c,e) -> kulur.parse kstr.lines(c), e ? ext
         inc rgs 1 '➜' ▸ 'punct keyword'
 
         rgs = ranges '┌─┬─┐'
-        inc rgs 0 '┌' ▸ 'text unicode'
-        inc rgs 1 '─' ▸ 'text unicode'
-        inc rgs 2 '┬' ▸ 'text unicode'
-        inc rgs 3 '─' ▸ 'text unicode'
-        inc rgs 4 '┐' ▸ 'text unicode'
+        inc rgs 0 '┌' ▸ 'text unicode box'
+        inc rgs 1 '─' ▸ 'text unicode box'
+        inc rgs 2 '┬' ▸ 'text unicode box'
+        inc rgs 3 '─' ▸ 'text unicode box'
+        inc rgs 4 '┐' ▸ 'text unicode box'
 
         rgs = ranges "🐀🐁🐂🐃🐄🐅🐆🐇🐈🐉🐊🐋🐌🐍🐎🐏🐐🐑🐒🐓🐔🐕🐖🐗🐘🐙🐚🐛🐜🐝🐞🐟🐠🐡🐢🐣🐤🐥"
         inc rgs 0  '🐀' ▸ 'text unicode'

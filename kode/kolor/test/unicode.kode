@@ -1,0 +1,62 @@
+
+use ./util ▪ inc ranges dissect lang
+
+▸ unicode
+
+    ▸ md
+
+        lang 'md'
+
+        rgs = ranges 'α я © – ↔ ∑ ─ ◇ ✔ ¬'
+        inc rgs, 0  'α'         ▸ 'text unicode greek'
+        inc rgs, 2  'я'         ▸ 'text unicode cyrillic'
+        inc rgs, 4  '©'         ▸ 'text unicode symbol'
+        inc rgs, 6  '–'         ▸ 'text unicode punct'
+        inc rgs, 8  '↔'         ▸ 'text unicode arrow'
+        inc rgs, 10 '∑'         ▸ 'text unicode math'
+        inc rgs, 12 '─'         ▸ 'text unicode box'
+        inc rgs, 14 '◇'         ▸ 'text unicode geometric'
+        inc rgs, 16 '✔'         ▸ 'text unicode'
+        inc rgs, 18 '¬'         ▸ 'text unicode symbol'
+
+        rgs = ranges '中 x'
+        inc rgs, 0  '中'        ▸ 'text unicode cjk'
+        inc rgs, 3  'x'         ▸ 'text'
+
+        rgs = ranges '■ ▸ ➜ ⮐ … ◆'          # sets carve their characters out of the ranges
+        inc rgs, 0  '■'         ▸ 'text unicode kode'
+        inc rgs, 2  '▸'         ▸ 'text unicode kode'
+        inc rgs, 4  '➜'         ▸ 'text unicode kode'
+        inc rgs, 6  '⮐'         ▸ 'text unicode kode'
+        inc rgs, 8  '…'         ▸ 'text unicode kode'
+        inc rgs, 10 '◆'         ▸ 'text unicode kode'
+
+        rgs = ranges '**a ↔ b** `α`'
+        inc rgs, 4  '↔'         ▸ 'text unicode arrow bold'
+        inc rgs, 11 'α'         ▸ 'text unicode greek code'
+
+        rgs = ranges 'a, b'
+        inc rgs, 1  ','         ▸ 'punct minor'
+
+    ▸ txt
+
+        lang 'txt'
+
+        rgs = ranges '▸ α ↔'
+        inc rgs, 0  '▸'         ▸ 'text unicode kode'
+        inc rgs, 2  'α'         ▸ 'text unicode greek'
+        inc rgs, 4  '↔'         ▸ 'text unicode arrow'
+
+    ▸ kode keeps its symbols as punct
+
+        lang 'kode'
+
+        rgs = ranges 'a ➜ b'
+        inc rgs, 2  '➜'         ▸ 'punct keyword'
+
+        rgs = ranges 'x = a ↔ b'
+        inc rgs, 6  '↔'         ▸ 'text unicode arrow'
+
+        lang 'md'                           # md chunks kode blocks before switching to kode
+        dss = dissect "```kode\n⮐ a\n```"
+        inc dss[1], 0 '⮐'       ▸ 'punct keyword return'

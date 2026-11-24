@@ -2,6 +2,9 @@
 use ../../kxk   ◆ matchr kstr kseg
 use ../../kolor ◆ kulur
 use ../theme    ◆ theme
+
+UNIKEY = new RegExp "^text unicode (#{Object.keys(kulur.UNICODE).join('|')})\\b"
+
 ■syntax
     @: @name -> 
         
@@ -120,8 +123,14 @@ use ../theme    ◆ theme
             else
                 clss = x
         
-        theme.syntax[clss] ? [255 0 0]
-        
+        syntax.themeColor(clss) ? [255 0 0]
+
+    @themeColor: clss -> # theme color of clss; 'text unicode <key> …' falls back to 'text unicode …'
+
+        ⮐ theme.syntax[clss] if theme.syntax[clss]
+        if m = UNIKEY.exec clss
+            ⮐ theme.syntax['text unicode' + clss[m[0].length..]]
+
     getAnsiColor: x y =>
         
         for clr in @colors[y]

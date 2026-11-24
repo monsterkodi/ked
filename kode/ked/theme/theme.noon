@@ -265,7 +265,17 @@ syntax
     text code                               #fa8   
     text bold code                          #ff0
     text unicode bold                       #ff8
-    
+    text unicode bold code                  #854
+    text unicode code                       #854
+    text italic                             #ccf
+    punct italic                            #448
+    text unicode italic                     #448
+    text unicode h1                         #050
+    text unicode h2                         #040
+    text unicode h3                         #030
+    text unicode h4                         #336
+    text unicode h5                         #224
+
     text h1                                 #0c0   
     text h2                                 #0a0   
     text h3                                 #080   

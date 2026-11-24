@@ -31,21 +31,27 @@ LI      = /(\sli\d\s|\sh\d\s)/
 
 UNICODE =
 
-    sets:
-        'text unicode kode':        '■□▪◆●◯▸➜⮐…'                  # kode's own syntax symbols
+    kode:        '■□▪◆●◯▸➜⮐…'                        # kode's own syntax symbols
+    greek:       [[0x0370 0x03ff] [0x1f00 0x1fff]]   # greek and coptic, greek extended
+    cyrillic:    [[0x0400 0x052f] [0x2de0 0x2dff] [0xa640 0xa69f]] # cyrillic, supplement, extended-a/b
+    symbol:      [[0x00a1 0x00bf] [0x00d7 0x00d7] [0x00f7 0x00f7]] # latin-1 symbols like © ° ± × ÷
+    punct:       [[0x2010 0x205e]]                   # general punctuation like – — • ‰
+    arrow:       [[0x2190 0x21ff] [0x27f0 0x27ff] [0x2900 0x297f] [0x2b00 0x2bff]] # arrows, supplemental arrows, misc symbols and arrows
+    math:        [[0x2200 0x22ff] [0x2a00 0x2aff]]   # mathematical operators, supplemental
+    box:         [[0x2500 0x259f]]                   # box drawing, block elements
+    geometric:   [[0x25A0 0x25ff]]                   # geometric shapes
+    cjk:         [[0x3040 0x30ff] [0x4e00 0x9fff] [0xac00 0xd7af]] # kana, cjk ideographs, hangul
 
-    ranges:
-        'text unicode greek':       [[0x0370 0x03FF] [0x1F00 0x1FFF]]   # greek and coptic, greek extended
-        'text unicode cyrillic':    [[0x0400 0x052F] [0x2DE0 0x2DFF] [0xA640 0xA69F]] # cyrillic, supplement, extended-a/b
-        'text unicode symbol':      [[0x00A1 0x00BF] [0x00D7 0x00D7] [0x00F7 0x00F7]] # latin-1 symbols like © ° ± × ÷
-        'text unicode punct':       [[0x2010 0x205E]]                   # general punctuation like – — • ‰
-        'text unicode arrow':       [[0x2190 0x21FF] [0x27F0 0x27FF] [0x2900 0x297F] [0x2B00 0x2BFF]] # arrows, supplemental arrows, misc symbols and arrows
-        'text unicode math':        [[0x2200 0x22FF] [0x2A00 0x2AFF]]   # mathematical operators, supplemental
-        'text unicode box':         [[0x2500 0x259F]]                   # box drawing, block elements
-        'text unicode geometric':   [[0x25A0 0x25FF]]                   # geometric shapes
-        'text unicode dingbat':     [[0x2600 0x27BF]]                   # misc symbols, dingbats like ✔ ✘
-        'text unicode cjk':         [[0x3040 0x30FF] [0x4E00 0x9FFF] [0xAC00 0xD7AF]] # kana, cjk ideographs, hangul
-        'text unicode emoji':       [[0x1F300 0x1FAFF]]                 # pictographs, emoticons, transport, supplemental
+unicodeKey = ch -> # the UNICODE key of a character or null, sets win over ranges
+
+    for key,val of UNICODE
+        ⮐ key if val is str and val.includes ch
+    cp = ch.codePointAt 0
+    for key,val of UNICODE
+        if val is arr
+            for r in val
+                ⮐ key if r[0] <= cp <= r[1]
+    null
 
 codeTypes = ['interpolation' 'code triple']
 
@@ -119,11 +125,6 @@ chunked = segls ext ->
             
             for s,segIndex in chnk.segl
                 
-                isUniko = ch cc -> 
-                    isu = cc >= 2000
-                    if isu ➜ ⮐ false if ch in '■□▪◆●◯▸➜⮐…'
-                    isu
-                
                 b = base s
                 
                 if m = PUNCT.exec b
@@ -140,15 +141,22 @@ chunked = segls ext ->
                             break
     
                     clss = 'punct'
-    
-                    if isUniko b b.charCodeAt(0)
+                    uniko = unicodeKey b
+
+                    if uniko == 'kode'
+                        clss = 'punct' # until blocked knows if the line's language uses them
+                    else if uniko
+                        clss = 'text unicode ' + uniko
+                    else if b.charCodeAt(0) >= 2000
                         clss = 'text unicode'
                     else
                         clss = 'punct' 
                         if b in [','';''{''}''('')']
                             clss += ' minor'
 
-                    chnks.chunks.push start:widths[chnk.index+segIndex] length:kseg.width(s) match:b text:s turd:turd clss:clss
+                    chnk2 = start:widths[chnk.index+segIndex] length:kseg.width(s) match:b text:s turd:turd clss:clss
+                    chnk2.kodesym = true if uniko == 'kode'
+                    chnks.chunks.push chnk2
                 else
                     if lastWord == null
                         lastWord = []
@@ -1451,6 +1459,13 @@ for ext,handler of handlers
 for ext in ['html' 'htm' 'xml' 'svg' 'md']
     commentStyles[ext] = start:'<!--' end:'-->'
 
+KODESYMS = [] # languages whose handlers treat the UNICODE.kode symbols as punctuation
+for ext,handler of handlers
+    for hnd in [kodePunct coffeePunct dashArrow]
+        if hnd in handler.punct
+            KODESYMS.push ext
+            break
+
 commentStyle = (ext) ->
     ⮐ if not ext is str
     ext = ext[1..] if ext[0] == '.'
@@ -1508,6 +1523,10 @@ blocked = lines ->
                 warn 'no handl?' ext
                 warn 'no handl?' line
                 warn 'no handl?' handlers[ext]
+
+        if ext not in KODESYMS
+            for c in line.chunks
+                c.clss = 'text unicode kode' if c.kodesym and c.clss == 'punct'
 
         chunkIndex = 0
         while chunkIndex < line.chunks.length
@@ -1632,3 +1651,4 @@ export
     syntax:         syntax
     commentStyle:   commentStyle
     commentStyles:  commentStyles
+    UNICODE:        UNICODE

@@ -1,11 +1,12 @@
 use ../../kolor ◆ kulur
 use ../theme    ◆ theme
+use ../util     ◆ syntax
 
 missing = lines ext filter ->
     clsss = []
     for line in kulur.dissect lines, ext
         for chunk in line
-            if filter(chunk.clss) and not theme.syntax[chunk.clss]
+            if filter(chunk.clss) and not syntax.themeColor(chunk.clss)
                 clsss.push chunk.clss if chunk.clss not in clsss
     clsss
 
@@ -38,3 +39,23 @@ missing = lines ext filter ->
             lines.push h + ' a, (b) `c-d` e'
         lines.push '**a → b**'
         missing(lines, 'md', (c) -> true) ▸ []
+
+    ▸ md unicode
+
+        lines = []
+        for h in ['#' '##' '###' '####' '#####']
+            lines.push h + ' a ▸ © ↔ α'
+        lines.push '`▸ © ↔ α` *▸ ↔ it* **`▸ ↔`** ▸ ✔'
+        missing(lines, 'md', (c) -> true) ▸ []
+
+    ▸ unicode fallback
+
+        syntax.themeColor('text unicode arrow bold')  ▸ theme.syntax['text unicode bold']
+        syntax.themeColor('text unicode greek')       ▸ theme.syntax['text unicode']
+        syntax.themeColor('text unicode bold')        ▸ theme.syntax['text unicode bold']
+        syntax.themeColor('text unicode h9')          ▸ undefined
+        syntax.themeColor('no such class')            ▸ undefined
+
+        s = new syntax 'test'
+        s.getColor('text unicode math code')          ▸ theme.syntax['text unicode code'] ? [255 0 0]
+        s.getColor('no such class')                   ▸ [255 0 0]
