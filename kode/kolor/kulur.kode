@@ -1061,7 +1061,7 @@ mdPunct = ->
                     pushStack merge:true fill:true type:'h5'
                     ⮐ addValues 5 'h5'
 
-    if chunk.match == '*'
+    if chunk.match == '*' and not topType?.endsWith('code') # code spans are literal
 
         if chunk.turd?[..1] == '**'
 

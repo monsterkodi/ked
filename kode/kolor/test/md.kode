@@ -35,6 +35,27 @@ lang 'md'
     inc rgs, 9 'code'       ▸ 'text italic code'
     inc rgs, 14 '*'         ▸ 'punct italic'
     
+    rgs = ranges "`a*b` c"
+    inc rgs, 0 '`'          ▸ 'punct code'
+    inc rgs, 1 'a'          ▸ 'text code'
+    inc rgs, 2 '*'          ▸ 'punct code'
+    inc rgs, 3 'b'          ▸ 'text code'
+    inc rgs, 4 '`'          ▸ 'punct code'
+    inc rgs, 6 'c'          ▸ 'text'
+
+    rgs = ranges "`**x**` c"
+    inc rgs, 1 '*'          ▸ 'punct code'
+    inc rgs, 2 '*'          ▸ 'punct code'
+    inc rgs, 3 'x'          ▸ 'text code'
+    inc rgs, 5 '*'          ▸ 'punct code'
+    inc rgs, 6 '`'          ▸ 'punct code'
+    inc rgs, 8 'c'          ▸ 'text'
+
+    rgs = ranges "- `a/*.k` c"
+    inc rgs, 5 '*'          ▸ 'punct li1 code'
+    inc rgs, 8 '`'          ▸ 'punct li1 code'
+    inc rgs, 10 'c'         ▸ 'text li1'
+
     rgs = ranges "it's good"
     inc rgs, 0 'it'         ▸ 'text'
     inc rgs, 2 "'"          ▸ 'punct'
