@@ -181,6 +181,42 @@ cppTree = (name source) ◯->
 #         child.tilde.endsWith(' ✔') ▸ true
 #         childLineMarked ▸ true
 
+▸ dircol active
+
+    # startup with an inactive dircol: the screen resize must not make it visible,
+    # otherwise the first toggle hides it and show only focuses the hidden tree
+
+    newDircol = ->
+        ked_sess()
+        h = new harness cols:100 rows:30
+        e = new editor h.screen 'test_editor' []
+        new dircol h.screen e []
+
+    [sent orig] = capture()
+
+    d = newDircol()
+    d.active ▸ false
+    d.showIfActive()
+    d.hidden() ▸ true
+
+    d.onShow()
+    d.visible() ▸ true
+    d.active ▸ true
+
+    d = newDircol()
+    d.showIfActive()
+    d.onToggle()
+    d.visible() ▸ true
+    d.active ▸ true
+    ked_session.get('dircol▸active') ▸ true
+
+    d.hide()
+    d.showIfActive()
+    d.visible() ▸ true
+
+    post.emit = orig
+    delete global.ked_session
+
 ▸ funcol
 
   ▸ seeding

@@ -42,6 +42,8 @@ use ../screen    ◆ cells
         @onViewActive()
 
     onViewActive: => post.emit 'view.active' @name @active
+
+    showIfActive: -> @show() if @active
         
     show: -> 
     
