@@ -1,5 +1,6 @@
 use fs
 use ../../kxk ▪ nfs slash sleep post
+use ../../kxk ◆ testdir
 use ../index ◆ index_kode index_hpp index_noon index_json index_utils indexer
 use ../util  ◆ fileutil walker
 
@@ -8,7 +9,7 @@ parsed = (klass text) ->
     idx.parse text
 
 indexed = (name content ext='kode') ◯->
-    root = "/tmp/opencode/ked-index-#{name}"
+    root = testdir "ked-index-#{name}"
     file = slash.path root "index.#{ext}"
     fs.rmSync root recursive:true force:true
     fs.mkdirSync root recursive:true
@@ -245,7 +246,7 @@ indexed = (name content ext='kode') ◯->
 
   ▸ depth
 
-        root = '/tmp/opencode/ked-walker-depth'
+        root = testdir 'ked-walker-depth'
 
         fs.rmSync root recursive:true force:true
         fs.mkdirSync slash.path(root 'one' 'two') recursive:true

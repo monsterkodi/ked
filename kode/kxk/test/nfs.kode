@@ -1,12 +1,12 @@
 
 use fs
-use .. ◆ nfs slash
+use .. ◆ nfs slash testdir
 
 ▸ nfs
 
     ▸ listing a directory it cannot read logs nothing
 
-        root = '/tmp/opencode/kxk-nfs-eacces'
+        root = testdir 'kxk-nfs-eacces'
         secret = slash.path root 'secret'
 
         fs.rmSync root recursive:true force:true
@@ -31,7 +31,7 @@ use .. ◆ nfs slash
 
     ▸ duplicating a file inserts a copy suffix before the extension
 
-        root = '/tmp/opencode/kxk-nfs-duplicate'
+        root = testdir 'kxk-nfs-duplicate'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
 
@@ -48,7 +48,7 @@ use .. ◆ nfs slash
 
     ▸ duplicating again continues the copy number and ignores gaps
 
-        root = '/tmp/opencode/kxk-nfs-duplicate'
+        root = testdir 'kxk-nfs-duplicate'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
 
@@ -65,7 +65,7 @@ use .. ◆ nfs slash
         slash.file(second) ▸ 'test-copy2.txt'
         slash.file(third)  ▸ 'test-copy3.txt'
 
-        root = '/tmp/opencode/kxk-nfs-duplicate-gap'
+        root = testdir 'kxk-nfs-duplicate-gap'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
 
@@ -81,7 +81,7 @@ use .. ◆ nfs slash
 
     ▸ duplicating a copy continues the chain of the original
 
-        root = '/tmp/opencode/kxk-nfs-duplicate-copy'
+        root = testdir 'kxk-nfs-duplicate-copy'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
 
@@ -98,7 +98,7 @@ use .. ◆ nfs slash
 
     ▸ duplicating a folder copies its contents
 
-        root = '/tmp/opencode/kxk-nfs-duplicate-dir'
+        root = testdir 'kxk-nfs-duplicate-dir'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
 
@@ -116,7 +116,7 @@ use .. ◆ nfs slash
 
     ▸ duplicating a file without an extension appends a copy suffix
 
-        root = '/tmp/opencode/kxk-nfs-duplicate-noext'
+        root = testdir 'kxk-nfs-duplicate-noext'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
 
@@ -141,7 +141,7 @@ use .. ◆ nfs slash
 
     ▸ trashing a file in /tmp deletes it
 
-        root = '/tmp/opencode/kxk-nfs-trash-tmp'
+        root = testdir 'kxk-nfs-trash-tmp' '/tmp'
         file = slash.path root 'a.txt'
 
         fs.rmSync root recursive:true force:true
@@ -158,7 +158,7 @@ use .. ◆ nfs slash
 
     ▸ trashing a file in ~/tmp deletes it
 
-        root = slash.path(slash.home() 'tmp' "opencode-nfs-trash-#{Date.now()}")
+        root = testdir 'kxk-nfs-trash' slash.path(slash.home() 'tmp')
         file = slash.path root 'a.txt'
 
         fs.rmSync root recursive:true force:true
@@ -175,7 +175,7 @@ use .. ◆ nfs slash
 
     ▸ trashing a file in the trash deletes it
 
-        file = slash.path slash.home() '.local/share/Trash/files' "opencode-nfs-trash-#{Date.now()}.txt"
+        file = slash.path slash.home() '.local/share/Trash/files' "#{testdir.id()}-nfs-trash.txt"
 
         fs.writeFileSync file 'hello'
 
@@ -189,7 +189,7 @@ use .. ◆ nfs slash
 
     ▸ trashed items go into a timestamped hashed folder
 
-        root = slash.path slash.home() '.cache/opencode' "kxk-nfs-trash-stamp-#{Date.now()}"
+        root = testdir 'kxk-nfs-trash-stamp' slash.path(slash.home() '.cache/opencode')
         file = slash.path root 'a.txt'
 
         fs.rmSync root recursive:true force:true
@@ -212,10 +212,9 @@ use .. ◆ nfs slash
     ▸ trashing a file with a name already in the trash keeps both
 
         trashRoot = slash.path slash.home() '.local/share/Trash/files'
-        stamp     = Date.now()
-        name      = "opencode-nfs-trash-collision-#{stamp}.txt"
+        name      = "#{testdir.id()}-nfs-trash-collision.txt"
         oldItem   = slash.path trashRoot name
-        root      = slash.path slash.home() '.cache/opencode' "kxk-nfs-trash-collision-#{stamp}"
+        root      = testdir 'kxk-nfs-trash-collision' slash.path(slash.home() '.cache/opencode')
         file      = slash.path root name
 
         fs.rmSync root recursive:true force:true
@@ -246,10 +245,9 @@ use .. ◆ nfs slash
     ▸ trashing a folder with a name already in the trash keeps both
 
         trashRoot = slash.path slash.home() '.local/share/Trash/files'
-        stamp     = Date.now()
-        name      = "opencode-nfs-trash-collision-dir-#{stamp}"
+        name      = "#{testdir.id()}-nfs-trash-collision-dir"
         oldItem   = slash.path trashRoot name
-        root      = slash.path slash.home() '.cache/opencode' "kxk-nfs-trash-collision-dir-#{stamp}"
+        root      = testdir 'kxk-nfs-trash-collision-dir' slash.path(slash.home() '.cache/opencode')
         folder    = slash.path root name
 
         fs.rmSync root recursive:true force:true

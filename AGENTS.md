@@ -33,6 +33,9 @@ usage: `./kk <flag>`
 | `kk -t ked a/b`  | only sections whose names contain `a`, then subsections containing `b`  |
 | `kk -t plain`    | only failures: `file:line`, actual and expected on one line, no colors  |
 
+Read `kode/ked/test/test.md` before writing or changing tests:
+several `kk` processes test in parallel, so test files must stay private to their process.
+
 ## files outside the transpiler
 
 `kolor/lang.noon` is on the ignore list and is deliberately not transpiled:

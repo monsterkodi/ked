@@ -1,13 +1,13 @@
-use fs os
+use fs
 use ../../kxk    ▪ post slash
+use ../../kxk    ◆ testdir
 use ../edit      ◆ editor
 use ../util      ◆ harness config
 use ../theme     ◆ theme
 use ../index     ◆ kacher prjcts
 use ../view/menu ◆ replacer searcher
 
-tmp = fs.mkdtempSync slash.path(os.tmpdir() 'ked-test-')
-process.on 'exit' -> fs.rmSync tmp recursive:true force:true
+tmp = testdir()
 
 ▸ searcher
 

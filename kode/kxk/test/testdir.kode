@@ -1,0 +1,51 @@
+
+use fs os child_process
+use .. ◆ slash testdir
+
+childRoot = ->
+
+    code = "import testdir from './js/kxk/testdir.js'; console.log(testdir())"
+    out = child_process.execFileSync 'node' ['--input-type=module' '-e' code] encoding:'utf8'
+    out.trim()
+
+▸ testdir
+
+    ▸ the root is a fresh directory in the system temp dir
+
+        root = testdir()
+
+        fs.existsSync(root)                      ▸ true
+        slash.dir(root)                          ▸ slash.path(os.tmpdir())
+        slash.file(root).startsWith 'ked-test-'  ▸ true
+
+    ▸ it is the same root for the whole process
+
+        testdir() ▸ testdir()
+
+    ▸ a name is a path below the root, and it is not created
+
+        dir = testdir 'some-name'
+
+        dir                ▸ slash.path(testdir() 'some-name')
+        fs.existsSync(dir) ▸ false
+
+    ▸ the id is the name of the root, for things that must live elsewhere
+
+        testdir.id() ▸ slash.file(testdir())
+
+    ▸ another base gets its own root below that base
+
+        base = slash.path testdir() 'base'
+        dir  = testdir 'x' base
+
+        slash.dir(slash.dir(dir))         ▸ base
+        slash.file(slash.dir(dir)).startsWith 'ked-test-'  ▸ true
+        testdir('x' base)                  ▸ dir
+
+    ▸ another process gets another root, and removes it when it exits
+
+        other = childRoot()
+
+        other != testdir()     ▸ true
+        slash.dir(other)       ▸ slash.dir(testdir())
+        fs.existsSync(other)   ▸ false

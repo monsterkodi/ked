@@ -134,13 +134,14 @@ fpDirs = ['kode' 'kxk' 'kolor'] # the modules whose source can reach the compile
 
 compilerDir = -> slash.path(◆dir, '..')
 
-fingerprintFiles = ◯->
-    
+fingerprintFiles = (root) ◯-> # root defaults to the running compiler; tests pass a copy
+
+    root ?= compilerDir()
     files = []
-    
+
     for d in fpDirs
-        
-        dir = slash.path(compilerDir(), d)
+
+        dir = slash.path(root, d)
         here = ◯ nfs.isDir dir
         if not here ➜ continue
         
@@ -154,14 +155,15 @@ fingerprintFiles = ◯->
     
     files.sort()
 
-fingerprint = ◯-> # generates the fingerprint for the kode compiler
+fingerprint = (root) ◯-> # generates the fingerprint for the kode compiler in root
 
-    files =◯ fingerprintFiles()
+    root ?= compilerDir()
+    files =◯ fingerprintFiles root
 
     parts = []
     for f in files
         body = ◯ nfs.read f
-        parts.push "#{slash.relative f, compilerDir()}\0#{body}"
+        parts.push "#{slash.relative f, root}\0#{body}"
 
     joined = parts.join ''
     hash joined
@@ -172,7 +174,7 @@ compilerFingerprint = -> loadedFingerprint ?= fingerprint() # the compiler this 
 
 compilerFingerprint()
 
-compilerMoved = ◯-> (◯ fingerprint()) != (◯ compilerFingerprint())
+compilerMoved = (root) ◯-> (◯ fingerprint(root)) != (◯ compilerFingerprint())
 
 loadCache = path ◯->
 
@@ -362,6 +364,7 @@ knrd.fingerprint = fingerprint
 knrd.compilerFingerprint = compilerFingerprint
 knrd.compilerMoved = compilerMoved
 knrd.fingerprintFiles = fingerprintFiles
+knrd.compilerDir = compilerDir
 knrd.stale       = stale
 knrd.hash        = hash
 knrd.rel         = rel

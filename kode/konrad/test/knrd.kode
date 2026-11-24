@@ -1,6 +1,6 @@
 
 use ../knrd
-use ../../kxk ◆ nfs slash
+use ../../kxk ◆ nfs slash testdir
 
 stamped = src -> "var a\n\n//# sourceURL=file://#{src}\n"
 relURL  = src -> "var a\n\n//# sourceURL=#{src}\n"
@@ -11,7 +11,7 @@ mapped = src ->
     b64  = Buffer.from(json,'utf8').toString('base64')
     "var a\n\n//# sourceMappingURL=data:application/json;base64,#{b64}\n"
 
-root = '/tmp/opencode/kodeknrd'
+root = testdir 'kodeknrd'
 
 jdir = slash.path(root, 'js')
 kdir = slash.path(root, 'kode')
@@ -388,31 +388,59 @@ cached = fp ◯->
         
         fpOne != knrd.hash('')  ▸ true
 
+    ▸ the fingerprint can be taken of a copy of the compiler, and a faithful
+    ▸ copy of that copy has the same fingerprint
+
+        # the probes below go into private copies. writing into the live js/kode
+        # would change the fingerprint of every kk that starts meanwhile
+
+        # the paths come from testdir directly: a variable that a failing
+        # step left undefined would make them relative to the repo
+
+        copyA = testdir 'compilerA'
+        copyB = testdir 'compilerB'
+
+        copyCompiler = from to ◯->
+            files =◯ knrd.fingerprintFiles from
+            for f in files
+                text =◯ nfs.read f
+                ◯ nfs.write slash.path(to, slash.relative(f, from)), text
+
+        ◯ copyCompiler knrd.compilerDir(), copyA
+        ◯ copyCompiler copyA, copyB
+
+        copyFpA = ◯ knrd.fingerprint copyA
+        copyFpB = ◯ knrd.fingerprint copyB
+
+        copied = ◯ knrd.fingerprintFiles copyA
+        live   = ◯ knrd.fingerprintFiles()
+
+        copyFpA.length  ▸ 40
+        copyFpA         ▸ copyFpB
+        copied.length   ▸ live.length
+
     ▸ the compiler fingerprint is taken when knrd loads, so a compiler that
     ▸ changes on disk later does not pass for the one that is running
 
-        files  = ◯ knrd.fingerprintFiles()
-        probe  = slash.path(slash.dir(files[0]), 'zz_fingerprint_probe.js')
         loaded = ◯ knrd.compilerFingerprint()
         was    = ◯ knrd.stale()
         calm   = ◯ knrd.compilerMoved()
-        
-        try
-            ◯ nfs.write probe, '// probe\n'
-            disk  = ◯ knrd.fingerprint()
-            after = ◯ knrd.compilerFingerprint()
-            still = ◯ knrd.stale()
-            moved = ◯ knrd.compilerMoved()
-        finally
-            ◯ nfs.remove probe
-        
+
+        ◯ nfs.write slash.path(copyA, 'kode', 'zz_fingerprint_probe.js'), '// probe\n'
+
+        disk  = ◯ knrd.fingerprint copyA
+        after = ◯ knrd.compilerFingerprint()
+        still = ◯ knrd.stale()
+        moved = ◯ knrd.compilerMoved copyA
+
         loaded.length  ▸ 40
+        disk != copyFpA ▸ true
         disk != loaded ▸ true
         after          ▸ loaded
         still          ▸ was
-        
+
     ▸ and it can tell when the compiler on disk is no longer the loaded one
-    
+
         calm           ▸ false
         moved          ▸ true
         knrd.compilerMoved() ◯▸ false

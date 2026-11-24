@@ -1,13 +1,13 @@
 
 use ../kode
 use ../srcmap
-use ../../kxk ◆ slash nfs
+use ../../kxk ◆ slash nfs testdir
 use buffer fs
 
 B64 = buffer.Buffer
 
-JS_FILE = '/tmp/probe.js'
-SRCFILE = '/tmp/probe.kode'
+JS_FILE = testdir 'probe.js'
+SRCFILE = testdir 'probe.kode'
 
 smap = new srcmap
 

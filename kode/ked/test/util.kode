@@ -5,7 +5,7 @@ use ../view/base   ◆ input crumbs
 use ../view/menu   ◆ choices greet
 use ../view/screen ◆ screen
 use ../../kxk      ▪ kseg
-use ../../kxk      ◆ nfs slash watcher
+use ../../kxk      ◆ nfs slash watcher testdir
 use ../edit        ◆ mode
 
 sample = (opt) ->
@@ -70,7 +70,7 @@ sample = (opt) ->
 
   ▸ history
 
-        dir = '/tmp/opencode/ked-session-history-test'
+        dir = testdir 'ked-session-history-test'
 
         ◯ nfs.remove dir
 

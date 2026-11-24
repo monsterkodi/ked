@@ -1,0 +1,38 @@
+
+use fs os
+use ◆ slash
+
+###
+    scratch directories that belong to this test process alone.
+
+    several test runs share the machine (kk -w, agents, a manual kk -t),
+    so a fixed path like /tmp/opencode/foo gets created, filled and removed
+    by all of them at once. testdir gives every process its own root,
+    created with mkdtemp on first use and removed when the process exits.
+
+    testdir()             ▸ the root, in os.tmpdir()
+    testdir 'name'        ▸ a path below the root, not created
+    testdir 'name' base   ▸ the same, below a private root inside base
+    testdir.id()          ▸ the root's name, unique per process
+###
+
+roots = {}
+
+testdir = (name, base) ->
+
+    base ?= os.tmpdir()
+
+    if not roots[base]
+        fs.mkdirSync base, recursive:true
+        roots[base] = fs.mkdtempSync slash.path(base, 'ked-test-')
+
+    if name then slash.path(roots[base], name) else roots[base]
+
+testdir.id = -> slash.file testdir()
+
+process.on 'exit' ->
+
+    for base,root of roots
+        fs.rmSync root, recursive:true, force:true
+
+export testdir

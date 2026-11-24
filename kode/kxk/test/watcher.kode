@@ -1,6 +1,6 @@
 
 use fs
-use .. ◆ slash post nfs watcher
+use .. ◆ slash post nfs watcher testdir
 use ../util ▪ sleep
 
 events = []
@@ -27,7 +27,7 @@ watcher.maxDelay = 40
   
   ▸ no read error logs
 
-        root = '/tmp/opencode/ked-watcher-eacces'
+        root = testdir 'ked-watcher-eacces'
         secret = slash.path root 'secret'
 
         fs.rmSync root recursive:true force:true
@@ -71,7 +71,7 @@ watcher.maxDelay = 40
 
   ▸ creates emit one create event
 
-        root = '/tmp/opencode/ked-watcher-create'
+        root = testdir 'ked-watcher-create'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
 
@@ -91,7 +91,7 @@ watcher.maxDelay = 40
 
   ▸ modifications emit one modify event
 
-        root = '/tmp/opencode/ked-watcher-modify'
+        root = testdir 'ked-watcher-modify'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
         file = slash.path root 'a.txt'
@@ -113,7 +113,7 @@ watcher.maxDelay = 40
 
   ▸ deletions emit one delete event
 
-        root = '/tmp/opencode/ked-watcher-delete'
+        root = testdir 'ked-watcher-delete'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
         file = slash.path root 'a.txt'
@@ -135,7 +135,7 @@ watcher.maxDelay = 40
 
   ▸ renames emit one rename event
 
-        root = '/tmp/opencode/ked-watcher-rename'
+        root = testdir 'ked-watcher-rename'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
         oldFile = slash.path root 'a.txt'
@@ -159,7 +159,7 @@ watcher.maxDelay = 40
 
   ▸ copies emit one create event
 
-        root = '/tmp/opencode/ked-watcher-copy'
+        root = testdir 'ked-watcher-copy'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
         oldFile = slash.path root 'a.txt'
@@ -182,7 +182,7 @@ watcher.maxDelay = 40
 
   ▸ atomic saves emit one modify event and no temp events
 
-        root = '/tmp/opencode/ked-watcher-atomic'
+        root = testdir 'ked-watcher-atomic'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
         file = slash.path root 'a.txt'
@@ -206,7 +206,7 @@ watcher.maxDelay = 40
 
   ▸ nfs.write emits one modify event
 
-        root = '/tmp/opencode/ked-watcher-nfswrite'
+        root = testdir 'ked-watcher-nfswrite'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
         file = slash.path root 'a.txt'
@@ -228,7 +228,7 @@ watcher.maxDelay = 40
 
   ▸ directories emit one create and one delete event
 
-        root = '/tmp/opencode/ked-watcher-dirs'
+        root = testdir 'ked-watcher-dirs'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
         dir = slash.path root 'folder'
@@ -265,7 +265,7 @@ watcher.maxDelay = 40
 
   ▸ directory renames emit one rename event
 
-        root = '/tmp/opencode/ked-watcher-dirrename'
+        root = testdir 'ked-watcher-dirrename'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
         oldDir = slash.path root 'old'
@@ -290,7 +290,7 @@ watcher.maxDelay = 40
 
   ▸ directories created after watching are watched
 
-        root = '/tmp/opencode/ked-watcher-newdir'
+        root = testdir 'ked-watcher-newdir'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
 
@@ -315,7 +315,7 @@ watcher.maxDelay = 40
 
   ▸ ignored directories are not watched
 
-        root = '/tmp/opencode/ked-watcher-ignored'
+        root = testdir 'ked-watcher-ignored'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
 
@@ -335,7 +335,7 @@ watcher.maxDelay = 40
 
   ▸ non-recursive watches are upgraded to recursive
 
-        root = '/tmp/opencode/ked-watcher-upgrade'
+        root = testdir 'ked-watcher-upgrade'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
         fs.mkdirSync slash.path(root 'sub')
@@ -369,7 +369,7 @@ watcher.maxDelay = 40
 
   ▸ watching a file filters out sibling changes
 
-        root = '/tmp/opencode/ked-watcher-file'
+        root = testdir 'ked-watcher-file'
         fs.rmSync root recursive:true force:true
         fs.mkdirSync root recursive:true
         file    = slash.path root 'a.txt'

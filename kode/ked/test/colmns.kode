@@ -1,5 +1,6 @@
 use fs
 use ../../kxk      ▪ kseg post slash sleep watcher
+use ../../kxk      ◆ testdir
 use ../edit        ◆ editor
 use ../util        ◆ harness git
 use ../index       ◆ indexer
@@ -38,7 +39,7 @@ capture = ->
 
 tree = (name base child) ◯->
     ked_sess()
-    root = "/tmp/opencode/ked-funtree-#{name}"
+    root = testdir "ked-funtree-#{name}"
     baseFile = slash.path root 'base.kode'
     childFile = slash.path root 'child.kode'
     fs.rmSync root recursive:true force:true
@@ -58,7 +59,7 @@ tree = (name base child) ◯->
 
 cppTree = (name source) ◯->
     ked_sess()
-    root = "/tmp/opencode/ked-funtree-#{name}"
+    root = testdir "ked-funtree-#{name}"
     file = slash.path root 'main.cpp'
     fs.rmSync root recursive:true force:true
     fs.mkdirSync root recursive:true
@@ -100,8 +101,8 @@ cppTree = (name source) ◯->
 #         h = new harness cols:100 rows:30
 #         d = new dirtree h.screen 'test_dirtree' []
 # 
-#         rootA = '/tmp/opencode/ked-dirtree-a'
-#         rootB = '/tmp/opencode/ked-dirtree-b'
+#         rootA = testdir 'ked-dirtree-a'
+#         rootB = testdir 'ked-dirtree-b'
 #         fileA = slash.path rootA 'sub/dirty.kode'
 #         fileB = slash.path rootB 'dirty.kode'
 #         dirA  = type:'dir'  path:slash.dir(fileA) depth:0
@@ -145,7 +146,7 @@ cppTree = (name source) ◯->
 #         h = new harness cols:100 rows:30
 #         d = new dirtree h.screen 'test_dirtree_cache' []
 # 
-#         root     = '/tmp/opencode/ked-dirtree-cache'
+#         root     = testdir 'ked-dirtree-cache'
 #         dirPath  = slash.path root 'sub'
 #         filePath = slash.path dirPath 'dirty.kode'
 #         rootDir  = type:'dir'  path:dirPath
