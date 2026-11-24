@@ -1,19 +1,4 @@
-# kulur unicode classes
-
-Characters outside of words get a class from the `UNICODE` table in `kulur.kode`.
-Every key below becomes `text unicode <key>`. Sets win over ranges, so the `kode`
-symbols keep their class although they sit inside the `geometric`, `box` and
-`arrow` ranges. In languages whose handlers use the `kode` symbols (kode, kim, kua,
-coffee, js, ts, nim, lua) they stay `punct`. Characters that are in no set and no
-range are `text unicode` from code 2000 up and `punct` below.
-
-Some latin letters like ß or Å count as word characters, so that words like Straße
-stay one word. A word that has no ascii and consists only of characters from one
-key, like a lone Å, gets that key's class too.
-
-Ranges with more than 320 printable characters show their first and last 160.
-Unassigned code points, combining marks, invisible and spacing characters, and
-characters that unicode normalization would rewrite are left out.
+# kulur
 
 ## kode
 
@@ -21,15 +6,15 @@ characters that unicode normalization would rewrite are left out.
 
 ## latin
 
-0x00c0 - 0x00d6  all 23
+0x00c0 - 0x00d6  ■ 23
 
 À Á Â Ã Ä Å Æ Ç È É Ê Ë Ì Í Î Ï Ð Ñ Ò Ó Ô Õ Ö
 
-0x00d8 - 0x00f6  all 31
+0x00d8 - 0x00f6  ■ 31
 
 Ø Ù Ú Û Ü Ý Þ ß à á â ã ä å æ ç è é ê ë ì í î ï ð ñ ò ó ô õ ö
 
-0x00f8 - 0x024f  first and last 160 of 344
+0x00f8 - 0x024f  ■ 320 □ 344
 
 ø ù ú û ü ý þ ÿ Ā ā Ă ă Ą ą Ć ć Ĉ ĉ Ċ ċ Č č Ď ď Đ đ Ē ē Ĕ ĕ Ė ė
 Ę ę Ě ě Ĝ ĝ Ğ ğ Ġ ġ Ģ ģ Ĥ ĥ Ħ ħ Ĩ ĩ Ī ī Ĭ ĭ Į į İ ı Ĳ ĳ Ĵ ĵ Ķ ķ
@@ -43,7 +28,7 @@ characters that unicode normalization would rewrite are left out.
 Ȑ ȑ Ȓ ȓ Ȕ ȕ Ȗ ȗ Ș ș Ț ț Ȝ ȝ Ȟ ȟ Ƞ ȡ Ȣ ȣ Ȥ ȥ Ȧ ȧ Ȩ ȩ Ȫ ȫ Ȭ ȭ Ȯ ȯ
 Ȱ ȱ Ȳ ȳ ȴ ȵ ȶ ȷ ȸ ȹ Ⱥ Ȼ ȼ Ƚ Ⱦ ȿ ɀ Ɂ ɂ Ƀ Ʉ Ʌ Ɇ ɇ Ɉ ɉ Ɋ ɋ Ɍ ɍ Ɏ ɏ
 
-0x1e00 - 0x1eff  all 256
+0x1e00 - 0x1eff  ■ 256
 
 Ḁ ḁ Ḃ ḃ Ḅ ḅ Ḇ ḇ Ḉ ḉ Ḋ ḋ Ḍ ḍ Ḏ ḏ Ḑ ḑ Ḓ ḓ Ḕ ḕ Ḗ ḗ Ḙ ḙ Ḛ ḛ Ḝ ḝ Ḟ ḟ
 Ḡ ḡ Ḣ ḣ Ḥ ḥ Ḧ ḧ Ḩ ḩ Ḫ ḫ Ḭ ḭ Ḯ ḯ Ḱ ḱ Ḳ ḳ Ḵ ḵ Ḷ ḷ Ḹ ḹ Ḻ ḻ Ḽ ḽ Ḿ ḿ
@@ -56,7 +41,7 @@ characters that unicode normalization would rewrite are left out.
 
 ## greek
 
-0x0370 - 0x03ff  all 132
+0x0370 - 0x03ff  ■ 132
 
 Ͱ ͱ Ͳ ͳ ͵ Ͷ ͷ ͺ ͻ ͼ ͽ Ϳ ΄ ΅ Ά Έ Ή Ί Ό Ύ Ώ ΐ Α Β Γ Δ Ε Ζ Η Θ Ι Κ
 Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω Ϊ Ϋ ά έ ή ί ΰ α β γ δ ε ζ η θ ι κ λ
@@ -64,7 +49,7 @@ characters that unicode normalization would rewrite are left out.
 Ϝ ϝ Ϟ ϟ Ϡ ϡ Ϣ ϣ Ϥ ϥ Ϧ ϧ Ϩ ϩ Ϫ ϫ Ϭ ϭ Ϯ ϯ ϰ ϱ ϲ ϳ ϴ ϵ ϶ Ϸ ϸ Ϲ Ϻ ϻ
 ϼ Ͻ Ͼ Ͽ
 
-0x1f00 - 0x1fff  all 213
+0x1f00 - 0x1fff  ■ 213
 
 ἀ ἁ ἂ ἃ ἄ ἅ ἆ ἇ Ἀ Ἁ Ἂ Ἃ Ἄ Ἅ Ἆ Ἇ ἐ ἑ ἒ ἓ ἔ ἕ Ἐ Ἑ Ἒ Ἓ Ἔ Ἕ ἠ ἡ ἢ ἣ
 ἤ ἥ ἦ ἧ Ἠ Ἡ Ἢ Ἣ Ἤ Ἥ Ἦ Ἧ ἰ ἱ ἲ ἳ ἴ ἵ ἶ ἷ Ἰ Ἱ Ἲ Ἳ Ἴ Ἵ Ἶ Ἷ ὀ ὁ ὂ ὃ
@@ -76,7 +61,7 @@ characters that unicode normalization would rewrite are left out.
 
 ## cyrillic
 
-0x0400 - 0x052f  all 297
+0x0400 - 0x052f  ■ 297
 
 Ѐ Ё Ђ Ѓ Є Ѕ І Ї Ј Љ Њ Ћ Ќ Ѝ Ў Џ А Б В Г Д Е Ж З И Й К Л М Н О П
 Р С Т У Ф Х Ц Ч Ш Щ Ъ Ы Ь Э Ю Я а б в г д е ж з и й к л м н о п
@@ -91,7 +76,7 @@ characters that unicode normalization would rewrite are left out.
 
 0x2de0 - 0x2dff holds only combining marks, which are not shown here.
 
-0xa640 - 0xa69f  all 80
+0xa640 - 0xa69f  ■ 80
 
 Ꙁ ꙁ Ꙃ ꙃ Ꙅ ꙅ Ꙇ ꙇ Ꙉ ꙉ Ꙋ ꙋ Ꙍ ꙍ Ꙏ ꙏ Ꙑ ꙑ Ꙓ ꙓ Ꙕ ꙕ Ꙗ ꙗ Ꙙ ꙙ Ꙛ ꙛ Ꙝ ꙝ Ꙟ ꙟ
 Ꙡ ꙡ Ꙣ ꙣ Ꙥ ꙥ Ꙧ ꙧ Ꙩ ꙩ Ꙫ ꙫ Ꙭ ꙭ ꙮ ꙳ ꙾ ꙿ Ꚁ ꚁ Ꚃ ꚃ Ꚅ ꚅ Ꚇ ꚇ Ꚉ ꚉ Ꚋ ꚋ Ꚍ ꚍ
@@ -99,21 +84,21 @@ characters that unicode normalization would rewrite are left out.
 
 ## symbol
 
-0x00a1 - 0x00bf  all 30
+0x00a1 - 0x00bf  ■ 30
 
 ¡ ¢ £ ¤ ¥ ¦ § ¨ © ª « ¬ ® ¯ ° ± ² ³ ´ µ ¶ · ¸ ¹ º » ¼ ½ ¾ ¿
 
-0x00d7 - 0x00d7  all 1
+0x00d7 - 0x00d7  ■ 1
 
 ×
 
-0x00f7 - 0x00f7  all 1
+0x00f7 - 0x00f7  ■ 1
 
 ÷
 
 ## punct
 
-0x2010 - 0x205e  all 71
+0x2010 - 0x205e  ■ 71
 
 ‐ ‑ ‒ – — ― ‖ ‗ ‘ ’ ‚ ‛ “ ” „ ‟ † ‡ • ‣ ․ ‥ … ‧ ‰ ‱ ′ ″ ‴ ‵
 ‶ ‷ ‸ ‹ › ※ ‼ ‽ ‾ ‿ ⁀ ⁁ ⁂ ⁃ ⁄ ⁅ ⁆ ⁇ ⁈ ⁉ ⁊ ⁋ ⁌ ⁍ ⁎ ⁏ ⁐ ⁑ ⁒ ⁓ ⁔ ⁕
@@ -121,25 +106,25 @@ characters that unicode normalization would rewrite are left out.
 
 ## arrow
 
-0x2190 - 0x21ff  all 112
+0x2190 - 0x21ff  ■ 112
 
 ← ↑ → ↓ ↔ ↕ ↖ ↗ ↘ ↙ ↚ ↛ ↜ ↝ ↞ ↟ ↠ ↡ ↢ ↣ ↤ ↥ ↦ ↧ ↨ ↩ ↪ ↫ ↬ ↭ ↮ ↯
 ↰ ↱ ↲ ↳ ↴ ↵ ↶ ↷ ↸ ↹ ↺ ↻ ↼ ↽ ↾ ↿ ⇀ ⇁ ⇂ ⇃ ⇄ ⇅ ⇆ ⇇ ⇈ ⇉ ⇊ ⇋ ⇌ ⇍ ⇎ ⇏
 ⇐ ⇑ ⇒ ⇓ ⇔ ⇕ ⇖ ⇗ ⇘ ⇙ ⇚ ⇛ ⇜ ⇝ ⇞ ⇟ ⇠ ⇡ ⇢ ⇣ ⇤ ⇥ ⇦ ⇧ ⇨ ⇩ ⇪ ⇫ ⇬ ⇭ ⇮ ⇯
 ⇰ ⇱ ⇲ ⇳ ⇴ ⇵ ⇶ ⇷ ⇸ ⇹ ⇺ ⇻ ⇼ ⇽ ⇾ ⇿
 
-0x27f0 - 0x27ff  all 16
+0x27f0 - 0x27ff  ■ 16
 
 ⟰ ⟱ ⟲ ⟳ ⟴ ⟵ ⟶ ⟷ ⟸ ⟹ ⟺ ⟻ ⟼ ⟽ ⟾ ⟿
 
-0x2900 - 0x297f  all 128
+0x2900 - 0x297f  ■ 128
 
 ⤀ ⤁ ⤂ ⤃ ⤄ ⤅ ⤆ ⤇ ⤈ ⤉ ⤊ ⤋ ⤌ ⤍ ⤎ ⤏ ⤐ ⤑ ⤒ ⤓ ⤔ ⤕ ⤖ ⤗ ⤘ ⤙ ⤚ ⤛ ⤜ ⤝ ⤞ ⤟
 ⤠ ⤡ ⤢ ⤣ ⤤ ⤥ ⤦ ⤧ ⤨ ⤩ ⤪ ⤫ ⤬ ⤭ ⤮ ⤯ ⤰ ⤱ ⤲ ⤳ ⤴ ⤵ ⤶ ⤷ ⤸ ⤹ ⤺ ⤻ ⤼ ⤽ ⤾ ⤿
 ⥀ ⥁ ⥂ ⥃ ⥄ ⥅ ⥆ ⥇ ⥈ ⥉ ⥊ ⥋ ⥌ ⥍ ⥎ ⥏ ⥐ ⥑ ⥒ ⥓ ⥔ ⥕ ⥖ ⥗ ⥘ ⥙ ⥚ ⥛ ⥜ ⥝ ⥞ ⥟
 ⥠ ⥡ ⥢ ⥣ ⥤ ⥥ ⥦ ⥧ ⥨ ⥩ ⥪ ⥫ ⥬ ⥭ ⥮ ⥯ ⥰ ⥱ ⥲ ⥳ ⥴ ⥵ ⥶ ⥷ ⥸ ⥹ ⥺ ⥻ ⥼ ⥽ ⥾ ⥿
 
-0x2b00 - 0x2bff  all 254
+0x2b00 - 0x2bff  ■ 254
 
 ⬀ ⬁ ⬂ ⬃ ⬄ ⬅ ⬆ ⬇ ⬈ ⬉ ⬊ ⬋ ⬌ ⬍ ⬎ ⬏ ⬐ ⬑ ⬒ ⬓ ⬔ ⬕ ⬖ ⬗ ⬘ ⬙ ⬚ ⬛ ⬜ ⬝ ⬞ ⬟
 ⬠ ⬡ ⬢ ⬣ ⬤ ⬥ ⬦ ⬧ ⬨ ⬩ ⬪ ⬫ ⬬ ⬭ ⬮ ⬯ ⬰ ⬱ ⬲ ⬳ ⬴ ⬵ ⬶ ⬷ ⬸ ⬹ ⬺ ⬻ ⬼ ⬽ ⬾ ⬿
@@ -152,7 +137,7 @@ characters that unicode normalization would rewrite are left out.
 
 ## math
 
-0x2200 - 0x22ff  all 256
+0x2200 - 0x22ff  ■ 256
 
 ∀ ∁ ∂ ∃ ∄ ∅ ∆ ∇ ∈ ∉ ∊ ∋ ∌ ∍ ∎ ∏ ∐ ∑ − ∓ ∔ ∕ ∖ ∗ ∘ ∙ √ ∛ ∜ ∝ ∞ ∟
 ∠ ∡ ∢ ∣ ∤ ∥ ∦ ∧ ∨ ∩ ∪ ∫ ∬ ∭ ∮ ∯ ∰ ∱ ∲ ∳ ∴ ∵ ∶ ∷ ∸ ∹ ∺ ∻ ∼ ∽ ∾ ∿
@@ -163,7 +148,7 @@ characters that unicode normalization would rewrite are left out.
 ⋀ ⋁ ⋂ ⋃ ⋄ ⋅ ⋆ ⋇ ⋈ ⋉ ⋊ ⋋ ⋌ ⋍ ⋎ ⋏ ⋐ ⋑ ⋒ ⋓ ⋔ ⋕ ⋖ ⋗ ⋘ ⋙ ⋚ ⋛ ⋜ ⋝ ⋞ ⋟
 ⋠ ⋡ ⋢ ⋣ ⋤ ⋥ ⋦ ⋧ ⋨ ⋩ ⋪ ⋫ ⋬ ⋭ ⋮ ⋯ ⋰ ⋱ ⋲ ⋳ ⋴ ⋵ ⋶ ⋷ ⋸ ⋹ ⋺ ⋻ ⋼ ⋽ ⋾ ⋿
 
-0x2a00 - 0x2aff  all 255
+0x2a00 - 0x2aff  ■ 255
 
 ⨀ ⨁ ⨂ ⨃ ⨄ ⨅ ⨆ ⨇ ⨈ ⨉ ⨊ ⨋ ⨌ ⨍ ⨎ ⨏ ⨐ ⨑ ⨒ ⨓ ⨔ ⨕ ⨖ ⨗ ⨘ ⨙ ⨚ ⨛ ⨜ ⨝ ⨞ ⨟
 ⨠ ⨡ ⨢ ⨣ ⨤ ⨥ ⨦ ⨧ ⨨ ⨩ ⨪ ⨫ ⨬ ⨭ ⨮ ⨯ ⨰ ⨱ ⨲ ⨳ ⨴ ⨵ ⨶ ⨷ ⨸ ⨹ ⨺ ⨻ ⨼ ⨽ ⨾ ⨿
@@ -176,7 +161,7 @@ characters that unicode normalization would rewrite are left out.
 
 ## box
 
-0x2500 - 0x259f  all 160
+0x2500 - 0x259f  ■ 160
 
 ─ ━ │ ┃ ┄ ┅ ┆ ┇ ┈ ┉ ┊ ┋ ┌ ┍ ┎ ┏ ┐ ┑ ┒ ┓ └ ┕ ┖ ┗ ┘ ┙ ┚ ┛ ├ ┝ ┞ ┟
 ┠ ┡ ┢ ┣ ┤ ┥ ┦ ┧ ┨ ┩ ┪ ┫ ┬ ┭ ┮ ┯ ┰ ┱ ┲ ┳ ┴ ┵ ┶ ┷ ┸ ┹ ┺ ┻ ┼ ┽ ┾ ┿
@@ -186,7 +171,7 @@ characters that unicode normalization would rewrite are left out.
 
 ## geometric
 
-0x25a0 - 0x25ff  all 96
+0x25a0 - 0x25ff  ■ 96
 
 ■ □ ▢ ▣ ▤ ▥ ▦ ▧ ▨ ▩ ▪ ▫ ▬ ▭ ▮ ▯ ▰ ▱ ▲ △ ▴ ▵ ▶ ▷ ▸ ▹ ► ▻ ▼ ▽ ▾ ▿
 ◀ ◁ ◂ ◃ ◄ ◅ ◆ ◇ ◈ ◉ ◊ ○ ◌ ◍ ◎ ● ◐ ◑ ◒ ◓ ◔ ◕ ◖ ◗ ◘ ◙ ◚ ◛ ◜ ◝ ◞ ◟
@@ -194,7 +179,7 @@ characters that unicode normalization would rewrite are left out.
 
 ## cjk
 
-0x3040 - 0x30ff  all 187
+0x3040 - 0x30ff  ■ 187
 
 ぁ あ ぃ い ぅ う ぇ え ぉ お か が き ぎ く ぐ け げ こ ご さ ざ し じ す ず せ ぜ そ ぞ た だ
 ち ぢ っ つ づ て で と ど な に ぬ ね の は ば ぱ ひ び ぴ ふ ぶ ぷ へ べ ぺ ほ ぼ ぽ ま み む
@@ -203,7 +188,7 @@ characters that unicode normalization would rewrite are left out.
 ヅ テ デ ト ド ナ ニ ヌ ネ ノ ハ バ パ ヒ ビ ピ フ ブ プ ヘ ベ ペ ホ ボ ポ マ ミ ム メ モ ャ ヤ
 ュ ユ ョ ヨ ラ リ ル レ ロ ヮ ワ ヰ ヱ ヲ ン ヴ ヵ ヶ ヷ ヸ ヹ ヺ ・ ー ヽ ヾ ヿ
 
-0x4e00 - 0x9fff  first and last 160 of 20992
+0x4e00 - 0x9fff  ■ 320 □ 20992
 
 一 丁 丂 七 丄 丅 丆 万 丈 三 上 下 丌 不 与 丏 丐 丑 丒 专 且 丕 世 丗 丘 丙 业 丛 东 丝 丞 丟
 丠 両 丢 丣 两 严 並 丧 丨 丩 个 丫 丬 中 丮 丯 丰 丱 串 丳 临 丵 丶 丷 丸 丹 为 主 丼 丽 举 丿
@@ -217,7 +202,7 @@ characters that unicode normalization would rewrite are left out.
 鿀 鿁 鿂 鿃 鿄 鿅 鿆 鿇 鿈 鿉 鿊 鿋 鿌 鿍 鿎 鿏 鿐 鿑 鿒 鿓 鿔 鿕 鿖 鿗 鿘 鿙 鿚 鿛 鿜 鿝 鿞 鿟
 鿠 鿡 鿢 鿣 鿤 鿥 鿦 鿧 鿨 鿩 鿪 鿫 鿬 鿭 鿮 鿯 鿰 鿱 鿲 鿳 鿴 鿵 鿶 鿷 鿸 鿹 鿺 鿻 鿼 鿽 鿾 鿿
 
-0xac00 - 0xd7af  first and last 160 of 11172
+0xac00 - 0xd7af  ■ 320 □ 11172
 
 가 각 갂 갃 간 갅 갆 갇 갈 갉 갊 갋 갌 갍 갎 갏 감 갑 값 갓 갔 강 갖 갗 갘 같 갚 갛 개 객 갞 갟
 갠 갡 갢 갣 갤 갥 갦 갧 갨 갩 갪 갫 갬 갭 갮 갯 갰 갱 갲 갳 갴 갵 갶 갷 갸 갹 갺 갻 갼 갽 갾 갿
