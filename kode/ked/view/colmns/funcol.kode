@@ -10,7 +10,6 @@ use                 ◆ funtree sheeditor colorpicker uniko
         super @screen 'funcol' features
         
         @isVisible     = false
-        @active        = false
         @colorReplace  = null
         @colorDecorate = null
         
@@ -59,14 +58,14 @@ use                 ◆ funtree sheeditor colorpicker uniko
         ⮐ if empty recent.funcol
         
         if recent.funcol.active
-            @active = true
+            @setActive true
             @show()
             
         ked_session.set 'funcol' recent.funcol
 
     onColorPickerShow: hexl opt=focus:true =>
 
-        @active = true
+        @setActive true
 
         @cells.cols = max 16 int(@cells.screen.cols / 6) if @cells.cols < 16
 
@@ -79,7 +78,7 @@ use                 ◆ funtree sheeditor colorpicker uniko
 
     onUnikoShow: =>
 
-        @active = true
+        @setActive true
         @show() if @hidden()
 
         @uniko.show()
@@ -137,7 +136,7 @@ use                 ◆ funtree sheeditor colorpicker uniko
     onFuncolToggle: => 
     
         @toggle()
-        @active = @visible()
+        @setActive @visible()
         ked_session.set 'funcol▸active' @active
         cols = max 16 int(@cells.screen.cols / 6)
         post.emit 'view.size' @name 'left' (@hidden() ? -@cells.cols : cols-@cells.cols)

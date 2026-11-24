@@ -26,8 +26,22 @@ use ../screen    ◆ cells
         @isVisible = true
         @focusable = false
         @focused   = false
-                                
+
+        # the user's intent to have this view open, independent of @isVisible.
+        # survives temporary hides (hideEditor, narrow terminal) so the view
+        # can be re-shown later. change it only via setActive.
+        # dircol and funcol persist it to the session.
+        @active    = false
+
     setColor: key clr => @color[key] = color.values(clr)
+
+    setActive: active =>
+
+        ⮐ if @active == active
+        @active = active
+        @onViewActive()
+
+    onViewActive: => post.emit 'view.active' @name @active
         
     show: -> 
     

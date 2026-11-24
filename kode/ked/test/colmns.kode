@@ -242,6 +242,51 @@ cppTree = (name source) ◯->
 
         delete global.ked_session
 
+  ▸ active
+
+        [h e f] = funcolAt [''] 0
+
+        f.active ▸ false
+
+        [sent orig] = capture()
+
+        f.setActive true
+        f.setActive true
+        f.onUnikoShow()
+        f.visible() ▸ true
+        f.onFuncolToggle()
+
+        post.emit = orig
+
+        f.active ▸ false
+        ked_session.get('funcol▸active') ▸ false
+        sent.filter((s) -> s[0] == 'view.active') ▸ [['view.active' 'funcol' true] ['view.active' 'funcol' false]]
+
+        delete global.ked_session
+
+▸ dircol active
+
+    ked_sess()
+    h = new harness cols:100 rows:30
+    e = new editor h.screen 'test_editor' []
+    d = new dircol h.screen e []
+
+    d.active ▸ true
+
+    [sent orig] = capture()
+
+    d.onToggle()
+    d.visible() ▸ true
+    d.onToggle()
+
+    post.emit = orig
+
+    d.active ▸ false
+    ked_session.get('dircol▸active') ▸ false
+    sent.filter((s) -> s[0] == 'view.active') ▸ [['view.active' 'dircol' false]]
+
+    delete global.ked_session
+
 ▸ funtree
 
   ▸ base chain
