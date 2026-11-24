@@ -389,7 +389,7 @@ use ../base        ◆ view
                 li  += 1
                 continue
 
-            break if row + scale > @cells.rows # a tall line that does not fit is left out
+            break if row + scale > @cells.rows and not @state.isWrapped(li) # a tall line that does not fit is left out
 
             y = li
             lineno = @lineno y

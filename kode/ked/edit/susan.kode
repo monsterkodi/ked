@@ -32,11 +32,12 @@ use ./tool  ◆ sue
             y = box.y
             continue if y < 0 or y >= lines.length
 
-            row = @state.rowOfLine y
-            continue if row < 0
-
+            row   = @state.rowOfLine y
             scale = @state.lineScale y
-            continue if row + @state.lineHeight(y) > @editor.cells.rows
+
+            if not @isBoxWrapped box
+                continue if row < 0
+                continue if row + @state.lineHeight(y) > @editor.cells.rows
 
             code = area.value[0]
 
@@ -94,8 +95,7 @@ use ./tool  ◆ sue
 
         for li in box.y...min(box.y+box.h lines.length)
 
-            row = @state.rowOfLine li
-            continue if row < 0 or row + @state.lineHeight(li) > @editor.cells.rows
+            continue if not @editor.lineFits li
 
             scale = @state.lineScale li
             cells = @editor.cellsForLine li
@@ -103,6 +103,7 @@ use ./tool  ◆ sue
 
             for gx in box.x...min(box.x+box.w lines[li].length)
                 [cx cr] = @editor.posCell gx li cells
+                continue if not @editor.rowFits cr scale
                 for r in cr...cr+scale
                     for x in max(0 cx)...min(cols cx+scale)
                         @styleCell x r style

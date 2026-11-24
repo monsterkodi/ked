@@ -435,7 +435,13 @@ use           ◆ mode keys
 
         li+1
 
-    maxTopRow: => @rowsBeforeLine @maxViewLine()
+    maxTopRow: =>
+
+        li = @maxViewLine()
+
+        ⮐ max 0 @totalRows()-@cells.rows if li > 0 and @isWrapped(li-1) # a wrapped line may be cut by the top edge
+
+        @rowsBeforeLine li
 
     marginValue: val fallback =>
 
@@ -642,26 +648,33 @@ use           ◆ mode keys
         topMargin = clamp 0 @cells.rows topMargin
         botMargin = clamp 0 @cells.rows botMargin
 
-        row     = @rowOfLine y
-        height  = @lineHeight y
-        topRow  = @viewTopRow()
+        row      = @rowOfLine y
+        height   = @lineHeight y
+        topRow   = @viewTopRow()
+        blockTop = @rowsBeforeLine y
+
+        if @isWrapped y # the row of the cursor is kept in view, not the whole line
+            dr        = @lineCell(x y)[1]
+            row      += dr
+            blockTop += dr
+            height    = @lineScale y
 
         if opt.adjust == 'topDelta'
 
-            topRow = @rowsBeforeLine(y) - topMargin
+            topRow = blockTop - topMargin
 
         else if opt.adjust == 'topBotDeltaGrow' and opt.mc
 
             if row < 0
-                topRow = @rowsBeforeLine(y) - topMargin
+                topRow = blockTop - topMargin
             else if row + height > @cells.rows
-                topRow = @rowsBeforeLine(y) - (@cells.rows - botMargin - height)
+                topRow = blockTop - (@cells.rows - botMargin - height)
             else
                 dir = y - opt.mc[1]
                 if row < topMargin and dir < 0
-                    topRow = @rowsBeforeLine(y) - topMargin
+                    topRow = blockTop - topMargin
                 else if row + height > @cells.rows - botMargin and dir > 0
-                    topRow = @rowsBeforeLine(y) - (@cells.rows - botMargin - height)
+                    topRow = blockTop - (@cells.rows - botMargin - height)
 
         else
 
@@ -673,9 +686,9 @@ use           ◆ mode keys
                 botDelta = botMargin
 
             if row + height > @cells.rows - botDelta
-                topRow = @rowsBeforeLine(y) - (@cells.rows - botDelta - height)
+                topRow = blockTop - (@cells.rows - botDelta - height)
             else if row < topDelta
-                topRow = @rowsBeforeLine(y) - topDelta
+                topRow = blockTop - topDelta
 
         if opt.adjust in ['topBotDeltaGrow' 'topBotDelta']
             current = @viewTopRow()
@@ -688,7 +701,6 @@ use           ◆ mode keys
 
         topRow = clamp 0 @maxTopRow() topRow
 
-        blockTop   = @rowsBeforeLine y
         visibleTop = blockTop + height - @cells.rows
 
         topRow = max visibleTop topRow

@@ -36,15 +36,16 @@ use              ◆ mode
 
         while y < lines.length and row < @cells.rows
             
-            height = @state.lineHeight y
+            height  = @state.lineHeight y
+            wrapped = @state.isWrapped y # the visible rows of a wrapped line are drawn
 
             if row < 0 # a line cut by the top edge is left out, but its rows stay
                 blankRows = min @cells.rows (row+height)
                 for r in 0...blankRows
                     @cells.bg_fill 0 r -1 r @color.empty
 
-            if row >= 0
-                break if row + height > @cells.rows # a tall line that does not fit is left out
+            if row >= 0 or wrapped
+                break if row + height > @cells.rows and not wrapped # a tall line that does not fit is left out
                 @drawLine lines[y] y row @state.lineScale(y)
 
             row += height
@@ -206,7 +207,7 @@ use              ◆ mode
 
             break if px >= @cells.cols and not wrapped
 
-            if px >= 0 and px+cw*scale <= @cells.cols
+            if px >= 0 and px+cw*scale <= @cells.cols and @rowFits(pr scale)
 
                 ci = si
                 clss = classes[ci]
@@ -235,7 +236,7 @@ use              ◆ mode
         if wrapped
             widths.push sw - ws
             for width,k in widths
-                @drawRowBackground y row+k*scale width*scale scale
+                @drawRowBackground y row+k*scale width*scale scale if @rowFits(row+k*scale scale)
             @drawColorBackgrounds y row bgSpans scale
             ⮐
 
@@ -255,8 +256,8 @@ use              ◆ mode
             for span in spans
                 for x in span[0]...min(span[1] lastIndex)
                     [cx cr] = @posCell x y cells
-                    continue if cx+scale > @cells.cols
-                    for r in cr...min(@cells.rows cr+scale)
+                    continue if cx+scale > @cells.cols or not @rowFits(cr scale)
+                    for r in cr...cr+scale
                         @cells.bg_rect cx r cx+scale-1 r span[2]
             ⮐
 
@@ -277,6 +278,19 @@ use              ◆ mode
                 @cells.bg_rect 0 r linel r @color.bg
             @cells.bg_fill max(0 linel) r -1 r @color.empty
             
+    rowFits: (row scale) -> row >= 0 and row + scale <= @cells.rows
+
+    #  lines cut by the edges are left out, except for the rows of wrapped lines
+
+    lineFits: li ->
+
+        row = @state.rowOfLine li
+        height = @state.lineHeight li
+
+        ⮐ row < @cells.rows and row + height > 0 if @state.isWrapped li
+
+        row >= 0 and row + height <= @cells.rows
+
     drawTrailingRows: row=0 -> # fill empty rows below last line
         
         for r in row...@cells.rows
@@ -296,8 +310,7 @@ use              ◆ mode
             scale = @state.lineScale li
             
             break if row >= @cells.rows
-            continue if row < 0
-            continue if row + @state.lineHeight(li) > @cells.rows
+            continue if not @lineFits li
                 
             [xs xe] = @clipToView li highlight[0] min(highlight[2] (@state.s.lines[li] ? []).length)
 
@@ -311,6 +324,7 @@ use              ◆ mode
                 [cx cr] = @posCell min(x lastIndex) li cells
                 continue if cx < 0
                 continue if cx+scale > @cells.cols
+                continue if not @rowFits cr scale
 
                 hlc = @cells.get_char cx cr
 
@@ -368,10 +382,8 @@ use              ◆ mode
 
         for li in start..rng[3]
 
-            row = @state.rowOfLine li
-
-            continue if row < 0
-            break if row + @state.lineHeight(li) > @cells.rows
+            break if @state.rowOfLine(li) >= @cells.rows
+            continue if not @lineFits li
 
             xs = 0
             xs = rng[0] if li == rng[1]
@@ -392,6 +404,7 @@ use              ◆ mode
 
                 continue if cx < 0
                 continue if cx+scale > @cells.cols
+                continue if not @rowFits cr scale
 
                 block = @cells.blockAt(cx cr)
 

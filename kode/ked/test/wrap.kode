@@ -159,6 +159,21 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         key 'ctrl+w'
         rows().map((r) -> r.trim()) ▸ ['1 0123456789' 'abcdefghij' 'k' '2 next' '' '']
 
+  ▸ tall
+
+        wed ['0123456789abcdefghijABCDEFGHIJklmnopqrstKLMNO' 'next'] 10 3
+        key 'ctrl+w'
+        e.state.lineHeight 0 ▸ 5
+        rows() ▸ ['0123456789' 'abcdefghij' 'ABCDEFGHIJ']
+        e.state.setMainCursor 32 0
+        rows() ▸ ['abcdefghij' 'ABCDEFGHIJ' 'klmnopqrst']
+        e.state.setMainCursor 2 1
+        rows() ▸ ['klmnopqrst' 'KLMNO' 'next']
+        e.state.setSelections [[25 0 42 0]]
+        marked('selection') ▸ ['klmnopqrst' 'KL' '']
+        e.state.setMainCursor 0 0
+        rows() ▸ ['0123456789' 'abcdefghij' 'ABCDEFGHIJ']
+
   ▸ selection
 
         wed ['0123456789abcdefghijk' 'next']
