@@ -36,18 +36,18 @@ use              ◆ mode
 
         while y < lines.length and row < @cells.rows
             
-            scale = @state.lineHeight y
+            height = @state.lineHeight y
 
             if row < 0 # a line cut by the top edge is left out, but its rows stay
-                blankRows = min @cells.rows (row+scale)
+                blankRows = min @cells.rows (row+height)
                 for r in 0...blankRows
                     @cells.bg_fill 0 r -1 r @color.empty
 
             if row >= 0
-                break if row + scale > @cells.rows # a tall line that does not fit is left out
-                @drawLine lines[y] y row scale
-            
-            row += scale
+                break if row + height > @cells.rows # a tall line that does not fit is left out
+                @drawLine lines[y] y row @state.lineScale(y)
+
+            row += height
             y   += 1
             
         @drawTrailingRows row        
@@ -77,7 +77,7 @@ use              ◆ mode
     runsForLine: y =>
 
         ⮐ [] if not @cells.screen.t.textSizing
-        ⮐ [] if @state.lineHeight(y) != 1
+        ⮐ [] if @state.lineScale(y) != 1 or @state.isWrapped(y)
 
         @state.scaleRunsForLine y
 
@@ -113,7 +113,7 @@ use              ◆ mode
     drawLine: line y row scale=1, classes=null ->
     
         row   ?= @state.rowOfLine y
-        scale ?= @state.lineHeight y
+        scale ?= @state.lineScale y
         bg = @color.bg
         
         checkColor = false
@@ -140,10 +140,14 @@ use              ◆ mode
         #  without text sizing a run would land on the wrong row, so it is
         #  drawn like normal text instead
 
-        runs = []
-        runs = @state.scaleRunsForLine y if scale == 1 and @cells.screen.t.textSizing
+        wrapped = @state.isWrapped y
+        starts  = @state.wrapStarts y
+        vx      = @state.viewX y
 
-        linel = kseg.width(line)*scale - view[0]
+        runs = []
+        runs = @state.scaleRunsForLine y if scale == 1 and not wrapped and @cells.screen.t.textSizing
+
+        linel = kseg.width(line)*scale - vx
 
         for run in runs
             x2 = min(run[1] line.length)
@@ -152,8 +156,16 @@ use              ◆ mode
         si = 0
         sw = 0
         ri = 0
+        wk = 0  # the row of a wrapped line
+        ws = 0  # the cell that row starts at
+        widths = []
 
         while si < line.length
+
+            if wk+1 < starts.length and si == starts[wk+1]
+                widths.push sw - ws
+                wk += 1
+                ws  = sw
 
             if ri < runs.length and si >= runs[ri][0]
 
@@ -189,9 +201,10 @@ use              ◆ mode
             cw = kseg.segWidth line[si]
             cw = max 1 cw # todo: this is to prevent endless loop with zero width characters, should be fixed eventually
 
-            px = sw*scale - view[0]
+            px = (sw-ws)*scale - vx
+            pr = row + wk*scale
 
-            break if px >= @cells.cols
+            break if px >= @cells.cols and not wrapped
 
             if px >= 0 and px+cw*scale <= @cells.cols
 
@@ -211,14 +224,21 @@ use              ◆ mode
                 else if ch in '0█'
                     if clss.endsWith('header') ➜ headerClass = clss
 
-                @cells.add_scaled px row ch fg bg scale y
+                @cells.add_scaled px pr ch fg bg scale y
 
                 if clss == 'invert_bg'
                     bg = @color.bg
 
             sw += cw
             si += 1
-                
+
+        if wrapped
+            widths.push sw - ws
+            for width,k in widths
+                @drawRowBackground y row+k*scale width*scale scale
+            @drawColorBackgrounds y row bgSpans scale
+            ⮐
+
         @drawRowBackground y row linel scale
                 
         @drawColorPills  line row linel scale       if checkColor
@@ -467,27 +487,24 @@ use              ◆ mode
 
     cursorRowAndScale: pos ->
 
-        linescale = @state.lineHeight pos[1]
+        linescale = @state.lineScale pos[1]
         runscale  = @cursorRunScale pos
+        row       = @posCell(pos[0] pos[1])[1]
 
         if runscale > 1 and linescale == 1
-            [@state.rowOfLine(pos[1]) - (runscale - 1) runscale]
+            [row - (runscale - 1) runscale]
         else
-            [@state.rowOfLine(pos[1]) linescale]
+            [row linescale]
 
-    #  the cell column of a cursor, mapped through wide graphemes and runs
+    #  the screen column and row of grapheme x in line y,
+    #  mapped through wide graphemes, runs and wrapped rows
     #  past the end of the line every further grapheme takes one more cell
 
-    cursorCellX: (x y) ->
+    posCell: (x y cells) ->
 
-        cells = @cellsForLine y
-        scale = @state.lineHeight y
-        lastIndex = cells.length-1
-
-        ⮐ (cells[x] * scale) if x <= lastIndex
-
-        ⮐ (cells[lastIndex] + (x - lastIndex)) * scale
-
+        cells ?= @cellsForLine y
+        [cx dr] = @state.lineCell x y cells
+        [cx - @state.viewX(y) @state.rowOfLine(y) + dr]
     drawCursors: ->
         
         s = @state.s
@@ -512,7 +529,7 @@ use              ◆ mode
             if @isCursorVisible cursor
              
                 [row scale] = @cursorRowAndScale cursor
-                cx = @cursorCellX(cursor[0] cursor[1]) - s.view[0]
+                cx = @posCell(cursor[0] cursor[1])[0]
                 @cursorIds[idx] = @cells.draw_rounded_multi_cursor(cx row bg scale)
                         
         if @isCursorVisible mainCursor
@@ -524,7 +541,7 @@ use              ◆ mode
             if not @hasFocus() ➜ bg = color.darken bg 
              
             [y scale] = @cursorRowAndScale mainCursor
-            x = @cursorCellX(mainCursor[0] mainCursor[1]) - s.view[0]
+            x = @posCell(mainCursor[0] mainCursor[1])[0]
              
             if s.cursors.length <= 1
                 if @isCursorInEmpty()

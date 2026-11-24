@@ -611,6 +611,23 @@ export
 
         @applySueAreas next
 
+##wrap
+    toggleWrap: ->
+
+        ⮐ if @rectree? or @wrap.all
+
+        indices = belt.lineIndicesForRangesAndPositions @s.selections @s.cursors
+        ⮐ if empty indices
+
+        areas = @s.sue ? []
+        wrap  = not sue.isWrapLine(areas @mainCursor()[1])
+
+        @applySueAreas sue.areasWithWraps(areas indices wrap)
+        @adjustViewForMainCursor()
+
+    toggleWrapAll:  -> @setWrap all:not @wrap.all
+    toggleWrapWord: -> @setWrap word:not @wrap.word
+
     scaleRunsForLine: y ->
 
         areas = @s.sue ? []

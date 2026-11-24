@@ -32,6 +32,7 @@
                       [34, 3, 1, "#ff0", "u"]       coloured underline
     40  line scale    [40, -1, 1, 3]                the line at 3x
     41  open run      [41, -1, 1, 3]                text after it at 3x
+    42  wrap          [42, -1, 1]                   the line wraps, only at x 0
     99  close run     [99, -1, 1, 41]               closes a 41
 
 #### geometry
@@ -41,7 +42,7 @@
     cols reaches to the end of the line, lines is 1 unless the feature
     spans rows. everything after the geometry is the feature's own data.
 
-    marks (40, 41, 99) are positions, not boxes. they write -1 for cols
+    marks (40, 41, 42, 99) are positions, not boxes. they write -1 for cols
     and 1 for lines to keep the shape uniform, and the geometry is
     ignored when they are read. marks are never cut by a range.
 

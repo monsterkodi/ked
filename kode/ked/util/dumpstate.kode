@@ -1,5 +1,6 @@
 
 use ../edit ◆ mode
+use ../edit/tool ◆ sue
 use ../popo ◆ layout
 ■dumpstate
     @tags: (state file focus) ->
@@ -18,6 +19,15 @@ use ../popo ◆ layout
         tags.push "undo #{state.h.length-1}" if state.h.length > 1
         tags.push "redo #{state.r.length}" if valid state.r
         tags.push "file: #{file}" if valid file
+
+        wrap = []
+        if state.wrap?.all
+            wrap.push 'all'
+        else
+            for area in (state.s.sue ? [])
+                wrap.push area.y if area.value[0] == sue.WRAP
+        wrap.push 'word' if state.wrap?.word
+        tags.push "wrap: #{wrap.join ' '}" if valid wrap
         
         tags.map((tag) -> "[#{tag}]").join ' '
 

@@ -34,6 +34,8 @@ use           ◆ mode keys
         @scales     = h1:3 h2:2
         @scaledExts = ['md' 'markdown' 'kode']
 
+        @wrap = all:false word:false
+
         @rowCache       = null
         @rowCacheExt    = null
         @maxWidthCache  = 0
@@ -258,7 +260,7 @@ use           ◆ mode keys
         @scales  = conf ? {}
         @rowCache = null
 
-    lineHeight: li =>
+    lineScale: li =>
 
         for area in (@s.sue ? [])
             if area.y == li and area.value[0] == sue.LINE_SCALE
@@ -266,11 +268,79 @@ use           ◆ mode keys
 
         if @syntax.scaleOfLine is func
             ⮐ @syntax.scaleOfLine @scales @scaling li
-        1    
+        1
+
+    lineHeight: li =>
+
+        ⮐ @lineScale li if not @isWrapped li
+
+        @lineScale(li) * @wrapStarts(li).length
+
+#!wrap
+
+    isWrapped: li =>
+
+        ⮐ false if not @isValidLineIndex li
+        @wrap.all or sue.isWrapLine(@s.sue li)
+
+    wrapCols: li => max 1 int(@cells.cols / @lineScale(li))
+
+    wrapStarts: li =>
+
+        ⮐ [0] if not @isWrapped li
+
+        line = @s.lines[li]
+        cols = @wrapCols li
+        key  = "#{cols} #{@wrap.word}"
+
+        @wrapCache ?= new WeakMap()
+
+        if line is arr
+            cached = @wrapCache.get line
+            ⮐ cached.starts if cached?.key == key
+
+        starts = sue.wrapStarts line cols @wrap.word
+        @wrapCache.set line {key:key starts:starts} if line is arr
+        starts
+
+    wrapRow: x li =>
+
+        starts = @wrapStarts li
+        k = starts.length-1
+        while k > 0 and starts[k] > x
+            k -= 1
+        k
+
+    #  the cell of grapheme x relative to the top left of line li, view ignored
+    #  cells are the grapheme cell positions of the line, plain if not given
+
+    lineCell: x li cells =>
+
+        cells ?= sue.cellPositionsForLine @s.lines li []
+        scale  = @lineScale li
+        lastIndex = cells.length-1
+
+        cx = x <= lastIndex ? cells[x] : cells[lastIndex] + x - lastIndex
+
+        ⮐ [cx*scale 0] if not @isWrapped li
+
+        k  = @wrapRow x li
+        cx = cx - cells[@wrapStarts(li)[k]]
+        cx = min cx @wrapCols(li)-1
+
+        [cx*scale k*scale]
+
+    viewX: li => @isWrapped(li) ? 0 : @s.view[0]
+
+    setWrap: wrap =>
+
+        @wrap = Object.assign {} @wrap wrap
+        @rowCache = null
+        @adjustViewForMainCursor()
 
     rowPrefix: =>
 
-        ⮐ @rowCache if @rowCache and @rowCacheExt == @syntax.ext
+        ⮐ @rowCache if @rowCache and @rowCacheExt == @syntax.ext and @rowCacheCols == @cells.cols
 
         @lineWidths ?= new WeakMap()
 
@@ -291,12 +361,15 @@ use           ◆ mode keys
                 width = kseg.width line
                 @lineWidths.set line width if line is arr
 
-            width = width * height
-            maxWidth = width if width > maxWidth
+            if not @isWrapped li
+                width = width * @lineScale(li)
+                maxWidth = width if width > maxWidth
+
             rows.push rows[li] + height
 
         @maxWidthCache = maxWidth
         @rowCacheExt   = @syntax.ext
+        @rowCacheCols  = @cells.cols
         @rowCache      = rows
 
     totalRows: =>
@@ -387,10 +460,26 @@ use           ◆ mode keys
 
         if @rectree? ➜ ⮐ @sheetPosForCell [x+@s.view[0] @lineAtRow(row)]
 
-        li = @lineAtRow row
-        h  = @lineHeight li
+        li    = @lineAtRow row
+        scale = @lineScale li
 
-        [int((x+@s.view[0]) / h) li]
+        ⮐ [int((x+@s.view[0]) / scale) li] if not @isWrapped li
+
+        starts = @wrapStarts li
+        k      = int((@viewTopRow() + row - @rowsBeforeLine(li)) / scale)
+        k      = clamp 0 starts.length-1 k
+        cells  = sue.cellPositionsForLine @s.lines li []
+        col    = int(x / scale) + cells[starts[k]]
+        stop   = @s.lines[li].length
+        stop   = starts[k+1]-1 if k+1 < starts.length
+
+        gi = starts[k]
+        while gi < stop and cells[gi+1] <= col
+            gi += 1
+
+        gi += col - cells[gi] if gi == @s.lines[li].length
+
+        [gi li]
 
     clearLines: =>
 
@@ -518,8 +607,9 @@ use           ◆ mode keys
         @rowPrefix()
 
         cursor      = @mainCursor()
-        cursorScale = @lineHeight cursor[1]
+        cursorScale = @lineScale cursor[1]
         cursorRight = cursor[0]*cursorScale + cursorScale
+        cursorRight = 0 if @isWrapped cursor[1]
 
         maxOffsetX = max 0 @maxWidthCache-@cells.cols+2
         maxOffsetX = max maxOffsetX cursorRight-@cells.cols+2
@@ -609,7 +699,11 @@ use           ◆ mode keys
         scrollOffset = topRow - @rowsBeforeLine(view[1])
 
         if not @skipAdjustViewForMainCursor
-            view[0] = max 0 x*height + height + 1 - @cells.cols
+            if @isWrapped y
+                view[0] = 0
+            else
+                scale = @lineScale y
+                view[0] = max 0 x*scale + scale + 1 - @cells.cols
         
         ⮐ if view eql @s.view and scrollOffset == @s.scrollOffset
         

@@ -118,12 +118,9 @@ use                ◆ state draw complete mode susan keys
         
     isCursorInRect: cursor rect =>
 
-        v = @state.s.view
+        scale   = @state.lineScale cursor[1]
+        [x row] = @posCell cursor[0] cursor[1]
 
-        scale = @state.lineHeight cursor[1]
-        row   = @state.rowOfLine cursor[1]
-        x     = @cursorCellX(cursor[0] cursor[1]) - v[0]
-        
         rect[0] <= x and x + scale <= rect[2] and rect[1] <= row and row + scale <= rect[3]
         
     syntaxColorAtMainCursor: =>
@@ -176,6 +173,14 @@ use                ◆ state draw complete mode susan keys
         @state.clearScales()
 
         @redraw()
+
+    wrapLines: action =>
+
+        @state[action]()
+
+        @redraw()
+
+        true
  
     deleteSheetNode: node =>
 
@@ -242,6 +247,9 @@ use                ◆ state draw complete mode susan keys
                 'shift+alt+='                ➜ ⮐ @scaleLine 1
                 'shift+alt+-'                ➜ ⮐ @scaleLine -1
                 'shift+alt+0'                ➜ ⮐ @unscaleLine()
+                'ctrl+w'                     ➜ ⮐ @wrapLines 'toggleWrap'
+                'alt+w'                      ➜ ⮐ @wrapLines 'toggleWrapAll'
+                'ctrl+alt+w'                 ➜ ⮐ @wrapLines 'toggleWrapWord'
 
         if @state.rectree?
             dir = switch key

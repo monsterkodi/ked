@@ -47,9 +47,10 @@ FG_BG_COLOR = 33
 STYLE       = 34
 LINE_SCALE  = 40
 SCALE       = 41
+WRAP        = 42
 CLOSE       = 99
 
-isMark = (value) -> value[0] in [LINE_SCALE SCALE CLOSE]
+isMark = (value) -> value[0] in [LINE_SCALE SCALE WRAP CLOSE]
 
 TAG   = 0xE0000
 MAGIC = 0x21
@@ -157,6 +158,27 @@ insertionIndex = (oldLine newLine) ->
 
     p
 
+#  a changed line keeps its wrap where it starts the changed block,
+#  so the base of a join or a split stays wrapped and new lines don't
+
+wrapLineIndex = (map y oldLines newLines) ->
+
+    ny = map[y]
+    ⮐ ny if ny? and ny >= 0
+
+    oldLen = oldLines.length
+    newLen = newLines.length
+
+    pre = 0
+    while pre < oldLen and pre < newLen and oldLines[pre] eql newLines[pre]
+        pre += 1
+
+    suf = 0
+    while suf < oldLen-pre and suf < newLen-pre and oldLines[oldLen-1-suf] eql newLines[newLen-1-suf]
+        suf += 1
+
+    ⮐ y if pre <= y and y < newLen-suf
+
 ■sue
 
     @FG_COLOR:    FG_COLOR
@@ -165,6 +187,7 @@ insertionIndex = (oldLine newLine) ->
     @STYLE:       STYLE
     @LINE_SCALE:  LINE_SCALE
     @SCALE:       SCALE
+    @WRAP:        WRAP
     @CLOSE:       CLOSE
 
     @addFlags: (have add) -> addFlags(have add)
@@ -342,6 +365,11 @@ insertionIndex = (oldLine newLine) ->
         result = []
 
         for area in areas
+
+            if area.value[0] == WRAP
+                ny = wrapLineIndex map area.y oldLines newLines
+                result.push {x: 0 y: ny value: area.value} if ny?
+                continue
 
             ny = map[area.y]
             continue if not valid ny or ny < 0
@@ -547,8 +575,61 @@ insertionIndex = (oldLine newLine) ->
 
         for y,i in indices
             if scales[i] > 1
-                keep.push {x: 0 y: y value: [sue.LINE_SCALE -1 1 scales[i]]} 
+                keep.push {x: 0 y: y value: [sue.LINE_SCALE -1 1 scales[i]]}
         keep
+
+    @isWrapLine: (areas y) ->
+
+        for area in (areas ? [])
+            ⮐ true if area.y == y and area.value[0] == WRAP
+        false
+
+    @areasWithWraps: (areas indices wrap) ->
+
+        keep = []
+
+        for area in areas
+            continue if area.y in indices and area.value[0] == WRAP
+            keep.push area
+
+        if wrap
+            for y in indices
+                keep.push {x: 0 y: y value: [WRAP -1 1]}
+        keep
+
+    #  the grapheme indices where the rows of a wrapped line start
+    #  word wrap breaks after a space, a word wider than the row breaks anywhere
+
+    @wrapStarts: (line cols word) ->
+
+        starts = [0]
+        width  = 0
+        brk    = -1
+
+        for gi in 0...line.length
+
+            cw = max(1 kseg.segWidth(line[gi]))
+
+            if width + cw > cols and gi > starts[-1]
+
+                start = gi
+                start = brk if word and brk > starts[-1]
+
+                width = 0
+                for i in start...gi
+                    width += max(1 kseg.segWidth(line[i]))
+
+                if width + cw > cols and gi > start
+                    start = gi
+                    width = 0
+
+                starts.push start
+                brk = -1
+
+            width += cw
+            brk = gi+1 if word and line[gi] in [' ' '\t']
+
+        starts
 
     @desue: text ->
         lines = text.split('\n')
