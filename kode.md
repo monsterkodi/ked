@@ -472,3 +472,27 @@ Logs time difference between matching `●▸` `●▪` pairs.
 
 If the `▸` has nothing on its left hand side, it denotes a test section.
 Otherwise the expressions on both sides are compared.
+
+# parens
+
+In **kode**, `( )` has only these uses:
+
+```kode
+g(b)              # a call, glued to the callee
+(a + b) * 2       # grouping operators
+max 1 (count ? 1) # also as an argument, when it holds an operator expression
+(a b) ->          # function parameters
+```
+
+and list comprehensions, which are rarely used.
+
+Parens are never a scope for expressions, as they are in CoffeeScript or Lisp.
+`(g b)` and `a (b)` mean nothing in **kode**, so they are compile errors
+(see [calls without parens](#calls-without-parens)). Write `g(b)` and `a(g b)`
+instead. A `(g b)` in kode code is a bug, usually a CoffeeScript or Lisp habit.
+
+This is the price for leaving out commas almost everywhere
+(`f a b`, `[a b]`, `(a b) ->`). The trade-off was made on purpose when
+**kode** replaced CoffeeScript: it is bold, unusual and painful while getting
+used to it, and it is not up for debate. The aim is only to make it
+frictionless, with compile errors instead of silent comma expressions.
