@@ -265,7 +265,7 @@
 ᶲ      ^ super ltphi                      
 ꜛ      ^ super uparrow                    
 ꜜ      ^ super downarrow                  
-ꜝ      ^ super !                          
+ꜝ      ^ super ! exclam                          
 ₀      _ sub 0                          
 ₁      _ sub 1                          
 ₂      _ sub 2                          
@@ -312,7 +312,7 @@
 ħ      hbar                        
 ∇      del                         
 €      euro                        
-¡      exclamdown                  
+¡      ! exclam down                  
 £      sterling                    
 ¥      yen                         
 ¦      brokenbar                   
