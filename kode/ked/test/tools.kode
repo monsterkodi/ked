@@ -342,7 +342,7 @@ mat = (cols rows) ->
 
         u.matrix.scale ▸ 1
 
-  ▸ info bubbles                           # right-aligned in the input row, never over its text
+  ▸ info bubbles
 
         L = ''
         R = ''
@@ -365,9 +365,6 @@ mat = (cols rows) ->
         n2bg  = h.screen.get_bg s+8  1
         n3bg  = h.screen.get_bg s+18 1
         hexbg = h.screen.get_bg s+23 1
-        (hexbg[2] > hexbg[0]) ▸ true                            # blue
-        (n1bg[0] == n1bg[1] == n1bg[2]) ▸ true                  # gray
-        (n2bg[0] == n2bg[1] == n2bg[2]) ▸ true
         (n1bg[0] != n2bg[0]) ▸ true                             # stacked shades
         h.screen.get_fg(s+6 1) ▸ n1bg                           # a name's cap overlaps its right neighbor
         h.screen.get_bg(s+6 1) ▸ n2bg

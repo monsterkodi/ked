@@ -62,8 +62,8 @@
     "selection_blur": "#333",
     "name": "#333",
     "name_fg": "#999",
-    "hex": "#338",
-    "hex_fg": "#66a"
+    "hex": "#111",
+    "hex_fg": "#338"
   },
   "knob": {
     "fg": "#222",
