@@ -153,7 +153,7 @@ export
         @rowWidths = widths
         @rowCache  = null
 
-    rowWidthAt: i -> max 1 @rowWidths[min(i @rowWidths.length-1)]
+    rowWidthAt: i -> max 1 @rowWidths[clamp(0 @rowWidths.length-1 i)]
 
     #  the cells row k of line li can hold, unscaled
 
@@ -163,36 +163,43 @@ export
 
         @rowWidthAt @flowLayout().tops[li]+k
 
-    #  the starts of all lines and the flow row each line begins at
+    #  the starts of all lines and the flow row each line begins at.
+    #  the view decides which row takes the first width: the row scrollOffset of
+    #  line view[1]. rows above it take the first width, their tops are negative
 
     flowLayout: ->
 
         lines = @s.lines
+        view  = clamp 0 lines.length-1 @s.view[1]
+        off   = @s.scrollOffset
         f     = @flowCache
 
-        ⮐ f if f? and f.lines == lines and f.widths == @rowWidths and f.word == @wrap.word and f.ext == @syntax.ext
+        ⮐ f if f? and f.lines == lines and f.widths == @rowWidths and f.word == @wrap.word and f.ext == @syntax.ext and f.view == view and f.off == off
 
         starts = []
         tops   = []
-        row    = 0
 
-        for li in 0...lines.length
+        startsAt = (li row) =>
+            ⮐ [0] if not @isWrapped li
+            indent = @wrapLineIndent li
+            width  = (k) =>
+                w = @rowWidthAt row+k
+                k == 0 ? w : max(1 w-min(indent int(w/2)))
+            sue.wrapStarts lines[li] width @wrap.word
 
-            tops.push row
+        row = -off
+        for li in view...lines.length
+            tops[li]   = row
+            starts[li] = startsAt li row
+            row += starts[li].length
 
-            if @isWrapped li
-                indent = @wrapLineIndent li
-                top    = row
-                width  = (k) =>
-                    w = @rowWidthAt top+k
-                    k == 0 ? w : max(1 w-min(indent int(w/2)))
-                starts.push sue.wrapStarts(lines[li] width @wrap.word)
-            else
-                starts.push [0]
+        row = -off
+        for li in view-1..0 by -1
+            starts[li] = startsAt li 0
+            row -= starts[li].length
+            tops[li] = row
 
-            row += starts[-1].length
-
-        @flowCache = lines:lines widths:@rowWidths word:@wrap.word ext:@syntax.ext starts:starts tops:tops
+        @flowCache = lines:lines widths:@rowWidths word:@wrap.word ext:@syntax.ext view:view off:off starts:starts tops:tops
 
     wrapStarts: li ->
 

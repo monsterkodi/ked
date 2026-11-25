@@ -14,7 +14,9 @@ children
                 r           2
                 b           2
             .
-                text    heading
+                text    md
+                lines
+                    |heading|
                 x       4
                 y       0
                 w       22
@@ -31,7 +33,9 @@ children
                 flows       true
                 fg          |#cc1414|
             .
-                text    som!
+                text    md
+                lines
+                    |som!|
                 x       40%
                 y       7
                 w       12
@@ -39,7 +43,9 @@ children
                 scale   3
                 blocks  true
             .
-                text    longer text that flows and flows and flows and flows into the sea.
+                text    md
+                lines
+                    |longer text that flows and flows and flows and flows into the sea.|
                 x       4
                 y       13
                 r       120
@@ -47,7 +53,9 @@ children
                 bg      |#000000|
                 fg      |#2e2e73|
             .
-                text    somx
+                text    md
+                lines
+                    |somx|
                 x       4
                 y       14
                 w       12

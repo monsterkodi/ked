@@ -272,7 +272,7 @@ use                ◆ state draw complete mode susan keys
                 @state.resizeSheetNode dir
                 ⮐ true
 
-        result = @state.feedKey key event
+        result = @state.rectree? ? @state.feedSheetKey(key event) : @state.feedKey(key event)
 
         if result == 'handled'
             @complete?.hide()

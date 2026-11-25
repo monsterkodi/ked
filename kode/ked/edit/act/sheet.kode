@@ -1,27 +1,148 @@
 
 use ../../../kxk ▪ kseg post
-use ../../popo   ◆ layout
-use ../tool      ◆ sue
+use ../../popo   ◆ layout projector
+use ../tool      ◆ sue belt
 use ..           ◆ mode
+
+#  keys that stay with the page while a sheet is loaded: the cursor moves across
+#  the sheet and the history is the page's. all other keys go to the text node
+#  at the cursor, if there is one
+
+pageKeys = [
+    'up' 'down' 'left' 'right' 'alt+left' 'alt+right'
+    'pageup' 'pagedown' 'home' 'end' 'ctrl+h' 'ctrl+j'
+    'cmd+up' 'cmd+down' 'ctrl+up' 'ctrl+down'
+    'cmd+z' 'ctrl+z' 'shift+cmd+z' 'cmd+y' 'ctrl+y'
+    ]
+
 #!sheet
 export
-    
-    insertIntoSheet: text ->
+
+    feedSheetKey: (key event) ->
+
+        ⮐ @feedKey(key event) if key in pageKeys
+
+        if done = @inSheetNode((st) -> st.feedKey key event)
+            ⮐ done.result
+
+        @feedKey key event
+
+    #  the text node at the main cursor and the position in its state the cursor
+    #  is at. the position is left out while the page cursors are still the ones
+    #  the last change of the node set, the node keeps its own cursors then.
+    #  the cell behind the end of a line belongs to the text node of that line
+
+    sheetHome: ->
+
+        if m = @sheetMirror
+            if m.cursors == @s.cursors and layout.pathOf(@rectree m.node)?
+                ⮐ node:m.node
 
         cells = @sheetSize()
         cell  = @sheetCellForPos @mainCursor()
+        node  = layout.nodeForPos cells @rectree cell
 
-        if sel = @sheetSelection()
-            @sheetCutText sel
-            cell = layout.cellForTextOffset sel.node sel.from
+        if node?.text?
+            ⮐ node:node pos:(projector.posAt(node cell) ? projector.endOf(node))
 
-        inserted = layout.insertTextAt cells @rectree cell text
+        left = layout.nodeForPos cells @rectree [cell[0]-1 cell[1]]
 
-        ⮐ false if not inserted?
+        if left?.text?
+            pos = projector.posAt left [cell[0]-1 cell[1]]
+            if pos? and pos[0]+1 == left.state.s.lines[pos[1]].length
+                ⮐ node:left pos:[pos[0]+1 pos[1]]
+
+        null
+
+    #  runs fn with the state of the text node at the main cursor and shows what it
+    #  changed. null if there is no text node at the cursor
+
+    inSheetNode: fn ->
+
+        ⮐ null if not @rectree?
+
+        home = @sheetHome()
+
+        ⮐ null if not home?
+
+        st = home.node.state
+        st.setCursors [home.pos] if home.pos?
+
+        before = st.s
+        result = fn st
+
+        @commitSheetNode home.node before
+
+        result:result
+
+    #  a node whose width was made for its single line of text grows and shrinks with it
+
+    commitSheetNode: (node before) ->
+
+        st      = node.state
+        changed = st.s.lines != before.lines
+
+        if changed and before.lines.length == 1 and st.s.lines.length == 1
+            scale = projector.scaleOf node
+            if node.w is num and int(node.h) == scale and not node.r? and not node.b?
+                if node.w == (kseg.width(before.lines[0])+1)*scale
+                    node.w = (kseg.width(st.s.lines[0])+1)*scale
+
+        cells = @sheetSize()
 
         layout.regionize cells @rectree
+        projector.attach @rectree
+        projector.scrollToCursor node
 
-        @renderSheet @rectree cells layout.cellForTextOffset(inserted.node inserted.offset)
+        @renderSheet @rectree cells projector.cellOf(node st.mainCursor()) history:changed
+
+        @sheetMirror = node:node cursors:@s.cursors
+
+    #  the selections of all text nodes as line ranges of the page
+
+    sheetSelections: ->
+
+        out = []
+
+        walk = (node) =>
+
+            st = node.state
+
+            if st? and valid st.s.selections
+                for rng in belt.splitLineRanges(st.s.lines st.s.selections false)
+                    li = rng[1]
+                    for x in rng[0]...min(rng[2] st.s.lines[li].length)
+                        continue if not cell = projector.cellOf(node [x li])
+                        [px py] = @sheetPosForCell cell
+                        prev = out[-1]
+                        if prev? and prev[1] == py and prev[2] == px
+                            prev[2] = px+1
+                        else
+                            out.push [px py px+1 py]
+
+            for child in node.children ? []
+                walk child
+
+        walk @rectree if @rectree?
+
+        out
+
+    #  typing where no text node is creates one
+
+    insertIntoSheet: text ->
+
+        ⮐ true if @inSheetNode((st) -> st.insert text)
+
+        cells = @sheetSize()
+        cell  = @sheetCellForPos @mainCursor()
+        node  = layout.addTextNode cells @rectree cell text
+
+        ⮐ false if not node?
+
+        layout.regionize cells @rectree
+        projector.attach @rectree
+
+        @renderSheet @rectree cells (projector.cellOf(node projector.endOf(node)) ? cell)
 
         true
 
@@ -129,7 +250,7 @@ export
             if cx < cells[gi+1] ➜ ⮐ [gi y]
 
         [lastIndex y]
-        
+
     sheetNodeAtCursor: ->
 
         ⮐ if not @rectree?
@@ -146,14 +267,14 @@ export
         cell = @sheetCellForPos @mainCursor()
         node = layout.topmostIn @rectree cell
 
-        ⮐ if not valid node?.text
+        ⮐ if not node?.text?
 
         old   = layout.scaleOf node
         scale = delta == 0 ? 1 : clamp(1 7 old+delta)
 
         ⮐ if scale == old
 
-        offset = layout.textOffsetAt node cell
+        pos = projector.posAt(node cell) ? projector.endOf(node)
 
         if scale > 1
             node.scale = scale
@@ -164,8 +285,9 @@ export
         if @sheetCellsValue node.h ➜ node.h = max(1 floor(int(node.h) / old)) * scale
 
         layout.regionize cells @rectree
+        projector.attach @rectree
 
-        @renderSheet @rectree cells layout.cellForTextOffset(node offset)
+        @renderSheet @rectree cells (projector.cellOf(node pos) ? cell)
 
         node
 
@@ -222,140 +344,11 @@ export
 
         node
 
-    #  back removes the glyph before the cursor, next the one behind it
-    #  a selection is removed as a whole
-
-    sheetDelete: type ->
-
-        if sel = @sheetSelection()
-            @sheetCutText sel
-            @renderSheet @rectree @sheetSize() layout.cellForTextOffset(sel.node sel.from)
-            ⮐
-
-        cell = @sheetCellForPos @mainCursor()
-        node = @sheetTextNodeAt cell
-
-        ⮐ if not node?
-
-        offset = layout.textOffsetAt node cell
-        from   = type == 'back' ? offset-1 : offset
-
-        ⮐ if from < 0 or from >= Array.from(node.text).length
-
-        @sheetCutText node:node from:from to:from+1
-        @renderSheet @rectree @sheetSize() layout.cellForTextOffset(node from)
-
-    sheetCutText: sel ->
-
-        chars = Array.from sel.node.text
-        chars.splice sel.from sel.to-sel.from
-        sel.node.text = chars.join ''
-
-        layout.regionize @sheetSize() @rectree
-
-    sheetTextNodeAt: cell -> layout.textNodeAt @sheetSize() @rectree cell
-
-    #  a sheet selection is a range of text offsets in the text node at the main cursor.
-    #  it is kept as line ranges over the glyphs of the range, so it draws like any selection,
-    #  and read back from whatever line ranges select glyphs of that node
-
-    sheetSelection: ->
-
-        ⮐ if empty @s.selections
-
-        node = @sheetTextNodeAt @sheetCellForPos(@mainCursor())
-
-        ⮐ if not node?
-
-        inside = (x y r) -> (y > r[1] or y == r[1] and x >= r[0]) and (y < r[3] or y == r[3] and x < r[2])
-
-        from = to = null
-
-        for slot in layout.textSlots node
-            continue if not slot[2]?
-            [x y] = @sheetPosForCell [slot[0] slot[1]]
-            for rng in @s.selections
-                if inside x y rng
-                    from = min (from ? slot[3]) slot[3]
-                    to   = max (to ? slot[3]+1) slot[3]+1
-                    break
-
-        ⮐ if not from?
-
-        node:node from:from to:to
-
-    sheetRangesForText: (node from to) ->
-
-        ranges = []
-
-        for slot in layout.textSlots node
-            continue if not slot[2]? or slot[3] < from or slot[3] >= to
-            [x y] = @sheetPosForCell [slot[0] slot[1]]
-            prev  = last ranges
-            if prev? and prev[1] == y and prev[2] == x
-                prev[2] = x+1
-            else
-                ranges.push [x y x+1 y]
-
-        ranges
-
-    sheetSelectedText: ->
-
-        if sel = @sheetSelection()
-            Array.from(sel.node.text).slice(sel.from sel.to).join ''
-
-    #  selects all text of the text node at the cursor, a second time deselects
-
-    sheetSelectAll: ->
-
-        node = @sheetTextNodeAt @sheetCellForPos(@mainCursor())
-
-        ⮐ if not node?
-
-        len    = Array.from(node.text).length
-        ranges = @sheetRangesForText node 0 len
-
-        if empty(ranges) or ranges eql @s.selections
-            @deselect()
-            ⮐
-
-        @setSelections ranges
-        @setCursors [@sheetPosForCell(layout.cellForTextOffset(node len))]
-
-    #  moves the main cursor through the text of its node and selects from the anchor:
-    #  the end of the selection the cursor is not at, or where the cursor was.
-    #  left and right step through the text, up and down through the rows,
-    #  moving out of the node selects to its start or end
-
-    sheetMoveAndSelect: dir ->
-
-        cell = @sheetCellForPos @mainCursor()
-        sel  = @sheetSelection()
-        node = sel?.node ? @sheetTextNodeAt(cell)
-
-        ⮐ if not node? or dir not in ['left' 'right' 'up' 'down']
-
-        at     = layout.textOffsetAt node cell
-        anchor = at
-        anchor = (at == sel.from ? sel.to : sel.from) if sel?
-
-        len = Array.from(node.text).length
-
-        if dir in ['left' 'right']
-            to = clamp 0 len (dir == 'left' ? at-1 : at+1)
-        else
-            next = @sheetCellForPos @sheetPosInDirection(@mainCursor() dir)
-            if layout.holds(node next) or @sheetTextNodeAt(next) == node
-                to = layout.textOffsetAt node next
-            else
-                to = dir == 'up' ? 0 : len
-
-        @setSelections @sheetRangesForText(node min(anchor to) max(anchor to))
-        @setCursors [@sheetPosForCell(layout.cellForTextOffset(node to))]
-
     setSheetTree: rectree ->
 
         @rectree = layout.pageOf rectree
+
+        delete @sheetMirror
 
         @s = @s.set 'rectree' layout.plainNode(@rectree)
         @
@@ -363,9 +356,13 @@ export
     clearSheet: ->
 
         delete @rectree
+        delete @sheetMirror
 
         @s = @s.set 'rectree' null
         @
+
+    #  undo and redo: the live tree is rebuilt from the snapshot, its text nodes get
+    #  states with the snapshot's s
 
     restoreSheet: ->
 
@@ -373,7 +370,9 @@ export
 
         cell = @sheetCellForPos @mainCursor()
 
-        @rectree = @s.rectree.asMutable()
+        @rectree = layout.liveNode @s.rectree
+
+        delete @sheetMirror
 
         @renderSheet @rectree @sheetSize() cell history:false silent:true
 
@@ -406,6 +405,8 @@ export
 
         @syntax.setSegls @s.lines
 
+        @rectree = rectree
+
         @s = @s.set 'sue' data.sue
         @s = @s.set 'rectree' layout.plainNode(rectree)
 
@@ -414,9 +415,7 @@ export
             @s = @s.set 'cursors' [pos]
             @s = @s.set 'main' 0
 
-        @s = @s.set 'selections' [] if opt.history != false # line ranges don't survive a new layout
-
-        @rectree = rectree
+        @s = @s.set 'selections' @sheetSelections()
 
         @segls = @s.lines.slice()
         @rowCache = null

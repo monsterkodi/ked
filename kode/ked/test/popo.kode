@@ -10,11 +10,26 @@ use ../util      ◆ harness
 absol   = cells tree -> layout.absolutize cells tree
 absrect = cells tree -> absol(cells tree).rect
 rgns    = cells tree path -> sds.get layout.regionize(cells tree) path
-dmp     = cells tree -> layout.dumpRegions layout.regionize(cells tree)
-desue   = cells tree -> sue.desue layout.sueify(cells tree)
+dmp     = cells tree -> layout.dumpRegions layout.regionize(cells lined(tree))
+desue   = cells tree -> sue.desue layout.sueify(cells lined(tree))
 areas   = data type -> data.sue.filter((area) -> area.value[0] == type)
-textnode = cells node -> projector.attach(layout.regionize(cells {children:[node]})).children[0]
+textnode = cells node -> projector.attach(layout.regionize(cells {children:[lined(node)]})).children[0]
 strs    = node -> node.state.s.lines.map (l) -> kseg.str l
+content = node -> projector.textOf node
+txt     = path -> content rt(path)
+
+lined = node ->
+    ⮐ node if not node? or typeof(node) != 'object'
+    out = {}
+    for k,v of node
+        if k == 'children'
+            out.children = v.map lined
+        else if k == 'text' and v is str
+            out.text  = 'md'
+            out.lines = v.split '\n'
+        else
+            out[k] = v
+    out
 
 h = e = null
 
@@ -33,7 +48,7 @@ key = combo -> h.key e combo
 click = x y -> e.onMouse type:'press' cell:[x+e.cells.x y+e.cells.y] button:'left' count:1
 
 loadSheet = tree cursor=[0 0] ->
-    e.state.setSheetTree tree
+    e.state.setSheetTree lined(tree)
     e.state.renderSheet e.state.rectree e.state.sheetSize() cursor history:false silent:true
     e.state.clearHistory()
 
@@ -338,18 +353,23 @@ showSue = data ->
 
     ▸ sourceOf
 
-            tree = { bg:'#333' children:[{ text:'hi' x:1 y:1 w:3 h:1 }] }
-    
+            tree = lined { bg:'#333' children:[{ text:'hi' x:1 y:1 w:3 h:1 }] }
+
             layout.titlify {cols:10 rows:5} tree
-            layout.regionize {cols:10 rows:5} tree
-    
-            noon.parse(layout.sourceOf(tree)) ▸ {bg:'#333' children:[{text:'hi' x:1 y:1 w:3 h:1}]}
-    
+            layout.sueify {cols:10 rows:5} tree
+
+            noon.parse(layout.sourceOf(tree)) ▸ {bg:'#333' children:[{text:'md' lines:['hi'] x:1 y:1 w:3 h:1}]}
+
             tree = { bg:'#333' }
-    
-            layout.insertTextAt {cols:10 rows:5} tree [2 1] 'a'
-    
-            noon.parse(layout.sourceOf(tree)) ▸ {bg:'#333' children:[{text:'a' x:2 y:1 w:2 h:1}]}
+
+            layout.addTextNode {cols:10 rows:5} tree [2 1] 'a'
+
+            noon.parse(layout.sourceOf(tree)) ▸ {bg:'#333' children:[{text:'md' lines:['a'] x:2 y:1 w:2 h:1}]}
+
+            tree = { children:[{ text:'kode' lines:['a' '    b' '' 'c'] x:0 y:0 w:9 h:4 }] }
+            layout.sueify {cols:10 rows:5} tree
+            tree.children[0].state.syntax.ext ▸ 'kode'
+            noon.parse(layout.sourceOf(tree)).children[0] ▸ {text:'kode' lines:['a' '    b' '' 'c'] x:0 y:0 w:9 h:4}
 
   ▸ pageOf
 
@@ -359,49 +379,21 @@ showSue = data ->
             layout.pageOf(page) == page ▸ true
             layout.pageOf({}) ▸ {}
 
-  ▸ insertTextAt
-
-    ▸ creates a text node
+  ▸ addTextNode
 
             tree = {}
-
-            layout.insertTextAt({cols:10 rows:5} tree [3 2] 'a').offset ▸ 1
-
-            sds.get(tree 'children.0') ▸ {text:'a' x:3 y:2 w:2 h:1}
+            layout.addTextNode({cols:10 rows:5} tree [3 2] 'a') == tree.children[0] ▸ true
+            sds.get(tree 'children.0') ▸ {text:'md' lines:['a'] x:3 y:2 w:2 h:1}
 
             tree = { pattern:'x' x:1 y:1 w:6 h:3 }
-
-            layout.insertTextAt({cols:10 rows:5} tree [3 2] 'a').offset ▸ 1
-
-            sds.get(tree 'children.0') ▸ {text:'a' x:2 y:1 w:2 h:1}
+            layout.addTextNode {cols:10 rows:5} tree [3 2] 'a'
+            sds.get(tree 'children.0') ▸ {text:'md' lines:['a'] x:2 y:1 w:2 h:1}
 
             tree = { x:2 y:2 w:4 h:2 }
+            layout.addTextNode {cols:10 rows:10} tree [8 8] 'ab\nc'
+            sds.get(tree 'children.0') ▸ {text:'md' lines:['ab' 'c'] x:6 y:6 w:3 h:1}
 
-            layout.insertTextAt({cols:10 rows:10} tree [8 8] 'a').node.text ▸ 'a'
-
-            sds.get(tree 'children.0') ▸ {text:'a' x:6 y:6 w:2 h:1}
-
-    ▸ inserts into a text node
-
-            tree = { children:[{ text:'ab' x:1 y:1 w:6 h:2 }] }
-
-            layout.insertTextAt({cols:10 rows:5} tree [2 1] 'X').offset ▸ 2
-
-            sds.get(tree 'children.0.text') ▸ 'aXb'
-
-            tree = { children:[{ text:'ab' x:1 y:1 w:6 h:2 }] }
-
-            layout.insertTextAt({cols:10 rows:5} tree [6 1] 'Z').offset ▸ 3
-
-            sds.get(tree 'children.0.text') ▸ 'abZ'
-
-            tree = { children:[{ text:'ab' scale:2 x:0 y:0 w:8 h:2 }] }
-
-            layout.insertTextAt({cols:8 rows:2} tree [4 0] 'X').offset ▸ 3
-
-            sds.get(tree 'children.0.text') ▸ 'abX'
-
-            layout.insertTextAt({cols:8 rows:2} null [0 0] 'X')? ▸ false
+            layout.addTextNode({cols:8 rows:2} null [0 0] 'X')? ▸ false
 
   ▸ fill
 
@@ -413,24 +405,11 @@ showSue = data ->
             fill.pattern {pattern:'ab' type:'repeat'} [] ▸ []
             fill.pattern {pattern:'ab' type:'repeat'} [[5 0 5]] ▸ ['']
             
-    ▸ text
-    
-            fill.text {text:'some text'} [[5 200 10] [5 201 10]] ▸ ['some ' 'text ']
-            fill.text {text:'abcdefgh'} [[0 0 3] [0 1 3] [0 2 3]] ▸ ['abc' 'def' 'gh ']
-            fill.text {text:'a\nb'} [[0 0 4] [0 1 4]] ▸ ['a   ' 'b   ']
-            fill.text {text:''} [[0 0 3]] ▸ ['   ']
+    ▸ bands
 
-    ▸ scaled
+            fill.bands {scale:2} [[0 0 6] [0 1 2] [4 1 6]] {x:0 y:0 w:6 h:2} ▸ [[0 0 2] [0 4 6]]
+            fill.bands {scale:2} [[0 0 4] [0 1 4] [0 2 4]] {x:0 y:0 w:4 h:3} ▸ [[0 0 4]]
 
-            fill.scaled {text:'abc' scale:2} [[0 0 8] [0 1 8]] {x:0 y:0 w:8 h:2} ▸ [[0 0 'a'] [2 0 'b'] [4 0 'c']]
-            fill.scaled {text:'abcdef' scale:2} [[0 0 5] [0 1 5]] {x:0 y:0 w:5 h:2} ▸ [[0 0 'a'] [2 0 'b']]
-            fill.scaled {text:'a cd' scale:2} [[0 0 4] [0 1 4] [0 2 4] [0 3 4]] {x:0 y:0 w:4 h:4} ▸ [[0 0 'a'] [2 0 ' '] [0 2 'c'] [2 2 'd']]
-            fill.scaled {text:'a\nb' scale:2} [[0 0 6] [0 1 6] [0 2 6] [0 3 6]] {x:0 y:0 w:6 h:4} ▸ [[0 0 'a'] [0 2 'b']]
-
-            fill.scaled {text:'abcd' scale:2} [[0 0 6] [0 1 2] [4 1 6]] {x:0 y:0 w:6 h:2} ▸ [[0 0 'a'] [4 0 'b']]
-
-            fill.scaled {text:'abcd' scale:2} [[0 0 4] [0 1 4] [0 2 4]] {x:0 y:0 w:4 h:3} ▸ [[0 0 'a'] [2 0 'b']]
-            
   ▸ regionize
     
     ▸ regions
@@ -469,18 +448,18 @@ showSue = data ->
             01  h  e  a  d  i  n  g     89
             01                          89
             01                          89
-            01  longer text that flows  89
-            01   and flos  o  m  e  ws  89
-            01   and flo            ws  89
-            01   and flo            ws  89
-            01   into the sea.          89
+            01  longer text that        89
+            01  flows ans  o  m  e  d   89
+            01  flows an            d   89
+            01  flows an            d   89
+            01  flows into the sea.     89
             01                          89
             01                          89
-            01  longer text that flows  89
-            01  s  o  m  e   and flows  89
-            01               and flows  89
-            01               and flows  89
-            01   into the sea.          89
+            01  longer text that        89
+            01  s  o  m  e  flows and   89
+            01              flows and   89
+            01              flows and   89
+            01  flows into the sea.     89
             012345678901234567890123456789
             012345678901234567890123456789
             """ 
@@ -495,13 +474,13 @@ showSue = data ->
             01                     34
             01  longer text that   34
             01  flows s  o  m  e   34
-            01  and fl             34
-            01  ows an             34
-            01  d flows and flows  34
+            01  and                34
+            01  flows              34
+            01  and flows and      34
             01                     34
             01                     34
             0123longer text that 1234
-            0123flows and flows a1234
+            0123flows and flows  1234
             """ 
             
             dmp {cols:10 rows:3} {pattern:'1234' type:'repeat'} ▸ 
@@ -627,10 +606,25 @@ showSue = data ->
         projector.posAt(node [3 2]) ▸ [6 0]
         projector.posAt(node [2 3]) ▸ [1 1]
         projector.posAt(node [1 4])? ▸ false
+        node.state.syntax.ext ▸ 'md'
+        node.lines? ▸ false
         layout.plainNode(node).state? ▸ false
-        node.text = 'xyz'
-        projector.attach node
-        strs(node) ▸ ['xyz']
+        layout.plainNode(node).s == node.state.s ▸ true
+        layout.dataNode(node) ▸ {text:'md' lines:['abcdef' 'xy'] x:1 y:1 w:4 h:4}
+
+        node = textnode {cols:4 rows:2} { text:'ab cd' x:0 y:0 w:4 h:2 }
+        node.state.wrapStarts 0 ▸ [0 3]
+
+        node = textnode {cols:4 rows:2} { text:'abcdefghij' x:0 y:0 w:4 h:2 }
+        node.state.setCursors [[10 0]]
+        projector.scrollToCursor node
+        projector.glyphs(node) ▸ [[0 0 'e'] [1 0 'f'] [2 0 'g'] [3 0 'h'] [0 1 'i'] [1 1 'j']]
+        projector.cellOf(node [10 0]) ▸ [2 1]
+        projector.cellOf(node [0 0])? ▸ false
+        projector.posAt(node [0 0]) ▸ [4 0]
+        node.state.setCursors [[1 0]]
+        projector.scrollToCursor node
+        projector.cellOf(node [1 0]) ▸ [1 0]
 
         node = textnode {cols:4 rows:4} { text:'abc' x:0 y:0 w:4 h:4 scale:2 }
         projector.glyphs(node) ▸ [[0 0 'a'] [2 0 'b'] [0 2 'c']]
@@ -671,18 +665,18 @@ showSue = data ->
 
         e.state.setCursors [[2 1]] ; e.state.insert 'a' ; e.draw()
         mc() ▸ [3 1] ; h.at(2 1) ▸ 'a'
-        rt('children.0.text') ▸ 'a'
+        txt('children.0') ▸ 'a'
         rt('children.0.rect.abs') ▸ {x:2 y:1 w:2 h:1}
 
         e.state.insert 'b' ; e.draw()
         mc() ▸ [4 1] ; h.at(3 1) ▸ 'b'
-        rt('children.0.text') ▸ 'ab'
+        txt('children.0') ▸ 'ab'
         rt('children.0.w') ▸ 3
 
         loadSheet {children:[{ x:2 y:1 w:6 h:2 }]}
 
         e.state.setCursors [[5 2]] ; e.state.insert 'c'
-        layout.plainNode(rt('children.0.children.0')) ▸ {text:'c' x:3 y:1 w:2 h:1}
+        layout.dataNode(rt('children.0.children.0')) ▸ {text:'md' lines:['c'] x:3 y:1 w:2 h:1}
 
   ▸ sheet move keys
 
@@ -714,21 +708,21 @@ showSue = data ->
         loadSheet {children:[{ text:'a' x:2 y:1 w:3 h:2 children:[{ text:'b' x:1 y:0 w:1 h:1 }] } { text:'c' x:8 y:0 w:2 h:1 }]}
 
         e.state.setCursors [[3 1]]
-        key 'ctrl+alt+delete' ; rt('children.0.children')? ▸ false ; rt('children.0.text') ▸ 'a'
-        key 'ctrl+alt+entf'   ; rt('children.0.text') ▸ 'c' ; rt('children').length ▸ 1
+        key 'ctrl+alt+delete' ; rt('children.0.children')? ▸ false ; txt('children.0') ▸ 'a'
+        key 'ctrl+alt+entf'   ; txt('children.0') ▸ 'c' ; rt('children').length ▸ 1
 
         e.state.setCursors [[12 3]]
         key 'ctrl+alt+delete' ; rt('children').length ▸ 1
 
         e.state.deleteSheetNode rt('children.0') ; rt('children')? ▸ false
-        e.state.undo() ; rt('children.0.text') ▸ 'c'
+        e.state.undo() ; txt('children.0') ▸ 'c'
 
         se = new sheeditor h.screen e 'popo_sheeditor'
         se.show()
         se.layout 0 0 16 4
         se.sheetree.reloadTree()
         se.sheetree.select 0
-        se.sheetree.current().text ▸ 'c'
+        content(se.sheetree.current()) ▸ 'c'
         se.onKey 'ctrl+alt+entf' h.event('ctrl+alt+entf') ; rt('children')? ▸ false
 
   ▸ sheet undo
@@ -761,9 +755,9 @@ showSue = data ->
         loadSheet {bg:'#000'} [2 1]
         e.state.setCursors [[2 1]]
 
-        e.state.insert 'a' ; rt('children.0.children.0.text') ▸ 'a'
+        e.state.insert 'a' ; txt('children.0.children.0') ▸ 'a'
         e.state.undo()     ; rt('children.0.children')? ▸ false
-        e.state.redo()     ; rt('children.0.children.0.text') ▸ 'a'
+        e.state.redo()     ; txt('children.0.children.0') ▸ 'a'
 
   ▸ sheet resize
 
@@ -787,7 +781,7 @@ showSue = data ->
         e.state.undo() ; rt('children.0.children')? ▸ false ; kseg.str(e.state.s.lines[0]) ▸ '        xxxxxxxx'
 
         e.layout 0 0 12 4
-        e.state.redo() ; rt('children.0.children.0.text') ▸ 'a' ; e.state.s.lines[0].length ▸ 12
+        e.state.redo() ; txt('children.0.children.0') ▸ 'a' ; e.state.s.lines[0].length ▸ 12
 
   ▸ sheet cells and cursors
 
@@ -811,14 +805,14 @@ showSue = data ->
         e.state.setCursors [[7 1]]
         e.state.insert 'y'
 
-        rt('children.1.text') ▸ 'zy'
+        txt('children.1') ▸ 'zy'
         rt('children')?.length ▸ 2
         e.state.mainCursor() ▸ [8 1]
 
         e.state.setCursors [[3 1]]
         e.state.insert 'C'
 
-        rt('children.0.text') ▸ 'ABC'
+        txt('children.0') ▸ 'ABC'
         e.state.mainCursor() ▸ [4 1]
 
         e.state.setCursors [[1 1]]
@@ -953,46 +947,49 @@ showSue = data ->
         e.grabFocus()
         loadSheet {children:[{ text:'abcdef' x:2 y:1 w:3 h:3 }]}
 
-        e.state.setCursors [[2 1]] ; key 'delete' ; rt('children.0.text') ▸ 'abcdef' ; mc() ▸ [2 1]
-        e.state.setCursors [[3 1]] ; key 'delete' ; rt('children.0.text') ▸ 'bcdef'  ; mc() ▸ [2 1]
+        e.state.setCursors [[2 1]] ; key 'delete' ; txt('children.0') ▸ 'abcdef' ; mc() ▸ [2 1]
+        e.state.setCursors [[3 1]] ; key 'delete' ; txt('children.0') ▸ 'bcdef'  ; mc() ▸ [2 1]
 
-        e.state.setCursors [[2 2]] ; key 'delete' ; rt('children.0.text') ▸ 'bcef' ; mc() ▸ [4 1]
+        e.state.setCursors [[2 2]] ; key 'delete' ; txt('children.0') ▸ 'bcef' ; mc() ▸ [4 1]
 
-        e.state.setCursors [[3 2]] ; key 'delete' ; rt('children.0.text') ▸ 'bce' ; mc() ▸ [2 2]
-        key 'delete' ; rt('children.0.text') ▸ 'bc' ; mc() ▸ [4 1]
+        e.state.setCursors [[3 2]] ; key 'delete' ; txt('children.0') ▸ 'bce' ; mc() ▸ [4 1]
+        key 'delete' ; txt('children.0') ▸ 'bc' ; mc() ▸ [4 1]
 
-        e.state.setCursors [[10 3]] ; key 'delete' ; rt('children.0.text') ▸ 'bc' ; mc() ▸ [10 3]
+        e.state.setCursors [[10 3]] ; key 'delete' ; txt('children.0') ▸ 'bc' ; mc() ▸ [10 3]
 
-        e.state.undo() ; rt('children.0.text') ▸ 'bce'
+        e.state.undo() ; txt('children.0') ▸ 'bce'
 
         loadSheet {children:[{ text:'ab\ncd' x:2 y:1 w:4 h:2 }]}
 
-        e.state.setCursors [[2 2]] ; key 'delete' ; rt('children.0.text') ▸ 'abcd' ; mc() ▸ [4 1]
+        e.state.setCursors [[2 2]] ; key 'delete' ; txt('children.0') ▸ 'abcd' ; mc() ▸ [4 1]
 
         loadSheet {children:[{ text:'abcd' x:2 y:0 w:4 h:4 scale:2 }]}
 
-        e.state.setCursors [[2 3]] ; key 'delete' ; rt('children.0.text') ▸ 'acd' ; mc() ▸ [3 1]
+        e.state.setCursors [[2 3]] ; key 'delete' ; txt('children.0') ▸ 'acd' ; mc() ▸ [3 1]
 
         loadSheet {children:[{ text:'ab' x:2 y:1 w:3 h:2 }]}
 
-        e.state.setCursors [[4 1]] ; e.state.insert 'c' ; rt('children.0.text') ▸ 'abc'   ; mc() ▸ [2 2]
-        e.state.insert 'd'                             ; rt('children.0.text') ▸ 'abcd'  ; mc() ▸ [3 2]
-        e.state.setCursors [[3 1]] ; e.state.insert 'X' ; rt('children.0.text') ▸ 'aXbcd' ; mc() ▸ [4 1]
-        e.state.insert 'Y'                             ; rt('children.0.text') ▸ 'aXYbcd' ; mc() ▸ [2 2]
+        e.state.setCursors [[4 1]] ; e.state.insert 'c' ; txt('children.0') ▸ 'abc'   ; mc() ▸ [4 1]
+        e.state.insert 'd'                             ; txt('children.0') ▸ 'abcd'  ; mc() ▸ [3 2]
+        e.state.setCursors [[3 1]] ; e.state.insert 'X' ; txt('children.0') ▸ 'aXbcd' ; mc() ▸ [4 1]
+        e.state.insert 'Y'                             ; txt('children.0') ▸ 'aXYbcd' ; mc() ▸ [2 2]
+        h.key e 'return' '\n' ; strs(rt('children.0')) ▸ ['aXY' 'bcd'] ; mc() ▸ [2 2]
 
         loadSheet {children:[{ text:'ab' x:2 y:1 w:2 h:1 }]}
 
-        e.state.setCursors [[4 1]] ; e.state.insert 'c' ; rt('children.0.text') ▸ 'abc' ; rt('children').length ▸ 1
+        e.state.setCursors [[4 1]] ; e.state.insert 'c' ; txt('children.0') ▸ 'abc' ; rt('children').length ▸ 1
+        mc() ▸ [3 1] ; e.draw() ; h.at(2 1) ▸ 'c'
+        e.state.setCursors [[2 1]] ; key 'up' ; key 'right' ; key 'left' ; e.draw() ; h.at(2 1) ▸ 'c'
 
         loadSheet {children:[{ text:'ab' x:2 y:0 w:6 h:4 scale:2 }]}
 
-        e.state.setCursors [[4 1]] ; e.state.insert 'c' ; rt('children.0.text') ▸ 'abc' ; mc() ▸ [2 3]
+        e.state.setCursors [[4 1]] ; e.state.insert 'c' ; txt('children.0') ▸ 'abc' ; mc() ▸ [4 1]
 
   ▸ sheet selection
 
         sheet 'popo_sheet_select'
         e.grabFocus()
-        sel = -> e.state.sheetSelectedText()
+        sel = -> rt('children.0').state.textOfSelection()
 
         loadSheet {children:[{ text:'abcdef' x:2 y:1 w:3 h:3 } { pattern:'.' x:8 y:0 w:2 h:2 }]}
 
@@ -1001,26 +998,25 @@ showSue = data ->
         key 'cmd+a' ; e.state.s.selections ▸ []
 
         key 'cmd+a' ; e.state.insert 'X'
-        rt('children.0.text') ▸ 'X' ; e.state.s.selections ▸ [] ; mc() ▸ [3 1]
-        e.state.undo() ; rt('children.0.text') ▸ 'abcdef'
+        txt('children.0') ▸ 'X' ; e.state.s.selections ▸ [] ; mc() ▸ [3 1]
+        e.state.undo() ; txt('children.0') ▸ 'abcdef'
 
-        e.state.deselect() ; e.state.setCursors [[3 1]]
+        key 'esc' ; e.state.setCursors [[3 1]]
         key 'shift+right' ; key 'shift+right' ; sel() ▸ 'bc'
         key 'shift+left' ; sel() ▸ 'b'
-        key 'shift+right' ; key 'shift+down' ; sel() ▸ 'bcdef'
-        e.state.insert 'Y' ; rt('children.0.text') ▸ 'aY' ; mc() ▸ [4 1]
+        key 'shift+down' ; sel() ▸ 'bcde' ; e.state.s.selections ▸ [[3 1 5 1] [2 2 4 2]]
+        e.state.insert 'Y' ; txt('children.0') ▸ 'aYf' ; mc() ▸ [4 1]
 
         loadSheet {children:[{ text:'abcdef' x:2 y:1 w:3 h:3 }]}
 
         e.state.setCursors [[5 2]]
         key 'shift+left' ; key 'shift+up' ; sel() ▸ 'cdef'
-        key 'shift+up' ; sel() ▸ 'abcdef'
-        key 'delete' ; rt('children.0.text') ▸ '' ; e.state.s.selections ▸ []
-        e.state.undo() ; rt('children.0.text') ▸ 'abcdef' ; sel() ▸ 'abcdef'
-        e.state.deselect()
+        key 'delete' ; txt('children.0') ▸ 'ab' ; e.state.s.selections ▸ []
+        e.state.undo() ; txt('children.0') ▸ 'abcdef' ; sel() ▸ 'cdef'
+        key 'esc'
 
-        e.state.setCursors [[3 1]] ; key 'entf' ; rt('children.0.text') ▸ 'acdef' ; mc() ▸ [3 1]
-        e.state.setCursors [[2 2]] ; key 'shift+right' ; key 'entf' ; rt('children.0.text') ▸ 'acdf'
+        e.state.setCursors [[3 1]] ; key 'entf' ; txt('children.0') ▸ 'acdef' ; mc() ▸ [3 1]
+        e.state.setCursors [[2 2]] ; key 'shift+right' ; key 'entf' ; txt('children.0') ▸ 'acdf'
 
         e.state.setCursors [[12 3]] ; key 'cmd+a' ; e.state.s.selections ▸ []
         key 'shift+right' ; e.state.s.selections ▸ []
@@ -1033,9 +1029,10 @@ showSue = data ->
 
         e.state.setCursors [[2 1]] ; key 'shift+right' ; key 'shift+right'
         e.state.copy() ; board ▸ 'ac'
-        e.state.cut()  ; board ▸ 'ac' ; rt('children.0.text') ▸ 'df'
-        e.state.setCursors [[3 1]] ; e.state.paste() ; rt('children.0.text') ▸ 'dacf'
-        e.state.setCursors [[12 3]] ; e.state.cut() ; rt('children.0.text') ▸ 'dacf'
+        e.state.setCursors [[4 1]] ; key 'shift+left' ; key 'shift+left'
+        e.state.cut()  ; board ▸ 'ac' ; txt('children.0') ▸ 'df'
+        e.state.setCursors [[3 1]] ; e.state.paste() ; txt('children.0') ▸ 'dacf'
+        e.state.setCursors [[12 3]] ; e.state.cut() ; txt('children.0') ▸ 'dacf'
 
         clip.copy  = savedCopy
         clip.paste = savedPaste
@@ -1068,8 +1065,8 @@ showSue = data ->
         se.sheetree.select 0 ; se.sheetree.jumpTo se.sheetree.current() ; mc() ▸ [2 1]
 
         e.grabFocus()
-        e.state.setCursors [[11 0]] ; se.sheetree.current().text ▸ 'z'
-        e.state.insert 'x' ; se.sheetree.current() == rt('children.1') ▸ true ; rt('children.1.text') ▸ 'zx'
+        e.state.setCursors [[11 0]] ; content(se.sheetree.current()) ▸ 'z'
+        e.state.insert 'x' ; se.sheetree.current() == rt('children.1') ▸ true ; txt('children.1') ▸ 'zx'
         key 'delete' ; se.sheetree.current() == rt('children.1') ▸ true
         e.state.undo() ; se.sheetree.current() == rt('children.1') ▸ true
 
@@ -1079,12 +1076,12 @@ showSue = data ->
         se.sheetree.grabFocus()
         se.sheetree.select 0
         se.onKey 'down' h.event('down') ; mc() ▸ [10 0]
-        se.onKey 'delete' h.event('delete') ; rt('children').length ▸ 2 ; se.sheetree.current().text ▸ 'q'   ; mc() ▸ [10 4]
-        se.onKey 'entf'   h.event('entf')   ; rt('children').length ▸ 1 ; se.sheetree.current().text ▸ 'abc' ; mc() ▸ [2 1]
+        se.onKey 'delete' h.event('delete') ; rt('children').length ▸ 2 ; content(se.sheetree.current()) ▸ 'q'   ; mc() ▸ [10 4]
+        se.onKey 'entf'   h.event('entf')   ; rt('children').length ▸ 1 ; content(se.sheetree.current()) ▸ 'abc' ; mc() ▸ [2 1]
         se.onKey 'ctrl+alt+delete' h.event('ctrl+alt+delete') ; rt('children')? ▸ false
 
         se.sheetree.grabFocus()
-        se.onKey 'cmd+z'       h.event('cmd+z')       ; rt('children.0.text') ▸ 'abc'
+        se.onKey 'cmd+z'       h.event('cmd+z')       ; txt('children.0') ▸ 'abc'
         se.onKey 'ctrl+z'      h.event('ctrl+z')      ; rt('children').length ▸ 2
         se.onKey 'shift+cmd+z' h.event('shift+cmd+z') ; rt('children').length ▸ 1
         se.onKey 'ctrl+y'      h.event('ctrl+y')      ; rt('children')? ▸ false
@@ -1095,13 +1092,13 @@ showSue = data ->
         se.sheetree.reloadTree()
         se.sheetree.grabFocus()
         se.sheetree.select 1
-        se.onKey 'delete' h.event('delete') ; se.sheetree.current().text ▸ 'q'
-        undo() ; rt('children').length ▸ 3 ; se.sheetree.current().text ▸ 'q' ; se.sheetree.currentIndex() ▸ 2
+        se.onKey 'delete' h.event('delete') ; content(se.sheetree.current()) ▸ 'q'
+        undo() ; rt('children').length ▸ 3 ; content(se.sheetree.current()) ▸ 'q' ; se.sheetree.currentIndex() ▸ 2
 
         loadSheet {children:[{ pattern:'.' x:0 y:0 w:8 h:3 }]}
         se.sheetree.reloadTree()
         e.state.setCursors [[2 1]] ; e.state.insert 'x'
-        se.sheetree.select 1 ; se.sheetree.current().text ▸ 'x'
+        se.sheetree.select 1 ; content(se.sheetree.current()) ▸ 'x'
         undo() ; rt('children.0.children')? ▸ false ; se.sheetree.current().pattern ▸ '.'
 
         board = ''
@@ -1115,16 +1112,16 @@ showSue = data ->
         se.sheetree.reloadTree()
         se.sheetree.grabFocus()
 
-        se.sheetree.select 1 ; cmd 'ctrl+c' ; JSON.parse(board) ▸ {text:'z' x:10 y:0 w:2 h:1 children:[{bg:'#f00' x:0 y:0 w:1 h:1}]}
+        se.sheetree.select 1 ; cmd 'ctrl+c' ; JSON.parse(board) ▸ {text:'md' lines:['z'] x:10 y:0 w:2 h:1 children:[{bg:'#f00' x:0 y:0 w:1 h:1}]}
 
         se.sheetree.select 0 ; cmd 'cmd+v'
-        rt('children').length ▸ 2 ; rt('children.0.children.0.text') ▸ 'z' ; rt('children.0.children.0.children.0.bg') ▸ '#f00'
+        rt('children').length ▸ 2 ; txt('children.0.children.0') ▸ 'z' ; rt('children.0.children.0.children.0.bg') ▸ '#f00'
         se.sheetree.current() == rt('children.0.children.0') ▸ true
 
         se.sheetree.select 0 ; cmd 'cmd+x'
-        rt('children').length ▸ 1 ; JSON.parse(board).text ▸ 'abc' ; se.sheetree.current().text ▸ 'z'
+        rt('children').length ▸ 1 ; JSON.parse(board).lines ▸ ['abc'] ; content(se.sheetree.current()) ▸ 'z'
 
-        cmd 'ctrl+v' ; rt('children').length ▸ 1 ; rt('children.0.children.1.text') ▸ 'abc' ; rt('children.0.children.1.children.0.text') ▸ 'z'
+        cmd 'ctrl+v' ; rt('children').length ▸ 1 ; txt('children.0.children.1') ▸ 'abc' ; txt('children.0.children.1.children.0') ▸ 'z'
 
         for text in ['hello' '{"foo":1}' '[1]' '{}' '{"children":[{"x":"1","nope":2}]}']
             board = text ; cmd 'cmd+v' ; rt('children.0.children').length ▸ 2
@@ -1134,46 +1131,46 @@ showSue = data ->
         clip.copy  = savedCopy
         clip.paste = savedPaste
 
-        order = -> se.sheetree.fuzzied.map (n) -> n.text
-        rect  = (text) -> se.sheetree.fuzzied.find((n) -> n.text == text).rect.abs
+        order = -> se.sheetree.fuzzied.map (n) -> content n
+        rect  = (text) -> se.sheetree.fuzzied.find((n) -> content(n) == text).rect.abs
 
         loadSheet {children:[{ text:'a' x:0 y:0 w:2 h:1 } { text:'b' x:4 y:1 w:8 h:4 children:[{ text:'c' x:1 y:1 w:2 h:1 } { text:'e' x:'50%' y:2 r:1 b:1 }] } { text:'d' x:14 y:0 w:2 h:1 }]}
         se.sheetree.reloadTree()
         se.sheetree.grabFocus()
         se.sheetree.select 0
 
-        cmd 'alt+down' ; order() ▸ ['b' 'a' 'c' 'e' 'd'] ; rt('children.0.children.0.text') ▸ 'a' ; rt('children.0.children.0.x') ▸ -4
+        cmd 'alt+down' ; order() ▸ ['b' 'a' 'c' 'e' 'd'] ; txt('children.0.children.0') ▸ 'a' ; rt('children.0.children.0.x') ▸ -4
         cmd 'alt+down' ; order() ▸ ['b' 'c' 'a' 'e' 'd']
         cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'a' 'd']
-        cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'a' 'd'] ; rt('children.1.text') ▸ 'a' ; rect('a') ▸ {x:0 y:0 w:2 h:1}
+        cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'a' 'd'] ; txt('children.1') ▸ 'a' ; rect('a') ▸ {x:0 y:0 w:2 h:1}
         cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'd' 'a']
         cmd 'alt+down' ; order() ▸ ['b' 'c' 'e' 'd' 'a']
         cmd 'alt+up'   ; order() ▸ ['b' 'c' 'e' 'a' 'd']
-        cmd 'alt+up'   ; order() ▸ ['b' 'c' 'e' 'a' 'd'] ; rt('children.0.children.2.text') ▸ 'a'
-        cmd 'alt+up'   ; order() ▸ ['b' 'c' 'a' 'e' 'd'] ; se.sheetree.current().text ▸ 'a'
+        cmd 'alt+up'   ; order() ▸ ['b' 'c' 'e' 'a' 'd'] ; txt('children.0.children.2') ▸ 'a'
+        cmd 'alt+up'   ; order() ▸ ['b' 'c' 'a' 'e' 'd'] ; content(se.sheetree.current()) ▸ 'a'
 
         se.sheetree.select 1 ; rect('c') ▸ {x:5 y:2 w:2 h:1}
         cmd 'alt+up'   ; order() ▸ ['c' 'b' 'a' 'e' 'd'] ; rect('c') ▸ {x:5 y:2 w:2 h:1}
 
         se.sheetree.select 3 ; rect('e') ▸ {x:8 y:3 w:3 h:1}
-        cmd 'alt+down' ; order() ▸ ['c' 'b' 'a' 'e' 'd'] ; rt('children.2.text') ▸ 'e' ; rect('e') ▸ {x:8 y:3 w:3 h:1}
+        cmd 'alt+down' ; order() ▸ ['c' 'b' 'a' 'e' 'd'] ; txt('children.2') ▸ 'e' ; rect('e') ▸ {x:8 y:3 w:3 h:1}
 
-        undo() ; rt('children.1.children.1.text') ▸ 'e'
+        undo() ; txt('children.1.children.1') ▸ 'e'
 
         loadSheet {bg:'#333' children:[{ text:'c' x:1 y:1 w:2 h:1 }]}
         se.sheetree.reloadTree()
         se.sheetree.grabFocus()
 
-        layouts = -> se.sheetree.fuzzied.map (n) -> n.text ? n.bg
+        layouts = -> se.sheetree.fuzzied.map (n) -> n.text? ? content(n) : n.bg
         layouts() ▸ ['#333' 'c']
 
         se.sheetree.select 1
-        cmd 'alt+up' ; layouts() ▸ ['c' '#333'] ; rt('children.0.text') ▸ 'c' ; rt('children.1.children')? ▸ false
+        cmd 'alt+up' ; layouts() ▸ ['c' '#333'] ; txt('children.0') ▸ 'c' ; rt('children.1.children')? ▸ false
         cmd 'alt+up' ; layouts() ▸ ['c' '#333']
 
         se.sheetree.select 1 ; cmd 'delete' ; layouts() ▸ ['c']
 
-        noon.parse(layout.sourceOf(e.state.rectree)) ▸ {children:[{text:'c' x:1 y:1 w:2 h:1}]}
+        noon.parse(layout.sourceOf(e.state.rectree)) ▸ {children:[{text:'md' lines:['c'] x:1 y:1 w:2 h:1}]}
 
         loadSheet {children:[{ x:1 y:1 w:6 h:3 children:[{ text:'t' x:2 y:1 w:2 h:1 }] } { text:'z' x:10 y:0 w:2 h:1 }]}
         se.sheetree.reloadTree()
@@ -1188,4 +1185,4 @@ showSue = data ->
 
         se.sheetree.grabFocus()
         se.sheetree.select 0
-        cmd 'delete' ; titles() ▸ ['text'] ; rt('children.0.text') ▸ 'z'
+        cmd 'delete' ; titles() ▸ ['text'] ; txt('children.0') ▸ 'z'

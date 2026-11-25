@@ -314,13 +314,35 @@ page s
    - **Gate:** all existing popo tests pass with the new paint path, and the headless
      output of `test2.sheet` and `test.sheet` is identical, for cursor moves and for
      typing into a text node.
-3. **Solo editing through the home state, and global undo.**
+3. ✔ **Solo editing through the home state, and global undo.**
    - Text keys in solo mode go to the home state.
    - Remove the A text twins and rewrite their tests.
    - Switch the format: `node.text` is the language (`'md'`), the content is `lines`,
      the state is the only copy of the text. Convert the sheets in `test/level2`.
    - Switch the node states to word wrap, and update the expected output once.
    - The node view: nodes scroll to keep the main cursor in view.
+   - **As built** (`act/sheet.kode`):
+     - `editor.onKey` → `feedSheetKey`. The page keeps the cursor motions,
+       cmd/ctrl+up/down and undo/redo (`pageKeys`); every other key runs in the home
+       state (`inSheetNode`), and falls back to the page if there is none, where
+       typing creates a text node (`layout.addTextNode`).
+     - The page's `insert`, `delete`, `cut`, `copy`, `selectAllLines` and
+       `moveCursorsAndSelect` go to the home state too, so direct calls work as
+       keys do. Page modes still transform typed text (`mode.insert`) first.
+     - `sheetHome`: the topmost text node at the cursor cell, or the text node whose
+       line ends just left of it. While the page cursors are the ones the last
+       node change set (`@sheetMirror`), the node keeps its own cursors and anchors.
+     - `commitSheetNode`: a node sized for its single line (`w == (width+1)*scale`,
+       `h == scale`) grows and shrinks with it; then regionize, scroll the node
+       view, render. Only changed lines make an undo step.
+     - `renderSheet` composites the node selections into the page
+       (`sheetSelections`), `restoreSheet` rebuilds the tree with
+       `layout.liveNode`.
+     - `layout.plainNode` keeps `s` (snapshots), `layout.dataNode` writes `lines`
+       (save, sheetree copy, `ownProps`).
+   - **Noticed, not changed:** word wrap moves a word to the next row when only the
+     space after it doesn't fit (`sue.wrapStarts`, the editor does the same). Saving
+     writes the page wrapper of `layout.pageOf` around the file's root node.
 4. **Multi mode.** Cursor spawning, local multiplexing, the broadcast highlights, and
    composited multi cursors and selections. This covers the four examples:
    - alt+cmd+d then typing

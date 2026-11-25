@@ -1,18 +1,20 @@
 use ◆ fill
+use ../../kxk    ▪ kseg
 use ../edit/tool ◆ sue
 use ../edit      ◆ state
 
 ■projector
 
     #  every text node gets an editor state, a runtime property like rect.
-    #  its lines are the lines of the node's text, all of them wrapped:
-    #  the rows of the lines flow through the spans of the node, one row per span
+    #  the state holds the text, node.text is the syntax language of it.
+    #  all lines are wrapped: their rows flow through the spans of the node, one row
+    #  per span, starting at the row the node view begins with
 
     @attach: node ->
 
         ⮐ node if not node?
 
-        if valid node.text
+        if node.text?
             if node.regions? ➜ @spans node else @stateOf node
 
         for child in node.children ? []
@@ -20,22 +22,44 @@ use ../edit      ◆ state
 
         node
 
-    #  the state of a text node, its lines follow node.text whenever that changes
+    #  the state of a text node. a new state takes the lines the node was loaded or
+    #  pasted with, or the s of an undo snapshot
 
     @stateOf: node ->
 
         if not node.state?
+
             st = new state {cols:0 rows:0} 'popo_node'
-            st.wrap    = all:true word:false
+            st.wrap    = all:true word:true
             st.scaling = false
-            st.syntax.setExt 'md'
+            st.syntax.setExt @extOf(node)
+
+            if node.s?
+                st.s = node.s
+                st.segls = node.s.lines.slice()
+                st.syntax.setSegls node.s.lines
+                st.clearHistory()
+            else
+                st.loadLines node.lines ? ['']
+
+            delete node.s
+            delete node.lines
+
             node.state = st
 
-        if node.stateText != node.text
-            node.state.loadLines node.text.split('\n')
-            node.stateText = node.text
+        st = node.state
 
-        node.state
+        if st.syntax.ext != @extOf(node)
+            st.syntax.setExt @extOf(node)
+            st.syntax.setSegls st.s.lines
+
+        st
+
+    @extOf: node -> (valid(node.text) and node.text is str) ? node.text : 'md'
+
+    @linesOf: node -> @stateOf(node).s.lines.map (l) -> kseg.str l
+
+    @textOf: node -> @linesOf(node).join '\n'
 
     @scaleOf: node -> max 1 int(node.scale ? 1)
 
@@ -76,6 +100,7 @@ use ../edit      ◆ state
 
                 si = tops[li] + k
 
+                continue if si < 0
                 ⮐ out if si >= spans.length
 
                 [y x1 x2] = spans[si]
@@ -89,7 +114,7 @@ use ../edit      ◆ state
         out
 
     #  the page cell of position [x li] in the node's state:
-    #  the bottom left cell of its block, null if its row has no span
+    #  the bottom left cell of its block, null if its row is outside the node view
 
     @cellOf: node pos ->
 
@@ -101,7 +126,7 @@ use ../edit      ◆ state
         [col k]  = st.lineCell x li
         si       = st.flowLayout().tops[li] + k
 
-        ⮐ null if si >= spans.length
+        ⮐ null if si < 0 or si >= spans.length
 
         [y x1] = spans[si]
 
@@ -127,8 +152,61 @@ use ../edit      ◆ state
         li  -= 1 while li > 0 and tops[li] > si
         k    = si - tops[li]
 
-        ⮐ null if k >= st.wrapStarts(li).length
+        ⮐ null if k < 0 or k >= st.wrapStarts(li).length
 
         [st.posInRow(li k floor((cx - spans[si][1]) / scale)) li]
+
+    #  the end of the node's text
+
+    @endOf: node ->
+
+        lines = @stateOf(node).s.lines
+        [lines[-1].length lines.length-1]
+
+    #  scrolls the node view row by row until the main cursor's row has a span
+
+    @scrollToCursor: node ->
+
+        spans = @spans node
+        st    = node.state
+
+        ⮐ if empty spans
+
+        [x li] = st.mainCursor()
+
+        for i in 0...1000
+            si = st.flowLayout().tops[li] + st.wrapRow(x li)
+            if si < 0
+                break if not @scrollRows st -1
+            else if si >= spans.length
+                break if not @scrollRows st 1
+            else
+                break
+
+    @scrollRows: st dir ->
+
+        view = st.s.view[1]
+        off  = st.s.scrollOffset
+
+        if dir > 0
+            if off+1 < st.wrapStarts(view).length
+                off += 1
+            else if view+1 < st.s.lines.length
+                view += 1
+                off   = 0
+            else
+                ⮐ false
+        else
+            if off > 0
+                off -= 1
+            else if view > 0
+                view -= 1
+                off   = st.wrapStarts(view).length-1
+            else
+                ⮐ false
+
+        st.setView [0 view] off
+
+        true
 
 export projector

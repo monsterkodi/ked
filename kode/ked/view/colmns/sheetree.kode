@@ -185,7 +185,7 @@ use ../menu         ◆ filterchoice
     copyCurrent: =>
 
         if node = @current()
-            clip.copy JSON.stringify(layout.plainNode(node))
+            clip.copy JSON.stringify(layout.dataNode(node))
 
         true
 

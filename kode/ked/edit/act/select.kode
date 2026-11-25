@@ -293,7 +293,7 @@ export
         
     selectAllLines: ->
 
-        ⮐ @sheetSelectAll() if @rectree?
+        ⮐ @inSheetNode((st) -> st.selectAllLines()) if @rectree?
 
         allsel = [[0 0 kseg.width(@s.lines[@s.lines.length-1]) @s.lines.length-1]]
         

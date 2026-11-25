@@ -493,11 +493,7 @@ import suact from './act/sue.js'
 
         opt ?= {}
 
-        if @rectree?
-            if text = @sheetSelectedText()
-                clip.copy text
-                @delete 'back'
-            ⮐
+        ⮐ @inSheetNode((st) -> st.cut opt) if @rectree?
 
         @copy deselect:false
 
@@ -509,9 +505,7 @@ import suact from './act/sue.js'
 
         opt ?= {}
 
-        if @rectree?
-            if text = @sheetSelectedText() ➜ clip.copy text
-            ⮐
+        ⮐ @inSheetNode((st) -> st.copy opt) if @rectree?
 
         clip.copy @textOfSelectionOrCursorLines()
 

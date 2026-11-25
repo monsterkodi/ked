@@ -199,7 +199,7 @@ export
             
     moveCursorsAndSelect: dir opt ->
 
-        ⮐ @sheetMoveAndSelect(dir) if @rectree?
+        ⮐ @inSheetNode((st) -> st.moveCursorsAndSelect dir opt) if @rectree?
         ⮐ @moveRowsAndSelect(dir) if dir in ['up' 'down'] and @hasWrap()
 
         if empty @anchors
