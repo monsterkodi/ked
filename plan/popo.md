@@ -150,6 +150,8 @@ Both maps go through the node state's flow layout: row k of line li is span
 their state: the graphemes `starts[k]...starts[k+1]` of line li go into span
 `first[li]+k`, grapheme cell c → page cell `x1 + c*scale`. This replaces `fill.flow` /
 `fill.text` / `fill.scaled` for text. Rows outside the node view aren't painted.
+The erase masks stay: `gone.char` for unscaled text, `charMaskedIn` for scaled blocks.
+Blockers keep shaping the regions, and with them the spans and row widths.
 
 **Hidden cursors.** A cursor in a row outside the node view has no cell and is left out
 of the page composite; it still edits. The main cursor is always in view (see *Node
@@ -317,7 +319,8 @@ page s
 3. ~~**Cursors in overflow lines or hidden text** aren't visible.~~ Decided: nodes
    scroll to keep the main cursor in view (*Node view*). Other cursors out of view
    aren't drawn, covered ones are drawn on top. No overflow marker.
-4. **node masking | flow mechanism** should we re-implement it after the refactor?
+4. ~~**node masking | flow mechanism** should we re-implement it after the refactor?~~
+   Decided: both stay as they are (see *Compositing and mapping*).
 5. **up/down in wrapped lines:** the editor moves by logical lines. Examples 3 and 4
    need moving by visual rows (spans). Change it for all wrapped lines, only for node
    states, or keep logical moves in sheets?
