@@ -291,7 +291,9 @@ page s
 2. **Projector, node states, compositing; rendering only.** Load the sheet, create
    the states, paint text from them, and map the cursor. Editing still goes through A.
    - **Gate:** all existing popo tests pass with the new paint path, and headless output
-     of `test2.sheet` is identical (only holds with char wrap, see open question 6).
+     of `test2.sheet` is identical. The gate runs with char wrap (`wrap.word = false`
+     in the node states), because that is how `fill.flow` breaks. After the gate, nodes
+     switch to word wrap and the expected output is updated once.
 3. **Solo editing through the home state, and global undo.**
    - Text keys in solo mode go to the home state.
    - Remove the A text twins and rewrite their tests.
@@ -346,7 +348,7 @@ page s
    Decided: both stay as they are (see *Compositing and mapping*).
 5. ~~**up/down in wrapped lines:** the editor moves by logical lines.~~ Decided: visual
    rows for all wrapped lines, the editor included (see *Visual row motion*).
-6. **word or char wrap in sheets:** `fill.flow` breaks anywhere, the state defaults to
-   word wrap. Word wrap in nodes changes how existing sheets look.
+6. ~~**word or char wrap in sheets**~~ Decided: word wrap, char wrap only for the phase 2
+   gate. No toggle in sheets for now; later the text type may choose it.
 7. **continuation indent in sheets:** none (as now), or the editor's indent that lines
    up with leading whitespace and list markers?
