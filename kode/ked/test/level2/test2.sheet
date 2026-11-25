@@ -51,23 +51,23 @@ children
                     .
                         text    md
                         lines
-                            |HELLO world! isn't this a really sun-shine happy day?     |
+                            |HELLO world! isn't this a really super nice sun-shine happy day?     |
                         x       1%
-                        y       13
-                        w       75
-                        h       4
-                        scale   2
+                        y       0
+                        h       18
+                        scale   4
                         bg      |#000000|
                         fg      |#f5ff69|
+                        r       0
                     .
                         text    md
                         lines
                             |HELLO world! isn't this a really sun-shine happy day?     |
-                        x       0%
+                        x       1%
                         y       0
-                        w       104
-                        h       12
-                        scale   4
+                        w       18
+                        h       4
+                        scale   2
                         bg      |#000000|
                         fg      |#f5ff69|
         x           25
