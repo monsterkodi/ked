@@ -75,8 +75,12 @@ line's rows ended:
   `(s.lines identity, capacities key, wrap.word)`. The per-line WeakMap cache doesn't
   fit, because a line's rows depend on the rows of the lines above it.
 - An empty line takes one span, as `fill.flow` does for `\n` now.
-- Continuation rows aren't indented in sheets: `wrapIndent` is 0 when `@rowWidths` is
-  set (to be confirmed, see open questions).
+- Continuation rows are indented as in the editor (`wrapIndent`). The indent is capped
+  at half of each row's own capacity and subtracted from it. The forward and reverse
+  maps include it, like `lineCell` and `posForCell` do.
+- Node states have no syntax extension yet, so only leading whitespace indents. List,
+  heading and comment markers can come with a text type like `md` later. No test text
+  starts with whitespace, so the phase 2 gate is unaffected.
 
 Because wrapping lives outside the logical lines, a **rect change only invalidates the
 cache**. Cursors, selections and highlights are logical and stay where they are; no
@@ -350,5 +354,5 @@ page s
    rows for all wrapped lines, the editor included (see *Visual row motion*).
 6. ~~**word or char wrap in sheets**~~ Decided: word wrap, char wrap only for the phase 2
    gate. No toggle in sheets for now; later the text type may choose it.
-7. **continuation indent in sheets:** none (as now), or the editor's indent that lines
-   up with leading whitespace and list markers?
+7. ~~**continuation indent in sheets**~~ Decided: kept, as in the editor (see *Wrapping
+   into spans*).
