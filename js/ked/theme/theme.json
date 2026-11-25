@@ -173,6 +173,7 @@
     "text unicode greek": "#aaf",
     "text unicode latin": "#faf",
     "text unicode cyrillic": "#faa",
+    "text unicode cjk": "#fa8",
     "keyword require": "#444",
     "keyword function": "#444",
     "comment": "#444",
