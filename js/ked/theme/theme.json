@@ -60,10 +60,10 @@
     "fg": "#888",
     "selection": "#44a",
     "selection_blur": "#333",
-    "hex": "#33a",
-    "hex_fg": "#ccf",
-    "name": "#444",
-    "name_fg": "#bbb"
+    "name": "#333",
+    "name_fg": "#999",
+    "hex": "#338",
+    "hex_fg": "#66a"
   },
   "knob": {
     "fg": "#222",
