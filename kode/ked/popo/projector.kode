@@ -1,0 +1,134 @@
+use ◆ fill
+use ../edit/tool ◆ sue
+use ../edit      ◆ state
+
+■projector
+
+    #  every text node gets an editor state, a runtime property like rect.
+    #  its lines are the lines of the node's text, all of them wrapped:
+    #  the rows of the lines flow through the spans of the node, one row per span
+
+    @attach: node ->
+
+        ⮐ node if not node?
+
+        if valid node.text
+            if node.regions? ➜ @spans node else @stateOf node
+
+        for child in node.children ? []
+            @attach child
+
+        node
+
+    #  the state of a text node, its lines follow node.text whenever that changes
+
+    @stateOf: node ->
+
+        if not node.state?
+            st = new state {cols:0 rows:0} 'popo_node'
+            st.wrap    = all:true word:false
+            st.scaling = false
+            st.syntax.setExt 'md'
+            node.state = st
+
+        if node.stateText != node.text
+            node.state.loadLines node.text.split('\n')
+            node.stateText = node.text
+
+        node.state
+
+    @scaleOf: node -> max 1 int(node.scale ? 1)
+
+    #  [y x1 x2] of every span in flow order. the state gets their widths as row widths
+
+    @spans: node ->
+
+        scale  = @scaleOf node
+        spans  = fill.bands node node.regions node.rect.abs
+        widths = spans.map (span) -> floor((span[2] - span[1]) / scale)
+        st     = @stateOf node
+
+        st.setRowWidths widths if not (widths eql st.rowWidths)
+
+        spans
+
+    #  [x y char] of every glyph that has a cell in a span, y is the top row of the band
+
+    @glyphs: node ->
+
+        spans = @spans node
+        st    = node.state
+        scale = @scaleOf node
+        out   = []
+
+        ⮐ out if empty spans
+
+        tops  = st.flowLayout().tops
+        lines = st.s.lines
+
+        for li in 0...lines.length
+
+            line   = lines[li]
+            starts = st.wrapStarts li
+            cells  = sue.cellPositionsForLine lines li []
+
+            for k in 0...starts.length
+
+                si = tops[li] + k
+
+                ⮐ out if si >= spans.length
+
+                [y x1 x2] = spans[si]
+                end    = (k+1 < starts.length) ? starts[k+1] : line.length
+                indent = st.wrapIndent li k
+
+                for gi in starts[k]...end
+                    x = x1 + (cells[gi] - cells[starts[k]] + indent) * scale
+                    out.push [x y line[gi]] if x + scale <= x2
+
+        out
+
+    #  the page cell of position [x li] in the node's state:
+    #  the bottom left cell of its block, null if its row has no span
+
+    @cellOf: node pos ->
+
+        spans = @spans node
+        st    = node.state
+        scale = @scaleOf node
+
+        [x li]   = pos
+        [col k]  = st.lineCell x li
+        si       = st.flowLayout().tops[li] + k
+
+        ⮐ null if si >= spans.length
+
+        [y x1] = spans[si]
+
+        [x1 + col*scale, y + scale-1]
+
+    #  the position in the node's state at a page cell, null if no row of the text
+    #  flows through the span at that cell
+
+    @posAt: node cell ->
+
+        spans = @spans node
+        st    = node.state
+        scale = @scaleOf node
+
+        [cx cy] = cell
+
+        si = spans.findIndex (span) -> span[0] <= cy < span[0]+scale and span[1] <= cx < span[2]
+
+        ⮐ null if si < 0
+
+        tops = st.flowLayout().tops
+        li   = tops.length-1
+        li  -= 1 while li > 0 and tops[li] > si
+        k    = si - tops[li]
+
+        ⮐ null if k >= st.wrapStarts(li).length
+
+        [st.posInRow(li k floor((cx - spans[si][1]) / scale)) li]
+
+export projector

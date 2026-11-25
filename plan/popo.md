@@ -297,20 +297,30 @@ page s
 
 ## Phases
 
-1. **Wrap seam and visual row motion.** `sue.wrapStarts` with a width function,
+1. ✔ **Wrap seam and visual row motion.** `sue.wrapStarts` with a width function,
    `@rowWidths` in the state, flow layout across lines, then up/down by visual rows.
    Tested on plain states, without sheets.
    - **Gate:** wrap and mapscr tests unchanged after the seam; after the motion only
      the up/down expectations in `test/wrap.kode` change.
-2. **Projector, node states, compositing; rendering only.** Load the sheet, create
-   the states, paint text from them, and map the cursor. Editing still goes through A.
-   - **Gate:** all existing popo tests pass with the new paint path, and headless output
-     of `test2.sheet` is identical. The gate runs with char wrap (`wrap.word = false`
-     in the node states), because that is how `fill.flow` breaks. After the gate, nodes
-     switch to word wrap and the expected output is updated once.
+2. ✔ **Projector, node states, compositing; rendering only.** `popo/projector.kode`
+   attaches a state to every text node (in `sueify`), gives it the span widths, and
+   paints text from it (`glyphs`). `cellOf` / `posAt` are the forward and reverse map.
+   Editing still goes through A.
+   - The **old format stays** in this phase: A edits `node.text` as content, so the
+     states are built from it (`node.text.split '\n'`) and reload whenever it
+     changes (`node.stateText`). The language and `lines` format comes in phase 3.
+   - The node states use **char wrap** and no node view yet: A's `textSlots` still
+     lay text out with `fill.flow`, so painting must match it until A is gone.
+   - **Gate:** all existing popo tests pass with the new paint path, and the headless
+     output of `test2.sheet` and `test.sheet` is identical, for cursor moves and for
+     typing into a text node.
 3. **Solo editing through the home state, and global undo.**
    - Text keys in solo mode go to the home state.
    - Remove the A text twins and rewrite their tests.
+   - Switch the format: `node.text` is the language (`'md'`), the content is `lines`,
+     the state is the only copy of the text. Convert the sheets in `test/level2`.
+   - Switch the node states to word wrap, and update the expected output once.
+   - The node view: nodes scroll to keep the main cursor in view.
 4. **Multi mode.** Cursor spawning, local multiplexing, the broadcast highlights, and
    composited multi cursors and selections. This covers the four examples:
    - alt+cmd+d then typing

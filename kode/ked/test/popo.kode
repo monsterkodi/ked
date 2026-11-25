@@ -1,7 +1,7 @@
 use ../../kxk    ◆ sds noon clip
 use ../../kxk    ▪ kseg post
 use ../edit/tool ◆ sue
-use ../popo      ◆ layout fill
+use ../popo      ◆ layout fill projector
 use ../edit      ◆ editor
 use ../view/editor ◆ fileeditor
 use ../view/colmns ◆ sheeditor
@@ -13,6 +13,8 @@ rgns    = cells tree path -> sds.get layout.regionize(cells tree) path
 dmp     = cells tree -> layout.dumpRegions layout.regionize(cells tree)
 desue   = cells tree -> sue.desue layout.sueify(cells tree)
 areas   = data type -> data.sue.filter((area) -> area.value[0] == type)
+textnode = cells node -> projector.attach(layout.regionize(cells {children:[node]})).children[0]
+strs    = node -> node.state.s.lines.map (l) -> kseg.str l
 
 h = e = null
 
@@ -612,7 +614,35 @@ showSue = data ->
   ▸ blocks are never cut
 
         dmp {cols:6 rows:2} { children:[{ text:'ab' x:0 y:0 w:6 h:2 scale:2 } { text:'z' x:1 y:1 w:1 h:1 }] } ▸ '  b   \n z    '
-        
+
+  ▸ projector
+
+        node = textnode {cols:8 rows:6} { text:'abcdef\nxy' x:1 y:1 w:4 h:4 }
+        strs(node) ▸ ['abcdef' 'xy']
+        node.state.wrapStarts 0 ▸ [0 4]
+        projector.glyphs(node) ▸ [[1 1 'a'] [2 1 'b'] [3 1 'c'] [4 1 'd'] [1 2 'e'] [2 2 'f'] [1 3 'x'] [2 3 'y']]
+        projector.cellOf(node [5 0]) ▸ [2 2]
+        projector.cellOf(node [4 0]) ▸ [1 2]
+        projector.cellOf(node [1 1]) ▸ [2 3]
+        projector.posAt(node [3 2]) ▸ [6 0]
+        projector.posAt(node [2 3]) ▸ [1 1]
+        projector.posAt(node [1 4])? ▸ false
+        layout.plainNode(node).state? ▸ false
+        node.text = 'xyz'
+        projector.attach node
+        strs(node) ▸ ['xyz']
+
+        node = textnode {cols:4 rows:4} { text:'abc' x:0 y:0 w:4 h:4 scale:2 }
+        projector.glyphs(node) ▸ [[0 0 'a'] [2 0 'b'] [0 2 'c']]
+        projector.cellOf(node [1 0]) ▸ [2 1]
+        projector.cellOf(node [2 0]) ▸ [0 3]
+        projector.posAt(node [2 1]) ▸ [1 0]
+        projector.posAt(node [1 3]) ▸ [2 0]
+
+        node = textnode {cols:6 rows:2} { text:'abcdefg' x:0 y:0 w:6 h:2 children:[{ x:2 y:0 w:2 h:1 blocks:true }] }
+        projector.glyphs(node) ▸ [[0 0 'a'] [1 0 'b'] [4 0 'c'] [5 0 'd'] [0 1 'e'] [1 1 'f'] [2 1 'g']]
+        projector.cellOf(node [2 0]) ▸ [4 0]
+
   ▸ editor
         
         sheet 'popo_test_editor' ['susan']
