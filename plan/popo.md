@@ -363,8 +363,17 @@ page s
      - `renderSheet` composites the cursors of all multi nodes (the active node's
        main cursor is the page's), and the selections and highlights of all text
        nodes. One undo step covers all nodes.
+     - Two paths in `commitSheetNodes`: a text change or a scrolled node view
+       renders the sheet; anything else only composites cursors, selections and
+       highlights into the unchanged page (`compositeSheet`, a `swapState`, no
+       `sue.changed` / `sheet.edited`). `renderSheet` reuses the page lines of
+       unchanged rows, so the page syntax only tokenizes changed rows. 20 moves with
+       10 cursors: 305ms → 86ms, the same as a single cursor.
+     - Cursors keep their visual row when moving sideways (`rowDelta`), in the
+       editor too, for all cursors (option a). Revisit with row end affinity if a
+       single cursor not reaching the end of a row gets in the way.
      - Not yet: adding cursors by click (phase 6), keeping the other nodes' cursors
-       in view.
+       in view, painting only the changed node on typing.
      - Noticed, not changed: multi cursor images are drawn one cell right of where
        the main cursor image would be, also in plain files.
 5. **Layout changes.** Resize, scale and move hand new capacities to the states,

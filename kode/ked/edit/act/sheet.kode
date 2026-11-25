@@ -153,6 +153,9 @@ export
     #  cursor in view. a second cursor in the active node starts multi mode, a
     #  single cursor in a single node ends it
 
+    #  only text changes and scrolled node views paint the sheet again, cursors,
+    #  selections and highlights are composited into the page as they are
+
     commitSheetNodes: (active nodes befores) ->
 
         changed = false
@@ -169,14 +172,47 @@ export
 
         cells = @sheetSize()
 
-        layout.regionize cells @rectree
-        projector.attach @rectree
+        if changed
+            layout.regionize cells @rectree
+            projector.attach @rectree
+
         projector.scrollToCursor active
 
-        @renderSheet @rectree cells projector.cellOf(active active.state.mainCursor()) history:changed
+        scrolled = nodes.some (node,i) ->
+            node.state.s.view != befores[i].view or node.state.s.scrollOffset != befores[i].scrollOffset
+
+        if changed or scrolled
+            @renderSheet @rectree cells projector.cellOf(active active.state.mainCursor()) history:changed
+        else
+            @compositeSheet active
 
         @sheetMirror = node:active cursors:@s.cursors
         @sheetMulti.cursors = @s.cursors if @sheetMulti
+
+    #  the cursors, selections and highlights of the nodes on the unchanged page
+
+    compositeSheet: active ->
+
+        if @sheetMulti
+            [cursors main] = @sheetCursors()
+            main = max 0 belt.indexOfPosInPositions(main cursors)
+        else if cell = projector.cellOf(active active.state.mainCursor())
+            cursors = [@sheetPosForCell(cell)]
+            main    = 0
+
+        if valid cursors
+            @s = @s.set 'cursors' cursors
+            @s = @s.set 'main' main
+
+        @s = @s.set 'selections' @sheetSelections()
+        @s = @s.set 'highlights' @sheetHighlights()
+        @s = @s.set 'rectree' layout.plainNode(@rectree)
+
+        @swapState()
+        @adjustViewForMainCursor()
+
+        mode.cursorsSet @
+        @emit 'cursorsSet'
 
     #  a node whose width was made for its single line of text grows and shrinks with it
 
@@ -531,10 +567,13 @@ export
 
         opt ?= {}
 
-        data  = sue.desue layout.sueify({cols:cells.cols rows:cells.rows} rectree)
-        lines = kseg.segls data.text.split('\n')
+        data = sue.desue layout.sueify({cols:cells.cols rows:cells.rows} rectree)
+        old  = @s.lines
 
-        @segls = lines
+        # unchanged rows keep their line, so the syntax and the line diff skip them
+
+        @segls = data.text.split('\n').map (text,i) ->
+            (old[i]? and kseg.str(old[i]) == text) ? old[i] : kseg(text)
 
         @changeLinesSegls()
 
