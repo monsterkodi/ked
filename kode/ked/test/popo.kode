@@ -1395,7 +1395,7 @@ showSue = data ->
             novimOn()
             loadSheet novimTree()
 
-            e.state.setCursors [[2 1]] ; type 'x'
+            e.state.setCursors [[2 1]] ; e.state.feedSheetKey('x' h.event('x' 'x')) ▸ 'handled'
             strs(rt('children.0')) ▸ ['fo bar' 'baz'] ; nvon() ▸ true
             e.state.setCursors [[1 1]] ; type 'dw'
             strs(rt('children.0')) ▸ ['bar' 'baz']
@@ -1485,6 +1485,53 @@ showSue = data ->
             e.state.h.length ▸ undos+1
             key 'esc' ; nvon() ▸ true
             type 'u' ; txt('children.0') ▸ 'foo bar\nbaz' ; txt('children.1') ▸ 'qux'
+
+            loadSheet novimTree()
+            nm = mode.get e.state 'novim'
+            errors = []
+            onError = (err) -> errors.push err
+            post.on 'novim.error' onError
+            e.state.setCursors [[1 1]]
+            nm.runEx 's/o/0/g' ; strs(rt('children.0')) ▸ ['f00 bar' 'baz'] ; txt('children.1') ▸ 'qux'
+            nm.runEx '%s/a/A/g' ; strs(rt('children.0')) ▸ ['f00 bAr' 'bAz']
+            nm.runEx '2d' ; strs(rt('children.0')) ▸ ['f00 bAr']
+            e.state.setCursors [[6 6]]
+            lines = e.state.s.lines
+            nm.runEx 's/q/Q/' ; errors[-1] ▸ 'not in a text node'
+            txt('children.1') ▸ 'qux' ; e.state.s.lines == lines ▸ true
+            post.removeListener 'novim.error' onError
+
+            loadSheet novimTree()
+            undos = e.state.h.length
+            e.state.setCursors [[1 2]]
+            nm.runEx '%s/a/X/gc' ; type 'y' ; type 'y'
+            strs(rt('children.0')) ▸ ['foo bXr' 'bXz'] ; e.state.h.length ▸ undos+1
+
+            loadSheet novimTree()
+            e.state.setCursors [[1 2]] ; type '/'
+            nm.searchChanged 'a'
+            rt('children.0').state.s.highlights.length ▸ 2 ; rt('children.1').state.s.highlights ▸ []
+            nm.commitSearch() ; mc() ▸ [2 2]
+            type 'N' ; mc() ▸ [6 1]
+            e.state.setCursors [[6 6]] ; type '/'
+            nm.searchChanged 'q' ; nm.commitSearch()
+            rt('children.1').state.s.highlights ▸ [] ; mc() ▸ [6 6]
+
+            loadSheet novimTree()
+            e.state.setCursors [[1 1]] ; type 'vjjd'
+            txt('children.1') ▸ 'qux' ; strs(rt('children.0')).length ▸ 1
+            e.state.setCursors [[6 6]] ; type 'v'
+            e.state.novim.visual ▸ null ; type 'l' ; mc() ▸ [7 6]
+            starts = []
+            onStart = (ev) -> starts.push ev.state if ev.state.startsWith 'popo_'
+            post.on 'novim.ex.start' onStart
+            post.on 'novim.search.start' onStart
+            e.state.setCursors [[1 5]] ; type 'V:'
+            nm.runEx "'<,'>s/u/U/" ; txt('children.1') ▸ 'qUx'
+            type '/' ; nm.cancelSearch()
+            starts ▸ [e.state.name e.state.name]
+            post.removeListener 'novim.ex.start' onStart
+            post.removeListener 'novim.search.start' onStart
         finally
             e.state.stopMode 'novim' if nvon()
             config.data = oldConfig

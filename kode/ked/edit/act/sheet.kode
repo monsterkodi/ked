@@ -25,7 +25,7 @@ highlightKeys = ['alt+cmd+d' 'alt+ctrl+d']
 novimCombos  = ['ctrl+v' 'ctrl+o' 'ctrl+i']
 novimMotions = ['h' 'j' 'k' 'l' 'left' 'right' 'up' 'down']
 novimParts   = ['count' 'operator' 'area' 'prefix' 'register' 'registerPending' 'macroPending' 'find' 'replace']
-novimOnPage  = ['move' 'undo' 'searchNext' 'searchPrev' 'searchWord' 'matchBracket']
+novimOnPage  = ['move' 'undo' 'matchBracket']
 
 #!sheet
 export
@@ -87,26 +87,67 @@ export
         prev    = nv.state
         feeding = @novimFeeding
         @novimFeeding = true
+        result  = 'unhandled'
 
         try
             done = @inSheetNode (st) =>
                 nv[k] = parts[k] for k in novimParts
                 nv.state = st
                 try
-                    nv.handleKey key event
+                    r = nv.handleKey key event
+                    result = r if r != 'unhandled'
                 finally
                     nv.state = prev
         finally
             @novimFeeding = feeding
 
-        @recordMacroKey key event if done?
+        handled = done? and result != 'unhandled'
 
-        if not @novimFeeding and @novimAfter?
-            jobs = @novimAfter
-            delete @novimAfter
-            job() for job in jobs
+        @recordMacroKey key event if handled
 
-        done?.result ? 'unhandled'
+        @runNovimLater()
+
+        handled ? 'handled' : 'unhandled'
+
+    #  runs fn with the novim mode working on the active text node, for the ex
+    #  commands and the search that the command line sends to the mode. without a
+    #  text node, quiet calls do nothing and the others report it
+
+    novimInNode: (nv fn quiet) ->
+
+        active = @sheetActive()
+
+        if not active?
+            ⮐ true if quiet
+            post.emit 'novim.error' 'not in a text node'
+            ⮐ false
+
+        prev    = nv.state
+        feeding = @novimFeeding
+        @novimFeeding = true
+        result  = null
+
+        try
+            @inTextNode active (st) =>
+                nv.state = st
+                try
+                    result = fn()
+                finally
+                    nv.state = prev
+        finally
+            @novimFeeding = feeding
+
+        @runNovimLater()
+
+        result
+
+    runNovimLater: ->
+
+        ⮐ if @novimFeeding or not @novimAfter?
+
+        jobs = @novimAfter
+        delete @novimAfter
+        job() for job in jobs
 
     #  jumps and macro replays that nodes ask for wait until the nodes are committed.
     #  true if fn was queued
@@ -191,7 +232,7 @@ export
             configurable: true
             enumerable:   true
 
-    #  novim commands on the page: motions, undo and search run, o and O start an
+    #  novim commands on the page: motions and undo run, o and O start an
     #  insert in the row below or above, the rest doesn't change the page lines.
     #  true if the command was taken
 

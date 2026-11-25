@@ -232,6 +232,8 @@ export
 
     startVisual: kind ->
 
+        ⮐ if @rectree?
+
         if @novim.visual == kind
             ⮐ @stopVisual()
 

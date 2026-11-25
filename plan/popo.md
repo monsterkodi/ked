@@ -479,7 +479,16 @@ page s
      - Noticed, not changed: typing over a selection that covers whole lines
        deletes linewise, so `C` from column 0 or `cw` on a line's last word also
        remove the line break, in plain files too.
-     - 7d ex, search, visual
+     - ✔ 7d ex, search, visual. As built: the command line calls the page's mode;
+       `inSheetText` runs `runEx` (all but `fileEx`), the ex highlights and the search
+       with the mode on the active node (`page.novimInNode`), and reports `not in a
+       text node` for ex commands on the background. Search on the background and
+       `startVisual` on the page do nothing; `n N * #` left `novimOnPage`. The mode's
+       events carry the page's name (`hostName`), so the title's input gets the focus.
+       `:s///c` groups on the page and closes after the last commit, `:normal` checks
+       novim on the page. `feedSheetNovim` returns `'handled'`, or the editor passes the
+       key on to the newly focused input.
+     - Noticed, not changed: `n` / `N` don't wrap around at the last match.
 
 ## Later
 
