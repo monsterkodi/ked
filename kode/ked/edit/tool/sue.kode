@@ -635,15 +635,64 @@ wrapLineIndex = (map y oldLines newLines) ->
         starts
 
     #  the cells the rows after the first of a wrapped line are indented by:
-    #  the width of its leading whitespace, but at most half the row
+    #  the width of its leading whitespace and of the markers that follow it,
+    #  so the rows line up with the text, but at most half the row
+    #  clss gives the syntax class of a grapheme, md adds the markdown markers
 
-    @wrapIndent: (line cols) ->
+    @wrapIndent: (line cols clss md) ->
+
+        gi = @skipBlanks line 0
+
+        if clss
+            while true
+                n = @markerLength line gi clss md
+                break if n == 0
+                gi = @skipBlanks line gi+n
 
         indent = 0
-        for seg in line
-            break if seg != ' ' and seg != '\t'
-            indent += 1
+        for i in 0...gi
+            indent += max(1 kseg.segWidth(line[i]))
         min indent int(cols/2)
+
+    @skipBlanks: (line gi) ->
+
+        while gi < line.length and line[gi] in [' ' '\t']
+            gi += 1
+        gi
+
+    #  the number of graphemes of the marker at gi that the text of a line follows:
+    #  list bullets, headings and comment starters by their syntax class,
+    #  the star of a block comment line, and in markdown quotes, bullets
+    #  the highlighter leaves out (in quotes), checkboxes and numbered items
+
+    @markerLength: (line gi clss md) ->
+
+        ⮐ 0 if gi >= line.length
+
+        c = clss(gi) ? ''
+        words = c.split ' '
+
+        if 'punct' in words and words.some((w) -> w == 'comment' or /^(li|h)\d$/.test(w))
+            n = 1
+            while gi+n < line.length and clss(gi+n) == c
+                n += 1
+            ⮐ n
+
+        ⮐ 1 if 'comment' in words and line[gi] == '*'
+
+        ⮐ 0 if not md
+
+        ⮐ 1 if line[gi] == '>' and 'punct' in words
+        ⮐ 1 if line[gi] in ['-' '*' '+'] and line[gi+1] == ' '
+        ⮐ 3 if line[gi] == '[' and line[gi+1] in [' ' 'x' 'X'] and line[gi+2] == ']'
+
+        if 'number' in words
+            n = 1
+            while gi+n < line.length and (clss(gi+n) ? '').split(' ').includes('number')
+                n += 1
+            ⮐ n+1 if line[gi+n] in ['.' ')'] and line[gi+n+1] == ' '
+
+        0
 
     @desue: text ->
         lines = text.split('\n')

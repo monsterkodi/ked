@@ -5,10 +5,11 @@ use ../util      ◆ harness dumpstate
 
 h = e = null
 
-wed = lines cols=10 rows=6 feats=['susan'] ->
+wed = lines cols=10 rows=6 feats=['susan'] ext=null ->
     h = new harness cols:cols rows:rows
     e = new editor h.screen 'test_wrap' feats
     e.layout 0 0 cols rows
+    e.state.syntax.setExt ext if ext
     e.state.loadLines lines
     e.grabFocus()
 
@@ -29,6 +30,11 @@ cellsWhere = test ->
             line += test(x y) ? h.at(x y).replace(/\x1b\[[^m]*m/g '') : ' '
         out.push line.trimEnd()
     out
+
+wrapped = line ext cols=10 ->
+    wed [line 'next'] cols 6 ['susan'] ext
+    key 'alt+w'
+    rows()[0...2]
 
 marked = kind -> cellsWhere (x y) -> h.screen.c[y][x].mark == kind
 withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
@@ -192,6 +198,29 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         key 'alt+w'
         key 'ctrl+alt+w'
         rows() ▸ ['  aaa bbb' '  ccc ddd' 'next' '' '' '']
+
+  ▸ syntax
+
+        wrapped '- aaaaaaaaaaa' 'md'                ▸ ['- aaaaaaaa' '  aaa']
+        wrapped '  * aaaaaaaaaa' 'md'               ▸ ['  * aaaaaa' '    aaaa']
+        wrapped '12. aaaaaaaaaa' 'md'               ▸ ['12. aaaaaa' '    aaaa']
+        wrapped '1) aaaaaaaaaaa' 'md'               ▸ ['1) aaaaaaa' '   aaaa']
+        wrapped '### aaaaaaaaaa' 'md'               ▸ ['### aaaaaa' '    aaaa']
+        wrapped '> aaaaaaaaaaaa' 'md'               ▸ ['> aaaaaaaa' '  aaaa']
+        wrapped '> - aaaaaaaaaa' 'md'               ▸ ['> - aaaaaa' '    aaaa']
+        wrapped '- [ ] aaaaaaaaaaaa' 'md' 12        ▸ ['- [ ] aaaaaa' '      aaaaaa']
+        wrapped 'aaaa aaaaaaaa' 'md'                ▸ ['aaaa aaaaa' 'aaa']
+        wrapped '# aaaaaaaaaaa' 'kode'              ▸ ['# aaaaaaaa' '  aaa']
+        wrapped '    # aaaaaaaaaaaaaaaaaaaa' 'kode' 20 ▸ ['    # aaaaaaaaaaaaaa' '      aaaaaa']
+        wrapped 'x = aaaaaaaaaaa' 'kode'            ▸ ['x = aaaaaa' 'aaaaa']
+        wrapped '// aaaaaaaaaaa' 'js'               ▸ ['// aaaaaaa' '   aaaa']
+        wrapped '# aaaaaaaaaaa' 'sh'                ▸ ['# aaaaaaaa' '  aaa']
+
+  ▸ block comment
+
+        wed ['/*' ' * aaaaaaaaaa' ' */'] 10 6 ['susan'] 'js'
+        key 'alt+w'
+        rows()[0...3] ▸ ['/*' ' * aaaaaaa' '   aaa']
 
   ▸ tall
 

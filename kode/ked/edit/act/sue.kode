@@ -149,9 +149,10 @@ export
 
         ⮐ [0] if not @isWrapped li
 
-        line = @s.lines[li]
-        cols = @wrapCols li
-        key  = "#{cols} #{@wrap.word}"
+        line   = @s.lines[li]
+        cols   = @wrapCols li
+        indent = @wrapIndent li 1
+        key    = "#{cols} #{@wrap.word} #{indent}"
 
         @wrapCache ?= new WeakMap()
 
@@ -159,16 +160,20 @@ export
             cached = @wrapCache.get line
             ⮐ cached.starts if cached?.key == key
 
-        starts = sue.wrapStarts line cols @wrap.word sue.wrapIndent(line cols)
+        starts = sue.wrapStarts line cols @wrap.word indent
         @wrapCache.set line {key:key starts:starts} if line is arr
         starts
 
     #  the cells row k of line li is indented by, unscaled
+    #  the indent follows the syntax: it lines up with the text after list
+    #  bullets, headings and comment starters
 
     wrapIndent: (li k) ->
 
         ⮐ 0 if k == 0 or not @isWrapped li
-        sue.wrapIndent @s.lines[li] @wrapCols(li)
+        md   = @syntax.ext in ['md' 'markdown']
+        clss = (x) => @syntax.getClass x li
+        sue.wrapIndent @s.lines[li] @wrapCols(li) clss md
 
     wrapRow: (x li) ->
 
