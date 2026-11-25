@@ -8,24 +8,91 @@ use ..           ◆ mode
 #  the sheet and the history is the page's. all other keys go to the text node
 #  at the cursor, if there is one
 
-pageKeys = [
+historyKeys = ['cmd+z' 'ctrl+z' 'shift+cmd+z' 'cmd+y' 'ctrl+y']
+
+pageKeys = historyKeys.concat [
     'up' 'down' 'left' 'right' 'alt+left' 'alt+right'
     'pageup' 'pagedown' 'home' 'end' 'ctrl+h' 'ctrl+j'
-    'cmd+up' 'cmd+down' 'ctrl+up' 'ctrl+down'
-    'cmd+z' 'ctrl+z' 'shift+cmd+z' 'cmd+y' 'ctrl+y'
     ]
+
+#  the highlights of these keys spread to all text nodes
+
+highlightKeys = ['alt+cmd+d' 'alt+ctrl+d']
 
 #!sheet
 export
 
+    #  multi mode: more than one cursor, in one or several text nodes. all keys but
+    #  undo and redo run in each of those nodes then, the cursor motions too.
+    #  esc goes back to the main cursor of the active node, and so does any change
+    #  of the page cursors that didn't come from the nodes
+
     feedSheetKey: (key event) ->
 
-        ⮐ @feedKey(key event) if key in pageKeys
+        delete @sheetMulti if @sheetMulti? and @sheetMulti.cursors != @s.cursors
+
+        ⮐ @feedKey(key event) if key in (@sheetMulti ? historyKeys : pageKeys)
+
+        ⮐ @leaveSheetMulti() if key == 'esc' and @sheetMulti
+
+        highlighted = valid @sheetActive()?.state.s.highlights
 
         if done = @inSheetNode((st) -> st.feedKey key event)
+            @spreadHighlights highlighted if key in highlightKeys
             ⮐ done.result
 
         @feedKey key event
+
+    #  the node the main cursor is in: the active node of multi mode, or the node
+    #  the last change happened in, or the node at the cursor
+
+    sheetActive: -> @sheetMulti?.active ? @sheetHome()?.node
+
+    leaveSheetMulti: ->
+
+        active = @sheetMulti.active
+
+        for node in @sheetMulti.nodes
+            node.state.clearCursorsHighlightsAndSelections() if node.state.hasCursorsHighlightsOrSelections()
+
+        delete @sheetMulti
+
+        @commitSheetNodes active [active] [active.state.s]
+
+        'handled'
+
+    #  the first highlight key highlights the word of the active node in all text
+    #  nodes, the next one selects all of them
+
+    spreadHighlights: highlighted ->
+
+        active = @sheetActive()
+
+        ⮐ if not active?
+
+        ast  = active.state
+        span = ast.s.highlights[0]
+        text = span? ? kseg.str(ast.s.lines[span[1]].slice(span[0] span[2])) : null
+        all  = highlighted and valid ast.s.selections
+        nodes = [active]
+
+        walk = (node) =>
+            if node.state? and node != active
+                st = node.state
+                if text? ➜ st.highlightText text else st.clearHighlights()
+                if all and valid st.s.highlights
+                    st.setCursors [belt.endOfSpan(st.s.highlights[0])]
+                    st.selectAllHighlights()
+                    nodes.push node
+            for child in node.children ? []
+                walk child
+
+        walk @rectree
+
+        if all
+            @sheetMulti = active:active nodes:nodes
+
+        @commitSheetNodes active nodes nodes.map((n) -> n.state.s)
 
     #  the text node at the main cursor and the position in its state the cursor
     #  is at. the position is left out while the page cursors are still the ones
@@ -61,71 +128,136 @@ export
 
         ⮐ null if not @rectree?
 
-        home = @sheetHome()
+        if @sheetMulti
+            active = @sheetMulti.active
+            nodes  = @sheetMulti.nodes
+        else
+            home = @sheetHome()
+            ⮐ null if not home?
+            active = home.node
+            nodes  = [active]
+            active.state.setCursors [home.pos] if home.pos?
 
-        ⮐ null if not home?
+        befores = nodes.map (node) -> node.state.s
+        result  = null
 
-        st = home.node.state
-        st.setCursors [home.pos] if home.pos?
+        for node in nodes
+            r = fn node.state
+            result = r if node == active
 
-        before = st.s
-        result = fn st
-
-        @commitSheetNode home.node before
+        @commitSheetNodes active nodes befores
 
         result:result
 
-    #  a node whose width was made for its single line of text grows and shrinks with it
+    #  shows what changed in the states of nodes. the active node keeps its main
+    #  cursor in view. a second cursor in the active node starts multi mode, a
+    #  single cursor in a single node ends it
 
-    commitSheetNode: (node before) ->
+    commitSheetNodes: (active nodes befores) ->
 
-        st      = node.state
-        changed = st.s.lines != before.lines
+        changed = false
 
-        if changed and before.lines.length == 1 and st.s.lines.length == 1
-            scale = projector.scaleOf node
-            if node.w is num and int(node.h) == scale and not node.r? and not node.b?
-                if node.w == (kseg.width(before.lines[0])+1)*scale
-                    node.w = (kseg.width(st.s.lines[0])+1)*scale
+        for node,i in nodes
+            if node.state.s.lines != befores[i].lines
+                changed = true
+                @fitTextNode node befores[i]
+
+        if @sheetMulti
+            delete @sheetMulti if nodes.length == 1 and active.state.s.cursors.length == 1
+        else if active.state.s.cursors.length > 1
+            @sheetMulti = active:active nodes:[active]
 
         cells = @sheetSize()
 
         layout.regionize cells @rectree
         projector.attach @rectree
-        projector.scrollToCursor node
+        projector.scrollToCursor active
 
-        @renderSheet @rectree cells projector.cellOf(node st.mainCursor()) history:changed
+        @renderSheet @rectree cells projector.cellOf(active active.state.mainCursor()) history:changed
 
-        @sheetMirror = node:node cursors:@s.cursors
+        @sheetMirror = node:active cursors:@s.cursors
+        @sheetMulti.cursors = @s.cursors if @sheetMulti
 
-    #  the selections of all text nodes as line ranges of the page
+    #  a node whose width was made for its single line of text grows and shrinks with it
+
+    fitTextNode: (node before) ->
+
+        st = node.state
+
+        ⮐ if before.lines.length != 1 or st.s.lines.length != 1
+
+        scale = projector.scaleOf node
+
+        if node.w is num and int(node.h) == scale and not node.r? and not node.b?
+            if node.w == (kseg.width(before.lines[0])+1)*scale
+                node.w = (kseg.width(st.s.lines[0])+1)*scale
+
+    #  page line ranges [x1 y x2 y] for the pieces [x1 li x2] of a node's lines
+
+    sheetRangesOf: (node pieces) ->
+
+        out   = []
+        lines = node.state.s.lines
+
+        for [x1 li x2] in pieces
+            for x in x1...min(x2 lines[li].length)
+                continue if not cell = projector.cellOf(node [x li])
+                [px py] = @sheetPosForCell cell
+                prev = out[-1]
+                if prev? and prev[1] == py and prev[2] == px
+                    prev[2] = px+1
+                else
+                    out.push [px py px+1 py]
+
+        out
+
+    sheetTextNodes: ->
+
+        out  = []
+        walk = (node) ->
+            out.push node if node.state?
+            for child in node.children ? []
+                walk child
+        walk @rectree if @rectree?
+        out
+
+    #  the selections and highlights of all text nodes, as ranges and spans of the page
 
     sheetSelections: ->
 
         out = []
-
-        walk = (node) =>
-
+        for node in @sheetTextNodes()
             st = node.state
-
-            if st? and valid st.s.selections
-                for rng in belt.splitLineRanges(st.s.lines st.s.selections false)
-                    li = rng[1]
-                    for x in rng[0]...min(rng[2] st.s.lines[li].length)
-                        continue if not cell = projector.cellOf(node [x li])
-                        [px py] = @sheetPosForCell cell
-                        prev = out[-1]
-                        if prev? and prev[1] == py and prev[2] == px
-                            prev[2] = px+1
-                        else
-                            out.push [px py px+1 py]
-
-            for child in node.children ? []
-                walk child
-
-        walk @rectree if @rectree?
-
+            continue if empty st.s.selections
+            pieces = belt.splitLineRanges(st.s.lines st.s.selections false).map (r) -> [r[0] r[1] r[2]]
+            out = out.concat @sheetRangesOf(node pieces)
         out
+
+    sheetHighlights: ->
+
+        out = []
+        for node in @sheetTextNodes()
+            continue if empty node.state.s.highlights
+            for rng in @sheetRangesOf(node node.state.s.highlights)
+                out.push [rng[0] rng[1] rng[2]]
+        out
+
+    #  the cursors of the nodes in multi mode and the page position of the main cursor
+
+    sheetCursors: ->
+
+        cursors = []
+        main    = null
+
+        for node in @sheetMulti.nodes
+            st = node.state
+            for c,i in st.s.cursors
+                continue if not cell = projector.cellOf(node c)
+                pos = @sheetPosForCell cell
+                cursors.push pos
+                main = pos if node == @sheetMulti.active and i == st.s.main
+
+        [belt.normalizePositions(cursors @s.lines.length-1) main]
 
     #  typing where no text node is creates one
 
@@ -349,6 +481,7 @@ export
         @rectree = layout.pageOf rectree
 
         delete @sheetMirror
+        delete @sheetMulti
 
         @s = @s.set 'rectree' layout.plainNode(@rectree)
         @
@@ -357,6 +490,7 @@ export
 
         delete @rectree
         delete @sheetMirror
+        delete @sheetMulti
 
         @s = @s.set 'rectree' null
         @
@@ -373,6 +507,7 @@ export
         @rectree = layout.liveNode @s.rectree
 
         delete @sheetMirror
+        delete @sheetMulti
 
         @renderSheet @rectree @sheetSize() cell history:false silent:true
 
@@ -415,7 +550,14 @@ export
             @s = @s.set 'cursors' [pos]
             @s = @s.set 'main' 0
 
+        if @sheetMulti
+            [cursors main] = @sheetCursors()
+            if valid cursors
+                @s = @s.set 'cursors' cursors
+                @s = @s.set 'main' max(0 belt.indexOfPosInPositions(main cursors))
+
         @s = @s.set 'selections' @sheetSelections()
+        @s = @s.set 'highlights' @sheetHighlights()
 
         @segls = @s.lines.slice()
         @rowCache = null

@@ -343,12 +343,30 @@ page s
    - **Noticed, not changed:** word wrap moves a word to the next row when only the
      space after it doesn't fit (`sue.wrapStarts`, the editor does the same). Saving
      writes the page wrapper of `layout.pageOf` around the file's root node.
-4. **Multi mode.** Cursor spawning, local multiplexing, the broadcast highlights, and
+4. ✔ **Multi mode.** Cursor spawning, local multiplexing, the broadcast highlights, and
    composited multi cursors and selections. This covers the four examples:
    - alt+cmd+d then typing
    - several shift-selections in one node
    - cmd+down multicursors behaving like the main cursor
    - cmd+down in scaled text landing as a large cursor in the next span
+   - **As built** (`act/sheet.kode`, tests in `sheet multi`):
+     - `@sheetMulti = {active nodes cursors}`. It starts when the active node gets a
+       second cursor (cmd/ctrl+up/down, shift+alt+cmd+up/down …), or with the second
+       alt+cmd+d. While it is on, every key but undo/redo runs in all its nodes
+       (`inSheetNode`), the motions too.
+     - It ends with esc (`leaveSheetMulti`: the nodes clear their extra cursors,
+       highlights and selections), when a single node is down to one cursor, and
+       when the page cursors change from outside (a click, `setCursors`).
+     - alt+cmd+d spreads (`spreadHighlights`): the first press highlights the word
+       of the active node in all text nodes, the next one selects all of them.
+       cmd+e, cmd+d and cmd+g stay in the active node.
+     - `renderSheet` composites the cursors of all multi nodes (the active node's
+       main cursor is the page's), and the selections and highlights of all text
+       nodes. One undo step covers all nodes.
+     - Not yet: adding cursors by click (phase 6), keeping the other nodes' cursors
+       in view.
+     - Noticed, not changed: multi cursor images are drawn one cell right of where
+       the main cursor image would be, also in plain files.
 5. **Layout changes.** Resize, scale and move hand new capacities to the states,
    create and delete attach and detach them, and undo works across them.
 6. **Consumers:** sheetree, colorpicker, dumpstate, mouse drag, save.

@@ -17,7 +17,9 @@ export
         pos[0]
     
     expandCursors: dir ->
-        
+
+        ⮐ @inSheetNode((st) -> st.expandCursors dir) if @rectree?
+
         cursors = @allCursors()
 
         dy = dir == 'up' ? -1 : 1
