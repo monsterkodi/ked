@@ -140,6 +140,19 @@ sel = r... -> s.allSelections() ▸ r
         cur 1 0
         sel [1 0 2 0]
         
+  ▸ select to a position
+
+        s.loadLines belt.linesForText('abcdef\nghij')
+        s.setMainCursor 1 0
+        s.setMainCursorAndSelect 3 0
+        cur 3 0
+        sel [1 0 3 0]
+        s.setMainCursorAndSelect 2 1
+        cur 2 1
+        sel [1 0 2 1]
+        s.setMainCursorAndSelect 0 0
+        sel [0 0 2 1]
+
   ▸ backtrack selection stays sticky after moving
     
         s.loadLines belt.linesForText('abcdef')

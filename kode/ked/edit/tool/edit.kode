@@ -435,7 +435,7 @@ use ../../util   ◆ prof
 
         if empty rngs ➜ ⮐ [@rangeFromStartToEnd(start pos)]
 
-        newRngs = rngs.asMutable()
+        newRngs = Array.from(rngs).map (rng) -> [rng[0] rng[1] rng[2] rng[3]]
         
         if rng = @rangeInRangesTouchingPos newRngs start
             if @isPosAfterRange pos rng
