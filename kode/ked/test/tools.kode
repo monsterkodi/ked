@@ -342,6 +342,55 @@ mat = (cols rows) ->
 
         u.matrix.scale ▸ 1
 
+  ▸ info bubbles                           # right-aligned in the input row, never over its text
+
+        L = ''
+        R = ''
+        full = "#{L}0x2026#{L}ldots#{L}ellipsis#{L}dot#{R}"
+
+        info = (text) ->
+            [h e u] = uni()
+            u.matrix.setItems [char:'…' search:'ldots ellipsis dot']
+            u.input.set text
+            u.draw()
+            [h u h.row(1)]
+
+        [h u row] = info ''
+
+        row.slice(59-full.length, 59) ▸ full
+        row.length                    ▸ 59                      # ends with the input
+
+        hx    = 59-full.length+1
+        names = hx+6
+        hexbg = h.screen.get_bg hx 1
+        n1bg  = h.screen.get_bg names+1 1
+        n2bg  = h.screen.get_bg names+7 1
+        (hexbg[2] > hexbg[0]) ▸ true                            # blue
+        (n1bg[0] == n1bg[1] == n1bg[2]) ▸ true                  # gray
+        (n2bg[0] == n2bg[1] == n2bg[2]) ▸ true
+        (n1bg[0] != n2bg[0]) ▸ true                             # stacked shades
+        h.screen.get_fg(names 1) ▸ n1bg                         # a name's cap overlaps its left neighbor
+        h.screen.get_bg(names 1) ▸ hexbg
+
+        row = info('x'.repeat(30))[2]
+        row.slice(1 31) ▸ 'x'.repeat(30)
+        row.trimEnd().endsWith "#{L}0x2026#{L}ldots#{L}ellipsis#{R}" ▸ true
+
+        row = info('x'.repeat(40))[2]
+        row.slice(1 41) ▸ 'x'.repeat(40)
+        row.trimEnd().endsWith "#{L}0x2026#{L}ldots#{R}" ▸ true
+
+        row = info('x'.repeat(45))[2]
+        row.trimEnd().endsWith "#{L}0x2026#{R}" ▸ true
+
+        row = info('x'.repeat(50))[2]
+        row.trimEnd() ▸ ' ' + 'x'.repeat(50)
+
+        [h e u] = uni()
+        u.filter 'nothing matches this'
+        u.draw()
+        h.row(1).includes(L) ▸ false
+
 #!matrix
 ▸ matrix
 

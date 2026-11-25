@@ -1,6 +1,6 @@
 
 use ../../../kxk ◆ clip kseg post
-use ../../theme  ◆ theme
+use ../../theme  ◆ color theme
 use ../../edit   ◆ specs
 use ../base      ◆ view input matrix
 
@@ -14,7 +14,11 @@ import julia from '../../util/julia.json' with { type: "json" }
 
         @height = 28
 
-        @setColor 'bg' theme.uniko.bg
+        @setColor 'bg'      theme.uniko.bg
+        @setColor 'hex'     theme.uniko.hex
+        @setColor 'hex_fg'  theme.uniko.hex_fg
+        @setColor 'name'    theme.uniko.name
+        @setColor 'name_fg' theme.uniko.name_fg
 
         @input  = new input  @screen "#{@name}_input"
         @matrix = new matrix @screen "#{@name}_matrix"
@@ -176,8 +180,48 @@ import julia from '../../util/julia.json' with { type: "json" }
         @cells.fill_rect 0 0 -1 -1 ' ' null @color.bg
 
         @input.draw()
+        @drawInfo()
         @matrix.draw()
 
         super()
+
+    infoBubbles: width => # hex and names of the selected char, as many as fit into width columns
+
+        item = @matrix.items[@matrix.selectedIndex]
+        ⮐ [] if empty item?.char
+
+        hex = Array.from(item.char).map((c) -> '0x' + c.codePointAt(0).toString(16)).join(' ')
+
+        bubbles = [text:hex fg:@color.hex_fg bg:@color.hex]
+        used    = 2 + kseg.width(hex) # left cap, text, right cap
+        ⮐ [] if used > width
+
+        for name,i in item.search.split(/\s+/).filter((n) -> valid n)
+            used += 1 + kseg.width(name)
+            break if used > width
+            bubbles.push text:name fg:@color.name_fg bg:color.darken(@color.name max(0.4 1-0.2*i))
+        bubbles
+
+    drawInfo: => # right-aligned in the input row, left of it only the input's text and cursor
+
+        right = @cells.cols - 1
+        free  = right - 1 - kseg.width(@input.current()) - 2
+        bubbles = @infoBubbles free
+        ⮐ if empty bubbles
+
+        x = right - 1
+        for b in bubbles
+            x -= 1 + kseg.width(b.text)
+
+        ibg  = @input.color.bg
+        prev = ibg
+        for b in bubbles
+            @cells.set x 1 '' b.bg prev
+            x += 1
+            for seg in kseg(b.text)
+                @cells.set x 1 kseg.str(seg) b.fg b.bg
+                x += kseg.segWidth seg
+            prev = b.bg
+        @cells.set x 1 '' prev ibg
 
 export uniko

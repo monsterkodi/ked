@@ -59,8 +59,12 @@ uniko
     bg                                      #0c0c0c
     fg                                      #888   
     selection                               #44a   
-    selection_blur                          #333   
-                                            
+    selection_blur                          #333
+    hex                                     #33a
+    hex_fg                                  #ccf
+    name                                    #444
+    name_fg                                 #bbb
+
 knob                            
     fg                                      #222   
     bg                                      #111   
