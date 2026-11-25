@@ -13,7 +13,6 @@ use              ◆ bubbles
 
         @pointerType = 'pointer'
         @rounded = ''
-        @padding = ''
 
         @setColor 'hover'       theme.hover.bg
         @setColor 'bg'          theme.crumbs.bg
@@ -44,7 +43,7 @@ use              ◆ bubbles
                 else
                     fg = color.brighten @color.fg
 
-            text:(si < lsi ? seg+' ' : seg+@padding) fg:fg bg:bg
+            text:seg fg:fg bg:bg
 
         super()
 
@@ -100,9 +99,9 @@ use              ◆ bubbles
 
         @root = @root.join '/'
 
-        @padding = @padLast ? lpad(@cells.cols-2-@rounded.length) : ''
+        padding = @padLast ? lpad(@cells.cols-2-@rounded.length) : '' # bubbles pads the same way
 
-        @rounded = '' + @rounded + @padding + ''
+        @rounded = '' + @rounded + padding + ''
 
     set: path -> # the path, not bubbles' items: draw makes those from the path
 

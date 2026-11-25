@@ -6,10 +6,13 @@ use              ◆ view
 ###
     a row of stacked 'bubbles', each with its own text, fg and bg color
     the half-circles between them point left (default) or right (@pointRight)
+    every text but the last is followed by a space
+    @padLast pads the last text with spaces, so the bubbles fill the view's width
     used by
         ◆ crumbs to display path segments
         ◆ uniko to display info about the selected character
 ###
+
     @LEFT:  ''
     @RIGHT: ''
 
@@ -19,6 +22,7 @@ use              ◆ view
 
         @items      = []
         @pointRight = false
+        @padLast    = false
 
         @setColor 'empty' theme.editor.bg
 
@@ -33,10 +37,10 @@ use              ◆ view
 
     set: items => @items = items ? []
 
-    @width: items -> # columns of items: a cap left of each bubble's text and one at the end
+    @width: items -> # columns of items without padding: caps, texts and the spaces between them
 
         ⮐ 0 if empty items
-        w = 1
+        w = items.length # the spaces after all but the last text and the right cap
         for item in items
             w += 1 + kseg.width(item.text)
         w
@@ -47,6 +51,9 @@ use              ◆ view
 
         ⮐ if @hidden() or @collapsed() or empty @items
 
+        lii = @items.length-1
+        pad = @padLast ? lpad(max(0 @cells.cols-@width())) : ''
+
         x = 0
         for item,i in @items
             if i == 0
@@ -56,7 +63,7 @@ use              ◆ view
             else
                 @cells.set x 0 bubbles.LEFT item.bg @items[i-1].bg
             x += 1
-            for seg in kseg(item.text)
+            for seg in kseg(item.text + (i < lii ? ' ' : pad))
                 @cells.set x 0 kseg.str(seg) item.fg item.bg
                 x += kseg.segWidth seg
 

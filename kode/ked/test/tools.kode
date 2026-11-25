@@ -346,7 +346,7 @@ mat = (cols rows) ->
 
         L = ''
         R = ''
-        full = "#{L}ldots#{R}ellipsis#{R}dot#{R}0x2026#{R}"     # hex last, so it rarely moves
+        full = "#{L}ldots #{R}ellipsis #{R}dot #{R}0x2026#{R}"  # hex last, so it rarely moves
 
         info = (text) ->
             [h e u] = uni()
@@ -362,25 +362,26 @@ mat = (cols rows) ->
 
         s     = 59-full.length
         n1bg  = h.screen.get_bg s+1  1
-        n2bg  = h.screen.get_bg s+7  1
-        n3bg  = h.screen.get_bg s+16 1
-        hexbg = h.screen.get_bg s+20 1
+        n2bg  = h.screen.get_bg s+8  1
+        n3bg  = h.screen.get_bg s+18 1
+        hexbg = h.screen.get_bg s+23 1
         (hexbg[2] > hexbg[0]) ▸ true                            # blue
         (n1bg[0] == n1bg[1] == n1bg[2]) ▸ true                  # gray
         (n2bg[0] == n2bg[1] == n2bg[2]) ▸ true
         (n1bg[0] != n2bg[0]) ▸ true                             # stacked shades
-        h.screen.get_fg(s+6 1) ▸ n1bg                           # a name's cap overlaps its right neighbor
-        h.screen.get_bg(s+6 1) ▸ n2bg
-        h.screen.get_fg(s+19 1) ▸ n3bg                          # the last name overlaps the hex
-        h.screen.get_bg(s+19 1) ▸ hexbg
+        h.screen.get_bg(s+6 1) ▸ n1bg                           # a space after each name
+        h.screen.get_fg(s+7 1) ▸ n1bg                           # a name's cap overlaps its right neighbor
+        h.screen.get_bg(s+7 1) ▸ n2bg
+        h.screen.get_fg(s+22 1) ▸ n3bg                          # the last name overlaps the hex
+        h.screen.get_bg(s+22 1) ▸ hexbg
 
         row = info('x'.repeat(30))[2]
         row.slice(1 31) ▸ 'x'.repeat(30)
-        row.trimEnd().endsWith "#{L}ldots#{R}ellipsis#{R}0x2026#{R}" ▸ true
+        row.trimEnd().endsWith "#{L}ldots #{R}ellipsis #{R}0x2026#{R}" ▸ true
 
         row = info('x'.repeat(40))[2]
         row.slice(1 41) ▸ 'x'.repeat(40)
-        row.trimEnd().endsWith "#{L}ldots#{R}0x2026#{R}" ▸ true
+        row.trimEnd().endsWith "#{L}ldots #{R}0x2026#{R}" ▸ true
 
         row = info('x'.repeat(45))[2]
         row.trimEnd().endsWith "#{L}0x2026#{R}" ▸ true
@@ -405,35 +406,43 @@ mat = (cols rows) ->
         c = [3 3 3]
         w = [9 9 9]
 
-        draw = (pointRight) ->
+        draw = (pointRight padLast=false) ->
             h = new harness cols:20 rows:2
             bs = new bubbles h.screen 'test_bubbles'
             bs.setColor 'empty' c
             bs.pointRight = pointRight
+            bs.padLast    = padLast
             bs.set [{text:'ab' fg:w bg:a} {text:'中' fg:w bg:b}]
-            bs.layout 2 0 bs.width() 1
+            bs.layout 2 0 (padLast ? 12 : bs.width()) 1
             bs.draw()
             h
 
-        bubbles.width([{text:'ab'} {text:'中'}]) ▸ 7
+        bubbles.width([{text:'ab'} {text:'中'}]) ▸ 8   # caps, texts and a space after all but the last
         bubbles.width([])                        ▸ 0
 
         h = draw false
-        h.row(0) ▸ "  #{L}ab#{L}中 #{R}"              # the row dump fills the wide char's second column
+        h.row(0) ▸ "  #{L}ab #{L}中 #{R}"             # the row dump fills the wide char's second column
         h.screen.get_fg(2 0) ▸ a                # the left cap
         h.screen.get_bg(2 0) ▸ c
         h.screen.get_fg(3 0) ▸ w
         h.screen.get_bg(3 0) ▸ a
-        h.screen.get_fg(5 0) ▸ b                # the second bubble overlaps the first
-        h.screen.get_bg(5 0) ▸ a
-        h.screen.get_bg(6 0) ▸ b
-        h.screen.get_fg(8 0) ▸ b                # the right cap
-        h.screen.get_bg(8 0) ▸ c
+        h.screen.get_bg(5 0) ▸ a                # the space after the first text
+        h.screen.get_fg(6 0) ▸ b                # the second bubble overlaps the first
+        h.screen.get_bg(6 0) ▸ a
+        h.screen.get_bg(7 0) ▸ b
+        h.screen.get_fg(9 0) ▸ b                # the right cap
+        h.screen.get_bg(9 0) ▸ c
 
         h = draw true
-        h.row(0) ▸ "  #{L}ab#{R}中 #{R}"
-        h.screen.get_fg(5 0) ▸ a                # the first bubble overlaps the second
-        h.screen.get_bg(5 0) ▸ b
+        h.row(0) ▸ "  #{L}ab #{R}中 #{R}"
+        h.screen.get_fg(6 0) ▸ a                # the first bubble overlaps the second
+        h.screen.get_bg(6 0) ▸ b
+
+        h = draw false true                     # padLast fills the view's width with the last bubble
+        h.row(0) ▸ "  #{L}ab #{L}中     #{R}"
+        h.screen.get_bg(12 0) ▸ b
+        h.screen.get_fg(13 0) ▸ b
+        h.screen.get_bg(13 0) ▸ c
 
         h = new harness cols:20 rows:2
         bs = new bubbles h.screen 'test_bubbles'

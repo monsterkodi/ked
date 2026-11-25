@@ -20,8 +20,8 @@ import julia from '../../util/julia.json' with { type: "json" }
         @setColor 'name'    theme.uniko.name
         @setColor 'name_fg' theme.uniko.name_fg
 
-        @input  = new input  @screen "#{@name}_input"
-        @matrix = new matrix @screen "#{@name}_matrix"
+        @input  = new input   @screen "#{@name}_input"
+        @matrix = new matrix  @screen "#{@name}_matrix"
         @info   = new bubbles @screen "#{@name}_info"
 
         @info.pointRight = true
