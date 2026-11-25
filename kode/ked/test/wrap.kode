@@ -396,3 +396,31 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         key 'up'   ; mc() ▸ [12 0]
         key 'up'   ; mc() ▸ [8 0]
         key 'down' ; key 'left' ; key 'down' ; mc() ▸ [14 0]
+        e.state.setMainCursor 10 0 ; key 'alt+right' ; mc() ▸ [12 0]
+        key 'alt+right' ; mc() ▸ [12 0]
+        e.state.setMainCursor 13 0 ; key 'alt+left' ; mc() ▸ [13 0]
+
+  ▸ row edges
+
+        wed ['0123456789abcdefghijk' 'next']
+        key 'ctrl+w'
+        e.state.setMainCursor 8 0
+        key 'right' ; mc() ▸ [9 0]
+        key 'right' ; mc() ▸ [9 0]
+        key 'left'  ; mc() ▸ [8 0]
+        e.state.setMainCursor 10 0
+        key 'left'  ; mc() ▸ [10 0]
+        key 'right' ; mc() ▸ [11 0]
+        e.state.setMainCursor 20 0
+        key 'left'  ; mc() ▸ [20 0]
+        key 'right' ; key 'right' ; mc() ▸ [22 0]
+        e.state.setCursors [[9 0] [19 0] [3 1]]
+        key 'right' ; e.state.s.cursors ▸ [[9 0] [19 0] [4 1]]
+        e.state.setCursors [[10 0] [20 0] [0 1]]
+        key 'left'  ; e.state.s.cursors ▸ [[10 0] [20 0] [0 1]]
+        e.state.setMainCursor 8 0
+        key 'shift+right' ; key 'shift+right'
+        mc() ▸ [9 0] ; e.state.s.selections ▸ [[8 0 9 0]]
+        e.state.deselect() ; e.state.setMainCursor 11 0
+        key 'shift+left' ; key 'shift+left'
+        mc() ▸ [10 0] ; e.state.s.selections ▸ [[10 0 11 0]]

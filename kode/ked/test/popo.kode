@@ -874,6 +874,13 @@ showSue = data ->
         h.key e 'shift+alt+b'
         e.state.s.sue ▸ before
 
+        key 'alt+w'
+        loadSheet {children:[{ text:'ab' x:0 y:0 w:4 h:2 scale:2 }]}
+        e.state.isWrapped(1) ▸ false
+        e.state.hasWrap() ▸ false
+        e.state.lineHeight(1) ▸ 1
+        e.state.scaleRunsForLine(1) ▸ [[0 2 2]]
+
   ▸ sheet cursor
 
         sheet 'popo_sheet_updown' [] 8
@@ -1073,7 +1080,9 @@ showSue = data ->
         key 'cmd+down' ; e.state.s.cursors ▸ [[1 0] [1 1]]
         key 'down'     ; e.state.s.cursors ▸ [[1 1] [1 2]]
         key 'right'    ; e.state.s.cursors ▸ [[2 1] [2 2]]
+        key 'right'    ; e.state.s.cursors ▸ [[2 1] [2 2]]
         key 'up'       ; e.state.s.cursors ▸ [[2 0] [2 1]]
+        key 'left' ; key 'left' ; key 'left' ; e.state.s.cursors ▸ [[0 0] [0 1]]
         key 'esc'      ; e.state.s.cursors.length ▸ 1
         key 'down'     ; e.state.s.cursors.length ▸ 1
 

@@ -138,9 +138,11 @@ export
         @rowCache = null
         @adjustViewForMainCursor()
 
+    #  the page of a sheet is never wrapped, its lines are the rows of the grid
+
     isWrapped: li ->
 
-        ⮐ false if not @isValidLineIndex li
+        ⮐ false if @rectree? or not @isValidLineIndex li
         @wrap.all or sue.isWrapLine(@s.sue li)
 
     wrapCols: li -> max 1 int(@cells.cols / @lineScale(li))
@@ -320,8 +322,24 @@ export
                 out.push c
         out
 
+    #  a horizontal step of delta graphemes, kept inside the visual row of the
+    #  wrapped line pos is in: cursors never change their row when moving sideways
+
+    rowDelta: (pos delta) ->
+
+        [x li] = pos
+
+        ⮐ delta if not @isWrapped li
+
+        starts = @wrapStarts li
+        k      = @wrapRow x li
+        hi     = (k+1 < starts.length) ? starts[k+1]-1 : Infinity
+
+        clamp(starts[k] hi x+delta) - x
+
     hasWrap: ->
 
+        ⮐ false if @rectree?
         ⮐ true if @wrap.all
         (@s.sue ? []).some (area) -> area.value[0] == sue.WRAP
 

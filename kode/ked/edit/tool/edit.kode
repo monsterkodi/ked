@@ -469,7 +469,10 @@ use ../../util   ◆ prof
             
             switch dir
                 'left'  
-                'right'     ➜ nc = @numCharsFromPosToWordOrPunctInDirection(lines pos dir opt); pos[0] += nc
+                'right'
+                    nc = @numCharsFromPosToWordOrPunctInDirection(lines pos dir opt)
+                    nc = opt.rowDelta(pos nc) if opt?.rowDelta
+                    pos[0] += nc
                 'up'        ➜ pos[1] -= 1
                 'down'      ➜ pos[1] += 1
                 'eol'       ➜ pos[0] = line.length

@@ -105,7 +105,7 @@ export
                     if @rectree? and not opt.jump
                         pos = @sheetPosInDirection c dir opt.count; c[0] = pos[0]; c[1] = pos[1]
                     else
-                        c[0] += belt.numCharsFromPosToWordOrPunctInDirection(lines c dir opt)
+                        c[0] += @rowDelta c belt.numCharsFromPosToWordOrPunctInDirection(lines c dir opt)
                 'up' 'down'
                     if @rectree?
                         pos = @sheetPosInDirection c dir opt.count; c[0] = pos[0]; c[1] = pos[1]
@@ -206,7 +206,9 @@ export
 
         if empty @anchors
             @anchors = @allCursors()
-        
+
+        opt = Object.assign({} opt {rowDelta:@rowDelta}) if @hasWrap()
+
         [selections cursors] = belt.extendLineRangesByMovingPositionsInDirection @s.lines @s.selections @s.cursors dir opt @anchors
         
         @setSelections selections
