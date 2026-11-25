@@ -387,7 +387,28 @@ page s
      every node view back to its first row (`sheetCursorsSet`, hooked into the
      page's `setCursors`). Resizing or scaling a node resets its view, and the page
      cursor is clamped to the node's rect (`sheet views`).
-6. **Consumers:** sheetree, colorpicker, dumpstate, mouse drag, save.
+6. ✔ **Consumers:** sheetree, colorpicker, dumpstate, mouse drag, save.
+   - **As built** (tests in `sheet mouse`):
+     - `fileeditor.onMouse` hands press, drag and release to `state.sheetMouse` while
+       a sheet is loaded (cmd/ctrl+click keeps jumping to words). A click clears the
+       extra cursors, selections and highlights of all nodes (`sheetClear`) and
+       places the cursor; inside a text node the node takes it. A drag selects in
+       the node it started in, shift+click selects from the cursor in the same
+       node, double and triple click select and highlight a word or a line.
+     - alt+click adds a cursor to the clicked text node and starts multi mode
+       (`sheetAddCursor`); a node that joins starts with just that cursor.
+     - Modes: before a node handles a key or a click, it gets the page's allowed
+       modes, and the page's active brckts and unype are started or stopped in it
+       (`syncSheetModes`). Node states have unique names (`popo_node_<n>`), the mode
+       instances of states that are gone are dropped. novim stays on the page.
+     - dumpstate: `text 0.1.0 · 2 cursors · 2:0 9:0`, the active node and its
+       cursors in its own lines (`dumpstate.textCursors`).
+     - sheetree and colorpicker needed no change: in multi mode the page's main
+       cursor is the active node's, so `sheetNodeAtCursor` is the active node.
+       Save reads the lines from the states since phase 3.
+     - Fixed on the way: `setMainCursorAndSelect` (shift+click) never selected, in
+       the editor too: a nested implicit call passed the function itself to
+       `setSelections`.
 7. **novim in sheets.** Until then novim stays active in sheets, mirrored into the node
    states like the other modes. If the refactor breaks novim tests, we decide then
    whether to deactivate novim in sheets or disable those tests. Known gaps of novim

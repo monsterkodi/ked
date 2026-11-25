@@ -29,7 +29,8 @@ use ../edit      ◆ state
 
         if not node.state?
 
-            st = new state {cols:0 rows:0} 'popo_node'
+            @count = (@count ? 0) + 1
+            st = new state {cols:0 rows:0} "popo_node_#{@count}"
             st.wrap    = all:true word:true
             st.scaling = false
             st.syntax.setExt @extOf(node)

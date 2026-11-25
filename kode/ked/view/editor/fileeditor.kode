@@ -254,7 +254,12 @@ use                 ◆ mapscr
             ⮐ @hover 
         
         [col row] = @eventPos event
-        
+
+        if @state.rectree? and event.type in ['press' 'drag' 'release']
+            if @state.sheetMouse event.type @state.posForCell(col row) event
+                @grabFocus() if event.type == 'press'
+                ⮐ redraw:true
+
         switch event.type
             
             'press'

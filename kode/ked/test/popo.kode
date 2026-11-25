@@ -2,10 +2,11 @@ use ../../kxk    ◆ sds noon clip
 use ../../kxk    ▪ kseg post
 use ../edit/tool ◆ sue
 use ../popo      ◆ layout fill projector
-use ../edit      ◆ editor
+use ../edit      ◆ editor mode
+use ../edit/mode ◆ brckts
 use ../view/editor ◆ fileeditor
 use ../view/colmns ◆ sheeditor
-use ../util      ◆ harness
+use ../util      ◆ harness dumpstate
 
 absol   = cells tree -> layout.absolutize cells tree
 absrect = cells tree -> absol(cells tree).rect
@@ -1326,3 +1327,49 @@ showSue = data ->
         se.sheetree.grabFocus()
         se.sheetree.select 0
         cmd 'delete' ; titles() ▸ ['text'] ; txt('children.0') ▸ 'z'
+
+  ▸ sheet mouse
+
+        sheet 'popo_sheet_mouse' [] 8 fileeditor
+        mouse = (type x y opt={}) -> e.onMouse Object.assign({type:type cell:[x+e.cells.x y+e.cells.y] button:'left' count:1} opt)
+        sel   = -> rt('children.0').state.textOfSelection()
+
+        loadSheet {children:[{ text:'foo bar\nbaz' x:1 y:1 w:8 h:3 } { text:'qux' x:1 y:5 w:4 h:1 }]}
+
+        mouse 'press' 1 1 ; mouse 'drag' 4 1 ; mouse 'release' 4 1
+        sel() ▸ 'foo' ; e.state.s.selections ▸ [[1 1 4 1]] ; mc() ▸ [4 1]
+        mouse 'press' 5 1 ; mouse 'drag' 3 2 ; mouse 'release' 3 2
+        sel() ▸ 'bar\nba' ; mc() ▸ [3 2]
+        mouse 'press' 6 6
+        sel() ▸ '' ; e.state.s.selections ▸ [] ; mc() ▸ [6 6]
+
+        mouse 'press' 1 1 ; mouse 'press' 4 1 {shift:true}
+        sel() ▸ 'foo' ; mc() ▸ [4 1]
+        mouse 'press' 6 1 {count:2}
+        sel() ▸ 'bar' ; e.state.s.highlights ▸ [[5 1 8]]
+        mouse 'press' 2 2 {count:3}
+        sel() ▸ 'baz'
+
+        mouse 'press' 2 1 ; mouse 'press' 2 2 {alt:true}
+        e.state.s.cursors ▸ [[2 1] [2 2]]
+        mouse 'press' 2 5 {alt:true}
+        e.state.s.cursors ▸ [[2 1] [2 2] [2 5]]
+        h.key e 'X' 'X'
+        strs(rt('children.0')) ▸ ['fXoo bar' 'bXaz'] ; txt('children.1') ▸ 'qXux'
+        dumpstate.textCursors(e.state) ▸ 'text 1 · 1 cursor · 2:0'
+        mouse 'press' 6 6 ; e.state.s.cursors.length ▸ 1
+        h.key e 'Y' 'Y' ; txt('children.1') ▸ 'qXux'
+
+        mouse 'press' 1 1 ; mouse 'press' 1 2 {alt:true}
+        dumpstate.textCursors(e.state) ▸ 'text 0 · 2 cursors · 0:0 0:1'
+
+        mode.modes.brckts = brckts
+        e.state.allowedModes.brckts = true
+        e.state.startMode 'brckts'
+        mouse 'press' 2 1 ; mouse 'drag' 5 1 ; mouse 'release' 5 1
+        h.key e '(' '('
+        strs(rt('children.0')) ▸ ['f(Xoo) bar' 'bXaz']
+        e.state.stopMode 'brckts'
+        mouse 'press' 2 3 ; mouse 'drag' 4 3 ; mouse 'release' 4 3
+        h.key e '(' '('
+        strs(rt('children.0')) ▸ ['f(Xoo) bar' 'b(z']

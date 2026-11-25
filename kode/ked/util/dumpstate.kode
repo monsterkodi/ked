@@ -64,6 +64,7 @@ use ../popo ◆ layout
             line = "    node #{selected}"
             line += " · at cursor #{atCursor}" if atCursor != selected
             out.push line
+            out.push "    #{text}" if text = @textCursors state
 
         if valid info.images
             out.push "    images #{@imageBoxes(info.images info.names info.cellh).join '  '}"
@@ -75,6 +76,25 @@ use ../popo ◆ layout
         out = out.concat logs.map((l) -> "    log #{l}")
 
         out
+
+    #  the text node the main cursor is in and its cursors, in the node's own lines:
+    #  text 0.1.0 · 3 cursors · 0:2 1:2 2:2
+
+    @textCursors: state ->
+
+        ⮐ if not state.rectree?
+
+        node = state.sheetActive()
+
+        ⮐ if not node?.state?
+
+        path    = layout.pathOf(state.rectree node) ? []
+        cursors = node.state.s.cursors
+        count   = cursors.length == 1 ? '1 cursor' : "#{cursors.length} cursors"
+
+        poss = cursors.map((c) -> c[0] + ':' + c[1]).join ' '
+
+        "text #{path.join('.')} · #{count} · #{poss}"
 
     @nodeText: rectree node ->
 

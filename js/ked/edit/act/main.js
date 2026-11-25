@@ -131,7 +131,7 @@ export default {
     },
     setMainCursorAndSelect:function (x, y)
     {
-        this.setSelections(belt.extendLineRangesFromPositionToPosition,this.s.lines,this.allSelections(),this.mainCursor(),[x,y])
+        this.setSelections(belt.extendLineRangesFromPositionToPosition(this.s.lines,this.allSelections(),this.mainCursor(),[x,y]))
         return this.setCursors([[x,y]],{adjust:'topBotDelta'})
     }
 }

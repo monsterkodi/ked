@@ -97,6 +97,6 @@ export
         
     setMainCursorAndSelect: x y ->
         
-        @setSelections belt.extendLineRangesFromPositionToPosition @s.lines @allSelections() @mainCursor() [x y]
+        @setSelections belt.extendLineRangesFromPositionToPosition(@s.lines @allSelections() @mainCursor() [x y])
         @setCursors [[x y]] adjust:'topBotDelta'
     

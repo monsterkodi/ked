@@ -105,8 +105,13 @@ export
             if m.cursors == @s.cursors and layout.pathOf(@rectree m.node)?
                 ⮐ node:m.node
 
+        @sheetNodeAt @sheetCellForPos(@mainCursor())
+
+    #  the text node at a page cell and the position in its state
+
+    sheetNodeAt: cell ->
+
         cells = @sheetSize()
-        cell  = @sheetCellForPos @mainCursor()
         node  = layout.nodeForPos cells @rectree cell
 
         if node?.text?
@@ -120,6 +125,131 @@ export
                 ⮐ node:left pos:[pos[0]+1 pos[1]]
 
         null
+
+    #  mouse events at page position pos. true if they were handled.
+    #  a click clears the extra cursors, selections and highlights of all nodes,
+    #  a drag selects in the text node it started in
+
+    sheetMouse: (type pos event) ->
+
+        ⮐ false if event.cmd or event.ctrl
+
+        hit = @sheetNodeAt @sheetCellForPos(pos)
+
+        switch type
+
+            'press'
+
+                count = event.count ? 1
+
+                ⮐ @sheetAddCursor(hit) if count == 1 and event.alt and hit?
+
+                if count == 1 and event.shift and hit? and hit.node == @sheetHome()?.node and not @sheetMulti
+                    @inSheetNode (st) -> st.setMainCursorAndSelect hit.pos[0] hit.pos[1]
+                    ⮐ true
+
+                @sheetClear()
+
+                if not hit?
+                    @setMainCursor pos[0] pos[1]
+                    @compositeSheet null
+                    ⮐ true
+
+                @inTextNode hit.node (st) ->
+                    st.setCursors [hit.pos]
+                    if count == 2
+                        st.selectWord hit.pos[0] hit.pos[1]
+                        st.highlightSelection()
+                    else if count > 2
+                        st.selectLine hit.pos[1]
+
+                if count == 1
+                    @sheetDrag = {node:hit.node pos:hit.pos}
+
+            'drag'
+
+                if d = @sheetDrag
+                    if to = projector.posAt(d.node @sheetCellForPos(pos))
+                        @inTextNode d.node (st) -> st.select d.pos to
+
+            'release'
+
+                delete @sheetDrag
+
+        true
+
+    #  all text nodes drop their extra cursors, selections and highlights
+
+    sheetClear: ->
+
+        delete @sheetMulti
+
+        for node in @sheetTextNodes()
+            st = node.state
+            if st.hasCursorsHighlightsOrSelections()
+                st.clearCursors()
+                st.clearHighlights()
+                st.deselect()
+
+    #  alt+click adds a cursor to a text node, the node takes the main cursor
+
+    sheetAddCursor: hit ->
+
+        active = @sheetActive()
+
+        if @sheetMulti
+            nodes = @sheetMulti.nodes.slice()
+        else if active?
+            home = @sheetHome()
+            active.state.setCursors [home.pos] if home?.pos?
+            nodes = [active]
+        else
+            nodes = []
+
+        joins = hit.node not in nodes
+
+        nodes.push hit.node if joins
+
+        befores = nodes.map (node) -> node.state.s
+
+        if joins
+            hit.node.state.setCursors [hit.pos]
+        else
+            hit.node.state.addCursor hit.pos[0] hit.pos[1]
+
+        @sheetMulti = {active:hit.node nodes:nodes} if active?
+
+        @commitSheetNodes hit.node nodes befores
+
+        true
+
+    #  runs fn with the state of one text node and shows what it changed
+
+    inTextNode: (node fn) ->
+
+        before = node.state.s
+        @syncSheetModes node.state
+        fn node.state
+        @commitSheetNodes node [node] [before]
+
+    #  the node states take the page's allowed modes and run the page's active
+    #  brckts and unype. modes of node states that are gone are dropped
+
+    syncSheetModes: st ->
+
+        st.allowedModes = @allowedModes
+
+        for name in ['brckts' 'unype']
+            continue if not mode.modes[name]?
+            if mode.isActive(@ name) and not mode.isActive(st name)
+                mode.start st name
+            else if mode.isActive(st name) and not mode.isActive(@ name)
+                mode.stop st name
+
+        live = new Set @sheetTextNodes().map((node) -> node.state.name)
+
+        for key in Object.keys(mode.active)
+            delete mode.active[key] if key.startsWith('popo_node') and not live.has(key)
 
     #  scrolls the views of nodes back to their first row. true if one was scrolled
 
@@ -167,6 +297,7 @@ export
         result  = null
 
         for node in nodes
+            @syncSheetModes node.state
             r = fn node.state
             result = r if node == active
 
@@ -233,7 +364,7 @@ export
         if @sheetMulti
             [cursors main] = @sheetCursors()
             main = max 0 belt.indexOfPosInPositions(main cursors)
-        else if cell = projector.cellOf(active active.state.mainCursor())
+        else if active? and cell = projector.cellOf(active active.state.mainCursor())
             cursors = [@sheetPosForCell(cell)]
             main    = 0
 
