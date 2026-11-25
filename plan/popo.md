@@ -372,8 +372,10 @@ page s
      - Cursors keep their visual row when moving sideways (`rowDelta`), in the
        editor too, for all cursors (option a). Revisit with row end affinity if a
        single cursor not reaching the end of a row gets in the way.
+     - Typing paints only the rows of the changed nodes again (`layout.sheetData`
+       with dirty rows, the root keeps its grid), unless a node changed its size.
      - Not yet: adding cursors by click (phase 6), keeping the other nodes' cursors
-       in view, painting only the changed node on typing.
+       in view.
      - Noticed, not changed: multi cursor images are drawn one cell right of where
        the main cursor image would be, also in plain files.
 5. **Layout changes.** Resize, scale and move hand new capacities to the states,
