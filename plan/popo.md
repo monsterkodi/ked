@@ -43,8 +43,8 @@ is built on top of that instead of hard-wrapping text into lines itself.
   - It owns its own cursors, selections, highlights and main cursor.
   - Scale doesn't exist inside a node state. Span capacities are already divided by the
     scale; scale only affects compositing.
-  - It is never drawn and never scrolls (`@skipAdjustViewForMainCursor`, or cells big
-    enough that the view never moves).
+  - It is never drawn itself, but it **scrolls** like the normal editor: its view
+    decides which rows go into the spans (see *Node view*).
 - **Projector.** A new `kode/ked/popo/projector.kode`, owned by the page state while a
   sheet is loaded. It holds:
   - the rectree and its layout
@@ -81,6 +81,22 @@ line's rows ended:
 Because wrapping lives outside the logical lines, a **rect change only invalidates the
 cache**. Cursors, selections and highlights are logical and stay where they are; no
 rewrap bookkeeping is needed.
+
+## Node view
+
+A node holds as many rows as it has spans. Rows that don't fit are scrolled out of
+sight, as in the normal editor, instead of being cut off at the bottom.
+
+- The node state's `s.view[1]` (first visible line) and `s.scrollOffset` (rows of that
+  line above the top) choose what fills span 0. The flow layout starts there. Lines
+  above the view aren't laid out.
+- Hidden rows of the first visible line (`scrollOffset > 0`) take the width of span 0.
+- After every key the projector keeps the **main cursor's row** inside the spans, with
+  the same rules as `adjustViewForMainCursor` (margins may be 0 in small nodes).
+- With different span widths, scrolling reflows the visible text, because rows move
+  to other spans. In rectangular nodes all spans are equally wide, and nothing reflows.
+- The view is part of `s`, so undo restores it. It is not saved.
+- **Later:** keeping the other cursors in view too, as far as they fit.
 
 ## Cursor model
 
@@ -133,7 +149,12 @@ Both maps go through the node state's flow layout: row k of line li is span
 **Painting.** In `layout.paintNode` / `paintScaled`, text nodes take their glyphs from
 their state: the graphemes `starts[k]...starts[k+1]` of line li go into span
 `first[li]+k`, grapheme cell c → page cell `x1 + c*scale`. This replaces `fill.flow` /
-`fill.text` / `fill.scaled` for text. Rows past the last span (overflow) aren't painted.
+`fill.text` / `fill.scaled` for text. Rows outside the node view aren't painted.
+
+**Hidden cursors.** A cursor in a row outside the node view has no cell and is left out
+of the page composite; it still edits. The main cursor is always in view (see *Node
+view*). A cursor whose cell is covered by a later node, or erased, still maps to that
+cell and is drawn on top.
 
 **Forward map, node → page.** (state, line li, grapheme x) → row k = `wrapRow x li`,
 column = `cells[x] - cells[starts[k]]` → cell `[x1 + col*scale, y+scale-1]` → page pos
@@ -234,8 +255,8 @@ page s
   coordinates (`node 0.1.0 · 3 cursors · 0:2 1:2 2:2`), so the headless dumps stay
   readable.
 - **Modes:** the node states get the page state's allowed and active modes mirrored,
-  so unype and brckts behave the same inside nodes. novim is blocked while a sheet is
-  loaded, until phase 7.
+  so unype and brckts behave the same inside nodes. novim included: it stays active in
+  sheets (see phase 7).
 
 ## Phases
 
@@ -258,11 +279,13 @@ page s
 5. **Layout changes.** Resize, scale and move hand new capacities to the states,
    create and delete attach and detach them, and undo works across them.
 6. **Consumers:** sheetree, colorpicker, dumpstate, mouse drag, save.
-7. **novim in sheets.** Until then the novim mode is stopped and can't be started while
-   a sheet is loaded. Per node, novim would break: the register, macros, jumps and
-   changes would be split across nodes, pending commands (`3d…`, `f`) would get lost
-   when the home changes, `u` / `ctrl+r` would hit the ignored node histories, and the
-   projector's raw key classes would fight novim's parser. The shape:
+7. **novim in sheets.** Until then novim stays active in sheets, mirrored into the node
+   states like the other modes. If the refactor breaks novim tests, we decide then
+   whether to deactivate novim in sheets or disable those tests. Known gaps of novim
+   per node: the register, macros, jumps and changes are split across nodes, pending
+   commands (`3d…`, `f`) get lost when the home changes, `u` / `ctrl+r` hit the
+   ignored node histories, and the projector's raw key classes fight novim's parser.
+   The shape of the fix:
    - **One novim mode on the page state.** It parses keys into commands, and the
      projector dispatches `executeNovim cmd`. With a single cursor, motions follow the
      solo rules (page-level `hjkl`, home mirroring). Everything else goes to the node
@@ -289,10 +312,11 @@ page s
 1. ~~**Undo:** how is sheet data stored in the immutable?~~ Decided: in the page's
    history, with each node's `s` inside its plain tree node (see *Undo*). `node.text`
    is the text type, the content is `lines` on disk, empty text nodes are kept.
-2. ~~**novim in sheet mode:** what would break|needs changes?~~ Decided: deferred to
-   phase 7, blocked in sheets until then.
-3. **Cursors in overflow lines or hidden text** (covered by other nodes) aren't visible.
-   Show a marker, or accept it for now?
+2. ~~**novim in sheet mode:** what would break|needs changes?~~ Decided: stays active,
+   properly fixed in phase 7; breaking tests are decided on when they break.
+3. ~~**Cursors in overflow lines or hidden text** aren't visible.~~ Decided: nodes
+   scroll to keep the main cursor in view (*Node view*). Other cursors out of view
+   aren't drawn, covered ones are drawn on top. No overflow marker.
 4. **node masking | flow mechanism** should we re-implement it after the refactor?
 5. **up/down in wrapped lines:** the editor moves by logical lines. Examples 3 and 4
    need moving by visual rows (spans). Change it for all wrapped lines, only for node
