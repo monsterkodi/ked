@@ -600,13 +600,16 @@ wrapLineIndex = (map y oldLines newLines) ->
     #  the grapheme indices where the rows of a wrapped line start
     #  word wrap breaks after a space, a word wider than the row breaks anywhere
     #  the rows after the first are indent cells narrower
+    #  cols may be a function that gives the width of row k, indent is ignored then
 
     @wrapStarts: (line cols word indent=0) ->
+
+        rowWidth = cols is func ? cols : (k) -> k == 0 ? cols : max(1 cols-indent)
 
         starts = [0]
         width  = 0
         brk    = -1
-        limit  = cols
+        limit  = rowWidth 0
 
         for gi in 0...line.length
 
@@ -614,7 +617,7 @@ wrapLineIndex = (map y oldLines newLines) ->
 
             if width + cw > limit and gi > starts[-1]
 
-                limit = max 1 cols-indent
+                limit = rowWidth starts.length
                 start = gi
                 start = brk if word and brk > starts[-1]
 
@@ -636,7 +639,7 @@ wrapLineIndex = (map y oldLines newLines) ->
 
     #  the cells the rows after the first of a wrapped line are indented by:
     #  the width of its leading whitespace and of the markers that follow it,
-    #  so the rows line up with the text, but at most half the row
+    #  so the rows line up with the text, but at most half the row (if cols is given)
     #  clss gives the syntax class of a grapheme, md adds the markdown markers
 
     @wrapIndent: (line cols clss md) ->
@@ -652,6 +655,7 @@ wrapLineIndex = (map y oldLines newLines) ->
         indent = 0
         for i in 0...gi
             indent += max(1 kseg.segWidth(line[i]))
+        ⮐ indent if not cols?
         min indent int(cols/2)
 
     @skipBlanks: (line gi) ->

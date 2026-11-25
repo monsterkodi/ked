@@ -413,21 +413,10 @@ import suact from './act/sue.js'
 
         ⮐ [int((x+@s.view[0]) / scale) li] if not @isWrapped li
 
-        starts = @wrapStarts li
-        k      = int((@viewTopRow() + row - @rowsBeforeLine(li)) / scale)
-        k      = clamp 0 starts.length-1 k
-        cells  = sue.cellPositionsForLine @s.lines li []
-        col    = max(0 int(x / scale) - @wrapIndent(li k)) + cells[starts[k]]
-        stop   = @s.lines[li].length
-        stop   = starts[k+1]-1 if k+1 < starts.length
+        k = int((@viewTopRow() + row - @rowsBeforeLine(li)) / scale)
+        k = clamp 0 @wrapStarts(li).length-1 k
 
-        gi = starts[k]
-        while gi < stop and cells[gi+1] <= col
-            gi += 1
-
-        gi += col - cells[gi] if gi == @s.lines[li].length
-
-        [gi li]
+        [@posInRow(li k int(x / scale)) li]
 
     clearLines: =>
 

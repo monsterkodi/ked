@@ -19,6 +19,7 @@ rows  = -> h.screen.init() ; e.draw() ; h.text().map((r) -> r.trimEnd())
 cell  = x y -> e.posCell x y
 pos   = x row -> e.state.posForCell x row
 wrap  = (s c w i) -> sue.wrapStarts kseg(s) c w i
+rw    = a -> (k) -> a[min(k a.length-1)]
 indent = (s c) -> sue.wrapIndent kseg(s) c
 
 cellsWhere = test ->
@@ -55,6 +56,9 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         wrap '  ab cd ef' 6 true 2 ▸ [0 5 8]
         wrap '- abcdefghijk' 10 true 2  ▸ [0 10]
         wrap '    abcdefghijk' 10 true 4 ▸ [0 10]
+        wrap('abcdefgh' rw([3 2 4]) false) ▸ [0 3 5]
+        wrap('abcdefgh' rw([3]) false)     ▸ [0 3 6]
+        wrap('ab cd efgh' rw([3 5]) true)  ▸ [0 3 6]
 
   ▸ indent
 
@@ -330,3 +334,65 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         e.state.setMainCursor 2 2
         e.state.joinLines()
         wraps() ▸ '2'
+
+  ▸ flow
+
+        wed ['abcdefgh' 'xyz']
+        key 'alt+w'
+        e.state.setRowWidths [3 2 4 5]
+        e.state.wrapStarts 0 ▸ [0 3 5]
+        e.state.wrapStarts 1 ▸ [0]
+        e.state.rowCols 0 2 ▸ 4
+        e.state.rowCols 1 0 ▸ 5
+        e.state.totalRows() ▸ 4
+        e.state.lineCell 4 0 ▸ [1 1]
+        e.state.lineCell 7 0 ▸ [2 2]
+        e.state.wrapMaxX 0 ▸ 8
+        e.state.wrapMaxX 1 ▸ 4
+        e.state.setRowWidths [3]
+        e.state.wrapStarts 0 ▸ [0 3 6]
+        e.state.rowCols 1 0 ▸ 3
+        e.state.rowOfLine 1 ▸ 3
+        e.state.setRowWidths null
+        e.state.wrapStarts 0 ▸ [0]
+        wed ['  abcdefghij']
+        key 'alt+w'
+        e.state.setRowWidths [6 3 10]
+        e.state.wrapStarts 0 ▸ [0 6 8]
+        e.state.wrapIndent 0 1 ▸ 1
+        e.state.wrapIndent 0 2 ▸ 2
+        e.state.lineCell 6 0 ▸ [1 1]
+
+  ▸ rows
+
+        wed ['0123456789abcdefghijk' 'next']
+        key 'ctrl+w'
+        e.state.setMainCursor 2 0
+        key 'down' ; mc() ▸ [12 0]
+        key 'down' ; mc() ▸ [22 0]
+        key 'down' ; mc() ▸ [2 1]
+        key 'up'   ; mc() ▸ [22 0]
+        key 'up'   ; mc() ▸ [12 0]
+        key 'up'   ; mc() ▸ [2 0]
+        key 'cmd+down'
+        e.state.s.cursors ▸ [[2 0] [12 0]]
+        key 'cmd+down'
+        e.state.s.cursors ▸ [[2 0] [12 0] [22 0]]
+        e.state.setMainCursor 2 0
+        key 'shift+down' ; mc() ▸ [12 0]
+        e.state.s.selections ▸ [[2 0 12 0]]
+        key 'shift+down' ; mc() ▸ [22 0]
+        e.state.s.selections ▸ [[2 0 21 0]]
+        key 'shift+up' ; mc() ▸ [12 0]
+        e.state.s.selections ▸ [[2 0 12 0]]
+        key 'shift+down' ; key 'shift+down' ; mc() ▸ [2 1]
+        e.state.s.selections ▸ [[2 0 2 1]]
+        wed ['abcdefghi jk lmnopqrstu' 'next']
+        key 'ctrl+w'
+        e.state.wrapStarts 0 ▸ [0 10 13]
+        e.state.setMainCursor 8 0
+        key 'down' ; mc() ▸ [12 0]
+        key 'down' ; mc() ▸ [21 0]
+        key 'up'   ; mc() ▸ [12 0]
+        key 'up'   ; mc() ▸ [8 0]
+        key 'down' ; key 'left' ; key 'down' ; mc() ▸ [14 0]

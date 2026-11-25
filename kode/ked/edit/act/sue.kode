@@ -145,9 +145,60 @@ export
 
     wrapCols: li -> max 1 int(@cells.cols / @lineScale(li))
 
+    #  row widths replace the editor width: the rows of all lines flow through
+    #  them one after the other, the last width holds for all rows past the end
+
+    setRowWidths: widths ->
+
+        @rowWidths = widths
+        @rowCache  = null
+
+    rowWidthAt: i -> max 1 @rowWidths[min(i @rowWidths.length-1)]
+
+    #  the cells row k of line li can hold, unscaled
+
+    rowCols: (li k=0) ->
+
+        ⮐ @wrapCols(li) if not valid @rowWidths
+
+        @rowWidthAt @flowLayout().tops[li]+k
+
+    #  the starts of all lines and the flow row each line begins at
+
+    flowLayout: ->
+
+        lines = @s.lines
+        f     = @flowCache
+
+        ⮐ f if f? and f.lines == lines and f.widths == @rowWidths and f.word == @wrap.word and f.ext == @syntax.ext
+
+        starts = []
+        tops   = []
+        row    = 0
+
+        for li in 0...lines.length
+
+            tops.push row
+
+            if @isWrapped li
+                indent = @wrapLineIndent li
+                top    = row
+                width  = (k) =>
+                    w = @rowWidthAt top+k
+                    k == 0 ? w : max(1 w-min(indent int(w/2)))
+                starts.push sue.wrapStarts(lines[li] width @wrap.word)
+            else
+                starts.push [0]
+
+            row += starts[-1].length
+
+        @flowCache = lines:lines widths:@rowWidths word:@wrap.word ext:@syntax.ext starts:starts tops:tops
+
     wrapStarts: li ->
 
         ⮐ [0] if not @isWrapped li
+
+        ⮐ @flowLayout().starts[li] if valid @rowWidths
 
         line   = @s.lines[li]
         cols   = @wrapCols li
@@ -166,14 +217,18 @@ export
 
     #  the cells row k of line li is indented by, unscaled
     #  the indent follows the syntax: it lines up with the text after list
-    #  bullets, headings and comment starters
+    #  bullets, headings and comment starters, but at most half the row
 
     wrapIndent: (li k) ->
 
         ⮐ 0 if k == 0 or not @isWrapped li
+        min @wrapLineIndent(li) int(@rowCols(li k)/2)
+
+    wrapLineIndent: li ->
+
         md   = @syntax.ext in ['md' 'markdown']
         clss = (x) => @syntax.getClass x li
-        sue.wrapIndent @s.lines[li] @wrapCols(li) clss md
+        sue.wrapIndent @s.lines[li] null clss md
 
     wrapRow: (x li) ->
 
@@ -188,19 +243,46 @@ export
 
     lineCell: (x li cells) ->
 
+        scale   = @lineScale li
+        [k cx]  = @rowCol x li cells
+        cx = min cx @rowCols(li k)-1 if @isWrapped li
+
+        [cx*scale k*scale]
+
+    #  the row of grapheme x in line li and its cell in that row:
+    #  unscaled, the indent included, not clamped to the row
+
+    rowCol: (x li cells) ->
+
         cells ?= sue.cellPositionsForLine @s.lines li []
-        scale  = @lineScale li
         lastIndex = cells.length-1
 
         cx = x <= lastIndex ? cells[x] : cells[lastIndex] + x - lastIndex
 
-        ⮐ [cx*scale 0] if not @isWrapped li
+        ⮐ [0 cx] if not @isWrapped li
 
-        k  = @wrapRow x li
-        cx = cx - cells[@wrapStarts(li)[k]] + @wrapIndent(li k)
-        cx = min cx @wrapCols(li)-1
+        k = @wrapRow x li
 
-        [cx*scale k*scale]
+        [k cx - cells[@wrapStarts(li)[k]] + @wrapIndent(li k)]
+
+    #  the grapheme at cell col of row k of line li, past the end of the last row
+    #  it goes on into the empty space
+
+    posInRow: (li k col) ->
+
+        starts = @wrapStarts li
+        cells  = sue.cellPositionsForLine @s.lines li []
+        end    = @s.lines[li].length
+        c      = max(0 col-@wrapIndent(li k)) + cells[starts[k]]
+        stop   = (k+1 < starts.length) ? starts[k+1]-1 : end
+
+        gi = starts[k]
+        while gi < stop and cells[gi+1] <= c
+            gi += 1
+
+        gi += c - cells[gi] if gi == end
+
+        gi
 
     viewX: li -> @isWrapped(li) ? 0 : @s.view[0]
 
@@ -217,7 +299,7 @@ export
         cend   = end <= lastIndex ? cells[end] : cells[lastIndex] + end - lastIndex
         used   = cend - cells[starts[k]] + @wrapIndent(li k)
 
-        max end end + @wrapCols(li)-1-used
+        max end end + @rowCols(li k)-1-used
 
     #  cursors in wrapped lines don't move on into the empty space past the last row
 
@@ -230,6 +312,77 @@ export
             else
                 out.push c
         out
+
+    hasWrap: ->
+
+        ⮐ true if @wrap.all
+        (@s.sue ? []).some (area) -> area.value[0] == sue.WRAP
+
+    #  up and down move by visual rows while lines are wrapped:
+    #  to the next row of the line, or into the nearest row of the next line.
+    #  the cell column is kept as a goal, so short rows don't lose it
+
+    rowStep: (pos dir goal) ->
+
+        [x y]   = pos
+        [k col] = @rowCol x y
+        col     = goal if goal?
+        dy      = dir == 'up' ? -1 : 1
+
+        k += dy
+
+        if k < 0 or k >= @wrapStarts(y).length
+            y += dy
+            ⮐ [[x pos[1]] col] if not @isValidLineIndex y
+            k = dy < 0 ? @wrapStarts(y).length-1 : 0
+
+        nx = @posInRow y k col
+        nx = min nx @wrapMaxX(y) if @isWrapped y
+
+        [[nx y] col]
+
+    rowSteps: (pos dir count goal) ->
+
+        for i in 0...count
+            [pos goal] = @rowStep pos dir goal
+        [pos goal]
+
+    rowGoals: ->
+
+        g = @rowGoalCache
+        ⮐ {} if not g? or g.cursors != @s.cursors
+        g.goals
+
+    keepRowGoals: goals -> @rowGoalCache = cursors:@s.cursors goals:goals
+
+    moveRowsAndSelect: dir ->
+
+        @anchors = @allCursors() if empty @anchors
+
+        after   = (a b) -> a[1] > b[1] or a[1] == b[1] and a[0] > b[0]
+        between = (a b) -> after(a b) ? [b[0] b[1] a[0] a[1]] : [a[0] a[1] b[0] b[1]]
+
+        rngs    = @s.selections.asMutable deep:true
+        goals   = @rowGoals()
+        next    = {}
+        cursors = []
+
+        for pos,idx in @allCursors()
+
+            anch = @anchors[idx] ? pos
+            [np goal] = @rowStep pos dir goals["#{pos[0]} #{pos[1]}"]
+            next["#{np[0]} #{np[1]}"] = goal
+            cursors.push np
+
+            if dir == 'up' ? after(pos anch) : after(anch pos)
+                rngs = belt.removeFromLineRangesBetweenPositions rngs pos np
+                rngs.push between(anch np)
+            else
+                rngs.push between(pos np)
+
+        @setSelections belt.clampLineRanges(@s.lines rngs)
+        @setCursors cursors adjust:'topBotDelta' keepAnchors:true
+        @keepRowGoals next
 
     scaleRunsForLine: y ->
 

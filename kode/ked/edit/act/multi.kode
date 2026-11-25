@@ -22,11 +22,16 @@ export
 
         dy = dir == 'up' ? -1 : 1
         
+        rows = @hasWrap()
+
         newCursors = []
         for c in cursors
             newCursors.push c
-            cn = @scaleAdjustedColumn [c[0] c[1]+dy] dy
-            newCursors.push [cn c[1]+dy]
+            if rows
+                newCursors.push @rowStep(c dir)[0]
+            else
+                cn = @scaleAdjustedColumn [c[0] c[1]+dy] dy
+                newCursors.push [cn c[1]+dy]
 
         mc = belt.traversePositionsInDirection newCursors @mainCursor() dir
         @setCursors newCursors main:mc adjust:'topBotDelta'
@@ -85,10 +90,14 @@ export
         cursors = @allCursors()
         lines   = @s.lines
 
+        if dir in ['up' 'down'] and not @rectree? and @hasWrap()
+            goals = @rowGoals()
+            rows  = {}
+
         for c in cursors
-            
+
             line = lines[c[1]]
-            
+
             switch dir
                 'left' 'right'
                     if @rectree? and not opt.jump
@@ -98,6 +107,10 @@ export
                 'up' 'down'
                     if @rectree?
                         pos = @sheetPosInDirection c dir opt.count; c[0] = pos[0]; c[1] = pos[1]
+                    else if rows
+                        [pos goal] = @rowSteps c dir opt.count goals["#{c[0]} #{c[1]}"]
+                        c[0] = pos[0]; c[1] = pos[1]
+                        rows["#{c[0]} #{c[1]}"] = goal
                     else if dir == 'up'
                         c[1] -= opt.count; c[0] = @scaleAdjustedColumn(c -opt.count)
                     else
@@ -138,9 +151,10 @@ export
                 adjust = 'topBotDeltaGrow'
                 
         @setCursors cursors main:main adjust:adjust
-        
+        @keepRowGoals rows if rows
+
         true
-        
+
     moveCursorsToStartOfSelections: ->
         
         selections = @allSelections()
@@ -186,6 +200,7 @@ export
     moveCursorsAndSelect: dir opt ->
 
         ⮐ @sheetMoveAndSelect(dir) if @rectree?
+        ⮐ @moveRowsAndSelect(dir) if dir in ['up' 'down'] and @hasWrap()
 
         if empty @anchors
             @anchors = @allCursors()
