@@ -112,9 +112,30 @@ sight, as in the normal editor, instead of being cut off at the bottom.
     alt+cmd+d, shift+alt+cmd+up/down, or a click that adds a cursor.
   - Cursors only exist inside node states, and every motion runs inside each state's own
     lines. The node edges are natural barriers.
-  - **up/down:** the editor moves wrapped lines by logical lines, so the cursor jumps
-    over continuation rows. Inside a node that means jumping over spans. Moving by spans
-    needs up/down by visual rows in wrapped lines (open question 5).
+  - **up/down** move by visual rows, so inside a node they move by spans (see *Visual
+    row motion*).
+
+## Visual row motion
+
+Up/down in wrapped lines move by visual rows, **in the normal editor too**: to the next
+or previous row of the same line, or to the last row of the line above / the first row
+of the line below. Unwrapped lines keep moving as now.
+
+- **Where:** the `'up' 'down'` branch of `moveCursors` (`multi.kode:99`),
+  `expandCursors` (cmd+up/down, `multi.kode:19`), and the shift+up/down selection
+  extension (`belt.extendLineRangesByMovingPositionsInDirection`, `multi.kode:193`).
+- **How:** `lineCell` gives the cursor's row and column, and the wrapped branch of
+  `posForCell` finds the grapheme at that column in the target row, both through the
+  `@rowWidths` seam. `scaleAdjustedColumn` still converts the column between scales.
+- **Goal column:** the editor has none; a cursor past the end of a line keeps its x,
+  and that makes the column stick. Wrapped lines clamp cursors (`clampToWrap`), so
+  vertical moves keep a goal column per cursor outside `s`, like `@anchors`. Any
+  move that isn't vertical drops it.
+- **Column in a node:** counted in cells from the span start. Where a blocker indents
+  a span, the cursor keeps its column in the text, not its page x. Solo mode moves on
+  the page and is unaffected.
+- **Tests:** the up/down expectations in `test/wrap.kode` change; new tests for row
+  moves, cmd+down cursors and shift+down selections in wrapped lines.
 - **Back to solo:** when only the main cursor is left (for example after esc /
   `clearCursors`), the other states drop their cursors and page-level motion takes over
   again.
@@ -262,9 +283,11 @@ page s
 
 ## Phases
 
-1. **Wrap seam.** `sue.wrapStarts` with a width function, `@rowWidths` in the state,
-   flow layout across lines. Tested on plain states, without sheets.
-   - **Gate:** all wrap and mapscr tests unchanged.
+1. **Wrap seam and visual row motion.** `sue.wrapStarts` with a width function,
+   `@rowWidths` in the state, flow layout across lines, then up/down by visual rows.
+   Tested on plain states, without sheets.
+   - **Gate:** wrap and mapscr tests unchanged after the seam; after the motion only
+     the up/down expectations in `test/wrap.kode` change.
 2. **Projector, node states, compositing; rendering only.** Load the sheet, create
    the states, paint text from them, and map the cursor. Editing still goes through A.
    - **Gate:** all existing popo tests pass with the new paint path, and headless output
@@ -321,9 +344,8 @@ page s
    aren't drawn, covered ones are drawn on top. No overflow marker.
 4. ~~**node masking | flow mechanism** should we re-implement it after the refactor?~~
    Decided: both stay as they are (see *Compositing and mapping*).
-5. **up/down in wrapped lines:** the editor moves by logical lines. Examples 3 and 4
-   need moving by visual rows (spans). Change it for all wrapped lines, only for node
-   states, or keep logical moves in sheets?
+5. ~~**up/down in wrapped lines:** the editor moves by logical lines.~~ Decided: visual
+   rows for all wrapped lines, the editor included (see *Visual row motion*).
 6. **word or char wrap in sheets:** `fill.flow` breaks anywhere, the state defaults to
    word wrap. Word wrap in nodes changes how existing sheets look.
 7. **continuation indent in sheets:** none (as now), or the editor's indent that lines
