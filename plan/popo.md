@@ -1,4 +1,4 @@
-# Sheets as independent editor states, orchestrated by popo
+# Sheets as independent editor states
 
 ## Context
 
@@ -12,10 +12,7 @@ The goal is that every text node is a full editor `state`, whose lines are its s
 and popo orchestrates those states. The normal editor's features then work inside sheet
 text unchanged.
 
-Assumption: `state` already supports soft wrapping. It is given a list of line widths,
-rewraps after edits and carries cursors, selections and highlights through. Lines past
-the last width reuse it (overflow grows the lines, never the node). It wraps by
-character, with word wrap behind a flag later.
+`state` already supports soft wrapping.
 
 ## Roles
 
@@ -31,7 +28,7 @@ character, with word wrap behind a flag later.
     wrap widths.
   - It owns its own cursors, selections, highlights and main cursor.
   - Scale doesn't exist inside a node state. It only affects compositing.
-- **Orchestrator.** A new `kode/ked/popo/orchestra.kode`, owned by the page state while a
+- **Projector.** A new `kode/ked/popo/projector.kode`, owned by the page state while a
   sheet is loaded. It holds:
   - the rectree and its layout
   - the node ↔ state attachment (runtime property on the node, like `rect`; never saved)
@@ -44,7 +41,7 @@ character, with word wrap behind a flag later.
 
 - **Solo mode** (the main cursor is the only cursor anywhere):
   - Motions are page-level and visual, as now (`sheetPosInDirection`, `sheetSnapCell`).
-  - After each motion the orchestrator finds the cursor's home, the topmost node at its
+  - After each motion the projector finds the cursor's home, the topmost node at its
     cell. If that's a text node, the cursor is mirrored into that node state as its
     single cursor, and the state becomes active.
   - A non-text home has no node state, so editing keys there take the A path (create a
@@ -64,7 +61,7 @@ character, with word wrap behind a flag later.
 `editor.onKey` → the existing sheet-level keys (node move, resize, scale, delete) are
 unchanged → otherwise `orchestra.feedKey key event` does:
 
-1. Classify the key. The policy table lives in the orchestrator, not in `keys.kode`:
+1. Classify the key. The policy table lives in the projector, not in `keys.kode`:
    - **solo motion**: page-level move, then home mirroring
    - **local** (default): run in every node state that has cursors, using
      `state.feedKey`, i.e. the unchanged `keys.kode` and modes
@@ -110,9 +107,9 @@ the text part of `insertTextAt`.
 - **Scale change:** node widths change, and so does the cell mapping. The node state
   itself doesn't change.
 
-## Undo (one timeline across all states)
+## Undo
 
-The orchestrator keeps a single history of **global snapshots**:
+The projector keeps a single history of **global snapshots**:
 `{tree: plain rectree structure, states: [node state s, in tree order]}`. These are
 cheap, because each `state.s` is immutable and only referenced.
 
@@ -122,11 +119,7 @@ cheap, because each `state.s` is immutable and only referenced.
 - **Created and deleted nodes** fall out of this: a deleted node's state lives on in
   older snapshots.
 - **Node states' own `h` / `r` histories** are bypassed in sheet mode. `cmd+z` is a
-  global key handled by the orchestrator.
-
-You proposed action counters. This is the same idea, a single timeline across all
-states, without the counters. If you prefer the counters, the rest of the plan doesn't
-change. Decide before phase 2.
+  global key handled by the projector.
 
 ## What gets removed or kept
 
@@ -155,9 +148,9 @@ change. Decide before phase 2.
 - **Modes:** the node states get the page state's allowed and active modes mirrored,
   so unype and brckts behave the same inside nodes.
 
-## Phases (each one ends green: `./kk -t` and headless checks)
+## Phases
 
-1. **Orchestrator, node states, compositing; rendering only.** Load the sheet, create
+1. **Projector, node states, compositing; rendering only.** Load the sheet, create
    the states, paint text from them, and map the cursor. Editing still goes through A.
    - **Gate:** all existing popo tests pass with the new paint path, and headless output
      of `test2.sheet` is identical.
@@ -185,10 +178,8 @@ change. Decide before phase 2.
 
 ## Open questions
 
-1. **Undo:** global snapshots (recommended) or action counters?
-2. **novim in sheet mode:** should its pending ex or operator state be multiplexed, or
-   should novim stay off in sheets for now?
+1. **Undo:** how is sheet data stored in the immutable?
+2. **novim in sheet mode:** what would break|needs changes?
 3. **Cursors in overflow lines or hidden text** (covered by other nodes) aren't visible.
    Show a marker, or accept it for now?
-4. **Clicking with several cursors:** does a plain click inside another node collapse to
-   solo, as in the normal editor? (I assume yes.)
+4. **node masking | flow mechanism** should we re-implement it after the refactor?
