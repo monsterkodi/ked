@@ -121,6 +121,8 @@ use ./utils ▪ kc ke
         ke  "true or false ? a:'b' : 666" ▸
             {a:'b'}
             
+        # kc  "stop = k+1 < starts.length ? 1 : 3" ▸ "???" #TODO
+            
   ▸ assert
         
         kc  "e?.d"                  ▸   ";(e != null ? e.d : undefined)"
