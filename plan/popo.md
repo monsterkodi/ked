@@ -470,7 +470,15 @@ page s
        for wait until its commit is done (`novimLater`), so one change is one step.
      - Noticed, not changed: `G` keeps the width of the line it starts on
        (`moveCursors 'eof'` uses the current line), in plain files too.
-     - 7c undo
+     - ✔ 7c undo. As built: `beginNovimInsert` opens one group on the host (the
+       page of a node state, or the state itself, `novimInsertGroup`) in
+       `startNovimInsert`, `startNovimReplace` and before `openLine` adds its line;
+       `finishNovimInsert` closes it, and so do starting novim, `esc` that ends multi
+       mode, and loading text. `undoCommand` of a node runs the page's undo after the
+       commit (`novimLater`). novim has no `ctrl+r`, redo stays on cmd/ctrl+y.
+     - Noticed, not changed: typing over a selection that covers whole lines
+       deletes linewise, so `C` from column 0 or `cw` on a line's last word also
+       remove the line break, in plain files too.
      - 7d ex, search, visual
 
 ## Later

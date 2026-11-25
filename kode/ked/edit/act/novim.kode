@@ -687,7 +687,30 @@ export
         @lastChange = cmd
         @deleteByMotion cmd.motion cmd.register
 
+    #  an insert session is one undo step: it opens a group in the history of the
+    #  page or of the state, the end of the insert closes it
+
+    beginNovimInsert: ->
+
+        host = @sheetPage ? @
+
+        ⮐ if host.novimInsertGroup
+
+        host.novimInsertGroup = true
+        host.begin()
+
+    endNovimInsert: ->
+
+        host = @sheetPage ? @
+
+        ⮐ if not host.novimInsertGroup
+
+        host.novimInsertGroup = false
+        host.end()
+
     startNovimInsert: spec ->
+
+        @beginNovimInsert()
 
         @novim.insert = copy spec
 
@@ -704,6 +727,8 @@ export
     startNovimReplace: count ->
 
         ⮐ if @rectree?
+
+        @beginNovimInsert()
 
         n = max 1 (count ? 1)
 
@@ -821,7 +846,9 @@ export
 
     finishNovimInsert: ->
 
-        ⮐ if not @novim.insert
+        if not @novim.insert
+            @endNovimInsert()
+            ⮐
 
         insert = @novim.insert
 
@@ -837,6 +864,8 @@ export
             @lastChange = { operator: 'replaceMode', text: text }
         else
             @lastChange = { operator: 'insert', insert: insert }
+
+        @endNovimInsert()
 
     repeatChange: count ->
 
@@ -1336,6 +1365,8 @@ export
 
     openLine: count after ->
 
+        @beginNovimInsert()
+
         @putOpenLines { count:count } after
 
         @startNovimInsert { kind: after ? 'openLineAfter' : 'openLineBefore', count:count }
@@ -1712,7 +1743,12 @@ export
         if changed
             @setCursors cursors main:@s.main
 
+    #  sheets undo on the page, after the nodes that asked for it are committed
+
     undoCommand: count ->
+
+        ⮐ @sheetPage.undoCommand(count) if @sheetPage?
+        ⮐ if @rectree? and @novimLater(=> @undoCommand count)
 
         n = max 1 (count ? 1)
 

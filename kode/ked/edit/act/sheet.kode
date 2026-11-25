@@ -41,6 +41,7 @@ export
 
         if key == 'esc' and @sheetMulti
             @recordMacroKey key event
+            node.state.finishNovimInsert() for node in @sheetMulti.nodes
             ⮐ @leaveSheetMulti()
 
         if nv = mode.get(@ 'novim')

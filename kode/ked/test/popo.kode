@@ -1468,6 +1468,23 @@ showSue = data ->
             e.state.setCursors [[1 2]] ; type 'qbA!' ; key 'esc' ; type 'q'
             strs(rt('children.0')) ▸ ['oo bar' 'baz!']
             e.state.setCursors [[1 5]] ; type '@b' ; txt('children.1') ▸ 'ux!'
+
+            loadSheet novimTree()
+            undos = e.state.h.length
+            e.state.setCursors [[1 5]] ; type 'iab ' ; key 'esc'
+            txt('children.1') ▸ 'ab qux' ; e.state.h.length ▸ undos+1
+            type 'u' ; txt('children.1') ▸ 'qux'
+            e.state.setCursors [[2 1]] ; type 'xu' ; strs(rt('children.0')) ▸ ['foo bar' 'baz']
+            e.state.setCursors [[6 6]] ; type 'iab ' ; key 'esc'
+            rt('children').length ▸ 3 ; e.state.h.length ▸ undos+1
+            type 'u' ; rt('children').length ▸ 2
+
+            click 2 1 ; altclick 2 5
+            type 'iX ' ; key 'esc' ; nvon() ▸ false
+            strs(rt('children.0')) ▸ ['fX oo bar' 'baz'] ; txt('children.1') ▸ 'qX ux'
+            e.state.h.length ▸ undos+1
+            key 'esc' ; nvon() ▸ true
+            type 'u' ; txt('children.0') ▸ 'foo bar\nbaz' ; txt('children.1') ▸ 'qux'
         finally
             e.state.stopMode 'novim' if nvon()
             config.data = oldConfig

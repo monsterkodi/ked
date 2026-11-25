@@ -1266,6 +1266,41 @@ windowReset = (s) ->
         stopNovim mac
         config.data = oldConfig
 
+  ▸ insert undo
+
+        oldConfig = config.data
+        config.data = { novim: { autoEnableOnEscape: true } }
+
+        try
+            h = new harness cols:55 rows:66
+            e = new editor h.screen 'insert_undo_editor' []
+            ins = e.state
+            e.grabFocus()
+            ins.allowedModes.novim = true
+            startNovim ins
+
+            feed = chars -> for c in chars ➜ e.onKey c {combo:c, char: (c == 'esc' ? null : c)}
+            itxt = -> kseg.str ins.s.lines
+
+            loadTextOn ins "one\ntwo"
+
+            undos = ins.h.length
+            feed ['A' '!' '?' 'esc'] ; itxt() ▸ "one!?\ntwo" ; ins.h.length ▸ undos+1
+            feed ['u'] ; itxt() ▸ "one\ntwo"
+            feed ['o' 'x' 'y' 'esc'] ; itxt() ▸ "one\nxy\ntwo"
+            feed ['u'] ; itxt() ▸ "one\ntwo"
+            ins.setMainCursor 1 0
+            feed ['C' 'z' 'esc'] ; itxt() ▸ "oz\ntwo"
+            feed ['u'] ; itxt() ▸ "one\ntwo"
+
+            feed ['i' 'a' 'b']
+            e.onKey 'alt+n' {combo:'alt+n'} ; mode.isActive(ins 'novim') ▸ true
+            feed ['u'] ; itxt() ▸ "one\ntwo"
+            feed ['i' 'c' 'esc' 'u'] ; itxt() ▸ "one\ntwo"
+        finally
+            stopNovim ins if mode.isActive(ins 'novim')
+            config.data = oldConfig
+
   ▸ clipboard registers
     
         copies = []

@@ -45,14 +45,17 @@ import suact from './act/sue.js'
 
         @clearSingle()
 
-    #  the states of sheet text nodes never run novim, the page's novim is used instead
+    #  the states of sheet text nodes never run novim, the page's novim is used instead.
+    #  starting novim ends an insert
 
     toggleMode: name =>
         ⮐ @sheetPage.novimFromNode('toggle') if @sheetPage? and name == 'novim'
+        @finishNovimInsert() if name == 'novim'
         mode.toggle @ name if @allowedModes[name]
 
     startMode: name =>
         ⮐ @sheetPage.novimFromNode('start') if @sheetPage? and name == 'novim'
+        @finishNovimInsert() if name == 'novim'
         mode.start @ name if @allowedModes[name]
 
     stopMode: name =>
@@ -215,7 +218,8 @@ import suact from './act/sue.js'
 
         @beginIndices = []
         delete @beginIndex
-        
+        @novimInsertGroup = false
+
     addLine: line ext =>
 
         segl = kseg line
