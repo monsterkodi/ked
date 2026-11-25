@@ -5,6 +5,22 @@ use ../theme    ◆ theme
 
 UNIKEY = new RegExp "^text unicode (#{Object.keys(kulur.UNICODE).join('|')})\\b"
 
+toIndices = segl dss -> # kulur chunks count display columns, ked indexes graphemes
+
+    idx = [] # grapheme index of every column
+    for seg,i in segl
+        for c in 0...kseg.segWidth(seg)
+            idx.push i
+    ⮐ dss if idx.length == segl.length # every grapheme is one column wide
+
+    for ds in dss
+        end = ds.start + ds.length
+        s   = idx[ds.start] ? segl.length
+        e   = (idx[end-1] ? segl.length-1) + 1
+        ds.start  = s
+        ds.length = e - s
+    dss
+
 ■syntax
     @: @name -> 
         
@@ -41,8 +57,9 @@ UNIKEY = new RegExp "^text unicode (#{Object.keys(kulur.UNICODE).join('|')})\\b"
             @clear()
             
             @diss = kulur.dissect segls @ext
-            
+
             for segl,idx in segls
+                toIndices segl, @diss[idx]
                 @lineDiss.set segl @diss[idx]
         
     partialUpdate: segls =>
@@ -56,7 +73,7 @@ UNIKEY = new RegExp "^text unicode (#{Object.keys(kulur.UNICODE).join('|')})\\b"
             dss = @lineDiss.get segl
             
             if not dss?
-                dss = kulur.dissect([segl] @ext)[0]
+                dss = toIndices segl, kulur.dissect([segl] @ext)[0]
                 @lineDiss.set segl dss
                 
                 @pruneLineDiss segls if @lineDiss.size > 2*segls.length + 100
@@ -77,7 +94,7 @@ UNIKEY = new RegExp "^text unicode (#{Object.keys(kulur.UNICODE).join('|')})\\b"
             
     addSegl: segl ext =>
     
-        dss = kulur.dissect([segl] ext)[0]
+        dss = toIndices segl, kulur.dissect([segl] ext)[0]
         @diss = @diss.concat [dss]
         @lineDiss.set segl dss
         
