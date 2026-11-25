@@ -6,7 +6,7 @@ mouse
                         wheelSteps      4
                         wheelSpeedup    2
 mapScroll
-                        enable          false
+                        enable          true
                         clickOffset     5
 scale
                         enable  true
