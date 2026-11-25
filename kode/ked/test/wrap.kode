@@ -53,6 +53,8 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         wrap 'a bcdefgh' 4 true   ▸ [0 2 6]
         wrap 'abcdefgh' 4 false 2 ▸ [0 4 6]
         wrap '  ab cd ef' 6 true 2 ▸ [0 5 8]
+        wrap '- abcdefghijk' 10 true 2  ▸ [0 10]
+        wrap '    abcdefghijk' 10 true 4 ▸ [0 10]
 
   ▸ indent
 
@@ -83,6 +85,7 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
   ▸ toggle
 
         wed ['aaaaaaaaaaaa' 'bbbbbbbbbbbb' 'cccccccccccc']
+        e.state.wrap.word ▸ true
         key 'ctrl+w'
         dumpstate.tags(e.state) ▸ '[dirty] [undo 1] [wrap: 0]'
         e.state.setCursors [[0 0] [0 1]]
@@ -101,7 +104,7 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         key 'alt+w'
         dumpstate.tags(e.state).endsWith('[wrap: 0 1]') ▸ true
         key 'ctrl+alt+w'
-        dumpstate.tags(e.state).endsWith('[wrap: 0 1 word]') ▸ true
+        dumpstate.tags(e.state).endsWith('[wrap: 0 1 char]') ▸ true
 
   ▸ draw
 
@@ -112,9 +115,9 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         rows() ▸ ['0123456789' 'next' '' '' '' '']
         wed ['aaa bbb ccc ddd' 'next']
         key 'alt+w'
-        rows() ▸ ['aaa bbb cc' 'c ddd' 'next' '' '' '']
-        key 'ctrl+alt+w'
         rows() ▸ ['aaa bbb' 'ccc ddd' 'next' '' '' '']
+        key 'ctrl+alt+w'
+        rows() ▸ ['aaa bbb cc' 'c ddd' 'next' '' '' '']
 
   ▸ scroll
 
@@ -196,7 +199,6 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         marked('selection')[0...2] ▸ ['        aa' '  aa']
         wed ['  aaa bbb ccc ddd' 'next']
         key 'alt+w'
-        key 'ctrl+alt+w'
         rows() ▸ ['  aaa bbb' '  ccc ddd' 'next' '' '' '']
 
   ▸ syntax
@@ -209,10 +211,10 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         wrapped '> aaaaaaaaaaaa' 'md'               ▸ ['> aaaaaaaa' '  aaaa']
         wrapped '> - aaaaaaaaaa' 'md'               ▸ ['> - aaaaaa' '    aaaa']
         wrapped '- [ ] aaaaaaaaaaaa' 'md' 12        ▸ ['- [ ] aaaaaa' '      aaaaaa']
-        wrapped 'aaaa aaaaaaaa' 'md'                ▸ ['aaaa aaaaa' 'aaa']
+        wrapped 'aaaa aaaaaaaa' 'md'                ▸ ['aaaa' 'aaaaaaaa']
         wrapped '# aaaaaaaaaaa' 'kode'              ▸ ['# aaaaaaaa' '  aaa']
         wrapped '    # aaaaaaaaaaaaaaaaaaaa' 'kode' 20 ▸ ['    # aaaaaaaaaaaaaa' '      aaaaaa']
-        wrapped 'x = aaaaaaaaaaa' 'kode'            ▸ ['x = aaaaaa' 'aaaaa']
+        wrapped 'x=aaaaaaaaaaaaa' 'kode'            ▸ ['x=aaaaaaaa' 'aaaaa']
         wrapped '// aaaaaaaaaaa' 'js'               ▸ ['// aaaaaaa' '   aaaa']
         wrapped '# aaaaaaaaaaa' 'sh'                ▸ ['# aaaaaaaa' '  aaa']
 

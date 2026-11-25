@@ -36,7 +36,7 @@ import suact from './act/sue.js'
         @scales     = h1:3 h2:2
         @scaledExts = ['md' 'markdown' 'kode']
 
-        @wrap = all:false word:false
+        @wrap = all:false word:true
 
         @rowCache       = null
         @rowCacheExt    = null

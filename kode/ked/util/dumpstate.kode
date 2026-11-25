@@ -26,7 +26,7 @@ use ../popo ◆ layout
         else
             for area in (state.s.sue ? [])
                 wrap.push area.y if area.value[0] == sue.WRAP
-        wrap.push 'word' if state.wrap?.word
+        wrap.push 'char' if state.wrap? and not state.wrap.word
         tags.push "wrap: #{wrap.join ' '}" if valid wrap
         
         tags.map((tag) -> "[#{tag}]").join ' '
