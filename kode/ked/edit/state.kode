@@ -117,14 +117,16 @@ import suact from './act/sue.js'
         @s = @s.set 'main' main
         
         @adjustViewForMainCursor opt
-        
+
         @swapState()
+
+        @sheetCursorsSet() if @rectree?
 
         if not opt.silent
             mode.cursorsSet @
             @emit 'cursorsSet'
         @
-            
+
     textOfSelectionOrWordAtCursor: => 
         
         if @s.selections.length

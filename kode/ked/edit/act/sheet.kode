@@ -121,6 +121,31 @@ export
 
         null
 
+    #  scrolls the views of nodes back to their first row. true if one was scrolled
+
+    sheetResetViews: nodes ->
+
+        reset = false
+
+        for node in nodes ? @sheetTextNodes()
+            st = node.state
+            continue if not st?
+            if st.s.view[1] != 0 or st.s.scrollOffset != 0
+                st.setView [0 0] 0
+                reset = true
+
+        reset
+
+    #  the page cursors were set from outside the nodes: a cursor that left the text
+    #  nodes scrolls all node views back
+
+    sheetCursorsSet: ->
+
+        ⮐ if @sheetHome()?
+        ⮐ if not @sheetResetViews()
+
+        @renderSheet @rectree @sheetSize() null history:false silent:true
+
     #  runs fn with the state of the text node at the main cursor and shows what it
     #  changed. null if there is no text node at the cursor
 
@@ -472,7 +497,13 @@ export
         layout.regionize cells @rectree
         projector.attach @rectree
 
-        @renderSheet @rectree cells (projector.cellOf(node pos) ? cell)
+        @sheetResetViews [node]
+
+        rect = node.rect.abs
+        mc   = projector.cellOf(node pos)
+        mc  ?= [clamp(rect.x max(rect.x rect.x+rect.w-1) cell[0]) clamp(rect.y max(rect.y rect.y+rect.h-1) cell[1])]
+
+        @renderSheet @rectree cells mc
 
         node
 
@@ -689,6 +720,8 @@ export
 
         x = clamp rect.x maxX (rect.x + cursor[0] - oldRect.x)
         y = clamp rect.y maxY (rect.y + cursor[1] - oldRect.y)
+
+        @sheetResetViews [moved]
 
         @renderSheet @rectree cells [x y]
 

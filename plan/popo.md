@@ -378,8 +378,15 @@ page s
        in view.
      - Noticed, not changed: multi cursor images are drawn one cell right of where
        the main cursor image would be, also in plain files.
-5. **Layout changes.** Resize, scale and move hand new capacities to the states,
+5. ✔ **Layout changes.** Resize, scale and move hand new capacities to the states,
    create and delete attach and detach them, and undo works across them.
+   - **As built:** every render attaches the states and hands them the span widths,
+     so this needed no new mechanism; `sheet layout undo` tests undo and redo across
+     typing, resize, move, scale, create and delete.
+   - **Node views reset:** a page cursor change that leaves the text nodes scrolls
+     every node view back to its first row (`sheetCursorsSet`, hooked into the
+     page's `setCursors`). Resizing or scaling a node resets its view, and the page
+     cursor is clamped to the node's rect (`sheet views`).
 6. **Consumers:** sheetree, colorpicker, dumpstate, mouse drag, save.
 7. **novim in sheets.** Until then novim stays active in sheets, mirrored into the node
    states like the other modes. If the refactor breaks novim tests, we decide then

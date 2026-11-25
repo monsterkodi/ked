@@ -784,6 +784,55 @@ showSue = data ->
         e.state.undo()     ; rt('children.0.children')? ▸ false
         e.state.redo()     ; txt('children.0.children.0') ▸ 'a'
 
+  ▸ sheet views
+
+        sheet 'popo_sheet_views' ['susan']
+        e.grabFocus()
+        loadSheet {children:[{ text:'abcdefghij' x:0 y:0 w:4 h:2 }]}
+        node = -> rt('children.0')
+
+        e.state.setCursors [[3 1]] ; key 'shift+down'
+        node().state.s.scrollOffset ▸ 1 ; e.draw() ; h.at(0 0) ▸ 'e'
+        mc() ▸ [3 1]
+        key "ctrl+alt+'" ; rt('children.0.h') ▸ 3
+        node().state.s.scrollOffset ▸ 0 ; e.draw() ; h.at(0 0) ▸ 'a' ; mc() ▸ [3 1]
+        key 'ctrl+alt+/' ; key 'ctrl+alt+/' ; rt('children.0.h') ▸ 1 ; mc() ▸ [3 0]
+
+        e.state.setCursors [[1 0]] ; key 'shift+down'
+        node().state.s.scrollOffset ▸ 1 ; e.draw() ; h.at(0 0) ▸ 'e'
+        key 'shift+alt+=' ; rt('children.0.scale') ▸ 2
+        node().state.s.scrollOffset ▸ 0 ; node().state.s.view ▸ [0 0]
+
+  ▸ sheet layout undo
+
+        sheet 'popo_sheet_layout_undo' ['susan']
+        e.grabFocus()
+        loadSheet {children:[{ text:'abc def' x:1 y:0 w:4 h:2 }]}
+        kseg.str(e.state.s.lines[0]).trimEnd() ▸ ' abc'
+
+        e.state.setCursors [[2 0]] ; e.state.insert 'X' ; txt('children.0') ▸ 'aXbc def'
+        key 'ctrl+alt+.' ; rt('children.0.w') ▸ 5
+        key 'shift+alt+l' ; rt('children.0.x') ▸ 2
+        key 'shift+alt+=' ; rt('children.0.scale') ▸ 2
+        e.state.setCursors [[0 3]] ; e.state.insert 'n' ; rt('children').length ▸ 2
+        e.state.deleteSheetNode rt('children.0') ; rt('children').length ▸ 1 ; txt('children.0') ▸ 'n'
+
+        e.state.undo() ; rt('children').length ▸ 2 ; txt('children.0') ▸ 'aXbc def' ; txt('children.1') ▸ 'n'
+        e.state.undo() ; rt('children').length ▸ 1
+        e.state.undo() ; rt('children.0.scale')? ▸ false ; rt('children.0.x') ▸ 2
+        e.state.undo() ; rt('children.0.x') ▸ 1 ; rt('children.0.w') ▸ 5
+        e.state.undo() ; rt('children.0.w') ▸ 4 ; txt('children.0') ▸ 'aXbc def'
+        e.state.undo() ; txt('children.0') ▸ 'abc def'
+        kseg.str(e.state.s.lines[0]).trimEnd() ▸ ' abc'
+
+        e.state.redo() ; txt('children.0') ▸ 'aXbc def'
+        e.state.redo() ; e.state.redo() ; e.state.redo() ; rt('children.0.scale') ▸ 2 ; rt('children.0.x') ▸ 2
+        e.state.redo() ; rt('children').length ▸ 2
+        e.state.redo() ; rt('children').length ▸ 1 ; txt('children.0') ▸ 'n'
+
+        e.state.undo() ; e.state.setCursors [[2 1]] ; e.state.insert 'Y'
+        txt('children.0') ▸ 'YaXbc def' ; e.state.hasRedo() ▸ false
+
   ▸ sheet resize
 
         sheet 'popo_sheet_resize'
@@ -1011,7 +1060,9 @@ showSue = data ->
 
         e.state.setCursors [[4 1]] ; e.state.insert 'c' ; txt('children.0') ▸ 'abc' ; rt('children').length ▸ 1
         mc() ▸ [3 1] ; e.draw() ; h.at(2 1) ▸ 'c'
-        e.state.setCursors [[2 1]] ; key 'up' ; key 'right' ; key 'left' ; e.draw() ; h.at(2 1) ▸ 'c'
+        e.state.setCursors [[2 1]] ; e.draw() ; h.at(2 1) ▸ 'c'
+        key 'up' ; rt('children.0').state.s.scrollOffset ▸ 0 ; e.draw() ; h.at(2 1) ▸ 'a'
+        e.state.setCursors [[3 1]] ; key 'right' ; mc() ▸ [4 1] ; h.at(2 1) ▸ 'a'
 
         loadSheet {children:[{ text:'ab' x:2 y:0 w:6 h:4 scale:2 }]}
 
