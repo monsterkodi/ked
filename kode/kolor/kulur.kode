@@ -1730,5 +1730,5 @@ export
 ◆main # node js/kolor/kulur.js regenerates kode/kolor/kulur.md
 
     file = path.resolve ◆dir, '../../kode/kolor/kulur.md'
-    fs.writeFileSync file, unicodeDoc()
+    fs.writeFileSync file unicodeDoc()
     log file

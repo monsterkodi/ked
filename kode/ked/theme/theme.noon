@@ -164,8 +164,10 @@ syntax
     text require                            #555   
     comment triple                          #555   
     text unicode                            #555   
+    text unicode kode                       #88f   
     text unicode math                       #99f   
     text unicode greek                      #aaf   
+    text unicode latin                      #faf   
     text unicode cyrillic                   #faa   
     keyword require                         #444   
     keyword function                        #444   
