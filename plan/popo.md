@@ -8,11 +8,13 @@ every cursor, alt+cmd+d, and cmd+up/down by spans. The current text editing in
 `kode/ked/edit/act/sheet.kode` re-implements editor operations against the rectree
 (option A). That path leads to a second editor just for sheets.
 
-The goal is that every text node is a full editor `state`, whose lines are its spans,
-and popo orchestrates those states. The normal editor's features then work inside sheet
-text unchanged.
+The goal is that every text node is a full editor `state`, and popo orchestrates those
+states. The normal editor's features then work inside sheet text unchanged.
 
-`state` already supports soft wrapping.
+`state` now has soft wrapping (`kode/ked/edit/act/sue.kode` `##wrap`): logical lines
+stay untouched, `wrapStarts li` gives the grapheme index where each visual row starts,
+and `lineCell` / `posForCell` / `wrapMaxX` / `clampToWrap` map between the two. popo
+is built on top of that instead of hard-wrapping text into lines itself.
 
 ## Roles
 
@@ -22,12 +24,19 @@ text unchanged.
   - The old editing functions never change them directly.
   - It keeps doing everything that is visual: view, scrolling, mapview, gutter, cell
     rect, drawing.
+  - It is never wrapped. Its lines are grid rows. `toggleWrap` and the scale actions
+    already return early while `@rectree?` is set.
 - **Node states.** One full `state` per text node, created eagerly when a sheet is
   loaded or a text node appears.
-  - Its lines are the node's text wrapped into its spans, with the span capacities as
-    wrap widths.
+  - Its lines are the node's **logical lines**: `node.text.split '\n'`. Writing back is
+    `lines.join '\n'`; there are no soft/hard line ends to track.
+  - Every line is wrapped (`@wrap.all = true`). The rows of the wrapped lines are the
+    node's spans, in flow order (see *Wrapping into spans*).
   - It owns its own cursors, selections, highlights and main cursor.
-  - Scale doesn't exist inside a node state. It only affects compositing.
+  - Scale doesn't exist inside a node state. Span capacities are already divided by the
+    scale; scale only affects compositing.
+  - It is never drawn and never scrolls (`@skipAdjustViewForMainCursor`, or cells big
+    enough that the view never moves).
 - **Projector.** A new `kode/ked/popo/projector.kode`, owned by the page state while a
   sheet is loaded. It holds:
   - the rectree and its layout
@@ -37,29 +46,59 @@ text unchanged.
 - **Sheet-level operations stay at sheet level** (A): create a text node by typing in a
   non-text home, move, resize, scale, delete, shift, paste nodes.
 
+## Wrapping into spans
+
+Spans are `fill.bands(node regions rect)` (`kode/ked/popo/fill.kode:58`), giving
+`[y x1 x2]` in flow order. A span's capacity is `floor((x2-x1)/scale)`.
+
+Today a wrapped line has one width for all rows: `wrapCols li` for the first row,
+`wrapCols - wrapIndent` for the rest (`sue.wrapStarts line cols word indent`). In a
+node the widths vary per row, and the rows of one line continue where the previous
+line's rows ended:
+
+- **Seam in `sue.wrapStarts`:** take a width function `width(k)` (or an array) instead
+  of `cols` + `indent`. The editor passes `k == 0 ? cols : cols-indent`, so nothing
+  changes there.
+- **Seam in the state:** a single `@rowWidths` hook (null in the editor). When set, it
+  gives the capacities of all spans of the node. `wrapStarts`, `wrapCols`, `lineCell`,
+  `wrapMaxX` and `posForCell` ask it for the width of row k of line li.
+- **Flow layout:** the node state computes the starts of all lines in one pass, line
+  after line, and remembers the first span index of each line. It is cached on
+  `(s.lines identity, capacities key, wrap.word)`. The per-line WeakMap cache doesn't
+  fit, because a line's rows depend on the rows of the lines above it.
+- An empty line takes one span, as `fill.flow` does for `\n` now.
+- Continuation rows aren't indented in sheets: `wrapIndent` is 0 when `@rowWidths` is
+  set (to be confirmed, see open questions).
+
+Because wrapping lives outside the logical lines, a **rect change only invalidates the
+cache**. Cursors, selections and highlights are logical and stay where they are; no
+rewrap bookkeeping is needed.
+
 ## Cursor model
 
 - **Solo mode** (the main cursor is the only cursor anywhere):
   - Motions are page-level and visual, as now (`sheetPosInDirection`, `sheetSnapCell`).
   - After each motion the projector finds the cursor's home, the topmost node at its
     cell. If that's a text node, the cursor is mirrored into that node state as its
-    single cursor, and the state becomes active.
+    single cursor (reverse map), and the state becomes active.
   - A non-text home has no node state, so editing keys there take the A path (create a
     text node).
 - **Multi mode** (more than one cursor):
   - Entered from the active node state through ordinary operations: cmd+up/down,
     alt+cmd+d, shift+alt+cmd+up/down, or a click that adds a cursor.
   - Cursors only exist inside node states, and every motion runs inside each state's own
-    lines. The node edges are natural barriers, and up/down moves by span because spans
-    are lines.
+    lines. The node edges are natural barriers.
+  - **up/down:** the editor moves wrapped lines by logical lines, so the cursor jumps
+    over continuation rows. Inside a node that means jumping over spans. Moving by spans
+    needs up/down by visual rows in wrapped lines (open question 5).
 - **Back to solo:** when only the main cursor is left (for example after esc /
   `clearCursors`), the other states drop their cursors and page-level motion takes over
   again.
 
 ## Key flow (sheet mode)
 
-`editor.onKey` → the existing sheet-level keys (node move, resize, scale, delete) are
-unchanged → otherwise `orchestra.feedKey key event` does:
+`editor.onKey` → the existing sheet-level keys (`editor.kode:233` delete/scale node,
+`:254` move/resize node) are unchanged → otherwise `projector.feedKey key event` does:
 
 1. Classify the key. The policy table lives in the projector, not in `keys.kode`:
    - **solo motion**: page-level move, then home mirroring
@@ -68,9 +107,12 @@ unchanged → otherwise `orchestra.feedKey key event` does:
    - **broadcast**: the highlight-all family (alt+cmd+d, cmd+e, cmd+g …). Run in the
      active state first to get the word or text, then `highlightText` +
      `selectAllHighlights` in every text state.
-2. For each state whose `s.lines` changed, write its text (lines joined at hard ends)
-   into `node.text`. A text edit doesn't move rects, so there's **no regionize** here;
-   only that node is composited again.
+   - **blocked**: the wrap toggles (ctrl+w, alt+w, ctrl+alt+w) and the susan line
+     scale keys. They are bound in `editor.kode` under `feats['susan']`, so they must be
+     caught before they reach a node state.
+2. For each state whose `s.lines` changed, write `lines.join '\n'` into `node.text`. A
+   text edit doesn't move rects, so there's **no regionize** here; only that node is
+   composited again.
 3. Composite, and record one undo step if anything changed.
 
 `insert`, `paste`, `delete`, `cut`, `copy` and `cmd+a` need no sheet-specific code: they
@@ -78,21 +120,24 @@ are local operations in the node states.
 
 ## Compositing and mapping
 
-Spans are `fill.bands(node regions rect)` (`kode/ked/popo/fill.kode:58`), giving
-`[y x1 x2]` in flow order. A span's capacity is floor((x2-x1)/scale).
+Both maps go through the node state's flow layout: row k of line li is span
+`first[li] + k`.
 
 **Painting.** In `layout.paintNode` / `paintScaled`, text nodes take their glyphs from
-their state's lines: line i → span i, glyph c → cell `x1 + c*scale`. This replaces
-`fill.flow` / `fill.text` / `fill.scaled` for text. Lines past the last span (overflow)
-aren't painted.
+their state: the graphemes `starts[k]...starts[k+1]` of line li go into span
+`first[li]+k`, grapheme cell c → page cell `x1 + c*scale`. This replaces `fill.flow` /
+`fill.text` / `fill.scaled` for text. Rows past the last span (overflow) aren't painted.
 
-**Forward map, node → page.** (state, line i, col c) → cell `[x1 + c*scale, y+scale-1]`
-→ page pos via `sheetPosForCell`. It is used to composite cursors, selections and
-highlights into the page `s`, per span segment.
+**Forward map, node → page.** (state, line li, grapheme x) → row k = `wrapRow x li`,
+column = `cells[x] - cells[starts[k]]` → cell `[x1 + col*scale, y+scale-1]` → page pos
+via `sheetPosForCell`. It is used to composite cursors, selections and highlights into
+the page `s`, per span segment. Like `lineCell` it clamps to the last cell of a full
+row.
 
-**Reverse map, page → node.** Cell → (topmost text node, span i, col c). It is used for
-clicks, drag selection and mirroring the solo cursor home. Selection drags inside one node
-go to that node state.
+**Reverse map, page → node.** Cell → (topmost text node, span → line li and row k,
+column → grapheme). The same lookup as the wrapped branch of `state.posForCell`. It is
+used for clicks, drag selection and mirroring the solo cursor home. Selection drags
+inside one node go to that node state.
 
 This replaces `layout.textSlots`, `textOffsetAt`, `cellForTextOffset`, `textNodeAt` and
 the text part of `insertTextAt`.
@@ -100,16 +145,19 @@ the text part of `insertTextAt`.
 ## Layout changes
 
 - **Rect changes** (resize, scale, move, terminal resize, shift in tree):
-  `layout.regionize`, recompute spans, and give each node state its new wrap widths.
-  The state rewraps and keeps its cursors.
+  `layout.regionize`, recompute spans, and hand the new capacities to the node state.
+  Its flow layout cache is invalidated; cursors stay logical.
 - **New text node** (typing in a non-text home, paste node): create and attach its state.
 - **Deleted text node:** detach its state.
-- **Scale change:** node widths change, and so does the cell mapping. The node state
-  itself doesn't change.
+- **Scale change:** capacities and the cell mapping change. The node state's lines don't.
 
 ## Undo
 
-The projector keeps a single history of **global snapshots**:
+Today the page `s` carries `rectree` as a plain node copy, `renderSheet` pushes one
+state per sheet change, and `undo` / `redo` call `restoreSheet`, which re-renders from
+`s.rectree`.
+
+The projector keeps a single history of **global snapshots** instead:
 `{tree: plain rectree structure, states: [node state s, in tree order]}`. These are
 cheap, because each `state.s` is immutable and only referenced.
 
@@ -123,26 +171,29 @@ cheap, because each `state.s` is immutable and only referenced.
 
 ## What gets removed or kept
 
-- **Removed** (replaced by node states): `sheetSelection`, `sheetRangesForText`,
-  `sheetMoveAndSelect`, `sheetDelete`, `sheetCutText`, `sheetSelectAll`,
-  `sheetSelectedText`, the text branch of `insertIntoSheet`, the sheet branches in
-  `state.cut` / `copy` / `selectAllLines` / `moveCursorsAndSelect` / `delete`, and
-  `layout.textSlots` and friends. Also their tests in `kode/ked/test/popo.kode`
-  (`sheet editing`, `sheet selection`, parts of `sheet cursor`), rewritten against the
-  new model.
+- **Removed** (replaced by node states):
+  - `act/sheet.kode`: `sheetSelection`, `sheetRangesForText`, `sheetMoveAndSelect`,
+    `sheetDelete`, `sheetCutText`, `sheetSelectAll`, `sheetSelectedText`,
+    `sheetTextNodeAt`, and the text branch of `insertIntoSheet`.
+  - their hooks: `del.kode:10`, `insert.kode:10`, `select.kode:296`,
+    `multi.kode:188` (move and select), and the `@rectree?` branches of `state.cut` /
+    `state.copy` (`state.kode:507`, `:523`).
+  - `layout.textSlots`, `textOffsetAt`, `cellForTextOffset`, `textNodeAt`.
+  - their tests in `kode/ked/test/popo.kode`: `sheet editing`, `sheet selection`, parts
+    of `sheet cursor` and `sheet text undo`, rewritten against the new model.
 - **Kept:** `moveNode`, `resizeNode` (+ `stepWidth`), `scaleSheetNode`,
-  `deleteSheetNode`, `shiftNode`, `sheetPosInDirection` / `sheetSnapCell` (solo motion),
-  `sueify`'s grid and block painting, and sheetree.
+  `deleteSheetNode`, `shiftNode`, `sheetPosInDirection` / `sheetSnapCell` (solo motion,
+  `multi.kode:94` and `:99`), `sueify`'s grid and block painting, and sheetree.
 
 ## Consumers to adapt
 
-- `kode/ked/ked.kode:520` load path (`setSheetTree`) → `orchestra.load`.
-- `ked.kode:646` save → `layout.sourceOf` reads texts from the node states.
-- Editor mouse handling (`state.kode:388` and click/drag in `editor` / `fileeditor`) →
-  reverse map.
-- `view/colmns/sheetree.kode` (`highlightCursorNode`), `colorpicker.kode`
-  (`sheetNodeAtCursor`) → the active node, or the solo home.
-- `util/dumpstate.kode`: add a line with the active node state's cursors in its own
+- `kode/ked/ked.kode:520` load path (`setSheetTree`) → `projector.load`.
+- `ked.kode:645` save → `layout.sourceOf` reads texts from the node states.
+- Editor mouse handling (`state.posForCell`, `state.kode:409`, and click/drag in
+  `editor` / `fileeditor`) → reverse map.
+- `view/colmns/sheetree.kode` (`highlightCursorNode`, `:108`), `colorpicker.kode`
+  (`sheetNodeAtCursor`, `:333`) → the active node, or the solo home.
+- `util/dumpstate.kode:61`: add a line with the active node state's cursors in its own
   coordinates (`node 0.1.0 · 3 cursors · 0:2 1:2 2:2`), so the headless dumps stay
   readable.
 - **Modes:** the node states get the page state's allowed and active modes mirrored,
@@ -150,22 +201,25 @@ cheap, because each `state.s` is immutable and only referenced.
 
 ## Phases
 
-1. **Projector, node states, compositing; rendering only.** Load the sheet, create
+1. **Wrap seam.** `sue.wrapStarts` with a width function, `@rowWidths` in the state,
+   flow layout across lines. Tested on plain states, without sheets.
+   - **Gate:** all wrap and mapscr tests unchanged.
+2. **Projector, node states, compositing; rendering only.** Load the sheet, create
    the states, paint text from them, and map the cursor. Editing still goes through A.
    - **Gate:** all existing popo tests pass with the new paint path, and headless output
-     of `test2.sheet` is identical.
-2. **Solo editing through the home state, and global undo.**
+     of `test2.sheet` is identical (only holds with char wrap, see open question 6).
+3. **Solo editing through the home state, and global undo.**
    - Text keys in solo mode go to the home state.
    - Remove the A text twins and rewrite their tests.
-3. **Multi mode.** Cursor spawning, local multiplexing, the broadcast highlights, and
-   composited multi cursors and selections. This covers all four of your examples:
+4. **Multi mode.** Cursor spawning, local multiplexing, the broadcast highlights, and
+   composited multi cursors and selections. This covers the four examples:
    - alt+cmd+d then typing
    - several shift-selections in one node
    - cmd+down multicursors behaving like the main cursor
    - cmd+down in scaled text landing as a large cursor in the next span
-4. **Layout changes.** Resize, scale and move rewrap the states, create and delete
-   attach and detach them, and undo works across them.
-5. **Consumers:** sheetree, colorpicker, dumpstate, mouse drag, save.
+5. **Layout changes.** Resize, scale and move hand new capacities to the states,
+   create and delete attach and detach them, and undo works across them.
+6. **Consumers:** sheetree, colorpicker, dumpstate, mouse drag, save.
 
 ## Verification
 
@@ -183,3 +237,10 @@ cheap, because each `state.s` is immutable and only referenced.
 3. **Cursors in overflow lines or hidden text** (covered by other nodes) aren't visible.
    Show a marker, or accept it for now?
 4. **node masking | flow mechanism** should we re-implement it after the refactor?
+5. **up/down in wrapped lines:** the editor moves by logical lines. Examples 3 and 4
+   need moving by visual rows (spans). Change it for all wrapped lines, only for node
+   states, or keep logical moves in sheets?
+6. **word or char wrap in sheets:** `fill.flow` breaks anywhere, the state defaults to
+   word wrap. Word wrap in nodes changes how existing sheets look.
+7. **continuation indent in sheets:** none (as now), or the editor's indent that lines
+   up with leading whitespace and list markers?
