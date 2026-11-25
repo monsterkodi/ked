@@ -262,7 +262,7 @@ use ../edit/tool ◆ sue
         noon.stringify @dataNode(rectree)
 
     #  a copy of the tree without the runtime properties, for undo snapshots:
-    #  text nodes keep the s of their state
+    #  text nodes keep the s and the name of their state
 
     @plainNode: node ->
 
@@ -275,7 +275,9 @@ use ../edit/tool ◆ sue
             else
                 out[key] = value
 
-        out.s = node.state.s if node.state?
+        if node.state?
+            out.s = node.state.s
+            out.stateName = node.state.name
 
         out
 
@@ -286,7 +288,7 @@ use ../edit/tool ◆ sue
         out = {}
 
         for key,value of node
-            continue if key in ['rect' 'title' 'index' 'regions' 'rendered' 'grid' 'rows' 'state' 's' 'lines']
+            continue if key in ['rect' 'title' 'index' 'regions' 'rendered' 'grid' 'rows' 'state' 's' 'stateName' 'lines']
             if key == 'children'
                 out.children = value.map (child) => @dataNode child
             else

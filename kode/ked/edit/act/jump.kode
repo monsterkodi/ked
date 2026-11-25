@@ -1,16 +1,23 @@
 use ../../../kxk ▪ post
 #!jump
 
-    
+
 export
-    
+
+    #  in a sheet text node the entry names the node, its position is in the node
+
     jumpEntry: pos ->
 
         pos ?= @mainCursor()
 
-        file: @currentFile()
-        x:    pos[0]
-        y:    pos[1]
+        entry =
+            file: (@sheetPage ? @).currentFile()
+            x:    pos[0]
+            y:    pos[1]
+
+        entry.node = @name if @sheetPage?
+
+        entry
 
     pushJump: pos ->
 
@@ -25,6 +32,8 @@ export
         n = max 1 (count ? 1)
         moved = false
 
+        @pruneJumps()
+
         for i in 0...n
             entry = @novim.jumps.older @jumpEntry()
             break if not entry
@@ -38,6 +47,8 @@ export
         n = max 1 (count ? 1)
         moved = false
 
+        @pruneJumps()
+
         for i in 0...n
             entry = @novim.jumps.newer()
             break if not entry
@@ -48,12 +59,12 @@ export
 
     jumpToEntry: entry ->
 
-        file = @currentFile()
+        page = @sheetPage ? @
 
-        if valid entry.file and entry.file != file
+        if valid entry.file and entry.file != page.currentFile()
             post.emit 'file.open' entry.file entry.x entry.y
         else
-            @setMainCursor entry.x entry.y
+            @jumpTo entry.x entry.y entry.node
 
         true
 
@@ -62,10 +73,12 @@ export
         n = max 1 (count ? 1)
         moved = false
 
+        @pruneJumps()
+
         for i in 0...n
             pos = @novim.changes.older()
             break if not pos
-            @setMainCursor pos[0] pos[1]
+            @jumpTo pos[0] pos[1] pos[2]
             moved = true
 
         moved
@@ -75,11 +88,30 @@ export
         n = max 1 (count ? 1)
         moved = false
 
+        @pruneJumps()
+
         for i in 0...n
             pos = @novim.changes.newer()
             break if not pos
-            @setMainCursor pos[0] pos[1]
+            @jumpTo pos[0] pos[1] pos[2]
             moved = true
 
         moved
-        
+
+    #  sheets jump into the named text node, or on the page without a node
+
+    jumpTo: (x y node) ->
+
+        page = @sheetPage ? @
+
+        if page.rectree?
+            page.sheetJump x y node
+        else
+            @setMainCursor x y
+
+    pruneJumps: ->
+
+        page = @sheetPage ? @
+
+        page.pruneSheetJumps() if page.rectree?
+

@@ -211,7 +211,7 @@ import suact from './act/sue.js'
         @h = []
         @r = []
 
-        @novim.changes.reset()
+        @novim.changes.reset() if not @sheetPage?
 
         @beginIndices = []
         delete @beginIndex
@@ -245,7 +245,12 @@ import suact from './act/sue.js'
         
         if oldLines != @s.lines
 
-            @novim.changes.record @mainCursor() if @h.length
+            #  a sheet records the changes in its text nodes, not its composited lines
+
+            if @sheetPage?
+                @novim.changes.record @mainCursor().concat([@name])
+            else if @h.length and not @rectree?
+                @novim.changes.record @mainCursor()
 
             colors = @s.colors
 

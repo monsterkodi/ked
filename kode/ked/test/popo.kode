@@ -1435,6 +1435,39 @@ showSue = data ->
             strs(rt('children.0')) ▸ ['fbar' 'baz'] ; txt('children.1') ▸ 'q'
             e.state.h.length ▸ undos+1
             key 'esc' ; e.state.s.cursors.length ▸ 1
+
+            loadSheet novimTree()
+            e.state.setCursors [[2 1]] ; type 'yw'
+            e.state.setCursors [[2 5]] ; type 'p' ; txt('children.1') ▸ 'qoo ux'
+
+            loadSheet novimTree()
+            e.state.setCursors [[1 1]] ; type 'G'
+            e.state.setCursors [[3 5]] ; type 'G'
+            key 'ctrl+o' ; mc() ▸ [1 1]
+            key 'ctrl+i' ; mc() ▸ [4 5]
+
+            loadSheet novimTree()
+            name = rt('children.0').state.name
+            e.state.setCursors [[2 1]] ; type 'x'
+            e.state.setCursors [[2 5]] ; type 'x'
+            e.state.undo() ; e.state.undo() ; e.state.redo() ; e.state.redo()
+            rt('children.0').state.name ▸ name
+            e.state.setCursors [[10 6]] ; type 'g;' ; mc() ▸ [2 5]
+            type 'g;' ; mc() ▸ [2 1]
+            type 'g,' ; mc() ▸ [2 5]
+            e.state.deleteSheetNode rt('children.1')
+            e.state.setCursors [[10 6]] ; type 'g;' ; mc() ▸ [2 1]
+
+            loadSheet novimTree()
+            e.state.setCursors [[1 1]] ; type 'qaxq'
+            strs(rt('children.0')) ▸ ['oo bar' 'baz']
+            e.state.novim.register.read('a').keys.length ▸ 1
+            undos = e.state.h.length
+            e.state.setCursors [[1 5]] ; type '@a' ; txt('children.1') ▸ 'ux'
+            e.state.h.length ▸ undos+1
+            e.state.setCursors [[1 2]] ; type 'qbA!' ; key 'esc' ; type 'q'
+            strs(rt('children.0')) ▸ ['oo bar' 'baz!']
+            e.state.setCursors [[1 5]] ; type '@b' ; txt('children.1') ▸ 'ux!'
         finally
             e.state.stopMode 'novim' if nvon()
             config.data = oldConfig

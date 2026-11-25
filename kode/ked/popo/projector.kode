@@ -23,14 +23,19 @@ use ../edit      ◆ state
         node
 
     #  the state of a text node. a new state takes the lines the node was loaded or
-    #  pasted with, or the s of an undo snapshot
+    #  pasted with, or the s and the name of an undo snapshot
 
     @stateOf: node ->
 
         if not node.state?
 
-            @count = (@count ? 0) + 1
-            st = new state {cols:0 rows:0} "popo_node_#{@count}"
+            if node.stateName?
+                name = node.stateName[0...-6]
+            else
+                @count = (@count ? 0) + 1
+                name = "popo_node_#{@count}"
+
+            st = new state {cols:0 rows:0} name
             st.wrap    = all:true word:true
             st.scaling = false
             st.syntax.setExt @extOf(node)
@@ -44,6 +49,7 @@ use ../edit      ◆ state
                 st.loadLines node.lines ? ['']
 
             delete node.s
+            delete node.stateName
             delete node.lines
 
             node.state = st

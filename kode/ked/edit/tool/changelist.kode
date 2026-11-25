@@ -4,7 +4,8 @@
 
     older and newer walk the list for g; and g,
 
-    changes close to each other on the same line keep only the last position
+    changes close to each other on the same line keep only the last position.
+    a third element names the sheet text node the position is in
 ###
     @: ->
 
@@ -17,7 +18,7 @@
 
         ⮐ false if not valid a or not valid b
 
-        a[1] == b[1] and abs(a[0]-b[0]) < @distance
+        a[2] == b[2] and a[1] == b[1] and abs(a[0]-b[0]) < @distance
 
     record: pos ->
 
@@ -29,12 +30,22 @@
             previous[0] = pos[0]
             previous[1] = pos[1]
         else
-            @entries.push [pos[0] pos[1]]
+            entry = [pos[0] pos[1]]
+            entry.push pos[2] if pos[2]?
+            @entries.push entry
             @entries.splice 0 @entries.length-@max if @entries.length > @max
 
         @index = @entries.length
 
         true
+
+    #  drops the entries fn doesn't keep, the index stays at its entry
+
+    retain: fn ->
+
+        before = @entries.filter((e,i) => i < @index and not fn(e)).length
+        @entries = @entries.filter fn
+        @index = max 0 @index-before
 
     older: ->
 

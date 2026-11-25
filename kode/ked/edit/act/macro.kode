@@ -11,8 +11,11 @@ export
 
     markMacroControlKey: -> @novim.macroSkipKey = true
 
+    #  the states of sheet text nodes leave recording and replay to the page
+
     startMacroRecording: register append ->
 
+        ⮐ @sheetPage.startMacroRecording(register append) if @sheetPage?
         ⮐ false if not register
 
         name = register.toLowerCase()
@@ -30,6 +33,8 @@ export
         true
 
     stopMacroRecording: ->
+
+        ⮐ @sheetPage.stopMacroRecording() if @sheetPage?
 
         recording = @macroRecording
 
@@ -81,7 +86,12 @@ export
 
         true
 
+    #  a sheet replays the keys like typed ones, through its text nodes
+
     replayMacroKeys: events ->
+
+        ⮐ @sheetPage.replayMacroKeys(events) if @sheetPage?
+        ⮐ true if @rectree? and @novimLater(=> @replayMacroKeys events)
 
         if @novim.macroReplaying >= 100
             ⮐ @macroError('macro recursion too deep')
@@ -90,7 +100,10 @@ export
 
         try
             for event in events
-                @feedKey event.key event
+                if @rectree?
+                    @feedSheetKey event.key event
+                else
+                    @feedKey event.key event
         catch err
             @macroError "macro failed: #{err.message}"
         finally
@@ -99,6 +112,8 @@ export
         true
 
     recordMacroKey: (key event) ->
+
+        ⮐ false if @sheetPage?
 
         if @novim.macroSkipKey
             @novim.macroSkipKey = false
@@ -111,24 +126,24 @@ export
 
         true
 
-    feedKey: (key event) -> 
+    feedKey: (key event) ->
 
         result = @handleKey key event
-    
+
         @recordMacroKey key event
-    
+
         ⮐ 'handled' if result != 'unhandled'
         ⮐ 'unhandled' if not event
-    
+
         char  = event.char
         combo = event.combo ? key
-    
+
         if valid char and \
                 (char == combo or \
                 combo in ['space' 'shift+space' 'return' 'tab'] or \
                 combo[0..-2] == 'shift+')
             @insert char
             ⮐ 'inserted'
-    
+
         'unhandled'
 

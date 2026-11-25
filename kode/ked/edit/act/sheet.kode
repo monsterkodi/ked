@@ -39,7 +39,9 @@ export
 
         delete @sheetMulti if @sheetMulti? and @sheetMulti.cursors != @s.cursors
 
-        ⮐ @leaveSheetMulti() if key == 'esc' and @sheetMulti
+        if key == 'esc' and @sheetMulti
+            @recordMacroKey key event
+            ⮐ @leaveSheetMulti()
 
         if nv = mode.get(@ 'novim')
             result = @feedSheetNovim nv key event
@@ -50,6 +52,7 @@ export
         highlighted = valid @sheetActive()?.state.s.highlights
 
         if done = @inSheetNode((st) -> st.feedKey key event)
+            @recordMacroKey key event
             @spreadHighlights highlighted if key in highlightKeys
             ⮐ done.result
 
@@ -62,7 +65,8 @@ export
 
     #  the page runs the only novim. its keys go to the text nodes at the cursors,
     #  the mode works on their states then. without a text node, and for plain
-    #  motions of a single cursor, the keys go to the page
+    #  motions of a single cursor, the keys go to the page. jumps the nodes ask
+    #  for are made after the nodes are committed
 
     feedSheetNovim: (nv key event) ->
 
@@ -79,15 +83,40 @@ export
         parts = {}
         parts[k] = nv[k] for k in novimParts
 
-        done = @inSheetNode (st) =>
-            nv[k] = parts[k] for k in novimParts
-            nv.state = st
-            try
-                nv.handleKey key event
-            finally
-                nv.state = @
+        prev    = nv.state
+        feeding = @novimFeeding
+        @novimFeeding = true
+
+        try
+            done = @inSheetNode (st) =>
+                nv[k] = parts[k] for k in novimParts
+                nv.state = st
+                try
+                    nv.handleKey key event
+                finally
+                    nv.state = prev
+        finally
+            @novimFeeding = feeding
+
+        @recordMacroKey key event if done?
+
+        if not @novimFeeding and @novimAfter?
+            jobs = @novimAfter
+            delete @novimAfter
+            job() for job in jobs
 
         done?.result ? 'unhandled'
+
+    #  jumps and macro replays that nodes ask for wait until the nodes are committed.
+    #  true if fn was queued
+
+    novimLater: fn ->
+
+        ⮐ false if not @novimFeeding
+
+        @novimAfter ?= []
+        @novimAfter.push fn
+        true
 
     novimPending: (nv st) ->
 
@@ -108,6 +137,58 @@ export
             'start'  ➜ @startMode 'novim'
             'stop'   ➜ @stopMode  'novim'
             'toggle' ➜ @toggleMode 'novim'
+
+    #  the main cursor goes to position x y of the text node with the state name,
+    #  or of the page without a name. false if that node is gone
+
+    sheetJump: (x y name) ->
+
+        node = null
+
+        if name?
+            node = @sheetTextNodes().find (n) -> n.state.name == name
+            ⮐ false if not node?
+
+        ⮐ true if @novimLater => @sheetJump x y name
+
+        @sheetClear()
+
+        if node?
+            @inTextNode node (st) -> st.setCursors [[x y]]
+        else
+            @setMainCursor x y
+            @compositeSheet null
+
+        true
+
+    #  jump and change entries of text nodes that are gone are dropped
+
+    pruneSheetJumps: ->
+
+        live = new Set @sheetTextNodes().map((node) -> node.state.name)
+
+        @novim.jumps.retain   (e) -> not e.node? or live.has(e.node)
+        @novim.changes.retain (e) -> not e[2]? or live.has(e[2])
+
+    #  node states use the page's register, jumps, changes and macros
+
+    shareSheetNovim: st ->
+
+        ⮐ if st.novim.page == @
+
+        for k in ['register' 'jumps' 'changes' 'macroReplaying' 'macroLastRegister' 'macroSkipKey']
+            @sharePart st.novim @novim k
+
+        Object.defineProperty st.novim 'page' value:@ configurable:true
+        Object.defineProperty st 'macroRecording' get:(=> @macroRecording) configurable:true
+
+    sharePart: (obj src k) ->
+
+        Object.defineProperty obj k,
+            get: -> src[k]
+            set: (v) -> src[k] = v
+            configurable: true
+            enumerable:   true
 
     #  novim commands on the page: motions, undo and search run, o and O start an
     #  insert in the row below or above, the rest doesn't change the page lines.
@@ -318,6 +399,8 @@ export
 
         st.sheetPage    = @
         st.allowedModes = @allowedModes
+
+        @shareSheetNovim st
 
         for name in ['brckts' 'unype']
             continue if not mode.modes[name]?

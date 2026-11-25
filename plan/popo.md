@@ -458,7 +458,18 @@ page s
        The page's `executeNovim` keeps only `novimOnPage` (`sheetNovim`), and
        `startNovimReplace` does nothing on a sheet. `mode.stop` of an inactive mode
        no longer removes another mode.
-     - 7b shared novim state, jumps and changes with nodes
+     - ✔ 7b shared novim state, jumps and changes with nodes. As built:
+       `shareSheetNovim` gives a node's `novim` accessors to the page's `register`,
+       `jumps`, `changes` and macro counters, and its `macroRecording` reads the
+       page's; visual, insert and yank flash stay per state. Node states keep their
+       name across undo (`stateName` in `plainNode` snapshots, not in `dataNode`).
+       Only node states record changes, the page's composited lines don't. Jumps
+       and `g;` / `g,` go through `jumpTo` → `page.sheetJump`, entries of gone nodes
+       are dropped first (`pruneSheetJumps`, `retain`). Recording happens once per key
+       on the page, replay runs through `feedSheetKey`; jumps and replays a node asks
+       for wait until its commit is done (`novimLater`), so one change is one step.
+     - Noticed, not changed: `G` keeps the width of the line it starts on
+       (`moveCursors 'eof'` uses the current line), in plain files too.
      - 7c undo
      - 7d ex, search, visual
 

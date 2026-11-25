@@ -18,8 +18,12 @@ export default {
     },
     startMacroRecording:function (register, append)
     {
-        var name
+        var name, _18_71_
     
+        if ((this.sheetPage != null))
+        {
+            return this.sheetPage.startMacroRecording(register,append)
+        }
         if (!register)
         {
             return false
@@ -39,8 +43,12 @@ export default {
     },
     stopMacroRecording:function ()
     {
-        var name, recording
+        var name, recording, _37_55_
     
+        if ((this.sheetPage != null))
+        {
+            return this.sheetPage.stopMacroRecording()
+        }
         recording = this.macroRecording
         if (!recording)
         {
@@ -98,8 +106,19 @@ export default {
     },
     replayMacroKeys:function (events)
     {
-        var event
+        var event, _103_27_, _93_58_, _94_26_
     
+        if ((this.sheetPage != null))
+        {
+            return this.sheetPage.replayMacroKeys(events)
+        }
+        if ((this.rectree != null) && this.novimLater((function ()
+            {
+                return this.replayMacroKeys(events)
+            }).bind(this)))
+        {
+            return true
+        }
         if (this.novim.macroReplaying >= 100)
         {
             return this.macroError('macro recursion too deep')
@@ -111,7 +130,14 @@ export default {
             for (var _a_ = 0; _a_ < list.length; _a_++)
             {
                 event = list[_a_]
-                this.feedKey(event.key,event)
+                if ((this.rectree != null))
+                {
+                    this.feedSheetKey(event.key,event)
+                }
+                else
+                {
+                    this.feedKey(event.key,event)
+                }
             }
         }
         catch (err)
@@ -126,6 +152,12 @@ export default {
     },
     recordMacroKey:function (key, event)
     {
+        var _116_29_
+    
+        if ((this.sheetPage != null))
+        {
+            return false
+        }
         if (this.novim.macroSkipKey)
         {
             this.novim.macroSkipKey = false
@@ -144,7 +176,7 @@ export default {
     },
     feedKey:function (key, event)
     {
-        var char, combo, result, _124_28_
+        var char, combo, result, _139_28_
     
         result = this.handleKey(key,event)
         this.recordMacroKey(key,event)
@@ -157,7 +189,7 @@ export default {
             return 'unhandled'
         }
         char = event.char
-        combo = ((_124_28_=event.combo) != null ? _124_28_ : key)
+        combo = ((_139_28_=event.combo) != null ? _139_28_ : key)
         if (!_k_.empty(char) && (char === combo || _k_.in(combo,['space','shift+space','return','tab']) || combo.slice(0, -1) === 'shift+'))
         {
             this.insert(char)
@@ -167,5 +199,5 @@ export default {
     }
 }
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFjcm8uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvYWN0L21hY3JvLmtvZGUiXSwibWFwcGluZ3MiOiI7O09BQWEsVUFBQTtJQUFNOzs7SUFJZixxQkFBYSxLQUFJOzs7O1FBRWIsa0JBQVEsZ0JBQUEsTUFBTyx1Q0FBUTtRQUN2QixRQUFRLGdCQUFBLE1BQU87Z0JBRWIsSUFBSyxJQUFLLE1BQU8sTUFBTyxLQUFNOztJQUVwQzs7ZUFBd0IsS0FBQyxNQUFNLGVBQWU7O0lBRTlDLDhCQUFxQixVQUFTOzs7O2FBRVg7O21CQUFiOztRQUVGLE9BQU8sU0FBUztZQUVMLEtBQUssV0FBVTs7bUJBQXhCOztxQkFDUyxLQUFZOzttQkFBckI7O1FBRUYsS0FBQyxrQkFDRyxTQUFVLEtBQ1YsT0FBVSxPQUNWO1FBRUosS0FBSyxLQUFLLHFCQUFvQixNQUFNLEtBQUMsS0FBSyxTQUFTLEtBQUssT0FBTztlQUUvRDs7SUFFSjs7OztRQUVJLFlBQVksS0FBQzthQUVFOzttQkFBYjs7ZUFFSyxLQUFDO1FBRVIsT0FBTyxVQUFVO1lBQ1ksVUFBVTs7WUFBdkMsT0FBTyxLQUFLOztRQUVaLEtBQUMsTUFBTSxTQUFTLFNBQVMsS0FBSyxVQUFVO1FBRXhDLEtBQUssS0FBSyxvQkFBbUIsTUFBTSxLQUFDLEtBQUssU0FBUyxVQUFVO2VBRTVEOztJQUVKLHFCQUFZOztRQUVSLEtBQUssS0FBSyxjQUFjO2VBRXhCOztJQUVKLHdCQUFlOzthQUUrQixLQUFDLE1BQU07O21CQUEvQyxLQUFDLFdBQVc7O2VBRWQsS0FBQyxVQUFVLEtBQUMsTUFBTSxrQkFBa0I7O0lBRXhDLG9CQUFXLFVBQVM7Ozs7YUFFeUI7O21CQUF2QyxLQUFDLFdBQVc7O1FBRWQsUUFBUSxLQUFDLE1BQU0sU0FBUyxLQUFLO2FBRXlCOzttQkFBcEQsS0FBQyx1QkFBdUI7O1FBRTFCLE9BQU8sTUFBTTtRQUViLFFBQUEsZUFBQSxPQUFRLEtBQUMsTUFBTSxTQUFTLFlBQVksS0FBQyxNQUFNLFNBQVMsYUFBYTtzQkFFVDs7bUJBQXRELEtBQUMsdUJBQXVCOztRQUUxQixLQUFDLE1BQU0sb0JBQW9CO1FBRTNCLFlBQVEsSUFBRyxnQkFBQSxRQUFRO2FBRWYsSUFBSyxPQUFJOztZQUNULEtBQUMsZ0JBQWdCOztlQUVyQjs7SUFFSiwwQkFBaUI7Ozs7WUFFVixLQUFDLE1BQU0sa0JBQWtCOzttQkFDdEIsS0FBQyxXQUFXOztRQUVsQixLQUFDLE1BQU0sa0JBQWtCOzs7Z0NBR1I7OztnQkFBVDtnQkFDQSxLQUFDLFFBQVEsTUFBTSxJQUFJOzs7ZUFDckI7O1lBQ0YsS0FBQyw0QkFBNEIsSUFBSTs7OztZQUVqQyxLQUFDLE1BQU0sa0JBQWtCOztlQUU3Qjs7SUFFSix5QkFBaUIsS0FBSTs7WUFFZCxLQUFDLE1BQU07O1lBQ04sS0FBQyxNQUFNLGVBQWU7bUJBQ3BCOztZQUVLLEtBQUMsTUFBTSxpQkFBaUI7O21CQUFqQzs7YUFDYSxLQUFDOzttQkFBZDs7UUFFRixLQUFDLGVBQWUsS0FBSyxLQUFLLEtBQUMsV0FBVyxJQUFJO2VBRTFDOztJQUVKLGtCQUFVLEtBQUk7Ozs7UUFFVixTQUFTLEtBQUMsVUFBVSxJQUFJO1FBRXhCLEtBQUMsZUFBZSxJQUFJO1lBRUwsV0FBVTs7bUJBQXZCOzthQUNtQjs7bUJBQW5COztRQUVGLE9BQVEsTUFBTTtRQUNkLG1CQUFRLE1BQU0sNEJBQVE7dUJBRWIsVUFDQSxTQUFRLGdCQUNULE9BQVUsUUFBUSxjQUFjLFNBQVMsV0FDekMsWUFBTSxXQUFVOztZQUNwQixLQUFDLE9BQU87bUJBQ047O2VBRU4ifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFjcm8uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL2VkaXQvYWN0L21hY3JvLmtvZGUiXSwibWFwcGluZ3MiOiI7O09BQWEsVUFBQTtJQUFNOzs7SUFJZixxQkFBYSxLQUFJOzs7O1FBRWIsa0JBQVEsZ0JBQUEsTUFBTyx1Q0FBUTtRQUN2QixRQUFRLGdCQUFBLE1BQU87Z0JBRWIsSUFBSyxJQUFLLE1BQU8sTUFBTyxLQUFNOztJQUVwQzs7ZUFBd0IsS0FBQyxNQUFNLGVBQWU7O0lBSTlDLDhCQUFxQixVQUFTOzs7O2FBRTJCLEtBQUM7O21CQUFwRCxLQUFDLFVBQVUsb0JBQW9CLFNBQVM7O2FBQzNCOzttQkFBYjs7UUFFRixPQUFPLFNBQVM7WUFFTCxLQUFLLFdBQVU7O21CQUF4Qjs7cUJBQ1MsS0FBWTs7bUJBQXJCOztRQUVGLEtBQUMsa0JBQ0csU0FBVSxLQUNWLE9BQVUsT0FDVjtRQUVKLEtBQUssS0FBSyxxQkFBb0IsTUFBTSxLQUFDLEtBQUssU0FBUyxLQUFLLE9BQU87ZUFFL0Q7O0lBRUo7Ozs7YUFFeUMsS0FBQzs7bUJBQXBDLEtBQUMsVUFBVTs7UUFFYixZQUFZLEtBQUM7YUFFRTs7bUJBQWI7O2VBRUssS0FBQztRQUVSLE9BQU8sVUFBVTtZQUNZLFVBQVU7O1lBQXZDLE9BQU8sS0FBSzs7UUFFWixLQUFDLE1BQU0sU0FBUyxTQUFTLEtBQUssVUFBVTtRQUV4QyxLQUFLLEtBQUssb0JBQW1CLE1BQU0sS0FBQyxLQUFLLFNBQVMsVUFBVTtlQUU1RDs7SUFFSixxQkFBWTs7UUFFUixLQUFLLEtBQUssY0FBYztlQUV4Qjs7SUFFSix3QkFBZTs7YUFFK0IsS0FBQyxNQUFNOzttQkFBL0MsS0FBQyxXQUFXOztlQUVkLEtBQUMsVUFBVSxLQUFDLE1BQU0sa0JBQWtCOztJQUV4QyxvQkFBVyxVQUFTOzs7O2FBRXlCOzttQkFBdkMsS0FBQyxXQUFXOztRQUVkLFFBQVEsS0FBQyxNQUFNLFNBQVMsS0FBSzthQUV5Qjs7bUJBQXBELEtBQUMsdUJBQXVCOztRQUUxQixPQUFPLE1BQU07UUFFYixRQUFBLGVBQUEsT0FBUSxLQUFDLE1BQU0sU0FBUyxZQUFZLEtBQUMsTUFBTSxTQUFTLGFBQWE7c0JBRVQ7O21CQUF0RCxLQUFDLHVCQUF1Qjs7UUFFMUIsS0FBQyxNQUFNLG9CQUFvQjtRQUUzQixZQUFRLElBQUcsZ0JBQUEsUUFBUTthQUVmLElBQUssT0FBSTs7WUFDVCxLQUFDLGdCQUFnQjs7ZUFFckI7O0lBSUosMEJBQWlCOzs7O2FBRTJCLEtBQUM7O21CQUF2QyxLQUFDLFVBQVUsZ0JBQWdCOzthQUNuQixLQUFDLG9CQUFhLEtBQUM7O3VCQUFjLEtBQUMsZ0JBQWdCOzs7bUJBQXREOztZQUVDLEtBQUMsTUFBTSxrQkFBa0I7O21CQUN0QixLQUFDLFdBQVc7O1FBRWxCLEtBQUMsTUFBTSxrQkFBa0I7OztnQ0FHUjs7O2dCQUFUO3FCQUNHLEtBQUM7O29CQUNBLEtBQUMsYUFBYSxNQUFNLElBQUk7Ozs7b0JBRXhCLEtBQUMsUUFBUSxNQUFNLElBQUk7Ozs7ZUFDekI7O1lBQ0YsS0FBQyw0QkFBNEIsSUFBSTs7OztZQUVqQyxLQUFDLE1BQU0sa0JBQWtCOztlQUU3Qjs7SUFFSix5QkFBaUIsS0FBSTs7OzthQUVOLEtBQUM7O21CQUFWOztZQUVDLEtBQUMsTUFBTTs7WUFDTixLQUFDLE1BQU0sZUFBZTttQkFDcEI7O1lBRUssS0FBQyxNQUFNLGlCQUFpQjs7bUJBQWpDOzthQUNhLEtBQUM7O21CQUFkOztRQUVGLEtBQUMsZUFBZSxLQUFLLEtBQUssS0FBQyxXQUFXLElBQUk7ZUFFMUM7O0lBRUosa0JBQVUsS0FBSTs7OztRQUVWLFNBQVMsS0FBQyxVQUFVLElBQUk7UUFFeEIsS0FBQyxlQUFlLElBQUk7WUFFTCxXQUFVOzttQkFBdkI7O2FBQ21COzttQkFBbkI7O1FBRUYsT0FBUSxNQUFNO1FBQ2QsbUJBQVEsTUFBTSw0QkFBUTt1QkFFYixVQUNBLFNBQVEsZ0JBQ1QsT0FBVSxRQUFRLGNBQWMsU0FBUyxXQUN6QyxZQUFNLFdBQVU7O1lBQ3BCLEtBQUMsT0FBTzttQkFDTjs7ZUFFTiJ9
 //# sourceURL=../../../../kode/ked/edit/act/macro.kode
