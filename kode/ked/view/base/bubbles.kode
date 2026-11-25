@@ -6,7 +6,8 @@ use              ◆ view
 ###
     a row of stacked 'bubbles', each with its own text, fg and bg color
     the half-circles between them point left (default) or right (@pointRight)
-    every text but the last is followed by a space
+    a text touching a divider's straight side starts or ends at the circle's center,
+    which leaves enough room. at the round side, a space keeps a similar distance
     @padLast pads the last text with spaces, so the bubbles fill the view's width
     used by
         ◆ crumbs to display path segments
@@ -40,7 +41,7 @@ use              ◆ view
     @width: items -> # columns of items without padding: caps, texts and the spaces between them
 
         ⮐ 0 if empty items
-        w = items.length # the spaces after all but the last text and the right cap
+        w = items.length # a space at each divider and the right cap
         for item in items
             w += 1 + kseg.width(item.text)
         w
@@ -63,7 +64,10 @@ use              ◆ view
             else
                 @cells.set x 0 bubbles.LEFT item.bg @items[i-1].bg
             x += 1
-            for seg in kseg(item.text + (i < lii ? ' ' : pad))
+            before = (i > 0   and @pointRight)     ? ' ' : '' # the divider's round side points at this text
+            after  = (i < lii and not @pointRight) ? ' ' : '' # the next divider's round side points back
+            after += pad if i == lii
+            for seg in kseg(before + item.text + after)
                 @cells.set x 0 kseg.str(seg) item.fg item.bg
                 x += kseg.segWidth seg
 

@@ -346,7 +346,7 @@ mat = (cols rows) ->
 
         L = ''
         R = ''
-        full = "#{L}ldots #{R}ellipsis #{R}dot #{R}0x2026#{R}"  # hex last, so it rarely moves
+        full = "#{L}ldots#{R} ellipsis#{R} dot#{R} 0x2026#{R}"  # hex last, so it rarely moves
 
         info = (text) ->
             [h e u] = uni()
@@ -369,19 +369,19 @@ mat = (cols rows) ->
         (n1bg[0] == n1bg[1] == n1bg[2]) ▸ true                  # gray
         (n2bg[0] == n2bg[1] == n2bg[2]) ▸ true
         (n1bg[0] != n2bg[0]) ▸ true                             # stacked shades
-        h.screen.get_bg(s+6 1) ▸ n1bg                           # a space after each name
-        h.screen.get_fg(s+7 1) ▸ n1bg                           # a name's cap overlaps its right neighbor
-        h.screen.get_bg(s+7 1) ▸ n2bg
-        h.screen.get_fg(s+22 1) ▸ n3bg                          # the last name overlaps the hex
-        h.screen.get_bg(s+22 1) ▸ hexbg
+        h.screen.get_fg(s+6 1) ▸ n1bg                           # a name's cap overlaps its right neighbor
+        h.screen.get_bg(s+6 1) ▸ n2bg
+        h.screen.get_bg(s+7 1) ▸ n2bg                           # a space after the cap's round side
+        h.screen.get_fg(s+21 1) ▸ n3bg                          # the last name overlaps the hex
+        h.screen.get_bg(s+21 1) ▸ hexbg
 
         row = info('x'.repeat(30))[2]
         row.slice(1 31) ▸ 'x'.repeat(30)
-        row.trimEnd().endsWith "#{L}ldots #{R}ellipsis #{R}0x2026#{R}" ▸ true
+        row.trimEnd().endsWith "#{L}ldots#{R} ellipsis#{R} 0x2026#{R}" ▸ true
 
         row = info('x'.repeat(40))[2]
         row.slice(1 41) ▸ 'x'.repeat(40)
-        row.trimEnd().endsWith "#{L}ldots #{R}0x2026#{R}" ▸ true
+        row.trimEnd().endsWith "#{L}ldots#{R} 0x2026#{R}" ▸ true
 
         row = info('x'.repeat(45))[2]
         row.trimEnd().endsWith "#{L}0x2026#{R}" ▸ true
@@ -417,7 +417,7 @@ mat = (cols rows) ->
             bs.draw()
             h
 
-        bubbles.width([{text:'ab'} {text:'中'}]) ▸ 8   # caps, texts and a space after all but the last
+        bubbles.width([{text:'ab'} {text:'中'}]) ▸ 8   # caps, texts and a space at each divider's round side
         bubbles.width([])                        ▸ 0
 
         h = draw false
@@ -434,9 +434,12 @@ mat = (cols rows) ->
         h.screen.get_bg(9 0) ▸ c
 
         h = draw true
-        h.row(0) ▸ "  #{L}ab #{R}中 #{R}"
-        h.screen.get_fg(6 0) ▸ a                # the first bubble overlaps the second
-        h.screen.get_bg(6 0) ▸ b
+        h.row(0) ▸ "  #{L}ab#{R} 中 #{R}"             # no space at a straight side
+        h.screen.get_fg(5 0) ▸ a                # the first bubble overlaps the second
+        h.screen.get_bg(5 0) ▸ b
+        h.screen.get_bg(6 0) ▸ b                # the space after the divider's round side
+        h.screen.get_fg(9 0) ▸ b                # the right cap
+        h.screen.get_bg(9 0) ▸ c
 
         h = draw false true                     # padLast fills the view's width with the last bubble
         h.row(0) ▸ "  #{L}ab #{L}中     #{R}"
