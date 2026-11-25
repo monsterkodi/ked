@@ -55,12 +55,17 @@ is built on top of that instead of hard-wrapping text into lines itself.
     scale; scale only affects compositing.
   - It is never drawn itself, but it **scrolls** like the normal editor: its view
     decides which rows go into the spans (see *Node view*).
-- **Projector.** A new `kode/ked/popo/projector.kode`, owned by the page state while a
-  sheet is loaded. It holds:
-  - the rectree and its layout
-  - the node → state attachment (`node.state`, a runtime property like `rect`)
-  - the **active** node state (the one that holds the main cursor)
-  - key routing and multiplexing, compositing, position mapping, and undo
+- **Projector.** `kode/ked/popo/projector.kode` is a set of static functions between a
+  text node and its state, without state of its own:
+  - the node → state attachment (`attach`, `stateOf`; `node.state` is a runtime
+    property like `rect`), the language (`extOf`) and the text (`linesOf`, `textOf`)
+  - the span capacities (`spans`), painting (`glyphs`), the forward and reverse map
+    (`cellOf`, `posAt`, `endOf`) and the node view (`scrollToCursor`, `scrollRows`)
+- **Sheet orchestration** lives on the page state, in `kode/ked/edit/act/sheet.kode`:
+  the rectree, the home and active node (`sheetHome`, `sheetActive`, `@sheetMirror`),
+  multi mode (`@sheetMulti`), key routing (`feedSheetKey`, `inSheetNode`), mouse
+  (`sheetMouse`), mode mirroring (`syncSheetModes`), compositing (`commitSheetNodes`,
+  `compositeSheet`, `renderSheet`) and undo (`restoreSheet`).
 - **Sheet-level operations stay at sheet level** (A): create a text node by typing in a
   non-text home, move, resize, scale, delete, shift, paste nodes.
 
@@ -156,25 +161,29 @@ of the line below. Unwrapped lines keep moving as now.
 
 ## Key flow (sheet mode)
 
-`editor.onKey` → the existing sheet-level keys (`editor.kode:233` delete/scale node,
-`:254` move/resize node) are unchanged → otherwise `projector.feedKey key event` does:
+As built (`act/sheet.kode`):
 
-1. Classify the key. The policy table lives in the projector, not in `keys.kode`:
-   - **solo motion**: page-level move, then home mirroring
-   - **local** (default): run in every node state that has cursors, using
-     `state.feedKey`, i.e. the unchanged `keys.kode` and modes
-   - **broadcast**: the highlight-all family (alt+cmd+d, cmd+e, cmd+g …). Run in the
-     active state first to get the word or text, then `highlightText` +
-     `selectAllHighlights` in every text state.
-   - **blocked**: the wrap toggles (ctrl+w, alt+w, ctrl+alt+w) and the susan line
-     scale keys. They are bound in `editor.kode` under `feats['susan']`, so they must be
-     caught before they reach a node state.
-2. For each state whose `s` changed, composite that node again. A text edit doesn't
-   move rects, so there's **no regionize** here.
-3. Record one undo step if anything changed.
-
-`insert`, `paste`, `delete`, `cut`, `copy` and `cmd+a` need no sheet-specific code: they
-are local operations in the node states.
+- `editor.onKey` handles the sheet-level keys first: delete and scale node, move and
+  resize node. The susan keys (line styles, line scale, the wrap toggles) are caught
+  there too and never reach a node state. Every other key goes to
+  `state.feedSheetKey`.
+- `feedSheetKey`:
+  - **page keys** (`pageKeys`: the cursor motions, cmd/ctrl+up/down, undo/redo) run on
+    the page with `feedKey`. In multi mode only the history keys (`historyKeys`) stay
+    on the page, and the motions run in the nodes.
+  - **esc** in multi mode ends it (`leaveSheetMulti`).
+  - **everything else** runs in the home state with `inSheetNode (st) -> st.feedKey`,
+    i.e. the unchanged `keys.kode` and the mirrored modes (`syncSheetModes`). In multi
+    mode it runs in every multi node. Without a home it falls back to the page, where
+    typing creates a text node (`insertIntoSheet` → `layout.addTextNode`).
+  - **broadcast**: after alt+cmd+d / alt+ctrl+d (`highlightKeys`) in the active node,
+    `spreadHighlights` highlights the word in all text nodes, or selects all of them.
+- `inSheetNode` then calls `commitSheetNodes`: the states whose `s` changed are
+  composited again (no regionize for a text edit), and one undo step is recorded if any
+  text changed.
+- The page's `insert`, `delete`, `cut`, `copy`, `selectAllLines` and
+  `moveCursorsAndSelect` go to the home state too, so direct calls work like keys.
+- novim: see phase 7.
 
 ## Compositing and mapping
 
@@ -292,8 +301,8 @@ page s
   coordinates (`node 0.1.0 · 3 cursors · 0:2 1:2 2:2`), so the headless dumps stay
   readable.
 - **Modes:** the node states get the page state's allowed and active modes mirrored,
-  so unype and brckts behave the same inside nodes. novim included: it stays active in
-  sheets (see phase 7).
+  so unype and brckts behave the same inside nodes. novim is not mirrored: the page
+  runs the only novim mode and sends its commands to the nodes (see phase 7).
 
 ## Phases
 
@@ -409,24 +418,50 @@ page s
      - Fixed on the way: `setMainCursorAndSelect` (shift+click) never selected, in
        the editor too: a nested implicit call passed the function itself to
        `setSelections`.
-7. **novim in sheets.** Until then novim stays active in sheets, mirrored into the node
-   states like the other modes. If the refactor breaks novim tests, we decide then
-   whether to deactivate novim in sheets or disable those tests. Known gaps of novim
-   per node: the register, macros, jumps and changes are split across nodes, pending
-   commands (`3d…`, `f`) get lost when the home changes, `u` / `ctrl+r` hit the
-   ignored node histories, and the projector's raw key classes fight novim's parser.
-   The shape of the fix:
-   - **One novim mode on the page state.** It parses keys into commands, and the
-     projector dispatches `executeNovim cmd`. With a single cursor, motions follow the
-     solo rules (page-level `hjkl`, home mirroring). Everything else goes to the node
-     states that have cursors.
-   - **Shared parts are owned by the page state:** register, macros, jumps (node +
-     position) and changes. Node states reference them instead of creating their own
-     `novimState()`.
-   - **Undo:** `u` / `ctrl+r` go to the page undo. An insert session is wrapped in page
-     `begin` / `end`, so it is one step.
-   - **Ex commands** run on the active node's lines. Visual mode stays inside one node,
-     like shift-selections.
+7. **novim in sheets.** Before this phase novim ran only on the page: its edits changed
+   the composited page lines (`x` on the background), the keys it doesn't parse went to
+   the node states, and the `esc` that ends an insert went to the node, so novim stayed
+   off. Decided (2026-11-25):
+   - **Routing.** The page owns the only novim mode. `feedSheetKey` gives it every key
+     first. Its commands run in the nodes that have cursors (all multi nodes) through
+     `inSheetNode`. Plain motions with a single cursor stay on the page (solo rules,
+     home mirroring). Node states never start novim.
+   - **Background** (no text node at the cursor). Editing commands and yanks do
+     nothing: no undo step, not dirty. Motions move the page cursor. `i a o O` start
+     insert on the page, the first typed character creates a text node (`o` / `O` on
+     the row below / above). Structural edits stay in the sheetree.
+   - **Shared parts.** Node states use the page's `state.novim` (register, macros,
+     jumps, changes). Jumps are `{file x y node}`, changes `[x y node]`, `x y` in node
+     coordinates; without `node` they are page positions. Going back makes the node
+     the home and sets its cursor; an entry whose node is gone is skipped and dropped.
+     Close entries merge only within the same node. A node is named by its state name
+     (`popo_node_<n>`), or by its path if names don't survive undo. Clearing a node
+     state doesn't reset the shared lists.
+   - **Undo.** `u` / `ctrl+r` use the page undo (one step for all multi nodes). An
+     insert session (`i a o O A I c s` … `esc`) is one undo step, **in plain files
+     too**: `startNovimInsert` calls `begin`, novim's restart calls `end`, and so do
+     toggling novim off, loading a file and clearing the state. The node histories stay
+     unused.
+   - **Ex, search, visual.** `:s :g :v :d :normal` run on the active node's logical
+     lines (`%` is the node, `:5` its fifth line), in multi mode too; on the background
+     they report `not in a text node`. `:w :q :wq :x :e` act on the page. `/ ? * # n N`
+     search the active node. `v V ctrl+v` stay inside one node and stop at its edges,
+     block columns are logical columns, `v` on the background does nothing; multi nodes
+     each run visual mode. The confirm session of `:s///c` is `begin` / `end` on the
+     page.
+   - **Steps**, each tests first (`sheet novim`) and one commit:
+     - 7a routing and background
+     - 7b shared novim state, jumps and changes with nodes
+     - 7c undo
+     - 7d ex, search, visual
+
+## Later
+
+- per-node syntax colors composited into the page
+- scaled md headings inside nodes
+- keeping the other nodes' cursors in view
+- row end affinity, if a cursor not reaching the end of a row gets in the way
+- novim: `:%s` over all text nodes, and search that continues into the next nodes
 
 ## Verification
 
@@ -443,8 +478,8 @@ page s
    history, with each node's `s` inside its plain tree node (see *Undo*). `node.text`
    is the syntax language (`'md'` by default), the content is `lines` on disk, empty
    text nodes are kept.
-2. ~~**novim in sheet mode:** what would break|needs changes?~~ Decided: stays active,
-   properly fixed in phase 7; breaking tests are decided on when they break.
+2. ~~**novim in sheet mode:** what would break|needs changes?~~ Decided: one novim on the
+   page, its commands run in the nodes (phase 7).
 3. ~~**Cursors in overflow lines or hidden text** aren't visible.~~ Decided: nodes
    scroll to keep the main cursor in view (*Node view*). Other cursors out of view
    aren't drawn, covered ones are drawn on top. No overflow marker.
