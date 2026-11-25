@@ -3,7 +3,7 @@ use ../../../kxk    ▪ post
 use ../../theme     ◆ theme
 use ../../util      ◆ config
 use ../../util/img  ◆ squares
-use ../../edit/tool ◆ belt
+use ../../edit/tool ◆ belt sue
 use                 ◆ mapview
 ■mapscr□mapview
     # scrollable source map to the right of the fileeditor
@@ -187,17 +187,71 @@ use                 ◆ mapview
 
         @botLine = bot
 
-    lineRows: y => @state.lineHeight y
+    lineRows:  y => @state.lineHeight y
+    lineScale: y => @state.lineScale y
+
+    #  wrapped lines are shown row by row, like in the editor
+
+    isWrappedLine: y => @state.isWrapped y
+
+    wrapSig: y =>
+
+        ⮐ '' if not @state.isWrapped y
+        "#{@state.wrapStarts(y)}|#{@state.wrapIndent(y 1)}"
+
+    wrapPos: y =>
+
+        ⮐ null if not @state.isWrapped y
+        cells = sue.cellPositionsForLine @state.s.lines y []
+        (x) => @state.lineCell x y cells
 
     lineOffsetPixels: y => @lineOffset y
 
     lineOffset: y -> (@state.rowsBeforeLine(y) - @topRow) * @pixelsPerRow
-        
-    pixelPos: pos -> 
-       [
-           @mapX + pos[0]*@pixelsPerCol*@lineRows(pos[1])
-           @mapY + @lineOffset(pos[1])
-       ]
+
+    pixelPos: pos ->
+
+        [x y] = pos
+
+        if @state.isWrapped y
+            [cx cy] = @state.lineCell x y
+            px = @mapX + cx*@pixelsPerCol
+            py = @mapY + @lineOffset(y) + cy*@pixelsPerRow
+            ⮐ [px py]
+
+        [
+            @mapX + x*@pixelsPerCol*@lineRows(y)
+            @mapY + @lineOffset(y)
+        ]
+
+    #  the top pixel and the height of the rows of line li that the graphemes
+    #  of ranges in it cover: every row for unwrapped lines, ranges are
+    #  [x1 y1 x2 y2] or highlight spans [x1 y x2]
+
+    rowsOfRanges: (li ranges) ->
+
+        sy = @mapY + @lineOffset(li)
+        sh = @lineRows(li) * @pixelsPerRow
+
+        ⮐ [sy sh] if not @state.isWrapped li
+
+        len = @state.s.lines[li].length
+        xs  = Infinity
+        xe  = -1
+
+        for rng in ranges
+            y2 = rng[3] ? rng[1]
+            continue if li < rng[1] or li > y2
+            xs = min xs (li == rng[1] ? rng[0] : 0)
+            xe = max xe (li == y2 ? rng[2] : len)
+
+        ⮐ [sy sh] if xe < 0
+
+        cells = sue.cellPositionsForLine @state.s.lines li []
+        r1 = @state.lineCell(xs li cells)[1]
+        r2 = @state.lineCell(max(xs xe-1) li cells)[1]
+
+        [sy+r1*@pixelsPerRow (r2-r1+@lineScale(li))*@pixelsPerRow]
     
     draw: =>
     
@@ -233,7 +287,7 @@ use                 ◆ mapview
                 
                 if y2 > y1
                     if id = @ensureImage y
-                        if @textLine(y)
+                        if @textLine(y) or @isWrappedLine(y)
                             t.placeImageSlice id @cells.x @cells.y y1 (y1-py) (y2-y1) @mapWidth
                         else
                             t.placeLineImage id @cells.x @cells.y y1 (y2-y1)
@@ -302,7 +356,7 @@ use                 ◆ mapview
             else
                 fg = theme.cursor.multi
 
-            sh = @lineRows(pos[1]) * @pixelsPerRow
+            sh = @lineScale(pos[1]) * @pixelsPerRow # one row of a wrapped line
             sh = min sh (@mapY + @mapHeight - sy)
 
             if isMain
@@ -327,11 +381,10 @@ use                 ◆ mapview
         hlw  = @pixelsPerCol*8
     
         for li in belt.lineIndicesForRangesAndPositions @state.s.selections []
-                
-            sy = @mapY + @lineOffset(li) 
+
+            [sy sh] = @rowsOfRanges li @state.s.selections
             continue if sy < @mapY or sy >= @mapBot
-            
-            sh = @lineRows(li) * @pixelsPerRow
+
             sh = min sh (@mapY + @mapHeight - sy)
 
             if @state.isSpanSelectedLine li 
@@ -342,11 +395,10 @@ use                 ◆ mapview
             squares.place xoff-selw sy selw sh clr 2000 'map.select'
     
         for li in belt.lineIndicesForSpans @state.s.highlights
-        
-            sy = @mapY + @lineOffset(li) 
+
+            [sy sh] = @rowsOfRanges li @state.s.highlights
             continue if sy < @mapY or sy >= @mapBot
-            
-            sh = @lineRows(li) * @pixelsPerRow
+
             sh = min sh (@mapY + @mapHeight - sy)
 
             squares.place xoff-hlw sy hlw sh @color.highlight 2001 'map.highlight'

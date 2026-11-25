@@ -167,7 +167,9 @@ use ../base         ◆ view
         key = @imageKey line h
         img = @imageCache.get key
         
-        if img and img.h == h and img.w == w
+        sig = @wrapSig y
+
+        if img and img.h == h and img.w == w and img.sig == sig
             img.y = y
             ⮐ img.id
         
@@ -184,7 +186,7 @@ use ../base         ◆ view
         
         t.sendImageData data id w h
         
-        @imageCache.set key {id: id h: h w: w y: y}
+        @imageCache.set key {id: id h: h w: w y: y sig: sig}
         
         id
         
@@ -238,19 +240,37 @@ use ../base         ◆ view
 
         rows[li]
 
-    textLine: y -> @lineRows(y) >= @textScale and glyphs.hasScale(@lineRows(y))
+    #  the scale of the text of line y, the rows of a wrapped line are this high
 
-    imageHeight: y -> @textLine(y) ? @lineRows(y)*@pixelsPerRow : 1
+    lineScale: y => @lineRows y
+
+    #  wrapping is shown in the map of the editor only, see mapscr
+
+    isWrappedLine: y => false
+    wrapSig:       y => ''
+    wrapPos:       y => null
+
+    textLine: y -> @lineScale(y) >= @textScale and glyphs.hasScale(@lineScale(y))
+
+    #  wrapped lines and lines drawn with glyphs get an image of their full height,
+    #  the image of every other line is one pixel row, placed once per pixel row
+
+    imageHeight: y -> (@textLine(y) or @isWrappedLine(y)) ? @lineRows(y)*@pixelsPerRow : 1
 
     lineOffsetPixels: y -> @rowOfLine(y)*@pixelsPerRow
 
+    #  the graphemes of a wrapped line are drawn at the cells wrapPos gives them,
+    #  each row of the line in its own band of the image
+
     imageForLine: data line y h ->
-    
-        scale   = @lineRows y
+
+        scale   = @lineScale y
         stride  = @pixelsPerCol * scale
         hgt     = h ? @imageHeight(y)
         w       = int(data.length/(3*hgt))
-        maxX    = int(w/stride)
+        wpos    = @wrapPos y
+        gh      = wpos ? scale*@pixelsPerRow : hgt
+        maxX    = wpos ? line.length : int(w/stride)
         syntax  = @getSyntax()
         classes = syntax.getClasses y
 
@@ -279,12 +299,21 @@ use ../base         ◆ view
 
         for x in 0...maxX
 
+            if wpos
+                [cx cy] = wpos x
+                ox = cx*@pixelsPerCol
+                oy = cy*@pixelsPerRow
+                continue if ox+stride > w or oy+gh > hgt
+            else
+                ox = x*stride
+                oy = 0
+
             ch = line[x]
             bg = customColor bgSpans x base
 
-            for py in 0...hgt
+            for py in 0...gh
                 for px in 0...stride
-                    i = ((py*w)+(x*stride+px))*3
+                    i = (((oy+py)*w)+(ox+px))*3
                     data[i+0] = bg[0]
                     data[i+1] = bg[1]
                     data[i+2] = bg[2]
@@ -306,11 +335,11 @@ use ../base         ◆ view
             mask = masks?[ch]
 
             if mask?
-                for py in 0...hgt
+                for py in 0...gh
                     for px in 0...stride
                         cov = mask[py*stride+px]
                         continue if cov == 0
-                        i = ((py*w)+(x*stride+px))*3
+                        i = (((oy+py)*w)+(ox+px))*3
                         if cov == 255
                             data[i+0] = fg[0]
                             data[i+1] = fg[1]
@@ -321,9 +350,9 @@ use ../base         ◆ view
                             data[i+1] = int(fg[1]*a + bg[1]*(1-a))
                             data[i+2] = int(fg[2]*a + bg[2]*(1-a))
             else
-                for py in 0...hgt
+                for py in 0...gh
                     for px in 0...stride
-                        i = ((py*w)+(x*stride+px))*3
+                        i = (((oy+py)*w)+(ox+px))*3
                         data[i+0] = fg[0]
                         data[i+1] = fg[1]
                         data[i+2] = fg[2]

@@ -1,0 +1,110 @@
+use ../edit        ◆ editor
+use ../util        ◆ harness
+use ../view/editor ◆ mapscr
+use ../util/img    ◆ squares
+
+h = e = m = null
+
+wmap = lines ->
+    h = new harness cols:40 rows:10
+    e = new editor h.screen 'test_wrapmap' ['susan']
+    e.layout 0 0 10 10
+    e.state.loadLines lines
+    e.grabFocus()
+    m = new mapscr e
+    m.cells.layout 30 0 12 10
+    m.csz = [10 20]
+    h.screen.t.pixels = [400 200]
+    h.screen.t.cellsz = [10 20]
+    squares.onResize 40 10 null [10 20]
+    e.state.setView [0 0]
+    m.calcView()
+
+key = combo -> h.key e combo
+
+ink = y ->
+    w    = m.cells.cols*m.csz[0]
+    hgt  = m.imageHeight y
+    data = Buffer.alloc w*hgt*3
+    m.imageForLine data e.state.s.lines[y] y
+    bg  = m.color.bg
+    out = []
+    for py in 0...hgt by m.pixelsPerRow
+        s = ''
+        for x in 0...12
+            i = (py*w + x*m.pixelsPerCol)*3
+            s += (data[i] == bg[0] and data[i+1] == bg[1] and data[i+2] == bg[2]) ? '.' : '#'
+        out.push s.replace(/\.+$/ '')
+    out
+
+squaresOf = name draw ->
+    calls = []
+    place = squares.place
+    squares.place = (sx sy sw sh fg z nm) -> calls.push [sx sy sw sh] if nm == name
+    try
+        draw()
+    finally
+        squares.place = place
+    calls
+
+cursors    = -> squaresOf 'map.cursor'    -> m.drawCursors()
+selections = -> squaresOf 'map.select'    -> m.drawHighlights()
+highlights = -> squaresOf 'map.highlight' -> m.drawHighlights()
+
+▸ wrapmap
+
+  ▸ chars
+
+        wmap ['0123456789abcdefghijk' 'next']
+        ink 0 ▸ ['############']
+        key 'ctrl+w'
+        m.imageHeight 0 ▸ 12
+        ink 0 ▸ ['##########' '##########' '#']
+        ink 1 ▸ ['####']
+        wmap ['  aaaaaaaaaaaaa' 'aaa bbb ccc ddd']
+        key 'alt+w'
+        ink 0 ▸ ['..########' '..#####']
+        ink 1 ▸ ['###.###' '###.###']
+
+  ▸ cache
+
+        wmap ['0123456789abcdefghijk' 'next']
+        key 'ctrl+w'
+        id = m.ensureImage 0
+        m.ensureImage 0 ▸ id
+        e.layout 0 0 7 10
+        (m.ensureImage(0) != id) ▸ true
+
+  ▸ cursors
+
+        wmap ['0123456789abcdefghijk' 'next']
+        key 'ctrl+w'
+        e.state.setCursors [[12 0]] adjust:false
+        cursors() ▸ [[412 4 8 4] [303 4 4 4]]
+        e.state.setCursors [[30 0] [2 1]] main:0 adjust:false
+        cursors() ▸ [[412 8 8 4] [317 8 4 4] [304 12 2 4]]
+        wmap ['  aaaaaaaaaaaaa' 'next']
+        key 'ctrl+w'
+        e.state.setCursors [[10 0]] adjust:false
+        cursors() ▸ [[412 4 8 4] [303 4 4 4]]
+
+  ▸ selections
+
+        wmap ['0123456789abcdefghijk' 'next']
+        key 'ctrl+w'
+        e.state.setCursors [[0 1]] adjust:false
+        e.state.setSelections [[8 0 12 0]]
+        selections() ▸ [[388 0 32 8]]
+        e.state.setSelections [[19 0 2 1]]
+        selections() ▸ [[388 4 32 8] [388 12 32 4]]
+        e.state.setSelections [[0 0 4 1]]
+        selections() ▸ [[388 0 32 12] [388 12 32 4]]
+
+  ▸ highlights
+
+        wmap ['0123456789abcdefghijk' 'next']
+        key 'ctrl+w'
+        e.state.setHighlights [[12 0 14 0]]
+        highlights() ▸ [[404 4 16 4]]
+        e.state.setHighlights [[9 0 21 0] [1 1 3 1]]
+        highlights() ▸ [[404 0 16 12] [404 12 16 4]]
