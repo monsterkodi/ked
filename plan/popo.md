@@ -30,11 +30,21 @@ is built on top of that instead of hard-wrapping text into lines itself.
   loaded or a text node appears.
   - Its lines are the node's **logical lines**. `s.lines` is the only copy of the text
     (see *Undo*).
-  - **`node.text` is the text type**, not the content. The key makes the node a text
-    node with a state, and the value is the kind of text. For now it is always
-    `'normal'`, a placeholder that gets a meaning later.
+  - **`node.text` is the syntax language** of the node, not the content. The key makes
+    the node a text node with a state, and the value is the language its state is
+    highlighted with: `text:'md'` (the default for new and converted nodes),
+    `text:'kode'`, and so on. It sets the node state's `syntax.ext`, so everything
+    that depends on the language (highlighting, comment toggling, wrap indent markers)
+    works per node. An unknown language falls back to plain text.
+  - **Syntax colors are composited** like the glyphs: the page draws the composited
+    lines, so a page cell asks the node that painted it for its class and color
+    (reverse map → `node.state.syntax`). The node's `fg` / `bg` win over syntax colors,
+    as sue colors do now.
+  - **No syntax line scaling in nodes for now:** `md` and `kode` scale headings
+    (`scaledExts`, `scales h1:3 h2:2`), but node states set `@scaling = false`. Scaled
+    rows inside a node can come later.
   - On disk the content is a `lines` list of strings:
-    `{text:'normal' lines:['HELLO world!' …] x:… }`. Load creates the state from it,
+    `{text:'md' lines:['HELLO world!' …] x:… }`. Load creates the state from it,
     save writes `s.lines` back. The sheets in `test/level2` are converted once, with no
     code for the old format.
   - An empty text node (`lines: ['']`) is kept. It is removed like any node.
@@ -78,9 +88,9 @@ line's rows ended:
 - Continuation rows are indented as in the editor (`wrapIndent`). The indent is capped
   at half of each row's own capacity and subtracted from it. The forward and reverse
   maps include it, like `lineCell` and `posForCell` do.
-- Node states have no syntax extension yet, so only leading whitespace indents. List,
-  heading and comment markers can come with a text type like `md` later. No test text
-  starts with whitespace, so the phase 2 gate is unaffected.
+- The node's language decides the markers: list bullets, headings, quotes and comment
+  starters indent like in the editor. No test text starts with whitespace or a marker
+  the indent follows, so the phase 2 gate is unaffected (to be checked).
 
 Because wrapping lives outside the logical lines, a **rect change only invalidates the
 cache**. Cursors, selections and highlights are logical and stay where they are; no
@@ -222,8 +232,8 @@ page s
         children: [
             bg: '#333'
             children: [
-                {text:'normal' x:1 y:0 w:6 h:1 s:sA}   # sA.lines = [['h','e','l','l','o']]
-                {text:'normal' x:1 y:2 w:4 h:2 s:sB}   # sB.lines = [['a'] ['b']]
+                {text:'md' x:1 y:0 w:6 h:1 s:sA}       # sA.lines = [['h','e','l','l','o']]
+                {text:'md' x:1 y:2 w:4 h:2 s:sB}       # sB.lines = [['a'] ['b']]
             ]
         ]
 ```
@@ -247,10 +257,10 @@ page s
   snapshots.
 - **Node states' own `h` / `r` histories** are ignored in sheet mode. `cmd+z` reaches
   the page state.
-- **`node.text` is the type:** `flows`, `scaleOf` and `typeOf` / `roleOf` / `argOf` test
-  the key or a valid value, so they keep working. The sheenode arg field shows and sets
-  the text type, like the color of a `bg` node; switching the type away from `text`
-  drops the state. Text is only edited in the sheet, so the sheenode doesn't touch node
+- **`node.text` is the language:** `flows`, `scaleOf` and `typeOf` / `roleOf` /
+  `argOf` test the key or a valid value, so they keep working. The sheenode arg field
+  shows and sets the language, like the color of a `bg` node; changing it sets the
+  node state's `syntax.ext`. Switching the type away from `text` drops the state. Text is only edited in the sheet, so the sheenode doesn't touch node
   states. `isNodeData` accepts `lines`. `insertTextAt`, `fill` and paint are rewritten
   anyway.
 
@@ -342,7 +352,8 @@ page s
 
 1. ~~**Undo:** how is sheet data stored in the immutable?~~ Decided: in the page's
    history, with each node's `s` inside its plain tree node (see *Undo*). `node.text`
-   is the text type, the content is `lines` on disk, empty text nodes are kept.
+   is the syntax language (`'md'` by default), the content is `lines` on disk, empty
+   text nodes are kept.
 2. ~~**novim in sheet mode:** what would break|needs changes?~~ Decided: stays active,
    properly fixed in phase 7; breaking tests are decided on when they break.
 3. ~~**Cursors in overflow lines or hidden text** aren't visible.~~ Decided: nodes
@@ -353,6 +364,6 @@ page s
 5. ~~**up/down in wrapped lines:** the editor moves by logical lines.~~ Decided: visual
    rows for all wrapped lines, the editor included (see *Visual row motion*).
 6. ~~**word or char wrap in sheets**~~ Decided: word wrap, char wrap only for the phase 2
-   gate. No toggle in sheets for now; later the text type may choose it.
+   gate. No toggle in sheets for now.
 7. ~~**continuation indent in sheets**~~ Decided: kept, as in the editor (see *Wrapping
    into spans*).
