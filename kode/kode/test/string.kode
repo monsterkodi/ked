@@ -3,12 +3,22 @@ use ./utils ▪ kc ke
 
 ▸ string
 
-    ▸ unicode
+  ▸ unicode
     
         kc '"▾"'   ▸   '"▾"'
         kc 'cs += "#{s.links[li][0]}▾#{s.links[li][1]} "' ▸ 'cs += `${s.links[li][0]}▾${s.links[li][1]} `'
+
+
+  ▸ addition        
+        
+        kc "s='x'+'…'"     ▸ "s = 'x' + '…'"
+        kc "padding + '…'" ▸ "padding + '…'"
+        kc "padding+'…'"   ▸ "padding + '…'"
+        kc "padding+ '…'"  ▸ "padding + '…'"
+        kc "padding +'…'"  ▸ "padding + '…'"
+        kc "padding +'s'"  ▸ "padding + 's'"
     
-    ▸ triple
+  ▸ triple
         
         ke  """
             a =\"\"\"
@@ -154,7 +164,7 @@ use ./utils ▪ kc ke
             '}\n'
         true
             
-    ▸ interpolation
+  ▸ interpolation
         
         kc "'#{}'"                                      ▸   "''" # `${}` throws an exception. js really sucks sometimes.
         kc '"1234#{}890"'                               ▸   '"1234890"'
