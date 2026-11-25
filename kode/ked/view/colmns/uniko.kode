@@ -53,7 +53,7 @@ import julia from '../../util/julia.json' with { type: "json" }
 
     @MAXCHARS: 0x10000
 
-    # parses ranges and sets of characters: '◜◝◞◟' '◜+3' '◜-◟' '25ef 0x25cc' '0x25ef+3' '25ef-25fa'
+    # parses ranges and sets of characters: '◜◞◟◝' '◜+3' '◜-◟' '25ef 0x25cc' '0x25ef+3' '25ef-25fa'
     # hex numbers need a 0x prefix, or four digits with at least one decimal digit
     # literal characters must be non-ascii, so that names like 'less-than' can be searched
     # returns the characters, each once, or null if the text is something else
@@ -262,7 +262,7 @@ import julia from '../../util/julia.json' with { type: "json" }
         item = @matrix.items[@matrix.selectedIndex]
         ⮐ [] if empty item?.char
 
-        hex   = Array.from(item.char).map((c) -> '0x' + c.codePointAt(0).toString(16)).join(' ')
+        hex   = Array.from(item.char).map((c) -> c.codePointAt(0).toString(16)).join(' ')
         names = item.search.split(/\s+/).filter((n) -> valid n).map (name,i) =>
             text:name fg:@color.name_fg bg:color.darken(@color.name max(0.4 1-0.2*i))
 

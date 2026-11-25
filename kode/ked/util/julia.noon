@@ -78,6 +78,7 @@
 ◅      white left-pointing pointer
 ◈      white diamond containing black small diamond
 ◉      fisheye
+🌙     moon
 ◍      circle vertical fill
 ◎      bullseye
 ◓      circle filled top half
@@ -397,7 +398,7 @@
 †      dagger                      
 ‡      ddagger                     
 •      bullet                      
-…      dots                        
+…      dots ellipsis
 ‰      perthousand                 
 ‱      pertenthousand              
 ′      prime                       
