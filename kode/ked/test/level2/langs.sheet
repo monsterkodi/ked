@@ -1,0 +1,122 @@
+bg          |#1a1a1a|
+children
+            .
+                text    kode
+                lines
+                    |# kode|
+                    |sq = x -> x * x|
+                    |log sq 3|
+                x       1
+                y       0
+                w       21
+                h       5
+            .
+                text    js
+                lines
+                    |// javascript|
+                    |const n = 42;|
+                    |if (n > 1) f('a');|
+                x       23
+                y       0
+                w       21
+                h       5
+            .
+                text    ts
+                lines
+                    |// typescript|
+                    |let s: string = 'x'|
+                    |type N = number|
+                x       45
+                y       0
+                w       21
+                h       5
+            .
+                text    swift
+                lines
+                    |// swift|
+                    |func f() -> Int {|
+                    |    return 7 }|
+                x       1
+                y       6
+                w       21
+                h       5
+            .
+                text    json
+                lines
+                    |{"name": "ked",|
+                    | "ok": true,|
+                    | "n": 3.14}|
+                x       23
+                y       6
+                w       21
+                h       5
+            .
+                text    cpp
+                lines
+                    |// c++|
+                    |#include <map>|
+                    |int main() { }|
+                x       45
+                y       6
+                w       21
+                h       5
+            .
+                text    html
+                lines
+                    |<!-- html -->|
+                    |<p class="a">|
+                    |  hi</p>|
+                x       1
+                y       12
+                w       21
+                h       5
+            .
+                text    css
+                lines
+                    |/* css */|
+                    |p { color: #f80;|
+                    |    margin: 2px }|
+                x       23
+                y       12
+                w       21
+                h       5
+            .
+                text    py
+                lines
+                    |# python|
+                    |def f(x=1):|
+                    |    return None|
+                x       45
+                y       12
+                w       21
+                h       5
+            .
+                text    sh
+                lines
+                    |# shell|
+                    |for f in *.md; do|
+                    |  echo "$f"; done|
+                x       1
+                y       18
+                w       21
+                h       5
+            .
+                text    zig
+                lines
+                    |// zig|
+                    |const x: u8 = 255;|
+                    |pub fn main() void|
+                x       23
+                y       18
+                w       21
+                h       5
+            .
+                text    lua
+                lines
+                    |-- lua|
+                    |local t = {1, 2}|
+                    |print(#t, nil)|
+                x       45
+                y       18
+                w       21
+                h       5
