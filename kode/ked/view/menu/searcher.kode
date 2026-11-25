@@ -2,9 +2,12 @@
 use ../../../kxk    ▪ post kseg kstr slash
 use ../../edit/tool ◆ belt
 use ../../index     ◆ prjcts kacher
+use ../../util      ◆ config
 use ../base         ◆ view
 use                 ◆ finder searcherfile
+
 ■searcher□finder
+
     # searches in multiple files provided by index▸prjcts
     
     @: @screen @editor @name='searcher' ->
@@ -45,7 +48,7 @@ use                 ◆ finder searcherfile
         dir    = prjcts.dir   editorFile
         files ?= prjcts.files editorFile
 
-        files = @filterFiles files [editorExt]
+        files = @filterFiles files editorExt
         files = @sortFiles files
 
         # log "searcher - search #{files.length} files in #{dir} for |#{text}|" #files
@@ -285,9 +288,10 @@ use                 ◆ finder searcherfile
             weight(b) - weight(a)
         files
         
-    filterFiles: files exts ->
-    
-        files.filter (f) -> slash.ext(f) in exts
+    filterFiles: files ext ->
+        
+        exclude = config.get 'searcher.exclude' []
+        files.filter (f) -> e = slash.ext(f); e == ext or not e in exclude
                 
     apply: choice ->
         

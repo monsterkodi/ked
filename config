@@ -9,7 +9,7 @@ mapScroll
                         enable          false
                         clickOffset     5
 scale
-                        enable  true
+                        enable  false
                         md
                             h1  7
                             h2  4
@@ -43,6 +43,9 @@ dirtree
                         allow
                             ~
                             /tmp
+searcher
+                        exclude    
+                            js
 filetypes
                         config          noon
                         .kkache         noon
