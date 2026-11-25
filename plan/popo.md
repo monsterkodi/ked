@@ -28,8 +28,9 @@ is built on top of that instead of hard-wrapping text into lines itself.
     already return early while `@rectree?` is set.
 - **Node states.** One full `state` per text node, created eagerly when a sheet is
   loaded or a text node appears.
-  - Its lines are the node's **logical lines**: `node.text.split '\n'`. Writing back is
-    `lines.join '\n'`; there are no soft/hard line ends to track.
+  - Its lines are the node's **logical lines**. There is no `node.text` at runtime:
+    `s.lines` is the only copy of the text (see *Undo*). The text exists only on disk:
+    load splits it at `\n` into a new state, save joins `s.lines` with `\n`.
   - Every line is wrapped (`@wrap.all = true`). The rows of the wrapped lines are the
     node's spans, in flow order (see *Wrapping into spans*).
   - It owns its own cursors, selections, highlights and main cursor.
@@ -40,7 +41,7 @@ is built on top of that instead of hard-wrapping text into lines itself.
 - **Projector.** A new `kode/ked/popo/projector.kode`, owned by the page state while a
   sheet is loaded. It holds:
   - the rectree and its layout
-  - the node ↔ state attachment (runtime property on the node, like `rect`; never saved)
+  - the node → state attachment (`node.state`, a runtime property like `rect`)
   - the **active** node state (the one that holds the main cursor)
   - key routing and multiplexing, compositing, position mapping, and undo
 - **Sheet-level operations stay at sheet level** (A): create a text node by typing in a
@@ -110,10 +111,9 @@ rewrap bookkeeping is needed.
    - **blocked**: the wrap toggles (ctrl+w, alt+w, ctrl+alt+w) and the susan line
      scale keys. They are bound in `editor.kode` under `feats['susan']`, so they must be
      caught before they reach a node state.
-2. For each state whose `s.lines` changed, write `lines.join '\n'` into `node.text`. A
-   text edit doesn't move rects, so there's **no regionize** here; only that node is
-   composited again.
-3. Composite, and record one undo step if anything changed.
+2. For each state whose `s` changed, composite that node again. A text edit doesn't
+   move rects, so there's **no regionize** here.
+3. Record one undo step if anything changed.
 
 `insert`, `paste`, `delete`, `cut`, `copy` and `cmd+a` need no sheet-specific code: they
 are local operations in the node states.
@@ -157,17 +157,45 @@ Today the page `s` carries `rectree` as a plain node copy, `renderSheet` pushes 
 state per sheet change, and `undo` / `redo` call `restoreSheet`, which re-renders from
 `s.rectree`.
 
-The projector keeps a single history of **global snapshots** instead:
-`{tree: plain rectree structure, states: [node state s, in tree order]}`. These are
-cheap, because each `state.s` is immutable and only referenced.
+This stays: the page's `h` / `r` is the only history, and every entry is a **snapshot of
+the whole sheet**. The node states go into the plain tree, one per text node:
 
-- **Undo / redo** restores the rectree structure, then re-attaches the states in tree
-  order and sets each one's `s` back. No node ids are needed: tree order within a
-  snapshot is enough.
-- **Created and deleted nodes** fall out of this: a deleted node's state lives on in
-  older snapshots.
-- **Node states' own `h` / `r` histories** are bypassed in sheet mode. `cmd+z` is a
-  global key handled by the projector.
+```
+page s
+    lines cursors selections highlights sue …   # composited output, what is drawn
+    rectree:
+        children: [
+            bg: '#333'
+            children: [
+                {x:1 y:0 w:6 h:1 s:sA}            # sA.lines = [['h','e','l','l','o']]
+                {x:1 y:2 w:4 h:2 s:sB}            # sB.lines = [['a'] ['b']]
+            ]
+        ]
+```
+
+- **Snapshots are cheap.** Each `sA` is immutable and only referenced, and unchanged
+  nodes share their `s` between snapshots.
+- **Live tree vs snapshot.** The live node holds the state object (`node.state`).
+  `plainNode` writes `s: node.state.s`. `sourceOf` writes `text: s.lines.join '\n'`
+  instead, and drops `s`.
+- **Edit:** the node state changes its `s`, the node is composited again, the page `s`
+  gets the new plain tree and output, and `pushState`.
+- **Undo / redo:** the page's `undo` / `redo` are unchanged, then `restoreSheet`:
+  1. Rebuilds the live tree from `s.rectree`. It walks the tree itself instead of
+     `asMutable deep:true`, which would make mutable copies of the `s` objects.
+  2. Gives every text node a state object and sets `state.s = plain.s`. State objects
+     are only containers; all undoable data is in `s`.
+  3. Always regionizes, hands the capacities to the states, and composites again: the
+     cells may have been resized since the snapshot was taken.
+  4. Sets the active node from the page's main cursor.
+- **Created and deleted nodes** fall out of this: a deleted node's `s` lives on in older
+  snapshots.
+- **Node states' own `h` / `r` histories** are ignored in sheet mode. `cmd+z` reaches
+  the page state.
+- **No `node.text`:** whatever tests or reads it today goes through one helper
+  (`layout.isText` / `layout.textOf`): `flows`, `scaleOf`, `typeOf` / `roleOf` /
+  `argOf`, `isNodeData`, the sheenode arg field, `dumpstate.nodeText`, `insertTextAt`
+  and paste node.
 
 ## What gets removed or kept
 
@@ -232,7 +260,9 @@ cheap, because each `state.s` is immutable and only referenced.
 
 ## Open questions
 
-1. **Undo:** how is sheet data stored in the immutable?
+1. ~~**Undo:** how is sheet data stored in the immutable?~~ Decided: in the page's
+   history, with each node's `s` inside its plain tree node (see *Undo*).
+   Still open: is an empty text node (`s.lines` is `['']`) kept or removed?
 2. **novim in sheet mode:** what would break|needs changes?
 3. **Cursors in overflow lines or hidden text** (covered by other nodes) aren't visible.
    Show a marker, or accept it for now?
