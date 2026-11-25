@@ -229,7 +229,7 @@ toExport["uniko"] = async function ()
         u.filter('')
         compare(u.matrix.numItems(),all)
     })
-    await section("ranges and sets                        # literal chars, hex numbers, +count and first-last", async function ()
+    await section("ranges and sets", async function ()
     {
         cps = function (fc, n)
         {
@@ -404,7 +404,7 @@ toExport["uniko"] = async function ()
 toExport["uniko"]._section_ = true
 toExport["bubbles"] = async function ()
 {
-    await section("caps                                   # half-circles between the bubbles point left or right", async function ()
+    await section("caps", async function ()
     {
         L = ''
         R = ''

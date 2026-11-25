@@ -246,7 +246,7 @@ mat = (cols rows) ->
 
         u.matrix.numItems() ▸ all
 
-  ▸ ranges and sets                        # literal chars, hex numbers, +count and first-last
+  ▸ ranges and sets
 
         cps = (fc n) -> [fc...fc+n].map (c) -> String.fromCodePoint c
         corners = ['◜' '◝' '◞' '◟']
@@ -254,7 +254,7 @@ mat = (cols rows) ->
         uniko.parse('◜◝◞◟')             ▸ corners
         uniko.parse('◜+3')              ▸ corners
         uniko.parse('◜-◟')              ▸ corners
-        uniko.parse('◟-◜')              ▸ corners             # reversed ranges ascend
+        uniko.parse('◟-◜')              ▸ corners
         uniko.parse('  ◜  ◝◞   ◟ ')     ▸ corners
         uniko.parse('◜   +   3')        ▸ corners
         uniko.parse('◜  -  ◟')          ▸ corners
@@ -266,26 +266,26 @@ mat = (cols rows) ->
         uniko.parse('25ef-25fa')        ▸ cps(0x25ef 12)
         uniko.parse('25ef - 0x25fa')    ▸ cps(0x25ef 12)
         uniko.parse('◜-0x25df')         ▸ corners
-        uniko.parse('◜ 25ef+1 ◜')       ▸ ['◜' '◯' '◰']        # a set, each char once
+        uniko.parse('◜ 25ef+1 ◜')       ▸ ['◜' '◯' '◰']
         uniko.parse('1f308')            ▸ ['🌈']
-        uniko.parse('0x41')             ▸ ['A']                # ascii only by number
+        uniko.parse('0x41')             ▸ ['A']
 
-        uniko.parse('◜+')               ▸ ['◜']                # typing in progress
+        uniko.parse('◜+')               ▸ ['◜']
         uniko.parse('◜ -')              ▸ ['◜']
 
-        uniko.parse('d7ff-0xd801')      ▸ [String.fromCodePoint(0xd7ff)]  # no surrogates
-        uniko.parse('0x1f-0x21')        ▸ [' ' '!']                       # no control chars
+        uniko.parse('d7ff-0xd801')      ▸ [String.fromCodePoint(0xd7ff)]  
+        uniko.parse('0x1f-0x21')        ▸ [' ' '!']                       
         uniko.parse('0x10ffff+5')       ▸ [String.fromCodePoint(0x10ffff)]
-        uniko.parse('0x0-0x10ffff').length ▸ 0x10000                      # capped
+        uniko.parse('0x0-0x10ffff').length ▸ 0x10000                      
 
-        uniko.parse('')                 ▸ null                 # names are searched instead
+        uniko.parse('')                 ▸ null
         uniko.parse('sqrt')             ▸ null
-        uniko.parse('face')             ▸ null                 # hex without 0x needs a digit
-        uniko.parse('2')                ▸ null                 # and four digits
+        uniko.parse('face')             ▸ null
+        uniko.parse('2')                ▸ null
         uniko.parse('sub 2')            ▸ null
         uniko.parse('less-than')        ▸ null
         uniko.parse('◜+x')              ▸ null
-        uniko.parse('◜+0x3')            ▸ null                 # counts are decimal
+        uniko.parse('◜+0x3')            ▸ null
         uniko.parse('0x')               ▸ null
 
         [h e u] = uni()
@@ -294,10 +294,10 @@ mat = (cols rows) ->
         u.matrix.items.map((i) -> i.char) ▸ corners
 
         u.filter '0x25ef'
-        u.matrix.items[0].search ▸ 'symbol circle open'       # names from julia
+        u.matrix.items[0].search ▸ 'symbol circle open'
 
         u.filter '0x2600'
-        u.matrix.items ▸ [char:'☀' search:'']                  # not in julia
+        u.matrix.items ▸ [char:'☀' search:'']
 
         u.filter 'circle open'
         u.matrix.items.map((i) -> i.char).includes('◯') ▸ true
@@ -402,7 +402,7 @@ mat = (cols rows) ->
 
         L = ''
         R = ''
-        full = "#{L}ldots#{R} ellipsis#{R} dot#{R} 2026#{R}"  # hex last, so it rarely moves
+        full = "#{L}ldots#{R} ellipsis#{R} dot#{R} 2026#{R}"
 
         info = (text) ->
             [h e u] = uni()
@@ -414,24 +414,24 @@ mat = (cols rows) ->
         [h u row] = info ''
 
         row.slice(59-full.length, 59) ▸ full
-        row.length                    ▸ 59                      # ends with the input
+        row.length                    ▸ 59
 
         s     = 59-full.length
         n1bg  = h.screen.get_bg s+1  1
         n2bg  = h.screen.get_bg s+8  1
         n3bg  = h.screen.get_bg s+18 1
         hexbg = h.screen.get_bg s+23 1
-        (n1bg[0] != n2bg[0]) ▸ true                             # stacked shades
-        h.screen.get_fg(s+6 1) ▸ n1bg                           # a name's cap overlaps its right neighbor
+        (n1bg[0] != n2bg[0]) ▸ true         
+        h.screen.get_fg(s+6 1) ▸ n1bg       
         h.screen.get_bg(s+6 1) ▸ n2bg
-        h.screen.get_bg(s+7 1) ▸ n2bg                           # a space after the cap's round side
-        h.screen.get_fg(s+21 1) ▸ n3bg                          # the last name overlaps the hex
+        h.screen.get_bg(s+7 1) ▸ n2bg       
+        h.screen.get_fg(s+21 1) ▸ n3bg      
         h.screen.get_bg(s+21 1) ▸ hexbg
 
-        row = info('x'.repeat(26))[2]                           # exactly enough room for everything
+        row = info('x'.repeat(26))[2]       
         row.trimEnd().endsWith full ▸ true
 
-        row = info('x'.repeat(27))[2]                           # the hex goes first, a hint that names are missing
+        row = info('x'.repeat(27))[2]       
         row.slice(1 28) ▸ 'x'.repeat(27)
         row.includes '0x2026'                                   ▸ false
 
@@ -453,7 +453,7 @@ mat = (cols rows) ->
 #!bubbles
 ▸ bubbles
 
-  ▸ caps                                   # half-circles between the bubbles point left or right
+  ▸ caps
 
         L = ''
         R = ''
@@ -473,31 +473,31 @@ mat = (cols rows) ->
             bs.draw()
             h
 
-        bubbles.width([{text:'ab'} {text:'中'}]) ▸ 8   # caps, texts and a space at each divider's round side
+        bubbles.width([{text:'ab'} {text:'中'}]) ▸ 8
         bubbles.width([])                        ▸ 0
 
         h = draw false
-        h.row(0) ▸ "  #{L}ab #{L}中 #{R}"             # the row dump fills the wide char's second column
-        h.screen.get_fg(2 0) ▸ a                # the left cap
+        h.row(0) ▸ "  #{L}ab #{L}中 #{R}"  
+        h.screen.get_fg(2 0) ▸ a          
         h.screen.get_bg(2 0) ▸ c
         h.screen.get_fg(3 0) ▸ w
         h.screen.get_bg(3 0) ▸ a
-        h.screen.get_bg(5 0) ▸ a                # the space after the first text
-        h.screen.get_fg(6 0) ▸ b                # the second bubble overlaps the first
+        h.screen.get_bg(5 0) ▸ a          
+        h.screen.get_fg(6 0) ▸ b          
         h.screen.get_bg(6 0) ▸ a
         h.screen.get_bg(7 0) ▸ b
-        h.screen.get_fg(9 0) ▸ b                # the right cap
+        h.screen.get_fg(9 0) ▸ b          
         h.screen.get_bg(9 0) ▸ c
 
         h = draw true
-        h.row(0) ▸ "  #{L}ab#{R} 中 #{R}"             # no space at a straight side
-        h.screen.get_fg(5 0) ▸ a                # the first bubble overlaps the second
+        h.row(0) ▸ "  #{L}ab#{R} 中 #{R}"  
+        h.screen.get_fg(5 0) ▸ a          
         h.screen.get_bg(5 0) ▸ b
-        h.screen.get_bg(6 0) ▸ b                # the space after the divider's round side
-        h.screen.get_fg(9 0) ▸ b                # the right cap
+        h.screen.get_bg(6 0) ▸ b          
+        h.screen.get_fg(9 0) ▸ b          
         h.screen.get_bg(9 0) ▸ c
 
-        h = draw false true                     # padLast fills the view's width with the last bubble
+        h = draw false true               
         h.row(0) ▸ "  #{L}ab #{L}中     #{R}"
         h.screen.get_bg(12 0) ▸ b
         h.screen.get_fg(13 0) ▸ b
