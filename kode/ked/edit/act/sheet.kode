@@ -962,6 +962,7 @@ export
         @changeLinesSegls()
 
         @syntax.setSegls @s.lines
+        @syntax.setOverlay data.classes
 
         @rectree = rectree
 

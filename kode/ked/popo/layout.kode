@@ -656,7 +656,10 @@ use ../edit/tool ◆ sue
             for area in row.areas
                 areas.push area
 
-        text:root.rows.map((row) -> row.line).join('\n') sue:areas
+        text    = root.rows.map((row) -> row.line).join('\n')
+        classes = root.rows.map((row) -> row.classes)
+
+        {text:text sue:areas classes:classes}
 
     #  paints the rows of the grid again, widened to whole bands of the scaled text
     #  they touch, because a block is never cut
@@ -689,6 +692,7 @@ use ../edit/tool ◆ sue
                 cell.fg    = null
                 cell.bg    = null
                 cell.block = null
+                cell.clss  = null
 
         @paintTree root grid rows
 
@@ -713,7 +717,7 @@ use ../edit/tool ◆ sue
                 if bottom == y
 
                     if block.x == x
-                        glyphs.push {char:block.char fg:cell.fg bg:cell.bg scale:block.scale node:block.node}
+                        glyphs.push {char:block.char fg:cell.fg bg:cell.bg scale:block.scale node:block.node clss:block.clss}
                         x += block.scale
                     else
                         x += 1
@@ -724,14 +728,16 @@ use ../edit/tool ◆ sue
                 x += 1
                 continue
 
-            glyphs.push {char:cell.char fg:cell.fg bg:cell.bg scale:1}
+            glyphs.push {char:cell.char fg:cell.fg bg:cell.bg scale:1 clss:cell.clss}
             x += 1
 
-        line = []
+        line    = []
+        classes = []
         for glyph in glyphs
             line.push glyph.char
+            classes.push glyph.clss ? null
 
-        {line:line.join('') areas:@areasOfGlyphs(glyphs y)}
+        {line:line.join('') areas:@areasOfGlyphs(glyphs y) classes:classes}
 
     @areasOfGlyphs: (glyphs y) ->
 
@@ -784,7 +790,7 @@ use ../edit/tool ◆ sue
         for y in 0...rect.h
             row = []
             for x in 0...rect.w
-                row.push {char:' ' fg:null bg:null block:null}
+                row.push {char:' ' fg:null bg:null block:null clss:null}
             grid.push row
         @paintTree rectree grid
 
@@ -808,11 +814,12 @@ use ../edit/tool ◆ sue
         masked = @channelMaskOf node
 
         strings = null
+        classes = null
 
         if valid node.pattern
             strings = fill.pattern(node node.regions)
         else if node.text? and @scaleOf(node) == 1
-            strings = @textRows node
+            [strings classes] = @textRows node
         else if node.text?
             strings = node.regions.map (rng) -> fill.blank(rng[2] - rng[0])
 
@@ -837,26 +844,38 @@ use ../edit/tool ◆ sue
                 if valid strings and not gone.char
                     @unblock grid cell.block if cell.block?
                     cell.char = chars[j] ? ' '
+                    cell.clss = classes?[i]?[j] ? null
 
                 cell.fg = node.fg if valid node.fg and not gone.fg
                 cell.bg = node.bg if valid node.bg and not gone.bg
 
         @paintScaled node grid masked rows if @scaleOf(node) > 1
 
-    #  the rows of the regions of an unscaled text node, with the glyphs of its state
+    #  the rows of the regions of an unscaled text node, with the glyphs of its state,
+    #  and the syntax classes of the glyphs per row
 
     @textRows: node ->
 
-        chars = {}
+        chars   = {}
+        classes = {}
 
-        for [x y ch] in projector.glyphs(node)
-            chars["#{x},#{y}"] = ch
+        for [x y ch clss] in projector.glyphs(node)
+            chars["#{x},#{y}"]   = ch
+            classes["#{x},#{y}"] = clss
 
-        node.regions.map (rng) ->
+        rows = node.regions.map (rng) ->
             row = ''
             for x in rng[0]...rng[2]
                 row += chars["#{x},#{rng[1]}"] ? ' '
             row
+
+        clss = node.regions.map (rng) ->
+            row = []
+            for x in rng[0]...rng[2]
+                row.push classes["#{x},#{rng[1]}"] ? null
+            row
+
+        [rows clss]
 
     #  every glyph of scaled text is a block of scale×scale cells
     #  the glyph lives in the top left cell, the other cells are reserved
@@ -868,8 +887,8 @@ use ../edit/tool ◆ sue
         rect  = node.rect.abs
         chars = {}
 
-        for [x y char] in projector.glyphs(node)
-            chars["#{x},#{y}"] = char
+        for [x y char clss] in projector.glyphs(node)
+            chars["#{x},#{y}"] = [char clss]
 
         for [y x1 x2] in fill.bands(node node.regions rect)
 
@@ -880,7 +899,8 @@ use ../edit/tool ◆ sue
             while x + scale <= x2
 
                 if not @charMaskedIn masked x y scale
-                    @markBlock grid x y scale (chars["#{x},#{y}"] ? ' ') node
+                    [char clss] = chars["#{x},#{y}"] ? [' ' null]
+                    @markBlock grid x y scale char node clss
 
                 x += scale
 
@@ -892,9 +912,9 @@ use ../edit/tool ◆ sue
 
         false
 
-    @markBlock: (grid x y scale char node) ->
+    @markBlock: (grid x y scale char node clss) ->
 
-        block = {x:x y:y scale:scale char:char node:node}
+        block = {x:x y:y scale:scale char:char node:node clss:clss}
 
         for r in y...min(grid.length y+scale)
             for c in x...min(grid[r].length x+scale)
@@ -916,6 +936,7 @@ use ../edit/tool ◆ sue
                 if cell.block == block
                     cell.block = null
                     cell.char  = ' '
+                    cell.clss  = null
 
     @channelMaskOf: node ->
 

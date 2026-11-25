@@ -27,11 +27,17 @@ toIndices = segl dss -> # kulur chunks count display columns, ked indexes graphe
         @ext  = 'txt' 
         @clear()
         
-    clear: => 
-        
-        @diss = []  
+    clear: =>
+
+        @diss = []
         @lineDiss = new Map()
-        
+        delete @overlay
+
+    #  classes that win over the dissected ones: a row of classes per line, where a
+    #  null keeps the line's own class. sheets put the classes of their text nodes here
+
+    setOverlay: @overlay =>
+
     setExt: @ext => @ansi = false
     
     setRgxs: rgxs => @config = matchr.config rgxs 'u'
@@ -104,18 +110,23 @@ toIndices = segl dss -> # kulur chunks count display columns, ked indexes graphe
             @addSegl segl ext
             
     getClass: x y =>
-        
+
+        ⮐ @overlay[y][x] if @overlay?[y]?[x]?
+
         for dss in @diss[y]
             if dss.start <= x < dss.start+dss.length
                 ⮐ dss.clss
         'text'
-        
+
     getClasses: y =>
-        
+
         classes = []
         for dss in @diss[y]
             for x in dss.start...dss.start+dss.length
                 classes[x] = dss.clss
+        if row = @overlay?[y]
+            for clss,x in row
+                classes[x] = clss if clss?
         classes
         
     hasPureClass: y clss =>

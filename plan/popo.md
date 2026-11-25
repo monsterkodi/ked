@@ -36,10 +36,13 @@ is built on top of that instead of hard-wrapping text into lines itself.
     `text:'kode'`, and so on. It sets the node state's `syntax.ext`, so everything
     that depends on the language (highlighting, comment toggling, wrap indent markers)
     works per node. An unknown language falls back to plain text.
-  - **Syntax colors are composited** like the glyphs: the page draws the composited
-    lines, so a page cell asks the node that painted it for its class and color
-    (reverse map → `node.state.syntax`). The node's `fg` / `bg` win over syntax colors,
-    as sue colors do now.
+  - **Syntax colors are composited** like the glyphs. As built: `projector.glyphs`
+    gives every glyph its class from `node.state.syntax`; cells and blocks of the
+    grid carry it (`clss`), `lineOfRow` returns a class per glyph of the page line,
+    and `renderSheet` hands them to the page's syntax as an overlay
+    (`syntax.setOverlay`), which `getClass` / `getClasses` prefer. Cells without a
+    text glyph keep the page's own classes. The node's `fg` / `bg` win over syntax
+    colors: the susan pass draws them over the text.
   - **No syntax line scaling in sheets, ever:** `md` and `kode` scale headings
     (`scaledExts`, `scales h1:3 h2:2`), but node states set `@scaling = false`. Scale
     comes only from `node.scale`.
@@ -494,11 +497,13 @@ page s
 
 In order of priority (decided 2026-11-25):
 
-1. per-node syntax colors composited into the page
+1. ✔ per-node syntax colors composited into the page (see *Roles*)
 2. novim: `:%s` over all text nodes, and search that continues into the next nodes
-3. keeping the other nodes' cursors in view, for cmd+d and the like (very low priority)
+3. row end affinity: a cursor at a wrap boundary is drawn at the start of the next
+   row, so it can never sit after the last character of a row that isn't the line's
+   last. A per-cursor flag would let it be drawn at the end of the upper row.
+4. keeping the other nodes' cursors in view, for cmd+d and the like (very low priority)
 
-- row end affinity: open, see the discussion of 2026-11-25
 - dropped: scaled md headings inside nodes (scale is only `node.scale`)
 
 ## Verification

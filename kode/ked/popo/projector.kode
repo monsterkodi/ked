@@ -83,7 +83,8 @@ use ../edit      ◆ state
 
         spans
 
-    #  [x y char] of every glyph that has a cell in a span, y is the top row of the band
+    #  [x y char clss] of every glyph that has a cell in a span, y is the top row of
+    #  the band, clss its syntax class in the node's language
 
     @glyphs: node ->
 
@@ -102,6 +103,7 @@ use ../edit      ◆ state
             line   = lines[li]
             starts = st.wrapStarts li
             cells  = sue.cellPositionsForLine lines li []
+            classes = st.syntax.getClasses li
 
             for k in 0...starts.length
 
@@ -116,7 +118,7 @@ use ../edit      ◆ state
 
                 for gi in starts[k]...end
                     x = x1 + (cells[gi] - cells[starts[k]] + indent) * scale
-                    out.push [x y line[gi]] if x + scale <= x2
+                    out.push [x y line[gi] (classes[gi] ? 'text')] if x + scale <= x2
 
         out
 
