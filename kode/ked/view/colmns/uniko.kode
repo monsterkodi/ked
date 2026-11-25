@@ -13,7 +13,6 @@ import julia from '../../util/julia.json' with { type: "json" }
         super @screen @name
 
         @height = 28
-        @focus  = 'matrix'
 
         @setColor 'bg' theme.uniko.bg
 
@@ -36,8 +35,12 @@ import julia from '../../util/julia.json' with { type: "json" }
         for char,comment of julia
             @allItems.push char:char search:trim(comment)
         @matrix.setItems @allItems
-
-        @isVisible = false
+        
+        @mouseItems  = [@input @matrix]
+        @focusRing   = [@input @matrix]
+        @wheelItems  = [       @matrix]
+        @focusUpDown = false
+        @isVisible   = false
 
     filter: text =>
 
@@ -56,13 +59,11 @@ import julia from '../../util/julia.json' with { type: "json" }
 
     focusInput: =>
 
-        @focus = 'input'
         @input.grabFocus()
         true
 
     focusMatrix: =>
 
-        @focus = 'matrix'
         @matrix.selectFirst()
         @matrix.grabFocus()
         true
@@ -77,7 +78,6 @@ import julia from '../../util/julia.json' with { type: "json" }
 
         @input.set ''
         @filter ''
-        @focus = 'matrix'
 
         super()
 
@@ -92,7 +92,6 @@ import julia from '../../util/julia.json' with { type: "json" }
 
         super()
 
-        @focus = 'matrix'
         @input.state.deselect()
 
         post.emit 'focus' @editor.name
@@ -123,62 +122,47 @@ import julia from '../../util/julia.json' with { type: "json" }
     onKey: key event =>
 
         ⮐ false if @hidden()
+        ⮐ false if not @hasFocus()
+
+        if ret = super key event
+            # log "view #{key}"
+            ⮐ ret
 
         switch event.combo
             'esc'       ➜ ⮐ @hide()
             'cmd+up'    ➜ ⮐ @incScale  1
             'cmd+down'  ➜ ⮐ @incScale -1
 
-        if @focus == 'input'
+        if @input.hasFocus()
 
             switch event.combo 
                 'down'  ➜ ⮐ @focusMatrix()
+                'tab'   ➜ ⮐ true
 
             ⮐ @input.onKey key event
-
+        
         switch event.combo 
-            'space'     ➜ ⮐ @submit()
-            'return'    ➜ ⮐ @submit()
-            'cmd+c'     ➜ ⮐ @copy()
-            'ctrl+c'    ➜ ⮐ @copy()
-            'up''left''right''down'
-                @matrix.moveSelection event.combo
-
+            'space'      ➜ ⮐ @submit()
+            'return'     ➜ ⮐ @submit()
+            'cmd+c'      ➜ ⮐ @copy()
+            'ctrl+c'     ➜ ⮐ @copy()
+            'up''right'
+            'down''left' ➜ ⮐ @matrix.moveSelection event.combo
+        
         if valid event.char and event.char.length == 1
             @focusInput()
             ⮐ true if event.char == '\t'
             ⮐ @input.onKey key event
-
-        false
 
     onInputAction: action text =>
 
         switch action
             'change' ➜ @filter text
 
-    onMouse: event =>
-
-        ⮐ if @hidden()
-        ret = @input.onMouse event   ; ⮐ ret if ret?.redraw
-        ret = @matrix.onMouse event  ; ⮐ ret if ret?.redraw
-        super event
-
-    onWheel: event =>
-
-        ⮐ false if @hidden()
-
-        if @matrix.cells.isInsideEvent event
-            switch event.dir
-                'up'   ➜ @matrix.moveSelection 'up'
-                'down' ➜ @matrix.moveSelection 'down'
-            ⮐ redraw:true
-
-        false
-
     layout: x y w h =>
 
         super x y w h
-
+        
         @input.layout x+1 y+1 w-2 1
 
         mh = max 0 (h-4)

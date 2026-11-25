@@ -133,17 +133,28 @@ use                 ◆ view
 
     onMouse: event =>
     
+        super event
+        
         if @cells.isInsideEvent event
         
             [x y] = @cells.posForEvent event
             [col row] = @cellAtPos x y
-            # @focus = 'matrix'
+
+            # log "selectAt #{col} #{row}"
             @selectAt col row
         
             if event.type == 'press'
                 @emit 'submit'
                 
             ⮐ redraw:true
+            
+    onWheel: event =>
+
+        switch event.dir
+            'left''right'
+            'up' 'down'   ➜ @moveSelection event.dir
+            
+        ⮐ redraw:true
 
     draw: =>
 

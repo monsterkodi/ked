@@ -23,9 +23,10 @@ use ../screen    ◆ cells
         @feats = {}
         @feats[f] = true for f in features
         
-        @isVisible = true
-        @focusable = false
-        @focused   = false
+        @isVisible   = true
+        @focusable   = false
+        @focused     = false
+        @focusUpDown = true
 
         # the user's intent to have this view open, independent of @isVisible.
         # survives temporary hides (hideEditor, narrow terminal) so the view
@@ -183,8 +184,13 @@ use ../screen    ◆ cells
         if valid @focusRing
             
             switch event.combo
-                'down''tab'      ➜ ⮐ @focusNext() 
-                'up''shift+tab'  ➜ ⮐ @focusPrev()
+                'tab'        ➜ ⮐ @focusNext() 
+                'shift+tab'  ➜ ⮐ @focusPrev()
+                
+            if @focusUpDown
+                switch event.combo
+                    'down'   ➜ ⮐ @focusNext() 
+                    'up'     ➜ ⮐ @focusPrev()
     
             for item in @focusRing
                 if item.hasFocus() ➜ ⮐ item.onKey key event

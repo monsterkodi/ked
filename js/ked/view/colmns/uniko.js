@@ -29,8 +29,6 @@ uniko = (function ()
 
         this["draw"] = this["draw"].bind(this)
         this["layout"] = this["layout"].bind(this)
-        this["onWheel"] = this["onWheel"].bind(this)
-        this["onMouse"] = this["onMouse"].bind(this)
         this["onInputAction"] = this["onInputAction"].bind(this)
         this["onKey"] = this["onKey"].bind(this)
         this["copy"] = this["copy"].bind(this)
@@ -43,7 +41,6 @@ uniko = (function ()
         this["filter"] = this["filter"].bind(this)
         uniko.__super__.constructor.call(this,this.screen,this.name)
         this.height = 28
-        this.focus = 'matrix'
         this.setColor('bg',theme.uniko.bg)
         this.input = new input(this.screen,`${this.name}_input`)
         this.matrix = new matrix(this.screen,`${this.name}_matrix`)
@@ -63,6 +60,10 @@ uniko = (function ()
             this.allItems.push({char:char,search:_k_.trim(comment)})
         }
         this.matrix.setItems(this.allItems)
+        this.mouseItems = [this.input,this.matrix]
+        this.focusRing = [this.input,this.matrix]
+        this.wheelItems = [this.matrix]
+        this.focusUpDown = false
         this.isVisible = false
     }
 
@@ -96,14 +97,12 @@ uniko = (function ()
 
     uniko.prototype["focusInput"] = function ()
     {
-        this.focus = 'input'
         this.input.grabFocus()
         return true
     }
 
     uniko.prototype["focusMatrix"] = function ()
     {
-        this.focus = 'matrix'
         this.matrix.selectFirst()
         this.matrix.grabFocus()
         return true
@@ -120,7 +119,6 @@ uniko = (function ()
     {
         this.input.set('')
         this.filter('')
-        this.focus = 'matrix'
         uniko.__super__.show.call(this)
         this.matrix.selectFirst()
         this.matrix.grabFocus()
@@ -134,7 +132,6 @@ uniko = (function ()
             return
         }
         uniko.__super__.hide.call(this)
-        this.focus = 'matrix'
         this.input.state.deselect()
         post.emit('focus',this.editor.name)
         return post.emit('redraw')
@@ -169,9 +166,19 @@ uniko = (function ()
 
     uniko.prototype["onKey"] = function (key, event)
     {
+        var ret
+
         if (this.hidden())
         {
             return false
+        }
+        if (!this.hasFocus())
+        {
+            return false
+        }
+        if (ret = uniko.__super__.onKey.call(this,key,event))
+        {
+            return ret
         }
         switch (event.combo)
         {
@@ -186,12 +193,15 @@ uniko = (function ()
 
         }
 
-        if (this.focus === 'input')
+        if (this.input.hasFocus())
         {
             switch (event.combo)
             {
                 case 'down':
                     return this.focusMatrix()
+
+                case 'tab':
+                    return true
 
             }
 
@@ -212,11 +222,11 @@ uniko = (function ()
                 return this.copy()
 
             case 'up':
-            case 'left':
             case 'right':
             case 'down':
-                this.matrix.moveSelection(event.combo)
-                break
+            case 'left':
+                return this.matrix.moveSelection(event.combo)
+
         }
 
         if (!_k_.empty(event.char) && event.char.length === 1)
@@ -228,7 +238,6 @@ uniko = (function ()
             }
             return this.input.onKey(key,event)
         }
-        return false
     }
 
     uniko.prototype["onInputAction"] = function (action, text)
@@ -240,50 +249,6 @@ uniko = (function ()
 
         }
 
-    }
-
-    uniko.prototype["onMouse"] = function (event)
-    {
-        var ret
-
-        if (this.hidden())
-        {
-            return
-        }
-        ret = this.input.onMouse(event)
-        if ((ret != null ? ret.redraw : undefined))
-        {
-            return ret
-        }
-        ret = this.matrix.onMouse(event)
-        if ((ret != null ? ret.redraw : undefined))
-        {
-            return ret
-        }
-        return uniko.__super__.onMouse.call(this,event)
-    }
-
-    uniko.prototype["onWheel"] = function (event)
-    {
-        if (this.hidden())
-        {
-            return false
-        }
-        if (this.matrix.cells.isInsideEvent(event))
-        {
-            switch (event.dir)
-            {
-                case 'up':
-                    this.matrix.moveSelection('up')
-                    break
-                case 'down':
-                    this.matrix.moveSelection('down')
-                    break
-            }
-
-            return {redraw:true}
-        }
-        return false
     }
 
     uniko.prototype["layout"] = function (x, y, w, h)
@@ -314,5 +279,5 @@ uniko = (function ()
 
 export default uniko;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidW5pa28uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3VuaWtvLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsV0FBTjtPQUFXLFdBQVg7T0FBZ0IsV0FBaEI7O09BQ00sWUFBVDs7T0FDUyxZQUFUOztPQUNTLFdBQVo7T0FBaUIsWUFBakI7T0FBdUIsYUFBdkI7O09BRUEsTUFBTSxLQUFLLHdCQUF3QixLQUFLLEVBQUUsS0FBSSxFQUFFLE9BQU87O0FBQzdELFNBQUQ7O3NCQUFPO2FBR0gsT0FBSSxRQUFRLFFBQVE7O1FBQWpCO1FBQVE7UUFBUTs7Ozs7Ozs7Ozs7Ozs7Ozs7OzhDQUVULEtBQUMsT0FBTyxLQUFDO1FBRWYsS0FBQyxTQUFTO1FBQ1YsS0FBQyxRQUFTO1FBRVYsS0FBQyxTQUFTLEtBQUssTUFBTSxNQUFNO1FBRTNCLEtBQUMsWUFBYSxNQUFPLEtBQUMsVUFBVSxLQUFDO1FBQ2pDLEtBQUMsYUFBYSxPQUFPLEtBQUMsVUFBVSxLQUFDO1FBRWpDLEtBQUMsT0FBTyxTQUFTLEtBQWlCLE1BQU0sTUFBTTtRQUM5QyxLQUFDLE9BQU8sU0FBUyxLQUFpQixNQUFNLE1BQU07UUFDOUMsS0FBQyxPQUFPLFNBQVMsWUFBaUIsTUFBTSxNQUFNO1FBQzlDLEtBQUMsT0FBTyxTQUFTLGlCQUFpQixNQUFNLE1BQU07UUFDOUMsS0FBQyxPQUFPLFNBQVMsU0FBaUIsTUFBTSxPQUFPO1FBQy9DLEtBQUMsT0FBTyxTQUFTLGFBQWlCLE1BQU0sT0FBTztRQUUvQyxLQUFDLE1BQU0sdUJBQXVCO1FBQzlCLEtBQUMsTUFBTSxHQUFHLFNBQVMsS0FBQztRQUVwQixLQUFDLE9BQU8sR0FBRyxTQUFTLEtBQUM7UUFFckIsS0FBQzthQUNHLFFBQWdCOztZQUFYLFVBQVc7WUFDaEIsS0FBQyxTQUFTLE1BQUssS0FBSyxLQUFLLGdCQUFZOztRQUN6QyxLQUFDLE9BQU8sU0FBUyxLQUFDO1FBRWxCLEtBQUMsWUFBWTs7O3FCQUVqQixx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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidW5pa28uanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL2tvZGUva2VkL3ZpZXcvY29sbW5zL3VuaWtvLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDbUIsV0FBTjtPQUFXLFdBQVg7T0FBZ0IsV0FBaEI7O09BQ00sWUFBVDs7T0FDUyxZQUFUOztPQUNTLFdBQVo7T0FBaUIsWUFBakI7T0FBdUIsYUFBdkI7O09BRUEsTUFBTSxLQUFLLHdCQUF3QixLQUFLLEVBQUUsS0FBSSxFQUFFLE9BQU87O0FBQzdELFNBQUQ7O3NCQUFPO2FBR0gsT0FBSSxRQUFRLFFBQVE7O1FBQWpCO1FBQVE7UUFBUTs7Ozs7Ozs7Ozs7Ozs7Ozs4Q0FFVCxLQUFDLE9BQU8sS0FBQztRQUVmLEtBQUMsU0FBUztRQUVWLEtBQUMsU0FBUyxLQUFLLE1BQU0sTUFBTTtRQUUzQixLQUFDLFlBQWEsTUFBTyxLQUFDLFVBQVUsS0FBQztRQUNqQyxLQUFDLGFBQWEsT0FBTyxLQUFDLFVBQVUsS0FBQztRQUVqQyxLQUFDLE9BQU8sU0FBUyxLQUFpQixNQUFNLE1BQU07UUFDOUMsS0FBQyxPQUFPLFNBQVMsS0FBaUIsTUFBTSxNQUFNO1FBQzlDLEtBQUMsT0FBTyxTQUFTLFlBQWlCLE1BQU0sTUFBTTtRQUM5QyxLQUFDLE9BQU8sU0FBUyxpQkFBaUIsTUFBTSxNQUFNO1FBQzlDLEtBQUMsT0FBTyxTQUFTLFNBQWlCLE1BQU0sT0FBTztRQUMvQyxLQUFDLE9BQU8sU0FBUyxhQUFpQixNQUFNLE9BQU87UUFFL0MsS0FBQyxNQUFNLHVCQUF1QjtRQUM5QixLQUFDLE1BQU0sR0FBRyxTQUFTLEtBQUM7UUFFcEIsS0FBQyxPQUFPLEdBQUcsU0FBUyxLQUFDO1FBRXJCLEtBQUM7YUFDRyxRQUFnQjs7WUFBWCxVQUFXO1lBQ2hCLEtBQUMsU0FBUyxNQUFLLEtBQUssS0FBSyxnQkFBWTs7UUFDekMsS0FBQyxPQUFPLFNBQVMsS0FBQztRQUVsQixLQUFDLGNBQWUsS0FBQyxNQUFNLEtBQUM7UUFDeEIsS0FBQyxh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
 //# sourceURL=../../../../kode/ked/view/colmns/uniko.kode

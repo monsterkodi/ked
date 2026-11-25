@@ -250,12 +250,12 @@ mat = (cols rows) ->
 
         [h e u] = uni()
 
-        u.focus ▸ 'matrix'
+        u.matrix.hasFocus()
         u.matrix.selectedIndex ▸ 0
 
         h.key u 's' 's'
 
-        u.focus ▸ 'input'
+        u.input.hasFocus() ▸ true
         u.input.current() ▸ 's'
 
   ▸ insert
@@ -263,7 +263,7 @@ mat = (cols rows) ->
         check = (e u) ->
             kseg.str(e.state.s.lines[0]) ▸ 'a√bc'
             u.hidden() ▸ false
-            u.focus ▸ 'matrix'
+            u.matrix.hasFocus() ▸ true
             e.hasFocus() ▸ false
 
         [h e u] = uni()
