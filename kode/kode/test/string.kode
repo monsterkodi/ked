@@ -17,6 +17,12 @@ use ./utils ▪ kc ke
         kc "padding+ '…'"  ▸ "padding + '…'"
         kc "padding +'…'"  ▸ "padding + '…'"
         kc "padding +'s'"  ▸ "padding + 's'"
+
+        # a + in front of a string is always an addition, also in arrays and arguments
+
+        kc "[a +'s']"      ▸ ";[a + 's']"
+        kc "[a +b]"        ▸ ";[a,+b]"
+        kc "log 'a' +'b'"  ▸ "console.log('a' + 'b')"
     
   ▸ triple
         
