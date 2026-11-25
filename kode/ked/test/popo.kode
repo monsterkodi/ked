@@ -827,6 +827,14 @@ showSue = data ->
         loadSheet {children:[{ text:'kode' lines:['1'] x:1 y:1 w:4 h:1 fg:'#ff0000' }]}
         e.draw() ; h.screen.get_fg(1+e.cells.x 1+e.cells.y) == e.state.syntax.getColor(1 1) ▸ false
 
+        e.state.clearSheet()
+        tree = lined {children:[{ text:'kode' lines:['x = 1 # c'] x:1 y:1 w:12 h:1 }]}
+        e.state.setSheetTree layout.pageOf(tree)
+        data = sue.desue e.state.sheetText()
+        e.state.loadSegls kseg.segls(data.text.split('\n'))
+        e.state.loadSue data.sue
+        cls(9 1) ▸ nodeCls('children.0' 8 0) ; cls(9 1) != 'text' ▸ true
+
         e.state.clearSheet() ; e.state.loadLines ['x = 1']
         e.state.syntax.overlay? ▸ false
 

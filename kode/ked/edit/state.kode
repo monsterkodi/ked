@@ -164,9 +164,10 @@ import suact from './act/sue.js'
         if empty @segls ➜ @segls = [[]]
         
         @changeLinesSegls()
-        
+
         @syntax.setSegls @s.lines
-        
+        @syntax.setOverlay @sheetClasses if @rectree? and @sheetClasses?
+
         @r = []
         
         @pushState()

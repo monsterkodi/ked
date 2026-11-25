@@ -520,7 +520,7 @@ use child_process ▪ spawn exec
             rectree = layout.pageOf noon.parse(text)
             if valid rectree
                 @editor.state.setSheetTree rectree
-                text = layout.sueify @editor.state.sheetSize() rectree
+                text = @editor.state.sheetText()
 
         sueData = sue.desue text
         text    = sueData.text

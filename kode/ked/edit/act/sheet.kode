@@ -906,11 +906,21 @@ export
         @s = @s.set 'rectree' layout.plainNode(@rectree)
         @
 
+    #  the text with sue of the loaded sheet, for loading it into the page. the syntax
+    #  classes of its text nodes are kept, they go to the page's syntax with the lines
+
+    sheetText: ->
+
+        data = layout.sheetData @sheetSize() @rectree
+        @sheetClasses = data.classes
+        sue.ensue data.text data.sue
+
     clearSheet: ->
 
         delete @rectree
         delete @sheetMirror
         delete @sheetMulti
+        delete @sheetClasses
 
         @s = @s.set 'rectree' null
         @
@@ -961,8 +971,9 @@ export
 
         @changeLinesSegls()
 
+        @sheetClasses = data.classes
         @syntax.setSegls @s.lines
-        @syntax.setOverlay data.classes
+        @syntax.setOverlay @sheetClasses
 
         @rectree = rectree
 
