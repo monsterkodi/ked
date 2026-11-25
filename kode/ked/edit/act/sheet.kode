@@ -159,11 +159,12 @@ export
     commitSheetNodes: (active nodes befores) ->
 
         changed = false
+        resized = false
 
         for node,i in nodes
             if node.state.s.lines != befores[i].lines
                 changed = true
-                @fitTextNode node befores[i]
+                resized = true if @fitTextNode node befores[i]
 
         if @sheetMulti
             delete @sheetMulti if nodes.length == 1 and active.state.s.cursors.length == 1
@@ -178,11 +179,22 @@ export
 
         projector.scrollToCursor active
 
-        scrolled = nodes.some (node,i) ->
-            node.state.s.view != befores[i].view or node.state.s.scrollOffset != befores[i].scrollOffset
+        #  the rows of the nodes whose glyphs changed are painted again,
+        #  all of them if a node changed its size
 
-        if changed or scrolled
-            @renderSheet @rectree cells projector.cellOf(active active.state.mainCursor()) history:changed
+        dirty = []
+
+        for node,i in nodes
+            st = node.state
+            b  = befores[i]
+            if st.s.lines != b.lines or st.s.view != b.view or st.s.scrollOffset != b.scrollOffset
+                rect = node.rect.abs
+                for y in rect.y...rect.y+rect.h
+                    dirty.push y
+
+        if valid dirty
+            mc = projector.cellOf(active active.state.mainCursor())
+            @renderSheet @rectree cells mc history:changed dirty:(resized ? null : dirty)
         else
             @compositeSheet active
 
@@ -220,13 +232,18 @@ export
 
         st = node.state
 
-        ⮐ if before.lines.length != 1 or st.s.lines.length != 1
+        ⮐ false if before.lines.length != 1 or st.s.lines.length != 1
 
         scale = projector.scaleOf node
 
         if node.w is num and int(node.h) == scale and not node.r? and not node.b?
             if node.w == (kseg.width(before.lines[0])+1)*scale
-                node.w = (kseg.width(st.s.lines[0])+1)*scale
+                w = (kseg.width(st.s.lines[0])+1)*scale
+                ⮐ false if w == node.w
+                node.w = w
+                ⮐ true
+
+        false
 
     #  page line ranges [x1 y x2 y] for the pieces [x1 li x2] of a node's lines
 
@@ -567,7 +584,7 @@ export
 
         opt ?= {}
 
-        data = sue.desue layout.sueify({cols:cells.cols rows:cells.rows} rectree)
+        data = layout.sheetData {cols:cells.cols rows:cells.rows} rectree opt.dirty
         old  = @s.lines
 
         # unchanged rows keep their line, so the syntax and the line diff skip them

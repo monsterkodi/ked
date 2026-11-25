@@ -269,7 +269,7 @@ use ../edit/tool ◆ sue
         out = {}
 
         for key,value of node
-            continue if key in ['rect' 'title' 'index' 'regions' 'rendered' 'state']
+            continue if key in ['rect' 'title' 'index' 'regions' 'rendered' 'grid' 'rows' 'state']
             if key == 'children'
                 out.children = value.map (child) => @plainNode child
             else
@@ -286,7 +286,7 @@ use ../edit/tool ◆ sue
         out = {}
 
         for key,value of node
-            continue if key in ['rect' 'title' 'index' 'regions' 'rendered' 'state' 's' 'lines']
+            continue if key in ['rect' 'title' 'index' 'regions' 'rendered' 'grid' 'rows' 'state' 's' 'lines']
             if key == 'children'
                 out.children = value.map (child) => @dataNode child
             else
@@ -619,28 +619,79 @@ use ../edit/tool ◆ sue
 
     @sueify: cells rectree ->
 
+        ⮐ '' if not rectree?
+
+        data = @sheetData cells rectree
+
+        sue.ensue data.text data.sue
+
+    #  the text and sue areas of the painted sheet. the root keeps its grid and rows:
+    #  with dirty rows given, and the layout painted at this size before, only those
+    #  rows are painted again. the caller knows that no rect changed since
+
+    @sheetData: cells rectree dirty ->
+
         root = @regionize cells rectree
 
-        ⮐ '' if not root?
+        ⮐ {text:'' sue:[]} if not root?
 
         projector.attach root
 
-        root.rendered = {cols:cells.cols rows:cells.rows}
+        size = {cols:cells.cols rows:cells.rows}
 
-        grid  = @gridOf root
-        lines = []
+        if dirty? and root.grid? and root.rendered eql size
+            @repaintRows root dirty
+        else
+            root.grid = @gridOf root
+            root.rows = []
+            for y in 0...root.grid.length
+                root.rows.push @lineOfRow(root.grid y)
+
+        root.rendered = size
+
         areas = []
-
-        for y in 0...grid.length
-
-            row = @lineOfRow(grid y)
-
-            lines.push row.line
-
+        for row in root.rows
             for area in row.areas
                 areas.push area
 
-        sue.ensue(lines.join('\n') areas)
+        text:root.rows.map((row) -> row.line).join('\n') sue:areas
+
+    #  paints the rows of the grid again, widened to whole bands of the scaled text
+    #  they touch, because a block is never cut
+
+    @repaintRows: root dirty ->
+
+        grid = root.grid
+        rows = new Set dirty.filter((y) -> 0 <= y < grid.length)
+
+        widen = (node) =>
+            if @scaleOf(node) > 1 and node.regions?.some((rng) -> rows.has rng[1])
+                rect = node.rect.abs
+                for y in rect.y...min(grid.length rect.y+rect.h)
+                    if not rows.has y
+                        rows.add y
+                        grown = true
+            for child in node.children ? []
+                widen child
+
+        grown = true
+        while grown
+            grown = false
+            widen root
+
+        ys = Array.from rows
+
+        for y in ys
+            for cell in grid[y]
+                cell.char  = ' '
+                cell.fg    = null
+                cell.bg    = null
+                cell.block = null
+
+        @paintTree root grid rows
+
+        for y in ys
+            root.rows[y] = @lineOfRow grid y
 
     @lineOfRow: (grid y) ->
 
@@ -737,16 +788,18 @@ use ../edit/tool ◆ sue
 
         grid
 
-    @paintTree: node grid ->
+    #  rows: the set of grid rows to paint, all if not given
+
+    @paintTree: node grid rows ->
 
         ⮐ if not node?
 
-        @paintNode(node grid) if not node.erase?
+        @paintNode(node grid rows) if not node.erase?
 
         for child in node.children ? []
-            @paintTree child grid
+            @paintTree child grid rows
 
-    @paintNode: node grid ->
+    @paintNode: node grid rows ->
 
         ⮐ if not node.regions?
 
@@ -764,6 +817,9 @@ use ../edit/tool ◆ sue
         for i in 0...node.regions.length
 
             rng   = node.regions[i]
+
+            continue if rows? and not rows.has rng[1]
+
             chars = Array.from(strings?[i] ? '')
 
             for j in 0...(rng[2] - rng[0])
@@ -783,7 +839,7 @@ use ../edit/tool ◆ sue
                 cell.fg = node.fg if valid node.fg and not gone.fg
                 cell.bg = node.bg if valid node.bg and not gone.bg
 
-        @paintScaled node grid masked if @scaleOf(node) > 1
+        @paintScaled node grid masked rows if @scaleOf(node) > 1
 
     #  the rows of the regions of an unscaled text node, with the glyphs of its state
 
@@ -804,7 +860,7 @@ use ../edit/tool ◆ sue
     #  the glyph lives in the top left cell, the other cells are reserved
     #  a block is never cut: whatever is painted later replaces it as a whole
 
-    @paintScaled: node grid masked ->
+    @paintScaled: node grid masked rows ->
 
         scale = @scaleOf node
         rect  = node.rect.abs
@@ -814,6 +870,8 @@ use ../edit/tool ◆ sue
             chars["#{x},#{y}"] = char
 
         for [y x1 x2] in fill.bands(node node.regions rect)
+
+            continue if rows? and not rows.has y
 
             x = x1
 
