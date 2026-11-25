@@ -372,16 +372,20 @@ mat = (cols rows) ->
         h.screen.get_fg(s+21 1) ▸ n3bg                          # the last name overlaps the hex
         h.screen.get_bg(s+21 1) ▸ hexbg
 
-        row = info('x'.repeat(30))[2]
-        row.slice(1 31) ▸ 'x'.repeat(30)
-        row.trimEnd().endsWith "#{L}ldots#{R} ellipsis#{R} 0x2026#{R}" ▸ true
+        row = info('x'.repeat(26))[2]                           # exactly enough room for everything
+        row.trimEnd().endsWith full ▸ true
+
+        row = info('x'.repeat(27))[2]                           # the hex goes first, a hint that names are missing
+        row.slice(1 28) ▸ 'x'.repeat(27)
+        row.trimEnd().endsWith " #{L}ldots#{R} ellipsis#{R} dot#{R}" ▸ true
+        row.includes '0x2026'                                   ▸ false
 
         row = info('x'.repeat(40))[2]
         row.slice(1 41) ▸ 'x'.repeat(40)
-        row.trimEnd().endsWith "#{L}ldots#{R} 0x2026#{R}" ▸ true
+        row.trimEnd().endsWith "#{L}ldots#{R}" ▸ true
 
-        row = info('x'.repeat(45))[2]
-        row.trimEnd().endsWith "#{L}0x2026#{R}" ▸ true
+        row = info('x'.repeat(49))[2]
+        row.trimEnd().endsWith "#{L}ldots#{R}" ▸ true
 
         row = info('x'.repeat(50))[2]
         row.trimEnd() ▸ ' ' + 'x'.repeat(50)

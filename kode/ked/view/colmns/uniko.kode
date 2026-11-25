@@ -188,20 +188,21 @@ import julia from '../../util/julia.json' with { type: "json" }
 
         super()
 
-    infoBubbles: width => # names and hex of the selected char, as many names as fit into width columns
+    infoBubbles: width => # names and hex of the selected char that fit into width columns
 
         item = @matrix.items[@matrix.selectedIndex]
         ⮐ [] if empty item?.char
 
         hex   = Array.from(item.char).map((c) -> '0x' + c.codePointAt(0).toString(16)).join(' ')
-        items = [text:hex fg:@color.hex_fg bg:@color.hex] # last, so it stays in place
-        ⮐ [] if bubbles.width(items) > width
+        names = item.search.split(/\s+/).filter((n) -> valid n).map (name,i) =>
+            text:name fg:@color.name_fg bg:color.darken(@color.name max(0.4 1-0.2*i))
 
-        for name,i in item.search.split(/\s+/).filter((n) -> valid n)
-            bub = text:name fg:@color.name_fg bg:color.darken(@color.name max(0.4 1-0.2*i))
-            break if bubbles.width(items) + 1 + kseg.width(name) > width
-            items.splice items.length-1 0 bub
-        items
+        all = names.concat [text:hex fg:@color.hex_fg bg:@color.hex] # hex last, so it stays in place
+        ⮐ all if bubbles.width(all) <= width
+
+        # not enough room: the hex goes first, its absence hints that names are cropped
+        names.pop() while names.length and bubbles.width(names) > width
+        names
 
     drawInfo: => # right-aligned in the input row, left of it only the input's text and cursor
 
