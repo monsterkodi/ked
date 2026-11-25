@@ -40,9 +40,9 @@ is built on top of that instead of hard-wrapping text into lines itself.
     lines, so a page cell asks the node that painted it for its class and color
     (reverse map → `node.state.syntax`). The node's `fg` / `bg` win over syntax colors,
     as sue colors do now.
-  - **No syntax line scaling in nodes for now:** `md` and `kode` scale headings
-    (`scaledExts`, `scales h1:3 h2:2`), but node states set `@scaling = false`. Scaled
-    rows inside a node can come later.
+  - **No syntax line scaling in sheets, ever:** `md` and `kode` scale headings
+    (`scaledExts`, `scales h1:3 h2:2`), but node states set `@scaling = false`. Scale
+    comes only from `node.scale`.
   - On disk the content is a `lines` list of strings:
     `{text:'md' lines:['HELLO world!' …] x:… }`. Load creates the state from it,
     save writes `s.lines` back. The sheets in `test/level2` are converted once, with no
@@ -492,11 +492,14 @@ page s
 
 ## Later
 
-- per-node syntax colors composited into the page
-- scaled md headings inside nodes
-- keeping the other nodes' cursors in view
-- row end affinity, if a cursor not reaching the end of a row gets in the way
-- novim: `:%s` over all text nodes, and search that continues into the next nodes
+In order of priority (decided 2026-11-25):
+
+1. per-node syntax colors composited into the page
+2. novim: `:%s` over all text nodes, and search that continues into the next nodes
+3. keeping the other nodes' cursors in view, for cmd+d and the like (very low priority)
+
+- row end affinity: open, see the discussion of 2026-11-25
+- dropped: scaled md headings inside nodes (scale is only `node.scale`)
 
 ## Verification
 
