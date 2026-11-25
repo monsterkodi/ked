@@ -39,8 +39,10 @@ import julia from '../../util/julia.json' with { type: "json" }
         @matrix.on 'submit' @submit
 
         @allItems = []
+        @charItem = {}
         for char,comment of julia
             @allItems.push char:char search:trim(comment)
+            @charItem[char] = @allItems[-1]
         @matrix.setItems @allItems
         
         @mouseItems  = [@input @matrix]
@@ -49,7 +51,74 @@ import julia from '../../util/julia.json' with { type: "json" }
         @focusUpDown = false
         @isVisible   = false
 
+    @MAXCHARS: 0x10000
+
+    # parses ranges and sets of characters: '◜◝◞◟' '◜+3' '◜-◟' '25ef 0x25cc' '0x25ef+3' '25ef-25fa'
+    # hex numbers need a 0x prefix, or four digits with at least one decimal digit
+    # literal characters must be non-ascii, so that names like 'less-than' can be searched
+    # returns the characters, each once, or null if the text is something else
+
+    @parse: text ->
+
+        toks = []
+        rgx  = /\s+|[+-]|0x[0-9a-f]+|[0-9a-f]+|[^\x00-\x7f]/iuy
+        pos  = 0
+        while pos < text.length
+            rgx.lastIndex = pos
+            m = rgx.exec text
+            ⮐ null if not m
+            pos += m[0].length
+            t = m[0]
+            if /^\s/.test t                     ➜ continue
+            else if t in ['+' '-']              ➜ toks.push op:t
+            else if t.codePointAt(0) > 0x7f     ➜ toks.push cp:t.codePointAt(0)
+            else                                  toks.push num:t
+
+        ⮐ null if empty toks
+
+        code = (t) -> # code point of a literal char or a hex number
+            ⮐ t.cp if t?.cp?
+            ⮐ null if not t?.num?
+            ⮐ parseInt(t.num[2..] 16) if /^0x[0-9a-f]+$/i.test t.num
+            ⮐ parseInt(t.num 16) if t.num.length >= 4 and /[0-9]/.test t.num
+            null
+
+        chars = new Set
+        add = (a b) ->
+            for c in a..b
+                break if chars.size >= uniko.MAXCHARS or c > 0x10ffff
+                continue if c < 0x20 or 0x7f <= c <= 0x9f or 0xd800 <= c <= 0xdfff
+                chars.add String.fromCodePoint(c)
+
+        i = 0
+        while i < toks.length
+            a = code toks[i]
+            ⮐ null if not a?
+            op   = toks[i+1]?.op
+            next = toks[i+2]
+            if op and not next? # an operator without operand while typing
+                add a a
+                break
+            switch op
+                '+'
+                    ⮐ null if not /^[0-9]+$/.test next.num ? ''
+                    add a a+parseInt(next.num)
+                    i += 3
+                '-'
+                    b = code next
+                    ⮐ null if not b?
+                    add min(a b) max(a b)
+                    i += 3
+                ➜
+                    add a a
+                    i += 1
+
+        Array.from chars
+
     filter: text =>
+
+        if chars = uniko.parse text
+            ⮐ @matrix.setItems chars.map((c) => @charItem[c] ? char:c search:'')
 
         text = trim(text).toLowerCase()
 

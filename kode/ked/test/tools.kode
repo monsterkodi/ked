@@ -246,6 +246,62 @@ mat = (cols rows) ->
 
         u.matrix.numItems() ▸ all
 
+  ▸ ranges and sets                        # literal chars, hex numbers, +count and first-last
+
+        cps = (fc n) -> [fc...fc+n].map (c) -> String.fromCodePoint c
+        corners = ['◜' '◝' '◞' '◟']
+
+        uniko.parse('◜◝◞◟')             ▸ corners
+        uniko.parse('◜+3')              ▸ corners
+        uniko.parse('◜-◟')              ▸ corners
+        uniko.parse('◟-◜')              ▸ corners             # reversed ranges ascend
+        uniko.parse('  ◜  ◝◞   ◟ ')     ▸ corners
+        uniko.parse('◜   +   3')        ▸ corners
+        uniko.parse('◜  -  ◟')          ▸ corners
+
+        uniko.parse('25ef 0x25cc')      ▸ ['◯' '◌']
+        uniko.parse('25EF   0X25CC')    ▸ ['◯' '◌']
+        uniko.parse('0x25ef+3')         ▸ cps(0x25ef 4)
+        uniko.parse('0x25ef  +  3')     ▸ cps(0x25ef 4)
+        uniko.parse('25ef-25fa')        ▸ cps(0x25ef 12)
+        uniko.parse('25ef - 0x25fa')    ▸ cps(0x25ef 12)
+        uniko.parse('◜-0x25df')         ▸ corners
+        uniko.parse('◜ 25ef+1 ◜')       ▸ ['◜' '◯' '◰']        # a set, each char once
+        uniko.parse('1f308')            ▸ ['🌈']
+        uniko.parse('0x41')             ▸ ['A']                # ascii only by number
+
+        uniko.parse('◜+')               ▸ ['◜']                # typing in progress
+        uniko.parse('◜ -')              ▸ ['◜']
+
+        uniko.parse('d7ff-0xd801')      ▸ [String.fromCodePoint(0xd7ff)]  # no surrogates
+        uniko.parse('0x1f-0x21')        ▸ [' ' '!']                       # no control chars
+        uniko.parse('0x10ffff+5')       ▸ [String.fromCodePoint(0x10ffff)]
+        uniko.parse('0x0-0x10ffff').length ▸ 0x10000                      # capped
+
+        uniko.parse('')                 ▸ null                 # names are searched instead
+        uniko.parse('sqrt')             ▸ null
+        uniko.parse('face')             ▸ null                 # hex without 0x needs a digit
+        uniko.parse('2')                ▸ null                 # and four digits
+        uniko.parse('sub 2')            ▸ null
+        uniko.parse('less-than')        ▸ null
+        uniko.parse('◜+x')              ▸ null
+        uniko.parse('◜+0x3')            ▸ null                 # counts are decimal
+        uniko.parse('0x')               ▸ null
+
+        [h e u] = uni()
+
+        u.filter '◜+3'
+        u.matrix.items.map((i) -> i.char) ▸ corners
+
+        u.filter '0x25ef'
+        u.matrix.items[0].search ▸ 'symbol circle open'       # names from julia
+
+        u.filter '0x2600'
+        u.matrix.items ▸ [char:'☀' search:'']                  # not in julia
+
+        u.filter 'circle open'
+        u.matrix.items.map((i) -> i.char).includes('◯') ▸ true
+
   ▸ focus
 
         [h e u] = uni()
