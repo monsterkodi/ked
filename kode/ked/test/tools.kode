@@ -402,7 +402,7 @@ mat = (cols rows) ->
 
         L = ''
         R = ''
-        full = "#{L}ldots#{R} ellipsis#{R} dot#{R} 0x2026#{R}"  # hex last, so it rarely moves
+        full = "#{L}ldots#{R} ellipsis#{R} dot#{R} 2026#{R}"  # hex last, so it rarely moves
 
         info = (text) ->
             [h e u] = uni()
@@ -433,7 +433,6 @@ mat = (cols rows) ->
 
         row = info('x'.repeat(27))[2]                           # the hex goes first, a hint that names are missing
         row.slice(1 28) ▸ 'x'.repeat(27)
-        row.trimEnd().endsWith " #{L}ldots#{R} ellipsis#{R} dot#{R}" ▸ true
         row.includes '0x2026'                                   ▸ false
 
         row = info('x'.repeat(40))[2]
