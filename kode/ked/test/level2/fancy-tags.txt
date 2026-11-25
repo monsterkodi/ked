@@ -68,53 +68,20 @@ this one has forty, and the words after it still wrap normally.
 
 SECTION C  lines that contain nothing visible at all
 
-each label line is followed by a line made only of tag characters. an
-editor that drops them shows the next line as blank. an editor that counts
-them shows it as indented. an editor that draws them shows junk.
+each label line is followed by a line made only of tag characters. an editor that drops them shows the next line as blank. an editor that counts them shows it as indented. an editor that draws them shows junk.
 
-next line: 1 tag letters and nothing else
-
-
-next line: 2 tag letters and nothing else
-
-
-next line: 4 tag letters and nothing else
-
-
-next line: 16 tag letters and nothing else
-
-
-next line: 96 tag letters and nothing else
-
-
-next line: one tag space and nothing else
-󠀠
-
-next line: 40 tag spaces and nothing else
-󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠
-
-next line: 20 cancel tags and nothing else
-󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿
+next line: 1 tag letters and nothing elsenext line: 
+2 tag letters and nothing elsenext line: 4 tag letters and nothing elsenext line: 16 tag letters and nothing elsenext line: 96 tag letters and nothing elsenext line: one tag space and nothing else󠀠next line: 40 tag spaces and nothing else󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠󠀠next line: 20 cancel tags and nothing else󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿󠁿
 
 next line: one payload, no visible text to attach it to
 󠁯󠁲󠁰󠁨󠁡󠁮󠁿
-
 end of section C
 
 ============================================================
 
 SECTION D  payloads attached after a run
 
-word󠁬󠁥󠁮󠀽󠀴󠁿
-red words󠁬󠁥󠁮󠀽󠀹󠀻󠁦󠁧󠀽󠁦󠁦󠀲󠀲󠀰󠀰󠁿
-a long run of ordinary text󠁬󠁥󠁮󠀽󠀲󠀴󠀻󠁢󠁧󠀽󠀰󠀰󠀳󠀳󠀶󠀶󠀻󠁦󠁧󠀽󠁦󠁦󠁦󠁦󠁦󠁦󠀻󠁳󠀽󠀲󠁿
-two payloads back to back󠁡󠀽󠀱󠁿󠁢󠀽󠀲󠁿
-a payload with a space in it󠁮󠁯󠁴󠁥󠀽󠁨󠁥󠁬󠁬󠁯󠀠󠁷󠁯󠁲󠁬󠁤󠁿
-a payload with a literal 0x7f in it󠁣󠁵󠁴󠁿󠁿󠁨󠁥󠁲󠁥󠁿
-a payload with two literals󠁿󠁿󠁿󠁿󠁿
-a payload with a tag space at the start󠀠󠁸󠁿
-a payload with a tag space at the end󠁸󠀠󠁿
-word󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁿 <- 200 byte body
+word󠁬󠁥󠁮󠀽󠀴󠁿red words󠁬󠁥󠁮󠀽󠀹󠀻󠁦󠁧󠀽󠁦󠁦󠀲󠀲󠀰󠀰󠁿a long run of ordinary text󠁬󠁥󠁮󠀽󠀲󠀴󠀻󠁢󠁧󠀽󠀰󠀰󠀳󠀳󠀶󠀶󠀻󠁦󠁧󠀽󠁦󠁦󠁦󠁦󠁦󠁦󠀻󠁳󠀽󠀲󠁿two payloads back to back󠁡󠀽󠀱󠁿󠁢󠀽󠀲󠁿a payload with a space in it󠁮󠁯󠁴󠁥󠀽󠁨󠁥󠁬󠁬󠁯󠀠󠁷󠁯󠁲󠁬󠁤󠁿a payload with a literal 0x7f in it󠁣󠁵󠁴󠁿󠁿󠁨󠁥󠁲󠁥󠁿a payload with two literals󠁿󠁿󠁿󠁿󠁿a payload with a tag space at the start󠀠󠁸󠁿a payload with a tag space at the end󠁸󠀠󠁿word󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁸󠁿 <- 200 byte body
 
 ============================================================
 
@@ -129,17 +96,7 @@ after the text󠁡󠀽󠀱󠁿󠁢󠀽󠀲󠁿󠁣󠀽󠀳󠁿
 
 SECTION F  crowded
 
-a tag after every character:
-crowded
-
-a payload after every character:
-d󠁣󠀽󠀶󠀴󠁿e󠁣󠀽󠀶󠀵󠁿n󠁣󠀽󠀶󠁥󠁿s󠁣󠀽󠀷󠀳󠁿e󠁣󠀽󠀶󠀵󠁿
-
-alternating tag and space:
-󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠
-
-one long line, 300 interleaved tags:
-abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij| <- bar at column 301
+a tag after every character:crowdeda payload after every character:d󠁣󠀽󠀶󠀴󠁿e󠁣󠀽󠀶󠀵󠁿n󠁣󠀽󠀶󠁥󠁿s󠁣󠀽󠀷󠀳󠁿e󠁣󠀽󠀶󠀵󠁿alternating tag and space:󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠󠁡󠀠one long line, 300 interleaved tags:abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij| <- bar at column 301
 
 ============================================================
 
