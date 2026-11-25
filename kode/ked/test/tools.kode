@@ -2,7 +2,7 @@
 use ../../kxk       ◆ clip kseg post
 use ../util         ◆ detector harness
 use ../edit         ◆ editor specs
-use ../view/base    ◆ matrix
+use ../view/base    ◆ matrix bubbles
 use ../view/colmns  ◆ uniko
 use ../view/menu    ◆ clippo
 use ../theme        ◆ theme
@@ -346,7 +346,7 @@ mat = (cols rows) ->
 
         L = ''
         R = ''
-        full = "#{L}ldots#{L}ellipsis#{L}dot#{L}0x2026#{R}"     # hex last, so it rarely moves
+        full = "#{L}ldots#{R}ellipsis#{R}dot#{R}0x2026#{R}"     # hex last, so it rarely moves
 
         info = (text) ->
             [h e u] = uni()
@@ -369,18 +369,18 @@ mat = (cols rows) ->
         (n1bg[0] == n1bg[1] == n1bg[2]) ▸ true                  # gray
         (n2bg[0] == n2bg[1] == n2bg[2]) ▸ true
         (n1bg[0] != n2bg[0]) ▸ true                             # stacked shades
-        h.screen.get_fg(s+6 1) ▸ n2bg                           # a name's cap overlaps its left neighbor
-        h.screen.get_bg(s+6 1) ▸ n1bg
-        h.screen.get_fg(s+19 1) ▸ hexbg                         # so does the hex cap
-        h.screen.get_bg(s+19 1) ▸ n3bg
+        h.screen.get_fg(s+6 1) ▸ n1bg                           # a name's cap overlaps its right neighbor
+        h.screen.get_bg(s+6 1) ▸ n2bg
+        h.screen.get_fg(s+19 1) ▸ n3bg                          # the last name overlaps the hex
+        h.screen.get_bg(s+19 1) ▸ hexbg
 
         row = info('x'.repeat(30))[2]
         row.slice(1 31) ▸ 'x'.repeat(30)
-        row.trimEnd().endsWith "#{L}ldots#{L}ellipsis#{L}0x2026#{R}" ▸ true
+        row.trimEnd().endsWith "#{L}ldots#{R}ellipsis#{R}0x2026#{R}" ▸ true
 
         row = info('x'.repeat(40))[2]
         row.slice(1 41) ▸ 'x'.repeat(40)
-        row.trimEnd().endsWith "#{L}ldots#{L}0x2026#{R}" ▸ true
+        row.trimEnd().endsWith "#{L}ldots#{R}0x2026#{R}" ▸ true
 
         row = info('x'.repeat(45))[2]
         row.trimEnd().endsWith "#{L}0x2026#{R}" ▸ true
@@ -392,6 +392,54 @@ mat = (cols rows) ->
         u.filter 'nothing matches this'
         u.draw()
         h.row(1).includes(L) ▸ false
+
+#!bubbles
+▸ bubbles
+
+  ▸ caps                                   # half-circles between the bubbles point left or right
+
+        L = ''
+        R = ''
+        a = [1 1 1]
+        b = [2 2 2]
+        c = [3 3 3]
+        w = [9 9 9]
+
+        draw = (pointRight) ->
+            h = new harness cols:20 rows:2
+            bs = new bubbles h.screen 'test_bubbles'
+            bs.setColor 'empty' c
+            bs.pointRight = pointRight
+            bs.set [{text:'ab' fg:w bg:a} {text:'中' fg:w bg:b}]
+            bs.layout 2 0 bs.width() 1
+            bs.draw()
+            h
+
+        bubbles.width([{text:'ab'} {text:'中'}]) ▸ 7
+        bubbles.width([])                        ▸ 0
+
+        h = draw false
+        h.row(0) ▸ "  #{L}ab#{L}中 #{R}"              # the row dump fills the wide char's second column
+        h.screen.get_fg(2 0) ▸ a                # the left cap
+        h.screen.get_bg(2 0) ▸ c
+        h.screen.get_fg(3 0) ▸ w
+        h.screen.get_bg(3 0) ▸ a
+        h.screen.get_fg(5 0) ▸ b                # the second bubble overlaps the first
+        h.screen.get_bg(5 0) ▸ a
+        h.screen.get_bg(6 0) ▸ b
+        h.screen.get_fg(8 0) ▸ b                # the right cap
+        h.screen.get_bg(8 0) ▸ c
+
+        h = draw true
+        h.row(0) ▸ "  #{L}ab#{R}中 #{R}"
+        h.screen.get_fg(5 0) ▸ a                # the first bubble overlaps the second
+        h.screen.get_bg(5 0) ▸ b
+
+        h = new harness cols:20 rows:2
+        bs = new bubbles h.screen 'test_bubbles'
+        bs.layout 0 0 10 1
+        bs.draw()
+        h.row(0) ▸ ''
 
 #!matrix
 ▸ matrix

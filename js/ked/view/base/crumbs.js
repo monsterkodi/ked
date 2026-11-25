@@ -1,4 +1,4 @@
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }, lpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s=c+s} return s}, trim: function (s,c=' ') {return _k_.ltrim(_k_.rtrim(s,c),c)}, ltrim: function (s,c=' ') { while (_k_.in(s[0],c)) { s = s.slice(1) } return s}, rtrim: function (s,c=' ') {while (_k_.in(s.slice(-1)[0],c)) { s = s.slice(0, s.length - 1) } return s}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, min: function () { var m = Infinity; for (var a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {var n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, lpad: function (l,s='',c=' ') {s=String(s); while(s.length<l){s=c+s} return s}, trim: function (s,c=' ') {return _k_.ltrim(_k_.rtrim(s,c),c)}, ltrim: function (s,c=' ') { while (_k_.in(s[0],c)) { s = s.slice(1) } return s}, rtrim: function (s,c=' ') {while (_k_.in(s.slice(-1)[0],c)) { s = s.slice(0, s.length - 1) } return s}}
 
 var crumbs
 
@@ -9,12 +9,12 @@ let post = kxk.post
 import color from "../../theme/color.js"
 import theme from "../../theme/theme.js"
 
-import view from "./view.js"
+import bubbles from "./bubbles.js"
 
 
 crumbs = (function ()
 {
-    _k_.extend(crumbs, view)
+    _k_.extend(crumbs, bubbles)
     function crumbs (screen, name)
     {
         this["onMouse"] = this["onMouse"].bind(this)
@@ -23,23 +23,10 @@ crumbs = (function ()
         crumbs.__super__.constructor.call(this,screen,name)
         this.pointerType = 'pointer'
         this.rounded = ''
+        this.padding = ''
         this.setColor('hover',theme.hover.bg)
         this.setColor('bg',theme.crumbs.bg)
         this.setColor('fg',theme.crumbs.fg)
-        this.setColor('empty',theme.editor.bg)
-    }
-
-    crumbs.prototype["setColor"] = function (key, color)
-    {
-        switch (key)
-        {
-            case 'empty':
-                this.setColor('empty_left',color)
-                this.setColor('empty_right',color)
-                break
-        }
-
-        return crumbs.__super__.setColor.call(this,key,color)
     }
 
     crumbs.prototype["layout"] = function (x, y, w, h)
@@ -51,7 +38,7 @@ crumbs = (function ()
 
     crumbs.prototype["draw"] = function ()
     {
-        var bg, ch, colors, fg, i, si, x
+        var lsi
 
         if (this.hidden())
         {
@@ -61,40 +48,20 @@ crumbs = (function ()
         {
             return
         }
-        colors = []
-        for (i = 0; i < this.split.length; i++)
+        lsi = this.split.length - 1
+        this.items = this.split.map((function (seg, si)
         {
-            if (i === this.hoverIndex)
+            var bg, fg
+
+            if (si === this.hoverIndex)
             {
-                colors.push(this.color.hover)
+                bg = this.color.hover
+                fg = color.adjustForBackground(this.color.fg,bg)
             }
             else
             {
-                colors.push(color.darken(this.color.bg,0.4 + 0.6 * (i + 1) / this.split.length))
-            }
-        }
-        for (x = 0; x < this.rounded.length; x++)
-        {
-            si = this.splitIndexAtCol(x)
-            bg = colors[si]
-            ch = this.rounded[x]
-            if (_k_.in(ch,''))
-            {
-                fg = bg
-                bg = (si > 0 ? colors[si - 1] : this.color.empty_left)
-                if (x === this.rounded.length - 1)
-                {
-                    bg = this.color.empty_right
-                }
-                this.cells.set(x,0,ch,fg,bg)
-            }
-            else
-            {
-                if (si === this.hoverIndex)
-                {
-                    fg = color.adjustForBackground(this.color.fg,bg)
-                }
-                else if (si < this.split.length - 1)
+                bg = color.darken(this.color.bg,0.4 + 0.6 * (si + 1) / this.split.length)
+                if (si < lsi)
                 {
                     fg = color.darken(this.color.fg,_k_.min(1,(si + 3) / this.split.length))
                 }
@@ -102,9 +69,10 @@ crumbs = (function ()
                 {
                     fg = color.brighten(this.color.fg)
                 }
-                this.cells.set(x,0,ch,fg,bg)
             }
-        }
+            return {text:((si < lsi ? seg + ' ' : seg + this.padding)),fg:fg,bg:bg}
+        }).bind(this))
+        return crumbs.__super__.draw.call(this)
     }
 
     crumbs.prototype["splitIndexAtCol"] = function (col)
@@ -154,13 +122,13 @@ crumbs = (function ()
 
     crumbs.prototype["adjustText"] = function ()
     {
-        var padding, _101_14_
+        var _82_14_
 
         if (this.hidden())
         {
             return
         }
-        this.path = ((_101_14_=this.path) != null ? _101_14_ : '')
+        this.path = ((_82_14_=this.path) != null ? _82_14_ : '')
         if (this.path === '')
         {
             this.rounded = ''
@@ -182,8 +150,8 @@ crumbs = (function ()
             this.rounded = this.split.join(' ')
         }
         this.root = this.root.join('/')
-        padding = (this.padLast ? _k_.lpad(this.cells.cols - 2 - this.rounded.length) : '')
-        return this.rounded = '' + this.rounded + padding + ''
+        this.padding = (this.padLast ? _k_.lpad(this.cells.cols - 2 - this.rounded.length) : '')
+        return this.rounded = '' + this.rounded + this.padding + ''
     }
 
     crumbs.prototype["set"] = function (path)
@@ -213,7 +181,7 @@ crumbs = (function ()
 
     crumbs.prototype["onMouse"] = function (event)
     {
-        var col, index, path, row, si, _147_26_
+        var col, index, path, row, si, _128_26_
 
         ;[col,row] = this.eventPos(event)
         crumbs.__super__.onMouse.call(this,event)
@@ -256,5 +224,5 @@ crumbs = (function ()
 
 export default crumbs;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY3J1bWJzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2Jhc2UvY3J1bWJzLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQU07SUFBTTs7T0FDTixZQUFUO09BQWUsWUFBZjs7T0FDUyxXQUFBOzs7QUFDbEIsVUFBRDs7dUJBQVE7YUFLSixRQUFHLFFBQU87Ozs7OytDQUVBLE9BQU87UUFFYixLQUFDLGNBQWM7UUFDZixLQUFDLFVBQVU7UUFFWCxLQUFDLFNBQVMsUUFBYyxNQUFNLE1BQU07UUFDcEMsS0FBQyxTQUFTLEtBQWMsTUFBTSxPQUFPO1FBQ3JDLEtBQUMsU0FBUyxLQUFjLE1BQU0sT0FBTztRQUNyQyxLQUFDLFNBQVMsUUFBYyxNQUFNLE9BQU87OztzQkFFekMsdUJBQVUsS0FBSTs7Z0JBRUg7O2lCQUNIO2dCQUNJLEtBQUMsU0FBUyxhQUFjO2dCQUN4QixLQUFDLFNBQVMsY0FBYzs7OzttREFFMUIsSUFBSTs7O3NCQUVkLHFCQUFRLEdBQUUsR0FBRSxHQUFFOzswQ0FFSixFQUFFLEVBQUUsRUFBRTs7ZUFFWixLQUFDOzs7c0JBRUw7Ozs7WUFFUyxLQUFDOzs7O3NCQUNLLEtBQUM7Ozs7UUFFWjthQUNJLElBQUssT0FBSSxLQUFDLE1BQU07O2dCQUNiLE1BQUssS0FBQzs7Z0JBQ0wsT0FBTyxLQUFLLEtBQUMsTUFBTTs7OztnQkFFbkIsT0FBTyxLQUFLLE1BQU0sT0FBTyxLQUFDLE1BQU0sR0FBRyxNQUFJLE9BQUssSUFBRSxLQUFHLEtBQUMsTUFBTTs7O2FBRTVELElBQUssT0FBSSxLQUFDLFFBQVE7O1lBRWxCLEtBQUssS0FBQyxnQkFBZ0I7WUFDdEIsS0FBSyxPQUFPO1lBQ1osS0FBSyxLQUFDLFFBQVE7dUJBRVgsR0FBTTs7Z0JBQ0wsS0FBSztnQkFDTCxNQUFLLEtBQUssSUFBSSxPQUFPLEtBQUcsS0FBSyxLQUFDLE1BQU07b0JBQ1QsTUFBSyxLQUFDLFFBQVEsU0FBTzs7b0JBQWhELEtBQUssS0FB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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY3J1bWJzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC92aWV3L2Jhc2UvY3J1bWJzLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQU07SUFBTTs7T0FDTixZQUFUO09BQWUsWUFBZjs7T0FDUyxjQUFBOzs7QUFDbEIsVUFBRDs7dUJBQVE7YUFLSixRQUFHLFFBQU87Ozs7OytDQUVBLE9BQU87UUFFYixLQUFDLGNBQWM7UUFDZixLQUFDLFVBQVU7UUFDWCxLQUFDLFVBQVU7UUFFWCxLQUFDLFNBQVMsUUFBYyxNQUFNLE1BQU07UUFDcEMsS0FBQyxTQUFTLEtBQWMsTUFBTSxPQUFPO1FBQ3JDLEtBQUMsU0FBUyxLQUFjLE1BQU0sT0FBTzs7O3NCQUV6QyxxQkFBUSxHQUFFLEdBQUUsR0FBRTs7MENBRUosRUFBRSxFQUFFLEVBQUU7O2VBRVosS0FBQzs7O3NCQUVMOzs7O1lBRVMsS0FBQzs7OztzQkFDSyxLQUFDOzs7O1FBRVosTUFBTSxLQUFDLE1BQU0sU0FBTztRQUVwQixLQUFDLFFBQVEsS0FBQyxNQUFNLGVBQUssS0FBSTs7OztnQkFFbEIsT0FBTSxLQUFDOztnQkFDTixLQUFLLEtBQUMsTUFBTTtnQkFDWixLQUFLLE1BQU0sb0JBQW9CLEtBQUMsTUFBTSxHQUFHOzs7O2dCQUV6QyxLQUFLLE1BQU0sT0FBTyxLQUFDLE1BQU0sR0FBRyxNQUFJLE9BQUssS0FBRyxLQUFHLEtBQUMsTUFBTTtvQkFDL0MsS0FBSzs7b0JBQ0osS0FBSyxNQUFNLE9BQU8sS0FBQyxNQUFNLFdBQU8sR0FBRyxLQUFHLEtBQUcsS0FBQyxNQUFNOzs7O29CQUVoRCxLQUFLLE1BQU0sU0FBUyxLQUFDLE1BQU07OztvQkFFbkMsT0FBTSxLQUFLLE1BQU0sTUFBSSxNQUFNLE1BQUksS0FBQyxVQUFTLEdBQUcsR0FBRyxHQUFHOzs7OztzQkFJMUQsOEJBQWlCOzs7O1FBRWIsS0FBSzthQUNELEtBQU0sUUFBSSxLQUFDLE1BQU07O1lBQ2pCLE1BQU0sS0FBQyxNQUFNLElBQUksU0FBUztnQkFDdkIsS0FBSzs7dUJBQ0Y7OztlQUNWLEtBQUMsTUFBTSxTQUFPOzs7c0JBRWxCLCtCQUFrQjs7OztRQUVkLEtBQUssS0FBSzthQUVOLElBQUssUUFBRzs7Z0JBQ0wsSUFBSTs7Z0JBQ0gsTUFBTSxLQUFDLE1BQU0sR0FBRyxTQUFTOztZQUM3QixNQUFNLEtBQUMsTUFBTSxHQUFHLFNBQVM7O2dCQUU1QixHQUFHOzs7c0JBRVIsK0JBQWtCOzs7O1FBRWQsT0FBTyxNQUFNLFFBQUssS0FBQyxZQUFNLFVBQUcsbUJBQUE7UUFDNUIsT0FBTyxNQUFNLEtBQUssS0FBQyxLQUFLO3FCQUNDLEtBQUssR0FBTTs7WUFBcEMsT0FBTyxNQUFNOztlQUNiOzs7c0JBRUo7Ozs7WUFFUyxLQUFDOzs7O1FBRU4sS0FBQyxpQkFBRCxLQUFDLDBCQUFRO1lBRU4sS0FBQyxTQUFROztZQUNSLEtBQUMsVUFBVTs7O1FBR2YsS0FBQyxRQUFRLE1BQU0sTUFBTSxLQUFDO2FBRWYsS0FBQzs7eUJBQ2tCLEtBQUMsTUFBTSxHQUFVOztnQkFBdkMsS0FBQyxNQUFNLFFBQVE7OztRQUVuQixLQUFDO1FBRUQsS0FBQyxVQUFVLEtBQUMsTUFBTSxLQUFLO2VBRWpCLEtBQUMsTUFBTSxTQUFTLEtBQU0sS0FBQyxRQUFRLFNBQVMsS0FBQyxNQUFNLE9BQUs7O1lBQ3RELEtBQUMsS0FBSyxLQUFLLEtBQUMsTUFBTTtZQUNsQixLQUFDLFVBQVUsS0FBQyxNQUFNLEtBQUs7O1FBRTNCLEtBQUMsT0FBTyxLQUFDLEtBQUssS0FBSztRQUVuQixLQUFDLFdBQVUsS0FBQyxtQkFBZSxLQUFDLE1BQU0sT0FBSyxJQUFFLEtBQUMsUUFBUSxVQUFVO2VBRTVELEtBQUMsVUFBVSxNQUFNLEtBQUMsVUFBVSxLQUFDLFVBQVU7OztzQkFFM0Msa0JBQUs7O1FBRUQsS0FBQyxNQUFNLE9BQU87UUFDZCxLQUFDLGdCQUFZO2VBQ2IsS0FBQzs7O3NCQUVMLG1CQUFNOztlQUFRLEtBQUMsSUFBSSxNQUFNLE1BQU07OztzQkFDL0I7O2VBQVksS0FBQyxNQUFNLE9BQU87OztzQkFFMUIsMkJBQWM7Ozs7UUFFVixRQUFRLEtBQUM7ZUFDVCxLQUFDLEtBQUssU0FBUyxRQUFRLEtBQUMsaUJBQWlCLFFBQU8sTUFBTSxNQUFNLEtBQUssS0FBQyxpQkFBaUI7OztzQkFFdkYsc0JBQVM7Ozs7VUFFSixJQUFJLE9BQU8sS0FBQyxTQUFTOzJDQUVoQjthQUVDLEtBQUM7O2lCQUNELEtBQUM7O3VCQUNPLEtBQUM7dUJBQ047Ozs7Z0JBR0gsTUFBTTs7aUJBRVQ7Z0JBRUksS0FBSyxLQUFDLGdCQUFnQjtxQkFDbkIsS0FBSyxLQUFDLGNBQUQsS0FBQyxhQUFhLEtBQUMsTUFBTTs7b0JBQ3pCLE9BQU8sS0FBQyxpQkFBaUIsS0FBQztvQkFDMUIsS0FBQyxLQUFLLFNBQVMsUUFBUSxLQUFLOzt3QkFDOUIsT0FBTzs7aUJBRWI7Z0JBRUksUUFBUSxLQUFDLGdCQUFnQjtvQkFDdEIsS0FBQyxlQUFjOztvQkFDZCxLQUFDLGFBQWE7b0JBQ2QsS0FBQyxLQUFLLFNBQVMsUUFBUSxLQUFDLGlCQUFpQixRQUFPLE1BQU0sTUFBTSxLQUFLLEtBQUMsaUJBQWlCOzRCQUNqRixPQUFPOzs7OztlQUVyQixLQUFDOzs7V0FsSlI7OztlQW9KTSJ9
 //# sourceURL=../../../../kode/ked/view/base/crumbs.kode

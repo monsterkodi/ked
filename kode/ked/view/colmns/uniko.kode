@@ -2,7 +2,7 @@
 use ../../../kxk ◆ clip kseg post
 use ../../theme  ◆ color theme
 use ../../edit   ◆ specs
-use ../base      ◆ view input matrix
+use ../base      ◆ view input matrix bubbles
 
 import julia from '../../util/julia.json' with { type: "json" }
 ■uniko□view
@@ -22,6 +22,9 @@ import julia from '../../util/julia.json' with { type: "json" }
 
         @input  = new input  @screen "#{@name}_input"
         @matrix = new matrix @screen "#{@name}_matrix"
+        @info   = new bubbles @screen "#{@name}_info"
+
+        @info.pointRight = true
 
         @matrix.setColor 'bg'             theme.uniko.bg
         @matrix.setColor 'fg'             theme.uniko.fg
@@ -190,39 +193,27 @@ import julia from '../../util/julia.json' with { type: "json" }
         item = @matrix.items[@matrix.selectedIndex]
         ⮐ [] if empty item?.char
 
-        hex  = Array.from(item.char).map((c) -> '0x' + c.codePointAt(0).toString(16)).join(' ')
-        used = 2 + kseg.width(hex) # left cap, text, right cap
-        ⮐ [] if used > width
+        hex   = Array.from(item.char).map((c) -> '0x' + c.codePointAt(0).toString(16)).join(' ')
+        items = [text:hex fg:@color.hex_fg bg:@color.hex] # last, so it stays in place
+        ⮐ [] if bubbles.width(items) > width
 
-        bubbles = []
         for name,i in item.search.split(/\s+/).filter((n) -> valid n)
-            used += 1 + kseg.width(name)
-            break if used > width
-            bubbles.push text:name fg:@color.name_fg bg:color.darken(@color.name max(0.4 1-0.2*i))
-
-        bubbles.push text:hex fg:@color.hex_fg bg:@color.hex # last, so it stays in place
-        bubbles
+            bub = text:name fg:@color.name_fg bg:color.darken(@color.name max(0.4 1-0.2*i))
+            break if bubbles.width(items) + 1 + kseg.width(name) > width
+            items.splice items.length-1 0 bub
+        items
 
     drawInfo: => # right-aligned in the input row, left of it only the input's text and cursor
 
         right = @cells.cols - 1
         free  = right - 1 - kseg.width(@input.current()) - 2
-        bubbles = @infoBubbles free
-        ⮐ if empty bubbles
+        items = @infoBubbles free
+        ⮐ if empty items
 
-        x = right - 1
-        for b in bubbles
-            x -= 1 + kseg.width(b.text)
-
-        ibg  = @input.color.bg
-        prev = ibg
-        for b in bubbles
-            @cells.set x 1 '' b.bg prev
-            x += 1
-            for seg in kseg(b.text)
-                @cells.set x 1 kseg.str(seg) b.fg b.bg
-                x += kseg.segWidth seg
-            prev = b.bg
-        @cells.set x 1 '' prev ibg
+        w = bubbles.width items
+        @info.layout @cells.x+right-w @cells.y+1 w 1
+        @info.setColor 'empty' @input.color.bg
+        @info.set items
+        @info.draw()
 
 export uniko
