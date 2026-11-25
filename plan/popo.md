@@ -418,7 +418,7 @@ page s
      - Fixed on the way: `setMainCursorAndSelect` (shift+click) never selected, in
        the editor too: a nested implicit call passed the function itself to
        `setSelections`.
-7. **novim in sheets.** Before this phase novim ran only on the page: its edits changed
+7. ✔ **novim in sheets.** Before this phase novim ran only on the page: its edits changed
    the composited page lines (`x` on the background), the keys it doesn't parse went to
    the node states, and the `esc` that ends an insert went to the node, so novim stayed
    off. Decided (2026-11-25):
