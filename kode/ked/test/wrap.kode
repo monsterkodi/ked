@@ -160,6 +160,21 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         rows()
         h.placedAt(1 3) ▸ true
         e.isCursorVisible() ▸ true
+        e.state.setMainCursor 40 0 ; mc() ▸ [29 0]
+        e.state.setMainCursor 27 0
+        key 'right' ; key 'right' ; key 'right' ; mc() ▸ [29 0]
+        key 'left' ; mc() ▸ [28 0]
+        e.state.setMainCursor 40 1 ; mc() ▸ [40 1]
+        e.state.setCursors [[40 0] [35 0] [5 1]]
+        e.state.s.cursors ▸ [[29 0] [5 1]]
+        wed ['  aaaaaaaaaaaaa' 'next']
+        key 'ctrl+w'
+        e.state.setMainCursor 40 0 ; mc() ▸ [17 0]
+        wed ['0123456789abcdefghij' 'next']
+        key 'ctrl+w'
+        e.state.setMainCursor 25 0 ; mc() ▸ [20 0]
+        key 'ctrl+w'
+        e.state.setMainCursor 25 0 ; mc() ▸ [25 0]
 
   ▸ scaled
 

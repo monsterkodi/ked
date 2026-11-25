@@ -204,6 +204,33 @@ export
 
     viewX: li -> @isWrapped(li) ? 0 : @s.view[0]
 
+    #  the last column a cursor can take in a wrapped line:
+    #  the last cell of its last row, or the end of the line if that row is full
+
+    wrapMaxX: li ->
+
+        end    = @s.lines[li].length
+        starts = @wrapStarts li
+        k      = starts.length-1
+        cells  = sue.cellPositionsForLine @s.lines li []
+        lastIndex = cells.length-1
+        cend   = end <= lastIndex ? cells[end] : cells[lastIndex] + end - lastIndex
+        used   = cend - cells[starts[k]] + @wrapIndent(li k)
+
+        max end end + @wrapCols(li)-1-used
+
+    #  cursors in wrapped lines don't move on into the empty space past the last row
+
+    clampToWrap: cursors ->
+
+        out = []
+        for c in cursors
+            if c[1] >= 0 and @isWrapped(c[1]) and c[0] > @wrapMaxX(c[1])
+                out.push [@wrapMaxX(c[1]) c[1]]
+            else
+                out.push c
+        out
+
     scaleRunsForLine: y ->
 
         areas = @s.sue ? []
