@@ -1,0 +1,161 @@
+
+use ../tool ◆ belt sue
+#!sue
+export
+
+    sueAt: pos ->
+
+        areas = @s.sue ? []
+        ⮐ if empty areas
+
+        [x y] = pos
+
+        for i in areas.length-1..0 by -1
+            area = areas[i]
+            if area.y == y and area.x <= x
+                ⮐ area
+
+    setSue: (x y value) ->
+
+        areas = @s.sue ? []
+        @changeSue areas.concat([{x: x y: y value: value}])
+
+    changeSue: areas ->
+
+        @s = @s.set 'sue' areas
+        @rowCache = null
+        @r = []
+        @pushState()
+        @emit 'sue.changed'
+
+    loadSue: areas ->
+
+        @s = @s.set 'sue' (areas ? [])
+        @rowCache = null
+        @clearHistory()
+        @emit 'sue.changed'
+
+    applySueAreas: next ->
+
+        areas = @s.sue ? []
+        ⮐ if next eql areas
+
+        @changeSue next
+
+    clearSueForRanges: ranges ->
+
+        ⮐ if @rectree?
+
+        areas = @s.sue ? []
+        ⮐ if empty areas or empty ranges
+
+        ranges = belt.splitLineRanges @s.lines ranges false
+
+        cut = sue.rangesCutFromAreasInLines ranges areas @s.lines
+
+        ⮐ if cut eql areas
+
+        @changeSue cut
+
+    toggleSueFlag: flag ->
+
+        ⮐ if @rectree?
+
+        ranges = @selectionsOrCursorWordRanges()
+        ⮐ if empty ranges
+
+        ranges = belt.splitLineRanges @s.lines ranges false
+
+        next = sue.rangesWithToggledFlag ranges (@s.sue ? []) @s.lines flag
+
+        ⮐ if next eql @s.sue
+
+        @changeSue next
+##scale
+    stepScales: delta ->
+
+        ⮐ if @rectree?
+
+        areas = @s.sue ? []
+        next  = areas
+
+        if empty @s.selections
+            indices = belt.lineIndicesForPositions @s.cursors
+            next = sue.areasWithSteppedLineScales(areas indices delta @lineScale)
+        else
+            lines = []
+            runs  = []
+
+            for piece in belt.splitLineRanges(@s.lines @s.selections false)
+                if belt.isFullLineRange @s.lines piece
+                    lines.push piece[1] if piece[1] not in lines
+                else
+                    runs.push piece
+
+            next = sue.areasWithSteppedLineScales(next lines delta @lineScale)
+            next = sue.areasWithSteppedRunsInLines(next runs delta @s.lines)
+
+        @applySueAreas next
+
+    clearScales: ->
+
+        ⮐ if @rectree?
+
+        areas = @s.sue ? []
+        indices = belt.lineIndicesForRangesOrPositions @s.selections @s.cursors
+
+        next = sue.areasWithoutLineScales(areas indices)
+
+        for piece in belt.splitLineRanges(@s.lines @s.selections false)
+            continue if belt.isFullLineRange @s.lines piece
+            for run in sue.runsForLine(next @s.lines piece[1])
+                if run[0] <= piece[0] and piece[2] <= run[1]
+                    next = sue.areasWithoutRun(next piece[1] run[0] run[1])
+                    break
+
+        @applySueAreas next
+
+##wrap
+    toggleWrap: ->
+
+        ⮐ if @rectree? or @wrap.all
+
+        indices = belt.lineIndicesForRangesAndPositions @s.selections @s.cursors
+        ⮐ if empty indices
+
+        areas = @s.sue ? []
+        wrap  = not sue.isWrapLine(areas @mainCursor()[1])
+
+        @applySueAreas sue.areasWithWraps(areas indices wrap)
+        @adjustViewForMainCursor()
+
+    toggleWrapAll:  -> @setWrap all:not @wrap.all
+    toggleWrapWord: -> @setWrap word:not @wrap.word
+
+    scaleRunsForLine: y ->
+
+        areas = @s.sue ? []
+        ⮐ [] if empty areas
+
+        sue.runsForLine(areas @s.lines y)
+
+    clearSueAtCursorOrSelection: ->
+
+        if ranges = @selectionsOrCursorWordRanges()
+            @clearSueForRanges ranges
+
+    sueColorAtSelection: layer ->
+
+        fg = layer == 'fg'
+
+        for rng in @s.selections
+            if area = @sueAt [rng[0] rng[1]]
+                [code] = area.value
+                if code == sue.FG_BG_COLOR
+                    ⮐ area.value[fg ? 3 : 4]
+                if fg and code == sue.FG_COLOR
+                    ⮐ area.value[3]
+                if not fg and code == sue.BG_COLOR
+                    ⮐ area.value[3]
+
+        null

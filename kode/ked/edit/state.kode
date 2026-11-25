@@ -6,6 +6,8 @@ use ./act     ◆ del insert select join indent multi main novim sort count rang
 use ./tool    ◆ belt colorspans jumplist changelist motion sue register
 use           ◆ mode keys
 
+import suact from './act/sue.js'
+
 ■state□events
     ###
   󠀡󠀰󠀰󠀱󠀱󠁛󠀴󠀰󠀬󠀭󠀱󠀬󠀱󠀬󠀲󠁝handles basic text editing for the 󠀡󠀰󠀰󠀲󠀸󠁛󠀳󠀳󠀬󠀶󠀬󠀱󠀬󠀢󠀣󠁦󠁦󠁦󠁦󠀰󠀰󠀢󠀬󠀢󠀣󠀰󠀰󠀰󠀰󠀰󠀰󠀢󠁝editor
@@ -21,7 +23,7 @@ use           ◆ mode keys
 
         @allowedModes   = {}
 
-        for act in [del insert select join indent multi main jump novim sort count range macro sheet]
+        for act in [del insert select join indent multi main jump novim sort count range macro sheet suact]
             for k,v of act
                 @[k] = v.bind @
                 
