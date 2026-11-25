@@ -185,21 +185,22 @@ import julia from '../../util/julia.json' with { type: "json" }
 
         super()
 
-    infoBubbles: width => # hex and names of the selected char, as many as fit into width columns
+    infoBubbles: width => # names and hex of the selected char, as many names as fit into width columns
 
         item = @matrix.items[@matrix.selectedIndex]
         ⮐ [] if empty item?.char
 
-        hex = Array.from(item.char).map((c) -> '0x' + c.codePointAt(0).toString(16)).join(' ')
-
-        bubbles = [text:hex fg:@color.hex_fg bg:@color.hex]
-        used    = 2 + kseg.width(hex) # left cap, text, right cap
+        hex  = Array.from(item.char).map((c) -> '0x' + c.codePointAt(0).toString(16)).join(' ')
+        used = 2 + kseg.width(hex) # left cap, text, right cap
         ⮐ [] if used > width
 
+        bubbles = []
         for name,i in item.search.split(/\s+/).filter((n) -> valid n)
             used += 1 + kseg.width(name)
             break if used > width
             bubbles.push text:name fg:@color.name_fg bg:color.darken(@color.name max(0.4 1-0.2*i))
+
+        bubbles.push text:hex fg:@color.hex_fg bg:@color.hex # last, so it stays in place
         bubbles
 
     drawInfo: => # right-aligned in the input row, left of it only the input's text and cursor
