@@ -244,7 +244,7 @@ use ../edit/tool ◆ sue
 
     @typeOf: node ->
 
-        for type in ['erase''text''pattern''bg''fg']
+        for type in ['text''erase''pattern''bg''fg']
             ⮐ type if node[type]?
 
         null
@@ -796,13 +796,14 @@ use ../edit/tool ◆ sue
 
         grid
 
-    #  rows: the set of grid rows to paint, all if not given
+    #  rows: the set of grid rows to paint, all if not given.
+    #  erase nodes only mask their parent, text nodes with erase paint their text too
 
     @paintTree: node grid rows ->
 
         ⮐ if not node?
 
-        @paintNode(node grid rows) if not node.erase?
+        @paintNode(node grid rows) if not node.erase? or node.text?
 
         for child in node.children ? []
             @paintTree child grid rows

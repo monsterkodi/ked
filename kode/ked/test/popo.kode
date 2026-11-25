@@ -347,7 +347,8 @@ showSue = data ->
             layout.typeOf(container) ▸ null
             layout.typeOf(text) ▸ 'text'
             layout.argOf(text) ▸ 'hi'
-    
+            layout.typeOf({text:'md' erase:'bg'}) ▸ 'text'
+
             tree = { bg:'#000' children:[{ x:2 y:1 w:10 h:5 children:[{ text:'hi' x:1 y:1 r:1 b:1 }] }] }
     
             layout.titlify {cols:30 rows:20} tree
@@ -552,6 +553,11 @@ showSue = data ->
         data.sue.length ▸ 4
         areas(data sue.FG_COLOR).length ▸ 1
         areas(data sue.FG_COLOR)[0].value ▸ [31 3 1 '#ff0']
+
+        data = desue {cols:8 rows:3} { bg:'#00f' children:[{ text:'hi' erase:'bg' x:1 y:1 w:3 h:1 }] }
+
+        data.text ▸ '        \n hi     \n        '
+        areas(data sue.BG_COLOR).filter((a) -> a.y == 1).map((a) -> [a.x a.value[1]]) ▸ [[0 1] [4 4]]
 
         data = desue {cols:6 rows:5} { children:[{ text:'A' x:1 y:1 w:3 h:3 scale:3 fg:'#ff0' }] }
         
