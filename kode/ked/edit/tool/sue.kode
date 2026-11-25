@@ -2,8 +2,8 @@
 use ../../../kxk ▪ kseg
 use ◆ colorspans
 
-#  sue areas
-#
+#!sue
+
 #  a sue area is a rectangle of cells described by a payload hidden in the
 #  text. the payload is placed before the text it describes.
 #

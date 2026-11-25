@@ -9,7 +9,7 @@ mapScroll
                         enable          false
                         clickOffset     5
 scale
-                        enable  false
+                        enable  true
                         md
                             h1  7
                             h2  4
@@ -44,7 +44,7 @@ dirtree
                             ~
                             /tmp
 searcher
-                        exclude    
+                        exclude
                             js
 filetypes
                         config          noon
