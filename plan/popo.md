@@ -28,9 +28,16 @@ is built on top of that instead of hard-wrapping text into lines itself.
     already return early while `@rectree?` is set.
 - **Node states.** One full `state` per text node, created eagerly when a sheet is
   loaded or a text node appears.
-  - Its lines are the node's **logical lines**. There is no `node.text` at runtime:
-    `s.lines` is the only copy of the text (see *Undo*). The text exists only on disk:
-    load splits it at `\n` into a new state, save joins `s.lines` with `\n`.
+  - Its lines are the node's **logical lines**. `s.lines` is the only copy of the text
+    (see *Undo*).
+  - **`node.text` is the text type**, not the content. The key makes the node a text
+    node with a state, and the value is the kind of text. For now it is always
+    `'normal'`, a placeholder that gets a meaning later.
+  - On disk the content is a `lines` list of strings:
+    `{text:'normal' lines:['HELLO world!' …] x:… }`. Load creates the state from it,
+    save writes `s.lines` back. The sheets in `test/level2` are converted once, with no
+    code for the old format.
+  - An empty text node (`lines: ['']`) is kept. It is removed like any node.
   - Every line is wrapped (`@wrap.all = true`). The rows of the wrapped lines are the
     node's spans, in flow order (see *Wrapping into spans*).
   - It owns its own cursors, selections, highlights and main cursor.
@@ -167,8 +174,8 @@ page s
         children: [
             bg: '#333'
             children: [
-                {x:1 y:0 w:6 h:1 s:sA}            # sA.lines = [['h','e','l','l','o']]
-                {x:1 y:2 w:4 h:2 s:sB}            # sB.lines = [['a'] ['b']]
+                {text:'normal' x:1 y:0 w:6 h:1 s:sA}   # sA.lines = [['h','e','l','l','o']]
+                {text:'normal' x:1 y:2 w:4 h:2 s:sB}   # sB.lines = [['a'] ['b']]
             ]
         ]
 ```
@@ -176,8 +183,8 @@ page s
 - **Snapshots are cheap.** Each `sA` is immutable and only referenced, and unchanged
   nodes share their `s` between snapshots.
 - **Live tree vs snapshot.** The live node holds the state object (`node.state`).
-  `plainNode` writes `s: node.state.s`. `sourceOf` writes `text: s.lines.join '\n'`
-  instead, and drops `s`.
+  `plainNode` writes `s: node.state.s`. `sourceOf` writes `lines` (as strings) instead,
+  and drops `s`.
 - **Edit:** the node state changes its `s`, the node is composited again, the page `s`
   gets the new plain tree and output, and `pushState`.
 - **Undo / redo:** the page's `undo` / `redo` are unchanged, then `restoreSheet`:
@@ -192,10 +199,12 @@ page s
   snapshots.
 - **Node states' own `h` / `r` histories** are ignored in sheet mode. `cmd+z` reaches
   the page state.
-- **No `node.text`:** whatever tests or reads it today goes through one helper
-  (`layout.isText` / `layout.textOf`): `flows`, `scaleOf`, `typeOf` / `roleOf` /
-  `argOf`, `isNodeData`, the sheenode arg field, `dumpstate.nodeText`, `insertTextAt`
-  and paste node.
+- **`node.text` is the type:** `flows`, `scaleOf` and `typeOf` / `roleOf` / `argOf` test
+  the key or a valid value, so they keep working. The sheenode arg field shows and sets
+  the text type, like the color of a `bg` node; switching the type away from `text`
+  drops the state. Text is only edited in the sheet, so the sheenode doesn't touch node
+  states. `isNodeData` accepts `lines`. `insertTextAt`, `fill` and paint are rewritten
+  anyway.
 
 ## What gets removed or kept
 
@@ -261,8 +270,8 @@ page s
 ## Open questions
 
 1. ~~**Undo:** how is sheet data stored in the immutable?~~ Decided: in the page's
-   history, with each node's `s` inside its plain tree node (see *Undo*).
-   Still open: is an empty text node (`s.lines` is `['']`) kept or removed?
+   history, with each node's `s` inside its plain tree node (see *Undo*). `node.text`
+   is the text type, the content is `lines` on disk, empty text nodes are kept.
 2. **novim in sheet mode:** what would break|needs changes?
 3. **Cursors in overflow lines or hidden text** (covered by other nodes) aren't visible.
    Show a marker, or accept it for now?
