@@ -19,6 +19,14 @@ pageKeys = historyKeys.concat [
 
 highlightKeys = ['alt+cmd+d' 'alt+ctrl+d']
 
+#  novim: the key combos it handles, the keys that move the page cursor while
+#  nothing is pending, its pending parts, and the commands that run on the page
+
+novimCombos  = ['ctrl+v' 'ctrl+o' 'ctrl+i']
+novimMotions = ['h' 'j' 'k' 'l' 'left' 'right' 'up' 'down']
+novimParts   = ['count' 'operator' 'area' 'prefix' 'register' 'registerPending' 'macroPending' 'find' 'replace']
+novimOnPage  = ['move' 'undo' 'searchNext' 'searchPrev' 'searchWord' 'matchBracket']
+
 #!sheet
 export
 
@@ -31,9 +39,13 @@ export
 
         delete @sheetMulti if @sheetMulti? and @sheetMulti.cursors != @s.cursors
 
-        ⮐ @feedKey(key event) if key in (@sheetMulti ? historyKeys : pageKeys)
-
         ⮐ @leaveSheetMulti() if key == 'esc' and @sheetMulti
+
+        if nv = mode.get(@ 'novim')
+            result = @feedSheetNovim nv key event
+            ⮐ result if result != 'unhandled'
+
+        ⮐ @feedKey(key event) if key in (@sheetMulti ? historyKeys : pageKeys)
 
         highlighted = valid @sheetActive()?.state.s.highlights
 
@@ -47,6 +59,73 @@ export
     #  the last change happened in, or the node at the cursor
 
     sheetActive: -> @sheetMulti?.active ? @sheetHome()?.node
+
+    #  the page runs the only novim. its keys go to the text nodes at the cursors,
+    #  the mode works on their states then. without a text node, and for plain
+    #  motions of a single cursor, the keys go to the page
+
+    feedSheetNovim: (nv key event) ->
+
+        combo = event?.combo ? key
+
+        if combo not in novimCombos
+            ⮐ 'unhandled' if combo.includes('alt+') or combo.includes('ctrl+') or combo.includes('cmd+')
+
+        if not @sheetMulti
+            home = @sheetHome()
+            if not home? or (combo in novimMotions and not @novimPending(nv home.node.state))
+                ⮐ @feedKey key event
+
+        parts = {}
+        parts[k] = nv[k] for k in novimParts
+
+        done = @inSheetNode (st) =>
+            nv[k] = parts[k] for k in novimParts
+            nv.state = st
+            try
+                nv.handleKey key event
+            finally
+                nv.state = @
+
+        done?.result ? 'unhandled'
+
+    novimPending: (nv st) ->
+
+        ⮐ true if st.novim.visual
+        for k in novimParts
+            continue if k == 'count'
+            ⮐ true if nv[k]
+        false
+
+    #  a node state starts, stops or toggles novim: the page's mode does it.
+    #  an insert that began on the page ends with it
+
+    novimFromNode: action ->
+
+        @finishNovimInsert() if action != 'stop'
+
+        switch action
+            'start'  ➜ @startMode 'novim'
+            'stop'   ➜ @stopMode  'novim'
+            'toggle' ➜ @toggleMode 'novim'
+
+    #  novim commands on the page: motions, undo and search run, o and O start an
+    #  insert in the row below or above, the rest doesn't change the page lines.
+    #  true if the command was taken
+
+    sheetNovim: cmd ->
+
+        ⮐ false if cmd.operator in novimOnPage
+
+        switch cmd.operator
+            'openLine'
+                pos = @sheetPosInDirection @mainCursor() (cmd.after ? 'down' : 'up')
+                @setMainCursor pos[0] pos[1]
+                @startNovimInsert kind:'insert'
+            'insertAtIndent'
+                @startNovimInsert kind:'insert'
+
+        true
 
     leaveSheetMulti: ->
 
@@ -237,6 +316,7 @@ export
 
     syncSheetModes: st ->
 
+        st.sheetPage    = @
         st.allowedModes = @allowedModes
 
         for name in ['brckts' 'unype']

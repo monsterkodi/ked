@@ -18,6 +18,8 @@ export
 
         # log 'novim command ▸' cmd
 
+        ⮐ if @rectree? and @sheetNovim(cmd)
+
         if cmd.motion
             cmd.motion.count ?= cmd.count
 
@@ -700,6 +702,8 @@ export
         @novim.insert
 
     startNovimReplace: count ->
+
+        ⮐ if @rectree?
 
         n = max 1 (count ? 1)
 

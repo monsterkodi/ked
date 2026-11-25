@@ -45,9 +45,19 @@ import suact from './act/sue.js'
 
         @clearSingle()
 
-    toggleMode: name => mode.toggle @ name if @allowedModes[name]
-    startMode:  name => mode.start  @ name if @allowedModes[name]
-    stopMode:   name => mode.stop   @ name if @allowedModes[name]
+    #  the states of sheet text nodes never run novim, the page's novim is used instead
+
+    toggleMode: name =>
+        ⮐ @sheetPage.novimFromNode('toggle') if @sheetPage? and name == 'novim'
+        mode.toggle @ name if @allowedModes[name]
+
+    startMode: name =>
+        ⮐ @sheetPage.novimFromNode('start') if @sheetPage? and name == 'novim'
+        mode.start @ name if @allowedModes[name]
+
+    stopMode: name =>
+        ⮐ @sheetPage.novimFromNode('stop') if @sheetPage? and name == 'novim'
+        mode.stop @ name if @allowedModes[name]
         
     owner: => 
         

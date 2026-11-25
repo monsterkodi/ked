@@ -66,7 +66,9 @@ use ../theme  ◆ theme
     @stop: state name ->
         
         m = @get state name
-        
+
+        ⮐ if not m?
+
         @active[state.name].splice @active[state.name].indexOf(m) 1
         
         m.stop() if m.stop is func

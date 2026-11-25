@@ -450,7 +450,14 @@ page s
      each run visual mode. The confirm session of `:s///c` is `begin` / `end` on the
      page.
    - **Steps**, each tests first (`sheet novim`) and one commit:
-     - 7a routing and background
+     - ✔ 7a routing and background. As built: `feedSheetNovim` runs before the page
+       keys; combos other than `ctrl+v/o/i` fall through. For the nodes the mode's
+       `state` is set to each node state while it handles the key, and its pending
+       parts (`novimParts`) are reset before every multi node. `start/stop/toggleMode
+       'novim'` on a node state go to the page (`novimFromNode`, `st.sheetPage`).
+       The page's `executeNovim` keeps only `novimOnPage` (`sheetNovim`), and
+       `startNovimReplace` does nothing on a sheet. `mode.stop` of an inactive mode
+       no longer removes another mode.
      - 7b shared novim state, jumps and changes with nodes
      - 7c undo
      - 7d ex, search, visual
