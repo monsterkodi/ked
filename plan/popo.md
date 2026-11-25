@@ -234,7 +234,8 @@ page s
   coordinates (`node 0.1.0 · 3 cursors · 0:2 1:2 2:2`), so the headless dumps stay
   readable.
 - **Modes:** the node states get the page state's allowed and active modes mirrored,
-  so unype and brckts behave the same inside nodes.
+  so unype and brckts behave the same inside nodes. novim is blocked while a sheet is
+  loaded, until phase 7.
 
 ## Phases
 
@@ -257,6 +258,22 @@ page s
 5. **Layout changes.** Resize, scale and move hand new capacities to the states,
    create and delete attach and detach them, and undo works across them.
 6. **Consumers:** sheetree, colorpicker, dumpstate, mouse drag, save.
+7. **novim in sheets.** Until then the novim mode is stopped and can't be started while
+   a sheet is loaded. Per node, novim would break: the register, macros, jumps and
+   changes would be split across nodes, pending commands (`3d…`, `f`) would get lost
+   when the home changes, `u` / `ctrl+r` would hit the ignored node histories, and the
+   projector's raw key classes would fight novim's parser. The shape:
+   - **One novim mode on the page state.** It parses keys into commands, and the
+     projector dispatches `executeNovim cmd`. With a single cursor, motions follow the
+     solo rules (page-level `hjkl`, home mirroring). Everything else goes to the node
+     states that have cursors.
+   - **Shared parts are owned by the page state:** register, macros, jumps (node +
+     position) and changes. Node states reference them instead of creating their own
+     `novimState()`.
+   - **Undo:** `u` / `ctrl+r` go to the page undo. An insert session is wrapped in page
+     `begin` / `end`, so it is one step.
+   - **Ex commands** run on the active node's lines. Visual mode stays inside one node,
+     like shift-selections.
 
 ## Verification
 
@@ -272,7 +289,8 @@ page s
 1. ~~**Undo:** how is sheet data stored in the immutable?~~ Decided: in the page's
    history, with each node's `s` inside its plain tree node (see *Undo*). `node.text`
    is the text type, the content is `lines` on disk, empty text nodes are kept.
-2. **novim in sheet mode:** what would break|needs changes?
+2. ~~**novim in sheet mode:** what would break|needs changes?~~ Decided: deferred to
+   phase 7, blocked in sheets until then.
 3. **Cursors in overflow lines or hidden text** (covered by other nodes) aren't visible.
    Show a marker, or accept it for now?
 4. **node masking | flow mechanism** should we re-implement it after the refactor?
