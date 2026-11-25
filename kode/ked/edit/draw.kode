@@ -144,6 +144,7 @@ use              ◆ mode
         wrapped = @state.isWrapped y
         starts  = @state.wrapStarts y
         vx      = @state.viewX y
+        indent  = @state.wrapIndent y 1 # the rows after the first start here
 
         runs = []
         runs = @state.scaleRunsForLine y if scale == 1 and not wrapped and @cells.screen.t.textSizing
@@ -166,7 +167,7 @@ use              ◆ mode
             if wk+1 < starts.length and si == starts[wk+1]
                 widths.push sw - ws
                 wk += 1
-                ws  = sw
+                ws  = sw - indent
 
             if ri < runs.length and si >= runs[ri][0]
 

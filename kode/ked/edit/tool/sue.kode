@@ -599,19 +599,22 @@ wrapLineIndex = (map y oldLines newLines) ->
 
     #  the grapheme indices where the rows of a wrapped line start
     #  word wrap breaks after a space, a word wider than the row breaks anywhere
+    #  the rows after the first are indent cells narrower
 
-    @wrapStarts: (line cols word) ->
+    @wrapStarts: (line cols word indent=0) ->
 
         starts = [0]
         width  = 0
         brk    = -1
+        limit  = cols
 
         for gi in 0...line.length
 
             cw = max(1 kseg.segWidth(line[gi]))
 
-            if width + cw > cols and gi > starts[-1]
+            if width + cw > limit and gi > starts[-1]
 
+                limit = max 1 cols-indent
                 start = gi
                 start = brk if word and brk > starts[-1]
 
@@ -619,7 +622,7 @@ wrapLineIndex = (map y oldLines newLines) ->
                 for i in start...gi
                     width += max(1 kseg.segWidth(line[i]))
 
-                if width + cw > cols and gi > start
+                if width + cw > limit and gi > start
                     start = gi
                     width = 0
 
@@ -630,6 +633,17 @@ wrapLineIndex = (map y oldLines newLines) ->
             brk = gi+1 if word and line[gi] in [' ' '\t']
 
         starts
+
+    #  the cells the rows after the first of a wrapped line are indented by:
+    #  the width of its leading whitespace, but at most half the row
+
+    @wrapIndent: (line cols) ->
+
+        indent = 0
+        for seg in line
+            break if seg != ' ' and seg != '\t'
+            indent += 1
+        min indent int(cols/2)
 
     @desue: text ->
         lines = text.split('\n')

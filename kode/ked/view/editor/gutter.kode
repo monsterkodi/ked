@@ -382,14 +382,16 @@ use ../base        ◆ view
 
         while row < @cells.rows and li < @state.s.lines.length
 
-            scale = @state.lineHeight li
+            height  = @state.lineHeight li
+            scale   = @state.lineScale li
+            wrapped = @state.isWrapped li
 
-            if row < 0
-                row += scale
+            if row < 0 and not wrapped # the visible rows of a wrapped line cut by the top get their marks
+                row += height
                 li  += 1
                 continue
 
-            break if row + scale > @cells.rows and not @state.isWrapped(li) # a tall line that does not fit is left out
+            break if row + height > @cells.rows and not wrapped # a tall line that does not fit is left out
 
             y = li
             lineno = @lineno y
@@ -400,45 +402,58 @@ use ../base        ◆ view
             spansel     = @state.isSpanSelectedLine y
             
             mark = @lineMarks[y]
-            
-            for c,i in lineno
-                
-                col = i
-                if col < @cells.cols
-                    
-                    if sc = @fgcolor i y c
-                        fg = sc
-                    else
-                        fg = if
-                            y == mainCursor[1] ➜ color.darken(@color.cursor_main @state.hasFocus?1:0.5)
-                            hasCursor          ➜ @color.cursor_multi
-                            spansel            ➜ @color.selection
-                            selected           ➜ @color.selection_line
-                            highlighted        ➜ @color.highlight
-                                               ➜ @color.fg
-                                               
-                        fg = color.darken fg if (selected or hasCursor or highlighted) and not @cells.screen.t.hasFocus
-                    
-                    bg = if 
-                        mark? and @hoverBlock? and (mark.reverted ? mark.entry : mark.block) == @hoverBlock ➜ @color.bg_git_hover
-                        mark?.reverted ➜ @revertColor mark.kind
-                        mark?          ➜ @changeColor mark.kind
-                        spansel        ➜ @color.bg_selected
-                        selected       ➜ @color.bg_fully_selected
-                                       ➜ @color.bg
-                                 
-                    bg = color.darken bg if selected and not @cells.screen.t.hasFocus
-                    
-                    @cells.set col row (y<@state.s.lines.length) ? c : ' ' fg bg
 
-            for s in 1...scale
-                row += 1
-                for c,i in lineno
-                    @cells.set i row ' ' fg bg
+            wrapmark = ' '.repeat(max(0 lineno.length-2)) + '⮐ '
 
-            row += 1
+            for r in 0...height
+
+                sr = row + r
+                continue if sr < 0 or sr >= @cells.rows
+
+                text = if
+                    r == 0                    ➜ lineno
+                    wrapped and r % scale == 0 ➜ wrapmark
+                                               ➜ ' '.repeat(lineno.length)
+
+                @drawLineno text sr y r>0 mainCursor hasCursor selected highlighted spansel mark
+
+            row += height
             li  += 1
-                    
+
         @drawGitScroll()
+
+    #  the line number or the wrap mark of line y at screen row
+    #  sub rows of a line are drawn dimmer
+
+    drawLineno: (text row y sub mainCursor hasCursor selected highlighted spansel mark) ->
+        for c,i in text
+
+            break if i >= @cells.cols
+
+            if sc = @fgcolor i y c
+                fg = sc
+            else
+                fg = if
+                    y == mainCursor[1] ➜ color.darken(@color.cursor_main @state.hasFocus?1:0.5)
+                    hasCursor          ➜ @color.cursor_multi
+                    spansel            ➜ @color.selection
+                    selected           ➜ @color.selection_line
+                    highlighted        ➜ @color.highlight
+                                       ➜ @color.fg
+
+                fg = color.darken fg if (selected or hasCursor or highlighted) and not @cells.screen.t.hasFocus
+                fg = color.darken fg if sub
+
+            bg = if
+                mark? and @hoverBlock? and (mark.reverted ? mark.entry : mark.block) == @hoverBlock ➜ @color.bg_git_hover
+                mark?.reverted ➜ @revertColor mark.kind
+                mark?          ➜ @changeColor mark.kind
+                spansel        ➜ @color.bg_selected
+                selected       ➜ @color.bg_fully_selected
+                               ➜ @color.bg
+
+            bg = color.darken bg if selected and not @cells.screen.t.hasFocus
+
+            @cells.set i row (y<@state.s.lines.length) ? c : ' ' fg bg
 
 export gutter

@@ -17,7 +17,8 @@ mc    = -> e.state.mainCursor()
 rows  = -> h.screen.init() ; e.draw() ; h.text().map((r) -> r.trimEnd())
 cell  = x y -> e.posCell x y
 pos   = x row -> e.state.posForCell x row
-wrap  = (s c w) -> sue.wrapStarts kseg(s) c w
+wrap  = (s c w i) -> sue.wrapStarts kseg(s) c w i
+indent = (s c) -> sue.wrapIndent kseg(s) c
 
 cellsWhere = test ->
     h.screen.init() ; e.draw()
@@ -44,6 +45,16 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         wrap 'ab cd ef' 4 true    ▸ [0 3 6]
         wrap 'abcdefgh ij' 4 true ▸ [0 4 8]
         wrap 'a bcdefgh' 4 true   ▸ [0 2 6]
+        wrap 'abcdefgh' 4 false 2 ▸ [0 4 6]
+        wrap '  ab cd ef' 6 true 2 ▸ [0 5 8]
+
+  ▸ indent
+
+        indent 'abc' 10         ▸ 0
+        indent '    abc' 10     ▸ 4
+        indent '\t\tabc' 10     ▸ 2
+        indent '        abc' 10 ▸ 5
+        indent '    ' 10        ▸ 4
 
   ▸ height
 
@@ -157,7 +168,30 @@ withBg = bg   -> cellsWhere (x y) -> h.screen.get_bg(x y) eql bg
         wed ['0123456789abcdefghijk' 'next'] 14 6 ['susan' 'gutter']
         e.cells.cols ▸ 10
         key 'ctrl+w'
-        rows().map((r) -> r.trim()) ▸ ['1 0123456789' 'abcdefghij' 'k' '2 next' '' '']
+        rows().map((r) -> r.trim()) ▸ ['1 0123456789' '⮐ abcdefghij' '⮐ k' '2 next' '' '']
+        e.layout 0 0 14 2
+        e.state.setMainCursor 20 0
+        rows().map((r) -> r.trim())[0...2] ▸ ['⮐ abcdefghij' '⮐ k']
+
+  ▸ indented
+
+        wed ['  aaaaaaaaaaaaa' 'next']
+        key 'ctrl+w'
+        e.state.wrapStarts 0 ▸ [0 10]
+        rows() ▸ ['  aaaaaaaa' '  aaaaa' 'next' '' '' '']
+        cell 9 0  ▸ [9 0]
+        cell 10 0 ▸ [2 1]
+        cell 14 0 ▸ [6 1]
+        pos 0 1   ▸ [10 0]
+        pos 2 1   ▸ [10 0]
+        pos 6 1   ▸ [14 0]
+        pos 9 1   ▸ [17 0]
+        e.state.setSelections [[8 0 12 0]]
+        marked('selection')[0...2] ▸ ['        aa' '  aa']
+        wed ['  aaa bbb ccc ddd' 'next']
+        key 'alt+w'
+        key 'ctrl+alt+w'
+        rows() ▸ ['  aaa bbb' '  ccc ddd' 'next' '' '' '']
 
   ▸ tall
 

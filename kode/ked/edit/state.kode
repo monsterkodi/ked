@@ -299,9 +299,16 @@ use           ◆ mode keys
             cached = @wrapCache.get line
             ⮐ cached.starts if cached?.key == key
 
-        starts = sue.wrapStarts line cols @wrap.word
+        starts = sue.wrapStarts line cols @wrap.word sue.wrapIndent(line cols)
         @wrapCache.set line {key:key starts:starts} if line is arr
         starts
+
+    #  the cells row k of line li is indented by, unscaled
+
+    wrapIndent: li k =>
+
+        ⮐ 0 if k == 0 or not @isWrapped li
+        sue.wrapIndent @s.lines[li] @wrapCols(li)
 
     wrapRow: x li =>
 
@@ -325,7 +332,7 @@ use           ◆ mode keys
         ⮐ [cx*scale 0] if not @isWrapped li
 
         k  = @wrapRow x li
-        cx = cx - cells[@wrapStarts(li)[k]]
+        cx = cx - cells[@wrapStarts(li)[k]] + @wrapIndent(li k)
         cx = min cx @wrapCols(li)-1
 
         [cx*scale k*scale]
@@ -475,7 +482,7 @@ use           ◆ mode keys
         k      = int((@viewTopRow() + row - @rowsBeforeLine(li)) / scale)
         k      = clamp 0 starts.length-1 k
         cells  = sue.cellPositionsForLine @s.lines li []
-        col    = int(x / scale) + cells[starts[k]]
+        col    = max(0 int(x / scale) - @wrapIndent(li k)) + cells[starts[k]]
         stop   = @s.lines[li].length
         stop   = starts[k+1]-1 if k+1 < starts.length
 
