@@ -1543,6 +1543,32 @@ showSue = data ->
             lines = e.state.s.lines
             nm.runEx 's/q/Q/' ; errors[-1] ▸ 'not in a text node'
             txt('children.1') ▸ 'qux' ; e.state.s.lines == lines ▸ true
+
+            loadSheet searchTree()
+            texts = -> [0 1 2].map (i) -> txt("children.#{i}")
+            undos = e.state.h.length
+            e.state.setCursors [[8 3]] ; errors = []
+            nm.runEx '%s/a/X/g' ; texts() ▸ ['Xb X' 'X b' 'b X'] ; e.state.h.length ▸ undos+1
+            type 'u' ; texts() ▸ ['ab a' 'a b' 'b a']
+            nm.runEx '%s/z/Z/' ; errors ▸ ['pattern not found: z']
+            nm.runEx '%s/ab/AB/' ; texts() ▸ ['AB a' 'a b' 'b a'] ; errors.length ▸ 1
+            type 'u' ; e.state.h.length ▸ undos
+            nm.runEx '%s/(/x/' ; errors.length ▸ 2
+            e.state.setCursors [[1 1]]
+            nm.runEx '1s/a/X/' ; texts() ▸ ['ab a' 'X b' 'b a']
+            type 'u'
+            nm.runEx '%d' ; texts() ▸ ['' '' ''] ; e.state.h.length ▸ undos+1
+            type 'u' ; texts() ▸ ['ab a' 'a b' 'b a']
+            nm.runEx 'g/ab/d' ; texts() ▸ ['' 'a b' 'b a']
+            type 'u'
+            nm.runEx 'v/ab/d' ; texts() ▸ ['ab a' '' '']
+            type 'u'
+            nm.runEx '%normal A!' ; texts() ▸ ['ab a!' 'a b!' 'b a!'] ; e.state.h.length ▸ undos+1
+            nm = mode.get e.state 'novim'
+            type 'u' ; texts() ▸ ['ab a' 'a b' 'b a']
+            nm.runEx '%s/a' ; e.state.s.cursors.length ▸ 4 ; e.state.sheetMulti.nodes.length ▸ 3
+            texts() ▸ ['ab a' 'a b' 'b a'] ; e.state.h.length ▸ undos
+            key 'esc' ; e.state.s.cursors.length ▸ 1
             post.removeListener 'novim.error' onError
 
             loadSheet novimTree()

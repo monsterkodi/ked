@@ -556,9 +556,19 @@ page s
        novim key clears the highlights of all nodes. Moves use `inTextNode`, not
        `sheetJump`, which would clear the highlights. In multi mode every node still
        searches on its own.
-     - 8c `%` over all nodes for `:s :g :v :d :normal`, one undo step, one error,
-       search-only `:%s` starts multi mode. The `%s/a/A/g` expectation of `sheet
-       novim` changes: it reaches `qux`'s node too.
+     - ✔ 8c `%` over all nodes. As built: `sheetExAll` picks `%` ranges and `:g :v`
+       without a range (not `:s` with `c`), `runExInNodes` records the line once
+       and runs it through the page's `novimInNodes`: each node in reading order
+       with `nv.state` set to it, inside one `begin` / `end`, one jump
+       (`jumps.keep`), one `commitSheetNodes` for all nodes. Nodes left with
+       selections start multi mode. The ex errors go through `exError`, collected
+       while `@exSheet` is set and emitted once each; `pattern not found` only if
+       no node matched (`exSheet.found`).
+     - Noticed, not changed: `:normal` with an insert (`A!`) ends novim, and
+       starting it again makes a new mode instance, in plain files too.
+     - Noticed, not changed: in `sheet novim` the page has an open `begin` group
+       (`beginIndices [1]`) before the ex cases start; something earlier in the
+       test doesn't close its group.
      - 8d `:%s///c` across nodes.
 
 ## Later

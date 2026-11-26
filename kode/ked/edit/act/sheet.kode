@@ -141,6 +141,56 @@ export
 
         result
 
+    #  runs fn with the novim mode working on every text node in reading order, for
+    #  the ex commands with %, from the background too. all changes are one undo
+    #  step and one jump. nodes that end with selections, like after :%s without a
+    #  replacement, start multi mode
+
+    novimInNodes: (nv fn) ->
+
+        nodes = @sheetReadingNodes()
+
+        if empty nodes
+            post.emit 'novim.error' 'not in a text node'
+            ⮐ false
+
+        active  = @sheetActive()
+        befores = nodes.map (node) -> node.state.s
+        prev    = nv.state
+        feeding = @novimFeeding
+
+        if active? ➜ active.state.pushJump() else @pushJump()
+
+        @novimFeeding = true
+        @novim.jumps.keep += 1
+        @begin()
+
+        try
+            for node in nodes
+                @syncSheetModes node.state
+                nv.state = node.state
+                fn()
+        finally
+            nv.state = prev
+            @novimFeeding = feeding
+            @novim.jumps.keep -= 1
+
+        selected = nodes.filter (node) -> valid node.state.s.selections
+
+        if valid selected
+            active = selected[0]
+            if selected.length > 1 or active.state.s.cursors.length > 1
+                @sheetMulti = active:active nodes:selected
+
+        active ?= nodes[0]
+
+        @commitSheetNodes active nodes befores
+        @end()
+
+        @runNovimLater()
+
+        true
+
     runNovimLater: ->
 
         ⮐ if @novimFeeding or not @novimAfter?

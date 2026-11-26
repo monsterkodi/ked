@@ -312,9 +312,59 @@ use ..           ◆ mode
 
         parsed.error or empty(parsed.name) and not parsed.range or parsed.name in ['q' 'w' 'wq' 'x' 'e' 'edit']
 
+    #  in a sheet, % and :g :v without a range go through all text nodes.
+    #  :s with confirm stays in the active node
+
+    sheetExAll: line ->
+
+        parsed = belt.parseEx belt.exTrimLeft(line)
+
+        ⮐ false if parsed.error
+
+        if parsed.name in ['s' 'substitute']
+            ⮐ false if belt.parseSubstitute(parsed.args.trim()).flags?.c
+
+        ⮐ parsed.range.kind == 'all' if parsed.range
+
+        parsed.name in ['g' 'v' 'global' 'vglobal']
+
+    #  the errors of the nodes are reported once each after all nodes ran,
+    #  pattern not found only if no node matched
+
+    runExInNodes: line record ->
+
+        line = belt.exTrimLeft line
+
+        @exHistory.add line if record
+        @state.novim.register.set ':', { lines: [line], linewise: false } if record
+
+        @exSheet = errors:[] found:false
+
+        try
+            result = @state.novimInNodes @ (=> @runEx line false)
+        finally
+            sheet = @exSheet
+            delete @exSheet
+
+        errors = sheet.errors
+        errors = errors.filter((err) -> not err.startsWith('pattern not found')) if sheet.found
+        errors = Array.from new Set(errors)
+
+        post.emit 'novim.error' err for err in errors
+
+        result and empty errors
+
+    exError: msg ->
+
+        if @exSheet
+            @exSheet.errors.push msg
+        else
+            post.emit 'novim.error' msg
+
     runEx: line record=true ->
 
         if @state.rectree? and not @fileEx(line)
+            ⮐ @runExInNodes(line record) if @sheetExAll(line)
             ⮐ @inSheetText((=> @runEx line record) false)
 
         @clearExHighlight()
@@ -374,7 +424,7 @@ use ..           ◆ mode
                     else
                         post.emit 'quit'
             ➜
-                    post.emit 'novim.error' "not an editor command: #{name}"
+                    @exError "not an editor command: #{name}"
                     ⮐ false
         true
 
@@ -383,7 +433,7 @@ use ..           ◆ mode
         spec = belt.parseSubstitute parsed.args.trim()
 
         if spec.error
-            post.emit 'novim.error' spec.error
+            @exError spec.error
             ⮐ false
 
         range = @resolveExRange parsed.range visualRange
@@ -399,8 +449,10 @@ use ..           ◆ mode
         entries = @state.collectSubstitutions range[0] range[1] searchSpec
 
         if empty entries
-            post.emit 'novim.error' "pattern not found: #{spec.pattern}"
+            @exError "pattern not found: #{spec.pattern}"
             ⮐ false
+
+        @exSheet.found = true if @exSheet
 
         @state.pushJump()
 
@@ -418,7 +470,7 @@ use ..           ◆ mode
         spec = belt.parseGlobal parsed.args
 
         if spec.error
-            post.emit 'novim.error' spec.error
+            @exError spec.error
             ⮐ false
 
         invert = parsed.name in ['v' 'vglobal']
@@ -429,7 +481,7 @@ use ..           ◆ mode
         try
             re = new RegExp spec.pattern
         catch err
-            post.emit 'novim.error' "invalid pattern: #{err.message}"
+            @exError "invalid pattern: #{err.message}"
             ⮐ false
 
         marks = []
