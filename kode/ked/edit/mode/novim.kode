@@ -313,7 +313,7 @@ use ..           ◆ mode
         parsed.error or empty(parsed.name) and not parsed.range or parsed.name in ['q' 'w' 'wq' 'x' 'e' 'edit']
 
     #  in a sheet, % and :g :v without a range go through all text nodes.
-    #  :s with confirm stays in the active node
+    #  'confirm' for :%s with c, its session walks through the nodes
 
     sheetExAll: line ->
 
@@ -321,12 +321,44 @@ use ..           ◆ mode
 
         ⮐ false if parsed.error
 
+        all = parsed.range ? parsed.range.kind == 'all' : parsed.name in ['g' 'v' 'global' 'vglobal']
+
+        ⮐ false if not all
+
         if parsed.name in ['s' 'substitute']
-            ⮐ false if belt.parseSubstitute(parsed.args.trim()).flags?.c
+            ⮐ 'confirm' if belt.parseSubstitute(parsed.args.trim()).flags?.c
 
-        ⮐ parsed.range.kind == 'all' if parsed.range
+        true
 
-        parsed.name in ['g' 'v' 'global' 'vglobal']
+    #  :%s///c in a sheet starts in the first node in reading order with a match
+
+    runConfirmInNodes: line record ->
+
+        line = belt.exTrimLeft line
+
+        @exHistory.add line if record
+        @state.novim.register.set ':', { lines: [line], linewise: false } if record
+
+        parsed = belt.parseEx line
+        spec   = belt.parseSubstitute parsed.args.trim()
+
+        if spec.error
+            post.emit 'novim.error' spec.error
+            ⮐ false
+
+        nodes = @state.sheetReadingNodes()
+        index = nodes.findIndex (node) -> valid node.state.collectSubstitutions(0 node.state.s.lines.length-1 spec)
+
+        if index < 0
+            post.emit 'novim.error' "pattern not found: #{spec.pattern}"
+            ⮐ false
+
+        @exConfirmNodes = nodes:nodes index:index
+
+        try
+            @state.novimInNode @ (=> @runEx line false) false nodes[index]
+        finally
+            delete @exConfirmNodes
 
     #  the errors of the nodes are reported once each after all nodes ran,
     #  pattern not found only if no node matched
@@ -364,7 +396,9 @@ use ..           ◆ mode
     runEx: line record=true ->
 
         if @state.rectree? and not @fileEx(line)
-            ⮐ @runExInNodes(line record) if @sheetExAll(line)
+            all = @sheetExAll line
+            ⮐ @runConfirmInNodes(line record) if all == 'confirm'
+            ⮐ @runExInNodes(line record) if all
             ⮐ @inSheetText((=> @runEx line record) false)
 
         @clearExHighlight()
@@ -647,6 +681,11 @@ use ..           ◆ mode
             remaining: []
             total:     0
 
+        if n = @exConfirmNodes
+            @exConfirms.nodes = n.nodes
+            @exConfirms.index = n.index
+            @exConfirms.node  = n.nodes[n.index]
+
         (@state.sheetPage ? @state).begin()
 
         @advanceSubstituteConfirm()
@@ -677,6 +716,14 @@ use ..           ◆ mode
         ⮐ @finishSubstituteConfirm() if not c
 
         c.remaining = @remainingSubstitutions()
+
+        #  in a sheet the page hands the session to the next node (sheetConfirmNext)
+
+        if empty(c.remaining) and c.nodes and c.index < c.nodes.length-1
+            @state.setHighlights []
+            @state.setSelections []
+            c.nextNode = true
+            ⮐ true
 
         ⮐ @finishSubstituteConfirm() if empty c.remaining
 
@@ -748,6 +795,8 @@ use ..           ◆ mode
         @advanceSubstituteConfirm()
 
     acceptAllSubstitutions: ->
+
+        @exConfirms.all = true if @exConfirms
 
         while @exConfirms and not empty @exConfirms.remaining
             @applyCurrentSubstitution()

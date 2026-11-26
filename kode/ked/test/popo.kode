@@ -1531,6 +1531,22 @@ showSue = data ->
             type 'u' ; txt('children.0') ▸ 'foo bar\nbaz' ; txt('children.1') ▸ 'qux'
 
             loadSheet novimTree()
+            e.state.setCursors [[1 1]] ; type 'vl'
+            key 'alt+z' ; nvon() ▸ false ; rt('children.0').state.s.selections.length ▸ 1
+            key 'alt+n' ; nvon() ▸ true ; rt('children.0').state.s.selections.length ▸ 1
+            loadSheet novimTree()
+            click 2 1 ; altclick 2 5 ; e.state.s.cursors.length ▸ 2
+            key 'alt+z' ; nvon() ▸ false ; e.state.s.cursors.length ▸ 2
+            key 'alt+n' ; nvon() ▸ true ; e.state.s.cursors.length ▸ 2
+            key 'esc' ; e.state.s.cursors.length ▸ 1
+            e.state.setCursors [[6 6]] ; key 'alt+z' ; nvon() ▸ false
+            key 'alt+n' ; nvon() ▸ true
+            undos = e.state.h.length
+            e.state.setCursors [[1 5]] ; type 'iab' ; key 'alt+n' ; nvon() ▸ true
+            txt('children.1') ▸ 'abqux' ; e.state.h.length ▸ undos+1
+            type 'u' ; txt('children.1') ▸ 'qux'
+
+            loadSheet novimTree()
             nm = mode.get e.state 'novim'
             errors = []
             onError = (err) -> errors.push err
@@ -1576,6 +1592,32 @@ showSue = data ->
             e.state.setCursors [[1 2]]
             nm.runEx '%s/a/X/gc' ; type 'y' ; type 'y'
             strs(rt('children.0')) ▸ ['foo bXr' 'bXz'] ; e.state.h.length ▸ undos+1
+
+            loadSheet searchTree()
+            lit = -> [0 1 2].map (i) -> rt("children.#{i}").state.s.highlights.length
+            undos = e.state.h.length
+            e.state.setCursors [[8 3]]
+            nm.runEx '%s/a/X/gc' ; mc() ▸ [1 1] ; lit() ▸ [0 1 0]
+            type 'y' ; texts() ▸ ['ab a' 'X b' 'b a'] ; mc() ▸ [11 1] ; lit() ▸ [0 0 1]
+            type 'n' ; mc() ▸ [1 5] ; lit() ▸ [2 0 0]
+            type 'y' ; texts() ▸ ['Xb a' 'X b' 'b a'] ; mc() ▸ [4 5]
+            type 'y' ; texts() ▸ ['Xb X' 'X b' 'b a'] ; nm.exConfirms ▸ null ; lit() ▸ [0 0 0]
+            e.state.h.length ▸ undos+1
+            type 'u' ; texts() ▸ ['ab a' 'a b' 'b a']
+            nm.runEx '%s/a/X/gc' ; type 'n' ; type 'a'
+            texts() ▸ ['Xb X' 'a b' 'b X'] ; nm.exConfirms ▸ null ; e.state.h.length ▸ undos+1
+            type 'u'
+            nm.runEx '%s/b/B/gc' ; type 'y' ; type 'q'
+            texts() ▸ ['ab a' 'a B' 'b a'] ; lit() ▸ [0 0 0] ; nm.exConfirms ▸ null
+            type 'u'
+            nm.runEx '%s/a/X/gc' ; type 'y' ; type 'l'
+            texts() ▸ ['ab a' 'X b' 'b X'] ; nm.exConfirms ▸ null
+            type 'u' ; e.state.h.length ▸ undos
+            confirmErrors = []
+            onConfirmError = (err) -> confirmErrors.push err
+            post.on 'novim.error' onConfirmError
+            nm.runEx '%s/z/Z/gc' ; confirmErrors ▸ ['pattern not found: z'] ; nm.exConfirms ▸ null
+            post.removeListener 'novim.error' onConfirmError
 
             loadSheet novimTree()
             e.state.setCursors [[1 2]] ; type '/'

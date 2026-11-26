@@ -569,7 +569,17 @@ page s
      - Noticed, not changed: in `sheet novim` the page has an open `begin` group
        (`beginIndices [1]`) before the ex cases start; something earlier in the
        test doesn't close its group.
-     - 8d `:%s///c` across nodes.
+     - ✔ 8d `:%s///c` across nodes. As built: `sheetExAll` returns `'confirm'`,
+       `runConfirmInNodes` starts the session in the first node in reading order
+       with a match (`novimInNode` takes that node), `exConfirms` keeps `nodes`,
+       `index` and `node`. While it runs, `feedSheetNovim` gives the keys to that
+       node (`feedSheetConfirm`). A node without matches left clears its highlights
+       and sets `nextNode`, `sheetConfirmNext` moves the session on and goes on with
+       `a` (`c.all`). One `begin` / `end` on the page for the whole session.
+     - ✔ Fixed on the way: `alt+n` / `alt+z` go to the page once
+       (`novimToggleKeys`) and finish the inserts of all nodes. Before, multi mode
+       toggled novim once per node, so with two nodes it never changed. Cursors and
+       selections stay, as in plain files.
 
 ## Later
 

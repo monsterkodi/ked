@@ -27,6 +27,10 @@ novimMotions = ['h' 'j' 'k' 'l' 'left' 'right' 'up' 'down']
 novimParts   = ['count' 'operator' 'area' 'prefix' 'register' 'registerPending' 'macroPending' 'find' 'replace']
 novimOnPage  = ['move' 'undo' 'matchBracket' 'searchNext' 'searchPrev']
 
+#  the keys that toggle novim go to the page once, not to every text node
+
+novimToggleKeys = ['alt+n' 'alt+z']
+
 #!sheet
 export
 
@@ -43,6 +47,10 @@ export
             @recordMacroKey key event
             node.state.finishNovimInsert() for node in @sheetMulti.nodes
             ⮐ @leaveSheetMulti()
+
+        if (event?.combo ? key) in novimToggleKeys
+            node.state.finishNovimInsert() for node in @sheetTextNodes()
+            ⮐ @feedKey key event
 
         if nv = mode.get(@ 'novim')
             result = @feedSheetNovim nv key event
@@ -70,6 +78,8 @@ export
     #  for are made after the nodes are committed
 
     feedSheetNovim: (nv key event) ->
+
+        ⮐ @feedSheetConfirm(nv key event) if nv.exConfirms?.nodes
 
         combo = event?.combo ? key
 
@@ -109,13 +119,13 @@ export
 
         handled ? 'handled' : 'unhandled'
 
-    #  runs fn with the novim mode working on the active text node, for the ex
-    #  commands and the search that the command line sends to the mode. without a
-    #  text node, quiet calls do nothing and the others report it
+    #  runs fn with the novim mode working on the active text node, or on node, for
+    #  the ex commands and the search that the command line sends to the mode.
+    #  without a text node, quiet calls do nothing and the others report it
 
-    novimInNode: (nv fn quiet) ->
+    novimInNode: (nv fn quiet node) ->
 
-        active = @sheetActive()
+        active = node ? @sheetActive()
 
         if not active?
             ⮐ true if quiet
@@ -140,6 +150,53 @@ export
         @runNovimLater()
 
         result
+
+    #  the keys of a :%s///c session go to the node whose matches are confirmed.
+    #  a node without matches left hands the session to the next node
+
+    feedSheetConfirm: (nv key event) ->
+
+        prev    = nv.state
+        feeding = @novimFeeding
+        @novimFeeding = true
+
+        try
+            @inTextNode nv.exConfirms.node (st) =>
+                nv.state = st
+                try
+                    nv.handleKey key event
+                finally
+                    nv.state = prev
+            @sheetConfirmNext nv prev
+        finally
+            @novimFeeding = feeding
+
+        @recordMacroKey key event
+
+        @runNovimLater()
+
+        'handled'
+
+    sheetConfirmNext: (nv prev) ->
+
+        while (c = nv.exConfirms) and c.nextNode
+
+            delete c.nextNode
+
+            c.index += 1
+            c.node   = c.nodes[c.index]
+            c.y1     = 0
+            c.y2     = c.node.state.s.lines.length-1
+            c.y      = 0
+            c.fromX  = 0
+
+            @inTextNode c.node (st) =>
+                nv.state = st
+                try
+                    nv.advanceSubstituteConfirm()
+                    nv.acceptAllSubstitutions() if c.all and nv.exConfirms
+                finally
+                    nv.state = prev
 
     #  runs fn with the novim mode working on every text node in reading order, for
     #  the ex commands with %, from the background too. all changes are one undo
