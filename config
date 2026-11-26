@@ -31,6 +31,7 @@ novim
                         autoStart           false
                         autoEnableOnEscape  true
                         yankFlashMs         700
+                        searchWrap          false
 project
                         maxDepth    6
                         ignore

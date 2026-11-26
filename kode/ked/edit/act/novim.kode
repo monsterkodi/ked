@@ -104,13 +104,22 @@ export
                 if not forward and before
                     target = span
 
-            if not target
-                break
+            target ?= @searchWrapTarget @s.highlights forward
+
+            break if not target
 
             pos = [target[0] target[1]]
 
         @pushJump(origin) if not (origin eql pos)
         @setMainCursor pos
+
+    #  n N * # wrap around at the last and first match if novim.searchWrap is set
+
+    searchWrapTarget: spans forward ->
+
+        ⮐ null if not config.data?.novim?.searchWrap or empty spans
+
+        forward ? spans[0] : spans[-1]
 
     wordSpansForText: text ->
 
@@ -167,6 +176,8 @@ export
                     break
                 if not forward and before
                     target = span
+
+            target ?= @searchWrapTarget spans forward
 
             break if not target
 

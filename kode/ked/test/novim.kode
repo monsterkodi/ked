@@ -2544,7 +2544,19 @@ windowReset = (s) ->
     
         key '#'
         cur 0 0
-    
+
+        oldConfig = config.data
+        config.data = { novim: { searchWrap: true } }
+        try
+            loadText "foo bar foo\nfoobar foo" 8 1
+            key '*' ; cur 0 0
+            key '#' ; cur 7 1
+            key '2' ; key '*' ; cur 8 0
+            loadText "one foo two" 5 0
+            key '*' ; cur 4 0
+        finally
+            config.data = oldConfig
+
         novim.lastVind = ''
     
   ▸ visual mode
@@ -3112,7 +3124,23 @@ windowReset = (s) ->
     
         key 'N'
         cur 0 0
-    
+
+        oldConfig = config.data
+        config.data = { novim: { searchWrap: true } }
+        try
+            loadText "foo\nbar\nfoo\nbar\nfoo" 0 4
+            s.setHighlights [[0 0 3 0] [0 2 3 2] [0 4 3 4]]
+            key 'n' ; cur 0 0
+            key 'N' ; cur 0 4
+            key '2' ; key 'n' ; cur 0 2
+            key '4' ; key 'N' ; cur 0 0
+            s.setMainCursor 0 3 ; key 'n' ; cur 0 4
+            s.setHighlights [[0 2 3 2]] ; s.setMainCursor 0 2
+            key 'n' ; cur 0 2
+            key 'N' ; cur 0 2
+        finally
+            config.data = oldConfig
+
         loadText "foo\nbar"
     
         key '/'

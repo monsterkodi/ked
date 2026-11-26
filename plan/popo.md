@@ -538,10 +538,12 @@ page s
        replaces the rest in this and all later nodes, `q` stops, `l` replaces and
        stops. The whole session is one undo step.
    - **Steps**, each tests first (`sheet novim`, `search highlights`) and one commit:
-     - 8a wrap around option: `novim.searchWrap false` in `config`,
-       `jumpByHighlight` and `searchWord` wrap when it is set. The `search
-       highlights` test stays as it is (default), a second block with
-       `config.data.novim.searchWrap = true` tests the wrap for `n N * #` and counts.
+     - ✔ 8a wrap around option. As built: `novim.searchWrap false` in `config`;
+       `jumpByHighlight` and `searchWord` take `searchWrapTarget` (first or last
+       span) when no match is left. The default cases of `search highlights` and
+       `search word under cursor` are unchanged, a `searchWrap: true` block in each
+       tests the wrap, counts through it, and a single match. `*` on the only match
+       now moves to its start with the wrap, as in vim.
      - 8b reading order and search across nodes: `sheetReadingNodes`, highlights in
        all nodes, `n N * #` and `commitSearch` continue into the next node, the
        position over all nodes, search from the background.
