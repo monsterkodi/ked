@@ -1,6 +1,6 @@
 children
     .
-        bg          |#2d1b3d|
+        bg          |#171717|
         x           0%
         y           0%
         children
@@ -36,7 +36,7 @@ children
         w           20%
         h           33%
     .
-        bg          |#3d3511|
+        bg          |#212121|
         x           20%
         y           0%
         children
@@ -71,7 +71,7 @@ children
         w           20%
         h           33%
     .
-        bg          |#112a3d|
+        bg          |#171717|
         x           40%
         y           0%
         children
@@ -107,7 +107,7 @@ children
         w           20%
         h           33%
     .
-        bg          |#3d1f11|
+        bg          |#212121|
         x           60%
         y           0%
         children
@@ -144,7 +144,7 @@ children
         w           20%
         h           33%
     .
-        bg          |#1f2d1f|
+        bg          |#171717|
         x           80%
         y           0%
         children
@@ -178,7 +178,7 @@ children
         w           20%
         h           33%
     .
-        bg          |#1a2433|
+        bg          |#212121|
         x           0%
         y           33%
         children
@@ -215,7 +215,7 @@ children
         w           20%
         h           33%
     .
-        bg          |#3d1a1a|
+        bg          |#171717|
         x           20%
         y           33%
         children
@@ -250,7 +250,7 @@ children
         w           20%
         h           33%
     .
-        bg          |#11333d|
+        bg          |#212121|
         x           40%
         y           33%
         children
@@ -286,7 +286,7 @@ children
         w           20%
         h           33%
     .
-        bg          |#2d3d11|
+        bg          |#171717|
         x           60%
         y           33%
         children
@@ -321,7 +321,7 @@ children
         w           20%
         h           33%
     .
-        bg          |#262626|
+        bg          |#212121|
         x           80%
         y           33%
         children
@@ -356,7 +356,7 @@ children
         w           20%
         h           33%
     .
-        bg          |#3d2a11|
+        bg          |#171717|
         x           0%
         y           66%
         b           0%
@@ -391,7 +391,7 @@ children
                 b       1
         w           20%
     .
-        bg          |#11113d|
+        bg          |#212121|
         x           20%
         y           66%
         b           0%
@@ -428,7 +428,7 @@ children
                 b       1
         w           20%
     .
-        bg          |#3d112d|
+        bg          |#171717|
         x           40%
         y           66%
         b           0%
@@ -461,7 +461,7 @@ children
                 b       1
         w           20%
     .
-        bg          |#113d2a|
+        bg          |#212121|
         x           60%
         y           66%
         b           0%
@@ -495,7 +495,7 @@ children
                 b       1
         w           20%
     .
-        bg          |#33331a|
+        bg          |#171717|
         x           80%
         y           66%
         b           0%
