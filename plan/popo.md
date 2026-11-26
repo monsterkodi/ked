@@ -496,27 +496,35 @@ page s
    node: `/ ? * #` highlight in it, `n N` stop at its last match, `%s` is its lines.
    And `n N * #` never wrap around, in plain files too (`jumpByHighlight` and
    `searchWord` break when no match is left, the `search highlights` test in
-   `test/novim.kode` expects that). Proposed (2026-11-26):
-   - **Wrap around.** `n N * #` continue at the first match after the last one and
-     at the last before the first, as vim's `wrapscan`. A count counts through the
-     wrap. One match: the cursor stays on it. In plain files and in nodes. No
-     "search hit BOTTOM" message (see *Open questions* 8).
+   `test/novim.kode` expects that). Decided (2026-11-26):
+   - **Wrap around is an option.** `novim.searchWrap` in `config`, `false` by
+     default: `n N * #` stop at the last / first match, as now. With `true` they
+     continue at the first match after the last one and at the last before the
+     first, as vim's `wrapscan`. A count counts through the wrap. One match: the
+     cursor stays on it. In plain files and in sheets, where the ends are those of
+     the whole match list (see *Reading order*). No "search hit BOTTOM" message.
+     `commitSearch` (`/ ?` + enter) keeps going to the first match when none is
+     after the cursor, with either setting.
    - **Reading order.** The nodes of a sheet are searched in reading order: by
      `rect.abs.y`, then `rect.abs.x`, ties in tree order (`sheetReadingNodes`).
      Tree order is z-order (`shift` moves nodes in it), so it can't be used.
      Inside a node the matches go by logical position. All matches of all nodes are
-     one list: the last match of the last node wraps to the first of the first.
+     one list: `n` on the last match of a node goes to the first match of the next
+     node with matches; at the end of the list it stops, or wraps to the first match
+     of the first node with `searchWrap`.
    - **Search.** `/ ? * #` highlight the text in all text nodes, `searchChanged`
      updates them while typing, `cancelSearch` clears them all, like
      `spreadHighlights` does for `alt+cmd+d`. `commitSearch`, `n N` and `* #` go to
      the next match in the list; a match in another node is reached through
      `sheetJump` (one jump entry, the node becomes the home). The position
      (`novim.search.position`) counts over all nodes: `3/7`.
-   - **Background.** `/ ? n N` on the background search too, from the page cursor:
-     the next match is the first one in a node that starts after the cursor cell in
-     reading order. `* #` need a word, so they still do nothing there.
-   - **`%` is the sheet.** `%` and the commands whose default range is `%` (`:g`
-     `:v`) run in every text node in reading order: `:%s :%g :%v :%d :%normal`.
+   - **Background.** Search always works: `/ ? n N` on the background search from the
+     page cursor, the next match is the first one in a node that starts after the
+     cursor cell in reading order. `* #` need a word at the cursor, the background has
+     none, so they do nothing there.
+   - **`%` is the sheet, for all commands.** `%` and the commands whose default range
+     is `%` (`:g` `:v`) run in every text node in reading order: `:%s :%g :%v :%d
+     :%normal`.
      Other ranges (`.`, `5`, `1,3`, `'<,'>`) stay in the active node and still report
      `not in a text node` on the background; `%` works on the background.
      - One undo step: one `begin` / `end` group on the page around all nodes.
@@ -530,9 +538,10 @@ page s
        replaces the rest in this and all later nodes, `q` stops, `l` replaces and
        stops. The whole session is one undo step.
    - **Steps**, each tests first (`sheet novim`, `search highlights`) and one commit:
-     - 8a wrap around: `jumpByHighlight` and `searchWord` wrap, in plain files and
-       nodes. The `search highlights` expectations change (`n` on the last match
-       goes to the first).
+     - 8a wrap around option: `novim.searchWrap false` in `config`,
+       `jumpByHighlight` and `searchWord` wrap when it is set. The `search
+       highlights` test stays as it is (default), a second block with
+       `config.data.novim.searchWrap = true` tests the wrap for `n N * #` and counts.
      - 8b reading order and search across nodes: `sheetReadingNodes`, highlights in
        all nodes, `n N * #` and `commitSearch` continue into the next node, the
        position over all nodes, search from the background.
@@ -583,6 +592,6 @@ In order of priority (decided 2026-11-25):
    gate. No toggle in sheets for now.
 7. ~~**continuation indent in sheets**~~ Decided: kept, as in the editor (see *Wrapping
    into spans*).
-8. **Phase 8 choices to confirm:** `%` for all ranged commands (not only `:s`), and
-   `:g :v` without a range over all nodes; `/ ? n N` working from the background;
-   no message when the search wraps around (vim shows "search hit BOTTOM").
+8. ~~**Phase 8 choices**~~ Decided (2026-11-26): `%` over all nodes for all ranged
+   commands, `:g :v` without a range too; search always works, from the background
+   too; no message when the search wraps; the wrap is an option, off by default.
