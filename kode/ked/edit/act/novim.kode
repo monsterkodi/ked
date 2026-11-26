@@ -61,7 +61,21 @@ export
             'repeat'                ➜ @repeatChange         cmd.count
                                     ➜ log 'novim unknown operator ▸' cmd.operator
 
+    #  the page of a sheet, its search goes through all text nodes. null outside of
+    #  sheets and in multi mode, where every node searches its own text
+
+    sheetSearchPage: ->
+
+        page = @sheetPage ? @
+
+        ⮐ null if not page.rectree? or page.sheetMulti
+
+        page
+
     searchPosition: ->
+
+        if page = @sheetSearchPage()
+            ⮐ page.sheetSearchPosition()
 
         spans = @s.highlights
 
@@ -76,6 +90,9 @@ export
         [0 spans.length]
 
     jumpByHighlight: count text forward ->
+
+        if page = @sheetSearchPage()
+            ⮐ page.sheetSearchNext count text forward
 
         if empty @s.highlights
             if valid text
@@ -147,6 +164,9 @@ export
 
         novim.lastVind = text
         novim.lastVindForward = forward
+
+        if page = @sheetSearchPage()
+            ⮐ page.sheetSearchWord @ text count forward
 
         spans = @wordSpansForText text
 

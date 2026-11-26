@@ -58,6 +58,7 @@ novimOn = ->
     e.state.startMode 'novim'
 
 novimTree = -> {children:[{ text:'foo bar\nbaz' x:1 y:1 w:8 h:3 } { text:'qux' x:1 y:5 w:4 h:1 }]}
+searchTree = -> {children:[{ text:'ab a' x:1 y:5 w:6 h:1 } { text:'a b' x:1 y:1 w:6 h:2 } { text:'b a' x:9 y:1 w:6 h:2 }]}
 
 loadSheet = tree cursor=[0 0] ->
     e.state.setSheetTree lined(tree)
@@ -1558,7 +1559,41 @@ showSue = data ->
             type 'N' ; mc() ▸ [6 1]
             e.state.setCursors [[6 6]] ; type '/'
             nm.searchChanged 'q' ; nm.commitSearch()
-            rt('children.1').state.s.highlights ▸ [] ; mc() ▸ [6 6]
+            rt('children.1').state.s.highlights.length ▸ 1 ; mc() ▸ [1 5]
+
+            loadSheet searchTree()
+            hls = -> [0 1 2].map (i) -> rt("children.#{i}").state.s.highlights.length
+            positions = []
+            onPosition = (p) -> positions.push [p.current p.total]
+            post.on 'novim.search.position' onPosition
+            e.state.setCursors [[1 1]] ; type '/'
+            nm.searchChanged 'a' ; hls() ▸ [2 1 1]
+            nm.commitSearch() ; mc() ▸ [1 1] ; positions[-1] ▸ [1 4]
+            type 'n' ; mc() ▸ [11 1] ; positions[-1] ▸ [2 4]
+            type 'n' ; mc() ▸ [1 5]
+            type 'n' ; mc() ▸ [4 5] ; positions[-1] ▸ [4 4]
+            type 'n' ; mc() ▸ [4 5]
+            type 'N' ; mc() ▸ [1 5]
+            type '2N' ; mc() ▸ [1 1]
+            type 'N' ; mc() ▸ [1 1]
+            config.data.novim.searchWrap = true
+            type 'N' ; mc() ▸ [4 5]
+            type 'n' ; mc() ▸ [1 1]
+            config.data.novim.searchWrap = false
+            hls() ▸ [2 1 1]
+            type 'j' ; hls() ▸ [0 0 0]
+            e.state.setCursors [[8 3]] ; type 'n' ; mc() ▸ [1 5] ; hls() ▸ [2 1 1]
+            e.state.setCursors [[8 3]] ; type 'N' ; mc() ▸ [11 1]
+            e.state.setCursors [[8 3]] ; type '/'
+            nm.searchChanged 'b' ; nm.commitSearch() ; mc() ▸ [2 5]
+            e.state.setCursors [[1 1]] ; type '*' ; mc() ▸ [11 1] ; hls() ▸ [1 1 1]
+            positions[-1] ▸ [2 3]
+            type '*' ; mc() ▸ [4 5]
+            type '*' ; mc() ▸ [4 5]
+            type '#' ; mc() ▸ [11 1]
+            key 'ctrl+o' ; mc() ▸ [4 5]
+            e.state.setCursors [[8 3]] ; type '*' ; mc() ▸ [8 3]
+            post.removeListener 'novim.search.position' onPosition
 
             loadSheet novimTree()
             e.state.setCursors [[1 1]] ; type 'vjjd'

@@ -739,31 +739,46 @@ use ..           ◆ mode
 
         true
 
+    #  in a sheet the search goes through all text nodes, from the background too.
+    #  only in multi mode it stays in the active node
+
+    sheetSearchOff: -> @state.rectree? and not @state.sheetSearchPage()
+
+    searchHighlight: text ->
+
+        if page = @state.sheetSearchPage()
+            page.sheetSearchHighlight text
+        else if empty text
+            @state.setHighlights []
+        else
+            @state.highlightText text
+
     startSearch: forward=true ->
 
-        ⮐ @inSheetText(=> @startSearch forward) if @state.rectree?
+        if @state.rectree? and (@sheetSearchOff() or @state.sheetActive()?)
+            ⮐ @inSheetText(=> @startSearch forward)
 
         @searchForward = forward
         novim.lastVindForward = forward
 
-        text = @state.textOfSelectionOrWordAtCursor()
-        text ?= ''
+        text = ''
+
+        if not @state.rectree?
+
+            text = @state.textOfSelectionOrWordAtCursor() ? ''
+
+            if @state.s.selections.length
+                sel = @state.s.selections[clamp 0 @state.s.selections.length-1 @state.s.main]
+                @state.setMainCursor sel[0] sel[1]
+            else if rng = belt.rangeOfClosestWordToPos @state.s.lines @state.mainCursor()
+                @state.setMainCursor rng[0] rng[1]
 
         @searchText = text
-
-        if @state.s.selections.length
-            sel = @state.s.selections[clamp 0 @state.s.selections.length-1 @state.s.main]
-            @state.setMainCursor sel[0] sel[1]
-        else if rng = belt.rangeOfClosestWordToPos @state.s.lines @state.mainCursor()
-            @state.setMainCursor rng[0] rng[1]
 
         novim.lastVind = text
         @state.novim.register.set '/', { lines: [text], linewise: false }
 
-        if empty text
-            @state.setHighlights []
-        else
-            @state.highlightText text
+        @searchHighlight text
 
         post.emit 'novim.search.start' state:@hostName() text:text
 
@@ -771,30 +786,29 @@ use ..           ◆ mode
 
     searchChanged: text ->
 
-        ⮐ @inSheetText(=> @searchChanged text) if @state.rectree?
+        ⮐ @inSheetText(=> @searchChanged text) if @sheetSearchOff()
 
         @searchText = text
         novim.lastVind = text
         @state.novim.register.set '/', { lines: [text], linewise: false }
 
-        if empty text
-            @state.setHighlights []
-        else
-            @state.highlightText text
+        @searchHighlight text
 
         true
 
     cancelSearch: ->
 
-        ⮐ @inSheetText(=> @cancelSearch()) if @state.rectree?
+        ⮐ @inSheetText(=> @cancelSearch()) if @sheetSearchOff()
 
-        @state.setHighlights []
+        @searchHighlight ''
 
         @searchHistory.reset()
 
         true
 
     emitSearchPosition: ->
+
+        ⮐ true if @state.sheetSearchPage()?.novimLater => @emitSearchPosition()
 
         position = @state.searchPosition()
 
@@ -806,9 +820,14 @@ use ..           ◆ mode
 
     commitSearch: ->
 
-        ⮐ @inSheetText(=> @commitSearch()) if @state.rectree?
+        ⮐ @inSheetText(=> @commitSearch()) if @sheetSearchOff()
 
         @searchHistory.add @searchText
+
+        if page = @state.sheetSearchPage()
+            page.sheetSearchCommit @searchForward
+            @emitSearchPosition()
+            ⮐ true
 
         spans = @state.s.highlights
 
@@ -992,7 +1011,8 @@ use ..           ◆ mode
             ⮐ true
 
         if not @find and char not in ',;nN0123456789@q' and key not in keyinfo.modifierNames
-            @state.setHighlights [] 
+            @state.setHighlights []
+            @state.sheetSearchPage()?.sheetSearchHighlight ''
 
         if @find
             # log "novim.find #{char} -- #{event.char} #{combo} #{key}" 

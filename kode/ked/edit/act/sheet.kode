@@ -25,7 +25,7 @@ highlightKeys = ['alt+cmd+d' 'alt+ctrl+d']
 novimCombos  = ['ctrl+v' 'ctrl+o' 'ctrl+i']
 novimMotions = ['h' 'j' 'k' 'l' 'left' 'right' 'up' 'down']
 novimParts   = ['count' 'operator' 'area' 'prefix' 'register' 'registerPending' 'macroPending' 'find' 'replace']
-novimOnPage  = ['move' 'undo' 'matchBracket']
+novimOnPage  = ['move' 'undo' 'matchBracket' 'searchNext' 'searchPrev']
 
 #!sheet
 export
@@ -211,6 +211,183 @@ export
 
         @novim.jumps.retain   (e) -> not e.node? or live.has(e.node)
         @novim.changes.retain (e) -> not e[2]? or live.has(e[2])
+
+    #  the text nodes in reading order: by the top, then the left of their rects.
+    #  the tree order is the stacking order
+
+    sheetReadingNodes: ->
+
+        @sheetTextNodes().sort (a b) ->
+            ra = a.rect.abs
+            rb = b.rect.abs
+            (ra.y - rb.y) or (ra.x - rb.x)
+
+    #  the search highlights the text in all text nodes, or clears them without text
+
+    sheetSearchHighlight: text ->
+
+        ⮐ if @novimLater => @sheetSearchHighlight text
+
+        nodes = @sheetTextNodes()
+
+        if empty text
+            nodes = nodes.filter (node) -> valid node.state.s.highlights
+            ⮐ if empty nodes
+
+        for node in nodes
+            if empty text ➜ node.state.clearHighlights() else node.state.highlightText text
+
+        @compositeSheet @sheetActive()
+
+    #  the search matches of all text nodes, as one list in reading order
+
+    sheetSearchMatches: nodes ->
+
+        matches = []
+
+        for node,i in nodes
+            for span in node.state.s.highlights
+                matches.push i:i node:node x:span[0] y:span[1]
+
+        matches
+
+    #  where the search starts: the main cursor of the home node, or on the
+    #  background a place between the nodes that start before and after the cursor
+
+    sheetSearchSpot: nodes ->
+
+        if home = @sheetHome()
+            pos = home.pos ? home.node.state.mainCursor()
+            ⮐ i:nodes.indexOf(home.node) node:home.node x:pos[0] y:pos[1]
+
+        cell   = @sheetCellForPos @mainCursor()
+        before = 0
+
+        for node in nodes
+            r = node.rect.abs
+            before += 1 if r.y < cell[1] or (r.y == cell[1] and r.x <= cell[0])
+
+        i:before-0.5 x:0 y:0
+
+    sheetSearchAt: (match spot) ->
+
+        match.node == spot.node and match.x == spot.x and match.y == spot.y
+
+    #  the first match after spot, or the last before it
+
+    sheetSearchStep: (matches spot forward) ->
+
+        target = null
+
+        for m in matches
+            c = (m.i - spot.i) or (m.y - spot.y) or (m.x - spot.x)
+            if forward and c > 0
+                ⮐ m
+            target = m if not forward and c < 0
+
+        target
+
+    #  n N: from the home node's cursor or from the background through the matches
+    #  of all text nodes. they stop at the ends, or wrap with novim.searchWrap
+
+    sheetSearchNext: (count text forward) ->
+
+        ⮐ if @novimLater => @sheetSearchNext count text forward
+
+        nodes   = @sheetReadingNodes()
+        matches = @sheetSearchMatches nodes
+
+        if empty(matches) and valid(text)
+            @sheetSearchHighlight text
+            matches = @sheetSearchMatches nodes
+
+        ⮐ if empty matches
+
+        spot = @sheetSearchSpot nodes
+
+        @sheetSearchGo @sheetSearchCount(matches spot count forward) spot
+
+    sheetSearchCount: (matches spot count forward) ->
+
+        target = null
+        from   = spot
+
+        for i in 0...max(1 count ? 1)
+            t = @sheetSearchStep(matches from forward) ? @searchWrapTarget(matches forward)
+            break if not t
+            target = from = t
+
+        target
+
+    #  * #: the word at the cursor of node state st, in all text nodes
+
+    sheetSearchWord: (st text count forward) ->
+
+        ⮐ if @novimLater => @sheetSearchWord st text count forward
+
+        nodes = @sheetReadingNodes()
+
+        for node in nodes
+            node.state.setHighlights node.state.wordSpansForText(text)
+
+        @compositeSheet @sheetActive()
+
+        node = nodes.find (n) -> n.state == st
+        rng  = belt.rangeOfClosestWordToPos st.s.lines st.mainCursor()
+
+        ⮐ if not node? or not rng
+
+        spot = i:nodes.indexOf(node) node:node x:rng[0] y:rng[1] origin:st.mainCursor()
+
+        @sheetSearchGo @sheetSearchCount(@sheetSearchMatches(nodes) spot count forward) spot
+
+    #  enter in the search input: the match at the cursor, or the next one, or the
+    #  first one when none is left
+
+    sheetSearchCommit: forward ->
+
+        nodes   = @sheetReadingNodes()
+        matches = @sheetSearchMatches nodes
+
+        ⮐ if empty matches
+
+        spot = @sheetSearchSpot nodes
+
+        ⮐ if matches.find (m) => @sheetSearchAt m spot
+
+        target = @sheetSearchStep(matches spot forward) ? (forward ? matches[0] : matches[-1])
+
+        @sheetSearchGo target spot
+
+    #  the main cursor goes to the match, the place it left is a jump
+
+    sheetSearchGo: (target spot) ->
+
+        ⮐ if not target?
+
+        origin = spot.origin ? [spot.x spot.y]
+
+        ⮐ if target.node == spot.node and target.x == origin[0] and target.y == origin[1]
+
+        if spot.node? ➜ spot.node.state.pushJump origin else @pushJump()
+
+        @inTextNode target.node (st) -> st.setCursors [[target.x target.y]]
+
+    #  the index of the match at the cursor and the number of matches of all nodes
+
+    sheetSearchPosition: ->
+
+        nodes   = @sheetReadingNodes()
+        matches = @sheetSearchMatches nodes
+
+        ⮐ if empty matches
+
+        spot = @sheetSearchSpot nodes
+
+        for m,k in matches
+            ⮐ [k+1 matches.length] if @sheetSearchAt m spot
+
+        [0 matches.length]
 
     #  node states use the page's register, jumps, changes and macros
 

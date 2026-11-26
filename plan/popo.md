@@ -544,9 +544,18 @@ page s
        `search word under cursor` are unchanged, a `searchWrap: true` block in each
        tests the wrap, counts through it, and a single match. `*` on the only match
        now moves to its start with the wrap, as in vim.
-     - 8b reading order and search across nodes: `sheetReadingNodes`, highlights in
-       all nodes, `n N * #` and `commitSearch` continue into the next node, the
-       position over all nodes, search from the background.
+     - ✔ 8b reading order and search across nodes. As built: the page's
+       `sheetSearch*` functions treat the highlights of `sheetReadingNodes` as one
+       match list, a place in it is `{i x y}` (node index, position; the background
+       is `i: before-0.5`). `sheetSearchPage` (the page, null outside sheets and in
+       multi mode) decides: `jumpByHighlight`, `searchWord` and `searchPosition` of
+       node states and of the page delegate to it, `searchNext` / `searchPrev` are in
+       `novimOnPage`. The mode's search input uses it too (`sheetSearchOff` only in
+       multi mode), `/` on the background starts with an empty text. Anything asked
+       for while a node is fed waits for `novimLater`, the position too. Any other
+       novim key clears the highlights of all nodes. Moves use `inTextNode`, not
+       `sheetJump`, which would clear the highlights. In multi mode every node still
+       searches on its own.
      - 8c `%` over all nodes for `:s :g :v :d :normal`, one undo step, one error,
        search-only `:%s` starts multi mode. The `%s/a/A/g` expectation of `sheet
        novim` changes: it reaches `qux`'s node too.
