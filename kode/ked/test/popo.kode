@@ -87,7 +87,28 @@ showSue = data ->
                 tree = { x:10 y:10 w:'100%' h:'100%' children:[{x:'50%' y:'50%' w:'50%' h:'25%'}]}
                 absrect {cols:100 rows:100} tree ▸ {abs:{x:10 y:10 w:90 h:90} rel:{x:10 y:10 w:90 h:90}}
                 sds.get(tree 'children.0.rect') ▸ {abs:{x:55 y:55 w:45 h:22} rel:{x:45 y:45 w:45 h:22}}
-            
+
+      ▸ edges
+
+                tiles = (size) ->
+                    cols = [0 20 40 60 80].map (p) -> { x:"#{p}%" y:0 w:'20%' h:1 }
+                    rows = [{ x:0 y:'0%' w:1 h:'33%' } { x:0 y:'33%' w:1 h:'33%' } { x:0 y:'66%' w:1 b:'0%' }]
+                    tree = absol {cols:size rows:size} { x:0 y:0 w:'100%' h:'100%' children:cols.concat(rows) }
+                    xs = tree.children[0...5].map (c) -> c.rect.abs
+                    ys = tree.children[5...8].map (c) -> c.rect.abs
+                    gaps = []
+                    for r,i in xs
+                        gaps.push "x#{i}" if r.x + r.w != (xs[i+1]?.x ? size)
+                    for r,i in ys
+                        gaps.push "y#{i}" if r.y + r.h != (ys[i+1]?.y ? size)
+                    gaps
+                bad = []
+                for size in 5..120
+                    bad.push "#{size}:#{tiles(size)}" if valid tiles(size)
+                bad ▸ []
+                absrect {cols:15 rows:10} { x:'20%' y:'10%' w:'20%' h:'30%' } ▸ {abs:{x:3 y:1 w:3 h:3} rel:{x:3 y:1 w:3 h:3}}
+                absrect {cols:12 rows:10} { x:'25%' y:0 w:'50%' h:1 } ▸ {abs:{x:3 y:0 w:6 h:1} rel:{x:3 y:0 w:6 h:1}}
+
       ▸ cells
     
                 absrect {cols:100 rows:50} { x:3 y:4 w:20 h:10 }         ▸ {abs:{x:3 y:4 w:20 h:10} rel:{x:3 y:4 w:20 h:10}}

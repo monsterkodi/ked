@@ -34,8 +34,8 @@ use ../edit/tool ◆ sue
         x = clamp 0 box.w (@offset(box.w node.x))
         y = clamp 0 box.h (@offset(box.h node.y))
 
-        w = clamp 0 (box.w-x) (@extent(box.w x node.w node.r))
-        h = clamp 0 (box.h-y) (@extent(box.h y node.h node.b))
+        w = clamp 0 (box.w-x) (@extent(box.w node.x node.w node.r))
+        h = clamp 0 (box.h-y) (@extent(box.h node.y node.h node.b))
         h = @linesHeight node h box.h-y
 
         node.rect = {abs:{x:box.x+x y:box.y+y w:w h:h} rel:{x:x y:y w:w h:h}}
@@ -95,24 +95,35 @@ use ../edit/tool ◆ sue
 
         "#{max(1 floor(int(node.h) / scale))}x#{scale}"
 
-    @offset: extent value ->
+    @offset: extent value -> @edge @exact(extent value)
+
+    #  the unrounded cell of a value, percentages are fractions of extent
+
+    @exact: extent value ->
 
         ⮐ 0 if not valid value
 
         if value is str
-            if value.endsWith '%'
-                value = extent * int(value) / 100
+            ⮐ extent * int(value) / 100 if value.endsWith '%'
             ⮐ int value
 
         value
 
+    @edge: v -> Math.floor v + 1e-9
+
+    #  both edges of a node are rounded down from their exact places, the
+    #  extent is their distance. a node that starts where another one ends
+    #  shares the edge with it, without a gap or an overlap
+
     @extent: total start w r ->
 
-        ⮐ @offset(total w) if valid w
+        left = @exact total start
 
-        ⮐ total - start - (@offset(total r)) if valid r
+        ⮐ @edge(left + @exact(total w)) - @edge(left) if valid w
 
-        total - start
+        ⮐ @edge(total - @exact(total r)) - @edge(left) if valid r
+
+        total - @edge(left)
 
     @regionize: cells rectree ->
 

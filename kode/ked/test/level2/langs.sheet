@@ -1,531 +1,531 @@
 children
+    .
+        bg          |#2d1b3d|
+        x           0%
+        y           0%
+        children
             .
-                bg      |#2d1b3d|
-                x       0%
-                y       0%
-                r       80%
-                b       67%
-                children
-                    .
-                        text    kode
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |# kode: a tiny counter|
-                            ||
-                            |use ../kxk ▪ post|
-                            ||
-                            |class counter|
-                            ||
-                            |    @: @name start=0 ->|
-                            |        @count = start|
-                            |        @steps = []|
-                            ||
-                            |    incr: n=1 ->|
-                            |        @count += n|
-                            |        @steps.push n|
-                            |        post.emit 'counter' @name @count|
-                            |        @count|
-                            ||
-                            |    reset: -> @count = 0 ; @steps = []|
-                            ||
-                            |c = new counter 'clicks' 3|
-                            |for i in 0...5 ➜ c.incr i|
-                            |log "count #{c.count}"|
+                text    kode
+                lines
+                    |# kode: a tiny counter|
+                    ||
+                    use ../kxk ▪ post
+                    ||
+                    class counter
+                    ||
+                    |    @: @name start=0 ->|
+                    |        @count = start|
+                    |        @steps = []|
+                    ||
+                    |    incr: n=1 ->|
+                    |        @count += n|
+                    |        @steps.push n|
+                    |        post.emit 'counter' @name @count|
+                    |        @count|
+                    ||
+                    |    reset: -> @count = 0 ; @steps = []|
+                    ||
+                    c = new counter 'clicks' 3
+                    for i in 0...5 ➜ c.incr i
+                    log "count #{c.count}"
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+        h           33%
+    .
+        bg          |#3d3511|
+        x           20%
+        y           0%
+        children
             .
-                bg      |#3d3511|
-                x       20%
-                y       0%
-                r       60%
-                b       67%
-                children
-                    .
-                        text    js
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |// javascript: debounce|
-                            ||
-                            |export function debounce(fn, ms = 200) {|
-                            |    let timer = null;|
-                            |    return function (...args) {|
-                            |        clearTimeout(timer);|
-                            |        timer = setTimeout(() => {|
-                            |            fn.apply(this, args);|
-                            |        }, ms);|
-                            |    };|
-                            |}|
-                            ||
-                            |const log = debounce((e) => {|
-                            |    console.log('resize', e.target.innerWidth);|
-                            |}, 100);|
-                            ||
-                            |window.addEventListener('resize', log);|
-                            ||
-                            |const nums = [1, 2, 3].map(n => n * 2);|
-                            |console.log(nums, typeof nums, null ?? 'x');|
+                text    js
+                lines
+                    // javascript: debounce
+                    ||
+                    export function debounce(fn, ms = 200) {
+                    |    let timer = null;|
+                    |    return function (...args) {|
+                    |        clearTimeout(timer);|
+                    |        timer = setTimeout(() => {|
+                    |            fn.apply(this, args);|
+                    |        }, ms);|
+                    |    };|
+                    }
+                    ||
+                    const log = debounce((e) => {
+                    |    console.log('resize', e.target.innerWidth);|
+                    }, 100);
+                    ||
+                    window.addEventListener('resize', log);
+                    ||
+                    const nums = [1, 2, 3].map(n => n * 2);
+                    console.log(nums, typeof nums, null ?? 'x');
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+        h           33%
+    .
+        bg          |#112a3d|
+        x           40%
+        y           0%
+        children
             .
-                bg      |#112a3d|
-                x       40%
-                y       0%
-                r       40%
-                b       67%
-                children
-                    .
-                        text    ts
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |// typescript: a typed store|
-                            ||
-                            |interface Item {|
-                            |    id: number;|
-                            |    name: string;|
-                            |    tags?: string[];|
-                            |}|
-                            ||
-                            |type Filter = (item: Item) => boolean;|
-                            ||
-                            |class Store<T extends Item> {|
-                            |    private items: Map<number, T> = new Map();|
-                            ||
-                            |    add(item: T): void {|
-                            |        this.items.set(item.id, item);|
-                            |    }|
-                            ||
-                            |    find(f: Filter): T[] {|
-                            |        return [...this.items.values()].filter(f);|
-                            |    }|
-                            |}|
+                text    ts
+                lines
+                    // typescript: a typed store
+                    ||
+                    interface Item {
+                    |    id: number;|
+                    |    name: string;|
+                    |    tags?: string[];|
+                    }
+                    ||
+                    type Filter = (item: Item) => boolean;
+                    ||
+                    class Store<T extends Item> {
+                    |    private items: Map<number, T> = new Map();|
+                    ||
+                    |    add(item: T): void {|
+                    |        this.items.set(item.id, item);|
+                    |    }|
+                    ||
+                    |    find(f: Filter): T[] {|
+                    |        return [...this.items.values()].filter(f);|
+                    |    }|
+                    }
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+        h           33%
+    .
+        bg          |#3d1f11|
+        x           60%
+        y           0%
+        children
             .
-                bg      |#3d1f11|
-                x       60%
-                y       0%
-                r       20%
-                b       67%
-                children
-                    .
-                        text    swift
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |// swift: shapes|
-                            ||
-                            |import Foundation|
-                            ||
-                            |protocol Shape {|
-                            |    var area: Double { get }|
-                            |}|
-                            ||
-                            |struct Circle: Shape {|
-                            |    let radius: Double|
-                            |    var area: Double { .pi * radius * radius }|
-                            |}|
-                            ||
-                            |struct Square: Shape {|
-                            |    let side: Double|
-                            |    var area: Double { side * side }|
-                            |}|
-                            ||
-                            |let shapes: [Shape] = [Circle(radius: 2), Square(side: 3)]|
-                            |for s in shapes {|
-                            |    print(String(format: "%.2f", s.area))|
-                            |}|
+                text    swift
+                lines
+                    // swift: shapes
+                    ||
+                    import Foundation
+                    ||
+                    protocol Shape {
+                    |    var area: Double { get }|
+                    }
+                    ||
+                    struct Circle: Shape {
+                    |    let radius: Double|
+                    |    var area: Double { .pi * radius * radius }|
+                    }
+                    ||
+                    struct Square: Shape {
+                    |    let side: Double|
+                    |    var area: Double { side * side }|
+                    }
+                    ||
+                    let shapes: [Shape] = [Circle(radius: 2), Square(side: 3)]
+                    for s in shapes {
+                    |    print(String(format: "%.2f", s.area))|
+                    }
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+        h           33%
+    .
+        bg          |#1f2d1f|
+        x           80%
+        y           0%
+        children
             .
-                bg      |#1f2d1f|
-                x       80%
-                y       0%
-                r       0%
-                b       67%
-                children
-                    .
-                        text    json
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |{|
-                            |    "name": "ked",|
-                            |    "version": "0.9.3",|
-                            |    "private": true,|
-                            |    "type": "module",|
-                            |    "bin": {|
-                            |        "ked": "bin/ked"|
-                            |    },|
-                            |    "scripts": {|
-                            |        "test": "./kk -t",|
-                            |        "build": "./kk -k"|
-                            |    },|
-                            |    "keywords": ["editor", "terminal", "tui"],|
-                            |    "limits": {|
-                            |        "cols": 400,|
-                            |        "ratio": 0.618,|
-                            |        "undo": null|
-                            |    }|
-                            |}|
+                text    json
+                lines
+                    {
+                    |    "name": "ked",|
+                    |    "version": "0.9.3",|
+                    |    "private": true,|
+                    |    "type": "module",|
+                    |    "bin": {|
+                    |        "ked": "bin/ked"|
+                    |    },|
+                    |    "scripts": {|
+                    |        "test": "./kk -t",|
+                    |        "build": "./kk -k"|
+                    |    },|
+                    |    "keywords": ["editor", "terminal", "tui"],|
+                    |    "limits": {|
+                    |        "cols": 400,|
+                    |        "ratio": 0.618,|
+                    |        "undo": null|
+                    |    }|
+                    }
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+        h           33%
+    .
+        bg          |#1a2433|
+        x           0%
+        y           33%
+        children
             .
-                bg      |#1a2433|
-                x       0%
-                y       33%
-                r       80%
-                b       33%
-                children
-                    .
-                        text    cpp
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |// c++: word count|
-                            ||
-                            |#include <iostream>|
-                            |#include <map>|
-                            |#include <string>|
-                            ||
-                            |template <typename K, typename V>|
-                            |void dump(const std::map<K, V>& m) {|
-                            |    for (const auto& [k, v] : m) {|
-                            |        std::cout << k << ": " << v << '\n';|
-                            |    }|
-                            |}|
-                            ||
-                            |int main(int argc, char** argv) {|
-                            |    std::map<std::string, int> counts;|
-                            |    std::string word;|
-                            |    while (std::cin >> word) {|
-                            |        ++counts[word];|
-                            |    }|
-                            |    dump(counts);|
-                            |    return 0;|
-                            |}|
+                text    cpp
+                lines
+                    // c++: word count
+                    ||
+                    |#include <iostream>|
+                    |#include <map>|
+                    |#include <string>|
+                    ||
+                    template <typename K, typename V>
+                    void dump(const std::map<K, V>& m) {
+                    |    for (const auto& [k, v] : m) {|
+                    |        std::cout << k << ": " << v << '\n';|
+                    |    }|
+                    }
+                    ||
+                    int main(int argc, char** argv) {
+                    |    std::map<std::string, int> counts;|
+                    |    std::string word;|
+                    |    while (std::cin >> word) {|
+                    |        ++counts[word];|
+                    |    }|
+                    |    dump(counts);|
+                    |    return 0;|
+                    }
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+        h           33%
+    .
+        bg          |#3d1a1a|
+        x           20%
+        y           33%
+        children
             .
-                bg      |#3d1a1a|
-                x       20%
-                y       33%
-                r       60%
-                b       33%
-                children
-                    .
-                        text    html
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |<!DOCTYPE html>|
-                            |<!-- html: a small page -->|
-                            |<html lang="en">|
-                            |  <head>|
-                            |    <meta charset="utf-8">|
-                            |    <title>ked sheets</title>|
-                            |    <link rel="stylesheet" href="style.css">|
-                            |  </head>|
-                            |  <body>|
-                            |    <header class="top">|
-                            |      <h1>Sheets</h1>|
-                            |      <nav><a href="#one">one</a> <a href="#two">two</a></nav>|
-                            |    </header>|
-                            |    <main id="one">|
-                            |      <p>Text nodes are <em>editor states</em>.</p>|
-                            |      <img src="sheet.png" alt="a sheet" width="320">|
-                            |    </main>|
-                            |    <script src="main.js" defer></script>|
-                            |  </body>|
-                            |</html>|
+                text    html
+                lines
+                    <!DOCTYPE html>
+                    <!-- html: a small page -->
+                    <html lang="en">
+                    |  <head>|
+                    |    <meta charset="utf-8">|
+                    |    <title>ked sheets</title>|
+                    |    <link rel="stylesheet" href="style.css">|
+                    |  </head>|
+                    |  <body>|
+                    |    <header class="top">|
+                    |      <h1>Sheets</h1>|
+                    |      <nav><a href="#one">one</a> <a href="#two">two</a></nav>|
+                    |    </header>|
+                    |    <main id="one">|
+                    |      <p>Text nodes are <em>editor states</em>.</p>|
+                    |      <img src="sheet.png" alt="a sheet" width="320">|
+                    |    </main>|
+                    |    <script src="main.js" defer></script>|
+                    |  </body>|
+                    </html>
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+        h           33%
+    .
+        bg          |#11333d|
+        x           40%
+        y           33%
+        children
             .
-                bg      |#11333d|
-                x       40%
-                y       33%
-                r       40%
-                b       33%
-                children
-                    .
-                        text    css
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |/* css: layout */|
-                            ||
-                            |:root {|
-                            |    --accent: #f80;|
-                            |    --gap: 12px;|
-                            |}|
-                            ||
-                            |body {|
-                            |    margin: 0;|
-                            |    font: 14px/1.4 monospace;|
-                            |    background: #111;|
-                            |}|
-                            ||
-                            |.top > nav a:hover {|
-                            |    color: var(--accent);|
-                            |    text-decoration: underline;|
-                            |}|
-                            ||
-                            |@media (max-width: 600px) {|
-                            |    main { padding: calc(var(--gap) * 2); }|
-                            |}|
+                text    css
+                lines
+                    /* css: layout */
+                    ||
+                    :root {
+                    |    --accent: #f80;|
+                    |    --gap: 12px;|
+                    }
+                    ||
+                    body {
+                    |    margin: 0;|
+                    |    font: 14px/1.4 monospace;|
+                    |    background: #111;|
+                    }
+                    ||
+                    .top > nav a:hover {
+                    |    color: var(--accent);|
+                    |    text-decoration: underline;|
+                    }
+                    ||
+                    @media (max-width: 600px) {
+                    |    main { padding: calc(var(--gap) * 2); }|
+                    }
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+        h           33%
+    .
+        bg          |#2d3d11|
+        x           60%
+        y           33%
+        children
             .
-                bg      |#2d3d11|
-                x       60%
-                y       33%
-                r       20%
-                b       33%
-                children
-                    .
-                        text    py
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |# python: a sheet of cells|
-                            ||
-                            |from dataclasses import dataclass, field|
-                            ||
-                            |@dataclass|
-                            |class Cell:|
-                            |    x: int|
-                            |    y: int|
-                            |    text: str = ''|
-                            |    tags: list = field(default_factory=list)|
-                            ||
-                            |def grid(cols, rows):|
-                            |    """all cells of a cols x rows grid"""|
-                            |    return [Cell(x, y) for y in range(rows) for x in range(cols)]|
-                            ||
-                            |if __name__ == '__main__':|
-                            |    cells = grid(4, 3)|
-                            |    for c in cells[:5]:|
-                            |        print(f'{c.x}:{c.y}', c.text or None)|
-                            |    print(len(cells), True, 3.5e2)|
+                text    py
+                lines
+                    |# python: a sheet of cells|
+                    ||
+                    from dataclasses import dataclass, field
+                    ||
+                    @dataclass
+                    class Cell:
+                    |    x: int|
+                    |    y: int|
+                    |    text: str = ''|
+                    |    tags: list = field(default_factory=list)|
+                    ||
+                    def grid(cols, rows):
+                    |    """all cells of a cols x rows grid"""|
+                    |    return [Cell(x, y) for y in range(rows) for x in range(cols)]|
+                    ||
+                    if __name__ == '__main__':
+                    |    cells = grid(4, 3)|
+                    |    for c in cells[:5]:|
+                    |        print(f'{c.x}:{c.y}', c.text or None)|
+                    |    print(len(cells), True, 3.5e2)|
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+        h           33%
+    .
+        bg          |#262626|
+        x           80%
+        y           33%
+        children
             .
-                bg      |#262626|
-                x       80%
-                y       33%
-                r       0%
-                b       33%
-                children
-                    .
-                        text    sh
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |#!/usr/bin/env bash|
-                            |# shell: build and test|
-                            ||
-                            |set -euo pipefail|
-                            ||
-                            |root="$(cd "$(dirname "$0")" && pwd)"|
-                            |cd "$root"|
-                            ||
-                            |for f in kode/**/*.kode; do|
-                            |    echo "compiling $f"|
-                            |done|
-                            ||
-                            |if [ -d js ]; then|
-                            |    ./kk -k && ./kk -t plain > /tmp/test.log 2>&1|
-                            |else|
-                            |    echo "no js dir" >&2|
-                            |    exit 1|
-                            |fi|
-                            ||
-                            |grep -c fail /tmp/test.log && echo done|
+                text    sh
+                lines
+                    |#!/usr/bin/env bash|
+                    |# shell: build and test|
+                    ||
+                    set -euo pipefail
+                    ||
+                    root="$(cd "$(dirname "$0")" && pwd)"
+                    cd "$root"
+                    ||
+                    for f in kode/**/*.kode; do
+                    |    echo "compiling $f"|
+                    done
+                    ||
+                    if [ -d js ]; then
+                    |    ./kk -k && ./kk -t plain > /tmp/test.log 2>&1|
+                    else
+                    |    echo "no js dir" >&2|
+                    |    exit 1|
+                    fi
+                    ||
+                    grep -c fail /tmp/test.log && echo done
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+        h           33%
+    .
+        bg          |#3d2a11|
+        x           0%
+        y           66%
+        b           0%
+        children
             .
-                bg      |#3d2a11|
-                x       0%
-                y       67%
-                r       80%
-                b       0%
-                children
-                    .
-                        text    zig
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |// zig: fibonacci|
-                            ||
-                            |const std = @import("std");|
-                            ||
-                            |fn fib(n: u32) u64 {|
-                            |    var a: u64 = 0;|
-                            |    var b: u64 = 1;|
-                            |    var i: u32 = 0;|
-                            |    while (i < n) : (i += 1) {|
-                            |        const t = a + b;|
-                            |        a = b;|
-                            |        b = t;|
-                            |    }|
-                            |    return a;|
-                            |}|
-                            ||
-                            |pub fn main() !void {|
-                            |    const out = std.io.getStdOut().writer();|
-                            |    try out.print("fib(42) = {d}\n", .{fib(42)});|
-                            |}|
+                text    zig
+                lines
+                    // zig: fibonacci
+                    ||
+                    const std = @import("std");
+                    ||
+                    fn fib(n: u32) u64 {
+                    |    var a: u64 = 0;|
+                    |    var b: u64 = 1;|
+                    |    var i: u32 = 0;|
+                    |    while (i < n) : (i += 1) {|
+                    |        const t = a + b;|
+                    |        a = b;|
+                    |        b = t;|
+                    |    }|
+                    |    return a;|
+                    }
+                    ||
+                    pub fn main() !void {
+                    |    const out = std.io.getStdOut().writer();|
+                    |    try out.print("fib(42) = {d}\n", .{fib(42)});|
+                    }
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+    .
+        bg          |#11113d|
+        x           20%
+        y           66%
+        b           0%
+        children
             .
-                bg      |#11113d|
-                x       20%
-                y       67%
-                r       60%
-                b       0%
-                children
-                    .
-                        text    lua
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |-- lua: a queue|
-                            ||
-                            |local Queue = {}|
-                            |Queue.__index = Queue|
-                            ||
-                            |function Queue.new()|
-                            |    return setmetatable({first = 1, last = 0, items = {}}, Queue)|
-                            |end|
-                            ||
-                            |function Queue:push(v)|
-                            |    self.last = self.last + 1|
-                            |    self.items[self.last] = v|
-                            |end|
-                            ||
-                            |function Queue:pop()|
-                            |    if self.first > self.last then return nil end|
-                            |    local v = self.items[self.first]|
-                            |    self.first = self.first + 1|
-                            |    return v|
-                            |end|
-                            ||
-                            |local q = Queue.new() ; q:push('a') ; print(q:pop(), #q.items)|
+                text    lua
+                lines
+                    -- lua: a queue
+                    ||
+                    local Queue = {}
+                    Queue.__index = Queue
+                    ||
+                    function Queue.new()
+                    |    return setmetatable({first = 1, last = 0, items = {}}, Queue)|
+                    end
+                    ||
+                    function Queue:push(v)
+                    |    self.last = self.last + 1|
+                    |    self.items[self.last] = v|
+                    end
+                    ||
+                    function Queue:pop()
+                    |    if self.first > self.last then return nil end|
+                    |    local v = self.items[self.first]|
+                    |    self.first = self.first + 1|
+                    |    return v|
+                    end
+                    ||
+                    local q = Queue.new() ; q:push('a') ; print(q:pop(), #q.items)
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+    .
+        bg          |#3d112d|
+        x           40%
+        y           66%
+        b           0%
+        children
             .
-                bg      |#3d112d|
-                x       40%
-                y       67%
-                r       40%
-                b       0%
-                children
-                    .
-                        text    pug
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |//- pug: the same page|
-                            |doctype html|
-                            |html(lang="en")|
-                            |  head|
-                            |    meta(charset="utf-8")|
-                            |    title ked sheets|
-                            |    link(rel="stylesheet" href="style.css")|
-                            |  body|
-                            |    header.top|
-                            |      h1 Sheets|
-                            |      nav|
-                            |        a(href="#one") one|
-                            |        a(href="#two") two|
-                            |    main#one|
-                            |      p Text nodes are #[em editor states].|
-                            |      each n in [1, 2, 3]|
-                            |        span.num= n|
-                            |    script(src="main.js" defer)|
+                text    pug
+                lines
+                    //- pug: the same page
+                    doctype html
+                    html(lang="en")
+                    |  head|
+                    |    meta(charset="utf-8")|
+                    |    title ked sheets|
+                    |    link(rel="stylesheet" href="style.css")|
+                    |  body|
+                    |    header.top|
+                    |      h1 Sheets|
+                    |      nav|
+                    |        a(href="#one") one|
+                    |        a(href="#two") two|
+                    |    main#one|
+                    |      p Text nodes are #[em editor states].|
+                    |      each n in [1, 2, 3]|
+                    |        span.num= n|
+                    |    script(src="main.js" defer)|
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+    .
+        bg          |#113d2a|
+        x           60%
+        y           66%
+        b           0%
+        children
             .
-                bg      |#113d2a|
-                x       60%
-                y       67%
-                r       20%
-                b       0%
-                children
-                    .
-                        text    styl
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |// styl: the same layout|
-                            ||
-                            |accent = #f80|
-                            |gap = 12px|
-                            ||
-                            |body|
-                            |    margin 0|
-                            |    font 14px/1.4 monospace|
-                            |    background #111|
-                            ||
-                            |.top|
-                            |    > nav a|
-                            |        &:hover|
-                            |            color accent|
-                            |            text-decoration underline|
-                            ||
-                            |@media (max-width 600px)|
-                            |    main|
-                            |        padding (gap * 2)|
+                text    styl
+                lines
+                    // styl: the same layout
+                    ||
+                    accent = #f80
+                    gap = 12px
+                    ||
+                    body
+                    |    margin 0|
+                    |    font 14px/1.4 monospace|
+                    |    background #111|
+                    ||
+                    .top
+                    |    > nav a|
+                    |        &:hover|
+                    |            color accent|
+                    |            text-decoration underline|
+                    ||
+                    @media (max-width 600px)
+                    |    main|
+                    |        padding (gap * 2)|
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
+    .
+        bg          |#33331a|
+        x           80%
+        y           66%
+        b           0%
+        children
             .
-                bg      |#33331a|
-                x       80%
-                y       67%
-                r       0%
-                b       0%
-                children
-                    .
-                        text    md
-                        erase   bg
-                        x       2
-                        y       1
-                        r       2
-                        b       1
-                        lines
-                            |# Sheets|
-                            ||
-                            |Every **text node** is a full *editor state*.|
-                            ||
-                            |## Features|
-                            ||
-                            |- word wrap with indent|
-                            |- multi cursors across nodes|
-                            |- novim in every node|
-                            |- syntax colors per `language`|
-                            ||
-                            |### Keys|
-                            ||
-                            |1. `alt+n` toggles novim|
-                            |2. `cmd+down` adds a cursor|
-                            |3. `shift+alt+=` scales a node|
-                            ||
-                            |> scale comes only from node.scale|
-                            ||
-                            |See [the plan](plan/popo.md) for details.|
+                text    md
+                lines
+                    |# Sheets|
+                    ||
+                    Every **text node** is a full *editor state*.
+                    ||
+                    |## Features|
+                    ||
+                    - word wrap with indent
+                    - multi cursors across nodes
+                    - novim in every node
+                    - syntax colors per `language`
+                    ||
+                    |### Keys|
+                    ||
+                    1. `alt+n` toggles novim
+                    2. `cmd+down` adds a cursor
+                    3. `shift+alt+=` scales a node
+                    ||
+                    > scale comes only from node.scale
+                    ||
+                    See [the plan](plan/popo.md) for details.
+                erase   bg
+                x       2
+                y       1
+                r       2
+                b       1
+        w           20%
