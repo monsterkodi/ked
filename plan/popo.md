@@ -492,6 +492,54 @@ page s
        novim on the page. `feedSheetNovim` returns `'handled'`, or the editor passes the
        key on to the newly focused input.
      - Noticed, not changed: `n` / `N` don't wrap around at the last match.
+8. **novim across text nodes.** After phase 7, search and `%` only cover the active
+   node: `/ ? * #` highlight in it, `n N` stop at its last match, `%s` is its lines.
+   And `n N * #` never wrap around, in plain files too (`jumpByHighlight` and
+   `searchWord` break when no match is left, the `search highlights` test in
+   `test/novim.kode` expects that). Proposed (2026-11-26):
+   - **Wrap around.** `n N * #` continue at the first match after the last one and
+     at the last before the first, as vim's `wrapscan`. A count counts through the
+     wrap. One match: the cursor stays on it. In plain files and in nodes. No
+     "search hit BOTTOM" message (see *Open questions* 8).
+   - **Reading order.** The nodes of a sheet are searched in reading order: by
+     `rect.abs.y`, then `rect.abs.x`, ties in tree order (`sheetReadingNodes`).
+     Tree order is z-order (`shift` moves nodes in it), so it can't be used.
+     Inside a node the matches go by logical position. All matches of all nodes are
+     one list: the last match of the last node wraps to the first of the first.
+   - **Search.** `/ ? * #` highlight the text in all text nodes, `searchChanged`
+     updates them while typing, `cancelSearch` clears them all, like
+     `spreadHighlights` does for `alt+cmd+d`. `commitSearch`, `n N` and `* #` go to
+     the next match in the list; a match in another node is reached through
+     `sheetJump` (one jump entry, the node becomes the home). The position
+     (`novim.search.position`) counts over all nodes: `3/7`.
+   - **Background.** `/ ? n N` on the background search too, from the page cursor:
+     the next match is the first one in a node that starts after the cursor cell in
+     reading order. `* #` need a word, so they still do nothing there.
+   - **`%` is the sheet.** `%` and the commands whose default range is `%` (`:g`
+     `:v`) run in every text node in reading order: `:%s :%g :%v :%d :%normal`.
+     Other ranges (`.`, `5`, `1,3`, `'<,'>`) stay in the active node and still report
+     `not in a text node` on the background; `%` works on the background.
+     - One undo step: one `begin` / `end` group on the page around all nodes.
+     - `pattern not found` is reported once, only if no node matches; the
+       `substitute` count of `novim.execute` is the total.
+     - `:%s/pat` (no replacement) selects the matches of all nodes, which starts
+       multi mode with the nodes that have matches.
+     - `:%d` leaves empty nodes (`lines: ['']`), like deleting their text by hand.
+     - `:%s///c` walks the nodes in reading order. Each node is the active node while
+       its matches are confirmed, its remaining matches are highlighted. `a`
+       replaces the rest in this and all later nodes, `q` stops, `l` replaces and
+       stops. The whole session is one undo step.
+   - **Steps**, each tests first (`sheet novim`, `search highlights`) and one commit:
+     - 8a wrap around: `jumpByHighlight` and `searchWord` wrap, in plain files and
+       nodes. The `search highlights` expectations change (`n` on the last match
+       goes to the first).
+     - 8b reading order and search across nodes: `sheetReadingNodes`, highlights in
+       all nodes, `n N * #` and `commitSearch` continue into the next node, the
+       position over all nodes, search from the background.
+     - 8c `%` over all nodes for `:s :g :v :d :normal`, one undo step, one error,
+       search-only `:%s` starts multi mode. The `%s/a/A/g` expectation of `sheet
+       novim` changes: it reaches `qux`'s node too.
+     - 8d `:%s///c` across nodes.
 
 ## Later
 
@@ -499,6 +547,7 @@ In order of priority (decided 2026-11-25):
 
 1. ✔ per-node syntax colors composited into the page (see *Roles*)
 2. novim: `:%s` over all text nodes, and search that continues into the next nodes
+   (phase 8, with the `n N` wrap around)
 3. row end affinity: a cursor at a wrap boundary is drawn at the start of the next
    row, so it can never sit after the last character of a row that isn't the line's
    last. A per-cursor flag would let it be drawn at the end of the upper row.
@@ -534,3 +583,6 @@ In order of priority (decided 2026-11-25):
    gate. No toggle in sheets for now.
 7. ~~**continuation indent in sheets**~~ Decided: kept, as in the editor (see *Wrapping
    into spans*).
+8. **Phase 8 choices to confirm:** `%` for all ranged commands (not only `:s`), and
+   `:g :v` without a range over all nodes; `/ ? n N` working from the background;
+   no message when the search wraps around (vim shows "search hit BOTTOM").
