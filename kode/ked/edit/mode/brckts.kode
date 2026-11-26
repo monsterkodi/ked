@@ -23,30 +23,67 @@ use ..           ◆ mode
         
         @name = 'brckts'      
         
+    #  the spans of the brackets around positions in lines, with the open/close
+    #  and string delimiter spans the keys work with
+
+    @spansAt: lines positions ->
+
+        [spans openClose strings] = belt.spansOfNestedPairsAtPositions(lines positions)
+
+        if empty spans
+            openClose = belt.openCloseSpansForPositions lines positions
+            strings   = belt.stringDelimiterSpansForPositions positions
+            spans     = openClose.concat strings
+
+        [spans openClose strings]
+
+    keepSpans: ->
+
+        [spans openClose strings] = brckts.spansAt @state.s.lines @state.s.cursors
+
+        @openCloseSpans       = openClose
+        @stringDelimiterSpans = strings
+
+        spans
+
     cursorsSet: ->
-    
+
+        #  a text node of a sheet keeps its spans for the keys, the page shows them
+
+        ⮐ @keepSpans() if @state.sheetPage?
 
         if @state.s.selections.length # don't highlight when selection exists (interferes with cmd+d currently)
             if @allSpans eql @state.s.highlights
                 @state.setHighlights []
-            ⮐ 
-            
+            ⮐
+
         if @state.s.highlights.length     # don't highlight brackets when other highlights exist and it's different
             ⮐ if not (@allSpans eql @state.s.highlights.asMutable()) # from the previous brckts highlight
-        
-        [spans openClose strings] = belt.spansOfNestedPairsAtPositions(@state.s.lines @state.s.cursors)
 
-        if empty spans
-            @openCloseSpans       = belt.openCloseSpansForPositions @state.s.lines @state.s.cursors
-            @stringDelimiterSpans = belt.stringDelimiterSpansForPositions          @state.s.cursors
-            spans = @openCloseSpans.concat(@stringDelimiterSpans)
-        else
-            @openCloseSpans       = openClose
-            @stringDelimiterSpans = strings
-            
+        spans = @state.rectree? ? @sheetSpans() : @keepSpans()
+
         @state.setHighlights spans
-        
+
         @allSpans = @state.s.highlights.asMutable()
+
+    #  on a sheet page every cursor only sees the lines of its own text node
+
+    sheetSpans: ->
+
+        spans = []
+
+        for pos in @state.s.cursors
+
+            hit = @state.sheetNodeAt @state.sheetCellForPos(pos)
+
+            continue if not hit?.node? or not hit.pos?
+
+            nodeSpans = brckts.spansAt(hit.node.state.s.lines [hit.pos])[0]
+
+            for rng in @state.sheetRangesOf(hit.node nodeSpans)
+                spans.push [rng[0] rng[1] rng[2]]
+
+        spans
 
     swapStringDelimiters: =>
  

@@ -1,4 +1,4 @@
-var _k_ = {eql: function (a,b,s) { var i, k, v; s = (s != null ? s : []); if (Object.is(a,b)) { return true }; if (typeof(a) !== typeof(b)) { return false }; if (!(Array.isArray(a)) && !(typeof(a) === 'object')) { return false }; if (Array.isArray(a)) { if (a.length !== b.length) { return false }; var list = _k_.list(a); for (i = 0; i < list.length; i++) { v = list[i]; s.push(i); if (!_k_.eql(v,b[i],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } } else if (_k_.isStr(a)) { return a === b } else { if (!_k_.eql(Object.keys(a),Object.keys(b))) { return false }; for (k in a) { v = a[k]; s.push(k); if (!_k_.eql(v,b[k],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } }; return true }, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, isStr: function (o) {return typeof o === 'string' || o instanceof String}}
+var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, eql: function (a,b,s) { var i, k, v; s = (s != null ? s : []); if (Object.is(a,b)) { return true }; if (typeof(a) !== typeof(b)) { return false }; if (!(Array.isArray(a)) && !(typeof(a) === 'object')) { return false }; if (Array.isArray(a)) { if (a.length !== b.length) { return false }; var list = _k_.list(a); for (i = 0; i < list.length; i++) { v = list[i]; s.push(i); if (!_k_.eql(v,b[i],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } } else if (_k_.isStr(a)) { return a === b } else { if (!_k_.eql(Object.keys(a),Object.keys(b))) { return false }; for (k in a) { v = a[k]; s.push(k); if (!_k_.eql(v,b[k],s)) { s.splice(0,s.length); return false }; if (_k_.empty(s)) { return false }; s.pop() } }; return true }, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, isStr: function (o) {return typeof o === 'string' || o instanceof String}}
 
 var brckts
 
@@ -25,10 +25,38 @@ brckts = (function ()
         this.name = 'brckts'
     }
 
-    brckts.prototype["cursorsSet"] = function ()
+    brckts["spansAt"] = function (lines, positions)
     {
         var openClose, spans, strings
 
+        ;[spans,openClose,strings] = belt.spansOfNestedPairsAtPositions(lines,positions)
+        if (_k_.empty(spans))
+        {
+            openClose = belt.openCloseSpansForPositions(lines,positions)
+            strings = belt.stringDelimiterSpansForPositions(positions)
+            spans = openClose.concat(strings)
+        }
+        return [spans,openClose,strings]
+    }
+
+    brckts.prototype["keepSpans"] = function ()
+    {
+        var openClose, spans, strings
+
+        ;[spans,openClose,strings] = brckts.spansAt(this.state.s.lines,this.state.s.cursors)
+        this.openCloseSpans = openClose
+        this.stringDelimiterSpans = strings
+        return spans
+    }
+
+    brckts.prototype["cursorsSet"] = function ()
+    {
+        var spans, _53_42_, _63_30_
+
+        if ((this.state.sheetPage != null))
+        {
+            return this.keepSpans()
+        }
         if (this.state.s.selections.length)
         {
             if (_k_.eql(this.allSpans, this.state.s.highlights))
@@ -44,20 +72,34 @@ brckts = (function ()
                 return
             }
         }
-        ;[spans,openClose,strings] = belt.spansOfNestedPairsAtPositions(this.state.s.lines,this.state.s.cursors)
-        if (_k_.empty(spans))
-        {
-            this.openCloseSpans = belt.openCloseSpansForPositions(this.state.s.lines,this.state.s.cursors)
-            this.stringDelimiterSpans = belt.stringDelimiterSpansForPositions(this.state.s.cursors)
-            spans = this.openCloseSpans.concat(this.stringDelimiterSpans)
-        }
-        else
-        {
-            this.openCloseSpans = openClose
-            this.stringDelimiterSpans = strings
-        }
+        spans = ((this.state.rectree != null) ? this.sheetSpans() : this.keepSpans())
         this.state.setHighlights(spans)
         return this.allSpans = this.state.s.highlights.asMutable()
+    }
+
+    brckts.prototype["sheetSpans"] = function ()
+    {
+        var hit, nodeSpans, pos, rng, spans, _79_37_, _79_53_
+
+        spans = []
+        var list = _k_.list(this.state.s.cursors)
+        for (var _a_ = 0; _a_ < list.length; _a_++)
+        {
+            pos = list[_a_]
+            hit = this.state.sheetNodeAt(this.state.sheetCellForPos(pos))
+            if (!((hit != null ? hit.node : undefined) != null) || !(hit.pos != null))
+            {
+                continue
+            }
+            nodeSpans = brckts.spansAt(hit.node.state.s.lines,[hit.pos])[0]
+            var list1 = _k_.list(this.state.sheetRangesOf(hit.node,nodeSpans))
+            for (var _b_ = 0; _b_ < list1.length; _b_++)
+            {
+                rng = list1[_b_]
+                spans.push([rng[0],rng[1],rng[2]])
+            }
+        }
+        return spans
     }
 
     brckts.prototype["swapStringDelimiters"] = function ()
@@ -218,5 +260,5 @@ brckts = (function ()
 
 export default brckts;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYnJja3RzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L21vZGUvYnJja3RzLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQU07SUFBSzs7T0FDTCxXQUFaOztPQUNZLFdBQUE7OztBQUNsQixVQUFEOztJQUNJLFFBQUMsY0FBVztJQUNaLFFBQUMsY0FFRyxLQUFNLEtBQUssS0FDWCxLQUFNLElBQUksS0FDVixLQUFNLElBQUksS0FDVixLQUFNLElBQUksS0FDVixLQUFNLElBQUksS0FDVixLQUFNLElBQUksS0FDVixLQUFNLElBQUksS0FDVixLQUFNLElBQUksS0FDVixLQUFNLElBQUk7YUFLZCxRQUFJOztRQUFEOzs7OztRQUVDLEtBQUMsT0FBTzs7O3NCQUVaOzs7O1lBR08sS0FBQyxNQUFNLEVBQUUsV0FBVzs7d0JBQ2hCLEtBQUMsVUFBYSxLQUFDLE1BQU0sRUFBRTs7Z0JBQ3RCLEtBQUMsTUFBTTs7OztZQUdaLEtBQUMsTUFBTSxFQUFFLFdBQVc7OzBCQUNULEtBQUMsVUFBYSxLQUFDLE1BQU0sRUFBRSxXQUFXOzs7OztVQUUvQyxNQUFNLFVBQVUsV0FBVyxLQUFLLDhCQUE4QixLQUFDLE1BQU0sRUFBRSxNQUFNLEtBQUMsTUFBTSxFQUFFO3NCQUU5RTs7WUFDTCxLQUFDLGlCQUF1QixLQUFLLDJCQUEyQixLQUFDLE1BQU0sRUFBRSxNQUFNLEtBQUMsTUFBTSxFQUFFO1lBQ2hGLEtBQUMsdUJBQXVCLEtBQUssaUNBQTBDLEtBQUMsTUFBTSxFQUFFO1lBQ2hGLFFBQVEsS0FBQyxlQUFlLE9BQU8sS0FBQzs7OztZQUVoQyxLQUFDLGlCQUF1QjtZQUN4QixLQUFDLHVCQUF1Qjs7UUFFNUIsS0FBQyxNQUFNLGNBQWM7ZUFFckIsS0FBQyxXQUFXLEtBQUMsTUFBTSxFQUFFLFdBQVc7OztzQkFFcEM7Ozs7UUFFSSxLQUFDLE1BQU07UUFDUCxLQUFDLE1BQU07UUFDUCxVQUFVLEtBQUMsTUFBTTtRQUNqQixhQUFhLEtB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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYnJja3RzLmpzIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9rb2RlL2tlZC9lZGl0L21vZGUvYnJja3RzLmtvZGUiXSwibWFwcGluZ3MiOiI7Ozs7T0FDYSxVQUFBO0lBQU07SUFBSzs7T0FDTCxXQUFaOztPQUNZLFdBQUE7OztBQUNsQixVQUFEOztJQUNJLFFBQUMsY0FBVztJQUNaLFFBQUMsY0FFRyxLQUFNLEtBQUssS0FDWCxLQUFNLElBQUksS0FDVixLQUFNLElBQUksS0FDVixLQUFNLElBQUksS0FDVixLQUFNLElBQUksS0FDVixLQUFNLElBQUksS0FDVixLQUFNLElBQUksS0FDVixLQUFNLElBQUksS0FDVixLQUFNLElBQUk7YUFLZCxRQUFJOztRQUFEOzs7OztRQUVDLEtBQUMsT0FBTzs7O0lBS1osUUFBQyxzQkFBUyxPQUFNOzs7O1VBRVgsTUFBTSxVQUFVLFdBQVcsS0FBSyw4QkFBOEIsTUFBTTtzQkFFNUQ7O1lBQ0wsWUFBWSxLQUFLLDJCQUEyQixNQUFNO1lBQ2xELFVBQVksS0FBSyxpQ0FBaUM7WUFDbEQsUUFBWSxVQUFVLE9BQU87O2dCQUVoQyxNQUFNLFVBQVU7OztzQkFFckI7Ozs7VUFFSyxNQUFNLFVBQVUsV0FBVyxPQUFPLFFBQVEsS0FBQyxNQUFNLEVBQUUsTUFBTSxLQUFDLE1BQU0sRUFBRTtRQUVuRSxLQUFDLGlCQUF1QjtRQUN4QixLQUFDLHVCQUF1QjtlQUV4Qjs7O3NCQUVKOzs7O2FBSXNCLEtBQUMsTUFBTTs7bUJBQXZCLEtBQUM7O1lBRUEsS0FBQyxNQUFNLEVBQUUsV0FBVzs7d0JBQ2hCLEtBQUMsVUFBYSxLQUFDLE1BQU0sRUFBRTs7Z0JBQ3RCLEtBQUMsTUFBTTs7OztZQUdaLEtBQUMsTUFBTSxFQUFFLFdBQVc7OzBCQUNULEtBQUMsVUFBYSxLQUFDLE1BQU0sRUFBRSxXQUFXOzs7OztRQUVoRCxVQUFRLEtBQUMsTUFBTSxtQkFBVyxLQUFDLGVBQWUsS0FBQztRQUUzQyxLQUFDLE1BQU0sY0FBYztlQUVyQixLQUFDLFdBQVcs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
 //# sourceURL=../../../../kode/ked/edit/mode/brckts.kode

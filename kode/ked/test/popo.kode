@@ -1681,3 +1681,25 @@ showSue = data ->
         finally
             e.state.stopMode 'novim' if nvon()
             config.data = oldConfig
+
+  ▸ sheet brckts
+
+        sheet 'popo_sheet_brckts' [] 8 fileeditor
+        e.grabFocus()
+        mode.modes.brckts = brckts
+        e.state.allowedModes.brckts = true
+        mode.start e.state 'brckts'
+        hlRows = -> e.state.s.highlights.map (h) -> h[1]
+
+        try
+            loadSheet {children:[{ text:'(a' x:1 y:1 w:6 h:1 } { text:'b)' x:1 y:3 w:6 h:1 } { text:'f(a)' x:1 y:5 w:6 h:1 }]}
+            e.state.setCursors [[3 5]] ; e.state.s.highlights ▸ [[2 5 3] [4 5 5]]
+            e.state.setCursors [[2 1]] ; hlRows().filter((y) -> y != 1) ▸ []
+            e.state.setCursors [[2 3]] ; hlRows().filter((y) -> y != 3) ▸ []
+            e.state.setCursors [[3 5]] ; type 'x' ; txt('children.2') ▸ 'f(xa)' ; mc() ▸ [4 5]
+            rt('children.2').state.s.highlights ▸ [] ; e.state.s.highlights ▸ [[2 5 3] [5 5 6]]
+            key 'cmd+z' ; e.state.setCursors [[3 5]] ; e.state.s.highlights ▸ [[2 5 3] [4 5 5]]
+            click 3 5 ; altclick 2 1 ; e.state.s.cursors.length ▸ 2
+            hlRows().filter((y) -> y != 1 and y != 5) ▸ [] ; hlRows().includes(5) ▸ true
+        finally
+            mode.stop e.state 'brckts'
