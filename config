@@ -30,8 +30,8 @@ zen
 novim
                         autoStart           false
                         autoEnableOnEscape  true
+                        searchWrap          true
                         yankFlashMs         700
-                        searchWrap          false
 project
                         maxDepth    6
                         ignore
