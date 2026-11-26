@@ -151,6 +151,22 @@ export
 
         result
 
+    #  runs fn with the novim mode working on each text node in reading order, for
+    #  what only changes highlights: the page shows them without a commit
+
+    novimOverNodes: (nv fn) ->
+
+        prev = nv.state
+
+        try
+            for node in @sheetReadingNodes()
+                nv.state = node.state
+                fn node
+        finally
+            nv.state = prev
+
+        @compositeSheet @sheetActive()
+
     #  the keys of a :%s///c session go to the node whose matches are confirmed.
     #  a node without matches left hands the session to the next node
 

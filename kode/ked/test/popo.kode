@@ -1619,6 +1619,24 @@ showSue = data ->
             nm.runEx '%s/z/Z/gc' ; confirmErrors ▸ ['pattern not found: z'] ; nm.exConfirms ▸ null
             post.removeListener 'novim.error' onConfirmError
 
+            e.state.setCursors [[1 1]] ; type ':'
+            nm.exChanged '%s/a' ; lit() ▸ [2 1 1]
+            nm.exChanged 's/a' ; lit() ▸ [0 1 0]
+            nm.exChanged '%s/a' ; lit() ▸ [2 1 1]
+            nm.exChanged '%s/a/X' ; lit() ▸ [2 1 1]
+            nm.exChanged '%s/b' ; lit() ▸ [1 1 1]
+            nm.exChanged '%' ; lit() ▸ [0 0 0]
+            nm.exChanged '%s/a' ; nm.cancelEx() ; lit() ▸ [0 0 0]
+            type ':' ; nm.exChanged '%s/a' ; nm.runEx '%s/a/X/g'
+            texts() ▸ ['Xb X' 'X b' 'b X'] ; lit() ▸ [0 0 0]
+            type 'u'
+            type ':' ; nm.exChanged '%s/a' ; nm.runEx '%s/a'
+            lit() ▸ [0 0 0] ; e.state.s.selections.length ▸ 4 ; key 'esc'
+            e.state.setCursors [[8 3]] ; type ':'
+            nm.exChanged '%s/b' ; lit() ▸ [1 1 1]
+            nm.exChanged 's/b' ; lit() ▸ [0 0 0]
+            nm.cancelEx()
+
             loadSheet novimTree()
             e.state.setCursors [[1 2]] ; type '/'
             nm.searchChanged 'a'

@@ -396,6 +396,7 @@ use ..           ◆ mode
     runEx: line record=true ->
 
         if @state.rectree? and not @fileEx(line)
+            @exHighlight true
             all = @sheetExAll line
             ⮐ @runConfirmInNodes(line record) if all == 'confirm'
             ⮐ @runExInNodes(line record) if all
@@ -981,16 +982,38 @@ use ..           ◆ mode
 
     cancelEx: ->
 
-        @inSheetText => @clearExHighlight()
+        @exHighlight true
         @reset()
         true
 
     exChanged: text ->
 
         @ex = text
-        @inSheetText => @updateExHighlight()
+        @exHighlight()
 
         true
+
+    #  in a sheet the ex highlights of % go to all text nodes, the others to the
+    #  active node. the other nodes drop theirs
+
+    exHighlight: clear=false ->
+
+        ⮐ (clear ? @clearExHighlight() : @updateExHighlight()) if not @state.rectree?
+
+        active = @state.sheetActive()
+        all    = not clear and @sheetExAll(@ex)
+        was    = @exHighlighting
+        any    = false
+
+        @state.novimOverNodes @ (node) =>
+            @exHighlighting = was
+            if all or (not clear and node == active)
+                @updateExHighlight()
+            else
+                @clearExHighlight()
+            any = true if @exHighlighting
+
+        @exHighlighting = any
 
     updateExHighlight: ->
 
